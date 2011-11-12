@@ -72,40 +72,14 @@ void TextLayoutCache::init() {
     mInitialized = true;
 }
 
-/*
- * Size management
- */
-
-uint32_t TextLayoutCache::getSize() {
-    return mSize;
-}
-
-uint32_t TextLayoutCache::getMaxSize() {
-    return mMaxSize;
-}
-
-void TextLayoutCache::setMaxSize(uint32_t maxSize) {
-    mMaxSize = maxSize;
-    removeOldests();
-}
-
-void TextLayoutCache::removeOldests() {
-    while (mSize > mMaxSize) {
-        mCache.removeOldest();
-    }
-}
-
 /**
  *  Callbacks
  */
 void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc) {
-    if (desc != NULL) {
-        size_t totalSizeToDelete = text.getSize() + desc->getSize();
-        mSize -= totalSizeToDelete;
-        if (mDebugEnabled) {
-            LOGD("Cache value deleted, size = %d", totalSizeToDelete);
-        }
-        desc.clear();
+    size_t totalSizeToDelete = text.getSize() + desc->getSize();
+    mSize -= totalSizeToDelete;
+    if (mDebugEnabled) {
+        LOGD("Cache value %p deleted, size = %d", desc.get(), totalSizeToDelete);
     }
 }
 
@@ -144,7 +118,9 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
         // Compute advances and store them
         value->computeValues(paint, text, start, count, contextCount, dirFlags);
 
-        nsecs_t endTime = systemTime(SYSTEM_TIME_MONOTONIC);
+        if (mDebugEnabled) {
+            value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
+        }
 
         // Don't bother to add in the cache if the entry is too big
         size_t size = key.getSize() + value->getSize();
@@ -156,7 +132,11 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 }
                 while (mSize + size > mMaxSize) {
                     // This will call the callback
-                    mCache.removeOldest();
+                    bool removedOne = mCache.removeOldest() != NULL;
+                    LOG_ALWAYS_FATAL_IF(!removedOne, "The cache is non-empty but we "
+                            "failed to remove the oldest entry.  "
+                            "mSize=%u, size=%u, mMaxSize=%u, mCache.size()=%u",
+                            mSize, size, mMaxSize, mCache.size());
                 }
             }
 
@@ -165,26 +145,34 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
 
             // Copy the text when we insert the new entry
             key.internalTextCopy();
-            mCache.put(key, value);
+
+            bool putOne = mCache.put(key, value);
+            LOG_ALWAYS_FATAL_IF(!putOne, "Failed to put an entry into the cache.  "
+                    "This indicates that the cache already has an entry with the "
+                    "same key but it should not since we checked earlier!"
+                    " - start=%d count=%d contextCount=%d - Text='%s'",
+                    start, count, contextCount, String8(text + start, count).string());
 
             if (mDebugEnabled) {
-                // Update timing information for statistics
-                value->setElapsedTime(endTime - startTime);
-
-                LOGD("CACHE MISS: Added entry with "
-                        "count=%d, entry size %d bytes, remaining space %d bytes"
-                        " - Compute time in nanos: %d - Text='%s' ",
-                        count, size, mMaxSize - mSize, value->getElapsedTime(),
-                        String8(text, count).string());
+                nsecs_t totalTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
+                LOGD("CACHE MISS: Added entry %p "
+                        "with start=%d count=%d contextCount=%d, "
+                        "entry size %d bytes, remaining space %d bytes"
+                        " - Compute time %0.6f ms - Put time %0.6f ms - Text='%s'",
+                        value.get(), start, count, contextCount, size, mMaxSize - mSize,
+                        value->getElapsedTime() * 0.000001f,
+                        (totalTime - value->getElapsedTime()) * 0.000001f,
+                        String8(text + start, count).string());
             }
         } else {
             if (mDebugEnabled) {
                 LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
                         "with start=%d count=%d contextCount=%d, "
                         "entry size %d bytes, remaining space %d bytes"
-                        " - Compute time in nanos: %lld - Text='%s'",
-                        start, count, contextCount, size, mMaxSize - mSize, endTime,
-                        String8(text, count).string());
+                        " - Compute time %0.6f ms - Text='%s'",
+                        start, count, contextCount, size, mMaxSize - mSize,
+                        value->getElapsedTime() * 0.000001f,
+                        String8(text + start, count).string());
             }
             value.clear();
         }
@@ -199,10 +187,12 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
                         / ((float)value->getElapsedTime()));
                 LOGD("CACHE HIT #%d with start=%d count=%d contextCount=%d"
-                        "- Compute time in nanos: %d - "
-                        "Cache get time in nanos: %lld - Gain in percent: %2.2f - Text='%s' ",
+                        "- Compute time %0.6f ms - "
+                        "Cache get time %0.6f ms - Gain in percent: %2.2f - Text='%s' ",
                         mCacheHitCount, start, count, contextCount,
-                        value->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent,
+                        value->getElapsedTime() * 0.000001f,
+                        elapsedTimeThruCacheGet * 0.000001f,
+                        deltaPercent,
                         String8(text, count).string());
             }
             if (mCacheHitCount % DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL == 0) {
@@ -216,16 +206,24 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
 void TextLayoutCache::dumpCacheStats() {
     float remainingPercent = 100 * ((mMaxSize - mSize) / ((float)mMaxSize));
     float timeRunningInSec = (systemTime(SYSTEM_TIME_MONOTONIC) - mCacheStartTime) / 1000000000;
+
+    size_t bytes = 0;
+    size_t cacheSize = mCache.size();
+    for (size_t i = 0; i < cacheSize; i++) {
+        bytes += mCache.getKeyAt(i).getSize() + mCache.getValueAt(i)->getSize();
+    }
+
     LOGD("------------------------------------------------");
     LOGD("Cache stats");
     LOGD("------------------------------------------------");
     LOGD("pid       : %d", getpid());
     LOGD("running   : %.0f seconds", timeRunningInSec);
-    LOGD("entries   : %d", mCache.size());
-    LOGD("size      : %d bytes", mMaxSize);
+    LOGD("entries   : %d", cacheSize);
+    LOGD("max size  : %d bytes", mMaxSize);
+    LOGD("used      : %d bytes according to mSize, %d bytes actual", mSize, bytes);
     LOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);
     LOGD("hits      : %d", mCacheHitCount);
-    LOGD("saved     : %lld milliseconds", mNanosecondsSaved / 1000000);
+    LOGD("saved     : %0.6f ms", mNanosecondsSaved * 0.000001f);
     LOGD("------------------------------------------------");
 }
 
@@ -306,7 +304,7 @@ void TextLayoutCacheKey::internalTextCopy() {
     text = NULL;
 }
 
-size_t TextLayoutCacheKey::getSize() {
+size_t TextLayoutCacheKey::getSize() const {
     return sizeof(TextLayoutCacheKey) + sizeof(UChar) * contextCount;
 }
 
@@ -339,7 +337,7 @@ void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars,
 #endif
 }
 
-size_t TextLayoutCacheValue::getSize() {
+size_t TextLayoutCacheValue::getSize() const {
     return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
             sizeof(jchar) * mGlyphs.capacity();
 }
@@ -404,10 +402,13 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     unsigned result = 0;
     switch(shaperItem.item.script) {
         case HB_Script_Arabic:
-        case HB_Script_Hebrew:
+        case HB_Script_Hebrew: {
             const uint16_t* text16 = (const uint16_t*)shaperItem.string;
             SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
             result = paint->getBaseGlyphCount(firstUnichar);
+            break;
+        }
+        default:
             break;
     }
 
