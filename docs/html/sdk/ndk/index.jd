@@ -1,18 +1,19 @@
 ndk=true
 
-ndk.win_download=android-ndk-r6b-windows.zip
-ndk.win_bytes=67670219
-ndk.win_checksum=f496b48fffb6d341303de170a081b812
+ndk.win_download=android-ndk-r7-windows.zip
+ndk.win_bytes=81270552
+ndk.win_checksum=55483482cf2b75e8dd1a5d9a7caeb6e5
 
-ndk.mac_download=android-ndk-r6b-darwin-x86.tar.bz2
-ndk.mac_bytes=52798843
-ndk.mac_checksum=65f2589ac1b08aabe3183f9ed1a8ce8e
+ndk.mac_download=android-ndk-r7-darwin-x86.tar.bz2
+ndk.mac_bytes=71262092
+ndk.mac_checksum=817ca5675a1dd44078098e43070f19b6
 
-ndk.linux_download=android-ndk-r6b-linux-x86.tar.bz2
-ndk.linux_bytes=46532436
-ndk.linux_checksum=309f35e49b64313cfb20ac428df4cec2
+ndk.linux_download=android-ndk-r7-linux-x86.tar.bz2
+ndk.linux_bytes=64884365
+ndk.linux_checksum=bf15e6b47bf50824c4b96849bf003ca3
 
 page.title=Android NDK
+
 @jd:body
 
 <h2 id="notes">Revisions</h2>
@@ -61,6 +62,310 @@ padding: .25em 1em;
 <div class="toggleable open">
   <a href="#" onclick="return toggleDiv(this)"><img src=
   "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 7</a> <em>(November 2011)</em>
+
+  <div class="toggleme">
+    <p>This release of the NDK includes new features to support the Android 4.0 platform as well
+    as many other additions and improvements:</p>
+
+    <dl>
+      <dt>New features</dt>
+
+      <dd>
+        <ul>
+          <li>Added official NDK APIs for Android 4.0 (API level 14), which adds the following
+          native features to the platform:
+
+            <ul>
+              <li>Added native multimedia API based on the Khronos Group OpenMAX AL™ 1.0.1
+              standard. The new <code>&lt;OMXAL/OpenMAXAL.h&gt;</code> and
+              <code>&lt;OMXAL/OpenMAXAL_Android.h&gt;</code> headers allow applications targeting
+              API level 14 to perform multimedia output directly from native code by using a new
+              Android-specific buffer queue interface. For more details, see
+              <code>docs/openmaxal/index.html</code> and <a href=
+              "http://www.khronos.org/openmax/">http://www.khronos.org/openmax/</a>.</li>
+
+              <li>Updated the native audio API based on the Khronos Group OpenSL ES 1.0.1™
+              standard. With API Level 14, you can now decode compressed audio (e.g. MP3, AAC,
+              Vorbis) to PCM. For more details, see <code>docs/opensles/index.html</code> and
+              <a href=
+              "http://www.khronos.org/opensles">http://www.khronos.org/opensles/</a>.</li>
+            </ul>
+          </li>
+
+          <li>Added CCache support. To speed up large rebuilds, define the
+          <code>NDK_CCACHE</code> environment variable to <code>ccache</code> (or the path to
+          your <code>ccache</code> binary). When declared, the NDK build system automatically
+          uses CCache when compiling any source file. For example:
+            <pre>
+export NDK_CCACHE=ccache
+</pre>
+          <p class="note"><strong>Note:</strong> CCache is not included in the NDK release
+          so you must have it installed prior to using it. For more information about CCache, see
+          <a href="http://ccache.samba.org">http://ccache.samba.org</a>.</p>
+          </li>
+
+          <li>Added support for setting <code>APP_ABI</code> to <code>all</code> to indicate that
+          you want to build your NDK modules for all the ABIs supported by your given NDK
+          release. This means that either one of the following two lines in your
+          <code>Application.mk</code> are equivalent with this release:
+            <pre>
+APP_ABI := all
+APP_ABI := armeabi armeabi-v7a x86
+</pre>
+
+            <p>This also works if you define <code>APP_ABI</code> when calling
+            <code>ndk-build</code> from the command-line, which is a quick way to check that your
+            project builds for all supported ABIs without changing the project's
+            <code>Application.mk file</code>. For example:</p>
+            <pre>
+ndk-build APP_ABI=all
+</pre>
+          </li>
+
+          <li>Added a <code>LOCAL_CPP_FEATURES</code> variable in <code>Android.mk</code> that
+          allows you to declare which C++ features (RTTI or Exceptions) your module uses. This
+          ensures that the final linking works correctly if you have prebuilt modules that depend
+          on these features. See <code>docs/ANDROID-MK.html</code> and
+          <code>docs/CPLUSPLUS-SUPPORT.html</code> for more details.</li>
+
+          <li>Shortened paths to source and object files that are used in build commands. When
+          invoking <code>$NDK/ndk-build</code> from your project path, the paths to the source,
+          object, and binary files that are passed to the build commands are significantly
+          shorter now, because they are passed relative to the current directory. This is useful
+          when building projects with a lot of source files, to avoid limits on the maximum
+          command line length supported by your host operating system. The behavior is unchanged
+          if you invoke <code>ndk-build</code> from a sub-directory of your project tree, or if
+          you define <code>NDK_PROJECT_PATH</code> to point to a specific directory.</li>
+        </ul>
+      </dd>
+
+      <dt>Experimental features</dt>
+
+      <dd>
+        You can now build your NDK source files on Windows <em>without</em> Cygwin by calling the
+        <code>ndk-build.cmd</code> script from the command line from your project path. The
+        script takes exactly the same arguments as the original <code>ndk-build</code> script.
+        The Windows NDK package comes with its own prebuilt binaries for GNU Make, Awk and other
+        tools required by the build. You should not need to install anything else to get a
+        working build system.
+
+        <p class="caution"><strong>Important:</strong> <code>ndk-gdb</code> does not work on
+        Windows, so you still need Cygwin to debug.</p>
+
+        <p>This feature is still experimental, so feel free to try it and report issues on the
+        <a href="http://b.android.com">public bug database</a> or <a href=
+        "http://groups.google.com/group/android-ndk">public forum</a>. All samples and unit tests
+        shipped with the NDK succesfully compile with this feature.</p>
+      </dd>
+
+      <dt>Important bug fixes</dt>
+
+      <dd>
+        <ul>
+          <li>Imported shared libraries are now installed by default to the target installation
+          location (<code>libs/&lt;abi&gt;</code>) if <code>APP_MODULES</code> is not defined in
+          your <code>Application.mk</code>. For example, if a top-level module <code>foo</code>
+          imports a module <code>bar</code>, then both <code>libfoo.so</code> and
+          <code>libbar.so</code> are copied to the install location. Previously, only
+          <code>libfoo.so</code> was copied, unless you listed <code>bar</code> in your
+          <code>APP_MODULES</code> too. If you define <code>APP_MODULES</code> explicitly, the
+          behavior is unchanged.</li>
+
+          <li><code>ndk-gdb</code> now works correctly for activities with multiple categories in
+          their MAIN intent filters.</li>
+
+          <li>Static library imports are now properly transitive. For example, if a top-level
+          module <code>foo</code> imports static library <code>bar</code> that imports static
+          library <code>zoo</code>, the <code>libfoo.so</code> will now be linked against both
+          <code>libbar.a</code> and <code>libzoo.a</code>.</li>
+        </ul>
+      </dd>
+
+      <dt>Other changes</dt>
+
+      <dd>
+        <ul>
+          <li><code>docs/NATIVE-ACTIVITY.HTML</code>: Fixed typo. The minimum API level should be
+          9, not 8 for native activities.</li>
+
+          <li><code>docs/STABLE-APIS.html</code>: Added missing documentation listing EGL as a
+          supported stable API, starting from API level 9.</li>
+
+          <li><code>download-toolchain-sources.sh</code>: Updated to download the toolchain
+          sources from <a href="http://android.googlesource.com">android.googlesource.com</a>,
+          which is the new location for the AOSP servers.</li>
+
+          <li>Added a new C++ support runtime named <code>gabi++</code>. More details about it
+          are available in the updated <code>docs/CPLUSPLUS-SUPPORT.html</code>.</li>
+
+          <li>Added a new C++ support runtime named <code>gnustl_shared</code> that corresponds
+          to the shared library version of GNU libstdc++ v3 (GPLv3 license). See more info at
+          <code>docs/CPLUSPLUS-SUPPORT.html</code></li>
+
+          <li>Added support for RTTI in the STLport C++ runtimes (no support for
+          exceptions).</li>
+
+          <li>Added support for multiple file extensions in <code>LOCAL_CPP_EXTENSION</code>. For
+          example, to compile both <code>foo.cpp</code> and <code>bar.cxx</code> as C++ sources,
+          declare the following:
+            <pre>
+LOCAL_CPP_EXTENSION := .cpp .cxx
+</pre>
+          </li>
+
+          <li>Removed many unwanted exported symbols from the link-time shared system libraries
+          provided by the NDK. This ensures that code generated with the standalone toolchain
+          doesn't risk to accidentally depend on a non-stable ABI symbol (e.g. any libgcc.a
+          symbol that changes each time the toolchain used to build the platform is changed)</li>
+
+          <li>Refreshed the EGL and OpenGLES Khronos headers to support more extensions. Note
+          that this does <em>not</em> change the NDK ABIs for the corresponding libraries,
+          because each extension must be probed at runtime by the client application.
+
+            <p>The extensions that are available depend on your actual device and GPU drivers,
+            not the platform version the device runs on. The header changes simply add new
+            constants and types to make it easier to use the extensions when they have been
+            probed with <code>eglGetProcAddress()</code> or <code>glGetProcAddress()</code>. The
+            following list describes the newly supported extensions:</p>
+
+            <dl>
+              <dt>GLES 1.x</dt>
+
+              <dd>
+                <ul>
+                  <li><code>GL_OES_vertex_array_object</code></li>
+
+                  <li><code>GL_OES_EGL_image_external</code></li>
+
+                  <li><code>GL_APPLE_texture_2D_limited_npot</code></li>
+
+                  <li><code>GL_EXT_blend_minmax</code></li>
+
+                  <li><code>GL_EXT_discard_framebuffer</code></li>
+
+                  <li><code>GL_EXT_multi_draw_arrays</code></li>
+
+                  <li><code>GL_EXT_read_format_bgra</code></li>
+
+                  <li><code>GL_EXT_texture_filter_anisotropic</code></li>
+
+                  <li><code>GL_EXT_texture_format_BGRA8888</code></li>
+
+                  <li><code>GL_EXT_texture_lod_bias</code></li>
+
+                  <li><code>GL_IMG_read_format</code></li>
+
+                  <li><code>GL_IMG_texture_compression_pvrtc</code></li>
+
+                  <li><code>GL_IMG_texture_env_enhanced_fixed_function</code></li>
+
+                  <li><code>GL_IMG_user_clip_plane</code></li>
+
+                  <li><code>GL_IMG_multisampled_render_to_texture</code></li>
+
+                  <li><code>GL_NV_fence</code></li>
+
+                  <li><code>GL_QCOM_driver_control</code></li>
+
+                  <li><code>GL_QCOM_extended_get</code></li>
+
+                  <li><code>GL_QCOM_extended_get2</code></li>
+
+                  <li><code>GL_QCOM_perfmon_global_mode</code></li>
+
+                  <li><code>GL_QCOM_writeonly_rendering</code></li>
+
+                  <li><code>GL_QCOM_tiled_rendering</code></li>
+                </ul>
+              </dd>
+
+              <dt>GLES 2.0</dt>
+
+              <dd>
+                <ul>
+                  <li><code>GL_OES_element_index_uint</code></li>
+
+                  <li><code>GL_OES_get_program_binary</code></li>
+
+                  <li><code>GL_OES_mapbuffer</code></li>
+
+                  <li><code>GL_OES_packed_depth_stencil</code></li>
+
+                  <li><code>GL_OES_texture_3D</code></li>
+
+                  <li><code>GL_OES_texture_float</code></li>
+
+                  <li><code>GL_OES_texture_float_linear</code></li>
+
+                  <li><code>GL_OES_texture_half_float_linear</code></li>
+
+                  <li><code>GL_OES_texture_npot</code></li>
+
+                  <li><code>GL_OES_vertex_array_object</code></li>
+
+                  <li><code>GL_OES_EGL_image_external</code></li>
+
+                  <li><code>GL_AMD_program_binary_Z400</code></li>
+
+                  <li><code>GL_EXT_blend_minmax</code></li>
+
+                  <li><code>GL_EXT_discard_framebuffer</code></li>
+
+                  <li><code>GL_EXT_multi_draw_arrays</code></li>
+
+                  <li><code>GL_EXT_read_format_bgra</code></li>
+
+                  <li><code>GL_EXT_texture_format_BGRA8888</code></li>
+
+                  <li><code>GL_EXT_texture_compression_dxt1</code></li>
+
+                  <li><code>GL_IMG_program_binary</code></li>
+
+                  <li><code>GL_IMG_read_format</code></li>
+
+                  <li><code>GL_IMG_shader_binary</code></li>
+
+                  <li><code>GL_IMG_texture_compression_pvrtc</code></li>
+
+                  <li><code>GL_IMG_multisampled_render_to_texture</code></li>
+
+                  <li><code>GL_NV_coverage_sample</code></li>
+
+                  <li><code>GL_NV_depth_nonlinear</code></li>
+
+                  <li><code>GL_QCOM_extended_get</code></li>
+
+                  <li><code>GL_QCOM_extended_get2</code></li>
+
+                  <li><code>GL_QCOM_writeonly_rendering</code></li>
+
+                  <li><code>GL_QCOM_tiled_rendering</code></li>
+                </ul>
+              </dd>
+
+              <dt>EGL</dt>
+
+              <dd>
+                <ul>
+                  <li><code>EGL_ANDROID_recordable</code></li>
+
+                  <li><code>EGL_NV_system_time</code></li>
+                </ul>
+              </dd>
+            </dl>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px">
   Android NDK, Revision 6b</a> <em>(August 2011)</em>
 
    <div class="toggleme">
