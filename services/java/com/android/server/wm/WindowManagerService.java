@@ -3074,7 +3074,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Application Window Tokens
     // -------------------------------------------------------------
 
-    public void validateAppTokens(List tokens) {
+    public void validateAppTokens(List<IBinder> tokens) {
         int v = tokens.size()-1;
         int m = mAppTokens.size()-1;
         while (v >= 0 && m >= 0) {
