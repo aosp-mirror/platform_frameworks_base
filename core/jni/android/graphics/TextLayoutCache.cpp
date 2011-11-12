@@ -261,7 +261,7 @@ TextLayoutCacheKey::TextLayoutCacheKey(const TextLayoutCacheKey& other) :
         flags(other.flags),
         hinting(other.hinting) {
     if (other.text) {
-        textCopy.setTo(other.text);
+        textCopy.setTo(other.text, other.contextCount);
     }
 }
 
