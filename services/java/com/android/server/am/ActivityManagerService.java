@@ -1669,7 +1669,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     final void setFocusedActivityLocked(ActivityRecord r) {
         if (mFocusedActivity != r) {
             mFocusedActivity = r;
-            mWindowManager.setFocusedApp(r, true);
+            mWindowManager.setFocusedApp(r.appToken, true);
         }
     }
 
@@ -2346,7 +2346,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // XXX we are not dealing with propagating grantedUriPermissions...
             // those are not yet exposed to user code, so there is no need.
             int res = mMainStack.startActivityLocked(r.app.thread, intent,
-                    r.resolvedType, null, 0, aInfo, resultTo, resultWho,
+                    r.resolvedType, null, 0, aInfo,
+                    resultTo != null ? resultTo.appToken : null, resultWho,
                     requestCode, -1, r.launchedFromUid, false, false, null);
             Binder.restoreCallingIdentity(origId);
 
@@ -2429,10 +2430,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
             final long origId = Binder.clearCallingIdentity();
-            mWindowManager.setAppOrientation(r, requestedOrientation);
+            mWindowManager.setAppOrientation(r.appToken, requestedOrientation);
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
                     mConfiguration,
-                    r.mayFreezeScreenLocked(r.app) ? r : null);
+                    r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
                 if (!updateConfigurationLocked(config, r, false)) {
@@ -2449,7 +2450,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (r == null) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
-            return mWindowManager.getAppOrientation(r);
+            return mWindowManager.getAppOrientation(r.appToken);
         }
     }
 
@@ -2515,7 +2516,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<activities.size(); i++) {
                 ActivityRecord r = activities.get(i);
                 if (!r.finishing) {
-                    int index = mMainStack.indexOfTokenLocked(r);
+                    int index = mMainStack.indexOfTokenLocked(r.appToken);
                     if (index >= 0) {
                         mMainStack.finishActivityLocked(r, index, Activity.RESULT_CANCELED,
                                 null, "finish-heavy");
@@ -2617,7 +2618,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int i;
             for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-                if (r == token) {
+                if (r.appToken == token) {
                     return true;
                 }
                 if (r.fullscreen && !r.finishing) {
@@ -2705,9 +2706,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     r.makeFinishing();
                     mMainStack.mHistory.remove(i);
                     r.takeFromHistory();
-                    mWindowManager.removeAppToken(r);
+                    mWindowManager.removeAppToken(r.appToken);
                     if (VALIDATE_TOKENS) {
-                        mWindowManager.validateAppTokens(mMainStack.mHistory);
+                        mMainStack.validateAppTokensLocked();
                     }
                     r.removeUriPermissionsLocked();
 
@@ -5173,10 +5174,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (topThumbnail != null) {
             if (localLOGV) Slog.v(TAG, "Requesting top thumbnail");
             try {
-                topThumbnail.requestThumbnail(topRecord);
+                topThumbnail.requestThumbnail(topRecord.appToken);
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown when requesting thumbnail", e);
-                sendPendingThumbnail(null, topRecord, null, null, true);
+                sendPendingThumbnail(null, topRecord.appToken, null, null, true);
             }
         }
 
@@ -5547,7 +5548,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         TaskRecord lastTask = null;
         for (int i=0; i<N; i++) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            if (r == token) {
+            if (r.appToken == token) {
                 if (!onlyRoot || lastTask != r.task) {
                     return r.task.taskId;
                 }
@@ -5568,7 +5569,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<N; i++) {
                 ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
                 if (r.realActivity.equals(className)
-                        && r != token && lastTask != r.task) {
+                        && r.appToken != token && lastTask != r.task) {
                     if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
                             null, "others")) {
                         i--;
@@ -7112,7 +7113,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // process, then terminate it to avoid getting in a loop.
                 Slog.w(TAG, "  Force finishing activity "
                         + r.intent.getComponent().flattenToShortString());
-                int index = mMainStack.indexOfTokenLocked(r);
+                int index = mMainStack.indexOfActivityLocked(r);
                 r.stack.finishActivityLocked(r, index,
                         Activity.RESULT_CANCELED, null, "crashed");
                 // Also terminate any activities below it that aren't yet
@@ -8631,8 +8632,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 TransferPipe tp = new TransferPipe();
                 try {
-                    r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(), r,
-                            innerPrefix, args);
+                    r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(),
+                            r.appToken, innerPrefix, args);
                     tp.go(fd);
                 } finally {
                     tp.kill();
@@ -9048,8 +9049,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     TransferPipe tp = new TransferPipe();
                     try {
-                        r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(), r,
-                                innerPrefix, args);
+                        r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(),
+                                r.appToken, innerPrefix, args);
                         // Short timeout, since blocking here can
                         // deadlock with the application.
                         tp.go(fd, 2000);
