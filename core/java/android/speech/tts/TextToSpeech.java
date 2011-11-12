@@ -482,7 +482,7 @@ public class TextToSpeech {
     private OnInitListener mInitListener;
     // Written from an unspecified application thread, read from
     // a binder thread.
-    private volatile OnUtteranceCompletedListener mUtteranceCompletedListener;
+    private volatile UtteranceProgressListener mUtteranceProgressListener;
     private final Object mStartLock = new Object();
 
     private String mRequestedEngine;
@@ -1146,9 +1146,28 @@ public class TextToSpeech {
      * @param listener The listener to use.
      *
      * @return {@link #ERROR} or {@link #SUCCESS}.
+     *
+     * @deprecated Use {@link #setOnUtteranceProgressListener(UtteranceProgressListener)}
+     *        instead.
      */
+    @Deprecated
     public int setOnUtteranceCompletedListener(final OnUtteranceCompletedListener listener) {
-        mUtteranceCompletedListener = listener;
+        mUtteranceProgressListener = UtteranceProgressListener.from(listener);
+        return TextToSpeech.SUCCESS;
+    }
+
+    /**
+     * Sets the listener that will be notified of various events related to the
+     * synthesis of a given utterance.
+     *
+     * See {@link UtteranceProgressListener} and
+     * {@link TextToSpeech.Engine#KEY_PARAM_UTTERANCE_ID}.
+     *
+     * @param listener the listener to use.
+     * @return {@link #ERROR} or {@link #SUCCESS}
+     */
+    public int setOnUtteranceProgressListener(UtteranceProgressListener listener) {
+        mUtteranceProgressListener = listener;
         return TextToSpeech.SUCCESS;
     }
 
@@ -1204,10 +1223,26 @@ public class TextToSpeech {
         private ITextToSpeechService mService;
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
             @Override
-            public void utteranceCompleted(String utteranceId) {
-                OnUtteranceCompletedListener listener = mUtteranceCompletedListener;
+            public void onDone(String utteranceId) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
-                    listener.onUtteranceCompleted(utteranceId);
+                    listener.onDone(utteranceId);
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onError(utteranceId);
+                }
+            }
+
+            @Override
+            public void onStart(String utteranceId) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onStart(utteranceId);
                 }
             }
         };

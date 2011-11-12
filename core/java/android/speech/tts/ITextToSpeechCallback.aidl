@@ -21,5 +21,7 @@ package android.speech.tts;
  * {@hide}
  */
 oneway interface ITextToSpeechCallback {
-    void utteranceCompleted(String utteranceId);
+    void onStart(String utteranceId);
+    void onDone(String utteranceId);
+    void onError(String utteranceId);
 }

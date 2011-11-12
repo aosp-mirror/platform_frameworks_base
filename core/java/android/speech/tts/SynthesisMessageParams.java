@@ -17,7 +17,7 @@ package android.speech.tts;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
-import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
+import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 
 import java.util.LinkedList;
 
@@ -56,7 +56,7 @@ final class SynthesisMessageParams extends MessageParams {
 
     SynthesisMessageParams(int streamType, int sampleRate,
             int audioFormat, int channelCount,
-            float volume, float pan, UtteranceCompletedDispatcher dispatcher,
+            float volume, float pan, UtteranceProgressDispatcher dispatcher,
             String callingApp, EventLogger logger) {
         super(dispatcher, callingApp);
 

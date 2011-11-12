@@ -15,22 +15,22 @@
  */
 package android.speech.tts;
 
-import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
+import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 
 abstract class MessageParams {
     static final int TYPE_SYNTHESIS = 1;
     static final int TYPE_AUDIO = 2;
     static final int TYPE_SILENCE = 3;
 
-    private final UtteranceCompletedDispatcher mDispatcher;
+    private final UtteranceProgressDispatcher mDispatcher;
     private final String mCallingApp;
 
-    MessageParams(UtteranceCompletedDispatcher dispatcher, String callingApp) {
+    MessageParams(UtteranceProgressDispatcher dispatcher, String callingApp) {
         mDispatcher = dispatcher;
         mCallingApp = callingApp;
     }
 
-    UtteranceCompletedDispatcher getDispatcher() {
+    UtteranceProgressDispatcher getDispatcher() {
         return mDispatcher;
     }
 

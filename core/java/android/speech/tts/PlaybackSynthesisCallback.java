@@ -15,7 +15,7 @@
  */
 package android.speech.tts;
 
-import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
+import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
 /**
@@ -62,12 +62,12 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     private volatile boolean mDone = false;
 
-    private final UtteranceCompletedDispatcher mDispatcher;
+    private final UtteranceProgressDispatcher mDispatcher;
     private final String mCallingApp;
     private final EventLogger mLogger;
 
     PlaybackSynthesisCallback(int streamType, float volume, float pan,
-            AudioPlaybackHandler audioTrackHandler, UtteranceCompletedDispatcher dispatcher,
+            AudioPlaybackHandler audioTrackHandler, UtteranceProgressDispatcher dispatcher,
             String callingApp, EventLogger logger) {
         mStreamType = streamType;
         mVolume = volume;
