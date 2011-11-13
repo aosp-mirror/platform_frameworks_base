@@ -5090,10 +5090,22 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Constrain thumbnail to smaller of screen width or height. Assumes aspect
             // of thumbnail is the same as the screen (in landscape) or square.
+            float targetWidthScale = width / (float) fw;
+            float targetHeightScale = height / (float) fh;
             if (dw <= dh) {
-                scale = width / (float) fw; // portrait
+                scale = targetWidthScale;
+                // If aspect of thumbnail is the same as the screen (in landscape),
+                // select the slightly larger value so we fill the entire bitmap
+                if (targetHeightScale > scale && (int) (targetHeightScale * fw) == width) {
+                    scale = targetHeightScale;
+                }
             } else {
-                scale = height / (float) fh; // landscape
+                scale = targetHeightScale;
+                // If aspect of thumbnail is the same as the screen (in landscape),
+                // select the slightly larger value so we fill the entire bitmap
+                if (targetWidthScale > scale && (int) (targetWidthScale * fh) == height) {
+                    scale = targetWidthScale;
+                }
             }
 
             // The screen shot will contain the entire screen.

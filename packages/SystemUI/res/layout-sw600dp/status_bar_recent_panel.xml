@@ -36,40 +36,36 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <LinearLayout android:id="@+id/recents_glow"
+        <com.android.systemui.recent.RecentsVerticalScrollView android:id="@+id/recents_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-49dip"
-            android:layout_gravity="bottom"
-            android:background="@drawable/recents_blue_glow"
-            android:orientation="horizontal"
+            android:layout_marginRight="@dimen/status_bar_recents_right_glow_margin"
+            android:divider="@null"
+            android:stackFromBottom="true"
+            android:fadingEdge="vertical"
+            android:scrollbars="none"
+            android:fadingEdgeLength="20dip"
+            android:layout_gravity="bottom|left"
             android:clipToPadding="false"
-            android:clipChildren="false"
-            >
-            <com.android.systemui.recent.RecentsVerticalScrollView android:id="@+id/recents_container"
+            android:clipChildren="false">
+
+            <LinearLayout android:id="@+id/recents_linear_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/status_bar_recents_right_glow_margin"
-                android:divider="@null"
-                android:stackFromBottom="true"
-                android:fadingEdge="vertical"
-                android:scrollbars="none"
-                android:fadingEdgeLength="20dip"
-                android:layout_gravity="bottom|left"
+                android:orientation="vertical"
                 android:clipToPadding="false"
                 android:clipChildren="false">
+            </LinearLayout>
 
-                <LinearLayout android:id="@+id/recents_linear_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:clipToPadding="false"
-                    android:clipChildren="false">
-                </LinearLayout>
+        </com.android.systemui.recent.RecentsVerticalScrollView>
 
-            </com.android.systemui.recent.RecentsVerticalScrollView>
-
-        </LinearLayout>
+        <include layout="@layout/status_bar_no_recent_apps"
+            android:id="@+id/recents_no_apps"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="58dip"
+            android:layout_marginBottom="36dip"
+            android:visibility="invisible" />
 
     </FrameLayout>
 
@@ -81,5 +77,6 @@
         android:background="@drawable/ic_sysbar_back_ime"
         android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
     />
+
 
 </com.android.systemui.recent.RecentsPanelView>
