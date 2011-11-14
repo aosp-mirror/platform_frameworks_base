@@ -159,7 +159,7 @@
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Tjenester, der koster dig penge"</string>
     <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Tillader, at en applikation kan gøre ting, som kan koste penge."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Dine beskeder"</string>
-    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Læs og skriv dine sms-, e-mail- og andre beskeder."</string>
+    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Læs og skriv dine sms-, e-mail og andre beskeder."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Dine personlige oplysninger"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Få direkte adgang til dine kontakter og din kalender, der er gemt på tabletcomputeren."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Få direkte adgang til dine kontakter og din kalender, der er gemt på telefonen."</string>
