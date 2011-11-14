@@ -116,11 +116,6 @@ abstract class HardwareLayer {
     abstract void destroy();
 
     /**
-     * Flush the render queue associated with this layer.
-     */
-    abstract void flush();
-
-    /**
      * This must be invoked before drawing onto this layer.
      * @param currentCanvas
      */

@@ -60,13 +60,6 @@ abstract class GLES20Layer extends HardwareLayer {
         }
         mLayer = 0;
     }
-    
-    @Override
-    void flush() {
-        if (mLayer != 0) {
-            GLES20Canvas.nFlushLayer(mLayer);
-        }
-    }
 
     static class Finalizer {
         private int mLayerId;
