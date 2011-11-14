@@ -635,6 +635,9 @@ public class WallpaperManager {
                     //Log.v(TAG, "...app returning after sending offsets!");
                 } catch (RemoteException e) {
                     // Ignore.
+                } catch (IllegalArgumentException e) {
+                    // Since this is being posted, it's possible that this windowToken is no longer
+                    // valid, for example, if setWallpaperOffsets is called just before rotation.
                 }
             }
         });
