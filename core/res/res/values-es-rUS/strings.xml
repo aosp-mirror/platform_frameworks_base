@@ -1024,7 +1024,7 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Verificando errores"</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Almacenamiento USB en blanco"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tarjeta SD vacía"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Almacenamiento USB en blanco o sistema de archivos no compatible."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Almacenamiento USB vacío o sistema de archivos no compatible"</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Tarjeta SD en blanco o el sistema de archivos no es compatible."</string>
     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Almacenamiento USB dañado"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Tarjeta SD dañada"</string>
@@ -1032,7 +1032,7 @@
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Tarjeta SD dañada. Es posible que debas reformatearla."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Almacenamiento USB extraído inesperadamente"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Almacenamiento USB extraído de forma imprevista"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Desmontar el almacenamiento USB antes de extraerlo para evitar la pérdida de datos."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Desactivar el almacenamiento USB antes de extraerlo para evitar la pérdida de datos."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Desmontar la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Es seguro extraer el almacenamiento USB"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Es seguro extraer la tarjeta SD"</string>

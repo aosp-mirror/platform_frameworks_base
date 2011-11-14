@@ -136,7 +136,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Vula okungenantambo"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Vala okungenantambo"</string>
     <string name="screen_lock" msgid="799094655496098153">"Ukuvala isikrini"</string>
-    <string name="power_off" msgid="4266614107412865048">"Amandla avaliwe"</string>
+    <string name="power_off" msgid="4266614107412865048">"Vala amandla"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Ivala shaqa..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ithebhulethi yakho izocima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ifoni yakho izocima."</string>
@@ -146,7 +146,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Okukhethwa konke kwethebhulethi"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Okukhethwa kukho kwefoni"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ukuvala isikrini"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Amandla avaliwe"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Vala amandla"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Imodi ethulile"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Umsindo UVALIWE"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Umsindo UVULIWE"</string>
@@ -838,7 +838,7 @@
     <item quantity="one" msgid="2178576254385739855">"Kusasa"</item>
     <item quantity="other" msgid="2973062968038355991">"ezinsukwini ezing-<xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
-    <string name="preposition_for_date" msgid="9093949757757445117">"Ngomhla ka <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"ngo-<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"e-<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"phakathi- <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"usuku"</string>
@@ -886,7 +886,7 @@
     <string name="no" msgid="5141531044935541497">"Khansela"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Ukunaka"</string>
     <string name="loading" msgid="1760724998928255250">"Iyalayisha..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"Ngomhla ka"</string>
+    <string name="capital_on" msgid="1544682755514494298">"VULIWE"</string>
     <string name="capital_off" msgid="6815870386972805832">"VALIWE"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Qedela isenzo usebenzisa"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Sebenzisa ngokuzenzakalelayo kulesenzo."</string>
@@ -1146,7 +1146,7 @@
     <string name="checkbox_not_checked" msgid="5174639551134444056">"akuhloliwe"</string>
     <string name="radiobutton_selected" msgid="8603599808486581511">"Okukhethiwe"</string>
     <string name="radiobutton_not_selected" msgid="2908760184307722393">"akukhethiwe"</string>
-    <string name="switch_on" msgid="551417728476977311">"Ngomhla ka-"</string>
+    <string name="switch_on" msgid="551417728476977311">"vuliwe"</string>
     <string name="switch_off" msgid="7249798614327155088">"valiwe"</string>
     <string name="togglebutton_pressed" msgid="4180411746647422233">"kucindezelwe."</string>
     <string name="togglebutton_not_pressed" msgid="4495147725636134425">"akucindezelwe."</string>

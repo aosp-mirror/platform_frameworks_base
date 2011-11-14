@@ -223,7 +223,7 @@
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"다른 애플리케이션 강제 종료"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"애플리케이션이 다른 애플리케이션을 강제로 종료할 수 있도록 합니다."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"강제로 애플리케이션 닫기"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"애플리케이션이 포그라운드에 있는 활동을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"애플리케이션이 포그라운드에 있는 작업을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"시스템 내부 상태 검색"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"애플리케이션이 시스템의 내부 상태를 검색할 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"화면 콘텐츠 검색"</string>
@@ -446,7 +446,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"애플리케이션이 인증 토큰을 요청하도록 합니다."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"네트워크 상태 보기"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"애플리케이션이 모든 네트워크의 상태를 볼 수 있도록 합니다."</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"인터넷에 최대한 액세스"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"인터넷 액세스"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"애플리케이션이 네트워크 소켓을 만들 수 있도록 합니다."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"네트워크 설정 및 트래픽 차단/변경"</string>
     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"애플리케이션이 모든 네트워크 트래픽을 가로채고 검사하거나 네트워크 설정을 변경하도록 허용합니다. 예를 들어 프록시나 APN의 포트를 변경할 수 있습니다. 악성 애플리케이션이 사용자 모르게 네트워크 패킷을 모니터링하고 리디렉션하며 수정할 수도 있습니다."</string>
@@ -899,7 +899,7 @@
     <string name="aerr_process" msgid="4507058997035697579">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 중지되었습니다."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g>이(가) 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
-    <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동이 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g>이(가) 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
     <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 응답하지 않습니다. 닫으시겠습니까?"</string>
     <string name="anr_process" msgid="306819947562555821">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
     <string name="force_close" msgid="8346072094521265605">"확인"</string>
@@ -1207,7 +1207,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 지문:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 지문:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"전체 보기..."</string>
-    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"활동 선택"</string>
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"작업 선택"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"공유 대상..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"기기가 잠겼습니다."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>

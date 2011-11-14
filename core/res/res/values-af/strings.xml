@@ -171,7 +171,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kry toegang tot beskikbare rekeninge."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardewarekontroles"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkte toegang tot hardeware op die selfoon."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"foonoproepe"</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Foonoproepe"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Monitor, neem op, en verwerk foonoproepe."</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Stelselhulpmiddels"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Laervlak-toegang en -beheer van die stelsel."</string>
@@ -991,8 +991,8 @@
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Kon nie jou SD-kaart vir USB-massaberging gebruik nie."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB gekoppel"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Kies om lêers na/van jou rekenaar te kopieer."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Skakel USB-geheue af"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Kies om USB-geheue af te skakel."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Skakel USB-berging af"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Kies om USB-berging af te skakel."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-berging in gebruik"</string>
     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Voordat jy USB-berging afskakel, maak seker dat jy jou Android se USB-berging van jou rekenaar ontheg (\"uitgestoot\") het."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Voordat jy die USB-berging afskakel, maak seker dat jy jou Android se SD-kaart uit die rekenaar ontheg (uitgeskiet) het."</string>
