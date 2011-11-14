@@ -66,7 +66,6 @@ public:
 
         mHasNPot = hasExtension("GL_OES_texture_npot");
         mHasFramebufferFetch = hasExtension("GL_NV_shader_framebuffer_fetch");
-        mHasDiscardFramebuffer = hasExtension("GL_EXT_discard_framebuffer");
 
         const char* vendor = (const char*) glGetString(GL_VENDOR);
         EXT_LOGD("Vendor: %s", vendor);
@@ -81,7 +80,6 @@ public:
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool needsHighpTexCoords() const { return mNeedsHighpTexCoords; }
-    inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
 
     bool hasExtension(const char* extension) const {
         const String8 s(extension);
@@ -100,7 +98,6 @@ private:
     bool mHasNPot;
     bool mNeedsHighpTexCoords;
     bool mHasFramebufferFetch;
-    bool mHasDiscardFramebuffer;
 }; // class Extensions
 
 }; // namespace uirenderer

@@ -10146,12 +10146,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 break;
         }
     }
-    
-    void flushLayer() {
-        if (mLayerType == LAYER_TYPE_HARDWARE && mHardwareLayer != null) {
-            mHardwareLayer.flush();
-        }
-    }
 
     /**
      * <p>Returns a hardware layer that can be used to draw this view again
@@ -10164,9 +10158,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
         }
-        
-        if (!mAttachInfo.mHardwareRenderer.validate()) return null;
-        
 
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;
@@ -10241,14 +10232,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     boolean destroyLayer() {
         if (mHardwareLayer != null) {
-            AttachInfo info = mAttachInfo;
-            if (info != null && info.mHardwareRenderer != null &&
-                    info.mHardwareRenderer.isEnabled()) {
-                if (!info.mHardwareRenderer.validate()) {
-                    mHardwareLayer.destroy();
-                    mHardwareLayer = null;                    
-                }
-            }
+            mHardwareLayer.destroy();
+            mHardwareLayer = null;
             return true;
         }
         return false;

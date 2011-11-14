@@ -305,10 +305,8 @@ void LayerRenderer::destroyLayer(Layer* layer) {
         LAYER_RENDERER_LOGD("Recycling layer, %dx%d fbo = %d",
                 layer->getWidth(), layer->getHeight(), layer->getFbo());
 
-        GLuint fbo = layer->getFbo();
-        if (fbo) {
-            flushLayer(layer);
-            Caches::getInstance().fboCache.put(fbo);
+        if (layer->getFbo()) {
+            Caches::getInstance().fboCache.put(layer->getFbo());
         }
 
         if (!Caches::getInstance().layerCache.put(layer)) {
@@ -331,26 +329,6 @@ void LayerRenderer::destroyLayerDeferred(Layer* layer) {
 
         Caches::getInstance().deleteLayerDeferred(layer);
     }
-}
-
-void LayerRenderer::flushLayer(Layer* layer) {
-#ifdef GL_EXT_discard_framebuffer
-    GLuint fbo = layer->getFbo();
-    if (layer && fbo) {
-        // If possible, discard any enqued operations on deferred
-        // rendering architectures
-        if (Caches::getInstance().extensions.hasDiscardFramebuffer()) {
-            GLuint previousFbo;
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
-
-            GLenum attachments = GL_COLOR_ATTACHMENT0;
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, &attachments);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        }
-    }
-#endif
 }
 
 bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
