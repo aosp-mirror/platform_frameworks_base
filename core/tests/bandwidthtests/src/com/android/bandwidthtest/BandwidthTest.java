@@ -142,7 +142,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      * Ensure that uploading on wifi reports reasonable stats.
      */
     @LargeTest
-    public void testWifiUpload() {
+    public void testWifiUpload() throws Exception {
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         uploadFile();
     }
@@ -196,7 +196,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      * accounting still goes to the app making the call and that the numbers still make sense.
      */
     @LargeTest
-    public void testWifiDownloadWithDownloadManager() {
+    public void testWifiDownloadWithDownloadManager() throws Exception {
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         downloadFileUsingDownloadManager();
     }
