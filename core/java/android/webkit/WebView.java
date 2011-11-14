@@ -9512,6 +9512,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeHideCursor();
     private native boolean  nativeHitSelection(int x, int y);
     private native String   nativeImageURI(int x, int y);
+    private native void     nativeInstrumentReport();
     private native Rect     nativeLayerBounds(int layer);
     /* package */ native boolean nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
