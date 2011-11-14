@@ -1416,7 +1416,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyDown(keyCode, mVolumeControlStreamType);
+                getAudioManager().handleKeyDown(event, mVolumeControlStreamType);
                 return true;
             }
 
@@ -1478,7 +1478,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyUp(keyCode, mVolumeControlStreamType);
+                getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
                 return true;
             }
 
