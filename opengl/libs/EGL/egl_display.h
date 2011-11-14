@@ -81,7 +81,7 @@ public:
     // remove object from this display's list
     void removeObject(egl_object_t* object);
     // add reference to this object. returns true if this is a valid object.
-    bool getObject(egl_object_t* object);
+    bool getObject(egl_object_t* object) const;
 
 
     static egl_display_t* get(EGLDisplay dpy);
@@ -119,9 +119,9 @@ public:
     egl_config_t*   configs;
 
 private:
-    uint32_t        refs;
-    Mutex           lock;
-    SortedVector<egl_object_t*> objects;
+            uint32_t                    refs;
+    mutable Mutex                       lock;
+            SortedVector<egl_object_t*> objects;
 };
 
 // ----------------------------------------------------------------------------
