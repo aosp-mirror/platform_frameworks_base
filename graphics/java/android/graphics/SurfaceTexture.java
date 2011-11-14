@@ -17,6 +17,7 @@
 package android.graphics;
 
 import java.lang.ref.WeakReference;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -141,6 +142,12 @@ public class SurfaceTexture {
      * android.view.Surface#lockCanvas} is called.  For OpenGL ES, the EGLSurface should be
      * destroyed (via eglDestroySurface), made not-current (via eglMakeCurrent), and then recreated
      * (via eglCreateWindowSurface) to ensure that the new default size has taken effect.
+     * 
+     * The width and height parameters must be no greater than the minimum of
+     * GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see 
+     * {@link javax.microedition.khronos.opengles.GL10#glGetIntegerv glGetIntegerv}).
+     * An error due to invalid dimensions might not be reported until
+     * updateTexImage() is called.
      */
     public void setDefaultBufferSize(int width, int height) {
         nativeSetDefaultBufferSize(width, height);
@@ -152,7 +159,10 @@ public class SurfaceTexture {
      * implicitly bind its texture to the GL_TEXTURE_EXTERNAL_OES texture target.
      */
     public void updateTexImage() {
-        nativeUpdateTexImage();
+        int err = nativeUpdateTexImage(); 
+        if (err != 0) {
+            throw new RuntimeException("Error during updateTexImage (see logs)");
+        }
     }
 
     /**
@@ -258,7 +268,7 @@ public class SurfaceTexture {
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
-    private native void nativeUpdateTexImage();
+    private native int nativeUpdateTexImage();
     private native int nativeGetQueuedCount();
     private native void nativeRelease();
 
