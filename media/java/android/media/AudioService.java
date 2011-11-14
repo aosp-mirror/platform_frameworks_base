@@ -3062,12 +3062,19 @@ public class AudioService extends IAudioService.Stub {
             if ((mRcClientDeathHandler != null) && (mRcClientDeathHandler.mCb != null)) {
                 try {
                     mRcClientDeathHandler.mCb.unlinkToDeath(mRcClientDeathHandler, 0);
+                    mRcClientDeathHandler = null;
                 } catch (java.util.NoSuchElementException e) {
                     // not much we can do here
                     Log.e(TAG, "Encountered " + e + " in unlinkToRcClientDeath()");
                     e.printStackTrace();
                 }
             }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            unlinkToRcClientDeath();// unlink exception handled inside method
+            super.finalize();
         }
     }
 
@@ -3115,6 +3122,7 @@ public class AudioService extends IAudioService.Stub {
                     if (packageName.equalsIgnoreCase(rcse.mReceiverComponent.getPackageName())) {
                         // a stack entry is from the package being removed, remove it from the stack
                         stackIterator.remove();
+                        rcse.unlinkToRcClientDeath();
                     }
                 }
                 if (mRCStack.empty()) {
@@ -3195,6 +3203,7 @@ public class AudioService extends IAudioService.Stub {
             RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
             if(rcse.mMediaIntent.equals(pi)) {
                 stackIterator.remove();
+                rcse.unlinkToRcClientDeath();
                 break;
             }
         }
@@ -3456,7 +3465,7 @@ public class AudioService extends IAudioService.Stub {
                         rcse.mCallingPackageName = callingPackageName;
                         rcse.mCallingUid = Binder.getCallingUid();
                         if (rcClient == null) {
-                            rcse.mRcClientDeathHandler = null;
+                            // here rcse.mRcClientDeathHandler is null;
                             break;
                         }
 
@@ -3512,7 +3521,6 @@ public class AudioService extends IAudioService.Stub {
                         rcse.unlinkToRcClientDeath();
                         // reset the client-related fields
                         rcse.mRcClient = null;
-                        rcse.mRcClientDeathHandler = null;
                         rcse.mCallingPackageName = null;
                     }
                 }
