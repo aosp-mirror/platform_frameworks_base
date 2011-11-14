@@ -40,6 +40,8 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
 
         private int[] mIntArray;
 
+        private boolean mWasArrayMethodCalled;
+
         public synchronized void setBooleanValue(boolean x) {
             mBooleanValue = x;
             notifyResultIsReady();
@@ -76,11 +78,13 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
             return mIntArray;
         }
 
-        public int[] getIntArray() {
+        public synchronized int[] arrayMethod() {
+            mWasArrayMethodCalled = true;
             return new int[] {42, 43, 44};
         }
-        public int[] getEmptyIntArray() {
-            return new int[] {};
+
+        public synchronized boolean wasArrayMethodCalled() {
+            return mWasArrayMethodCalled;
         }
     }
 
@@ -160,18 +164,13 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
 
     // Note that this requires being able to pass a boolean from JavaScript to
     // Java.
-    public void testReturnArray() throws Throwable {
-        // LIVECONNECT_COMPLIANCE: Convert to JavaScript array.
-        executeJavaScript("testObject.setBooleanValue(undefined === testObject.getIntArray())");
+    public void testMethodReturningArrayNotCalled() throws Throwable {
+        // We don't invoke methods which return arrays, but note that no
+        // exception is raised.
+        // LIVECONNECT_COMPLIANCE: Should call method and convert result to
+        // JavaScript array.
+        executeJavaScript("testObject.setBooleanValue(undefined === testObject.arrayMethod())");
         assertTrue(mTestObject.waitForBooleanValue());
-    }
-
-    // Note that this requires being able to pass a boolean from JavaScript to
-    // Java.
-    public void testReturnEmptyArray() throws Throwable {
-        // LIVECONNECT_COMPLIANCE: Convert to JavaScript array.
-        executeJavaScript(
-            "testObject.setBooleanValue(undefined === testObject.getEmptyIntArray())");
-        assertTrue(mTestObject.waitForBooleanValue());
+        assertFalse(mTestObject.wasArrayMethodCalled());
     }
 }
