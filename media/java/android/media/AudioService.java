@@ -146,6 +146,7 @@ public class AudioService extends IAudioService.Stub {
     private AudioHandler mAudioHandler;
     /** @see VolumeStreamState */
     private VolumeStreamState[] mStreamStates;
+    private MasterMuteState mMasterMuteState;
     private SettingsObserver mSettingsObserver;
 
     private int mMode;
@@ -446,6 +447,7 @@ public class AudioService extends IAudioService.Stub {
         for (int i = 0; i < numStreamTypes; i++) {
             streams[i] = new VolumeStreamState(System.VOLUME_SETTINGS[STREAM_VOLUME_ALIAS[i]], i);
         }
+        mMasterMuteState = new MasterMuteState();
 
         // Correct stream index values for streams with aliases
         for (int i = 0; i < numStreamTypes; i++) {
@@ -762,6 +764,16 @@ public class AudioService extends IAudioService.Stub {
         return (mStreamStates[streamType].muteCount() != 0);
     }
 
+    /** @see AudioManager#setMasterMute(boolean, IBinder) */
+    public void setMasterMute(boolean state, IBinder cb) {
+        mMasterMuteState.mute(cb, state);
+    }
+
+    /** get master mute state. */
+    public boolean isMasterMute() {
+        return (mMasterMuteState.muteCount() != 0);
+    }
+
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -770,7 +782,8 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public int getMasterVolume() {
-        return Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
+        if (isMasterMute()) return 0;
+        return getLastAudibleMasterVolume();
     }
 
     public void setMasterVolume(int volume, int flags) {
@@ -792,6 +805,11 @@ public class AudioService extends IAudioService.Stub {
         ensureValidStreamType(streamType);
         int device = getDeviceForStream(streamType);
         return (mStreamStates[streamType].getIndex(device, true  /* lastAudible */) + 5) / 10;
+    }
+
+    /** Get last audible master volume before it was muted. */
+    public int getLastAudibleMasterVolume() {
+        return Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
     }
 
     /** @see AudioManager#getRingerMode() */
@@ -2222,6 +2240,122 @@ public class AudioService extends IAudioService.Stub {
                 // client death handler. Otherwise, it is an out of sequence unmute request.
                 if (state) {
                     handler = new VolumeDeathHandler(cb);
+                } else {
+                    Log.w(TAG, "stream was not muted by this client");
+                    handler = null;
+                }
+                return handler;
+            }
+        }
+    }
+
+    public class MasterMuteState {
+
+        private ArrayList<MasterMuteDeathHandler> mDeathHandlers;
+
+        private MasterMuteState() {
+            mDeathHandlers = new ArrayList<MasterMuteDeathHandler>();
+        }
+
+        public void mute(IBinder cb, boolean state) {
+            MasterMuteDeathHandler handler = getDeathHandler(cb, state);
+            if (handler == null) {
+                Log.e(TAG, "Could not get client death handler for master volume");
+                return;
+            }
+            handler.mute(state);
+        }
+
+        private class MasterMuteDeathHandler implements IBinder.DeathRecipient {
+            private IBinder mICallback; // To be notified of client's death
+            private int mMuteCount; // Number of active mutes for this client
+
+            MasterMuteDeathHandler(IBinder cb) {
+                mICallback = cb;
+            }
+
+            public void mute(boolean state) {
+                synchronized(mDeathHandlers) {
+                    if (state) {
+                        if (mMuteCount == 0) {
+                            // Register for client death notification
+                            try {
+                                // mICallback can be 0 if muted by AudioService
+                                if (mICallback != null) {
+                                    mICallback.linkToDeath(this, 0);
+                                }
+                                mDeathHandlers.add(this);
+                                // If the stream is not yet muted by any client, set lvel to 0
+                                if (muteCount() == 0) {
+                                    AudioSystem.setMasterMute(true);
+                                    mVolumePanel.postMasterMuteChanged(AudioManager.FLAG_SHOW_UI);
+                                }
+                            } catch (RemoteException e) {
+                                // Client has died!
+                                binderDied();
+                                mDeathHandlers.notify();
+                                return;
+                            }
+                        } else {
+                            Log.w(TAG, "master volume was already muted by this client");
+                        }
+                        mMuteCount++;
+                    } else {
+                        if (mMuteCount == 0) {
+                            Log.e(TAG, "unexpected unmute for master volume");
+                        } else {
+                            mMuteCount--;
+                            if (mMuteCount == 0) {
+                                // Unregistr from client death notification
+                                mDeathHandlers.remove(this);
+                                // mICallback can be 0 if muted by AudioService
+                                if (mICallback != null) {
+                                    mICallback.unlinkToDeath(this, 0);
+                                }
+                                if (muteCount() == 0) {
+                                    AudioSystem.setMasterMute(false);
+                                    mVolumePanel.postMasterMuteChanged(AudioManager.FLAG_SHOW_UI);
+                                }
+                            }
+                        }
+                    }
+                    mDeathHandlers.notify();
+                }
+            }
+
+            public void binderDied() {
+                Log.w(TAG, "Volume service client died for master volume");
+                if (mMuteCount != 0) {
+                    // Reset all active mute requests from this client.
+                    mMuteCount = 1;
+                    mute(false);
+                }
+            }
+        }
+
+        private int muteCount() {
+            int count = 0;
+            int size = mDeathHandlers.size();
+            for (int i = 0; i < size; i++) {
+                count += mDeathHandlers.get(i).mMuteCount;
+            }
+            return count;
+        }
+
+        private MasterMuteDeathHandler getDeathHandler(IBinder cb, boolean state) {
+            synchronized(mDeathHandlers) {
+                MasterMuteDeathHandler handler;
+                int size = mDeathHandlers.size();
+                for (int i = 0; i < size; i++) {
+                    handler = mDeathHandlers.get(i);
+                    if (cb == handler.mICallback) {
+                        return handler;
+                    }
+                }
+                // If this is the first mute request for this client, create a new
+                // client death handler. Otherwise, it is an out of sequence unmute request.
+                if (state) {
+                    handler = new MasterMuteDeathHandler(cb);
                 } else {
                     Log.w(TAG, "stream was not muted by this client");
                     handler = null;

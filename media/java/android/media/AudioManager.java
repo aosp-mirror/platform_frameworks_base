@@ -372,11 +372,12 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void preDispatchKeyEvent(int keyCode, int stream) {
+    public void preDispatchKeyEvent(KeyEvent event, int stream) {
         /*
          * If the user hits another key within the play sound delay, then
          * cancel the sound
          */
+        int keyCode = event.getKeyCode();
         if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
                 && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
                 && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
@@ -397,7 +398,8 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void handleKeyDown(int keyCode, int stream) {
+    public void handleKeyDown(KeyEvent event, int stream) {
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
@@ -426,7 +428,13 @@ public class AudioManager {
                 }
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
-                // TODO: Actually handle MUTE.
+                if (event.getRepeatCount() == 0) {
+                    if (mUseMasterVolume) {
+                        setMasterMute(!isMasterMute());
+                    } else {
+                        // TODO: Actually handle MUTE.
+                    }
+                }
                 break;
         }
     }
@@ -434,7 +442,8 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void handleKeyUp(int keyCode, int stream) {
+    public void handleKeyUp(KeyEvent event, int stream) {
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
@@ -459,9 +468,6 @@ public class AudioManager {
                 }
 
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
-                break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                // TODO: Actually handle MUTE.
                 break;
         }
     }
@@ -657,7 +663,7 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                return service.getMasterVolume();
+                return service.getLastAudibleMasterVolume();
             } else {
                 return service.getLastAudibleStreamVolume(streamType);
             }
@@ -779,6 +785,35 @@ public class AudioManager {
             return service.isStreamMute(streamType);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in isStreamMute", e);
+            return false;
+        }
+    }
+
+    /**
+     * set master mute state.
+     *
+     * @hide
+     */
+    public void setMasterMute(boolean state) {
+        IAudioService service = getService();
+        try {
+            service.setMasterMute(state, mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMasterMute", e);
+        }
+    }
+
+    /**
+     * get master mute state.
+     *
+     * @hide
+     */
+    public boolean isMasterMute() {
+        IAudioService service = getService();
+        try {
+            return service.isMasterMute();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isMasterMute", e);
             return false;
         }
     }

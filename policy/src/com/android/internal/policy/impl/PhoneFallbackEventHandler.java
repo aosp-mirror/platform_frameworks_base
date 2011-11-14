@@ -52,8 +52,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     }
 
     public void preDispatchKeyEvent(KeyEvent event) {
-        getAudioManager().preDispatchKeyEvent(event.getKeyCode(),
-                AudioManager.USE_DEFAULT_STREAM_TYPE);
+        getAudioManager().preDispatchKeyEvent(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
     }
 
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -79,7 +78,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                getAudioManager().handleKeyDown(keyCode, AudioManager.USE_DEFAULT_STREAM_TYPE);
+                getAudioManager().handleKeyDown(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
                 return true;
             }
 
@@ -197,8 +196,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
                     AudioManager audioManager = (AudioManager)mContext.getSystemService(
                             Context.AUDIO_SERVICE);
                     if (audioManager != null) {
-                        getAudioManager().handleKeyUp(keyCode,
-                                AudioManager.USE_DEFAULT_STREAM_TYPE);
+                        getAudioManager().handleKeyUp(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
                     }
                 }
                 return true;
