@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
 /* //device/apps/common/assets/res/any/strings.xml
 **
@@ -3364,5 +3364,14 @@
 
     <!-- Delimeter used between each item in a textual list; for example "Alpha, Beta". [CHAR LIMIT=3] -->
     <string name="list_delimeter">", "</string>
+
+    <!-- STK sending DTMF, SMS, USSD, SS -->
+    <string name="sending">Sending...</string>
+
+    <!-- STK launch Browser -->
+    <string name="launchBrowserDefault">Launch Browser?</string>
+
+    <!-- STK setup Call -->
+    <string name="SetupCallDefault">Accept Call?</string>
 
 </resources>
