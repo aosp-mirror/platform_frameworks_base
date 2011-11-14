@@ -468,6 +468,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'communication', 'new'],
+    path: 'samples/BluetoothHDP/index.html',
+    title: {
+      en: 'Bluetooth HDP Demo'
+    },
+    description: {
+      en: 'A sample application that demonstrates how to communicate with a Bluetooth Health Device Profile (HDP) device.'
+    }
+  },
+  {
     tags: ['sample', 'accountsync'],
     path: 'samples/BusinessCard/index.html',
     title: {
