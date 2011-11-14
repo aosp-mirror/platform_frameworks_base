@@ -1,0 +1,1215 @@
+page.title=Content Provider Basics
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+                    <!-- In this document -->
+<h2>In this document</h2>
+<ol>
+    <li>
+        <a href="#Basics">Overview</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">Accessing a provider</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">Content URIs</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">Retrieving Data from the Provider</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">Requesting read access permission</a>
+            </li>
+            <li>
+                <a href="#Query">Constructing the query</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">Displaying query results</a>
+            </li>
+            <li>
+                <a href="#GettingResults">Getting data from query results</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">Content Provider Permissions</a>
+    </li>
+    <li>
+        <a href="#Modifications">Inserting, Updating, and Deleting Data</a>
+        <ol>
+            <li>
+                <a href="#Inserting">Inserting data</a>
+            </li>
+            <li>
+                <a href="#Updating">Updating data</a>
+            </li>
+            <li>
+                <a href="#Deleting">Deleting data</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">Provider Data Types</a>
+    </li>
+    <li>
+        <a href="#AltForms">Alternative Forms of Provider Access</a>
+        <ol>
+            <li>
+                <a href="#Batch">Batch access</a>
+            </li>
+            <li>
+                <a href="#Intents">Data access via intents</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">Contract Classes</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">MIME Type Reference</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Key classes</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>Related Samples</h2>
+    <ol>
+        <li>
+        <a
+        href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Cursor (People)</a>
+        </li>
+        <li>
+        <a
+        href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Cursor (Phones)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>See also</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            Creating a Content Provider</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Calendar Provider</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    A content provider manages access to a central repository of data. The provider and
+    is part of an Android application, which often provides its own UI for working with
+    the data. However, content providers are primarily intended to be used by other
+    applications, which access the provider using a provider client object. Together, providers
+    and provider clients offer a consistent, standard interface to data that also handles
+    inter-process communication and secure data access.
+</p>
+<p>
+    This topic describes the basics of the following:
+</p>
+    <ul>
+        <li>How content providers work.</li>
+        <li>The API you use retrieve data from a content provider.</li>
+        <li>The API you use to insert, update, or delete data in a content provider.</li>
+        <li>Other API features that facilitate working with providers.</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">Overview</h2>
+<p>
+    A content provider presents data to external applications as one or more tables that are
+    similar to the tables found in a relational database. A row represents an instance of some type
+    of data the provider collects, and each row in the column represents an individual piece of
+    data collected for an instance.
+</p>
+<p>
+    For example, one of the built-in providers in the Android platform is the user dictionary, which
+    stores the spellings of non-standard words that the user wants to keep. Table 1 illustrates what
+    the data might look like in this provider's table:
+</p>
+<p class="table-caption">
+    <strong>Table 1:</strong> Sample user dictionary table.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">word</th>
+        <th style="width:20%" align="center" scope="col">app id</th>
+        <th style="width:20%" align="center" scope="col">frequency</th>
+        <th style="width:20%" align="center" scope="col">locale</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    In table 1, each row represents an instance of a word that might not be
+    found in a standard dictionary. Each column represents some data for that word, such as the
+    locale in which it was first encountered. The column headers are column names that are stored in
+    the provider. To refer to a row's locale, you refer to its <code>locale</code> column. For
+    this provider, the <code>_ID</code> column serves as a "primary key" column that
+    the provider automatically maintains.
+</p>
+<p class="note">
+    <strong>Note:</strong> A provider isn't required to have a primary key, and it isn't required
+    to use <code>_ID</code> as the column name of a primary key if one is present. However,
+    if you want to bind data from a provider to a {@link android.widget.ListView}, one of the
+    column names has to be <code>_ID</code>. This requirement is explained in more detail in the
+    section <a href="#DisplayResults">Displaying query results</a>.
+</p>
+<h3 id="ClientProvider">Accessing a provider</h3>
+<p>
+    An application accesses the data from a content provider with
+    a {@link android.content.ContentResolver} client object. This object has methods that call
+    identically-named methods in the provider object, an instance of one of the concrete
+    subclasses of {@link android.content.ContentProvider}. The
+    {@link android.content.ContentResolver} methods provide the basic
+    "CRUD" (create, retrieve, update, and delete) functions of persistent storage.
+</p>
+<p>
+    The {@link android.content.ContentResolver} object in the client application's
+    process and the {@link android.content.ContentProvider} object in the application that owns
+    the provider automatically handle inter-process communication.
+    {@link android.content.ContentProvider} also acts as an abstraction layer between its
+    repository of data and the external appearance of data as tables.
+</p>
+<p class="note">
+    <strong>Note:</strong> To access a provider, your application usually has to request specific
+    permissions in its manifest file. This is described in more detail in the section
+    <a href="#Permissions">Content Provider Permissions</a>
+</p>
+<p>
+    For example, to get a list of the words and their locales from the User Dictionary Provider,
+    you call {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    ContentResolver.query()}.
+    The {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    query()} method calls the
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} method defined by the User Dictionary Provider. The following lines
+    of code show a
+    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    ContentResolver.query()} call:
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    Table 2 shows how the arguments to
+    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    query(Uri,projection,selection,selectionArgs,sortOrder)} match an SQL SELECT statement:
+</p>
+<p class="table-caption">
+    <strong>Table 2:</strong> Query() compared to SQL query.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">query() argument</th>
+        <th style="width:25%" align="center" scope="col">SELECT keyword/parameter</th>
+        <th style="width:50%" align="center" scope="col">Notes</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> maps to the table in the provider named <em>table_name</em>.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> is an array of columns that should be included for each row
+            retrieved.
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> specifies the criteria for selecting rows.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (No exact equivalent. Selection arguments replace <code>?</code> placeholders in the
+            selection clause.)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> specifies the order in which rows appear in the returned
+            {@link android.database.Cursor}.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">Content URIs</h3>
+<p>
+    A <strong>content URI</strong> is a URI that identifies data in a provider. Content URIs
+    include the symbolic name of the entire provider (its <strong>authority</strong>) and a
+    name that points to a table (a <strong>path</strong>). When you call
+    a client method to access a table in a provider, the content URI for the table is one of
+    the arguments.
+</p>
+<p>
+    In the preceding lines of code, the constant
+    {@link android.provider.UserDictionary.Words#CONTENT_URI} contains the content URI of
+    the user dictionary's "words" table. The {@link android.content.ContentResolver}
+    object parses out the URI's authority, and uses it to "resolve" the provider by
+    comparing the authority to a system table of known providers. The
+    {@link android.content.ContentResolver} can then dispatch the query arguments to the correct
+    provider.
+</p>
+<p>
+    The {@link android.content.ContentProvider} uses the path part of the content URI to choose the
+    table to access. A provider usually has a <strong>path</strong> for each table it exposes.
+</p>
+<p>
+    In the previous lines of code, the full URI for the "words" table is:
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    where the <code>user_dictionary</code> string is the provider's authority, and
+    <code>words</code> string is the table's path. The string
+    <code>content://</code> (the <strong>scheme</strong>) is always present,
+    and identifies this as a content URI.
+</p>
+<p>
+    Many providers allow you to access a single row in a table by appending an ID value
+    to the end of the URI. For example, to retrieve a row whose <code>_ID</code> is
+    <code>4</code> from user dictionary, you can use this content URI:
+</p>
+<pre>
+Uri singleUri = ContentUri.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    You often use id values when you've retrieved a set of rows and then want to update or delete
+    one of them.
+</p>
+<p class="note">
+    <strong>Note:</strong> The {@link android.net.Uri} and {@link android.net.Uri.Builder} classes
+    contain convenience methods for constructing well-formed Uri objects from strings. The
+    {@link android.content.ContentUris} contains convenience methods for appending id values to
+    a URI. The previous snippet uses {@link android.content.ContentUris#withAppendedId(Uri, long)
+    withAppendedId()} to append an id to the UserDictionary content URI.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">Retrieving Data from the Provider</h2>
+<p>
+    This section describes how to retrieve data from a provider, using the User Dictionary Provider
+    as an example.
+</p>
+<p class="note">
+    For the sake of clarity, the code snippets in this section call
+    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    ContentResolver.query()} on the "UI thread"". In actual code, however, you should
+    do queries asynchronously on a separate thread. One way to do this is to use the
+    {@link android.content.CursorLoader} class, which is described
+    in more detail in the <a href="{@docRoot}guide/topics/fundamentals/loaders.html">
+    Loaders</a> guide. Also, the lines of code are snippets only; they don't show a complete
+    application.
+</p>
+<p>
+    To retrieve data from a provider, follow these basic steps:
+</p>
+<ol>
+   <li>
+        Request the read access permission for the provider.
+   </li>
+   <li>
+        Define the code that sends a query to the provider.
+   </li>
+</ol>
+<h3 id="RequestPermissions">Requesting read access permission</h3>
+<p>
+    To retrieve data from a provider, your application needs "read access permission" for the
+    provider. You can't request this permission at run-time; instead, you have to specify that
+    you need this permission in your manifest, using the
+    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+    &lt;uses-permission&gt;</a></code> element and the exact permission name defined by the
+    provider. When you specify this element in your manifest, you are in effect "requesting" this
+    permission for your application. When users install your application, they implicitly grant
+    this request.
+</p>
+<p>
+    To find the exact name of the read access permission for the provider you're using, as well
+    as the names for other access permissions used by the provider, look in the provider's
+    documentation.
+</p>
+<p>
+    The role of permissions in accessing providers is described in more detail in the section
+    <a href="#Permissions">Content Provider Permissions</a>.
+</p>
+<p>
+    The User Dictionary Provider defines the permission
+    <code>android.permission.READ_USER_DICTIONARY</code> in its manifest file, so an
+    application that wants to read from the provider must request this permission.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">Constructing the query</h3>
+<p>
+    The next step in retrieving data a provider is to construct a query. This first snippet
+    defines some variables for accessing the User Dictionary Provider:
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    The next snippet shows how to use
+    {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    ContentResolver.query()}, using the User Dictionary Provider as an example.
+    A provider client query is similar to an SQL query, and it contains a set of columns to return,
+    a set of selection criteria, and a sort order.
+</p>
+<p>
+    The set of columns that the query should return is called a <strong>projection</strong>
+    (the variable <code>mProjection</code>).
+</p>
+<p>
+    The expression that specifies the rows to retrieve is split into a selection clause and
+    selection arguments. The selection clause is a combination of logical and Boolean expressions,
+    column names, and values (the variable <code>mSelection</code>). If you specify the replaceable
+    parameter <code>?</code> instead of a value, the query method retrieves the value from the
+    selection arguments array (the variable <code>mSelectionArgs</code>).
+</p>
+<p>
+    In the next snippet, if the user doesn't enter a word, the selection clause is set to
+    <code>null</code>, and the query returns all the words in the provider. If the user enters
+    a word, the selection clause is set to <code>UserDictionary.Words.Word + " = ?"</code> and
+    the first element of selection arguments array is set to the word the user enters.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    This query is analogous to the SQL statement:
+</p>
+<pre>
+SELECT _ID, word, frequency, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    In this SQL statement, the actual column names are used instead of contract class constants.
+</p>
+<h4 id="Injection">Protecting against malicious input</h4>
+<p>
+    If the data managed by the content provider is in an SQL database, including external untrusted
+    data into raw SQL statements can lead to SQL injection.
+</p>
+<p>
+    Consider this selection clause:
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    If you do this, you're allowing the user to concatenate malicious SQL onto your SQL statement.
+    For example, the user could enter "nothing; DROP TABLE *;"  for <code>mUserInput</code>, which
+    would result in the selection clause <code>var = nothing; DROP TABLE *;</code>. Since the
+    selection clause is treated as an SQL statement, this might cause the provider to erase all of
+    the tables in the underlying SQLite database (unless the provider is set up to catch
+    <a href="http://en.wikipedia.org/wiki/SQL_injection">SQL injection</a> attempts).
+</p>
+<p>
+    To avoid this problem, use a selection clause that uses <code>?</code> as a replaceable
+    parameter and a separate array of selection arguments. When you do this, the user input
+    is bound directly to the query rather than being interpreted as part of an SQL statement.
+    Because it's not treated as SQL, the user input can't inject malicious SQL. Instead of using
+    concatenation to include the user input, use this selection clause:
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    Set up the array of selection arguments like this:
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    Put a value in the selection arguments array like this:
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    A selection clause that uses <code>?</code> as a replaceable parameter and an array of
+    selection arguments array are preferred way to specify a selection, even the provider isn't
+    based on an SQL database.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">Displaying query results</h3>
+<p>
+    The {@link android.content.ContentResolver#query(Uri, String[], String, String[], String)
+    ContentResolver.query()} client method always returns a {@link android.database.Cursor}
+    containing the columns specified by the query's projection for the rows that match the query's
+    selection criteria. A {@link android.database.Cursor} object provides random read access to the
+    rows and columns it contains. Using {@link android.database.Cursor} methods,
+    you can iterate over the rows in the results, determine the data type of each column, get the
+    data out of a column, and examine other properties of the results. Some
+    {@link android.database.Cursor} implementations automatically update the object when the
+    provider's data changes, or trigger methods in an observer object when the
+    {@link android.database.Cursor} changes, or both.
+</p>
+<p class="note">
+    <strong>Note:</strong> A provider may restrict access to columns based on the nature of the
+    object making the query. For example, the Contacts Provider restricts access for some columns to
+    sync adapters, so it won't return them to an activity or service.
+</p>
+<p>
+    If no rows match the selection criteria, the provider
+    returns a {@link android.database.Cursor} object for which
+    {@link android.database.Cursor#getCount() Cursor.getCount()} is 0 (an empty cursor).
+</p>
+<p>
+    If an internal error occurs, the results of the query depend on the particular provider. It may
+    choose to return <code>null</code>, or it may throw an {@link java.lang.Exception}.
+</p>
+<p>
+    Since a {@link android.database.Cursor} is a "list" of rows, a good way to display the
+    contents of a {@link android.database.Cursor} is to link it to a {@link android.widget.ListView}
+    via a {@link android.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    The following snippet continues the code from the previous snippet. It creates a
+    {@link android.widget.SimpleCursorAdapter} object containing the {@link android.database.Cursor}
+    retrieved by the query, and sets this object to be the adapter for a
+    {@link android.widget.ListView}:
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>Note:</strong> To back a {@link android.widget.ListView} with a
+    {@link android.database.Cursor}, the cursor must contain a column named <code>_ID</code>.
+    Because of this, the query shown previously retrieves the <code>_ID</code> column for the
+    "words" table, even though the {@link android.widget.ListView} doesn't display it.
+    This restriction also explains why most providers have a <code>_ID</code> column for each of
+    their tables.
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">Getting data from query results</h3>
+<p>
+    Rather than simply displaying query results, you can use them for other tasks. For
+    example, you can retrieve spellings from the user dictionary and then look them up in
+    other providers. To do this, you iterate over the rows in the {@link android.database.Cursor}:
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    {@link android.database.Cursor} implementations contain several "get" methods for
+    retrieving different types of data from the object. For example, the previous snippet
+    uses {@link android.database.Cursor#getString(int) getString()}. They also have a
+    {@link android.database.Cursor#getType(int) getType()} method that returns a value indicating
+    the data type of the column.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">Content Provider Permissions</h2>
+<p>
+    A provider's application can specify permissions that other applications must have in order to
+    access the provider's data. These permissions ensure that the user knows what data
+    an application will try to access. Based on the provider's requirements, other applications
+    request the permissions they need in order to access the provider. End users see the requested
+    permissions when they install the application.
+</p>
+<p>
+    If a provider's application doesn't specify any permissions, then other applications have no
+    access to the provider's data. However, components in the provider's application always have
+    full read and write access, regardless of the specified permissions.
+</p>
+<p>
+    As noted previously, the User Dictionary Provider requires the
+    <code>android.permission.READ_USER_DICTIONARY</code> permission to retrieve data from it.
+    The provider has the separate <code>android.permission.WRITE_USER_DICTIONARY</code>
+    permission for inserting, updating, or deleting data.
+</p>
+<p>
+    To get the permissions needed to access a provider, an application requests them with a
+    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+    &lt;uses-permission&gt;</a></code> element in its manifest file.
+    When the Android Package Manager installs the application, a user must approve all of the
+    permissions the application requests. If the user approves all of them, Package Manager
+    continues the installation; if the user doesn't approve them, Package Manager
+    aborts the installation.
+</p>
+<p>
+    The following
+    <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+    &lt;uses-permission&gt;</a></code> element requests read access to the User Dictionary Provider:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    The impact of permissions on provider access is explained in more detail in the
+    <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> guide.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">Inserting, Updating, and Deleting Data</h2>
+<p>
+    In the same way that you retrieve data from a provider, you also use the interaction between
+    a provider client and the provider's {@link android.content.ContentProvider} to modify data.
+    You call a method of {@link android.content.ContentResolver} with arguments that are passed to
+    the corresponding method of {@link android.content.ContentProvider}. The provider and provider
+    client automatically handle security and inter-process communication.
+</p>
+<h3 id="Inserting">Inserting data</h3>
+<p>
+    To insert data into a provider, you call the
+    {@link android.content.ContentResolver#insert(Uri,ContentValues) ContentResolver.insert()}
+    method. This method inserts a new row into the provider and returns a content URI for that row.
+    This snippet shows how to insert a new word into the User Dictionary Provider:
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    The data for the new row goes into a single {@link android.content.ContentValues} object, which
+    is similar in form to a one-row cursor. The columns in this object don't need to have the
+    same data type, and if you don't want to specify a value at all, you can set a column
+    to <code>null</code> using {@link android.content.ContentValues#putNull(String)
+    ContentValues.putNull()}.
+</p>
+<p>
+    The snippet doesn't add the <code>_ID</code> column, because this column is maintained
+    automatically. The provider assigns a unique value of <code>_ID</code> to every row that is
+    added. Providers usually use this value as the table's primary key.
+</p>
+<p>
+    The content URI returned in <code>newUri</code> identifies the newly-added row, with
+    the following format:
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    The <code>&lt;id_value&gt;</code> is the contents of <code>_ID</code> for the new row.
+    Most providers can detect this form of content URI automatically and then perform the requested
+    operation on that particular row.
+</p>
+<p>
+    To get the value of <code>_ID</code> from the returned {@link android.net.Uri}, call
+    {@link android.content.ContentUris#parseId(Uri) ContentUris.parseId()}.
+</p>
+<h3 id="Updating">Updating data</h3>
+<p>
+    To update a row, you use a {@link android.content.ContentValues} object with the updated
+    values just as you do with an insertion, and selection criteria just as you do with a query.
+    The client method you use is
+    {@link android.content.ContentResolver#update(Uri, ContentValues, String, String[])
+    ContentResolver.update()}. You only need to add values to the
+    {@link android.content.ContentValues} object for columns you're updating. If you want to clear
+    the contents of a column, set the value to <code>null</code>.
+</p>
+<p>
+    The following snippet changes all the rows whose locale has the language "en" to a
+    have a locale of <code>null</code>. The return value is the number of rows that were updated:
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    You should also sanitize user input when you call
+    {@link android.content.ContentResolver#update(Uri, ContentValues, String, String[])
+    ContentResolver.update()}. To learn more about this, read the section
+    <a href="#Injection">Protecting against malicious input</a>.
+</p>
+<h3 id="Deleting">Deleting data</h3>
+<p>
+    Deleting rows is similar to retrieving row data: you specify selection criteria for the rows
+    you want to delete and the client method returns the number of deleted rows.
+    The following snippet deletes rows whose appid matches "user". The method returns the
+    number of deleted rows.
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    You should also sanitize user input when you call
+    {@link android.content.ContentResolver#delete(Uri, String, String[])
+    ContentResolver.delete()}. To learn more about this, read the section
+    <a href="#Injection">Protecting against malicious input</a>.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">Provider Data Types</h2>
+<p>
+    Content providers can offer many different data types. The User Dictionary Provider offers only
+    text, but providers can also offer the following formats:
+</p>
+    <ul>
+        <li>
+            integer
+        </li>
+        <li>
+            long integer (long)
+        </li>
+        <li>
+            floating point
+        </li>
+        <li>
+            long floating point (double)
+        </li>
+    </ul>
+<p>
+    Another data type that providers often use is Binary Large OBject (BLOB) implemented as a
+    64KB byte array. You can see the available data types by looking at the
+    {@link android.database.Cursor} class "get" methods.
+</p>
+<p>
+    The data type for each column in a provider is usually listed in its documentation.
+    The data types for the User Dictionary Provider are listed in the reference documentation
+    for its contract class {@link android.provider.UserDictionary.Words} (contract classes are
+    described in the section <a href="#ContractClasses">Contract Classes</a>).
+    You can also determine the data type by calling {@link android.database.Cursor#getType(int)
+    Cursor.getType()}.
+</p>
+<p>
+    Providers also maintain MIME data type information for each content URI they define. You can
+    use the MIME type information to find out if your application can handle data that the
+    provider offers, or to choose a type of handling based on the MIME type. You usually need the
+    MIME type when you are working with a provider that contains complex
+    data structures or files. For example, the {@link android.provider.ContactsContract.Data}
+    table in the Contacts Provider uses MIME types to label the type of contact data stored in each
+    row. To get the MIME type corresponding to a content URI, call
+    {@link android.content.ContentResolver#getType(Uri) ContentResolver.getType()}.
+</p>
+<p>
+    The section <a href="#MIMETypeReference">MIME Type Reference</a> describes the
+    syntax of both standard and custom MIME types.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">Alternative Forms of Provider Access</h2>
+<p>
+    Three alternative forms of provider access are important in application development:
+</p>
+<ul>
+    <li>
+        <a href="#Batch">Batch access</a>: You can create a batch of access calls with methods in
+        the {@link android.content.ContentProviderOperation} class, and then apply them with
+        {@link android.content.ContentResolver#applyBatch(String, ArrayList)
+        ContentResolver.applyBatch()}.
+    </li>
+    <li>
+        Asynchronous queries: You should do queries in a separate thread. One way to do this is to
+        use a {@link android.content.CursorLoader} object. The examples in the
+        <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> guide demonstrate
+        how to do this.
+    </li>
+    <li>
+        <a href="#Intents">Data access via intents</a>: Although you can't send an intent
+        directly to a provider, you can send an intent to the provider's application, which is
+        usually the best-equipped to modify the provider's data.
+    </li>
+</ul>
+<p>
+    Batch access and modification via intents are described in the following sections.
+</p>
+<h3 id="Batch">Batch access</h3>
+<p>
+    Batch access to a provider is useful for inserting a large number of rows, or for inserting
+    rows in multiple tables in the same method call, or in general for performing a set of
+    operations across process boundaries as a transaction (an atomic operation).
+</p>
+<p>
+    To access a provider in "batch mode",
+    you create an array of {@link android.content.ContentProviderOperation} objects and then
+    dispatch them to a content provider with
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList)
+    ContentResolver.applyBatch()}. You pass the content provider's <em>authority</em> to this
+    method, rather than a particular content URI, which allows each
+    {@link android.content.ContentProviderOperation} object in the array to work against a
+    different table. A call to {@link android.content.ContentResolver#applyBatch(String, ArrayList)
+    ContentResolver.applyBatch()} returns an array of results.
+</p>
+<p>
+    The description of the {@link android.provider.ContactsContract.RawContacts} contract class
+    includes a code snippet that demonstrates batch insertion. The
+    <a href="{@docRoot}resources/samples/ContactManager/index.html">Contact Manager</a>
+    sample application contains an example of batch access in its <code>ContactAdder.java</code>
+    source file.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Displaying data using a helper app</h2>
+<p>
+    If your application <em>does</em> have access permissions, you still may want to use an
+    intent to display data in another application. For example, the Calendar application accepts an
+    {@link android.content.Intent#ACTION_VIEW} intent, which displays a particular date or event.
+    This allows you to display calendar information without having to create your own UI.
+    To learn more about this feature, see the
+    <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar Provider</a> guide.
+</p>
+<p>
+    The application to which you send the intent doesn't have to be the application
+    associated with the provider. For example, you can retrieve a contact from the
+    Contact Provider, then send an {@link android.content.Intent#ACTION_VIEW} intent
+    containing the content URI for the contact's image to an image viewer.
+</p>
+</div>
+</div>
+<h3 id="Intents">Data access via intents</h3>
+<p>
+    Intents can provide indirect access to a content provider. You allow the user to access
+    data in a provider even if your application doesn't have access permissions, either by
+    getting a result intent back from an application that has permissions, or by activating an
+    application that has permissions and letting the user do work in it.
+</p>
+<h4>Getting access with temporary permissions</h4>
+<p>
+    You can access data in a content provider, even if you don't have the proper access
+    permissions, by sending an intent to an application that does have the permissions and
+    receiving back a result intent containing "URI" permissions.
+    These are permissions for a specific content URI that last until the activity that receives
+    them is finished. The application that has permanent permissions grants temporary
+    permissions by setting a flag in the result intent:
+</p>
+<ul>
+    <li>
+        <strong>Read permission:</strong>
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>Write permission:</strong>
+        {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>Note:</strong> These flags don't give general read or write access to the provider
+    whose authority is contained in the content URI. The access is only for the URI itself.
+</p>
+<p>
+    A provider defines URI permissions for content URIs in its manifest, using the
+    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+    android:grantUriPermission</a></code>
+    attribute of the
+    {@code <a href="guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    element, as well as the
+    {@code <a href="guide/topics/manifest/grant-uri-permission-element.html">
+    &lt;grant-uri-permission&gt;</a>} child element of the
+    {@code <a href="guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>}
+    element. The URI permissions mechanism is explained in more detail in the
+    <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> guide,
+    in the section "URI Permissions".
+</p>
+<p>
+    For example, you can retrieve data for a contact in the Contacts Provider, even if you don't
+    have the {@link android.Manifest.permission#READ_CONTACTS} permission. You might want to do
+    this in an application that sends e-greetings to a contact on his or her birthday. Instead of
+    requesting {@link android.Manifest.permission#READ_CONTACTS}, which gives you access to all of
+    the user's contacts and all of their information, you prefer to let the user control which
+    contacts are used by your application. To do this, you use the following process:
+</p>
+<ol>
+    <li>
+        Your application sends an intent containing the action
+        {@link android.content.Intent#ACTION_PICK} and the "contacts" MIME type
+        {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}, using the
+        method {@link android.app.Activity#startActivityForResult(Intent, int)
+        startActivityForResult()}.
+    </li>
+    <li>
+        Because this intent matches the intent filter for the
+        People app's "selection" activity, the activity will come to the foreground.
+    </li>
+    <li>
+        In the selection activity, the user selects a
+        contact to update. When this happens, the selection activity calls
+        {@link android.app.Activity#setResult(int, Intent) setResult(resultcode, intent)}
+        to set up a intent to give back to your application. The intent contains the content URI
+        of the contact the user selected, and the "extras" flags
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}. These flags grant URI
+        permission to your app to read data for the contact pointed to by the
+        content URI. The selection activity then calls {@link android.app.Activity#finish()} to
+        return control to your application.
+    </li>
+    <li>
+        Your activity returns to the foreground, and the system calls your activity's
+        {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}
+        method. This method receives the result intent created by the selection activity in
+        the People app.
+    </li>
+    <li>
+        With the content URI from the result intent, you can read the contact's data
+        from the Contacts Provider, even though you didn't request permanent read access permission
+        to the provider in your manifest. You can then get the contact's birthday information
+        or his or her email address and then send the e-greeting.
+    </li>
+</ol>
+<h4>Using another application</h4>
+<p>
+    A simple way to allow the user to modify data to which you don't have access permissions is to
+    activate an application that has permissions and let the user do the work there.
+</p>
+<p>
+    For example, the Calendar application accepts an
+    {@link android.content.Intent#ACTION_INSERT} intent, which allows you to activate the
+    application's insert UI. You can pass "extras" data in this intent, which the application
+    uses to pre-populate the UI. Because recurring events have a complex syntax, the preferred
+    way of inserting events into the Calendar Provider is to activate the Calendar app with an
+    {@link android.content.Intent#ACTION_INSERT} and then let the user insert the event there.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">Contract Classes</h2>
+<p>
+    A contract class defines constants that help applications work with the content URIs, column
+    names, intent actions, and other features of a content provider. Contract classes are not
+    included automatically with a provider; the provider's developer has to define them and then
+    make them available to other developers. Many of the providers included with the Android
+    platform have corresponding contract classes in the package {@link android.provider}.
+</p>
+<p>
+    For example, the User Dictionary Provider has a contract class
+    {@link android.provider.UserDictionary} containing content URI and column name constants. The
+    content URI for the "words" table is defined in the constant
+    {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
+    The {@link android.provider.UserDictionary.Words} class also contains column name constants,
+    which are used in the example snippets in this guide. For example, a query projection can be
+    defined as:
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    Another contract class is {@link android.provider.ContactsContract} for the Contacts Provider.
+    The reference documentation for this class includes example code snippets. One of its
+    subclasses, {@link android.provider.ContactsContract.Intents.Insert}, is a contract
+    class that contains constants for intents and intent data.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">MIME Type Reference</h2>
+<p>
+    Content providers can return standard MIME media types, or custom MIME type strings, or both.
+</p>
+<p>
+    MIME types have the format
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    For example, the well-known MIME type <code>text/html</code> has the <code>text</code> type and
+    the <code>html</code> subtype. If the provider returns this type for a URI, it means that a
+    query using that URI will return text containing HTML tags.
+</p>
+<p>
+    Custom MIME type strings, also called "vendor-specific" MIME types, have more
+    complex <em>type</em> and <em>subtype</em> values. The <em>type</em> value is always
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    for multiple rows, or
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    for a single row.
+</p>
+<p>
+    The <em>subtype</em> is provider-specific. The Android built-in providers usually have a simple
+    subtype. For example, the when the Contacts application creates a row for a telephone number,
+    it sets the following MIME type in the row:
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    Notice that the subtype value is simply <code>phone_v2</code>.
+</p>
+<p>
+    Other provider developers may create their own pattern of subtypes based on the provider's
+    authority and table names. For example, consider a provider that contains train timetables.
+    The provider's authority is <code>com.example.trains</code>, and it contains the tables
+    Line1, Line2, and Line3. In response to the content URI
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    for table Line1, the provider returns the MIME type
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     In response to the content URI
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    for row 5 in table Line2, the provider returns the MIME type
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    Most content providers define contract class constants for the MIME types they use. The
+    Contacts Provider contract class {@link android.provider.ContactsContract.RawContacts},
+    for example, defines the constant
+    {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} for the MIME type of
+    a single raw contact row.
+</p>
+<p>
+    Content URIs for single rows are described in the section
+    <a href="#ContentURIs">Content URIs</a>.
+</p>
