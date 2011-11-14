@@ -7574,11 +7574,17 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 
 AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
                                         int sessionId)
-    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mTrackCnt(0),
+    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mTrackCnt(0), mTailBufferCount(0),
       mOwnInBuffer(false), mVolumeCtrlIdx(-1), mLeftVolume(UINT_MAX), mRightVolume(UINT_MAX),
       mNewLeftVolume(UINT_MAX), mNewRightVolume(UINT_MAX)
 {
     mStrategy = AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
+    sp<ThreadBase> thread = mThread.promote();
+    if (thread == 0) {
+        return;
+    }
+    mMaxTailBuffers = ((kProcessTailDurationMs * thread->sampleRate()) / 1000) /
+                                    thread->frameCount();
 }
 
 AudioFlinger::EffectChain::~EffectChain()
@@ -7646,22 +7652,31 @@ void AudioFlinger::EffectChain::process_l()
     }
     bool isGlobalSession = (mSessionId == AUDIO_SESSION_OUTPUT_MIX) ||
             (mSessionId == AUDIO_SESSION_OUTPUT_STAGE);
-    bool tracksOnSession = false;
+    // always process effects unless no more tracks are on the session and the effect tail
+    // has been rendered
+    bool doProcess = true;
     if (!isGlobalSession) {
-        tracksOnSession = (trackCnt() != 0);
-    }
+        bool tracksOnSession = (trackCnt() != 0);
 
-    // if no track is active, input buffer must be cleared here as the mixer process
-    // will not do it
-    if (tracksOnSession &&
-            activeTrackCnt() == 0) {
-        size_t numSamples = thread->frameCount() * thread->channelCount();
-        memset(mInBuffer, 0, numSamples * sizeof(int16_t));
+        if (!tracksOnSession && mTailBufferCount == 0) {
+            doProcess = false;
+        }
+
+        if (activeTrackCnt() == 0) {
+            // if no track is active and the effect tail has not been rendered,
+            // the input buffer must be cleared here as the mixer process will not do it
+            if (tracksOnSession || mTailBufferCount > 0) {
+                size_t numSamples = thread->frameCount() * thread->channelCount();
+                memset(mInBuffer, 0, numSamples * sizeof(int16_t));
+                if (mTailBufferCount > 0) {
+                    mTailBufferCount--;
+                }
+            }
+        }
     }
 
     size_t size = mEffects.size();
-    // do not process effect if no track is present in same audio session
-    if (isGlobalSession || tracksOnSession) {
+    if (doProcess) {
         for (size_t i = 0; i < size; i++) {
             mEffects[i]->process();
         }
