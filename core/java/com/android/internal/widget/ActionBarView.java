@@ -537,7 +537,7 @@ public class ActionBarView extends AbsActionBarView {
 
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
             final boolean showHome = (options & ActionBar.DISPLAY_SHOW_HOME) != 0;
-            final int vis = showHome ? VISIBLE : GONE;
+            final int vis = showHome && mExpandedActionView == null ? VISIBLE : GONE;
             mHomeLayout.setVisibility(vis);
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
