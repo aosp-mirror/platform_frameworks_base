@@ -212,10 +212,10 @@ static void SurfaceTexture_setDefaultBufferSize(
     surfaceTexture->setDefaultBufferSize(width, height);
 }
 
-static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
+static jint SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
 {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
-    surfaceTexture->updateTexImage();
+    return surfaceTexture->updateTexImage();
 }
 
 static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject thiz,
@@ -246,7 +246,7 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeInit",               "(ILjava/lang/Object;Z)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",           "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
-    {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
+    {"nativeUpdateTexImage",     "()I",   (void*)SurfaceTexture_updateTexImage },
     {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
     {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp },
     {"nativeRelease",            "()V",   (void*)SurfaceTexture_release },
