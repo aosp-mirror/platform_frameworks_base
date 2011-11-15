@@ -20,9 +20,5 @@ typedef struct TestData_s {
     int renderSurfaceW;
     int renderSurfaceH;
     float dt;
-    int user;
-    int user1;
-    int user2;
-    int user3;
 } TestData;
 

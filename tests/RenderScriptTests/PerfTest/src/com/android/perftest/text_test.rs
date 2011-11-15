@@ -22,6 +22,11 @@
 rs_font gFontSans;
 rs_font gFontSerif;
 
+typedef struct TextTestData_s {
+    int fillNum;
+} TextTestData;
+TextTestData *gData;
+
 void init() {
 }
 
@@ -78,5 +83,8 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     TestData *testData = (TestData*)usrData;
     gRenderSurfaceW = testData->renderSurfaceW;
     gRenderSurfaceH = testData->renderSurfaceH;
-    displayFontSamples(testData->user);
+
+    gData = (TextTestData*)v_in;
+
+    displayFontSamples(gData->fillNum);
 }
