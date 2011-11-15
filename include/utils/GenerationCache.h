@@ -34,17 +34,17 @@ public:
 
 template<typename EntryKey, typename EntryValue>
 struct Entry: public LightRefBase<Entry<EntryKey, EntryValue> > {
-    Entry() { }
-    Entry(const Entry<EntryKey, EntryValue>& e):
-            key(e.key), value(e.value), parent(e.parent), child(e.child) { }
-    Entry(sp<Entry<EntryKey, EntryValue> > e):
-            key(e->key), value(e->value), parent(e->parent), child(e->child) { }
+    Entry(const Entry<EntryKey, EntryValue>& e) :
+            key(e.key), value(e.value),
+            parent(e.parent), child(e.child) { }
+    Entry(const EntryKey& key, const EntryValue& value) :
+            key(key), value(value) { }
 
     EntryKey key;
     EntryValue value;
 
-    sp<Entry<EntryKey, EntryValue> > parent;
-    sp<Entry<EntryKey, EntryValue> > child;
+    sp<Entry<EntryKey, EntryValue> > parent; // next older entry
+    sp<Entry<EntryKey, EntryValue> > child;  // next younger entry
 }; // struct Entry
 
 /**
@@ -62,23 +62,20 @@ public:
 
     void setOnEntryRemovedListener(OnEntryRemoved<K, V>* listener);
 
+    size_t size() const;
+
     void clear();
 
-    bool contains(K key) const;
-    V get(K key);
-    K getKeyAt(uint32_t index) const;
-    bool put(K key, V value);
-    V remove(K key);
-    V removeOldest();
-    V getValueAt(uint32_t index) const;
+    bool contains(const K& key) const;
+    const K& getKeyAt(size_t index) const;
+    const V& getValueAt(size_t index) const;
 
-    uint32_t size() const;
+    const V& get(const K& key);
+    bool put(const K& key, const V& value);
 
-    void addToCache(sp<Entry<K, V> > entry, K key, V value);
-    void attachToCache(sp<Entry<K, V> > entry);
-    void detachFromCache(sp<Entry<K, V> > entry);
-
-    V removeAt(ssize_t index);
+    void removeAt(ssize_t index);
+    bool remove(const K& key);
+    bool removeOldest();
 
 private:
     KeyedVector<K, sp<Entry<K, V> > > mCache;
@@ -88,6 +85,9 @@ private:
 
     sp<Entry<K, V> > mOldest;
     sp<Entry<K, V> > mYoungest;
+
+    void attachToCache(const sp<Entry<K, V> >& entry);
+    void detachFromCache(const sp<Entry<K, V> >& entry);
 }; // class GenerationCache
 
 template<typename K, typename V>
@@ -130,45 +130,44 @@ void GenerationCache<K, V>::clear() {
 }
 
 template<typename K, typename V>
-bool GenerationCache<K, V>::contains(K key) const {
+bool GenerationCache<K, V>::contains(const K& key) const {
     return mCache.indexOfKey(key) >= 0;
 }
 
 template<typename K, typename V>
-K GenerationCache<K, V>::getKeyAt(uint32_t index) const {
+const K& GenerationCache<K, V>::getKeyAt(size_t index) const {
     return mCache.keyAt(index);
 }
 
 template<typename K, typename V>
-V GenerationCache<K, V>::getValueAt(uint32_t index) const {
+const V& GenerationCache<K, V>::getValueAt(size_t index) const {
     return mCache.valueAt(index)->value;
 }
 
 template<typename K, typename V>
-V GenerationCache<K, V>::get(K key) {
+const V& GenerationCache<K, V>::get(const K& key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        sp<Entry<K, V> > entry = mCache.valueAt(index);
-        if (entry.get()) {
-            detachFromCache(entry);
-            attachToCache(entry);
-            return entry->value;
-        }
+        const sp<Entry<K, V> >& entry = mCache.valueAt(index);
+        detachFromCache(entry);
+        attachToCache(entry);
+        return entry->value;
     }
 
     return NULL;
 }
 
 template<typename K, typename V>
-bool GenerationCache<K, V>::put(K key, V value) {
+bool GenerationCache<K, V>::put(const K& key, const V& value) {
     if (mMaxCapacity != kUnlimitedCapacity && mCache.size() >= mMaxCapacity) {
         removeOldest();
     }
 
     ssize_t index = mCache.indexOfKey(key);
     if (index < 0) {
-        sp<Entry<K, V> > entry = new Entry<K, V>;
-        addToCache(entry, key, value);
+        sp<Entry<K, V> > entry = new Entry<K, V>(key, value);
+        mCache.add(key, entry);
+        attachToCache(entry);
         return true;
     }
 
@@ -176,49 +175,44 @@ bool GenerationCache<K, V>::put(K key, V value) {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::addToCache(sp<Entry<K, V> > entry, K key, V value) {
-    entry->key = key;
-    entry->value = value;
-    mCache.add(key, entry);
-    attachToCache(entry);
-}
-
-template<typename K, typename V>
-V GenerationCache<K, V>::remove(K key) {
+bool GenerationCache<K, V>::remove(const K& key) {
     ssize_t index = mCache.indexOfKey(key);
     if (index >= 0) {
-        return removeAt(index);
+        removeAt(index);
+        return true;
     }
 
-    return NULL;
+    return false;
 }
 
 template<typename K, typename V>
-V GenerationCache<K, V>::removeAt(ssize_t index) {
+void GenerationCache<K, V>::removeAt(ssize_t index) {
     sp<Entry<K, V> > entry = mCache.valueAt(index);
     if (mListener) {
         (*mListener)(entry->key, entry->value);
     }
     mCache.removeItemsAt(index, 1);
     detachFromCache(entry);
-
-    return entry->value;
 }
 
 template<typename K, typename V>
-V GenerationCache<K, V>::removeOldest() {
+bool GenerationCache<K, V>::removeOldest() {
     if (mOldest.get()) {
         ssize_t index = mCache.indexOfKey(mOldest->key);
         if (index >= 0) {
-            return removeAt(index);
+            removeAt(index);
+            return true;
         }
+        LOGE("GenerationCache: removeOldest failed to find the item in the cache "
+                "with the given key, but we know it must be in there.  "
+                "Is the key comparator kaput?");
     }
 
-    return NULL;
+    return false;
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::attachToCache(sp<Entry<K, V> > entry) {
+void GenerationCache<K, V>::attachToCache(const sp<Entry<K, V> >& entry) {
     if (!mYoungest.get()) {
         mYoungest = mOldest = entry;
     } else {
@@ -229,20 +223,16 @@ void GenerationCache<K, V>::attachToCache(sp<Entry<K, V> > entry) {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::detachFromCache(sp<Entry<K, V> > entry) {
+void GenerationCache<K, V>::detachFromCache(const sp<Entry<K, V> >& entry) {
     if (entry->parent.get()) {
         entry->parent->child = entry->child;
+    } else {
+        mOldest = entry->child;
     }
 
     if (entry->child.get()) {
         entry->child->parent = entry->parent;
-    }
-
-    if (mOldest == entry) {
-        mOldest = entry->child;
-    }
-
-    if (mYoungest == entry) {
+    } else {
         mYoungest = entry->parent;
     }
 
