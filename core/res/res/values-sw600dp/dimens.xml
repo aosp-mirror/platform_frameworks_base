@@ -43,7 +43,7 @@
     <dimen name="action_bar_subtitle_bottom_margin">9dip</dimen>
 
     <!-- Size of clock font in LockScreen. -->
-    <dimen name="keyguard_pattern_unlock_clock_font_size">98sp</dimen>
+    <dimen name="keyguard_pattern_unlock_clock_font_size">112sp</dimen>
 
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">364dp</dimen>
