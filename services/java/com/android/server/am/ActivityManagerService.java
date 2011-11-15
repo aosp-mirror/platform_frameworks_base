@@ -1493,6 +1493,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mConfiguration.setToDefaults();
         mConfiguration.locale = Locale.getDefault();
+        mConfigurationSeq = mConfiguration.seq = 1;
         mProcessStats.init();
         
         mCompatModePackages = new CompatModePackages(this, systemDir);
@@ -2457,7 +2458,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     r.mayFreezeScreenLocked(r.app) ? r.appToken : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
-                if (!updateConfigurationLocked(config, r, false)) {
+                if (!updateConfigurationLocked(config, r, false, false)) {
                     mMainStack.resumeTopActivityLocked(null);
                 }
             }
@@ -3818,7 +3819,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.instrumentationClass, profileFile, profileFd, profileAutoStop,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     isRestrictedBackupMode || !normalMode, app.persistent,
-                    mConfiguration, app.compat, getCommonServicesLocked(),
+                    new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
@@ -6730,8 +6731,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mAlwaysFinishActivities = alwaysFinishActivities;
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
-            mConfiguration.updateFrom(configuration);
-            mConfigurationSeq = mConfiguration.seq = 1;
+            updateConfigurationLocked(configuration, null, false, true);
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Initial config: " + mConfiguration);
         }
     }
@@ -12957,7 +12957,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
-            updateConfigurationLocked(values, null, true);
+            updateConfigurationLocked(values, null, true, false);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -12980,7 +12980,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (values != null) {
                 Settings.System.clearConfiguration(values);
             }
-            updateConfigurationLocked(values, null, false);
+            updateConfigurationLocked(values, null, false, false);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -12994,7 +12994,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param persistent TODO
      */
     public boolean updateConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean persistent) {
+            ActivityRecord starting, boolean persistent, boolean initLocale) {
         // do nothing if we are headless
         if (mHeadless) return true;
 
@@ -13012,7 +13012,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 
                 EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
-                if (values.locale != null) {
+                if (values.locale != null && !initLocale) {
                     saveLocaleLocked(values.locale, 
                                      !values.locale.equals(mConfiguration.locale),
                                      values.userSetLocale);
@@ -13025,14 +13025,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changed: " + newConfig);
-                
+
                 // TODO: If our config changes, should we auto dismiss any currently
                 // showing dialogs?
                 mShowDialogs = shouldShowDialogs(newConfig);
 
+                final Configuration configCopy = new Configuration(mConfiguration);
+
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
-                    ac.updateConfiguration(mConfiguration);
+                    ac.updateConfiguration(configCopy);
                 }
 
                 // Make sure all resources in our process are updated
@@ -13042,11 +13044,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // boot, where the first config change needs to guarantee
                 // all resources have that config before following boot
                 // code is executed.
-                mSystemThread.applyConfigurationToResources(newConfig);
+                mSystemThread.applyConfigurationToResources(configCopy);
 
                 if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
-                    msg.obj = new Configuration(mConfiguration);
+                    msg.obj = new Configuration(configCopy);
                     mHandler.sendMessage(msg);
                 }
         
@@ -13056,7 +13058,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (app.thread != null) {
                             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
                                     + app.processName + " new config " + mConfiguration);
-                            app.thread.scheduleConfigurationChanged(mConfiguration);
+                            app.thread.scheduleConfigurationChanged(configCopy);
                         }
                     } catch (Exception e) {
                     }
