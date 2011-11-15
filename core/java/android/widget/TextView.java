@@ -131,7 +131,6 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.widget.AdapterView.OnItemClickListener;
@@ -5356,7 +5355,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
-                mEnterKeyIsDown = true;
                 if (event.hasNoModifiers()) {
                     // When mInputContentType is set, we know that we are
                     // running in a "modern" cupcake environment, so don't need
@@ -5388,7 +5386,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
                 
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                mDPadCenterIsDown = true;
                 if (event.hasNoModifiers()) {
                     if (shouldAdvanceFocusOnEnter()) {
                         return 0;
@@ -5502,7 +5499,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                mDPadCenterIsDown = false;
                 if (event.hasNoModifiers()) {
                     /*
                      * If there is a click listener, just call through to
@@ -5527,7 +5523,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return super.onKeyUp(keyCode, event);
 
             case KeyEvent.KEYCODE_ENTER:
-                mEnterKeyIsDown = false;
                 if (event.hasNoModifiers()) {
                     if (mInputContentType != null
                             && mInputContentType.onEditorActionListener != null
@@ -8989,17 +8984,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private long getLastTouchOffsets() {
-        int minOffset, maxOffset;
-
-        if (mContextMenuTriggeredByKey) {
-            minOffset = getSelectionStart();
-            maxOffset = getSelectionEnd();
-        } else {
-            SelectionModifierCursorController selectionController = getSelectionController();
-            minOffset = selectionController.getMinTouchOffset();
-            maxOffset = selectionController.getMaxTouchOffset();
-        }
-
+        SelectionModifierCursorController selectionController = getSelectionController();
+        final int minOffset = selectionController.getMinTouchOffset();
+        final int maxOffset = selectionController.getMaxTouchOffset();
         return packRangeInLong(minOffset, maxOffset);
     }
 
@@ -9091,12 +9078,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int ID_CUT = android.R.id.cut;
     private static final int ID_COPY = android.R.id.copy;
     private static final int ID_PASTE = android.R.id.paste;
-
-    private class MenuHandler implements MenuItem.OnMenuItemClickListener {
-        public boolean onMenuItemClick(MenuItem item) {
-            return onTextContextMenuItem(item.getItemId());
-        }
-    }
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
@@ -11496,12 +11477,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean                 mInsertionControllerEnabled;
     private boolean                 mSelectionControllerEnabled;
     private boolean                 mInBatchEditControllers;
-
-    // These are needed to desambiguate a long click. If the long click comes from ones of these, we
-    // select from the current cursor position. Otherwise, select from long pressed position.
-    private boolean                 mDPadCenterIsDown = false;
-    private boolean                 mEnterKeyIsDown = false;
-    private boolean                 mContextMenuTriggeredByKey = false;
 
     private boolean                 mSelectAllOnFocus = false;
 
