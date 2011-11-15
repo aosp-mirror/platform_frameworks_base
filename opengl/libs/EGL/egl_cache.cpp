@@ -46,13 +46,13 @@ namespace android {
 //
 // Callback functions passed to EGL.
 //
-static void setBlob(const void* key, EGLsizei keySize, const void* value,
-        EGLsizei valueSize) {
+static void setBlob(const void* key, EGLsizeiANDROID keySize,
+        const void* value, EGLsizeiANDROID valueSize) {
     egl_cache_t::get()->setBlob(key, keySize, value, valueSize);
 }
 
-static EGLsizei getBlob(const void* key, EGLsizei keySize, void* value,
-        EGLsizei valueSize) {
+static EGLsizeiANDROID getBlob(const void* key, EGLsizeiANDROID keySize,
+        void* value, EGLsizeiANDROID valueSize) {
     return egl_cache_t::get()->getBlob(key, keySize, value, valueSize);
 }
 
@@ -87,22 +87,23 @@ void egl_cache_t::initialize(egl_display_t *display) {
                     !strcmp(" " BC_EXT_STR, exts + extsLen - (bcExtLen+1));
             bool inMiddle = strstr(" " BC_EXT_STR " ", exts);
             if (equal || atStart || atEnd || inMiddle) {
-                PFNEGLSETBLOBCACHEFUNCSPROC eglSetBlobCacheFuncs;
-                eglSetBlobCacheFuncs =
-                        reinterpret_cast<PFNEGLSETBLOBCACHEFUNCSPROC>(
-                            cnx->egl.eglGetProcAddress("eglSetBlobCacheFuncs"));
-                if (eglSetBlobCacheFuncs == NULL) {
+                PFNEGLSETBLOBCACHEFUNCSANDROIDPROC eglSetBlobCacheFuncsANDROID;
+                eglSetBlobCacheFuncsANDROID =
+                        reinterpret_cast<PFNEGLSETBLOBCACHEFUNCSANDROIDPROC>(
+                            cnx->egl.eglGetProcAddress(
+                                    "eglSetBlobCacheFuncsANDROID"));
+                if (eglSetBlobCacheFuncsANDROID == NULL) {
                     LOGE("EGL_ANDROID_blob_cache advertised by display %d, "
-                            "but unable to get eglSetBlobCacheFuncs", i);
+                            "but unable to get eglSetBlobCacheFuncsANDROID", i);
                     continue;
                 }
 
-                eglSetBlobCacheFuncs(display->disp[i].dpy, android::setBlob,
-                        android::getBlob);
+                eglSetBlobCacheFuncsANDROID(display->disp[i].dpy,
+                        android::setBlob, android::getBlob);
                 EGLint err = cnx->egl.eglGetError();
                 if (err != EGL_SUCCESS) {
-                    LOGE("eglSetBlobCacheFuncs resulted in an error: %#x",
-                            err);
+                    LOGE("eglSetBlobCacheFuncsANDROID resulted in an error: "
+                            "%#x", err);
                 }
             }
         }
@@ -119,8 +120,8 @@ void egl_cache_t::terminate() {
     mInitialized = false;
 }
 
-void egl_cache_t::setBlob(const void* key, EGLsizei keySize, const void* value,
-        EGLsizei valueSize) {
+void egl_cache_t::setBlob(const void* key, EGLsizeiANDROID keySize,
+        const void* value, EGLsizeiANDROID valueSize) {
     Mutex::Autolock lock(mMutex);
 
     if (keySize < 0 || valueSize < 0) {
@@ -158,8 +159,8 @@ void egl_cache_t::setBlob(const void* key, EGLsizei keySize, const void* value,
     }
 }
 
-EGLsizei egl_cache_t::getBlob(const void* key, EGLsizei keySize, void* value,
-        EGLsizei valueSize) {
+EGLsizeiANDROID egl_cache_t::getBlob(const void* key, EGLsizeiANDROID keySize,
+        void* value, EGLsizeiANDROID valueSize) {
     Mutex::Autolock lock(mMutex);
 
     if (keySize < 0 || valueSize < 0) {
@@ -323,7 +324,8 @@ void egl_cache_t::loadBlobCacheLocked() {
             return;
         }
 
-        status_t err = mBlobCache->unflatten(buf + headerSize, cacheSize, NULL, 0);
+        status_t err = mBlobCache->unflatten(buf + headerSize, cacheSize, NULL,
+                0);
         if (err != OK) {
             LOGE("error reading cache contents: %s (%d)", strerror(-err),
                     -err);
