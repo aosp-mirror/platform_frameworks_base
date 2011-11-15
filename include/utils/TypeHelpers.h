@@ -213,6 +213,9 @@ void move_backward_type(TYPE* d, const TYPE* s, size_t n = 1) {
 
 template <typename KEY, typename VALUE>
 struct key_value_pair_t {
+    typedef KEY key_t;
+    typedef VALUE value_t;
+
     KEY     key;
     VALUE   value;
     key_value_pair_t() { }
@@ -221,6 +224,12 @@ struct key_value_pair_t {
     key_value_pair_t(const KEY& k) : key(k) { }
     inline bool operator < (const key_value_pair_t& o) const {
         return strictly_order_type(key, o.key);
+    }
+    inline const KEY& getKey() const {
+        return key;
+    }
+    inline const VALUE& getValue() const {
+        return value;
     }
 };
 
@@ -242,6 +251,41 @@ struct trait_trivial_move< key_value_pair_t<K, V> >
 { enum { value = aggregate_traits<K,V>::has_trivial_move }; };
 
 // ---------------------------------------------------------------------------
+
+/*
+ * Hash codes.
+ */
+typedef uint32_t hash_t;
+
+template <typename TKey>
+hash_t hash_type(const TKey& key);
+
+/* Built-in hash code specializations.
+ * Assumes pointers are 32bit. */
+#define ANDROID_INT32_HASH(T) \
+        template <> inline hash_t hash_type(const T& value) { return hash_t(value); }
+#define ANDROID_INT64_HASH(T) \
+        template <> inline hash_t hash_type(const T& value) { \
+                return hash_t((value >> 32) ^ value); }
+#define ANDROID_REINTERPRET_HASH(T, R) \
+        template <> inline hash_t hash_type(const T& value) { \
+                return hash_type(*reinterpret_cast<const R*>(&value)); }
+
+ANDROID_INT32_HASH(bool)
+ANDROID_INT32_HASH(char)
+ANDROID_INT32_HASH(unsigned char)
+ANDROID_INT32_HASH(short)
+ANDROID_INT32_HASH(unsigned short)
+ANDROID_INT32_HASH(int)
+ANDROID_INT32_HASH(unsigned int)
+ANDROID_INT64_HASH(long)
+ANDROID_INT64_HASH(unsigned long)
+ANDROID_REINTERPRET_HASH(float, uint32_t)
+ANDROID_REINTERPRET_HASH(double, uint64_t)
+
+template <typename T> inline hash_t hash_type(const T*& value) {
+    return hash_type(uintptr_t(value));
+}
 
 }; // namespace android
 
