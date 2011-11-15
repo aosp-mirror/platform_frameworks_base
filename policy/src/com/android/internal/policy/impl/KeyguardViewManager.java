@@ -118,6 +118,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
                     | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
+                    | WindowManager.LayoutParams.FLAG_SLIPPERY
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
