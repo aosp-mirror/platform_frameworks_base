@@ -651,7 +651,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
                                float x4, float y4, float z4,
                                float u4, float v4) {
     const uint32_t vertsPerQuad = 4;
-    const uint32_t floatsPerVert = 5;
+    const uint32_t floatsPerVert = 6;
     float *currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
 
     // Cull things that are off the screen
@@ -670,24 +670,28 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
     (*currentPos++) = x1;
     (*currentPos++) = y1;
     (*currentPos++) = z1;
+    (*currentPos++) = 0;
     (*currentPos++) = u1;
     (*currentPos++) = v1;
 
     (*currentPos++) = x2;
     (*currentPos++) = y2;
     (*currentPos++) = z2;
+    (*currentPos++) = 0;
     (*currentPos++) = u2;
     (*currentPos++) = v2;
 
     (*currentPos++) = x3;
     (*currentPos++) = y3;
     (*currentPos++) = z3;
+    (*currentPos++) = 0;
     (*currentPos++) = u3;
     (*currentPos++) = v3;
 
     (*currentPos++) = x4;
     (*currentPos++) = y4;
     (*currentPos++) = z4;
+    (*currentPos++) = 0;
     (*currentPos++) = u4;
     (*currentPos++) = v4;
 

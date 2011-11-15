@@ -169,7 +169,8 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize) {
         break;
     }
 
-    mBits = mTypeBits * mVectorSize;
+    mBitsUnpadded = mTypeBits * mVectorSize;
+    mBits = mTypeBits * rsHigherPow2(mVectorSize);
 }
 
 bool Component::isReference() const {

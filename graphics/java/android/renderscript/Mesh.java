@@ -514,6 +514,7 @@ public class Mesh extends BaseObj {
     public static class TriangleMeshBuilder {
         float mVtxData[];
         int mVtxCount;
+        int mMaxIndex;
         short mIndexData[];
         int mIndexCount;
         RenderScript mRS;
@@ -548,6 +549,7 @@ public class Mesh extends BaseObj {
         public TriangleMeshBuilder(RenderScript rs, int vtxSize, int flags) {
             mRS = rs;
             mVtxCount = 0;
+            mMaxIndex = 0;
             mIndexCount = 0;
             mVtxData = new float[128];
             mIndexData = new short[128];
@@ -581,11 +583,13 @@ public class Mesh extends BaseObj {
                 mVtxData[mVtxCount++] = mT0;
             }
             if ((mFlags & NORMAL) != 0) {
-                makeSpace(3);
+                makeSpace(4);
                 mVtxData[mVtxCount++] = mNX;
                 mVtxData[mVtxCount++] = mNY;
                 mVtxData[mVtxCount++] = mNZ;
+                mVtxData[mVtxCount++] = 0.0f;
             }
+            mMaxIndex ++;
         }
 
         /**
@@ -622,10 +626,11 @@ public class Mesh extends BaseObj {
             if (mVtxSize != 3) {
                 throw new IllegalStateException("add mistmatch with declared components.");
             }
-            makeSpace(3);
+            makeSpace(4);
             mVtxData[mVtxCount++] = x;
             mVtxData[mVtxCount++] = y;
             mVtxData[mVtxCount++] = z;
+            mVtxData[mVtxCount++] = 1.0f;
             latch();
             return this;
         }
@@ -697,9 +702,9 @@ public class Mesh extends BaseObj {
         * @return this
         **/
         public TriangleMeshBuilder addTriangle(int idx1, int idx2, int idx3) {
-            if((idx1 >= mVtxCount) || (idx1 < 0) ||
-               (idx2 >= mVtxCount) || (idx2 < 0) ||
-               (idx3 >= mVtxCount) || (idx3 < 0)) {
+            if((idx1 >= mMaxIndex) || (idx1 < 0) ||
+               (idx2 >= mMaxIndex) || (idx2 < 0) ||
+               (idx3 >= mMaxIndex) || (idx3 < 0)) {
                throw new IllegalStateException("Index provided greater than vertex count.");
             }
             if ((mIndexCount + 3) >= mIndexData.length) {
@@ -729,20 +734,16 @@ public class Mesh extends BaseObj {
         **/
         public Mesh create(boolean uploadToBufferObject) {
             Element.Builder b = new Element.Builder(mRS);
-            int floatCount = mVtxSize;
             b.add(Element.createVector(mRS,
                                        Element.DataType.FLOAT_32,
                                        mVtxSize), "position");
             if ((mFlags & COLOR) != 0) {
-                floatCount += 4;
                 b.add(Element.F32_4(mRS), "color");
             }
             if ((mFlags & TEXTURE_0) != 0) {
-                floatCount += 2;
                 b.add(Element.F32_2(mRS), "texture0");
             }
             if ((mFlags & NORMAL) != 0) {
-                floatCount += 3;
                 b.add(Element.F32_3(mRS), "normal");
             }
             mElement = b.create();
@@ -753,12 +754,12 @@ public class Mesh extends BaseObj {
             }
 
             Builder smb = new Builder(mRS, usage);
-            smb.addVertexType(mElement, mVtxCount / floatCount);
+            smb.addVertexType(mElement, mMaxIndex);
             smb.addIndexSetType(Element.U16(mRS), mIndexCount, Primitive.TRIANGLE);
 
             Mesh sm = smb.create();
 
-            sm.getVertexAllocation(0).copy1DRangeFromUnchecked(0, mVtxCount / floatCount, mVtxData);
+            sm.getVertexAllocation(0).copy1DRangeFromUnchecked(0, mMaxIndex, mVtxData);
             if(uploadToBufferObject) {
                 if (uploadToBufferObject) {
                     sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
