@@ -644,9 +644,13 @@ int32_t InputReader::getStateLocked(int32_t deviceId, uint32_t sourceMask, int32
         for (size_t i = 0; i < numDevices; i++) {
             InputDevice* device = mDevices.valueAt(i);
             if (! device->isIgnored() && sourcesMatchMask(device->getSources(), sourceMask)) {
-                result = (device->*getStateFunc)(sourceMask, code);
-                if (result >= AKEY_STATE_DOWN) {
-                    return result;
+                // If any device reports AKEY_STATE_DOWN or AKEY_STATE_VIRTUAL, return that
+                // value.  Otherwise, return AKEY_STATE_UP as long as one device reports it.
+                int32_t currentResult = (device->*getStateFunc)(sourceMask, code);
+                if (currentResult >= AKEY_STATE_DOWN) {
+                    return currentResult;
+                } else if (currentResult == AKEY_STATE_UP) {
+                    result = currentResult;
                 }
             }
         }
@@ -1000,9 +1004,13 @@ int32_t InputDevice::getState(uint32_t sourceMask, int32_t code, GetStateFunc ge
     for (size_t i = 0; i < numMappers; i++) {
         InputMapper* mapper = mMappers[i];
         if (sourcesMatchMask(mapper->getSources(), sourceMask)) {
-            result = (mapper->*getStateFunc)(sourceMask, code);
-            if (result >= AKEY_STATE_DOWN) {
-                return result;
+            // If any mapper reports AKEY_STATE_DOWN or AKEY_STATE_VIRTUAL, return that
+            // value.  Otherwise, return AKEY_STATE_UP as long as one mapper reports it.
+            int32_t currentResult = (mapper->*getStateFunc)(sourceMask, code);
+            if (currentResult >= AKEY_STATE_DOWN) {
+                return currentResult;
+            } else if (currentResult == AKEY_STATE_UP) {
+                result = currentResult;
             }
         }
     }
