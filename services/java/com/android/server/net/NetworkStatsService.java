@@ -1243,7 +1243,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // trim any history beyond max
         if (mTime.hasCache()) {
-            final long currentTime = mTime.currentTimeMillis();
+            final long currentTime = Math.min(
+                    System.currentTimeMillis(), mTime.currentTimeMillis());
             final long maxHistory = mSettings.getNetworkMaxHistory();
             for (NetworkStatsHistory history : input.values()) {
                 history.removeBucketsBefore(currentTime - maxHistory);
@@ -1287,7 +1288,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // trim any history beyond max
         if (mTime.hasCache()) {
-            final long currentTime = mTime.currentTimeMillis();
+            final long currentTime = Math.min(
+                    System.currentTimeMillis(), mTime.currentTimeMillis());
             final long maxUidHistory = mSettings.getUidMaxHistory();
             final long maxTagHistory = mSettings.getTagMaxHistory();
             for (UidStatsKey key : mUidStats.keySet()) {
