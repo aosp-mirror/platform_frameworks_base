@@ -149,6 +149,7 @@ public class PhoneStatusBar extends StatusBar {
     // icons
     LinearLayout mIcons;
     IconMerger mNotificationIcons;
+    View mMoreIcon;
     LinearLayout mStatusIcons;
 
     // expanded notifications
@@ -307,6 +308,8 @@ public class PhoneStatusBar extends StatusBar {
         mPixelFormat = PixelFormat.OPAQUE;
         mStatusIcons = (LinearLayout)sb.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
+        mMoreIcon = sb.findViewById(R.id.moreIcon);
+        mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mIcons = (LinearLayout)sb.findViewById(R.id.icons);
         mTickerView = sb.findViewById(R.id.ticker);
 
