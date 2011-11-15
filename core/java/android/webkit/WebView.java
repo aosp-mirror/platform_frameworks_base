@@ -361,6 +361,7 @@ public class WebView extends AbsoluteLayout
 
     private final Rect mGLRectViewport = new Rect();
     private final Rect mViewRectViewport = new Rect();
+    private final RectF mVisibleContentRect = new RectF();
     private boolean mGLViewportEmpty = false;
 
     /**
@@ -4586,11 +4587,14 @@ public class WebView extends AbsoluteLayout
                     + " extras=" + extras);
         }
 
+        calcOurContentVisibleRectF(mVisibleContentRect);
         if (canvas.isHardwareAccelerated()) {
-            int functor = nativeGetDrawGLFunction(mNativeClass,
-                    mGLViewportEmpty ? null : mGLRectViewport, mGLViewportEmpty ? null : mViewRectViewport, getScale(), extras);
-            ((HardwareCanvas) canvas).callDrawGLFunction(functor);
+            Rect glRectViewport = mGLViewportEmpty ? null : mGLRectViewport;
+            Rect viewRectViewport = mGLViewportEmpty ? null : mViewRectViewport;
 
+            int functor = nativeGetDrawGLFunction(mNativeClass, glRectViewport,
+                    viewRectViewport, mVisibleContentRect, getScale(), extras);
+            ((HardwareCanvas) canvas).callDrawGLFunction(functor);
             if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
                 mHardwareAccelSkia = getSettings().getHardwareAccelSkiaEnabled();
                 nativeUseHardwareAccelSkia(mHardwareAccelSkia);
@@ -4606,7 +4610,8 @@ public class WebView extends AbsoluteLayout
             canvas.setDrawFilter(df);
             // XXX: Revisit splitting content.  Right now it causes a
             // synchronization problem with layers.
-            int content = nativeDraw(canvas, color, extras, false);
+            int content = nativeDraw(canvas, mVisibleContentRect, color,
+                    extras, false);
             canvas.setDrawFilter(null);
             if (!mBlockWebkitViewMessages && content != 0) {
                 mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
@@ -5776,8 +5781,9 @@ public class WebView extends AbsoluteLayout
         } else {
             mGLViewportEmpty = true;
         }
+        calcOurContentVisibleRectF(mVisibleContentRect);
         nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
-                mGLViewportEmpty ? null : mViewRectViewport);
+                mGLViewportEmpty ? null : mViewRectViewport, mVisibleContentRect);
     }
 
     /**
@@ -8774,7 +8780,6 @@ public class WebView extends AbsoluteLayout
         mSendScrollEvent = false;
         recordNewContentSize(draw.mContentSize.x,
                 draw.mContentSize.y, updateLayout);
-
         if (isPictureAfterFirstLayout) {
             // Reset the last sent data here since dealing with new page.
             mLastWidthSent = 0;
@@ -9345,7 +9350,8 @@ public class WebView extends AbsoluteLayout
      * @hide only needs to be accessible to Browser and testing
      */
     public void drawPage(Canvas canvas) {
-        nativeDraw(canvas, 0, 0, false);
+        calcOurContentVisibleRectF(mVisibleContentRect);
+        nativeDraw(canvas, mVisibleContentRect, 0, 0, false);
     }
 
     /**
@@ -9476,13 +9482,14 @@ public class WebView extends AbsoluteLayout
      * MUST be passed to WebViewCore with SPLIT_PICTURE_SET message so that the
      * native allocation can be freed.
      */
-    private native int nativeDraw(Canvas canvas, int color, int extra,
-            boolean splitIfNeeded);
+    private native int nativeDraw(Canvas canvas, RectF visibleRect,
+            int color, int extra, boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations(int nativeInstance);
     private native int      nativeGetDrawGLFunction(int nativeInstance, Rect rect,
-            Rect viewRect, float scale, int extras);
-    private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect);
+            Rect viewRect, RectF visibleRect, float scale, int extras);
+    private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect,
+            RectF visibleRect);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,
             boolean sameAsLastSearch);
