@@ -62,11 +62,13 @@ void egl_display_t::removeObject(egl_object_t* object) {
     objects.remove(object);
 }
 
-bool egl_display_t::getObject(egl_object_t* object) {
+bool egl_display_t::getObject(egl_object_t* object) const {
     Mutex::Autolock _l(lock);
     if (objects.indexOf(object) >= 0) {
-        object->incRef();
-        return true;
+        if (object->getDisplay() == this) {
+            object->incRef();
+            return true;
+        }
     }
     return false;
 }
