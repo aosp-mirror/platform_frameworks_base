@@ -36,8 +36,12 @@
 #include <utils/Log.h>
 #include <utils/String8.h>
 
-
-#define ALLOW_DEQUEUE_CURRENT_BUFFER    false
+#ifdef ALLOW_DEQUEUE_CURRENT_BUFFER
+#define FLAG_ALLOW_DEQUEUE_CURRENT_BUFFER    true
+#warning "ALLOW_DEQUEUE_CURRENT_BUFFER enabled"
+#else
+#define FLAG_ALLOW_DEQUEUE_CURRENT_BUFFER    false
+#endif
 
 // Macros for including the SurfaceTexture name in log messages
 #define ST_LOGV(x, ...) LOGV("[%s] "x, mName.string(), ##__VA_ARGS__)
@@ -323,7 +327,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             LOGW_IF((state == BufferSlot::FREE) && (mCurrentTexture==i),
                     "dequeueBuffer: buffer %d is both FREE and current!", i);
 
-            if (ALLOW_DEQUEUE_CURRENT_BUFFER) {
+            if (FLAG_ALLOW_DEQUEUE_CURRENT_BUFFER) {
                 if (state == BufferSlot::FREE || i == mCurrentTexture) {
                     foundSync = i;
                     if (i != mCurrentTexture) {
