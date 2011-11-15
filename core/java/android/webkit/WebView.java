@@ -3097,10 +3097,7 @@ public class WebView extends AbsoluteLayout
         // Special-case layer scrolling so that we do not trigger normal scroll
         // updating.
         if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
-            nativeScrollLayer(mScrollingLayer, scrollX, scrollY);
-            mScrollingLayerRect.left = scrollX;
-            mScrollingLayerRect.top = scrollY;
-            invalidate();
+            scrollLayerTo(scrollX, scrollY);
             return;
         }
         mInOverScrollMode = false;
@@ -3603,9 +3600,7 @@ public class WebView extends AbsoluteLayout
                     mScrollY = y;
                 } else {
                     // Update the layer position instead of WebView.
-                    nativeScrollLayer(mScrollingLayer, x, y);
-                    mScrollingLayerRect.left = x;
-                    mScrollingLayerRect.top = y;
+                    scrollLayerTo(x, y);
                 }
                 abortAnimation();
                 nativeSetIsScrolling(false);
@@ -3622,6 +3617,17 @@ public class WebView extends AbsoluteLayout
         } else {
             super.computeScroll();
         }
+    }
+
+    private void scrollLayerTo(int x, int y) {
+        if (x == mScrollingLayerRect.left && y == mScrollingLayerRect.top) {
+            return;
+        }
+        nativeScrollLayer(mScrollingLayer, x, y);
+        mScrollingLayerRect.left = x;
+        mScrollingLayerRect.top = y;
+        onScrollChanged(mScrollX, mScrollY, mScrollX, mScrollY);
+        invalidate();
     }
 
     private static int computeDuration(int dx, int dy) {
@@ -8300,12 +8306,8 @@ public class WebView extends AbsoluteLayout
                     if (mScrollingLayer == 0) {
                         pinScrollBy(mAutoScrollX, mAutoScrollY, true, 0);
                     } else {
-                        mScrollingLayerRect.left += mAutoScrollX;
-                        mScrollingLayerRect.top += mAutoScrollY;
-                        nativeScrollLayer(mScrollingLayer,
-                                mScrollingLayerRect.left,
-                                mScrollingLayerRect.top);
-                        invalidate();
+                        scrollLayerTo(mScrollingLayerRect.left + mAutoScrollX,
+                                mScrollingLayerRect.top + mAutoScrollY);
                     }
                     sendEmptyMessageDelayed(
                             SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
