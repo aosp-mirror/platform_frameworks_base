@@ -48,15 +48,21 @@ enum camcorder_quality {
 };
 
 /**
- *Set CIF as default maximum import and export resolution of video editor.
- *The maximum import and export resolutions are platform specific,
- *which should be defined in media_profiles.xml.
+ * Set CIF as default maximum import and export resolution of video editor.
+ * The maximum import and export resolutions are platform specific,
+ * which should be defined in media_profiles.xml.
+ * Set default maximum prefetch YUV frames to 6, which means video editor can
+ * queue up to 6 YUV frames in the video encoder source.
+ * This value is used to limit the amount of memory used by video editor
+ * engine when the encoder consumes YUV frames at a lower speed
+ * than video editor engine produces.
  */
 enum videoeditor_capability {
     VIDEOEDITOR_DEFAULT_MAX_INPUT_FRAME_WIDTH = 352,
     VIDEOEDITOR_DEFUALT_MAX_INPUT_FRAME_HEIGHT = 288,
     VIDEOEDITOR_DEFAULT_MAX_OUTPUT_FRAME_WIDTH = 352,
     VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT = 288,
+    VIDEOEDITOR_DEFAULT_MAX_PREFETCH_YUV_FRAMES = 6
 };
 
 enum video_decoder {
@@ -138,6 +144,8 @@ public:
      * videoeditor.input.height.max - max input video frame height
      * videoeditor.output.width.max - max output video frame width
      * videoeditor.output.height.max - max output video frame height
+     * maxPrefetchYUVFrames - max prefetch YUV frames in video editor engine. This value is used
+     * to limit the memory consumption.
      */
     int getVideoEditorCapParamByName(const char *name) const;
 
@@ -357,11 +365,12 @@ private:
     };
     struct VideoEditorCap {
         VideoEditorCap(int inFrameWidth, int inFrameHeight,
-            int outFrameWidth, int outFrameHeight)
+            int outFrameWidth, int outFrameHeight, int frames)
             : mMaxInputFrameWidth(inFrameWidth),
               mMaxInputFrameHeight(inFrameHeight),
               mMaxOutputFrameWidth(outFrameWidth),
-              mMaxOutputFrameHeight(outFrameHeight) {}
+              mMaxOutputFrameHeight(outFrameHeight),
+              mMaxPrefetchYUVFrames(frames) {}
 
         ~VideoEditorCap() {}
 
@@ -369,6 +378,7 @@ private:
         int mMaxInputFrameHeight;
         int mMaxOutputFrameWidth;
         int mMaxOutputFrameHeight;
+        int mMaxPrefetchYUVFrames;
     };
 
     int getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const;
