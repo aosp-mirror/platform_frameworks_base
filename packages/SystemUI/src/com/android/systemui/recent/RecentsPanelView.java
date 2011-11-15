@@ -16,14 +16,13 @@
 
 package com.android.systemui.recent;
 
-import java.util.ArrayList;
-
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
@@ -42,21 +41,23 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView.ScaleType;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
+
+import java.util.ArrayList;
 
 public class RecentsPanelView extends RelativeLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener, View.OnTouchListener {
@@ -65,7 +66,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     private Context mContext;
     private StatusBar mBar;
     private View mRecentsScrim;
-    private View mRecentsGlowView;
     private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
 
@@ -79,6 +79,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     private boolean mRecentTasksDirty = true;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
+    private boolean mFitThumbnailToXY;
 
     public void setRecentTasksLoader(RecentTasksLoader loader) {
         mRecentTasksLoader = loader;
@@ -174,9 +175,8 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         // use mRecentsContainer's exact bounds to determine horizontal position
         final int l = mRecentsContainer.getLeft();
         final int r = mRecentsContainer.getRight();
-        // use surrounding mRecentsGlowView's position in parent determine vertical bounds
-        final int t = mRecentsGlowView.getTop();
-        final int b = mRecentsGlowView.getBottom();
+        final int t = mRecentsContainer.getTop();
+        final int b = mRecentsContainer.getBottom();
         return x >= l && x < r && y >= t && y < b;
     }
 
@@ -194,7 +194,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             // if there are no apps, either bring up a "No recent apps" message, or just
             // quit early
             boolean noApps = (mRecentTaskDescriptions.size() == 0);
-            if (mRecentsNoApps != null) { // doesn't exist on large devices
+            if (mRecentsNoApps != null) {
                 mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
             } else {
                 if (noApps) {
@@ -325,8 +325,9 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     }
 
     public void updateValuesFromResources() {
-        mThumbnailWidth =
-            (int) mContext.getResources().getDimension(R.dimen.status_bar_recents_thumbnail_width);
+        final Resources res = mContext.getResources();
+        mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
+        mFitThumbnailToXY = res.getBoolean(R.bool.config_recents_thumbnail_image_fits_to_xy);
     }
 
     @Override
@@ -351,10 +352,9 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         }
 
 
-        mRecentsGlowView = findViewById(R.id.recents_glow);
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
-        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, mRecentsNoApps, this);
+        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsContainer, mRecentsNoApps, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
         if (mRecentsDismissButton != null) {
             mRecentsDismissButton.setOnClickListener(new OnClickListener() {
@@ -409,11 +409,15 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             if (h.thumbnailViewImageBitmap == null ||
                 h.thumbnailViewImageBitmap.getWidth() != thumbnail.getWidth() ||
                 h.thumbnailViewImageBitmap.getHeight() != thumbnail.getHeight()) {
-                Matrix scaleMatrix = new Matrix();
-                float scale = mThumbnailWidth / (float) thumbnail.getWidth();
-                scaleMatrix.setScale(scale, scale);
-                h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
-                h.thumbnailViewImage.setImageMatrix(scaleMatrix);
+                if (mFitThumbnailToXY) {
+                    h.thumbnailViewImage.setScaleType(ScaleType.FIT_XY);
+                } else {
+                    Matrix scaleMatrix = new Matrix();
+                    float scale = mThumbnailWidth / (float) thumbnail.getWidth();
+                    scaleMatrix.setScale(scale, scale);
+                    h.thumbnailViewImage.setScaleType(ScaleType.MATRIX);
+                    h.thumbnailViewImage.setImageMatrix(scaleMatrix);
+                }
             }
             if (show && h.thumbnailView.getVisibility() != View.VISIBLE) {
                 if (anim) {
@@ -444,7 +448,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
                             // only fade in the thumbnail if recents is already visible-- we
                             // show it immediately otherwise
                             boolean animateShow = mShowing &&
-                                mRecentsGlowView.getAlpha() > ViewConfiguration.ALPHA_THRESHOLD;
+                                mRecentsContainer.getAlpha() > ViewConfiguration.ALPHA_THRESHOLD;
                             updateThumbnail(h, ad.getThumbnail(), true, animateShow);
                         }
                     }
@@ -516,7 +520,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         final int items = mRecentTaskDescriptions.size();
 
         mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
-        mRecentsGlowView.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
 
         // Set description for accessibility
         int numRecentApps = mRecentTaskDescriptions.size();

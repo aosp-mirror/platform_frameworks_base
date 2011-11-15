@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
+/* apps/common/assets/default/default/skins/StatusBar.xml
+**
 ** Copyright 2011, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +18,19 @@
 */
 -->
 
-<resources>
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <bool name="config_recents_interface_for_tablets">true</bool>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    >
 
-    <!-- Whether recents thumbnails should stretch in both x and y to fill their
-     ImageView -->
-    <bool name="config_recents_thumbnail_image_fits_to_xy">true</bool>
-</resources>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:textColor="@android:color/holo_blue_light"
+        android:text="@string/status_bar_no_recent_apps"
+        android:gravity="left"
+        android:layout_gravity="bottom|left"
+    />
+</FrameLayout>
