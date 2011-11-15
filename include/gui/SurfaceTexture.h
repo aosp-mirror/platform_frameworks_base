@@ -79,7 +79,11 @@ public:
     // pointed to by the buf argument and a status of OK is returned.  If no
     // slot is available then a status of -EBUSY is returned and buf is
     // unmodified.
-    virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
+    // The width and height parameters must be no greater than the minimum of
+    // GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see: glGetIntegerv).
+    // An error due to invalid dimensions might not be reported until
+    // updateTexImage() is called.
+    virtual status_t dequeueBuffer(int *buf, uint32_t width, uint32_t height,
             uint32_t format, uint32_t usage);
 
     // queueBuffer returns a filled buffer to the SurfaceTexture. In addition, a
@@ -176,7 +180,11 @@ public:
     // requestBuffers when a with and height of zero is requested.
     // A call to setDefaultBufferSize() may trigger requestBuffers() to
     // be called from the client.
-    status_t setDefaultBufferSize(uint32_t w, uint32_t h);
+    // The width and height parameters must be no greater than the minimum of
+    // GL_MAX_VIEWPORT_DIMS and GL_MAX_TEXTURE_SIZE (see: glGetIntegerv).
+    // An error due to invalid dimensions might not be reported until
+    // updateTexImage() is called.
+    status_t setDefaultBufferSize(uint32_t width, uint32_t height);
 
     // getCurrentBuffer returns the buffer associated with the current image.
     sp<GraphicBuffer> getCurrentBuffer() const;

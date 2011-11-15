@@ -1520,4 +1520,36 @@ TEST_F(SurfaceTextureGLTest, EglDestroySurfaceAfterAbandonUnrefsBuffers) {
     EXPECT_EQ(1, buffers[2]->getStrongCount());
 }
 
+TEST_F(SurfaceTextureGLTest, InvalidWidthOrHeightFails) {
+    int texHeight = 16;
+    ANativeWindowBuffer* anb;
+
+    GLint maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+
+    // make sure it works with small textures
+    mST->setDefaultBufferSize(16, texHeight);
+    EXPECT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    EXPECT_EQ(16, anb->width);
+    EXPECT_EQ(texHeight, anb->height);
+    EXPECT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), anb));
+    EXPECT_EQ(NO_ERROR, mST->updateTexImage());
+
+    // make sure it works with GL_MAX_TEXTURE_SIZE
+    mST->setDefaultBufferSize(maxTextureSize, texHeight);
+    EXPECT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    EXPECT_EQ(maxTextureSize, anb->width);
+    EXPECT_EQ(texHeight, anb->height);
+    EXPECT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), anb));
+    EXPECT_EQ(NO_ERROR, mST->updateTexImage());
+
+    // make sure it fails with GL_MAX_TEXTURE_SIZE+1
+    mST->setDefaultBufferSize(maxTextureSize+1, texHeight);
+    EXPECT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    EXPECT_EQ(maxTextureSize+1, anb->width);
+    EXPECT_EQ(texHeight, anb->height);
+    EXPECT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), anb));
+    ASSERT_NE(NO_ERROR, mST->updateTexImage());
+}
+
 } // namespace android
