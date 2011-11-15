@@ -1261,7 +1261,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         PrintWriter pw = new PrintWriter(sw);
                         StringWriter catSw = new StringWriter();
                         PrintWriter catPw = new PrintWriter(catSw);
-                        dumpApplicationMemoryUsage(null, pw, "  ", new String[] { }, true, catPw);
+                        String[] emptyArgs = new String[] { };
+                        dumpApplicationMemoryUsage(null, pw, "  ", emptyArgs, true, catPw);
+                        pw.println();
+                        dumpProcessesLocked(null, pw, emptyArgs, 0, false);
+                        pw.println();
+                        dumpServicesLocked(null, pw, emptyArgs, 0, false, false);
+                        pw.println();
+                        dumpActivitiesLocked(null, pw, emptyArgs, 0, false, false);
                         String memUsage = sw.toString();
                         dropBuilder.append('\n');
                         dropBuilder.append(memUsage);
@@ -8812,6 +8819,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         TimeUtils.formatDuration(r.createTime, nowReal, pw);
                         pw.print(" started="); pw.print(r.startRequested);
                         pw.print(" connections="); pw.println(r.connections.size());
+                    if (r.connections.size() > 0) {
+                        pw.println("    Connections:");
+                        for (ArrayList<ConnectionRecord> clist : r.connections.values()) {
+                            for (int i=0; i<clist.size(); i++) {
+                                ConnectionRecord conn = clist.get(i);
+                                pw.print("      ");
+                                pw.print(conn.binding.intent.intent.getIntent().toShortString(
+                                        false, false, false));
+                                pw.print(" -> ");
+                                ProcessRecord proc = conn.binding.client;
+                                pw.println(proc != null ? proc.toShortString() : "null");
+                            }
+                        }
+                    }
                 }
                 if (dumpClient && r.app != null && r.app.thread != null) {
                     pw.println("    Client:");
@@ -8931,17 +8952,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
                 pw.print("  * "); pw.print(cls); pw.print(" (");
-                        pw.print(comp.flattenToShortString()); pw.print(")");
+                        pw.print(comp.flattenToShortString()); pw.println(")");
                 if (dumpAll) {
-                    pw.println();
                     r.dump(pw, "      ");
                 } else {
-                    pw.print("  * "); pw.print(e.getKey().flattenToShortString());
                     if (r.proc != null) {
-                        pw.println(":");
                         pw.print("      "); pw.println(r.proc);
                     } else {
                         pw.println();
+                    }
+                    if (r.clients.size() > 0) {
+                        pw.println("      Clients:");
+                        for (ProcessRecord cproc : r.clients) {
+                            pw.print("        - "); pw.println(cproc);
+                        }
                     }
                 }
             }
