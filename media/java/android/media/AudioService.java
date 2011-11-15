@@ -2687,9 +2687,20 @@ public class AudioService extends IAudioService.Stub {
             mCallingUid = uid;
         }
 
-        public void unlinkToDeath() {
+        private void unlinkToDeath() {
             if (mSourceRef != null && mHandler != null) {
                 mSourceRef.unlinkToDeath(mHandler, 0);
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                unlinkToDeath();
+            } catch (java.util.NoSuchElementException e) {
+                Log.w(TAG, e + " thrown by unlinkToDeath() during finalize, ignoring");
+            } finally {
+                super.finalize();
             }
         }
     }
@@ -2726,8 +2737,7 @@ public class AudioService extends IAudioService.Stub {
         if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
         {
             //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
-            FocusStackEntry fse = mFocusStack.pop();
-            fse.unlinkToDeath();
+            mFocusStack.pop();
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
@@ -2746,7 +2756,6 @@ public class AudioService extends IAudioService.Stub {
                     Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
                             + fse.mClientId);
                     stackIterator.remove();
-                    fse.unlinkToDeath();
                 }
             }
         }
@@ -2852,6 +2861,9 @@ public class AudioService extends IAudioService.Stub {
                 // if focus is already owned by this client and the reason for acquiring the focus
                 // hasn't changed, don't do anything
                 if (mFocusStack.peek().mFocusChangeType == focusChangeHint) {
+                    // unlink death handler so it can be gc'ed.
+                    // linkToDeath() creates a JNI global reference preventing collection.
+                    cb.unlinkToDeath(afdh, 0);
                     return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
                 }
                 // the reason for the audio focus request has changed: remove the current top of
