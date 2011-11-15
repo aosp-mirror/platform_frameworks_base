@@ -352,6 +352,21 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
         
+        case DUMP_PROVIDER_TRANSACTION: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ParcelFileDescriptor fd = data.readFileDescriptor();
+            final IBinder service = data.readStrongBinder();
+            final String[] args = data.readStringArray();
+            if (fd != null) {
+                dumpProvider(fd.getFileDescriptor(), service, args);
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
+            }
+            return true;
+        }
+
         case SCHEDULE_REGISTERED_RECEIVER_TRANSACTION: {
             data.enforceInterface(IApplicationThread.descriptor);
             IIntentReceiver receiver = IIntentReceiver.Stub.asInterface(
@@ -931,6 +946,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
     
+    public void dumpProvider(FileDescriptor fd, IBinder token, String[] args)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeFileDescriptor(fd);
+        data.writeStrongBinder(token);
+        data.writeStringArray(args);
+        mRemote.transact(DUMP_PROVIDER_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
     public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
             int resultCode, String dataStr, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException {
