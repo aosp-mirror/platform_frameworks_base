@@ -168,7 +168,7 @@ class KeyguardStatusViewManager implements OnClickListener {
                 boolean emergencyButtonEnabledInScreen) {
         if (DEBUG) Log.v(TAG, "KeyguardStatusViewManager()");
         mContainer = view;
-        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
+        mDateFormatString = getContext().getString(R.string.abbrev_wday_month_day_no_year);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
