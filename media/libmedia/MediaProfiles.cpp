@@ -404,11 +404,12 @@ MediaProfiles::createVideoEditorCap(const char **atts, MediaProfiles *profiles)
     CHECK(!strcmp("maxInputFrameWidth", atts[0]) &&
           !strcmp("maxInputFrameHeight", atts[2])  &&
           !strcmp("maxOutputFrameWidth", atts[4]) &&
-          !strcmp("maxOutputFrameHeight", atts[6]));
+          !strcmp("maxOutputFrameHeight", atts[6]) &&
+          !strcmp("maxPrefetchYUVFrames", atts[8]));
 
     MediaProfiles::VideoEditorCap *pVideoEditorCap =
         new MediaProfiles::VideoEditorCap(atoi(atts[1]), atoi(atts[3]),
-                atoi(atts[5]), atoi(atts[7]));
+                atoi(atts[5]), atoi(atts[7]), atoi(atts[9]));
 
     logVideoEditorCap(*pVideoEditorCap);
     profiles->mVideoEditorCap = pVideoEditorCap;
@@ -850,7 +851,8 @@ MediaProfiles::createDefaultVideoEditorCap(MediaProfiles *profiles)
                 VIDEOEDITOR_DEFAULT_MAX_INPUT_FRAME_WIDTH,
                 VIDEOEDITOR_DEFUALT_MAX_INPUT_FRAME_HEIGHT,
                 VIDEOEDITOR_DEFAULT_MAX_OUTPUT_FRAME_WIDTH,
-                VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT);
+                VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT,
+                VIDEOEDITOR_DEFAULT_MAX_PREFETCH_YUV_FRAMES);
 }
 /*static*/ void
 MediaProfiles::createDefaultExportVideoProfiles(MediaProfiles *profiles)
@@ -1019,6 +1021,8 @@ int MediaProfiles::getVideoEditorCapParamByName(const char *name) const
         return mVideoEditorCap->mMaxOutputFrameWidth;
     if (!strcmp("videoeditor.output.height.max", name))
         return mVideoEditorCap->mMaxOutputFrameHeight;
+    if (!strcmp("maxPrefetchYUVFrames", name))
+        return mVideoEditorCap->mMaxPrefetchYUVFrames;
 
     LOGE("The given video editor param name %s is not found", name);
     return -1;
