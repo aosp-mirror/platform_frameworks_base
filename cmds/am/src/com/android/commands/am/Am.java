@@ -124,6 +124,10 @@ public class Am {
             runProfile();
         } else if (op.equals("dumpheap")) {
             runDumpHeap();
+        } else if (op.equals("set-debug-app")) {
+            runSetDebugApp();
+        } else if (op.equals("clear-debug-app")) {
+            runClearDebugApp();
         } else if (op.equals("monitor")) {
             runMonitor();
         } else if (op.equals("screen-compat")) {
@@ -709,6 +713,31 @@ public class Am {
         }
     }
 
+    private void runSetDebugApp() throws Exception {
+        boolean wait = false;
+        boolean persistent = false;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-w")) {
+                wait = true;
+            } else if (opt.equals("--persistent")) {
+                persistent = true;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                showUsage();
+                return;
+            }
+        }
+
+        String pkg = nextArgRequired();
+        mAm.setDebugApp(pkg, wait, persistent);
+    }
+
+    private void runClearDebugApp() throws Exception {
+        mAm.setDebugApp(null, false, true);
+    }
+
     class MyActivityController extends IActivityController.Stub {
         final String mGdbPort;
 
@@ -1243,6 +1272,8 @@ public class Am {
                 "       am profile [looper] start <PROCESS> <FILE>\n" +
                 "       am profile [looper] stop [<PROCESS>]\n" +
                 "       am dumpheap [flags] <PROCESS> <FILE>\n" +
+                "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
+                "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am display-size [reset|MxN]\n" +
@@ -1285,6 +1316,12 @@ public class Am {
                 "\n" +
                 "am dumpheap: dump the heap of a process.  Options are:\n" +
                 "    -n: dump native heap instead of managed heap\n" +
+                "\n" +
+                "am set-debug-app: set application <PACKAGE> to debug.  Options are:\n" +
+                "    -w: wait for debugger when application starts\n" +
+                "    --persistent: retain this value\n" +
+                "\n" +
+                "am clear-debug-app: clear the previously set-debug-app.\n" +
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +

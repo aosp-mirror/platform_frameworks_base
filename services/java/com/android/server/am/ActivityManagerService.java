@@ -1262,21 +1262,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                         StringWriter catSw = new StringWriter();
                         PrintWriter catPw = new PrintWriter(catSw);
                         String[] emptyArgs = new String[] { };
-                        dumpApplicationMemoryUsage(null, pw, "  ", emptyArgs, true, catPw);
-                        pw.println();
-                        dumpProcessesLocked(null, pw, emptyArgs, 0, false);
-                        pw.println();
-                        dumpServicesLocked(null, pw, emptyArgs, 0, false, false);
-                        pw.println();
-                        dumpActivitiesLocked(null, pw, emptyArgs, 0, false, false);
+                        StringBuilder tag = new StringBuilder(128);
+                        dumpProcessesLocked(null, catPw, emptyArgs, 0, false);
+                        catPw.println();
+                        dumpServicesLocked(null, catPw, emptyArgs, 0, false, false);
+                        catPw.println();
+                        dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false);
+                        catPw.println();
+                        tag.append("Low on memory -- ");
+                        dumpApplicationMemoryUsage(null, pw, "  ", emptyArgs, true, catPw, tag);
                         String memUsage = sw.toString();
                         dropBuilder.append('\n');
                         dropBuilder.append(memUsage);
                         dropBuilder.append(catSw.toString());
                         logBuilder.append(memUsage);
-                        addErrorToDropBox("watchdog", null, "system_server", null,
-                                null, "Low on memory -- no more background processes",
-                                dropBuilder.toString(), null, null);
+                        addErrorToDropBox("lowmem", null, "system_server", null,
+                                null, tag.toString(), dropBuilder.toString(), null, null);
                         Slog.i(TAG, logBuilder.toString());
                         synchronized (ActivityManagerService.this) {
                             long now = SystemClock.uptimeMillis();
@@ -1429,7 +1430,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
+            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args,
+                    false, null, null);
         }
     }
 
@@ -8984,8 +8986,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (!matcher.match(r, r.name)) {
                         continue;
                     }
-                    pw.print("  "); pw.print(e.getKey()); pw.print(": ");
-                            pw.println(r);
+                    pw.print("  "); pw.print(e.getKey()); pw.println(":");
+                    pw.print("    "); pw.println(r);
                 }
                 needSep = true;
             }
@@ -9369,16 +9371,20 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final static class MemItem {
         final String label;
+        final String shortLabel;
         final long pss;
+        final int id;
         ArrayList<MemItem> subitems;
 
-        public MemItem(String _label, long _pss) {
+        public MemItem(String _label, String _shortLabel, long _pss, int _id) {
             label = _label;
+            shortLabel = _shortLabel;
             pss = _pss;
+            id = _id;
         }
     }
 
-    final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items,
+    static final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items,
             boolean sort) {
         if (sort) {
             Collections.sort(items, new Comparator<MemItem>() {
@@ -9396,16 +9402,56 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
-            pw.print(prefix); pw.printf("%7d Kb: ", mi.pss); pw.println(mi.label);
+            pw.print(prefix); pw.printf("%7d kB: ", mi.pss); pw.println(mi.label);
             if (mi.subitems != null) {
                 dumpMemItems(pw, prefix + "           ", mi.subitems, true);
             }
         }
     }
 
+    // These are in KB.
+    static final long[] DUMP_MEM_BUCKETS = new long[] {
+        5*1024, 7*1024, 10*1024, 15*1024, 20*1024, 30*1024, 40*1024, 80*1024,
+        120*1024, 160*1024, 200*1024,
+        250*1024, 300*1024, 350*1024, 400*1024, 500*1024, 600*1024, 800*1024,
+        1*1024*1024, 2*1024*1024, 5*1024*1024, 10*1024*1024, 20*1024*1024
+    };
+
+    static final void appendMemBucket(StringBuilder out, long memKB, String label) {
+        int start = label.lastIndexOf('.');
+        if (start >= 0) start++;
+        else start = 0;
+        int end = label.length();
+        for (int i=0; i<DUMP_MEM_BUCKETS.length; i++) {
+            if (DUMP_MEM_BUCKETS[i] >= memKB) {
+                long bucket = DUMP_MEM_BUCKETS[i]/1024;
+                out.append(bucket);
+                out.append("MB ");
+                out.append(label, start, end);
+                return;
+            }
+        }
+        out.append(memKB/1024);
+        out.append("MB ");
+        out.append(label, start, end);
+    }
+
+    static final int[] DUMP_MEM_OOM_ADJ = new int[] {
+            ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ, ProcessList.FOREGROUND_APP_ADJ,
+            ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
+            ProcessList.BACKUP_APP_ADJ, ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
+            ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.HIDDEN_APP_MAX_ADJ
+    };
+    static final String[] DUMP_MEM_OOM_LABEL = new String[] {
+            "System", "Persistent", "Foreground",
+            "Visible", "Perceptible", "Heavy Weight",
+            "Backup", "A Services", "Home", "Previous",
+            "B Services", "Background"
+    };
+
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief,
-            PrintWriter categoryPw) {
+            PrintWriter categoryPw, StringBuilder outTag) {
         boolean dumpAll = false;
         boolean oomOnly = false;
         
@@ -9461,20 +9507,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         long nativePss=0, dalvikPss=0, otherPss=0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
-        final int[] oomAdj = new int[] {
-            ProcessList.SYSTEM_ADJ, ProcessList.PERSISTENT_PROC_ADJ, ProcessList.FOREGROUND_APP_ADJ,
-            ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
-            ProcessList.BACKUP_APP_ADJ, ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
-            ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.HIDDEN_APP_MAX_ADJ
-        };
-        final String[] oomLabel = new String[] {
-                "System", "Persistent", "Foreground",
-                "Visible", "Perceptible", "Heavy Weight",
-                "Backup", "A Services", "Home", "Previous",
-                "B Services", "Background"
-        };
-        long oomPss[] = new long[oomLabel.length];
-        ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])new ArrayList[oomLabel.length];
+        long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
+        ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
+                new ArrayList[DUMP_MEM_OOM_LABEL.length];
 
         long totalPss = 0;
 
@@ -9504,7 +9539,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     long myTotalPss = mi.getTotalPss();
                     totalPss += myTotalPss;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + r.pid + ")",
-                            myTotalPss);
+                            r.processName, myTotalPss, 0);
                     procMems.add(pssItem);
 
                     nativePss += mi.nativePss;
@@ -9517,7 +9552,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
 
                     for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
-                        if (r.setAdj <= oomAdj[oomIndex] || oomIndex == (oomPss.length-1)) {
+                        if (r.setAdj <= DUMP_MEM_OOM_ADJ[oomIndex]
+                                || oomIndex == (oomPss.length-1)) {
                             oomPss[oomIndex] += myTotalPss;
                             if (oomProcs[oomIndex] == null) {
                                 oomProcs[oomIndex] = new ArrayList<MemItem>();
@@ -9533,19 +9569,44 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!isCheckinRequest && procs.size() > 1) {
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
-            catMems.add(new MemItem("Native", nativePss));
-            catMems.add(new MemItem("Dalvik", dalvikPss));
-            catMems.add(new MemItem("Unknown", otherPss));
+            catMems.add(new MemItem("Native", "Native", nativePss, -1));
+            catMems.add(new MemItem("Dalvik", "Dalvik", dalvikPss, -2));
+            catMems.add(new MemItem("Unknown", "Unknown", otherPss, -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
-                catMems.add(new MemItem(Debug.MemoryInfo.getOtherLabel(j), miscPss[j]));
+                String label = Debug.MemoryInfo.getOtherLabel(j);
+                catMems.add(new MemItem(label, label, miscPss[j], j));
             }
 
             ArrayList<MemItem> oomMems = new ArrayList<MemItem>();
             for (int j=0; j<oomPss.length; j++) {
                 if (oomPss[j] != 0) {
-                    MemItem item = new MemItem(oomLabel[j], oomPss[j]);
+                    String label = DUMP_MEM_OOM_LABEL[j];
+                    MemItem item = new MemItem(label, label, oomPss[j],
+                            DUMP_MEM_OOM_ADJ[j]);
                     item.subitems = oomProcs[j];
                     oomMems.add(item);
+                }
+            }
+
+            if (outTag != null) {
+                appendMemBucket(outTag, totalPss, "total");
+                for (int i=0; i<oomMems.size(); i++) {
+                    MemItem miCat = oomMems.get(i);
+                    if (miCat.subitems == null || miCat.subitems.size() < 1) {
+                        continue;
+                    }
+                    if (miCat.id < ProcessList.SERVICE_ADJ
+                            || miCat.id == ProcessList.HOME_APP_ADJ
+                            || miCat.id == ProcessList.PREVIOUS_APP_ADJ) {
+                        outTag.append(" / ");
+                        for (int j=0; j<miCat.subitems.size(); j++) {
+                            MemItem mi = miCat.subitems.get(j);
+                            if (j > 0) {
+                                outTag.append(" ");
+                            }
+                            appendMemBucket(outTag, mi.pss, mi.shortLabel);
+                        }
+                    }
                 }
             }
 
@@ -9564,7 +9625,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpMemItems(out, "  ", catMems, true);
             }
             pw.println();
-            pw.print("Total PSS: "); pw.print(totalPss); pw.println(" Kb");
+            pw.print("Total PSS: "); pw.print(totalPss); pw.println(" kB");
         }
     }
 
@@ -14034,7 +14095,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         // application processes based on their current state.
         int i = mLruProcesses.size();
         int curHiddenAdj = ProcessList.HIDDEN_APP_MIN_ADJ;
-        int numBg = 0;
         while (i > 0) {
             i--;
             ProcessRecord app = mLruProcesses.get(i);
@@ -14058,12 +14118,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 app.processName, app.setAdj, "too many background");
                         app.killedBackground = true;
                         Process.killProcessQuiet(app.pid);
-                    } else {
-                        numBg++;
                     }
-                } else if (app.curAdj >= ProcessList.HOME_APP_ADJ
-                        && app.curAdj != ProcessList.SERVICE_B_ADJ) {
-                    numBg++;
                 }
             }
         }
@@ -14078,12 +14133,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         // memory they want.
         if (numHidden <= (ProcessList.MAX_HIDDEN_APPS/2)) {
             final int N = mLruProcesses.size();
-            factor = numBg/3;
+            factor = numHidden/3;
+            int minFactor = 2;
+            if (mHomeProcess != null) minFactor++;
+            if (mPreviousProcess != null) minFactor++;
+            if (factor < minFactor) factor = minFactor;
             step = 0;
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (i=0; i<N; i++) {
                 ProcessRecord app = mLruProcesses.get(i);
-                if (app.curAdj >= ProcessList.HIDDEN_APP_MIN_ADJ && !app.killedBackground) {
+                if (app.curAdj >= ProcessList.HOME_APP_ADJ
+                        && app.curAdj != ProcessList.SERVICE_B_ADJ
+                        && !app.killedBackground) {
                     if (app.trimMemoryLevel < curLevel && app.thread != null) {
                         try {
                             app.thread.scheduleTrimMemory(curLevel);
