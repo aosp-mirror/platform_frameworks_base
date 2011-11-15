@@ -74,6 +74,10 @@ class ContentProviderRecord extends ContentProviderHolder {
                     pw.print(" initOrder="); pw.println(info.initOrder);
         }
         if (clients.size() > 0) {
+            pw.print(prefix); pw.println("Clients:");
+            for (ProcessRecord cproc : clients) {
+                pw.print(prefix); pw.println("  - "); pw.println(cproc);
+            }
             pw.print(prefix); pw.print("clients="); pw.println(clients);
         }
         if (externals != 0) {
