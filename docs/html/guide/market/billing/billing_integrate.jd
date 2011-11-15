@@ -476,7 +476,7 @@ key can have the following five values:</p>
 <ul>
   <li><code>CHECK_BILLING_SUPPORTED</code>&mdash;verifies that the Android Market application
   supports in-app billing.</li>
-  <li><code>REQUEST_PURCHASE</code>&mdash;sends a purchase request for an in-app item.</li> 
+  <li><code>REQUEST_PURCHASE</code>&mdash;sends a purchase request for an in-app item.</li>
   <li><code>GET_PURCHASE_INFORMATION</code>&mdash;retrieves transaction information for a purchase
   or refund.</li>
   <li><code>CONFIRM_NOTIFICATIONS</code>&mdash;acknowledges that you received the transaction
@@ -584,9 +584,9 @@ interface.</p>
   // Note that the developer payload is optional.
   if (mDeveloperPayload != null) {
     request.putString(DEVELOPER_PAYLOAD, mDeveloperPayload);
+  }
   Bundle response = mService.sendBillingRequest(request);
   // Do something with this response.
-  }
 </pre>
 <p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the
 three keys that are required for all requests: <code>BILLING_REQUEST</code>,
@@ -930,9 +930,9 @@ sent in response to billing requests.</p>
 
 <pre>
 public class BillingReceiver extends BroadcastReceiver {
-  
+
   private static final String TAG = "BillingReceiver";
-  
+
   // Intent actions that we receive in the BillingReceiver from Android Market.
   // These are defined by Android Market and cannot be changed.
   // The sample application defines these in the Consts.java file.
@@ -940,7 +940,7 @@ public class BillingReceiver extends BroadcastReceiver {
   public static final String ACTION_RESPONSE_CODE = "com.android.vending.billing.RESPONSE_CODE";
   public static final String ACTION_PURCHASE_STATE_CHANGED =
     "com.android.vending.billing.PURCHASE_STATE_CHANGED";
-    
+
   // The intent extras that are passed in an intent from Android Market.
   // These are defined by Android Market and cannot be changed.
   // The sample application defines these in the Consts.java file.
