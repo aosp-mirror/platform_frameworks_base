@@ -38,7 +38,7 @@ class audio_track_cblk_t;
 
 // ----------------------------------------------------------------------------
 
-class AudioTrack
+class AudioTrack : virtual public RefBase
 {
 public:
     enum channel_index {
