@@ -49,8 +49,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -131,8 +129,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // Show the intermediate notification
         mTickerAddSpace = !mTickerAddSpace;
         mNotificationId = nId;
+        mNotificationManager = nManager;
         mNotificationBuilder = new Notification.Builder(context)
-            .setLargeIcon(croppedIcon)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
@@ -141,9 +139,12 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             .setWhen(System.currentTimeMillis());
         Notification n = mNotificationBuilder.getNotification();
         n.flags |= Notification.FLAG_NO_CLEAR;
-
-        mNotificationManager = nManager;
         mNotificationManager.notify(nId, n);
+
+        // On the tablet, the large icon makes the notification appear as if it is clickable (and
+        // on small devices, the large icon is not shown) so defer showing the large icon until
+        // we compose the final post-save notification below.
+        mNotificationBuilder.setLargeIcon(croppedIcon);
     }
 
     @Override
