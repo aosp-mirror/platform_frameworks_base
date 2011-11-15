@@ -1026,10 +1026,6 @@ public class AudioService extends IAudioService.Stub {
                 return true;
             }
             mSoundPool = new SoundPool(NUM_SOUNDPOOL_CHANNELS, AudioSystem.STREAM_SYSTEM, 0);
-            if (mSoundPool == null) {
-                Log.w(TAG, "loadSoundEffects() could not allocate sound pool");
-                return false;
-            }
 
             try {
                 mSoundPoolCallBack = null;
@@ -2104,32 +2100,30 @@ public class AudioService extends IAudioService.Stub {
                     mSoundPool.play(SOUND_EFFECT_FILES_MAP[effectType][1], volFloat, volFloat, 0, 0, 1.0f);
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
-                    if (mediaPlayer != null) {
-                        try {
-                            String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH + SOUND_EFFECT_FILES[SOUND_EFFECT_FILES_MAP[effectType][0]];
-                            mediaPlayer.setDataSource(filePath);
-                            mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
-                            mediaPlayer.prepare();
-                            mediaPlayer.setVolume(volFloat, volFloat);
-                            mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-                                public void onCompletion(MediaPlayer mp) {
-                                    cleanupPlayer(mp);
-                                }
-                            });
-                            mediaPlayer.setOnErrorListener(new OnErrorListener() {
-                                public boolean onError(MediaPlayer mp, int what, int extra) {
-                                    cleanupPlayer(mp);
-                                    return true;
-                                }
-                            });
-                            mediaPlayer.start();
-                        } catch (IOException ex) {
-                            Log.w(TAG, "MediaPlayer IOException: "+ex);
-                        } catch (IllegalArgumentException ex) {
-                            Log.w(TAG, "MediaPlayer IllegalArgumentException: "+ex);
-                        } catch (IllegalStateException ex) {
-                            Log.w(TAG, "MediaPlayer IllegalStateException: "+ex);
-                        }
+                    try {
+                        String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH + SOUND_EFFECT_FILES[SOUND_EFFECT_FILES_MAP[effectType][0]];
+                        mediaPlayer.setDataSource(filePath);
+                        mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
+                        mediaPlayer.prepare();
+                        mediaPlayer.setVolume(volFloat, volFloat);
+                        mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+                            public void onCompletion(MediaPlayer mp) {
+                                cleanupPlayer(mp);
+                            }
+                        });
+                        mediaPlayer.setOnErrorListener(new OnErrorListener() {
+                            public boolean onError(MediaPlayer mp, int what, int extra) {
+                                cleanupPlayer(mp);
+                                return true;
+                            }
+                        });
+                        mediaPlayer.start();
+                    } catch (IOException ex) {
+                        Log.w(TAG, "MediaPlayer IOException: "+ex);
+                    } catch (IllegalArgumentException ex) {
+                        Log.w(TAG, "MediaPlayer IllegalArgumentException: "+ex);
+                    } catch (IllegalStateException ex) {
+                        Log.w(TAG, "MediaPlayer IllegalStateException: "+ex);
                     }
                 }
             }
