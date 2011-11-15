@@ -2734,8 +2734,9 @@ public final class ActivityThread {
         CharSequence description;
     }
 
-    private class ProviderRefCount {
+    private static final class ProviderRefCount {
         public int count;
+
         ProviderRefCount(int pCount) {
             count = pCount;
         }
@@ -3988,16 +3989,14 @@ public final class ActivityThread {
             buf.append(": ");
             buf.append(cpi.name);
             Log.i(TAG, buf.toString());
-            IContentProvider cp = installProvider(context, null, cpi, false);
+            IContentProvider cp = installProvider(context, null, cpi,
+                    false /*noisy*/, true /*noReleaseNeeded*/);
             if (cp != null) {
                 IActivityManager.ContentProviderHolder cph =
-                    new IActivityManager.ContentProviderHolder(cpi);
+                        new IActivityManager.ContentProviderHolder(cpi);
                 cph.provider = cp;
+                cph.noReleaseNeeded = true;
                 results.add(cph);
-                // Don't ever unload this provider from the process.
-                synchronized(mProviderMap) {
-                    mProviderRefCountMap.put(cp.asBinder(), new ProviderRefCount(10000));
-                }
             }
         }
 
@@ -4008,26 +4007,22 @@ public final class ActivityThread {
         }
     }
 
-    private IContentProvider getExistingProvider(Context context, String name) {
-        synchronized(mProviderMap) {
-            final ProviderClientRecord pr = mProviderMap.get(name);
-            if (pr != null) {
-                return pr.mProvider;
-            }
-            return null;
-        }
-    }
-
-    private IContentProvider getProvider(Context context, String name) {
-        IContentProvider existing = getExistingProvider(context, name);
-        if (existing != null) {
-            return existing;
+    public final IContentProvider acquireProvider(Context c, String name) {
+        IContentProvider provider = acquireExistingProvider(c, name);
+        if (provider != null) {
+            return provider;
         }
 
+        // There is a possible race here.  Another thread may try to acquire
+        // the same provider at the same time.  When this happens, we want to ensure
+        // that the first one wins.
+        // Note that we cannot hold the lock while acquiring and installing the
+        // provider since it might take a long time to run and it could also potentially
+        // be re-entrant in the case where the provider is in the same process.
         IActivityManager.ContentProviderHolder holder = null;
         try {
             holder = ActivityManagerNative.getDefault().getContentProvider(
-                getApplicationThread(), name);
+                    getApplicationThread(), name);
         } catch (RemoteException ex) {
         }
         if (holder == null) {
@@ -4035,135 +4030,136 @@ public final class ActivityThread {
             return null;
         }
 
-        IContentProvider prov = installProvider(context, holder.provider,
-                holder.info, true);
-        //Slog.i(TAG, "noReleaseNeeded=" + holder.noReleaseNeeded);
-        if (holder.noReleaseNeeded || holder.provider == null) {
-            // We are not going to release the provider if it is an external
-            // provider that doesn't care about being released, or if it is
-            // a local provider running in this process.
-            //Slog.i(TAG, "*** NO RELEASE NEEDED");
-            synchronized(mProviderMap) {
-                mProviderRefCountMap.put(prov.asBinder(), new ProviderRefCount(10000));
+        // Install provider will increment the reference count for us, and break
+        // any ties in the race.
+        provider = installProvider(c, holder.provider, holder.info,
+                true /*noisy*/, holder.noReleaseNeeded);
+        if (holder.provider != null && provider != holder.provider) {
+            if (localLOGV) {
+                Slog.v(TAG, "acquireProvider: lost the race, releasing extraneous "
+                        + "reference to the content provider");
+            }
+            try {
+                ActivityManagerNative.getDefault().removeContentProvider(
+                        getApplicationThread(), name);
+            } catch (RemoteException ex) {
             }
         }
-        return prov;
-    }
-
-    public final IContentProvider acquireProvider(Context c, String name) {
-        IContentProvider provider = getProvider(c, name);
-        if(provider == null)
-            return null;
-        IBinder jBinder = provider.asBinder();
-        synchronized(mProviderMap) {
-            ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
-            if(prc == null) {
-                mProviderRefCountMap.put(jBinder, new ProviderRefCount(1));
-            } else {
-                prc.count++;
-            } //end else
-        } //end synchronized
         return provider;
     }
 
     public final IContentProvider acquireExistingProvider(Context c, String name) {
-        IContentProvider provider = getExistingProvider(c, name);
-        if(provider == null)
-            return null;
-        IBinder jBinder = provider.asBinder();
-        synchronized(mProviderMap) {
+        synchronized (mProviderMap) {
+            ProviderClientRecord pr = mProviderMap.get(name);
+            if (pr == null) {
+                return null;
+            }
+
+            IContentProvider provider = pr.mProvider;
+            IBinder jBinder = provider.asBinder();
+
+            // Only increment the ref count if we have one.  If we don't then the
+            // provider is not reference counted and never needs to be released.
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
-            if(prc == null) {
-                mProviderRefCountMap.put(jBinder, new ProviderRefCount(1));
-            } else {
-                prc.count++;
-            } //end else
-        } //end synchronized
-        return provider;
+            if (prc != null) {
+                prc.count += 1;
+                if (prc.count == 1) {
+                    if (localLOGV) {
+                        Slog.v(TAG, "acquireExistingProvider: "
+                                + "snatched provider from the jaws of death");
+                    }
+                    // Because the provider previously had a reference count of zero,
+                    // it was scheduled to be removed.  Cancel that.
+                    mH.removeMessages(H.REMOVE_PROVIDER, provider);
+                }
+            }
+            return provider;
+        }
     }
 
     public final boolean releaseProvider(IContentProvider provider) {
         if(provider == null) {
             return false;
         }
+
         IBinder jBinder = provider.asBinder();
-        synchronized(mProviderMap) {
+        synchronized (mProviderMap) {
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
-            if(prc == null) {
-                if(localLOGV) Slog.v(TAG, "releaseProvider::Weird shouldn't be here");
+            if (prc == null) {
+                // The provider has no ref count, no release is needed.
                 return false;
-            } else {
-                prc.count--;
-                if(prc.count == 0) {
-                    // Schedule the actual remove asynchronously, since we
-                    // don't know the context this will be called in.
-                    // TODO: it would be nice to post a delayed message, so
-                    // if we come back and need the same provider quickly
-                    // we will still have it available.
-                    Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, provider);
-                    mH.sendMessage(msg);
-                } //end if
-            } //end else
-        } //end synchronized
-        return true;
+            }
+
+            if (prc.count == 0) {
+                if (localLOGV) Slog.v(TAG, "releaseProvider: ref count already 0, how?");
+                return false;
+            }
+
+            prc.count -= 1;
+            if (prc.count == 0) {
+                // Schedule the actual remove asynchronously, since we don't know the context
+                // this will be called in.
+                // TODO: it would be nice to post a delayed message, so
+                // if we come back and need the same provider quickly
+                // we will still have it available.
+                Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, provider);
+                mH.sendMessage(msg);
+            }
+            return true;
+        }
     }
 
     final void completeRemoveProvider(IContentProvider provider) {
         IBinder jBinder = provider.asBinder();
-        String name = null;
+        String remoteProviderName = null;
         synchronized(mProviderMap) {
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
-            if(prc != null && prc.count == 0) {
-                mProviderRefCountMap.remove(jBinder);
-                //invoke removeProvider to dereference provider
-                name = removeProviderLocked(provider);
+            if (prc == null) {
+                // Either no release is needed (so we shouldn't be here) or the
+                // provider was already released.
+                if (localLOGV) Slog.v(TAG, "completeRemoveProvider: release not needed");
+                return;
+            }
+
+            if (prc.count != 0) {
+                // There was a race!  Some other client managed to acquire
+                // the provider before the removal was completed.
+                // Abort the removal.  We will do it later.
+                if (localLOGV) Slog.v(TAG, "completeRemoveProvider: lost the race, "
+                        + "provider still in use");
+                return;
+            }
+
+            mProviderRefCountMap.remove(jBinder);
+
+            Iterator<ProviderClientRecord> iter = mProviderMap.values().iterator();
+            while (iter.hasNext()) {
+                ProviderClientRecord pr = iter.next();
+                IBinder myBinder = pr.mProvider.asBinder();
+                if (myBinder == jBinder) {
+                    iter.remove();
+                    if (pr.mLocalProvider == null) {
+                        myBinder.unlinkToDeath(pr, 0);
+                        if (remoteProviderName == null) {
+                            remoteProviderName = pr.mName;
+                        }
+                    }
+                }
             }
         }
-        
-        if (name != null) {
+
+        if (remoteProviderName != null) {
             try {
-                if(localLOGV) Slog.v(TAG, "removeProvider::Invoking " +
-                        "ActivityManagerNative.removeContentProvider(" + name);
+                if (localLOGV) {
+                    Slog.v(TAG, "removeProvider: Invoking ActivityManagerNative."
+                            + "removeContentProvider(" + remoteProviderName + ")");
+                }
                 ActivityManagerNative.getDefault().removeContentProvider(
-                        getApplicationThread(), name);
+                        getApplicationThread(), remoteProviderName);
             } catch (RemoteException e) {
                 //do nothing content provider object is dead any way
-            } //end catch
+            }
         }
-    }
-    
-    public final String removeProviderLocked(IContentProvider provider) {
-        if (provider == null) {
-            return null;
-        }
-        IBinder providerBinder = provider.asBinder();
-
-        String name = null;
-        
-        // remove the provider from mProviderMap
-        Iterator<ProviderClientRecord> iter = mProviderMap.values().iterator();
-        while (iter.hasNext()) {
-            ProviderClientRecord pr = iter.next();
-            IBinder myBinder = pr.mProvider.asBinder();
-            if (myBinder == providerBinder) {
-                //find if its published by this process itself
-                if(pr.mLocalProvider != null) {
-                    if(localLOGV) Slog.i(TAG, "removeProvider::found local provider returning");
-                    return name;
-                }
-                if(localLOGV) Slog.v(TAG, "removeProvider::Not local provider Unlinking " +
-                        "death recipient");
-                //content provider is in another process
-                myBinder.unlinkToDeath(pr, 0);
-                iter.remove();
-                //invoke remove only once for the very first name seen
-                if(name == null) {
-                    name = pr.mName;
-                }
-            } //end if myBinder
-        }  //end while iter
-        
-        return name;
     }
 
     final void removeDeadProvider(String name, IContentProvider provider) {
@@ -4179,8 +4175,23 @@ public final class ActivityThread {
         }
     }
 
+    /**
+     * Installs the provider.
+     *
+     * Providers that are local to the process or that come from the system server
+     * may be installed permanently which is indicated by setting noReleaseNeeded to true.
+     * Other remote providers are reference counted.  The initial reference count
+     * for all reference counted providers is one.  Providers that are not reference
+     * counted do not have a reference count (at all).
+     *
+     * This method detects when a provider has already been installed.  When this happens,
+     * it increments the reference count of the existing provider (if appropriate)
+     * and returns the existing provider.  This can happen due to concurrent
+     * attempts to acquire the same provider.
+     */
     private IContentProvider installProvider(Context context,
-            IContentProvider provider, ProviderInfo info, boolean noisy) {
+            IContentProvider provider, ProviderInfo info,
+            boolean noisy, boolean noReleaseNeeded) {
         ContentProvider localProvider = null;
         if (provider == null) {
             if (noisy) {
@@ -4238,24 +4249,69 @@ public final class ActivityThread {
         }
 
         synchronized (mProviderMap) {
-            // Cache the pointer for the remote provider.
+            // There is a possibility that this thread raced with another thread to
+            // add the provider.  If we find another thread got there first then we
+            // just get out of the way and return the original provider.
+            IBinder jBinder = provider.asBinder();
             String names[] = PATTERN_SEMICOLON.split(info.authority);
-            for (int i=0; i<names.length; i++) {
-                ProviderClientRecord pr = new ProviderClientRecord(names[i], provider,
-                        localProvider);
-                try {
-                    provider.asBinder().linkToDeath(pr, 0);
+            for (int i = 0; i < names.length; i++) {
+                ProviderClientRecord pr = mProviderMap.get(names[i]);
+                if (pr != null) {
+                    if (localLOGV) {
+                        Slog.v(TAG, "installProvider: lost the race, "
+                                + "using existing named provider");
+                    }
+                    provider = pr.mProvider;
+                } else {
+                    pr = new ProviderClientRecord(names[i], provider, localProvider);
+                    if (localProvider == null) {
+                        try {
+                            jBinder.linkToDeath(pr, 0);
+                        } catch (RemoteException e) {
+                            // Provider already dead.  Bail out of here without making
+                            // any changes to the provider map or other data structures.
+                            return null;
+                        }
+                    }
                     mProviderMap.put(names[i], pr);
-                } catch (RemoteException e) {
-                    return null;
                 }
             }
+
             if (localProvider != null) {
-                mLocalProviders.put(provider.asBinder(),
-                        new ProviderClientRecord(null, provider, localProvider));
+                ProviderClientRecord pr = mLocalProviders.get(jBinder);
+                if (pr != null) {
+                    if (localLOGV) {
+                        Slog.v(TAG, "installProvider: lost the race, "
+                                + "using existing local provider");
+                    }
+                    provider = pr.mProvider;
+                } else {
+                    pr = new ProviderClientRecord(null, provider, localProvider);
+                    mLocalProviders.put(jBinder, pr);
+                }
+            }
+
+            if (!noReleaseNeeded) {
+                ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
+                if (prc != null) {
+                    if (localLOGV) {
+                        Slog.v(TAG, "installProvider: lost the race, incrementing ref count");
+                    }
+                    prc.count += 1;
+                    if (prc.count == 1) {
+                        if (localLOGV) {
+                            Slog.v(TAG, "installProvider: "
+                                    + "snatched provider from the jaws of death");
+                        }
+                        // Because the provider previously had a reference count of zero,
+                        // it was scheduled to be removed.  Cancel that.
+                        mH.removeMessages(H.REMOVE_PROVIDER, provider);
+                    }
+                } else {
+                    mProviderRefCountMap.put(jBinder, new ProviderRefCount(1));
+                }
             }
         }
-
         return provider;
     }
 
