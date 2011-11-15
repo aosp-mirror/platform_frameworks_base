@@ -3100,7 +3100,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 sensorRotation = lastRotation;
             }
 
-            int preferredRotation = -1;
+            final int preferredRotation;
             if (mHdmiPlugged) {
                 // Ignore sensor when plugged into HDMI.
                 preferredRotation = mHdmiRotation;
@@ -3149,28 +3149,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
                 // Apply rotation lock.
                 preferredRotation = mUserRotation;
+            } else {
+                // No overriding preference.
+                // We will do exactly what the application asked us to do.
+                preferredRotation = -1;
             }
-
-            // TODO: Sometimes, we might want to override the application-requested
-            //       orientation, such as when HDMI is plugged in or when docked.
-            //       We can do that by modifying the appropriate cases above to return
-            //       the preferred orientation directly instead of continuing on down here.
 
             switch (orientation) {
                 case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                    // Always return portrait if orientation set to portrait.
+                    // Return portrait unless overridden.
+                    if (isAnyPortrait(preferredRotation)) {
+                        return preferredRotation;
+                    }
                     return mPortraitRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                    // Always return landscape if orientation set to landscape.
+                    // Return landscape unless overridden.
+                    if (isLandscapeOrSeascape(preferredRotation)) {
+                        return preferredRotation;
+                    }
                     return mLandscapeRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                    // Always return portrait if orientation set to portrait.
+                    // Return reverse portrait unless overridden.
+                    if (isAnyPortrait(preferredRotation)) {
+                        return preferredRotation;
+                    }
                     return mUpsideDownRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                    // Always return seascape if orientation set to reverse landscape.
+                    // Return seascape unless overridden.
+                    if (isLandscapeOrSeascape(preferredRotation)) {
+                        return preferredRotation;
+                    }
                     return mSeascapeRotation;
 
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
