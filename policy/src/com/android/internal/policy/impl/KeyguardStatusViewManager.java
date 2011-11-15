@@ -481,7 +481,14 @@ class KeyguardStatusViewManager implements OnClickListener {
                 break;
 
             case SimMissing:
+                // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
+                // This depends on mPlmn containing the text "Emergency calls only" when the radio
+                // has some connectivity. Otherwise, it should be null or empty and just show
+                // "No SIM card"
                 carrierText = getContext().getText(R.string.lockscreen_missing_sim_message_short);
+                if (mLockPatternUtils.isEmergencyCallCapable()) {
+                    carrierText = makeCarierString(carrierText, mPlmn);
+                }
                 carrierHelpTextId = R.string.lockscreen_missing_sim_instructions_long;
                 break;
 
