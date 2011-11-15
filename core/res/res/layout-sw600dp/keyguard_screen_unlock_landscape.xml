@@ -27,19 +27,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- left side: status  -->
+    <!-- left side: status and music -->
     <RelativeLayout
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_width="0dip">
+        android:layout_width="0dip"
+        android:gravity="center">
 
-        <include layout="@layout/keyguard_screen_status_land"
-            android:layout_width="wrap_content"
+        <RelativeLayout android:id="@+id/transport_bg_protect"
+            android:layout_width="512dip"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="102dip"
-            android:layout_marginTop="320dip"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"/>
+            android:layout_marginBottom="24dip">
+
+            <!-- Music transport control underneath -->
+            <include android:id="@+id/transport"
+                layout="@layout/keyguard_transport_control"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_rowSpan="3"
+                android:layout_columnSpan="1"
+                android:layout_gravity="fill"
+                android:layout_width="match_parent"
+                android:layout_height="512dip"
+                />
+
+            <include layout="@layout/keyguard_screen_status_land"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dip"
+                android:layout_marginTop="50dip"
+                android:layout_marginBottom="50dip"
+                android:layout_marginRight="64dip"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
@@ -58,22 +80,23 @@
 
         <!-- Emergency and forgot pattern buttons. -->
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/lockPattern"
             android:layout_alignLeft="@id/lockPattern"
             android:layout_alignRight="@id/lockPattern"
             android:layout_marginTop="28dip"
-            android:layout_marginLeft="28dip"
-            android:layout_marginRight="28dip"
-            android:orientation="horizontal">
+            android:gravity="center"
+            style="?android:attr/buttonBarStyle"
+            android:weightSum="2">
 
             <Button android:id="@+id/forgotPatternButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/Widget.Button.Transparent"
-                android:drawableLeft="@drawable/ic_emergency"
+                style="?android:attr/buttonBarButtonStyle"
+                android:drawableLeft="@drawable/lockscreen_forgot_password_button"
                 android:drawablePadding="8dip"
                 android:text="@string/lockscreen_forgot_pattern_button_text"
                 android:visibility="gone"
@@ -83,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                style="@style/Widget.Button.Transparent"
+                style="?android:attr/buttonBarButtonStyle"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 android:text="@string/lockscreen_emergency_call"
