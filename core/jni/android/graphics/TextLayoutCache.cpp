@@ -132,7 +132,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 }
                 while (mSize + size > mMaxSize) {
                     // This will call the callback
-                    bool removedOne = mCache.removeOldest() != NULL;
+                    bool removedOne = mCache.removeOldest();
                     LOG_ALWAYS_FATAL_IF(!removedOne, "The cache is non-empty but we "
                             "failed to remove the oldest entry.  "
                             "mSize=%u, size=%u, mMaxSize=%u, mCache.size()=%u",
