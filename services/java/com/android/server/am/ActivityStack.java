@@ -529,7 +529,7 @@ final class ActivityStack {
             Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r : null);
-            mService.updateConfigurationLocked(config, r, false);
+            mService.updateConfigurationLocked(config, r, false, false);
         }
 
         r.app = app;
@@ -591,7 +591,8 @@ final class ActivityStack {
                 }
             }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
-                    System.identityHashCode(r), r.info, mService.mConfiguration,
+                    System.identityHashCode(r), r.info,
+                    new Configuration(mService.mConfiguration),
                     r.compat, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
                     profileAutoStop);
@@ -1453,7 +1454,7 @@ final class ActivityStack {
                     if (config != null) {
                         next.frozenBeforeDestroy = true;
                     }
-                    updated = mService.updateConfigurationLocked(config, next, false);
+                    updated = mService.updateConfigurationLocked(config, next, false, false);
                 }
             }
             if (!updated) {
@@ -2900,7 +2901,7 @@ final class ActivityStack {
                 mConfigWillChange = false;
                 if (DEBUG_CONFIGURATION) Slog.v(TAG,
                         "Updating to new configuration after starting activity.");
-                mService.updateConfigurationLocked(config, null, false);
+                mService.updateConfigurationLocked(config, null, false, false);
             }
             
             Binder.restoreCallingIdentity(origId);
@@ -4171,7 +4172,7 @@ final class ActivityStack {
             if (DEBUG_SWITCH) Slog.i(TAG, "Switch is restarting resumed " + r);
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r, results, newIntents,
-                    changes, !andResume, mService.mConfiguration);
+                    changes, !andResume, new Configuration(mService.mConfiguration));
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
