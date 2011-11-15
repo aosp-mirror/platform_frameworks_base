@@ -63,33 +63,33 @@ Overview
 New Types
 
     /*
-     * EGLsizei is a signed integer type for representing the size of a memory
-     * buffer.
+     * EGLsizeiANDROID is a signed integer type for representing the size of a
+     * memory buffer.
      */
     #include <khrplatform.h>
-    typedef khronos_ssize_t EGLsizei;
+    typedef khronos_ssize_t EGLsizeiANDROID;
 
     /*
      * EGLSetBlobFunc is a pointer to an application-provided function that a
      * client API implementation may use to insert a key/value pair into the
      * cache.
      */
-    typedef void (*EGLSetBlobFunc) (const void* key, EGLsizei keySize,
-        const void* value, EGLsizei valueSize)
+    typedef void (*EGLSetBlobFuncANDROID) (const void* key,
+        EGLsizeiANDROID keySize, const void* value, EGLsizeiANDROID valueSize)
 
     /*
      * EGLGetBlobFunc is a pointer to an application-provided function that a
      * client API implementation may use to retrieve a cached value from the
      * cache.
      */
-    typedef EGLsizei (*EGLGetBlobFunc) (const void* key, EGLsizei keySize,
-        void* value, EGLsizei valueSize)
+    typedef EGLsizeiANDROID (*EGLGetBlobFuncANDROID) (const void* key,
+        EGLsizeiANDROID keySize, void* value, EGLsizeiANDROID valueSize)
 
 New Procedures and Functions
 
-    void eglSetBlobCacheFuncs(EGLDisplay dpy,
-                              EGLSetBlobFunc set,
-                              EGLGetBlobFunc get);
+    void eglSetBlobCacheFuncsANDROID(EGLDisplay dpy,
+                                     EGLSetBlobFunc set,
+                                     EGLGetBlobFunc get);
 
 New Tokens
 
@@ -107,8 +107,8 @@ Changes to Chapter 3 of the EGL 1.4 Specification (EGL Functions and Errors)
     function pointers through which the client APIs can request data be cached
     and retrieved.  The command
 
-        void eglSetBlobCacheFuncs(EGLDisplay dpy,
-            EGLSetBlobFunc set, EGLGetBlobFunc get);
+        void eglSetBlobCacheFuncsANDROID(EGLDisplay dpy,
+            EGLSetBlobFuncANDROID set, EGLGetBlobFuncANDROID get);
 
     sets the callback function pointers that client APIs associated with
     display <dpy> can use to interact with caching functionality provided by
@@ -120,17 +120,17 @@ Changes to Chapter 3 of the EGL 1.4 Specification (EGL Functions and Errors)
 
     Cache functions may only be specified once during the lifetime of an
     EGLDisplay.  The <set> and <get> functions may be called at any time and
-    from any thread from the time at which eglSetBlobCacheFuncs is called until
-    the time that the last resource associated with <dpy> is deleted and <dpy>
-    itself is terminated.  Concurrent calls to these functions from different
-    threads is also allowed.
+    from any thread from the time at which eglSetBlobCacheFuncsANDROID is
+    called until the time that the last resource associated with <dpy> is
+    deleted and <dpy> itself is terminated.  Concurrent calls to these
+    functions from different threads is also allowed.
 
-    If eglSetBlobCacheFuncs generates an error then all client APIs must behave
-    as though eglSetBlobCacheFuncs was not called for the display <dpy>.  If
-    <set> or <get> is NULL then an EGL_BAD_PARAMETER error is generated.  If a
-    successful eglSetBlobCacheFuncs call was already made for <dpy> and the
-    display has not since been terminated then an EGL_BAD_PARAMETER error is
-    generated.
+    If eglSetBlobCacheFuncsANDROID generates an error then all client APIs must
+    behave as though eglSetBlobCacheFuncsANDROID was not called for the display
+    <dpy>.  If <set> or <get> is NULL then an EGL_BAD_PARAMETER error is
+    generated.  If a successful eglSetBlobCacheFuncsANDROID call was already
+    made for <dpy> and the display has not since been terminated then an
+    EGL_BAD_PARAMETER error is generated.
 
     3.9.1 Cache Operations
 
@@ -138,8 +138,8 @@ Changes to Chapter 3 of the EGL 1.4 Specification (EGL Functions and Errors)
     key, a client API implementation can call the application-provided callback
     function
 
-        void (*set) (const void* key, EGLsizei keySize, const void* value,
-            EGLsizei valueSize)
+        void (*set) (const void* key, EGLsizeiANDROID keySize,
+            const void* value, EGLsizeiANDROID valueSize)
 
     <key> and <value> are pointers to the beginning of the key and value,
     respectively, that are to be inserted.  <keySize> and <valueSize> specify
@@ -157,8 +157,8 @@ Changes to Chapter 3 of the EGL 1.4 Specification (EGL Functions and Errors)
     client API implementation can call the application-provided callback
     function
 
-        EGLsizei (*get) (const void* key, EGLsizei keySize, void* value,
-            EGLsizei valueSize)
+        EGLsizeiANDROID (*get) (const void* key, EGLsizeiANDROID keySize,
+            void* value, EGLsizeiANDROID valueSize)
 
     <key> is a pointer to the beginning of the key.  <keySize> specifies the
     size in bytes of the binary key pointed to by <key>.  If the cache contains

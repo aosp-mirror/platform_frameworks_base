@@ -52,14 +52,14 @@ public:
     // setBlob attempts to insert a new key/value blob pair into the cache.
     // This will be called by the hardware vendor's EGL implementation via the
     // EGL_ANDROID_blob_cache extension.
-    void setBlob(const void* key, EGLsizei keySize, const void* value,
-        EGLsizei valueSize);
+    void setBlob(const void* key, EGLsizeiANDROID keySize, const void* value,
+        EGLsizeiANDROID valueSize);
 
     // getBlob attempts to retrieve the value blob associated with a given key
     // blob from cache.  This will be called by the hardware vendor's EGL
     // implementation via the EGL_ANDROID_blob_cache extension.
-    EGLsizei getBlob(const void* key, EGLsizei keySize, void* value,
-        EGLsizei valueSize);
+    EGLsizeiANDROID getBlob(const void* key, EGLsizeiANDROID keySize,
+        void* value, EGLsizeiANDROID valueSize);
 
     // setCacheFilename sets the name of the file that should be used to store
     // cache contents from one program invocation to another.
