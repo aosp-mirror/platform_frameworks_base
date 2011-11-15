@@ -16,22 +16,22 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.os.Parcel;
 import android.telephony.PhoneNumberUtils;
 import android.text.format.Time;
 import android.util.Log;
-import com.android.internal.telephony.IccUtils;
+
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
+import static android.telephony.SmsMessage.ENCODING_16BIT;
 import static android.telephony.SmsMessage.ENCODING_7BIT;
 import static android.telephony.SmsMessage.ENCODING_8BIT;
-import static android.telephony.SmsMessage.ENCODING_16BIT;
 import static android.telephony.SmsMessage.ENCODING_KSC5601;
 import static android.telephony.SmsMessage.ENCODING_UNKNOWN;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
@@ -240,18 +240,43 @@ public class SmsMessage extends SmsMessageBase {
             return null;
         }
 
+        if (encoding == ENCODING_UNKNOWN) {
+            // Find the best encoding to use
+            TextEncodingDetails ted = calculateLength(message, false);
+            encoding = ted.codeUnitSize;
+            languageTable = ted.languageTable;
+            languageShiftTable = ted.languageShiftTable;
+
+            if (encoding == ENCODING_7BIT && (languageTable != 0 || languageShiftTable != 0)) {
+                if (header != null) {
+                    SmsHeader smsHeader = SmsHeader.fromByteArray(header);
+                    if (smsHeader.languageTable != languageTable
+                            || smsHeader.languageShiftTable != languageShiftTable) {
+                        Log.w(LOG_TAG, "Updating language table in SMS header: "
+                                + smsHeader.languageTable + " -> " + languageTable + ", "
+                                + smsHeader.languageShiftTable + " -> " + languageShiftTable);
+                        smsHeader.languageTable = languageTable;
+                        smsHeader.languageShiftTable = languageShiftTable;
+                        header = SmsHeader.toByteArray(smsHeader);
+                    }
+                } else {
+                    SmsHeader smsHeader = new SmsHeader();
+                    smsHeader.languageTable = languageTable;
+                    smsHeader.languageShiftTable = languageShiftTable;
+                    header = SmsHeader.toByteArray(smsHeader);
+                }
+            }
+        }
+
         SubmitPdu ret = new SubmitPdu();
         // MTI = SMS-SUBMIT, UDHI = header != null
         byte mtiByte = (byte)(0x01 | (header != null ? 0x40 : 0x00));
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, mtiByte,
                 statusReportRequested, ret);
+
         // User Data (and length)
         byte[] userData;
-        if (encoding == ENCODING_UNKNOWN) {
-            // First, try encoding it with the GSM alphabet
-            encoding = ENCODING_7BIT;
-        }
         try {
             if (encoding == ENCODING_7BIT) {
                 userData = GsmAlphabet.stringToGsm7BitPackedWithHeader(message, header,
@@ -283,6 +308,7 @@ public class SmsMessage extends SmsMessageBase {
         if (encoding == ENCODING_7BIT) {
             if ((0xff & userData[0]) > MAX_USER_DATA_SEPTETS) {
                 // Message too long
+                Log.e(LOG_TAG, "Message too long (" + (0xff & userData[0]) + " septets)");
                 return null;
             }
             // TP-Data-Coding-Scheme
@@ -297,6 +323,7 @@ public class SmsMessage extends SmsMessageBase {
         } else { // assume UCS-2
             if ((0xff & userData[0]) > MAX_USER_DATA_BYTES) {
                 // Message too long
+                Log.e(LOG_TAG, "Message too long (" + (0xff & userData[0]) + " bytes)");
                 return null;
             }
             // TP-Data-Coding-Scheme
