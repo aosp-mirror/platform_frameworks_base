@@ -80,7 +80,6 @@ import com.google.common.util.concurrent.AbstractFuture;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.easymock.IExpectationSetters;
 
 import java.io.File;
 import java.util.LinkedHashSet;
@@ -537,6 +536,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
         expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
+        expectPolicyDataEnable(TYPE_WIFI, true);
 
         // TODO: consider making strongly ordered mock
         expectRemoveInterfaceQuota(TEST_IFACE);
@@ -580,7 +580,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         NetworkState[] state = null;
         NetworkStats stats = null;
         Future<Void> future;
-        Capture<String> tag;
+        Future<String> tagFuture;
 
         final long TIME_FEB_15 = 1171497600000L;
         final long TIME_MAR_10 = 1173484800000L;
@@ -598,6 +598,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
             expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectClearNotifications();
             future = expectMeteredIfacesChanged();
@@ -620,6 +621,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
             expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectRemoveInterfaceQuota(TEST_IFACE);
             expectSetInterfaceQuota(TEST_IFACE, 2 * MB_IN_BYTES);
@@ -642,14 +644,15 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectCurrentTime();
             expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true);
 
             expectForceUpdate();
             expectClearNotifications();
-            tag = expectEnqueueNotification();
+            tagFuture = expectEnqueueNotification();
 
             replay();
             mNetworkObserver.limitReached(null, TEST_IFACE);
-            assertNotificationType(TYPE_WARNING, tag.getValue());
+            assertNotificationType(TYPE_WARNING, tagFuture.get());
             verifyAndReset();
         }
 
@@ -662,15 +665,15 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectCurrentTime();
             expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
-            expectPolicyDataEnable(TYPE_WIFI, false).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, false);
 
             expectForceUpdate();
             expectClearNotifications();
-            tag = expectEnqueueNotification();
+            tagFuture = expectEnqueueNotification();
 
             replay();
             mNetworkObserver.limitReached(null, TEST_IFACE);
-            assertNotificationType(TYPE_LIMIT, tag.getValue());
+            assertNotificationType(TYPE_LIMIT, tagFuture.get());
             verifyAndReset();
         }
 
@@ -682,21 +685,20 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
             expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
                     .andReturn(stats).atLeastOnce();
-            expectPolicyDataEnable(TYPE_WIFI, true).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true);
 
             // snoozed interface still has high quota so background data is
             // still restricted.
             expectRemoveInterfaceQuota(TEST_IFACE);
             expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
+            expectMeteredIfacesChanged(TEST_IFACE);
 
             expectClearNotifications();
-            tag = expectEnqueueNotification();
-            future = expectMeteredIfacesChanged(TEST_IFACE);
+            tagFuture = expectEnqueueNotification();
 
             replay();
             mService.snoozePolicy(sTemplateWifi);
-            future.get();
-            assertNotificationType(TYPE_LIMIT_SNOOZED, tag.getValue());
+            assertNotificationType(TYPE_LIMIT_SNOOZED, tagFuture.get());
             verifyAndReset();
         }
     }
@@ -737,9 +739,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectLastCall().anyTimes();
     }
 
-    private Capture<String> expectEnqueueNotification() throws Exception {
-        final Capture<String> tag = new Capture<String>();
-        mNotifManager.enqueueNotificationWithTag(isA(String.class), capture(tag), anyInt(),
+    private Future<String> expectEnqueueNotification() throws Exception {
+        final FutureCapture<String> tag = new FutureCapture<String>();
+        mNotifManager.enqueueNotificationWithTag(isA(String.class), capture(tag.capture), anyInt(),
                 isA(Notification.class), isA(int[].class));
         return tag;
     }
@@ -789,27 +791,40 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         return future;
     }
 
-    private <T> IExpectationSetters<T> expectPolicyDataEnable(int type, boolean enabled)
-            throws Exception {
+    private Future<Void> expectPolicyDataEnable(int type, boolean enabled) throws Exception {
+        final FutureAnswer future = new FutureAnswer();
         mConnManager.setPolicyDataEnable(type, enabled);
-        return expectLastCall();
+        expectLastCall().andAnswer(future);
+        return future;
     }
 
-    private static class FutureAnswer extends AbstractFuture<Void> implements IAnswer<Void> {
+    private static class TestAbstractFuture<T> extends AbstractFuture<T> {
         @Override
-        public Void get() throws InterruptedException, ExecutionException {
+        public T get() throws InterruptedException, ExecutionException {
             try {
                 return get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
 
+    private static class FutureAnswer extends TestAbstractFuture<Void> implements IAnswer<Void> {
         @Override
         public Void answer() {
             set(null);
             return null;
         }
+    }
+
+    private static class FutureCapture<T> extends TestAbstractFuture<T> {
+        public Capture<T> capture = new Capture<T>() {
+            @Override
+            public void setValue(T value) {
+                super.setValue(value);
+                set(value);
+            }
+        };
     }
 
     private static class IdleFuture extends AbstractFuture<Void> implements IdleHandler {
