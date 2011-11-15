@@ -52,10 +52,11 @@ public:
 
     inline int32_t incRef() { return android_atomic_inc(&count); }
     inline int32_t decRef() { return android_atomic_dec(&count); }
+    inline egl_display_t* getDisplay() const { return display; }
 
 private:
     void terminate();
-    bool get();
+    static bool get(egl_display_t const* display, egl_object_t* object);
 
 public:
     template <typename N, typename T>
@@ -66,9 +67,9 @@ public:
     public:
         ~LocalRef();
         explicit LocalRef(egl_object_t* rhs);
-        explicit LocalRef(T o) : ref(0) {
+        explicit LocalRef(egl_display_t const* display, T o) : ref(0) {
             egl_object_t* native = reinterpret_cast<N*>(o);
-            if (o && native->get()) {
+            if (o && egl_object_t::get(display, native)) {
                 ref = native;
             }
         }
