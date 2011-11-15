@@ -23,15 +23,14 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        >
+        android:gravity="right">
 
     <TextView
         android:id="@+id/carrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
+        android:textSize="16sp"
         android:drawablePadding="4dip"
         android:layout_marginTop="32dip"
         android:singleLine="true"
@@ -72,19 +71,6 @@
             android:layout_marginBottom="6dip"
             />
 
-        <TextView android:id="@+id/am_pm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/timeDisplayBackground"
-            android:layout_alignBaseline="@id/timeDisplayBackground"
-            android:singleLine="true"
-            android:ellipsize="none"
-            android:textSize="30sp"
-            android:layout_marginLeft="8dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/lockscreen_clock_am_pm"
-            />
-
     </com.android.internal.widget.DigitalClock>
 
     <LinearLayout
@@ -99,15 +85,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="17sp"/>
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/alarm_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30dip"
+            android:layout_marginLeft="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="17sp"/>
+            android:drawablePadding="4dip"
+            android:textSize="16sp"/>
 
     </LinearLayout>
 
@@ -117,7 +104,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dip"
-        android:textSize="17sp"
+        android:textSize="16sp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
@@ -127,7 +114,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
+        android:textSize="16sp"
         android:layout_marginTop="20dip"
         android:singleLine="false"
         android:textColor="@color/lockscreen_owner_info"
