@@ -32,13 +32,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -1741,8 +1745,10 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     void workAroundBadLayerDrawableOpacity(View v) {
-        LayerDrawable d = (LayerDrawable)v.getBackground();
-        if (d == null) return;
+        Drawable bgd = v.getBackground();
+        if (!(bgd instanceof LayerDrawable)) return;
+
+        LayerDrawable d = (LayerDrawable) bgd;
         v.setBackgroundDrawable(null);
         d.setOpacity(PixelFormat.TRANSLUCENT);
         v.setBackgroundDrawable(d);
@@ -1808,12 +1814,32 @@ public class TabletStatusBar extends StatusBar implements
             row.setDrawingCacheEnabled(true);
         }
 
+        applyLegacyRowBackground(sbn, content);
+
         entry.row = row;
         entry.content = content;
         entry.expanded = expanded;
         entry.largeIcon = largeIcon;
 
         return true;
+    }
+
+    void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
+        if (sbn.notification.contentView.getLayoutId() !=
+                com.android.internal.R.layout.status_bar_latest_event_content) {
+            int version = 0;
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.pkg, 0);
+                version = info.targetSdkVersion;
+            } catch (NameNotFoundException ex) {
+                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.pkg, ex);
+            }
+            if (version > 0 && version < Build.VERSION_CODES.HONEYCOMB) {
+                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else {
+                content.setBackgroundResource(R.drawable.notification_row_bg);
+            }
+        }
     }
 
     public void clearAll() {
