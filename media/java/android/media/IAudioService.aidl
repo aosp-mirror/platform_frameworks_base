@@ -45,6 +45,10 @@ interface IAudioService {
 
     boolean isStreamMute(int streamType);
 
+    void setMasterMute(boolean state, IBinder cb);
+
+    boolean isMasterMute();
+
     int getStreamVolume(int streamType);
 
     int getMasterVolume();
@@ -54,6 +58,8 @@ interface IAudioService {
     int getMasterMaxVolume();
     
     int getLastAudibleStreamVolume(int streamType);
+
+    int getLastAudibleMasterVolume();
 
     void setRingerMode(int ringerMode);
     
