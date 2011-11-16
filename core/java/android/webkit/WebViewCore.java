@@ -2336,6 +2336,9 @@ public final class WebViewCore {
             adjust = (float) mContext.getResources().getDisplayMetrics().densityDpi
                     / mViewportDensityDpi;
         }
+        if (adjust != mWebView.getDefaultZoomScale()) {
+            mWebView.updateDefaultZoomDensity(adjust);
+        }
         int defaultScale = (int) (adjust * 100);
 
         if (mViewportInitialScale > 0) {
@@ -2546,7 +2549,7 @@ public final class WebViewCore {
     // called by JNI
     private void restoreScale(float scale, float textWrapScale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
-            mIsRestored = scale > 0;
+            mIsRestored = true;
             mRestoredScale = scale;
             if (mSettings.getUseWideViewPort()) {
                 mRestoredTextWrapScale = textWrapScale;
