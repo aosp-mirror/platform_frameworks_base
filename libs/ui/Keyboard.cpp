@@ -173,50 +173,6 @@ bool isEligibleBuiltInKeyboard(const InputDeviceIdentifier& deviceIdentifier,
     return strstr(deviceIdentifier.name.string(), "-keypad");
 }
 
-void setKeyboardProperties(int32_t deviceId,
-        const InputDeviceIdentifier& deviceIdentifier,
-        const String8& keyLayoutFile, const String8& keyCharacterMapFile) {
-    char propName[PROPERTY_KEY_MAX];
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.devname", deviceId);
-    property_set(propName, deviceIdentifier.name.string());
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.klfile", deviceId);
-    property_set(propName, keyLayoutFile.string());
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
-    property_set(propName, keyCharacterMapFile.string());
-}
-
-void clearKeyboardProperties(int32_t deviceId) {
-    char propName[PROPERTY_KEY_MAX];
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.devname", deviceId);
-    property_set(propName, "");
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.klfile", deviceId);
-    property_set(propName, "");
-    snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
-    property_set(propName, "");
-}
-
-status_t getKeyCharacterMapFile(int32_t deviceId, String8& outKeyCharacterMapFile) {
-    if (deviceId != DEVICE_ID_VIRTUAL_KEYBOARD) {
-        char propName[PROPERTY_KEY_MAX];
-        char fn[PROPERTY_VALUE_MAX];
-        snprintf(propName, sizeof(propName), "hw.keyboards.%u.kcmfile", deviceId);
-        if (property_get(propName, fn, "") > 0) {
-            outKeyCharacterMapFile.setTo(fn);
-            return OK;
-        }
-    }
-
-    // Default to Virtual since the keyboard does not appear to be installed.
-    outKeyCharacterMapFile.setTo(getInputDeviceConfigurationFilePathByName(String8("Virtual"),
-            INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP));
-    if (!outKeyCharacterMapFile.isEmpty()) {
-        return OK;
-    }
-
-    LOGE("Can't find any key character map files including the Virtual key map!");
-    return NAME_NOT_FOUND;
-}
-
 static int lookupValueByLabel(const char* literal, const KeycodeLabel *list) {
     while (list->literal) {
         if (strcmp(literal, list->literal) == 0) {
