@@ -926,7 +926,20 @@ public class MediaRecorder
     /**
      * Releases resources associated with this MediaRecorder object.
      * It is good practice to call this method when you're done
-     * using the MediaRecorder.
+     * using the MediaRecorder. In particular, whenever an Activity
+     * of an application is paused (its onPause() method is called),
+     * or stopped (its onStop() method is called), this method should be
+     * invoked to release the MediaRecorder object, unless the application
+     * has a special need to keep the object around. In addition to
+     * unnecessary resources (such as memory and instances of codecs)
+     * being held, failure to call this method immediately if a
+     * MediaRecorder object is no longer needed may also lead to
+     * continuous battery consumption for mobile devices, and recording
+     * failure for other applications if no multiple instances of the
+     * same codec are supported on a device. Even if multiple instances
+     * of the same codec are supported, some performance degradation
+     * may be expected when unnecessary multiple instances are used
+     * at the same time.
      */
     public native void release();
 
