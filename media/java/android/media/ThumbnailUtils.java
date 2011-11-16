@@ -161,6 +161,8 @@ public class ThumbnailUtils {
         try {
             retriever.setDataSource(filePath);
             bitmap = retriever.getFrameAtTime(-1);
+        } catch (OutOfMemoryError e) {
+                Log.e(TAG, "Got OOM error", e);
         } catch (IllegalArgumentException ex) {
             // Assume this is a corrupt video file
         } catch (RuntimeException ex) {
