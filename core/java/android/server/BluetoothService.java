@@ -809,7 +809,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
-    /*package*/ synchronized String getProperty(String name, boolean checkState) {
+    /*package*/ String getProperty(String name, boolean checkState) {
         // If checkState is false, check if the event loop is running.
         // before making the call to Bluez
         if (checkState) {
@@ -853,14 +853,14 @@ public class BluetoothService extends IBluetooth.Stub {
         return getProperty("Name", false);
     }
 
-    public synchronized ParcelUuid[] getUuids() {
+    public ParcelUuid[] getUuids() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         String value =  getProperty("UUIDs", true);
         if (value == null) return null;
         return convertStringToParcelUuid(value);
     }
 
-    private synchronized ParcelUuid[] convertStringToParcelUuid(String value) {
+    private ParcelUuid[] convertStringToParcelUuid(String value) {
         String[] uuidStrings = null;
         // The UUIDs are stored as a "," separated string.
         uuidStrings = value.split(",");
@@ -933,7 +933,7 @@ public class BluetoothService extends IBluetooth.Stub {
      * @return The discoverability window of the device, in seconds.  A negative
      *         value indicates an error.
      */
-    public synchronized int getDiscoverableTimeout() {
+    public int getDiscoverableTimeout() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         String timeout = getProperty("DiscoverableTimeout", true);
         if (timeout != null)
@@ -942,7 +942,7 @@ public class BluetoothService extends IBluetooth.Stub {
             return -1;
     }
 
-    public synchronized int getScanMode() {
+    public int getScanMode() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!isEnabledInternal())
             return BluetoothAdapter.SCAN_MODE_NONE;
@@ -968,7 +968,7 @@ public class BluetoothService extends IBluetooth.Stub {
         return stopDiscoveryNative();
     }
 
-    public synchronized boolean isDiscovering() {
+    public boolean isDiscovering() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
         String discoveringProperty = getProperty("Discovering", false);
@@ -2384,7 +2384,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceProfileState.remove(address);
     }
 
-    synchronized String[] getKnownDevices() {
+    String[] getKnownDevices() {
         String[] bonds = null;
         String val = getProperty("Devices", true);
         if (val != null) {
