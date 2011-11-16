@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"مطالعه داده های گزارش حساس"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با رایانه لوحی انجام می دهید را کشف می کند، که ممکن است حاوی اطلاعات شخصی و خصوصی باشند."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"به یک برنامه کاربردی اجازه می دهد فایل های مختلف گزارش سیستم را بخواند. با این کار، اطلاعات کلی مربوط به کاری که با گوشی انجام می دهید را کشف می کند، که ممکن است حاوی اطلاعات شخصی و خصوصی باشند."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"استفاده از هر رمزگشای رسانه‎ای برای بازپخش"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"به یک برنامه اجازه می‌دهد تا از هر رمزگشای رسانه نصب شده برای رمزگشایی جهت بازپخش استفاده کند."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"خواندن/نوشتن منابع متعلق به تشخیص"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"به یک برنامه کاربردی امکان می دهد هر منبع متعلق به گروه تشخیص را بخواند یا بنویسد، مانند فایل های موجود در /dev. این امر می تواند بصورت بالقوه بر ثبات و امنیت سیستم تأثیر بگذارد. از این امکان تنها باید برای شناسایی مشکلات مخصوص سخت افزار توسط سازنده یا اپراتور استفاده شود."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"فعال یا غیرفعال کردن مؤلفه های برنامه"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"به یک برنامه کاربردی اجازه می دهد به نقاط دسترسی Wi-Fi متصل شده و از آنها جدا شود، همچنین تغییراتی را در مورد شبکه های Wi-Fi پیکربندی شده ایجاد کند."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"دریافت چندگانه Wi-Fi را مجاز می کند"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"به یک برنامه کاربردی اجازه می دهد بسته هایی را دریافت کند که مستقیماً برای دستگاه شما ارسال نشده باشد. این امر زمانی که در حال شناسایی سرویس های نزدیک به خود هستید، می تواند مؤثر باشد. در این حالت در مقایسه با حالت غیر چندگانه، از انرژِی بیشتری استفاده می شود."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"مشاهده وضعیت WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"به یک برنامه کاربردی امکان می دهد اطلاعات مربوط به وضعیت WiMAX را مشاهده کند."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"تغییر وضعیت WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"به یک برنامه کاربردی امکان می دهد به شبکه WiMAX متصل یا از آن قطع شود."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"سرپرست بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"به یک برنامه کاربردی اجازه می دهد تا رایانه لوحی محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"به یک برنامه کاربردی اجازه می دهد تا تلفن محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک‌گذاری با..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل است."</string>
     <string name="list_delimeter" msgid="3975117572185494152">"، "</string>
+    <string name="sending" msgid="8715108995741758718">"در حال ارسال..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"مرورگر راه‌اندازی شود؟"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"تماس را می‌پذیرید؟"</string>
 </resources>

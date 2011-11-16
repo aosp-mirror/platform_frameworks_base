@@ -101,7 +101,12 @@
     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"I-Wi-Fi umugqaa owodwa."</string>
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"I-Wi-Fi imigqaa emibili."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"I-Wi-Fi imigqaa emithathu."</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Uphawu lwe-Wi-Fi igcwele."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"i-signal ye-WiFi igcwele"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ayikho i-WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Ibha eyodwa ye-WiMAX."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Amabha amabili we-WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Amabha amathathu we-WiMAX."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Isiginali ye-WiMAX egcwele."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
@@ -110,7 +115,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ekucupheleni"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"I-Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ayikho i-SIM"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ukusebenzisa i-Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Imodemu nge-Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Imodi yendiza."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhetri"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Izilungiselelo zesistimu"</string>
@@ -133,4 +138,5 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Isesha i-GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Indawo ihlelwe i-GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Susa zonke izaziso."</string>
+    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Yenza ukuthi iskrini seyiva sisebenze"</string>
 </resources>

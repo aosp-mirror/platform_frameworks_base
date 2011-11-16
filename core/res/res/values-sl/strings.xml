@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"branje občutljivih dnevniških podatkov"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v tabličnem računalniku, lahko tudi do osebnih podatkov."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v telefonu, lahko tudi do osebnih podatkov."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"uporaba katerega koli predstavnostnega dekodirnika za predvajanje"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Programu dovoljuje uporabo katerega koli nameščenega predstavnostnega dekodirnika za dekodiranje pri predvajanju."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"branje/pisanje v sredstva, ki so v lasti skupine za diagnostiko"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Programu dovoljuje branje in pisanje na poljuben vir, ki je v lasti skupine za diagnostiko; na primer datoteke v mapi /dev. To lahko vpliva na stabilnost in varnost sistema. To naj uporablja SAMO izdelovalec ali operater za diagnostiko, specifično za strojno opremo."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"omogočanje ali onemogočanje komponent programa"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Programu dovoljuje vzpostavljanje povezave z dostopnimi točkami brezžičnega omrežja in prekinitev povezave z njimi ter spreminjanje konfiguriranih brezžičnih omrežij."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"dovoljevanje sprejema večvrstnega brezžičnega oddajanja"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Programu dovoljuje prejemanje paketov, ki niso naslovljeni neposredno na vašo napravo. To je lahko uporabno, ko odkrivate storitve, ki so dane na voljo v bližini. Poraba je večja od načina delovanja brez večvrstnega oddajanja."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"prikaz stanja omrežja WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Programu omogoča prikaz podatkov o stanju omrežja WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"sprememba stanja omrežja WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Programu omogoča povezovanje v omrežje WiMAX in prekinitev povezave."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"skrbništvo storitve Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Programu omogoča konfiguriranje lokalnega tabličnega računalnika Bluetooth ter zaznavanje oddaljenih naprav in združevanje z njimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Programu dovoljuje konfiguriranje lokalnega telefona s tehnologijo Bluetooth ter odkrivanje oddaljenih naprav in povezovanje z njimi."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Skupna raba z ..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naprava zaklenjena."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

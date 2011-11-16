@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"magbasa ng sensitibong data ng tala"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Pinapayagan ang application na magbasa mula sa iba\'t ibang file ng tala ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa tablet, potensyal na kabilang ang personal o pribadong impormasyon."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Pinapayagan ang application na magbasa mula sa iba\'t ibang file ng tala ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa telepono, potensyal na kabilang ang personal o pribadong impormasyon."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gumamit ng anumang media decoder para sa pag-playback"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Pinapayagan ka ng application na gumamit ng anumang naka-install na media decoder upang mag-decode para sa pag-playback."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"magbasa/magsulat sa mga mapagkukunang pag-aari ng diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Pinapayagan ang isang application na magbasa at magsulat ng anumang mapagkukunang pag-aari ng pangkat ng diag; halimbawa, mga file sa /dev. Posibleng maapektuhan nito ang katatagan at seguridad ng system. Dapat LANG itong gamitin sa mga tukoy sa hardware na diagnostic ng manufacturer o operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"paganahin o huwag paganahin ang mga nilalaman ng application"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Pinapayagan ang isang application na kumonekta sa at i-disconnect mula sa mga Wi-Fi access point, at magsagawa ng mga pagbabago sa mga na-configure na Wi-Fi network."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"payagan ang pagtanggap ng Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Pinapayagan ang isang application na tumanggap ng mga packet na hindi direktang nakatugon sa iyong device. Magiging kapaki-pakinabang ito kapag tumutuklas ng mga serbisyong inaalok sa malapit. Gumagamit ito ng higit pang baterya kaysa sa non-multicast mode."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"tingnan ang katayuan ng WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Pinapayagan ang application na tingnan ang impormasyon tungkol sa katayuan ng WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"baguhin ang katayuan ng WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Pinapayagan ang isang application na makakonekta sa at maalis sa pagkakakonekta mula sa network ng WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"pangangasiwa ng bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Pinapayagan ang application na i-configure ang lokal na Bluetooth tablet, at tumuklas at ipares sa mga malayuang device."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Pinapayagan ang isang application na i-configure ang lokal na Bluetooth na telepono, at upang tumuklas at mapareha sa mga remote na device."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ibahagi kay..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naka-lock ang device."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

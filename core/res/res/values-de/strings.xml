@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"Lesen vertraulicher Protokolldaten"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Ermöglicht einer App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Tablet durchgeführten Aktionen eingesehen werden. Diese können persönliche oder geheime Daten enthalten."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Ermöglicht einer App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Telefon durchgeführten Aktionen eingesehen werden. Diese können persönliche oder geheime Daten enthalten."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Für Wiedergabe beliebigen Mediendecodierer verwenden"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Ermöglicht einer App, einen beliebigen Mediendecodierer für die Wiedergabe zu verwenden"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ermöglicht einer App, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für Hardware-spezifische Diagnosen des Herstellers oder Netzbetreibers verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"Anwendungskomponenten aktivieren oder deaktivieren"</string>
@@ -344,7 +346,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Auf zusätzliche Dienstanbieterbefehle für Standort zugreifen"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Zugriff auf zusätzliche Dienstanbieterbefehle für Standort. Schädliche Anwendungen könnten so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt falsche Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Anwendungen können damit bestimmen, wo Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Anwendungen können damit bestimmen, so Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Ermöglicht einer App, eine Verbindung zu den WLAN-Zugangspunkten herzustellen und diese zu trennen oder Änderungen an den konfigurierten WLAN-Netzwerken vorzunehmen"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"WLAN-Multicast-Empfang zulassen"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ermöglicht einer App, Datenpakete zu empfangen, die nicht direkt an Ihr Gerät gerichtet sind. Dies kann bei der Erkennung von in der Nähe angebotenen Diensten hilfreich sein. Diese Einstellung verbraucht mehr Energie als der Nicht-Multicast-Modus."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX-Status anzeigen"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ermöglicht einer App, die Informationen zum WiMAX-Status einzusehen"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-Status ändern"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ermöglicht einer App, eine Verbindung mit dem WiMAX-Netzwerk herzustellen bzw. zu trennen"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth-Verwaltung"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Ermöglicht einer App, das lokale Bluetooth-Tablet zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Ermöglicht einer App, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
@@ -889,7 +895,7 @@
     <string name="capital_on" msgid="1544682755514494298">"AN"</string>
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Immer für diese Aktion verwenden"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Apps &gt; Apps verwalten\""</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Aktion auswählen"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"App für das USB-Gerät auswählen"</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Teilen mit..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Gerät gesperrt"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"gevoelige logbestandsgegevens lezen"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Hiermee kan een app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw tabletgebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Hiermee kan een app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw telefoongebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"elke mediadecoder gebruiken voor afspelen"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Hiermee kan een app alle geïnstalleerde mediadecoders gebruiken om te decoderen voor het afspelen."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Hiermee kan een app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"toepassingscomponenten in- of uitschakelen"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Hiermee kan een app zich koppelen aan en loskoppelen van Wi-Fi toegangspunten en wijzigingen aanbrengen in geconfigureerde Wi-Fi-netwerken."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi Multicast-ontvangst toestaan"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Hiermee kan een app pakketten ontvangen die niet rechtstreeks zijn geadresseerd aan uw apparaat. Dit kan handig zijn wanneer services in de buurt worden ontdekt. Dit verbruikt meer energie dan de niet-multicastmodus."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX-status bekijken"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Hiermee kan een app informatie over de WiMAX-status bekijken."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-status wijzigen"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Hiermee kan een app verbinding maken met een WiMAX-netwerk en deze verbreken."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-beheer"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Hiermee kan een app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en aansluiten."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Hiermee kan een app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en aansluiten."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Delen met..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Apparaat vergrendeld."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Verzenden..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Oproep accepteren?"</string>
 </resources>

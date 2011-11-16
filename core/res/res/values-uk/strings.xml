@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"зчит. закриті дані журн."</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Дозволяє програмі здійснювати зчитування з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в пристрої, яка потенційно може містити особисті чи конфіденційні дані."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Дозволяє програмі здійснювати зчитування з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в телефоні, яка потенційно може містити особисті чи конфіденційні дані."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"використовувати будь-який медіа-декодер для відтворення"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Дозволяє програмі використовувати будь-який установлений медіа-декодер для декодування з метою відтворення."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"чит./зап. на ресури., якими вол. діаг."</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Дозволяє програмі зчитувати та запис. на будь-який ресурс, яким володіє діагностична група; напр., файли в /dev. Це потенційно може вплинути на безпеку та стабільність системи. Це необхідно використ. ЛИШЕ для діагностики обладнання, яку виконує виробник чи оператор."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"вмикати чи вимикати компоненти програми"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Дозволяє програмі підключатися та відключатися від точок доступу Wi-Fi, а також вносити зміни до налаштованих Wi-Fi мереж."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дозвол. отримання багатоадр. Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Дозволяє програмі отрим. пакети, які не адрес. безпосер. вашому пристрою. Це може бути корисно під час виявл. пропонованих служб неподалік. Викор. більше потужності, ніж не багатоадресний реж."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"переглядати стан WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Дозволяє програмі переглядати інформацію про стан WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"змінювати стан WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Дозволяє програмі підключатися та відключатися від мережі WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"адміністрування bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Дозволяє програмі налашт. локальний пристрій із Bluetooth, знаходити віддалені пристрої та створ. з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Дозволяє програмі налашт. локальний телефон із Bluetooth і знаходити та створ. пару з віддаленими пристроями."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Надіслати..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Пристрій заблоковано."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Надсилання..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Запустити веб-переглядач?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Прийняти виклик?"</string>
 </resources>

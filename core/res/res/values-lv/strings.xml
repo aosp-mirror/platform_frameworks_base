@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lasīt sensitīvus žurnāla datus"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Ļauj lietojumprogrammai lasīt no sistēmas dažādiem žurnālfailiem. Šādi lietojumprogramma var atrast vispārīgu informāciju par jūsu darbībām planšetdatorā, tostarp, iespējams, arī personisku vai privātu informāciju."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Ļauj lietojumprogrammai lasīt no sistēmas dažādiem žurnālfailiem. Šādi lietojumprogramma var atrast vispārīgu informāciju par jūsu darbībām tālrunī, tostarp, iespējams, arī personisku vai privātu informāciju."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"multivides failu atskaņošanai izmantot jebkuru dekodētāju"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Ļauj lietojumprogrammai izmantot jebkuru instalētu multivides failu dekodētāju, lai dekodētu failus atskaņošanai."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ļauj lietojumprogrammai lasīt jebkuru resursu, kas pieder grupai “diag”, un rakstīt tajos; piemēram, failus direktorijā /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Tas ir jāizmanto TIKAI aparatūrai specifiskas diagnostikas veikšanai, ko izpilda ražotājs vai operators."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"iespējot vai atspējot lietojumprogrammas komponentus"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Ļauj lietojumprogrammai izveidot savienojumu ar Wi-Fi piekļuves punktiem un atvienot to, kā arī veikt izmaiņas konfigurētajos Wi-Fi tīklos."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"atļaut Wi-Fi multiraides uztveršanu"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ļauj lietojumprogrammai saņemt paketes, kas nav tieši adresētas ierīcei. Tas var būt noderīgi, atklājot pakalpojumus, kas tiek piedāvāti tuvākajā apkārtnē. Tas izmanto vairāk jaudas nekā režīmā, kas nav multiraides režīms."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX statusa skatīšana"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ļauj lietojumprogrammai skatīt informāciju par WiMAX statusu."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX statusa mainīšana"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ļauj lietojumprogrammai izveidot un pārtraukt savienojumu ar WiMAX tīklu."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth administrēšana"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Ļauj lietojumprogrammai konfigurēt vietējo Bluetooth tālruni un atklāt attālās ierīces, un izveidot pāri ar tām."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Koplietot ar..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Ierīce ir bloķēta."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"érzékeny naplóadatok olvasása"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Lehetővé teszi az alkalmazások számára, hogy olvassák a rendszer különböző naplófájljait. Ezáltal általános információkat deríthetnek ki arról, hogy mire használja a táblagépét, valamint személyes, magánjellegű adatokhoz is hozzájuthatnak."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Lehetővé teszi az alkalmazások számára, hogy olvassák a rendszer különböző naplófájljait. Ezáltal általános információkat deríthetnek ki arról, hogy mire használja a telefonját, valamint személyes, magánjellegű adatokhoz is hozzájuthatnak."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"bármely médiadekóder használata lejátszáshoz"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Lehetővé teszi egy alkalmazás számára bármely telepített médiadekóder használatát a lejátszás dekódolásához."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"a diag tulajdonában lévő erőforrások olvasása és írása"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lehetővé teszi egy alkalmazás számára, hogy olvassa és írja a diag csoport által birtokolt erőforrásokat; például a /dev könyvtár fájljait. Ez esetleg hatással lehet a rendszer stabilitására és biztonságára. Ezt CSAK a gyártó vagy a szolgáltató használhatja hardverspecifikus hibakeresésre."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"alkalmazáskomponensek be- és kikapcsolása"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Lehetővé teszi egy alkalmazás számára Wi-Fi hozzáférési pontok használatát, valamint módosítások végrehajtását a konfigurált Wi-Fi hálózatokban."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi multicast vétel engedélyezése"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Lehetővé teszi egy alkalmazás számára, hogy nem közvetlenül az eszköznek küldött csomagokat is fogadjon. Ez a közeli szolgáltatások felderítésében nyújthat segítséget. Több energiát fogyaszt, mint a nem multicast mód."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX-állapot megtekintése"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Lehetővé teszi az alkalmazás számára a WiMAX állapotinformációk megtekintését."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-állapot módosítása"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Lehetővé teszi, hogy egy alkalmazás csatlakozzon a WiMAX hálózathoz, illetve megszüntesse a kapcsolatot a hálózattal."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth felügyelet"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Lehetővé teszi az alkalmazások számára, hogy konfigurálják a helyi Bluetooth-t, valamint felfedezzenek és párosítsanak távoli eszközöket."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Lehetővé teszi egy alkalmazás számára a helyi Bluetooth telefon konfigurálását, valamint a távoli eszközök felderítését és párosítását."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Megosztás..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Az eszköz le van zárva."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>
