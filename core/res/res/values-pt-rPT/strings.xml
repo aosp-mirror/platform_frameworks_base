@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"ler dados sensíveis de registo"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permite a uma aplicação ler a partir dos diversos ficheiros de registo do sistema. Isto permite descobrir informações gerais sobre a forma como o utilizador usa o tablet, podendo, inclusive, incluir dados pessoais ou privados."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permite a uma aplicação ler a partir dos diversos ficheiros de registo do sistema. Isto permite descobrir informações gerais sobre a forma como o utilizador usa o telefone, podendo, inclusive, incluir dados pessoais ou privados."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Utilizar qualquer descodificador de multimédia para a reprodução"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite que uma aplicação utilize qualquer descodificador de multimédia instalado para descodificar a reprodução."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/escrever em recursos propriedade de diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite a uma aplicação ler e escrever em qualquer recurso que seja propriedade do grupo diag. Por exemplo, ficheiros em /dev. Isto pode afectar potencialmente a estabilidade e a segurança do sistema e deve ser utilizado APENAS para diagnósticos específicos do hardware pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"activar ou desactivar componentes da aplicação"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite a uma aplicação ligar e desligar de pontos de acesso de Wi-Fi, bem como efectuar alterações a redes Wi-Fi configuradas."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepção Multicast Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite que uma aplicação receba pacotes não enviados directamente para o dispositivo. Esta opção pode ser útil para descobrir serviços oferecidos na vizinhança. Utiliza mais energia do que o modo não multicast."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"ver estado do WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite a uma aplicação ver as informações acerca do estado do Wi-Fi."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"alterar estado do WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a uma aplicação ligar-se e desligar-se da rede WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permite a uma aplicação configurar o tablet Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permite a uma aplicação configurar o telefone Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Partilhar com..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Aparelho bloqueado."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

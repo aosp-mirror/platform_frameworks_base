@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lees sensitiewe logdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Laat \'n program toe om die stelsel se verskeie loglêers te lees. Dit maak dit moontlik om algemene inligting te ontdek oor wat jy met die tablet doen en bevat potensieel persoonlike of private inligting."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Laat \'n program toe om van die stelsel se verskillende loglêers te lees. Dit maak dit moontlik om algemene inligting te ontdek oor wat jy met die foon doen, wat potensieel persoonlike of private inligting kan bevat."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gebruik enige mediadekodeerder vir terugspeel"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Hiermee kan \'n program enige geïnstalleerde mediadekodeerder gebruik om te dekodeer vir terugspeel."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Laat \'n program toe om enige hulpbron te lees en na toe te skryf wat deur die diag-groep besit word; byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en -sekuriteit beïnvloed. Dit behoort net gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktiveer of deaktiveer programkomponente"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Laat \'n program toe om aan Wi-Fi-toegangspunte te koppel of van te ontkoppel, en om wysigings aan opgestelde Wi-Fi-netwerke aan te bring."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"laat Wi-Fi-multisendontvangs toe"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Laat \'n program toe om pakkies te ontvang wat nie direk aan jou toestel gestuur is nie. Dit kan handig wees wanneer jy dienste wat naby is, wil opspoor. Dit gebruik meer krag as die niemultisaai-modus."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"sien WiMAX-status"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Laat \'n program toe om die inligting oor die status van WiMAX te sien."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"verander WiMAX-status"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Laat \'n program toe om aan die WiMAX-netwerk te koppel en te ontkoppel."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-administrasie"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Laat \'n program toe om die plaaslike Bluetooth-tablet op te stel en om afgeleë toestelle te ontdek en daarmee saam te bind."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Laat \'n program toe om die plaaslike Bluetooth-foon op te stel, en om afgeleë toestelle te ontdek en daarmee saam te bind."</string>
@@ -1009,7 +1015,7 @@
     <string name="usb_notification_message" msgid="4447869605109736382">"Raak vir ander USB-opsies"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formateer USB-berging"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formateer SD-kaart"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vee USB-berging uit, wat alle lêers wat daar gestoor word, sal uitvee? Handeling kan nie omgekeer word nie!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vee USB-berging uit, wat alle lêers wat daar gestoor word, sal uitvee? Handeling kan nie ontdoen word nie!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Is jy seker jy wil die SD-kaart formateer? Alle data op jou kaart sal verlore gaan."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formaat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Deel met..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Toestel gesluit."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Stuur tans..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aanvaar Bel?"</string>
 </resources>

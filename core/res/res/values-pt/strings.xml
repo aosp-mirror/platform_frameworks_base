@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"ler dados de registro de informações confidenciais"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permite que um aplicativo leia os diversos arquivos de registro do sistema. Isso permite que ele descubra informações gerais sobre o que você está fazendo com o tablet, inclusive possíveis informações pessoais ou privadas."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permite que um aplicativo leia os diversos arquivos de registro do sistema. Isso permite que ele descubra informações gerais sobre o que você está fazendo com o telefone, inclusive possíveis informações pessoais ou privadas."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"usar qualquer decodificador de mídia para reprodução"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite que um aplicativo use qualquer decodificador de mídia instalado para decodificar e reproduzir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/gravar em recursos pertencentes ao diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite que um aplicativo leia e grave em qualquer recurso que pertença ao grupo de diagnósticos; por exemplo, arquivos em /dev. Isso possivelmente pode afetar a estabilidade e a segurança do sistema. Isso deve ser usado APENAS para diagnósticos específicos do hardware realizados pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"ativar ou desativar os componentes do aplicativo"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite que um aplicativo se conecte e desconecte dos pontos de acesso Wi-Fi e faça alterações nas redes Wi-Fi configuradas."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recebimento de multicast Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite que um aplicativo receba pacotes não endereçados diretamente para o seu aparelho. Isso pode ser útil ao detectar os serviços oferecidos nas proximidades. Ele consome mais energia do que o modo não-multicast."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visualizar estado do WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite que um aplicativo veja as informações sobre o estado do WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"alterar estado do WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite que um aplicativo seja conectado e desconectado à uma rede WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permite que um aplicativo configure o tablet Bluetooth local, descubra dispositivos remotos e emparelhe com eles."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permite que um aplicativo configure o telefone Bluetooth local, descubra e pareie com dispositivos remotos."</string>
@@ -886,8 +892,8 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atenção"</string>
     <string name="loading" msgid="1760724998928255250">"Carregando..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"ATIVADO"</string>
-    <string name="capital_off" msgid="6815870386972805832">"DESATIVADO"</string>
+    <string name="capital_on" msgid="1544682755514494298">"LIG"</string>
+    <string name="capital_off" msgid="6815870386972805832">"DESL"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Complete a ação usando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar como padrão para esta ação."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Limpar o padrão em Configurações da página inicial &gt; Aplicativos &gt; Gerenciar aplicativos."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Compartilhar com..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Enviando..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Abrir Navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aceitar chamada?"</string>
 </resources>

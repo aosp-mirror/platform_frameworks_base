@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"קרא נתונים רגישים של יומן רישום"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"מאפשר ליישום לקרוא מקובצי היומן השונים של המערכת. כך הוא יכול לגלות מידע כללי על הפעולות שלך בטבלט, שעשוי לכלול מידע אישי או פרטי."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"מאפשר ליישום לקרוא מקובצי יומני הרישום השונים של המערכת. כך הוא יכול לגלות מידע כללי על הפעולות שלך בטלפון, מידע שעשוי לכלול מידע אישי או פרטי."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"שימוש בכל מפענח מדיה שהוא להפעלה"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"אפשרות ליישום להשתמש בכל מפענח מדיה מותקן לצורך פענוח להפעלה."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"קרא/כתוב במשאבים בבעלות diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"מאפשר ליישום לקרוא ולכתוב בכל משאב שבבעלות קבוצת diag; לדוגמה, קבצים ב-‎/dev. פעולה זו עשויה להשפיע על היציבות והאבטחה של המערכת. היצרן או המפעיל בלבד יכולים להשתמש באפשרות זו לצורך אבחונים ספציפיים לחומרה."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"הפעל או השבת רכיבי יישום"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"מאפשר ליישום להתחבר לנקודות גישה מסוג Wi-Fi ולהתנתק מהן, ולבצע שינויים ברשתות Wi-Fi מוגדרות."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"אפשר קבלת שידורים מרובים ב-Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"מאפשר ליישום לקבל חבילות שלא ממוענות ישירות למכשיר שלך. יכולת זו שימושית בעת גילוי שירותים המוצעים בקרבת מקום. היא צורכת יותר חשמל לעומת מצב שאינו כולל ריבוי שידורים."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"הצג את מצב WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"מאפשר ליישום להציג את המידע על המצב של WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"שנה את מצב WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"מאפשר ליישום להתחבר ולהתנתק מרשת WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"ניהול Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"מאפשר ליישום להגדיר את הטבלט המקומי מסוג Bluetooth, וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"מאפשר ליישום להגדיר את טלפון Bluetooth המקומי, ולגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
@@ -982,24 +988,24 @@
     <string name="no_permissions" msgid="7283357728219338112">"לא דרושים אישורים"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"הסתר"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"הצג הכל"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"אמצעי אחסון גדול מסוג USB"</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"אחסון USB בנפח גדול"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB מחובר"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"התחברת למחשב באמצעות USB. גע בלחצן שבהמשך אם ברצונך להעתיק קבצים בין המחשב ואמצעי האחסון מסוג USB של מכשיר Android."</string>
-    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"התחברת למחשב באמצעות USB. גע בלחצן שבהמשך אם ברצונך להעתיק קבצים בין המחשב לבין כרטיס ה-SD של מכשיר ה-Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"הפעל אמצעי אחסון מסוג USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"קיימת בעיה בשימוש באמצעי אחסון מסוג USB לאחסון בנפח גדול ב-USB."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"התחברת למחשב באמצעות USB. גע בלחצן שלמטה אם ברצונך להעתיק קבצים בין המחשב ואמצעי האחסון מסוג USB של מכשיר Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"התחברת למחשב באמצעות USB. גע בלחצן שלמטה אם ברצונך להעתיק קבצים בין המחשב לבין כרטיס ה-SD של מכשיר ה-Android."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"הפעל אחסון USB"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"יש בעיה בשימוש ב-USB לאחסון בנפח גדול"</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"יש בעיה בשימוש בכרטיס SD לאחסון גדול ב-USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB מחובר"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"בחר כדי להעתיק קבצים למחשב/מהמחשב."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"כבה אמצעי אחסון מסוג USB"</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"כבה אחסון USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"בחר כאן לכיבוי אחסון USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"אמצעי אחסון מסוג USB שנמצא בשימוש"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"לפני כיבוי אמצעי אחסון מסוג USB, ודא שביטלת את הטעינה של אמצעי האחסון מסוג USB של Android (\"הוצאת אותו\") מהמחשב."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"לפני הכיבוי של אמצעי אחסון מסוג USB, ודא שהסרת (\"הוצאת\") את כרטיס SD של Android מהמחשב."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"כבה אמצעי אחסון מסוג USB"</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"אחסון USB שנמצא בשימוש"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"לפני כיבוי אחסון USB, ודא שביטלת את הטעינה של אמצעי האחסון מסוג USB של Android (\"הוצאת אותו\") מהמחשב."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"לפני הכיבוי של אחסון USB, ודא שהסרת (\"הוצאת\") את כרטיס SD של Android מהמחשב."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"כבה אחסון USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"היתה בעיה בכיבוי אמצעי האחסון מסוג USB. ודא שביטלת את טעינת מארח ה-USB ולאחר מכן נסה שוב."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"הפעל אמצעי אחסון מסוג USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"אם תפעיל אמצעי אחסון מסוג USB, יישומים מסוימים שבהם אתה משתמש יעצרו וייתכן שלא יהיו זמינים עד שתכבה את אמצעי האחסון מסוג USB."</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"הפעל אחסון USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"אם תפעיל אחסון USB, יישומים מסוימים שבהם אתה משתמש יעצרו וייתכן שלא יהיו זמינים עד שתכבה את אמצעי האחסון מסוג USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"פעולת USB נכשלה"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"אישור"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"מחובר כמכשיר מדיה"</string>
@@ -1007,7 +1013,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"מחובר כמתקין"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"מחובר לאביזר USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"גע לקבלת אפשרויות USB נוספות"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"פרמט אמצעי אחסון מסוג USB"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"פרמט אחסון USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"פרמוט כרטיס SD"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"לפרמט את אמצעי האחסון מסוג USB, ולמחוק את כל הקבצים המאוחסנים בו? הפעולה בלתי הפיכה!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"האם אתה בטוח שברצונך לפרמט את כרטיס ה-SD? כל הנתונים בכרטיס יאבדו."</string>
@@ -1019,7 +1025,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"מועמדים"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"מכין אמצעי אחסון מסוג USB"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"מכין אחסון USB"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"מכין את כרטיס SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"בודק אם יש שגיאות."</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"אמצעי אחסון ריק מסוג USB"</string>
@@ -1030,7 +1036,7 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"כרטיס SD פגום"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"אחסון USB נפגם. ייתכן שיהיה עליך לפרמט אותו שוב."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"כרטיס SD פגום. ייתכן שתצטרך לפרמט אותו שוב."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"אמצעי אחסון מסוג USB הוסר באופן בלתי צפוי"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"אחסון USB הוסר באופן בלתי צפוי"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"כרטיס SD הוסר באופן לא צפוי"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"בטל טעינה של אחסון USB לפני הסרתו כדי למנוע אובדן נתונים."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"בטל את טעינת כרטיס SD לפני הסרתו כדי למנוע אובדן נתונים."</string>
@@ -1038,9 +1044,9 @@
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"אפשר להסיר את כרטיס SD"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"אתה יכול להסיר בבטחה את אחסון ה-USB."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"ניתן להסיר בבטחה כרטיס SD."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"אמצעי אחסון מסוג USB הוסר"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"אחסון USB הוסר"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"כרטיס SD הוסר"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"אמצעי אחסון מסוג USB הוסר. הכנס מדיה חדשה."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"אחסון USB הוסר. הכנס מדיה חדשה."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"כרטיס SD הוסר. הכנס כרטיס חדש."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"לא נמצאו פעילויות תואמות"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"עדכן נתונים סטטיסטיים על שימוש ברכיב"</string>
@@ -1096,17 +1102,17 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> מתוך <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"סיום"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"מבטל טעינה של אמצעי אחסון מסוג USB..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"מבטל טעינה של אחסון USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"מבטל טעינה של כרטיס SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"מוחק אמצעי אחסון מסוג USB..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"מוחק אחסון USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"מוחק כרטיס SD..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"לא ניתן למחוק את אחסון ה- USB."</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"לא ניתן למחוק את כרטיס ה-SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"כרטיס SD הוסר לפני שטעינתו בוטלה."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"אמצעי אחסון מסוג USB נבדק כעת."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"אחסון USB נבדק כעת."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"כרטיס SD נבדק כעת."</string>
     <string name="media_removed" msgid="7001526905057952097">"כרטיס SD הוסר."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"אמצעי אחסון מסוג USB נמצא כעת בשימוש של מחשב."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"אחסון USB נמצא כעת בשימוש של מחשב."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"כרטיס SD נמצא כעת בשימוש של מחשב."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"מדיה חיצונית במצב לא ידוע."</string>
     <string name="share" msgid="1778686618230011964">"שתף"</string>
@@ -1177,7 +1183,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"אפשרויות נוספות"</string>
     <string name="storage_internal" msgid="7556050805474115618">"אחסון פנימי"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"כרטיס SD"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"אמצעי אחסון מסוג USB"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"אחסון USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"ערוך..."</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"אזהרת שימוש בנתונים"</string>
     <string name="data_usage_warning_body" msgid="7217480745540055170">"גע כדי להציג נתוני שימוש והגדרות"</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"שתף עם..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"המכשיר נעול."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"שולח..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"להפעיל את הדפדפן?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"לקבל את השיחה?"</string>
 </resources>

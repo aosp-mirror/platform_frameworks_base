@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lese sensitive loggdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, og kan inneholde personlig eller privat informasjon."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"bruke en hvilken som helst mediedekoder for avspilling"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Gir en app tillatelse til å bruke en hvilken som helst installert mediedekoder for å dekode for avspilling."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivere eller deaktigere applikasjonskomponenter"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Lar applikasjonen koble til og fra trådløse aksesspunkt, og å gjøre endringer i konfigurerte trådløse nettverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillat multicast for trådløse nettverk"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Lar applikasjonen motta pakker som ikke er adressert til enheten selv. Dette kan være nyttig ved leting etter nærliggende tjenester, men bruker mer strøm enn ikke-multicast-modus."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vis WiMAX-status"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Dette gjør det mulig for en app å vise informasjon om WiMAX-statusen."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"endre WiMAX-status"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Gjør at en app kan koble til og fra WiMAX-nettverk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth-administrasjon"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Lar applikasjonen konfigurere den lokale Bluetooth-telefonen, og å oppdage og pare med andre enheter."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Del med"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enheten er låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

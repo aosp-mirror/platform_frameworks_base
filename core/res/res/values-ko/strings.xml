@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"중요한 로그 데이터 읽기"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이렇게 되면 애플리케이션은 개인정보 또는 비공개 정보를 포함하여 태블릿으로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이렇게 되면 애플리케이션은 개인정보 또는 비공개 정보를 포함하여 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"재생에 모든 미디어 디코더 사용"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"애플리케이션에서 설치된 모든 미디어 디코더를 사용하여 디코딩 후 재생할 수 있도록 허용합니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"애플리케이션이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"애플리케이션 구성 요소 사용 또는 사용 안함"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"애플리케이션이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"애플리케이션이 휴대기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX 상태 보기"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"애플리케이션이 WiMAX의 상태에 대한 정보를 볼 수 있도록 합니다."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX 상태 변경"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"애플리케이션이 WiMAX 네트워크에 연결하거나 연결을 끊을 수 있도록 합니다."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"블루투스 관리"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"애플리케이션이 로컬 블루투스 태블릿을 구성한 다음 원격 기기를 검색하여 페어링할 수 있도록 합니다."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"애플리케이션이 로컬 블루투스 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"공유 대상..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"기기가 잠겼습니다."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

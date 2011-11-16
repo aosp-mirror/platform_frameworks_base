@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"read sensitive log data"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Allows an application to read from the system\'s various log files. This allows it to discover general information about what you are doing with the tablet, potentially including personal or private information."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Allows an application to read from the system\'s various log files. This allows it to discover general information about what you are doing with the phone, potentially including personal or private information."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"use any media decoder for playback"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Allows an application to use any media decoder installed to decode for playback."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"read/write to resources owned by diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Allows an application to read and write to any resource owned by the diag group; for example, files in /dev. This could potentially affect system stability and security. This should ONLY be used for hardware-specific diagnostics by the manufacturer or operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"enable or disable application components"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Allows an application to connect to and disconnect from Wi-Fi access points and to make changes to configured Wi-Fi networks."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"allow Wi-Fi Multicast reception"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Allows an application to receive packets not directly addressed to your device. This can be useful when discovering services offered nearby. It uses more power than the non-multicast mode."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"view WiMAX state"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Allows an application to view the information about the state of WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"change WiMAX state"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Allows an application to connect to and disconnect from WiMAX network."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth administration"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Allows an application to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Allows an application to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Share with..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Device locked."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Sending..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Launch Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Accept Call?"</string>
 </resources>

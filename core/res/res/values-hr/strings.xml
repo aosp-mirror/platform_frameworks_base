@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"čitaj osjetljive podatke dnevnika"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako može otkriti opće informacije o tome što radite na tabletnom uređaju, što potencijalno uključuje osobne ili privatne informacije."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka dnevnika. Tako može otkriti opće informacije o tome što radite na telefonu, što potencijalno uključuje osobne ili privatne informacije."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"upotrijebi bilo koji dekoder za reprodukciju"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Aplikaciji omogućuje upotrebu svih instaliranih dekodera za dekodiranje medija radi reprodukcije."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"pisanje/čitanje u resursima čije je vlasnik dijagnostika"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Aplikaciji omogućuje čitanje i pisanje u bilo koji resurs u vlasništvu dijagnostičke grupe; na primjer, datoteke u stavci /dev. To potencijalno može utjecati na stabilnost i sigurnost sustava. To se treba koristiti SAMO za dijagnostiku koja se posebno odnosi na hardver od strane proizvođača ili operatera."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Aplikacije omogućuju povezivanje i prekidanje veze s Wi-Fi pristupnim točkama te promjene u konfiguriranim Wi-Fi mrežama."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"omogući višenamjenski Wi-Fi prijem"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Aplikaciji omogućuje primanje paketa koji nisu izravno upućeni na vaš uređaj. To može biti korisno za otkrivanje obližnjih usluge. Koristi više energije od višenamjenskog načina rada."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"prikaz stanja WiMAX mreže"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Aplikaciji omogućuje prikaz informacija o stanju WiMAX mreže."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"promjena stanja WiMAX mreže"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Omogućuje aplikaciji povezivanje i prekid veze s WiMAX mrežom."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth administracija"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Aplikaciji omogućuje konfiguraciju lokalnog tabletnog uređaja s Bluetoothom te otkrivanje i sparivanje s udaljenim uređajima."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Aplikaciji omogućuje konfiguraciju lokalnog Bluetooth telefona i otkrivanje i sparivanje s udaljenim uređajima."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Dijeli sa..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Uređaj zaključan."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>
