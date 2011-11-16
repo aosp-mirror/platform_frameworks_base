@@ -3785,7 +3785,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return;
                 }
             }
-            
+
             // This is the handling for some default action.
             // Note that for backwards compatibility we don't do this
             // default handling if explicit ime options have not been given,
@@ -5594,6 +5594,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.extras = mInputContentType.extras;
             } else {
                 outAttrs.imeOptions = EditorInfo.IME_NULL;
+                // May not be defined otherwise and needed by onEditorAction
+                mInputContentType = new InputContentType();
             }
             if (focusSearch(FOCUS_DOWN) != null) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
