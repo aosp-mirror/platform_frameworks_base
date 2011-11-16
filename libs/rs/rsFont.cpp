@@ -654,11 +654,7 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
     const uint32_t floatsPerVert = 5;
     float *currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
 
-    // Cull things that are off the screen
-    float width = (float)mRSC->getWidth();
-    float height = (float)mRSC->getHeight();
-
-    if (x1 > width || y1 < 0.0f || x2 < 0 || y4 > height) {
+    if (x1 > mSurfaceWidth || y1 < 0.0f || x2 < 0 || y4 > mSurfaceHeight) {
         return;
     }
 
@@ -745,6 +741,10 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
         LOGE("Unable to initialize any fonts");
         return;
     }
+
+    // Cull things that are off the screen
+    mSurfaceWidth = (float)mRSC->getCurrentSurfaceWidth();
+    mSurfaceHeight = (float)mRSC->getCurrentSurfaceHeight();
 
     currentFont->renderUTF(text, len, x, y, startIndex, numGlyphs,
                            mode, bounds, bitmap, bitmapW, bitmapH);

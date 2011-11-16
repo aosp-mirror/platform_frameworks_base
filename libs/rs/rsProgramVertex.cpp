@@ -206,8 +206,11 @@ void ProgramVertexState::init(Context *rsc) {
 void ProgramVertexState::updateSize(Context *rsc) {
     float *f = static_cast<float *>(mDefaultAlloc->getPtr());
 
+    float surfaceWidth = (float)rsc->getCurrentSurfaceWidth();
+    float surfaceHeight = (float)rsc->getCurrentSurfaceHeight();
+
     Matrix4x4 m;
-    m.loadOrtho(0,rsc->getWidth(), rsc->getHeight(),0, -1,1);
+    m.loadOrtho(0, surfaceWidth, surfaceHeight, 0, -1, 1);
     memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m.m, sizeof(m));
     memcpy(&f[RS_PROGRAM_VERTEX_MVP_OFFSET], m.m, sizeof(m));
 

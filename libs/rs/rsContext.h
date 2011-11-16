@@ -164,6 +164,9 @@ public:
     uint32_t getWidth() const {return mWidth;}
     uint32_t getHeight() const {return mHeight;}
 
+    uint32_t getCurrentSurfaceWidth() const;
+    uint32_t getCurrentSurfaceHeight() const;
+
     mutable ThreadIO mIO;
 
     // Timers
