@@ -42,7 +42,7 @@ public class WebViewDatabase {
     // log tag
     protected static final String LOGTAG = "webviewdatabase";
 
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
     // 2 -> 3 Modified Cache table to allow cache of redirects
     // 3 -> 4 Added Oma-Downloads table
     // 4 -> 5 Modified Cache table to support persistent contentLength
@@ -52,6 +52,9 @@ public class WebViewDatabase {
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
     // 9 -> 10 Update httpauth table UNIQUE
+    // 10 -> 11 Drop cookies and cache now managed by the chromium stack,
+    //          and update the form data table to use the new format
+    //          implemented for b/5265606.
     private static final int CACHE_DATABASE_VERSION = 4;
     // 1 -> 2 Add expires String
     // 2 -> 3 Add content-disposition
@@ -204,7 +207,9 @@ public class WebViewDatabase {
         }
 
         initDatabase(context);
-        if (!JniUtil.useChromiumHttpStack()) {
+        if (JniUtil.useChromiumHttpStack()) {
+            context.deleteDatabase(CACHE_DATABASE_FILE);
+        } else {
             initCacheDatabase(context);
         }
 
@@ -328,8 +333,41 @@ public class WebViewDatabase {
 
     private static void upgradeDatabase() {
         upgradeDatabaseToV10();
+        upgradeDatabaseFromV10ToV11();
         // Add future database upgrade functions here, one version at a
         // time.
+        mDatabase.setVersion(DATABASE_VERSION);
+    }
+
+    private static void upgradeDatabaseFromV10ToV11() {
+        int oldVersion = mDatabase.getVersion();
+
+        if (oldVersion >= 11) {
+            // Nothing to do.
+            return;
+        }
+
+        if (JniUtil.useChromiumHttpStack()) {
+            // Clear out old java stack cookies - this data is now stored in
+            // a separate database managed by the Chrome stack.
+            mDatabase.execSQL("DROP TABLE IF EXISTS " + mTableNames[TABLE_COOKIES_ID]);
+
+            // Likewise for the old cache table.
+            mDatabase.execSQL("DROP TABLE IF EXISTS cache");
+        }
+
+        // Update form autocomplete  URLs to match new ICS formatting.
+        Cursor c = mDatabase.query(mTableNames[TABLE_FORMURL_ID], null, null,
+                null, null, null, null);
+        while (c.moveToNext()) {
+            String urlId = Long.toString(c.getLong(c.getColumnIndex(ID_COL)));
+            String url = c.getString(c.getColumnIndex(FORMURL_URL_COL));
+            ContentValues cv = new ContentValues(1);
+            cv.put(FORMURL_URL_COL, WebTextView.urlForAutoCompleteData(url));
+            mDatabase.update(mTableNames[TABLE_FORMURL_ID], cv, ID_COL + "=?",
+                    new String[] { urlId });
+        }
+        c.close();
     }
 
     private static void upgradeDatabaseToV10() {
@@ -356,7 +394,6 @@ public class WebViewDatabase {
                     + HTTPAUTH_PASSWORD_COL + " TEXT," + " UNIQUE ("
                     + HTTPAUTH_HOST_COL + ", " + HTTPAUTH_REALM_COL
                     + ") ON CONFLICT REPLACE);");
-            mDatabase.setVersion(DATABASE_VERSION);
             return;
         }
 
@@ -410,8 +447,6 @@ public class WebViewDatabase {
                 + " TEXT, " + PASSWORD_PASSWORD_COL + " TEXT," + " UNIQUE ("
                 + PASSWORD_HOST_COL + ", " + PASSWORD_USERNAME_COL
                 + ") ON CONFLICT REPLACE);");
-
-        mDatabase.setVersion(DATABASE_VERSION);
     }
 
     private static void upgradeCacheDatabase() {
@@ -1158,7 +1193,7 @@ public class WebViewDatabase {
                 cursor = mDatabase.query(mTableNames[TABLE_FORMURL_ID],
                         ID_PROJECTION, urlSelection, new String[] { url }, null,
                         null, null);
-                if (cursor.moveToFirst()) {
+                while (cursor.moveToNext()) {
                     long urlid = cursor.getLong(cursor.getColumnIndex(ID_COL));
                     Cursor dataCursor = null;
                     try {
