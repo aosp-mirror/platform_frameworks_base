@@ -137,6 +137,7 @@
     <assign-permission name="android.permission.SET_ALWAYS_FINISH" uid="shell" />
     <assign-permission name="android.permission.DUMP" uid="shell" />
     <assign-permission name="android.permission.SIGNAL_PERSISTENT_PROCESSES" uid="shell" />
+    <assign-permission name="android.permission.KILL_BACKGROUND_PROCESSES" uid="shell" />
     <!-- Internal permissions granted to the shell. -->
     <assign-permission name="android.permission.FORCE_BACK" uid="shell" />
     <assign-permission name="android.permission.BATTERY_STATS" uid="shell" />
