@@ -49,22 +49,6 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 
-static char const * const sVendorString     = "Android";
-static char const * const sVersionString    = "1.4 Android META-EGL";
-static char const * const sClientApiString  = "OpenGL ES";
-static char const * const sExtensionString  =
-        "EGL_KHR_image "
-        "EGL_KHR_image_base "
-        "EGL_KHR_image_pixmap "
-        "EGL_KHR_gl_texture_2D_image "
-        "EGL_KHR_gl_texture_cubemap_image "
-        "EGL_KHR_gl_renderbuffer_image "
-        "EGL_KHR_fence_sync "
-        "EGL_ANDROID_image_native_buffer "
-        "EGL_ANDROID_swap_rectangle "
-        "EGL_NV_system_time "
-        ;
-
 struct extention_map_t {
     const char* name;
     __eglMustCastToProperFunctionPointerType address;
@@ -79,8 +63,6 @@ static const extention_map_t sExtentionMap[] = {
             (__eglMustCastToProperFunctionPointerType)&eglCreateImageKHR },
     { "eglDestroyImageKHR",
             (__eglMustCastToProperFunctionPointerType)&eglDestroyImageKHR },
-    { "eglSetSwapRectangleANDROID",
-            (__eglMustCastToProperFunctionPointerType)&eglSetSwapRectangleANDROID },
     { "eglGetSystemTimeFrequencyNV",
             (__eglMustCastToProperFunctionPointerType)&eglGetSystemTimeFrequencyNV },
     { "eglGetSystemTimeNV",
@@ -978,13 +960,13 @@ const char* eglQueryString(EGLDisplay dpy, EGLint name)
 
     switch (name) {
         case EGL_VENDOR:
-            return sVendorString;
+            return dp->getVendorString();
         case EGL_VERSION:
-            return sVersionString;
+            return dp->getVersionString();
         case EGL_EXTENSIONS:
-            return sExtensionString;
+            return dp->getExtensionString();
         case EGL_CLIENT_APIS:
-            return sClientApiString;
+            return dp->getClientApiString();
     }
     return setError(EGL_BAD_PARAMETER, (const char *)0);
 }
@@ -1447,25 +1429,7 @@ EGLBoolean eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute
 // ANDROID extensions
 // ----------------------------------------------------------------------------
 
-EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
-        EGLint left, EGLint top, EGLint width, EGLint height)
-{
-    clearError();
-
-    egl_display_t const * const dp = validate_display(dpy);
-    if (!dp) return EGL_FALSE;
-
-    SurfaceRef _s(dp, draw);
-    if (!_s.get())
-        return setError(EGL_BAD_SURFACE, EGL_FALSE);
-
-    egl_surface_t const * const s = get_surface(draw);
-    if (s->cnx->egl.eglSetSwapRectangleANDROID) {
-        return s->cnx->egl.eglSetSwapRectangleANDROID(
-                dp->disp[s->impl].dpy, s->surface, left, top, width, height);
-    }
-    return setError(EGL_BAD_DISPLAY, NULL);
-}
+/* ANDROID extensions entry-point go here */
 
 // ----------------------------------------------------------------------------
 // NVIDIA extensions
