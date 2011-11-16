@@ -411,9 +411,9 @@ public class JavaBridgeArrayCoercionTest extends JavaBridgeTestBase {
         executeJavaScript("testObject.setByteArray([\"+042.10\"]);");
         assertEquals(0, mTestObject.waitForByteArray()[0]);
 
-        // LIVECONNECT_COMPLIANCE: Should use valueOf() of appropriate type.
+        // LIVECONNECT_COMPLIANCE: Should decode and convert to numeric char value.
         executeJavaScript("testObject.setCharArray([\"+042.10\"]);");
-        assertEquals('+', mTestObject.waitForCharArray()[0]);
+        assertEquals(0, mTestObject.waitForCharArray()[0]);
 
         // LIVECONNECT_COMPLIANCE: Should use valueOf() of appropriate type.
         executeJavaScript("testObject.setShortArray([\"+042.10\"]);");
