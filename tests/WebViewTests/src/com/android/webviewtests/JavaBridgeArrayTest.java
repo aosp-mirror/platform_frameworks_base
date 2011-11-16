@@ -39,6 +39,9 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
         private String mStringValue;
 
         private int[] mIntArray;
+        private int[][] mIntIntArray;
+
+        private boolean mWasArrayMethodCalled;
 
         public synchronized void setBooleanValue(boolean x) {
             mBooleanValue = x;
@@ -70,17 +73,27 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
             mIntArray = x;
             notifyResultIsReady();
         }
+        public synchronized void setIntIntArray(int[][] x) {
+            mIntIntArray = x;
+            notifyResultIsReady();
+        }
 
         public synchronized int[] waitForIntArray() {
             waitForResult();
             return mIntArray;
         }
+        public synchronized int[][] waitForIntIntArray() {
+            waitForResult();
+            return mIntIntArray;
+        }
 
-        public int[] getIntArray() {
+        public synchronized int[] arrayMethod() {
+            mWasArrayMethodCalled = true;
             return new int[] {42, 43, 44};
         }
-        public int[] getEmptyIntArray() {
-            return new int[] {};
+
+        public synchronized boolean wasArrayMethodCalled() {
+            return mWasArrayMethodCalled;
         }
     }
 
@@ -148,6 +161,13 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
         assertEquals(0, result[2]);
     }
 
+    public void testNonNumericLengthProperty() throws Throwable {
+        // LIVECONNECT_COMPLIANCE: This should not count as an array, so we
+        // should raise a JavaScript exception.
+        executeJavaScript("testObject.setIntArray({length: \"foo\"});");
+        assertEquals(0, mTestObject.waitForIntArray().length);
+    }
+
     public void testSparseArray() throws Throwable {
         executeJavaScript("var x = [42, 43]; x[3] = 45; testObject.setIntArray(x);");
         int[] result = mTestObject.waitForIntArray();
@@ -160,18 +180,28 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
 
     // Note that this requires being able to pass a boolean from JavaScript to
     // Java.
-    public void testReturnArray() throws Throwable {
-        // LIVECONNECT_COMPLIANCE: Convert to JavaScript array.
-        executeJavaScript("testObject.setBooleanValue(undefined === testObject.getIntArray())");
+    public void testMethodReturningArrayNotCalled() throws Throwable {
+        // We don't invoke methods which return arrays, but note that no
+        // exception is raised.
+        // LIVECONNECT_COMPLIANCE: Should call method and convert result to
+        // JavaScript array.
+        executeJavaScript("testObject.setBooleanValue(undefined === testObject.arrayMethod())");
         assertTrue(mTestObject.waitForBooleanValue());
+        assertFalse(mTestObject.wasArrayMethodCalled());
     }
 
-    // Note that this requires being able to pass a boolean from JavaScript to
-    // Java.
-    public void testReturnEmptyArray() throws Throwable {
-        // LIVECONNECT_COMPLIANCE: Convert to JavaScript array.
-        executeJavaScript(
-            "testObject.setBooleanValue(undefined === testObject.getEmptyIntArray())");
-        assertTrue(mTestObject.waitForBooleanValue());
+    public void testMultiDimensionalArrayMethod() throws Throwable {
+        // LIVECONNECT_COMPLIANCE: Should handle multi-dimensional arrays.
+        executeJavaScript("testObject.setIntIntArray([ [42, 43], [44, 45] ]);");
+        assertNull(mTestObject.waitForIntIntArray());
+    }
+
+    public void testPassMultiDimensionalArray() throws Throwable {
+        // LIVECONNECT_COMPLIANCE: Should handle multi-dimensional arrays.
+        executeJavaScript("testObject.setIntArray([ [42, 43], [44, 45] ]);");
+        int[] result = mTestObject.waitForIntArray();
+        assertEquals(2, result.length);
+        assertEquals(0, result[0]);
+        assertEquals(0, result[1]);
     }
 }
