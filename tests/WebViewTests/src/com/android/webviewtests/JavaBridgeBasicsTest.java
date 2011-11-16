@@ -75,6 +75,12 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
         }
     }
 
+    private static class ObjectWithStaticMethod {
+        public static String staticMethod() {
+            return "foo";
+        }
+    }
+
     TestController mTestController;
 
     @Override
@@ -99,6 +105,17 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
             }
         });
         mWebViewClient.waitForOnPageFinished();
+    }
+
+    // Note that this requires that we can pass a JavaScript boolean to Java.
+    private void assertRaisesException(String script) throws Throwable {
+        executeJavaScript("try {" +
+                          script + ";" +
+                          "  testController.setBooleanValue(false);" +
+                          "} catch (exception) {" +
+                          "  testController.setBooleanValue(true);" +
+                          "}");
+        assertTrue(mTestController.waitForBooleanValue());
     }
 
     public void testTypeOfInjectedObject() throws Throwable {
@@ -161,6 +178,28 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
                 executeJavaScriptAndGetStringResult("typeof testController.setStringValue"));
     }
 
+    public void testTypeOfInvalidMethod() throws Throwable {
+        assertEquals("undefined", executeJavaScriptAndGetStringResult("typeof testController.foo"));
+    }
+
+    public void testCallingInvalidMethodRaisesException() throws Throwable {
+        assertRaisesException("testController.foo()");
+    }
+
+    // Note that this requires that we can pass a JavaScript string to Java.
+    public void testTypeOfStaticMethod() throws Throwable {
+        injectObjectAndReload(new ObjectWithStaticMethod(), "testObject");
+        executeJavaScript("testController.setStringValue(typeof testObject.staticMethod)");
+        assertEquals("function", mTestController.waitForStringValue());
+    }
+
+    // Note that this requires that we can pass a JavaScript string to Java.
+    public void testCallStaticMethod() throws Throwable {
+        injectObjectAndReload(new ObjectWithStaticMethod(), "testObject");
+        executeJavaScript("testController.setStringValue(testObject.staticMethod())");
+        assertEquals("foo", mTestController.waitForStringValue());
+    }
+
     public void testPrivateMethodNotExposed() throws Throwable {
         injectObjectAndReload(new Object() {
             private void method() {}
@@ -214,20 +253,8 @@ public class JavaBridgeBasicsTest extends JavaBridgeTestBase {
     }
 
     public void testCallMethodWithWrongNumberOfArgumentsRaisesException() throws Throwable {
-        class Test {
-            public void run(String script) throws Throwable {
-                executeJavaScript("try {" +
-                                  script + ";" +
-                                  "  testController.setBooleanValue(false);" +
-                                  "} catch (exception) {" +
-                                  "  testController.setBooleanValue(true);" +
-                                  "}");
-                assertTrue(mTestController.waitForBooleanValue());
-            }
-        }
-        Test test = new Test();
-        test.run("testController.setIntValue()");
-        test.run("testController.setIntValue(42, 42)");
+        assertRaisesException("testController.setIntValue()");
+        assertRaisesException("testController.setIntValue(42, 42)");
     }
 
     public void testObjectPersistsAcrossPageLoads() throws Throwable {
