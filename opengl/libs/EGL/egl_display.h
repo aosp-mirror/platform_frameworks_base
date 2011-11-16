@@ -29,6 +29,7 @@
 
 #include <utils/SortedVector.h>
 #include <utils/threads.h>
+#include <utils/String8.h>
 
 #include "egldefs.h"
 #include "hooks.h"
@@ -91,6 +92,11 @@ public:
     inline bool isValid() const { return magic == '_dpy'; }
     inline bool isAlive() const { return isValid(); }
 
+    char const * getVendorString() const { return mVendorString.string(); }
+    char const * getVersionString() const { return mVersionString.string(); }
+    char const * getClientApiString() const { return mClientApiString.string(); }
+    char const * getExtensionString() const { return mExtensionString.string(); }
+
     inline uint32_t getRefsCount() const { return refs; }
 
     struct strings_t {
@@ -122,6 +128,10 @@ private:
             uint32_t                    refs;
     mutable Mutex                       lock;
             SortedVector<egl_object_t*> objects;
+            String8 mVendorString;
+            String8 mVersionString;
+            String8 mClientApiString;
+            String8 mExtensionString;
 };
 
 // ----------------------------------------------------------------------------
