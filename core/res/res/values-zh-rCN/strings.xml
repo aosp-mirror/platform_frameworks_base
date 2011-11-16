@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"查阅敏感日志数据"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"允许应用程序从系统的各种日志文件中读取信息。这样，应用程序就可以发现关于您平板电脑使用情况的一般信息，其中可能包含个人信息或私密信息。"</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"允许应用程序从系统的各个日志文件中读取信息。这样，应用程序就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或私密信息。"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒体解码器进行播放"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"允许应用程序使用任何已安装的媒体解码器进行解码，以便播放。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允许应用程序读取/写入诊断组所拥有的任何资源（例如，/dev 中的文件）。这可能会影响系统稳定性和安全性。此权限仅供制造商或运营商诊断硬件问题。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"启用或停用应用程序组件"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"允许应用程序连接到 Wi-Fi 接入点以及与 Wi-Fi 接入点断开连接，并对配置的 Wi-Fi 网络进行更改。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收 Wi-Fi 多播"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"允许应用程序接收并非直接向您的设备发送的数据包。这样在查找附近提供的服务时很有用。这种操作所耗电量大于非多播模式。"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"查看 WiMAX 状态"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允许应用程序查看有关 WiMAX 状态的信息。"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"更改 WiMAX 状态"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允许应用程序连接到 WiMAX 网络以及从 WiMAX 网络断开连接。"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"蓝牙管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"允许应用程序配置本地蓝牙平板电脑，以及发现远程设备并与其配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"允许应用程序配置本地蓝牙手机，以及发现远程设备并与其配对。"</string>
@@ -1064,7 +1070,7 @@
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已请求权限"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"已为帐户<xliff:g id="ACCOUNT">%s</xliff:g>"\n"请求了权限"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"有程序请求获得帐户 <xliff:g id="ACCOUNT">%s</xliff:g>"\n"的访问权限"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享方式..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"设备已锁定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

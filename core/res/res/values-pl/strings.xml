@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"odczyt wrażliwych danych dziennika"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Zezwala aplikacji na odczyt różnych plików dzienników systemowych. Dzięki temu może ona uzyskać ogólne informacje na temat sposobu korzystania z tabletu, w tym również osobiste i prywatne dane użytkownika."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Umożliwia aplikacjom odczyt z różnych plików dzienników systemowych. Pozwala to poznać ogólne informacje na temat korzystania z telefonu, co potencjalnie może obejmować również informacje prywatne lub osobiste."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"użycie dowolnego dekodera multimediów w celu odtwarzania"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Zezwala aplikacji na użycie dowolnego zainstalowanego dekodera multimediów w celu odtwarzania."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"czytanie/zapisywanie w zasobach należących do diagnostyki"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Pozwala aplikacji na czytanie i zapisywanie we wszystkich zasobach posiadanych przez diagnozowaną grupę, jak na przykład pliki w katalogu /dev. Może to potencjalnie wpłynąć na stabilność i bezpieczeństwo systemu. Powinno być wykorzystywane TYLKO w celach diagnozowania sprzętu przez producenta lub operatora."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"włączanie lub wyłączanie składników aplikacji"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Pozwala aplikacji na łączenie i rozłączanie z punktami dostępowymi Wi-Fi oraz na dokonywanie zmian skonfigurowanych sieci Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"zezwolenie na odbiór grupowych połączeń Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Umożliwia aplikacji odbieranie pakietów nieskierowanych bezpośrednio do Twojego urządzenia. Może to być przydatne przy wykrywaniu usług oferowanych w okolicy. Powoduje większe zapotrzebowanie na energię niż w trybie innym niż grupowy."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"wyświetlanie stanu WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Zezwala aplikacji na dostęp do informacji o stanie połączenia WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"zmiana stanu WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Zezwala aplikacji na łączenie się i rozłączanie z siecią WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrowanie Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Zezwala aplikacji na konfigurowanie lokalnego tabletu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i tworzenie powiązań z nimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Pozwala aplikacji na konfigurowanie lokalnego telefonu Bluetooth, wyszukiwanie urządzeń zdalnych i łączenie się z nimi."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Udostępnij..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Urządzenie zablokowane."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

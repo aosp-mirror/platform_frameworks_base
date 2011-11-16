@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"läsa känsliga loggdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med pekdatorn, vilket kan inkludera personlig eller privat information."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med telefonen, vilket kan inkludera personlig eller privat information."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"använda alla medieavkodare för uppspelning"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Tillåter att ett program använder installerade medieavkodare för att avkoda media för uppspelning."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"läsa/skriva till resurser som ägs av diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillåter att ett program läser och skriver till en resurs som ägs av diag-gruppen; till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST används av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivera eller inaktivera programkomponenter"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillåter att ett program ansluter till och kopplar från Wi-Fi-åtkomstpunkter och gör ändringar i konfigurerade Wi-Fi-nätverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillåt Wi-Fi multicast-mottagning"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillåter att ett program tar emot paket som inte är adresserade direkt till din enhet. Detta är användbart om du vill upptäcka tillgängliga tjänster i närheten. Det drar mer batteri än om telefonen inte är i multicast-läge."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visa WiMAX-status"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Gör att en app kan visa information om WiMAX-status."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"ändra WiMAX-status"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Gör att en app kan anslutas till och kopplas ifrån WiMAX-nätverk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrera bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Tillåter att ett program konfigurerar den lokala Bluetooth-pekdatorn samt upptäcker och parkopplar den med fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Tillåter att ett program konfigurerar den lokala Bluetooth-telefonen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Dela med..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enheten är låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

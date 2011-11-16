@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lire les données des journaux à caractère confidentiel"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permet à une application de lire les différents fichiers journaux du système afin d\'obtenir des informations générales sur la façon dont vous utilisez votre tablette. Celles-ci peuvent éventuellement inclure des informations d\'ordre personnel ou privé."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permet à une application de lire les différents fichiers journaux du système afin d\'obtenir des informations générales sur la façon dont vous utilisez votre téléphone (celles-ci peuvent éventuellement inclure des informations d\'ordre personnel ou privé)."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utiliser n\'importe quel décodeur pour lire les fichiers multimédias"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permet à une application d\'utiliser n\'importe quel décodeur installé pour lire les fichiers multimédias."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lecture/écriture dans les ressources appartenant aux diagnostics"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permet à une application de lire et d\'éditer toute ressource appartenant au groupe de diagnostics (par exemple, les fichiers in/dev). Ceci peut affecter la stabilité et la sécurité du système. Cette fonctionnalité est UNIQUEMENT réservée aux diagnostics matériels effectués par le fabricant ou l\'opérateur."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"Activer ou désactiver des éléments de l\'application"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permet à une application de se connecter à des points d\'accès Wi-Fi, de s\'en déconnecter et de modifier des réseaux Wi-Fi configurés."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"autoriser la réception de données en Wi-Fi multidiffusion"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Autorise une application à recevoir des paquets qui ne sont pas directement adressés à votre mobile. Cela peut être utile pour la recherche de services disponibles à proximité. Consomme plus que le mode non multidiffusion."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"afficher l\'état du WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet à une application d\'afficher les informations concernant l\'état du WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"modifier l\'état du WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet à une application de se connecter au réseau WiMAX et de s\'en déconnecter."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Gestion Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permet à une application de configurer la tablette Bluetooth locale, d\'identifier des appareils distants et de les associer à la tablette."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permet à une application de configurer le téléphone Bluetooth local, d\'identifier des périphériques distants et de les associer au téléphone."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Partager avec..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Appareil verrouillé"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

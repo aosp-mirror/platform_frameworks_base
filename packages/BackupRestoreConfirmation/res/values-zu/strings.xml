@@ -24,12 +24,12 @@
     <string name="restore_confirm_text" msgid="7499866728030461776">"Kucelwe ukubuyiselwa esimweni okuphelele kwayo yonke imininingo yakho kwi-desktop yekhompuyutha exhunyiswe. Ngabe ufuna ukuvumela lokhu ukuthi kwenzeke?"\n\n"Uma ungazange ucele ukuthi lokhu kwenzeke wena uqobo, ungavumeli lokhu ukuthi kuqhubekele phambili. Lokhu kuzothatha indawo yayo yonke imininingo ekhona njengamanje kwi-device!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Buyisela esimweni imininingo yami"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Ungabuyiseli esimweni"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Sicela ufake i-password yakho yamanje yokwenza isipele ngezansi:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Sicela ufake iphasiwedi yakho yamanje yokwenza isipele ngezansi:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"Uyacelwa ukuba ufake ihasiwedi efakwe kudivayisi ngezansi."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Uyacelwa ukuba ufake iphasiwedi efakwe kudivayisi yakho ngezansi. lokhu kuzosetshenziswa ukufaka kusilondoloza sokusiza lapho kudingeka."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Sicela ufake i-password ezosetshenziselwa ukubhala ngokufihlekileyo imininingo eyesekwe ngokulondoloza. Uma lokhu kushiywe kungabhalwe lutho, kuzosetshenziswa i-password yokweseka ngokulondoloza yamanje:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Sicela ufake iphasiwedi ezosetshenziselwa ukubhala ngokufihlekileyo imininingo eyesekwe ngokulondoloza. Uma lokhu kushiywe kungabhalwe lutho, kuzosetshenziswa iphasiwedi yokweseka ngokulondoloza yamanje:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Uma ufuna ukufaka ikhowudi kwimininingo yonke eyesekelwe ngokulondoloza faka i-passowrd engezansi:"</string>
-    <string name="restore_enc_password_text" msgid="6140898525580710823">"Uma insiza yokubuyiselwa esimweni kwmininingo ibhalwe ngokufihlekileyo, sicela ufake i-password ngezansi:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Uma insiza yokubuyiselwa esimweni kwmininingo ibhalwe ngokufihlekileyo, sicela ufake iphasiwedi engezansi:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Ukulondoloza kuyaqala..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Ukulondoloza kuphelile"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Ukubuyisa kuyaqala..."</string>

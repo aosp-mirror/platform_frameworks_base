@@ -32,7 +32,7 @@
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Không có số điện thoại nào)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Không xác định)"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Thư thoại"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Thư thoại"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Sự cố kết nối hoặc mã MMI không hợp lệ."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Chỉ hạn chế thao tác đối với số quay số định sẵn."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"đọc dữ liệu nhật ký nhạy cảm"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Cho phép ứng dụng đọc từ nhiều tệp nhật ký khác nhau của hệ thống. Quyền này cho phép ứng dụng phát hiện thông tin chung về những gì bạn đang thực hiện với máy tính bảng, có thể bao gồm thông tin cá nhân hoặc riêng tư."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Cho phép ứng dụng đọc từ nhiều tệp nhật ký khác nhau của hệ thống. Quyền này cho phép ứng dụng phát hiện thông tin chung về những gì bạn đang thực hiện với điện thoại, có thể bao gồm thông tin cá nhân hoặc riêng tư."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"sử dụng bất kỳ bộ giải mã phương tiện nào để phát lại"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Cho phép ứng dụng sử dụng bất kỳ bộ giải mã phương tiện đã cài đặt nào để giải mã phát lại."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"đọc/ghi vào tài nguyên do chẩn đoán sở hữu"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể bởi nhà sản xuất hoặc nhà cung cấp dịch vụ."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"bật hoặc vô hiệu hoá các thành phần ứng dụng"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Cho phép ứng dụng kết nối và ngắt kết nối khỏi điểm truy cập Wi-Fi cũng như thực hiện các thay đổi đối với mạng Wi-Fi đã được định cấu hình."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"cho phép thu tín hiệu Wi-Fi Đa hướng"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Cho phép ứng dụng nhận các gói không được gửi trực tiếp đến thiết bị của bạn. Quyền này có thể hữu ích khi phát hiện các dịch vụ được cung cấp gần đó. Thiết bị của bạn sử dụng nhiều năng lượng hơn chế độ không phát đa hướng."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"xem trạng thái WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Cho phép ứng dụng xem thông tin về trạng thái của WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"thay đổi trạng thái WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Cho phép ứng dụng kết nối và ngắt kết nối khỏi mạng WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"quản trị bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Cho phép ứng dụng định cấu hình máy tính bảng Bluetooth nội hạt cũng như phát hiện và ghép nối với các thiết bị từ xa."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Cho phép ứng dụng định cấu hình điện thoại Bluetooth nội hạt cũng như phát hiện và ghép nối với các thiết bị từ xa."</string>
@@ -526,34 +532,34 @@
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"ĐT di động"</item>
     <item msgid="7897544654242874543">"Cơ quan"</item>
-    <item msgid="1103601433382158155">"Số fax Cơ quan"</item>
-    <item msgid="1735177144948329370">"Số fax Nhà riêng"</item>
-    <item msgid="603878674477207394">"Số máy nhắn tin"</item>
+    <item msgid="1103601433382158155">"Số fax Cơ quan"</item>
+    <item msgid="1735177144948329370">"Số fax Nhà riêng"</item>
+    <item msgid="603878674477207394">"Số máy nhắn tin"</item>
     <item msgid="1650824275177931637">"Khác"</item>
-    <item msgid="9192514806975898961">"Tùy chỉnh"</item>
+    <item msgid="9192514806975898961">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Nhà riêng"</item>
     <item msgid="7084237356602625604">"Cơ quan"</item>
     <item msgid="1112044410659011023">"Khác"</item>
-    <item msgid="2374913952870110618">"Tùy chỉnh"</item>
+    <item msgid="2374913952870110618">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Nhà riêng"</item>
     <item msgid="5629153956045109251">"Cơ quan"</item>
     <item msgid="4966604264500343469">"Khác"</item>
-    <item msgid="4932682847595299369">"Tùy chỉnh"</item>
+    <item msgid="4932682847595299369">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Nhà riêng"</item>
     <item msgid="1359644565647383708">"Cơ quan"</item>
     <item msgid="7868549401053615677">"Khác"</item>
-    <item msgid="3145118944639869809">"Tùy chỉnh"</item>
+    <item msgid="3145118944639869809">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Cơ quan"</item>
     <item msgid="4378074129049520373">"Khác"</item>
-    <item msgid="3455047468583965104">"Tùy chỉnh"</item>
+    <item msgid="3455047468583965104">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -565,13 +571,13 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Tùy chỉnh"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Nhà riêng"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"ĐT di động"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Cơ quan"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax Cơ quan"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax Nhà riêng"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"Số máy nhắn tin"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax Cơ quan"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax Nhà riêng"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Số máy nhắn tin"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Khác"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Số gọi lại"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Ô tô"</string>
@@ -586,24 +592,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Số Máy nhắn tin tại Cơ quan"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Số điện thoại Hỗ trợ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Tùy chỉnh"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Tùy chỉnh"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Ngày sinh"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Ngày kỷ niệm"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Khác"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Tùy chỉnh"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Tùy chỉnh"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Nhà riêng"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Cơ quan"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Khác"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"ĐT di động"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Tùy chỉnh"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Tùy chỉnh"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Nhà riêng"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Cơ quan"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Khác"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Tùy chỉnh"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Tùy chỉnh"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Nhà riêng"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Cơ quan"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Khác"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Tùy chỉnh"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Tùy chỉnh"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -615,8 +621,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Cơ quan"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Khác"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Tùy chỉnh"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Tùy chỉnh"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Tùy chỉnh"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Tùy chỉnh"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Trợ lý"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Anh em trai"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Con cái"</string>
@@ -631,8 +637,8 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Họ hàng"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Chị em gái"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Vợ/chồng"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Tùy chỉnh"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Nhà riêng"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Tùy chỉnh"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Nhà riêng"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Cơ quan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Khác"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Nhập mã PIN"</string>
@@ -695,7 +701,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Đăng nhập"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Bạn quên tên người dùng hoặc mật khẩu?"\n"Hãy truy cập "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Đang kiểm tra..."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Đang kiểm tra..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Mở khoá"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Bật âm thanh"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Tắt âm thanh"</string>
@@ -765,7 +771,7 @@
     <string name="searchview_description_search" msgid="6749826639098512120">"Tìm kiếm"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Truy vấn tìm kiếm"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Xóa truy vấn"</string>
-    <string name="searchview_description_submit" msgid="2688450133297983542">"Gửi truy vấn"</string>
+    <string name="searchview_description_submit" msgid="2688450133297983542">"Gửi truy vấn"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Tìm kiếm bằng giọng nói"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 tháng trước"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Trước 1 tháng trước"</string>
@@ -775,7 +781,7 @@
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"1 phút trước"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</item>
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"1 giờ trước"</item>
@@ -839,7 +845,7 @@
     <item quantity="other" msgid="2973062968038355991">"trong <xliff:g id="COUNT">%d</xliff:g> ngày"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"vào <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"trong <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"ngày"</string>
     <string name="days" msgid="4774547661021344602">"ngày"</string>
@@ -849,7 +855,7 @@
     <string name="minutes" msgid="5646001005827034509">"phút"</string>
     <string name="second" msgid="3184235808021478">"giây"</string>
     <string name="seconds" msgid="3161515347216589235">"giây"</string>
-    <string name="week" msgid="5617961537173061583">"tuần"</string>
+    <string name="week" msgid="5617961537173061583">"tuần"</string>
     <string name="weeks" msgid="6509623834583944518">"tuần"</string>
     <string name="year" msgid="4001118221013892076">"năm"</string>
     <string name="years" msgid="6881577717993213522">"năm"</string>
@@ -864,7 +870,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Nửa đêm"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Chọn tất cả"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Chọn tất cả"</string>
     <string name="cut" msgid="3092569408438626261">"Cắt"</string>
     <string name="copy" msgid="2681946229533511987">"Sao chép"</string>
     <string name="paste" msgid="5629880836805036433">"Dán"</string>
@@ -885,7 +891,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Hủy"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Chú ý"</string>
-    <string name="loading" msgid="1760724998928255250">"Đang tải..."</string>
+    <string name="loading" msgid="1760724998928255250">"Đang tải..."</string>
     <string name="capital_on" msgid="1544682755514494298">"BẬT"</string>
     <string name="capital_off" msgid="6815870386972805832">"TẮT"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Hoàn tất tác vụ đang sử dụng"</string>
@@ -1051,7 +1057,7 @@
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Lỗi khi gia tăng tiện ích"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Đến"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Tìm kiếm"</string>
-    <string name="ime_action_send" msgid="2316166556349314424">"Gửi"</string>
+    <string name="ime_action_send" msgid="2316166556349314424">"Gửi"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Tiếp theo"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Xong"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Trước"</string>
@@ -1077,7 +1083,7 @@
     <string name="upload_file" msgid="2897957172366730416">"Chọn tệp"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Không có tệp nào được chọn"</string>
     <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
-    <string name="submit" msgid="1602335572089911941">"Gửi"</string>
+    <string name="submit" msgid="1602335572089911941">"Gửi"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Chế độ trên ô tô đã được bật"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Chọn để thoát khỏi chế độ trên ô tô."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Chức năng điểm truy cập Internet hoặc điểm phát sóng đang hoạt động"</string>
@@ -1122,7 +1128,7 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Xóa mục."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Hoàn tác các tác vụ xóa."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ngay bây giờ bạn không cần làm gì cả."</string>
-    <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Thêm tài khoản"</string>
     <string name="choose_account_text" msgid="6891230675141555481">"Bạn muốn sử dụng tài khoản nào?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Thêm tài khoản"</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Chia sẻ với..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Thiết bị đã bị khóa."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

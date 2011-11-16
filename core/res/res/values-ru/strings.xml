@@ -148,11 +148,11 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Режим без звука"</string>
-    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звук ВЫКЛ"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звук ВКЛЮЧЕН"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Выключить"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Включить"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим полета"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим полета ВКЛЮЧЕН"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим полета ВЫКЛЮЧЕН"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Выключить"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Включить"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"считывать конфиденциальные данные журнала"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Позволяет приложению считывать информацию из различных файлов журналов системы. Приложение может получать сведения о работе пользователя на планшетном ПК, которые могут содержать личную или конфиденциальную информацию."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Позволяет приложению считывать информацию из различных журналов системы. Приложение может получать сведения о работе пользователя с телефоном, которые могут содержать личную или конфиденциальную информацию."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Использование любых дешифраторов"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Приложение сможет использовать любой установленный дешифратор."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"считывать/записывать данные в ресурсы, принадлежащие группе диагностики"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Позволяет приложению считывать и записывать данные в любые ресурсы, принадлежащие группе диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Эта возможность может быть использована ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"включать или отключать компоненты приложения"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Позволяет приложению подключаться к точкам доступа Wi-Fi и отключаться от них, а также вносить изменения в конфигурацию сетей Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"разрешить принимать многоадресный сигнал Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Разрешает приложению получать пакеты, не адресованные напрямую вашему устройству. Это может быть полезно при поиске находящихся рядом служб. Расход заряда батареи при этом выше, чем при одноадресной передаче."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"получать сведения о состоянии WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Позволяет приложению получать сведения о состоянии WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"изменять состояние WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Позволяет приложению подключаться к сети WiMAX и отключаться от нее."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"управление Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Позволяет приложению настраивать локальный планшетный ПК через Bluetooth, а также обнаруживать и выполнять сопряжение удаленных устройств."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Позволяет приложению настраивать локальный телефон Bluetooth, обнаруживать и выполнять сопряжение удаленных устройств."</string>
@@ -785,7 +791,7 @@
     <item quantity="other" msgid="3069992808164318268">"Последние <xliff:g id="COUNT">%d</xliff:g> дн."</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Прошлый месяц"</string>
-    <string name="older" msgid="5211975022815554840">"Пред."</string>
+    <string name="older" msgid="5211975022815554840">"Еще раньше"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"вчера"</item>
     <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Настройка доступа"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

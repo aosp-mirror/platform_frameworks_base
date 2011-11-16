@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"soma kumbukumbu ya data muhimu"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Huruhusu programu kusoma kutoka kwa faili mbalimbali za kumbukumbu za mfumo. Hii huiruhusu kutambua maelezo ya jumla kuhusu unachofanya na kompyuta ndogo, kwa hivyo kujumuisha maelezo ya kibinafsi na ya siri."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Huruhusu programu kusoma kutoka kwa mfiumo wa faili tofauti za kumbukumbu. Hii inairuhusu kugundua habari ya jumla kuhusu kile unachokifanya kwa simu, kwa kawaida ikijumlisha habari binafsi au faragha."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Tumia chombo chochote cha habari cha kufasiria maandishi ya siri ili kucheza tena."</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Huruhusu programu ya kompyuta kutumia vyombo vyovyote vya habari vya kufasiria maandishi ya siri, vilivyosanikishwa, ili kusimbua kwa kucheza tena."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"soma/andika kwa vyanzo vinavyomilikiwa na diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Huruhusu programu kusoma na kuandika kwa nyenzo yoyote inayomilikiwa na kikundi cha diag; kwa mfano, faili katika/dev. Huenda hii ikaathiri udhabiti na usalama wa mfumo. Hii inapaswa kutumia TU na vikagua matatizo mahsusi vya maunzi na mtengenezaji au opereta."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"wezesha au lemaza vijenzi vya programu"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Huruhusu programu kuunganisha na kutenganisha kutoka kwa pointi za ufikivu za Wi-Fi, na kufanya mabadiliko kwa mitandao ya Wi-Fi iliyosanidiwa."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ruhusu upokeaji wa Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Huruhusu programu kupokea paketi zisizoelekezwa moja kwa moja kwa kifaa chako. Hii inawezakuwa muhimu wakati wa kutambua huduma zinazotambuliwa karibu na eneo hilo. Hutumia nguvu zaidi kuliko midi isiyo ya matangazo anuwai."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"Tazama hali ya wiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Huruhusu programu kuangalia maelezo kuhusu hali ya WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"badilisha hali ya WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Huruhusu programu kuunganisha kwa na kukata muunganisho kutoka mtandao wa WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"usimamiaji bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Huruhusu programu kusanidi kompyuta ndogo ya karibu ya Bluetooth na kutambua na kulinganisha na vifaa vya mbali."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Huruhusu programu kusanidi simu ya ndani ya Bluetooth, na kutambua na kulinganisha na vifaa vya mbali."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Shiriki na..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Kifaa kimefungwa."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

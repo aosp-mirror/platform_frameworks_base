@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"tundlike logiandmete lugemine"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Lubab rakendusel lugeda süsteemi erinevaid logifaile. Nii on võimalik avastada üldist teavet selle kohta, mida te tahvelarvutiga teete, mis võib kaasata ka isiklikku või privaatset teavet."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Lubab rakendusel lugeda süsteemi erinevaid logifaile. Nii on võimalik avastada üldist teavet selle kohta, mida te telefoniga teete, mis võib kaasata ka isiklikku või privaatset teavet."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Mis tahes meediumidekooderi kasutamine taasesituseks"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Võimaldab rakendusel kasutada installitud meediumidekooderit taasesituse dekodeerimiseks."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"loe/kirjuta valija allikaid"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Võimaldab rakendusel lugeda valimisrühma mis tahes ressurssi ja sellesse kirjutada (näiteks kaustas /dev olevad failid). See võib mõjutada süsteemi stabiilsust ja turvet. Seda tohiks kasutada tootja või operaator AINULT riistvaraspetsiifiliseks diagnostikaks."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"luba või keela rakenduse komponente"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Võimaldab rakendusel luua ja katkestada ühenduse WiFi pääsupunktidega ning teha muudatusi konfigureeritud WiFi-võrkudesse."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"luba WiFi multiedastusvastuvõtt"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Võimaldab rakendusel vastu võtta mitte otse teie seadmele suunatud pakette. See võib olla kasulik teie lähedal pakutavate teenuste leidmisel. See kasutab rohkem energiat kui mitte-multiedastusrežiim."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX-i oleku kuvamine"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Võimaldab rakendusel WiMAX-i oleku kohta teavet vaadata."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-i oleku muutmine"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Võimaldab rakendusel WiMAX-võrguga ühendust võtta ja selle katkestada."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetoothi administreerimine"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Lubab rakendusel kohalikku Bluetoothi tahvelarvutit seadistada ning leida ja siduda kaugseadmetega."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Võimaldab rakendusel kohalikku Bluetooth-telefoni konfigureerida ning leida ja siduda kaugseadmetega."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Jaga kasutaja(te)ga ..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Seade lukustatud."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>
