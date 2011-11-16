@@ -507,6 +507,15 @@ void EventHub::getVirtualKeyDefinitions(int32_t deviceId,
     }
 }
 
+String8 EventHub::getKeyCharacterMapFile(int32_t deviceId) const {
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+    if (device) {
+        return device->keyMap.keyCharacterMapFile;
+    }
+    return String8();
+}
+
 EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
     if (deviceId == 0) {
         deviceId = mBuiltInKeyboardId;
@@ -1013,16 +1022,12 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     // Configure the keyboard, gamepad or virtual keyboard.
     if (device->classes & INPUT_DEVICE_CLASS_KEYBOARD) {
-        // Set system properties for the keyboard.
-        setKeyboardPropertiesLocked(device, false);
-
         // Register the keyboard as a built-in keyboard if it is eligible.
         if (!keyMapStatus
                 && mBuiltInKeyboardId == -1
                 && isEligibleBuiltInKeyboard(device->identifier,
                         device->configuration, &device->keyMap)) {
             mBuiltInKeyboardId = device->id;
-            setKeyboardPropertiesLocked(device, true);
         }
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
@@ -1120,17 +1125,6 @@ status_t EventHub::loadKeyMapLocked(Device* device) {
     return device->keyMap.load(device->identifier, device->configuration);
 }
 
-void EventHub::setKeyboardPropertiesLocked(Device* device, bool builtInKeyboard) {
-    int32_t id = builtInKeyboard ? 0 : device->id;
-    android::setKeyboardProperties(id, device->identifier,
-            device->keyMap.keyLayoutFile, device->keyMap.keyCharacterMapFile);
-}
-
-void EventHub::clearKeyboardPropertiesLocked(Device* device, bool builtInKeyboard) {
-    int32_t id = builtInKeyboard ? 0 : device->id;
-    android::clearKeyboardProperties(id);
-}
-
 bool EventHub::isExternalDeviceLocked(Device* device) {
     if (device->configuration) {
         bool value;
@@ -1184,9 +1178,7 @@ void EventHub::closeDeviceLocked(Device* device) {
         LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
                 device->path.string(), mBuiltInKeyboardId);
         mBuiltInKeyboardId = -1;
-        clearKeyboardPropertiesLocked(device, true);
     }
-    clearKeyboardPropertiesLocked(device, false);
 
     if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, device->fd, NULL)) {
         LOGW("Could not remove device fd from epoll instance.  errno=%d", errno);

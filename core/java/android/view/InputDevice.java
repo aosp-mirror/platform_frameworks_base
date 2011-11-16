@@ -19,7 +19,6 @@ package android.view;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +43,7 @@ public final class InputDevice implements Parcelable {
     private String mName;
     private int mSources;
     private int mKeyboardType;
+    private String mKeyCharacterMapFile;
 
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
@@ -360,6 +360,10 @@ public final class InputDevice implements Parcelable {
         return KeyCharacterMap.load(mId);
     }
 
+    String getKeyCharacterMapFile() {
+        return mKeyCharacterMapFile;
+    }
+
     /**
      * Gets information about the range of values for a particular {@link MotionEvent} axis.
      * If the device supports multiple sources, the same axis may have different meanings
@@ -532,6 +536,7 @@ public final class InputDevice implements Parcelable {
         mName = in.readString();
         mSources = in.readInt();
         mKeyboardType = in.readInt();
+        mKeyCharacterMapFile = in.readString();
 
         for (;;) {
             int axis = in.readInt();
@@ -549,6 +554,7 @@ public final class InputDevice implements Parcelable {
         out.writeString(mName);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
+        out.writeString(mKeyCharacterMapFile);
 
         final int numRanges = mMotionRanges.size();
         for (int i = 0; i < numRanges; i++) {
@@ -586,6 +592,8 @@ public final class InputDevice implements Parcelable {
                 break;
         }
         description.append("\n");
+
+        description.append("  Key Character Map: ").append(mKeyCharacterMapFile).append("\n");
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");

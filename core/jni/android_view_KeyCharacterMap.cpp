@@ -35,18 +35,25 @@ static struct {
 } gFallbackActionClassInfo;
 
 
-static jint nativeLoad(JNIEnv *env, jobject clazz, jint deviceId) {
+static jint nativeLoad(JNIEnv *env, jobject clazz, jstring fileStr) {
+    const char* file = env->GetStringUTFChars(fileStr, NULL);
+
     KeyCharacterMap* map;
-    status_t status = KeyCharacterMap::loadByDeviceId(deviceId, &map);
+    status_t status = KeyCharacterMap::load(String8(file), &map);
+    jint result;
     if (status) {
         String8 msg;
-        msg.appendFormat("Could not load key character map for device %d due to error %d.  "
-                "Refer to the log for details.", deviceId, status);
+        msg.appendFormat("Could not load key character map '%s' due to error %d.  "
+                "Refer to the log for details.", file, status);
         jniThrowException(env, "android/view/KeyCharacterMap$KeyCharacterMapUnavailableException",
                 msg.string());
-        return 0;
+        result = 0;
+    } else {
+        result = reinterpret_cast<jint>(map);
     }
-    return reinterpret_cast<jint>(map);
+
+    env->ReleaseStringUTFChars(fileStr, file);
+    return result;
 }
 
 static void nativeDispose(JNIEnv *env, jobject clazz, jint ptr) {
@@ -141,7 +148,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jint ptr, jint d
 
 static JNINativeMethod g_methods[] = {
     /* name, signature, funcPtr */
-    { "nativeLoad", "(I)I",
+    { "nativeLoad", "(Ljava/lang/String;)I",
             (void*)nativeLoad },
     { "nativeDispose", "(I)V",
             (void*)nativeDispose },

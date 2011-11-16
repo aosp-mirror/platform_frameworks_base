@@ -208,6 +208,8 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
 
+    virtual String8 getKeyCharacterMapFile(int32_t deviceId) const = 0;
+
     /* Requests the EventHub to reopen all input devices on the next call to getEvents(). */
     virtual void requestReopenDevices() = 0;
 
@@ -263,6 +265,8 @@ public:
 
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const;
+
+    virtual String8 getKeyCharacterMapFile(int32_t deviceId) const;
 
     virtual void requestReopenDevices();
 
@@ -321,8 +325,6 @@ private:
     void loadConfigurationLocked(Device* device);
     status_t loadVirtualKeyMapLocked(Device* device);
     status_t loadKeyMapLocked(Device* device);
-    void setKeyboardPropertiesLocked(Device* device, bool builtInKeyboard);
-    void clearKeyboardPropertiesLocked(Device* device, bool builtInKeyboard);
 
     bool isExternalDeviceLocked(Device* device);
 

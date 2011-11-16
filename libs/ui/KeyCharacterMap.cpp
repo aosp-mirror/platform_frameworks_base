@@ -124,17 +124,6 @@ status_t KeyCharacterMap::load(const String8& filename, KeyCharacterMap** outMap
     return status;
 }
 
-status_t KeyCharacterMap::loadByDeviceId(int32_t deviceId, KeyCharacterMap** outMap) {
-    *outMap = NULL;
-
-    String8 filename;
-    status_t result = getKeyCharacterMapFile(deviceId, filename);
-    if (!result) {
-        result = load(filename, outMap);
-    }
-    return result;
-}
-
 int32_t KeyCharacterMap::getKeyboardType() const {
     return mType;
 }
