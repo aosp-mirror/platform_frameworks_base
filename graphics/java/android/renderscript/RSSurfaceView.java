@@ -77,10 +77,12 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
-    public synchronized void surfaceDestroyed(SurfaceHolder holder) {
-        // Surface will be destroyed when we return
-        if (mRS != null) {
-            mRS.setSurface(null, 0, 0);
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        synchronized (this) {
+            // Surface will be destroyed when we return
+            if (mRS != null) {
+                mRS.setSurface(null, 0, 0);
+            }
         }
     }
 
@@ -88,9 +90,11 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * This method is part of the SurfaceHolder.Callback interface, and is
      * not normally called or subclassed by clients of RSSurfaceView.
      */
-    public synchronized void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        if (mRS != null) {
-            mRS.setSurface(holder, w, h);
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        synchronized (this) {
+            if (mRS != null) {
+                mRS.setSurface(holder, w, h);
+            }
         }
     }
 
@@ -125,9 +129,11 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         return rs;
     }
 
-    public synchronized void destroyRenderScriptGL() {
-        mRS.destroy();
-        mRS = null;
+    public void destroyRenderScriptGL() {
+        synchronized (this) {
+            mRS.destroy();
+            mRS = null;
+        }
     }
 
     public void setRenderScriptGL(RenderScriptGL rs) {
