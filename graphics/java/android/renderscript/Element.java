@@ -690,7 +690,11 @@ public class Element extends BaseObj {
         if ((dt != DataType.UNSIGNED_5_6_5) &&
             (dt != DataType.UNSIGNED_4_4_4_4) &&
             (dt != DataType.UNSIGNED_5_5_5_1)) {
-            mSize = dt.mSize * size;
+            if (size == 3) {
+                mSize = dt.mSize * 4;
+            } else {
+                mSize = dt.mSize * size;
+            }
         } else {
             mSize = dt.mSize;
         }
@@ -885,6 +889,7 @@ public class Element extends BaseObj {
         String[] mElementNames;
         int[] mArraySizes;
         int mCount;
+        int mSkipPadding;
 
         /**
          * Create a builder object.
@@ -910,6 +915,21 @@ public class Element extends BaseObj {
             if (arraySize < 1) {
                 throw new RSIllegalArgumentException("Array size cannot be less than 1.");
             }
+
+            // Skip padding fields after a vector 3 type.
+            if (mSkipPadding != 0) {
+                if (name.startsWith("#padding_")) {
+                    mSkipPadding = 0;
+                    return this;
+                }
+            }
+
+            if (element.mVectorSize == 3) {
+                mSkipPadding = 1;
+            } else {
+                mSkipPadding = 0;
+            }
+
             if(mCount == mElements.length) {
                 Element[] e = new Element[mCount + 8];
                 String[] s = new String[mCount + 8];
