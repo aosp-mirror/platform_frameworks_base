@@ -23,6 +23,7 @@ using namespace android::renderscript;
 
 Element::Element(Context *rsc) : ObjectBase(rsc) {
     mBits = 0;
+    mBitsUnpadded = 0;
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
@@ -56,6 +57,18 @@ size_t Element::getSizeBits() const {
     size_t total = 0;
     for (size_t ct=0; ct < mFieldCount; ct++) {
         total += mFields[ct].e->mBits * mFields[ct].arraySize;
+    }
+    return total;
+}
+
+size_t Element::getSizeBitsUnpadded() const {
+    if (!mFieldCount) {
+        return mBitsUnpadded;
+    }
+
+    size_t total = 0;
+    for (size_t ct=0; ct < mFieldCount; ct++) {
+        total += mFields[ct].e->mBitsUnpadded * mFields[ct].arraySize;
     }
     return total;
 }
@@ -146,14 +159,18 @@ Element *Element::createFromStream(Context *rsc, IStream *stream) {
 void Element::compute() {
     if (mFieldCount == 0) {
         mBits = mComponent.getBits();
+        mBitsUnpadded = mComponent.getBitsUnpadded();
         mHasReference = mComponent.isReference();
         return;
     }
 
     size_t bits = 0;
+    size_t bitsUnpadded = 0;
     for (size_t ct=0; ct < mFieldCount; ct++) {
         mFields[ct].offsetBits = bits;
+        mFields[ct].offsetBitsUnpadded = bitsUnpadded;
         bits += mFields[ct].e->getSizeBits() * mFields[ct].arraySize;
+        bitsUnpadded += mFields[ct].e->getSizeBitsUnpadded() * mFields[ct].arraySize;
 
         if (mFields[ct].e->mHasReference) {
             mHasReference = true;

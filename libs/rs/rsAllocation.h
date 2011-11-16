@@ -135,6 +135,11 @@ protected:
 private:
     void freeChildrenUnlocked();
     Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc);
+
+    uint32_t getPackedSize() const;
+    static void writePackedData(const Type *type, uint8_t *dst, const uint8_t *src, bool dstPadded);
+    void unpackVec3Allocation(const void *data, uint32_t dataSize);
+    void packVec3Allocation(OStream *stream) const;
 };
 
 }

@@ -195,6 +195,81 @@ void Allocation::dumpLOGV(const char *prefix) const {
          prefix, getPtr(), mHal.state.usageFlags, mHal.state.mipmapControl);
 }
 
+uint32_t Allocation::getPackedSize() const {
+    uint32_t numItems = mHal.state.type->getSizeBytes() / mHal.state.type->getElementSizeBytes();
+    return numItems * mHal.state.type->getElement()->getSizeBytesUnpadded();
+}
+
+void Allocation::writePackedData(const Type *type,
+                                 uint8_t *dst, const uint8_t *src, bool dstPadded) {
+    const Element *elem = type->getElement();
+    uint32_t unpaddedBytes = elem->getSizeBytesUnpadded();
+    uint32_t paddedBytes = elem->getSizeBytes();
+    uint32_t numItems = type->getSizeBytes() / paddedBytes;
+
+    uint32_t srcInc = !dstPadded ? paddedBytes : unpaddedBytes;
+    uint32_t dstInc =  dstPadded ? paddedBytes : unpaddedBytes;
+
+    // no sub-elements
+    uint32_t fieldCount = elem->getFieldCount();
+    if (fieldCount == 0) {
+        for (uint32_t i = 0; i < numItems; i ++) {
+            memcpy(dst, src, unpaddedBytes);
+            src += srcInc;
+            dst += dstInc;
+        }
+        return;
+    }
+
+    // Cache offsets
+    uint32_t *offsetsPadded = new uint32_t[fieldCount];
+    uint32_t *offsetsUnpadded = new uint32_t[fieldCount];
+    uint32_t *sizeUnpadded = new uint32_t[fieldCount];
+
+    for (uint32_t i = 0; i < fieldCount; i++) {
+        offsetsPadded[i] = elem->getFieldOffsetBytes(i);
+        offsetsUnpadded[i] = elem->getFieldOffsetBytesUnpadded(i);
+        sizeUnpadded[i] = elem->getField(i)->getSizeBytesUnpadded();
+    }
+
+    uint32_t *srcOffsets = !dstPadded ? offsetsPadded : offsetsUnpadded;
+    uint32_t *dstOffsets =  dstPadded ? offsetsPadded : offsetsUnpadded;
+
+    // complex elements, need to copy subelem after subelem
+    for (uint32_t i = 0; i < numItems; i ++) {
+        for (uint32_t fI = 0; fI < fieldCount; fI++) {
+            memcpy(dst + dstOffsets[fI], src + srcOffsets[fI], sizeUnpadded[fI]);
+        }
+        src += srcInc;
+        dst += dstInc;
+    }
+
+    delete[] offsetsPadded;
+    delete[] offsetsUnpadded;
+    delete[] sizeUnpadded;
+}
+
+void Allocation::unpackVec3Allocation(const void *data, uint32_t dataSize) {
+    const uint8_t *src = (const uint8_t*)data;
+    uint8_t *dst = (uint8_t*)getPtr();
+
+    writePackedData(getType(), dst, src, true);
+}
+
+void Allocation::packVec3Allocation(OStream *stream) const {
+    uint32_t paddedBytes = getType()->getElement()->getSizeBytes();
+    uint32_t unpaddedBytes = getType()->getElement()->getSizeBytesUnpadded();
+    uint32_t numItems = mHal.state.type->getSizeBytes() / paddedBytes;
+
+    const uint8_t *src = (const uint8_t*)getPtr();
+    uint8_t *dst = new uint8_t[numItems * unpaddedBytes];
+
+    writePackedData(getType(), dst, src, false);
+    stream->addByteArray(dst, getPackedSize());
+
+    delete[] dst;
+}
+
 void Allocation::serialize(OStream *stream) const {
     // Need to identify ourselves
     stream->addU32((uint32_t)getClassId());
@@ -207,10 +282,17 @@ void Allocation::serialize(OStream *stream) const {
     mHal.state.type->serialize(stream);
 
     uint32_t dataSize = mHal.state.type->getSizeBytes();
+    // 3 element vectors are padded to 4 in memory, but padding isn't serialized
+    uint32_t packedSize = getPackedSize();
     // Write how much data we are storing
-    stream->addU32(dataSize);
-    // Now write the data
-    stream->addByteArray(getPtr(), dataSize);
+    stream->addU32(packedSize);
+    if (dataSize == packedSize) {
+        // Now write the data
+        stream->addByteArray(getPtr(), dataSize);
+    } else {
+        // Now write the data
+        packVec3Allocation(stream);
+    }
 }
 
 Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
@@ -230,22 +312,30 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
     }
     type->compute();
 
+    Allocation *alloc = Allocation::createAllocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
+    type->decUserRef();
+
     // Number of bytes we wrote out for this allocation
     uint32_t dataSize = stream->loadU32();
-    if (dataSize != type->getSizeBytes()) {
+    // 3 element vectors are padded to 4 in memory, but padding isn't serialized
+    uint32_t packedSize = alloc->getPackedSize();
+    if (dataSize != type->getSizeBytes() &&
+        dataSize != packedSize) {
         LOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
+        ObjectBase::checkDelete(alloc);
         ObjectBase::checkDelete(type);
         return NULL;
     }
 
-    Allocation *alloc = Allocation::createAllocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
     alloc->setName(name.string(), name.size());
-    type->decUserRef();
 
-    uint32_t count = dataSize / type->getElementSizeBytes();
-
-    // Read in all of our allocation data
-    alloc->data(rsc, 0, 0, count, stream->getPtr() + stream->getPos(), dataSize);
+    if (dataSize == type->getSizeBytes()) {
+        uint32_t count = dataSize / type->getElementSizeBytes();
+        // Read in all of our allocation data
+        alloc->data(rsc, 0, 0, count, stream->getPtr() + stream->getPos(), dataSize);
+    } else {
+        alloc->unpackVec3Allocation(stream->getPtr() + stream->getPos(), dataSize);
+    }
     stream->reset(stream->getPos() + dataSize);
 
     return alloc;

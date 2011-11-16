@@ -43,6 +43,11 @@ public:
     uint32_t getGLType() const;
     uint32_t getGLFormat() const;
 
+    size_t getSizeBitsUnpadded() const;
+    size_t getSizeBytesUnpadded() const {
+        return (getSizeBitsUnpadded() + 7) >> 3;
+    }
+
     size_t getSizeBits() const;
     size_t getSizeBytes() const {
         return (getSizeBits() + 7) >> 3;
@@ -55,6 +60,10 @@ public:
         return mFields[componentNumber].offsetBits >> 3;
     }
 
+    size_t getFieldOffsetBytesUnpadded(uint32_t componentNumber) const {
+        return mFields[componentNumber].offsetBitsUnpadded >> 3;
+    }
+
     uint32_t getFieldCount() const {return mFieldCount;}
     const Element * getField(uint32_t idx) const {return mFields[idx].e.get();}
     const char * getFieldName(uint32_t idx) const {return mFields[idx].name.string();}
@@ -64,6 +73,7 @@ public:
     RsDataType getType() const {return mComponent.getType();}
     RsDataKind getKind() const {return mComponent.getKind();}
     uint32_t getBits() const {return mBits;}
+    uint32_t getBitsUnpadded() const {return mBitsUnpadded;}
 
     void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const;
@@ -112,6 +122,7 @@ protected:
         String8 name;
         ObjectBaseRef<const Element> e;
         uint32_t offsetBits;
+        uint32_t offsetBitsUnpadded;
         uint32_t arraySize;
     } ElementField_t;
     ElementField_t *mFields;
@@ -123,6 +134,7 @@ protected:
     Element(Context *);
 
     Component mComponent;
+    uint32_t mBitsUnpadded;
     uint32_t mBits;
 
     void compute();

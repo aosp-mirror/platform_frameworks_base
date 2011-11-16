@@ -41,6 +41,7 @@ public:
     bool getIsFloat() const {return mIsFloat;}
     bool getIsSigned() const {return mIsSigned;}
     uint32_t getBits() const {return mBits;}
+    uint32_t getBitsUnpadded() const {return mBitsUnpadded;}
 
     // Helpers for reading / writing this class out
     void serialize(OStream *stream) const;
@@ -56,6 +57,7 @@ protected:
 
     // derived
     uint32_t mBits;
+    uint32_t mBitsUnpadded;
     uint32_t mTypeBits;
     bool mIsFloat;
     bool mIsSigned;
