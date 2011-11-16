@@ -216,7 +216,7 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         if (mPendingRequest == REQUEST_NULL) {
             // If there are no allowable accounts go directly to add account
-            if (mAccountInfos.isEmpty()) {
+            if (shouldSkipToChooseAccountTypeFlow()) {
                 startChooseAccountTypeActivity();
                 return;
             }
@@ -265,6 +265,12 @@ public class ChooseTypeAndAccountActivity extends Activity
         mPendingRequest = REQUEST_NULL;
 
         if (resultCode == RESULT_CANCELED) {
+            // if cancelling out of addAccount and the original state caused us to skip this,
+            // finish this activity
+            if (shouldSkipToChooseAccountTypeFlow()) {
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
             return;
         }
 
@@ -316,6 +322,14 @@ public class ChooseTypeAndAccountActivity extends Activity
         }
         setResult(Activity.RESULT_CANCELED);
         finish();
+    }
+
+    /**
+     * convenience method to check if we should skip the accounts list display and immediately
+     * jump to the flow that asks the user to select from the account type list
+     */
+    private boolean shouldSkipToChooseAccountTypeFlow() {
+        return mAccountInfos.isEmpty();
     }
 
     protected void runAddAccountForAuthenticator(String type) {
