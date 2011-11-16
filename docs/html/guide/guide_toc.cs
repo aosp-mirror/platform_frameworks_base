@@ -797,6 +797,10 @@ applications</span>
       <li><a href="<?cs var:toroot ?>guide/practices/design/seamlessness.html">
             <span class="en">Designing for Seamlessness</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/practices/security.html">
+            <span class="en">Designing for Security</span></a>
+            <span class="new">new!</span><!-- 11/7/10 -->
+          </li>
     </ul>
   </li>
 
