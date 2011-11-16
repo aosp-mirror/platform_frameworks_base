@@ -385,6 +385,8 @@ private:
     uint32_t                mChannelMask;
     audio_io_handle_t       mInput;
     int                     mSessionId;
+    int                     mPreviousPriority;          // before start()
+    int                     mPreviousSchedulingGroup;
 };
 
 }; // namespace android
