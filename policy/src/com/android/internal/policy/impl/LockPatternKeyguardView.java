@@ -147,6 +147,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     //Also true if we've activated a phone call, either emergency dialing or incoming
     //This resets when the phone is turned off with no current call
     private boolean mHasOverlay;
+    //True if a dialog is currently displaying on top of this window
+    //Unlike other overlays, this does not close with a power button cycle
+    private boolean mHasDialog = false;
 
 
     /**
@@ -556,7 +559,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         if (DEBUG) Log.d(TAG, "screen off");
         mScreenOn = false;
         mForgotPattern = false;
-        mHasOverlay = mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE;
+        mHasOverlay = mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE ||
+                mHasDialog;
         if (mMode == Mode.LockScreen) {
             ((KeyguardScreen) mLockScreen).onPause();
         } else {
@@ -643,8 +647,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             mHasOverlay = true;
             stopAndUnbindFromFaceLock();
             hideFaceLockArea();
-        } else if (runFaceLock) {
-            activateFaceLockIfAble();
+        } else {
+            mHasDialog = false;
+            if (runFaceLock) activateFaceLockIfAble();
         }
     }
 
@@ -1043,6 +1048,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     }
 
     private void showDialog(String title, String message) {
+        mHasDialog = true;
         final AlertDialog dialog = new AlertDialog.Builder(mContext)
             .setTitle(title)
             .setMessage(message)
