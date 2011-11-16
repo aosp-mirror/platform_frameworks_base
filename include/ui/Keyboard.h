@@ -81,24 +81,6 @@ extern bool isEligibleBuiltInKeyboard(const InputDeviceIdentifier& deviceIdentif
         const PropertyMap* deviceConfiguration, const KeyMap* keyMap);
 
 /**
- * Sets keyboard system properties.
- */
-extern void setKeyboardProperties(int32_t deviceId, const InputDeviceIdentifier& deviceIdentifier,
-        const String8& keyLayoutFile, const String8& keyCharacterMapFile);
-
-/**
- * Clears keyboard system properties.
- */
-extern void clearKeyboardProperties(int32_t deviceId);
-
-/**
- * Gets the key character map filename for a device using inspecting system properties
- * and then falling back on a default key character map if necessary.
- * Returns a NAME_NOT_FOUND if none found.
- */
-extern status_t getKeyCharacterMapFile(int32_t deviceId, String8& outKeyCharacterMapFile);
-
-/**
  * Gets a key code by its short form label, eg. "HOME".
  * Returns 0 if unknown.
  */
