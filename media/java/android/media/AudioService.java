@@ -2687,21 +2687,21 @@ public class AudioService extends IAudioService.Stub {
             mCallingUid = uid;
         }
 
-        private void unlinkToDeath() {
-            if (mSourceRef != null && mHandler != null) {
-                mSourceRef.unlinkToDeath(mHandler, 0);
+        public void unlinkToDeath() {
+            try {
+                if (mSourceRef != null && mHandler != null) {
+                    mSourceRef.unlinkToDeath(mHandler, 0);
+                    mHandler = null;
+                }
+            } catch (java.util.NoSuchElementException e) {
+                Log.e(TAG, "Encountered " + e + " in FocusStackEntry.unlinkToDeath()");
             }
         }
 
         @Override
         protected void finalize() throws Throwable {
-            try {
-                unlinkToDeath();
-            } catch (java.util.NoSuchElementException e) {
-                Log.w(TAG, e + " thrown by unlinkToDeath() during finalize, ignoring");
-            } finally {
-                super.finalize();
-            }
+            unlinkToDeath(); // unlink exception handled inside method
+            super.finalize();
         }
     }
 
@@ -2733,11 +2733,12 @@ public class AudioService extends IAudioService.Stub {
      *   focus, notify the next item in the stack it gained focus.
      */
     private void removeFocusStackEntry(String clientToRemove, boolean signal) {
-        // is the current top of the focus stack abandoning focus? (because of death or request)
+        // is the current top of the focus stack abandoning focus? (because of request, not death)
         if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
         {
             //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
-            mFocusStack.pop();
+            FocusStackEntry fse = mFocusStack.pop();
+            fse.unlinkToDeath();
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
@@ -2756,6 +2757,7 @@ public class AudioService extends IAudioService.Stub {
                     Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
                             + fse.mClientId);
                     stackIterator.remove();
+                    fse.unlinkToDeath();
                 }
             }
         }
@@ -2764,7 +2766,7 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Helper function:
      * Called synchronized on mAudioFocusLock
-     * Remove focus listeners from the focus stack for a particular client.
+     * Remove focus listeners from the focus stack for a particular client when it has died.
      */
     private void removeFocusStackEntryForClient(IBinder cb) {
         // is the owner of the audio focus part of the client to remove?
@@ -2777,6 +2779,7 @@ public class AudioService extends IAudioService.Stub {
                 Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
                         + fse.mClientId);
                 stackIterator.remove();
+                // the client just died, no need to unlink to its death
             }
         }
         if (isTopOfStackForClientToRemove) {
@@ -2868,7 +2871,8 @@ public class AudioService extends IAudioService.Stub {
                 }
                 // the reason for the audio focus request has changed: remove the current top of
                 // stack and respond as if we had a new focus owner
-                mFocusStack.pop();
+                FocusStackEntry fse = mFocusStack.pop();
+                fse.unlinkToDeath();
             }
 
             // notify current top of stack it is losing focus
