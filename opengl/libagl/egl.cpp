@@ -49,6 +49,11 @@
 #undef NELEM
 #define NELEM(x) (sizeof(x)/sizeof(*(x)))
 
+
+EGLBoolean EGLAPI eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
+        EGLint left, EGLint top, EGLint width, EGLint height);
+
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------

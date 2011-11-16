@@ -14,6 +14,8 @@
  ** limitations under the License.
  */
 
+#include <string.h>
+
 #include "egl_cache.h"
 #include "egl_display.h"
 #include "egl_object.h"
@@ -24,6 +26,36 @@
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
+
+static char const * const sVendorString     = "Android";
+static char const * const sVersionString    = "1.4 Android META-EGL";
+static char const * const sClientApiString  = "OpenGL ES";
+
+// this is the list of EGL extensions that are exposed to applications
+// some of them are mandatory because used by the ANDROID system.
+//
+// mandatory extensions are required per the CDD and not explicitly
+// checked during EGL initialization. the system *assumes* these extensions
+// are present. the system may not function properly if some mandatory
+// extensions are missing.
+//
+// NOTE: sExtensionString MUST be have a single space as the last character.
+//
+static char const * const sExtensionString  =
+        "EGL_KHR_image "                        // mandatory
+        "EGL_KHR_image_base "                   // mandatory
+        "EGL_KHR_image_pixmap "
+        "EGL_KHR_gl_texture_2D_image "
+        "EGL_KHR_gl_texture_cubemap_image "
+        "EGL_KHR_gl_renderbuffer_image "
+        "EGL_KHR_fence_sync "
+        "EGL_NV_system_time "
+        "EGL_ANDROID_image_native_buffer "      // mandatory
+        ;
+
+// extensions not exposed to applications but used by the ANDROID system
+//      "EGL_ANDROID_recordable "               // mandatory
+//      "EGL_ANDROID_blob_cache "               // strongly recommended
 
 extern void initEglTraceLevel();
 extern void setGLHooksThreadSpecific(gl_hooks_t const *value);
@@ -173,6 +205,36 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
                     egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
         }
     }
+
+    // the query strings are per-display
+    mVendorString.setTo(sVendorString);
+    mVersionString.setTo(sVersionString);
+    mClientApiString.setTo(sClientApiString);
+
+    // we only add extensions that exist in at least one implementation
+    char const* start = sExtensionString;
+    char const* end;
+    do {
+        // find the space separating this extension for the next one
+        end = strchr(start, ' ');
+        if (end) {
+            // length of the extension string
+            const size_t len = end - start;
+            // NOTE: we could avoid the copy if we had strnstr.
+            const String8 ext(start, len);
+            // now go through all implementations and look for this extension
+            for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
+                // if we find it, add this extension string to our list
+                // (and don't forget the space)
+                const char* match = strstr(disp[i].queryString.extensions, ext.string());
+                if (match && (match[len] == ' ' || match[len] == 0)) {
+                    mExtensionString.append(start, len+1);
+                }
+            }
+            // process the next extension string, and skip the space.
+            start = end + 1;
+        }
+    } while (end);
 
     egl_cache_t::get()->initialize(this);
 
