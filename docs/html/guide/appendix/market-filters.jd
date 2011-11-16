@@ -25,7 +25,7 @@ manifest file to the configurations defined by the device, as well as other fact
 </ol>
 
 <h2>See also</h2>
- <ol> 
+ <ol>
 <li><a
 href="{@docRoot}guide/practices/compatibility.html">Android Compatibility</a></li>
 <li><code><a
@@ -48,7 +48,7 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</c
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
   <div id="qv-sub-rule">
     <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0 5px;">
-    <h2 style="color:#669999;">Interested in publishing your app on Android Market?</h2> 
+    <h2 style="color:#669999;">Interested in publishing your app on Android Market?</h2>
     <p><a id="publish-link"
 href="http://market.android.com/publish">Go to Android Market</a> to create a publisher
 account and upload your app.</p></div>
@@ -83,7 +83,7 @@ restrictions and dependencies expressed by the application's
 manifest file and publishing details. If the application is
 compatible with the device according to the filter rules, Market displays the
 application to the user. Otherwise, Market hides your application from search
-results and category browsing, even if a user specifically requests 
+results and category browsing, even if a user specifically requests
 the app by clicking a deep link that points directly to the app's ID within Market..</p>
 
 <p class="note"><strong>Note:</strong> When users browse the <a
@@ -108,7 +108,7 @@ available.</p>
 
 <p>Most Market filters are triggered by elements within an application's
 manifest file, <a
-href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a> 
+href="{@docRoot}guide/topics/manifest/manifest-intro.html">AndroidManifest.xml</a>
 (although not everything in the manifest file can trigger filtering).
 Table 1 lists the manifest elements that you should use to trigger Android
 Market filtering, and explains how the filtering for each element works.</p>
@@ -173,7 +173,7 @@ default.</li>
     </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"
     android:targetSdkVersion="4"&gt;</code> and does not include a
     <code>&lt;supports-screens&gt;</code> element.
-    <strong>Result</strong>: Android Market will show the app to users on all 
+    <strong>Result</strong>: Android Market will show the app to users on all
     devices, unless other filters apply. </p>
     <p><strong>Example 3<br />
     </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="4"&gt;</code>
@@ -402,9 +402,9 @@ country (as determined by SIM carrier) in which paid apps are available.</p></td
     visible on devices that support that platform. For details about the NDK and using
     native libraries, see <a href="{@docRoot}sdk/ndk/index.html#overview">What is the
       Android NDK?</a></p> </tr> <tr>
-        <td valign="top">Forward-Locked Applications</td> <td valign="top"><p>To
-          forward lock an application, set copy protection to "On" when you upload the
-          application to Market. Market will not show copy-protected applications on
+        <td valign="top">Copy-Protected Applications</td> <td valign="top"><p>To
+          copy protect an application, set copy protection to "On" when you configure publishing
+options for your application. Market will not show copy-protected applications on
 developer devices or unreleased devices.</p></td> </tr> </table>
 
 
@@ -431,7 +431,7 @@ href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
     <p>By using the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> or <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> element.</p>   
+&lt;compatible-screens&gt;}</a> element.</p>
   </li>
   <li>API level
     <p>By using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
