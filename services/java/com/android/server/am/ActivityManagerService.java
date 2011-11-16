@@ -1224,8 +1224,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 synchronized (ActivityManagerService.this) {
                     long now = SystemClock.uptimeMillis();
-                    if (now < (mLastMemUsageReportTime+10000)) {
-                        // Don't report more than every 10 seconds to somewhat
+                    if (now < (mLastMemUsageReportTime+5*60*1000)) {
+                        // Don't report more than every 5 minutes to somewhat
                         // avoid spamming.
                         return;
                     }
@@ -1263,12 +1263,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         PrintWriter catPw = new PrintWriter(catSw);
                         String[] emptyArgs = new String[] { };
                         StringBuilder tag = new StringBuilder(128);
-                        dumpProcessesLocked(null, catPw, emptyArgs, 0, false);
-                        catPw.println();
-                        dumpServicesLocked(null, catPw, emptyArgs, 0, false, false);
-                        catPw.println();
-                        dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false);
-                        catPw.println();
+                        synchronized (ActivityManagerService.this) {
+                            dumpProcessesLocked(null, catPw, emptyArgs, 0, false);
+                            catPw.println();
+                            dumpServicesLocked(null, catPw, emptyArgs, 0, false, false);
+                            catPw.println();
+                            dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false);
+                            catPw.println();
+                        }
                         tag.append("Low on memory -- ");
                         dumpApplicationMemoryUsage(null, pw, "  ", emptyArgs, true, catPw, tag);
                         String memUsage = sw.toString();
