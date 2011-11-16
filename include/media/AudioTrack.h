@@ -487,6 +487,8 @@ private:
     int                     mAuxEffectId;
     Mutex                   mLock;
     status_t                mRestoreStatus;
+    int                     mPreviousPriority;          // before start()
+    int                     mPreviousSchedulingGroup;
 };
 
 
