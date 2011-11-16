@@ -726,6 +726,71 @@ public class AudioManager {
     }
 
     /**
+     * Returns the maximum volume index for master volume.
+     *
+     * @hide
+     */
+    public int getMasterMaxVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getMasterMaxVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getMasterMaxVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the current volume index for master volume.
+     *
+     * @return The current volume index for master volume.
+     * @hide
+     */
+    public int getMasterVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getMasterVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getMasterVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Get last audible volume before master volume was muted.
+     *
+     * @hide
+     */
+    public int getLastAudibleMasterVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getLastAudibleMasterVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getLastAudibleMasterVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Sets the volume index for master volume.
+     *
+     * @param index The volume index to set. See
+     *            {@link #getMasterMaxVolume(int)} for the largest valid value.
+     * @param flags One or more flags.
+     * @see #getMasterMaxVolume(int)
+     * @see #getMasterVolume(int)
+     * @hide
+     */
+    public void setMasterVolume(int index, int flags) {
+        IAudioService service = getService();
+        try {
+            service.setMasterVolume(index, flags);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMasterVolume", e);
+        }
+    }
+
+    /**
      * Solo or unsolo a particular stream. All other streams are muted.
      * <p>
      * The solo command is protected against client process death: if a process
