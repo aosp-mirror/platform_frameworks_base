@@ -145,5 +145,6 @@
     <string name="same_year_wday1_mdy1_wday2_mdy2">%3$s %2$s %9$s, %1$s - %8$s %7$s y, %6$s</string>
     <string name="short_format_month">%b</string>
     <string name="full_wday_month_day_no_year">d MMMM, EEEE</string>
+    <string name="abbrev_wday_month_day_no_year">d MMMM, EEE</string>
     <string name="abbrev_wday_month_day_year">d MMM yyyy, E</string>
 </resources>

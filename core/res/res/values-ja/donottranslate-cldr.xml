@@ -145,5 +145,6 @@
     <string name="same_year_wday1_mdy1_wday2_mdy2">%9$s年%2$s%3$s日 (%1$s)～%7$s%8$s日 (%6$s)</string>
     <string name="short_format_month">%b</string>
     <string name="full_wday_month_day_no_year">M月d日 (E)</string>
+    <string name="abbrev_wday_month_day_no_year">M月d日 (E)</string>
     <string name="abbrev_wday_month_day_year">yyyy年M月d日 (E)</string>
 </resources>

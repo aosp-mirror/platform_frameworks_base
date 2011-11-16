@@ -145,5 +145,6 @@
     <string name="same_year_wday1_mdy1_wday2_mdy2">%9$s년 %2$s %3$s일 %1$s ~ %7$s %8$s일 %6$s</string>
     <string name="short_format_month">%b</string>
     <string name="full_wday_month_day_no_year">MMMM d일 EEEE</string>
+    <string name="abbrev_wday_month_day_no_year">MMMM d일 EEE</string>
     <string name="abbrev_wday_month_day_year">yyyy년 MMM d일 EEE</string>
 </resources>
