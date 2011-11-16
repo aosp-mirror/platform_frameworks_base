@@ -28,11 +28,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -775,6 +778,8 @@ public class PhoneStatusBar extends StatusBar {
             row.setDrawingCacheEnabled(true);
         }
 
+        applyLegacyRowBackground(notification, content);
+
         return new View[] { row, content, expanded };
     }
 
@@ -948,12 +953,32 @@ public class PhoneStatusBar extends StatusBar {
             row.setDrawingCacheEnabled(true);
         }
 
+        applyLegacyRowBackground(sbn, content);
+
         entry.row = row;
         entry.content = content;
         entry.expanded = expanded;
         entry.largeIcon = largeIcon;
 
         return true;
+    }
+
+    void applyLegacyRowBackground(StatusBarNotification sbn, View content) {
+        if (sbn.notification.contentView.getLayoutId() !=
+                com.android.internal.R.layout.status_bar_latest_event_content) {
+            int version = 0;
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.pkg, 0);
+                version = info.targetSdkVersion;
+            } catch (NameNotFoundException ex) {
+                Slog.e(TAG, "Failed looking up ApplicationInfo for " + sbn.pkg, ex);
+            }
+            if (version > 0 && version < Build.VERSION_CODES.HONEYCOMB) {
+                content.setBackgroundResource(R.drawable.notification_row_legacy_bg);
+            } else {
+                content.setBackgroundResource(R.drawable.notification_row_bg);
+            }
+        }
     }
 
     StatusBarNotification removeNotificationViews(IBinder key) {
