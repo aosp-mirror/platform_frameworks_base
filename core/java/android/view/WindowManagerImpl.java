@@ -21,6 +21,7 @@ import android.content.ComponentCallbacks2;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.opengl.ManagedEGLContext;
 import android.os.IBinder;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -428,7 +429,7 @@ public class WindowManagerImpl implements WindowManager {
                             }
                         }
                         // Terminate the hardware renderer to free all resources
-                        HardwareRenderer.terminate();                        
+                        ManagedEGLContext.doTerminate();
                         break;
                     }
                     // high end gfx devices fall through to next case
