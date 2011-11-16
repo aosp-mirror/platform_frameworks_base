@@ -1775,6 +1775,7 @@ void KeyboardInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     InputMapper::populateDeviceInfo(info);
 
     info->setKeyboardType(mKeyboardType);
+    info->setKeyCharacterMapFile(getEventHub()->getKeyCharacterMapFile(getDeviceId()));
 }
 
 void KeyboardInputMapper::dump(String8& dump) {

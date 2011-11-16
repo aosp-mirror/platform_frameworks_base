@@ -826,6 +826,9 @@ public:
     inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
     inline int32_t getKeyboardType() const { return mKeyboardType; }
 
+    inline void setKeyCharacterMapFile(const String8& value) { mKeyCharacterMapFile = value; }
+    inline const String8& getKeyCharacterMapFile() const { return mKeyCharacterMapFile; }
+
     inline const Vector<MotionRange>& getMotionRanges() const {
         return mMotionRanges;
     }
@@ -835,6 +838,7 @@ private:
     String8 mName;
     uint32_t mSources;
     int32_t mKeyboardType;
+    String8 mKeyCharacterMapFile;
 
     Vector<MotionRange> mMotionRanges;
 };
