@@ -101,7 +101,12 @@
     <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Одна смужка сигналу Wi-Fi."</string>
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Дві смужки сигналу Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Три смужки сигналу Wi-Fi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="4826278754383492058">"Максимальний сигнал Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Максимальний сигнал Wi-Fi."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Немає сигналу WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Одна смужка сигналу WiMAX."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Дві смужки сигналу WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Три смужки сигналу WiMAX."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Максимальний сигнал WiMAX."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
@@ -133,4 +138,5 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Виконується пошук GPS-сигналу"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Місцезнаходження встановлено за допомогою GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Очистити всі сповіщення."</string>
+    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Активувати заставку"</string>
 </resources>

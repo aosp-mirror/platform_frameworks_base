@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"четене на поверителни данни от регистрационните файлове"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Разрешава на приложението да чете от различните регистрационни файлове на системата. Това му позволява да получи обща информация какво правите с таблета, потенциално включително и лични или поверителни данни."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Разрешава на приложението да чете от различните регистрационни файлове на системата. Това му позволява да получи обща информация какво правите с телефона, потенциално включително и лични или поверителни данни."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"използване на всеки медиен декодер за възпроизвеждане"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Разрешава на приложението да използва всеки инсталиран медиен декодер с цел декодиране за възпроизвеждане."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"четене/запис в ресурси, притежавани от diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Разрешава на приложението да чете и записва във всеки ресурс, притежаван от групата diag, например файловете в /dev. Това потенциално може да засегне стабилността и защитеността на системата. То трябва да се използва САМО за специфично за хардуера диагностициране от страна на производителя или оператора."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"активиране или деактивиране на компоненти на приложенията"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Разрешава на приложението да се свързва към Wi-Fi точки за достъп и да прекратява връзката с тях, както и да извършва промени в конфигурирани Wi-Fi мрежи."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"разрешаване на приемане на мултикаст през Wi-Fi мрежата"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Разрешава на приложението да получава пакети, които не са адресирани директно към устройството ви. Това може да е полезно при откриване на предлагани в района услуги. Консумира се повече мощност, отколкото в режим без мултикаст."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"преглед на състоянието на WiMAX мрежата"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Разрешава на приложението да вижда информацията за състоянието на WiMAX мрежата."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"промяна на състоянието на WiMAX мрежата"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Разрешава на приложението да се свързва към WiMAX мрежа и да прекратява връзката с нея."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"администриране на Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Разрешава на приложението да конфигурира локалния таблет с Bluetooth, както и да открива и да се сдвоява с отдалечени устройства."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Разрешава на приложението да конфигурира локалния Bluetooth телефон, както и да открива и да се сдвоява с отдалечени устройства."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Споделяне със..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройството е заключено."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

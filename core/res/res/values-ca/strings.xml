@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"llegir dades de registre personals"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permet que una aplicació llegeixi els diversos fitxers de registre del sistema. Això li permet descobrir informació general sobre què estàs fent amb la tauleta, i pot incloure informació personal o privada."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permet que una aplicació llegeixi els diversos fitxers de registre del sistema. Això li permet descobrir informació general sobre què estàs fent amb el telèfon i, potencialment, pot incloure informació personal o privada."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilitza qualsevol descodificador de mitjans per a la reproducció"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permet que una aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permet a una aplicació llegir i escriure a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. Només l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"activar o desactivar els components de l\'aplicació"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permet a una aplicació connectar-se i desconnectar-se de punts d\'accés Wi-fi i fer canvis a les xarxes Wi-fi configurades."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permetre la recepció de multidifusió Wi-fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permet a una aplicació rebre paquets no adreçats directament al vostre dispositiu. Això pot ser útil en detectar serveis oferts a prop. Utilitza més energia que el mode que no utilitza la multidifusió."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visualitza l\'estat de WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet que una aplicació visualitzi la informació sobre l\'estat de WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"canvia l\'estat de WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet que una aplicació es connecti i es desconnecti d\'una xarxa WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administració de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permet que una aplicació configuri la tauleta Bluetooth local i que cerqui i emparelli dispositius remots."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permet a una aplicació configurar el telèfon Bluetooth local i detectar dispositius remots i emparellar-se amb ells."</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ús compartit amb..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositiu bloquejat."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"S\'està enviant..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Vols iniciar el navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vols acceptar la trucada?"</string>
 </resources>

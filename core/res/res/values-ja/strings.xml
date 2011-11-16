@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"機密ログデータの読み取り"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可するとタブレットの使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可すると端末の使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"再生用にメディア デコーダーを使用"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"インストール済みのメディア デコーダーを使用して再生用にデコードすることをアプリケーションに許可します。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/通信事業者によるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"アプリケーションのコンポーネントを有効/無効にする"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Wi-Fiアクセスポイントへの接続や接続の切断、設定されたWi-Fiネットワークの変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fiマルチキャストの受信を許可する"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"端末を直接の宛先とはしていないパケットの受信をアプリケーションに許可します。近隣で提供中のサービスを検出したい場合に便利です。マルチキャスト以外のモードよりも電力を消費します。"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX状態の表示"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"WiMAX状態に関する情報の表示をアプリケーションに許可します。"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX状態の変更"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"WiMAXネットワークへの接続と接続解除をアプリケーションに許可します。"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetoothの管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"このBluetoothタブレットを設定することや、リモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"共有相手..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"端末がロックされています。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

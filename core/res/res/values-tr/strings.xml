@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"hassas günlük verilerini okuma"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Uygulamaya, sistemin çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, tablette yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar. Bu bilgiler arasında kişisel ve gizli bilgileriniz de olabilir."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Bir uygulamanın, sistemin çeşitli günlük dosyalarındaki bilgileri okumasına izin verir. Bu izin, uygulamanın, telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar ve bunlar kişisel ve gizli bilgilerinizi de içerebilir."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"oynatma için herhangi bir medya kod çözücüyü kullan"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Uygulamaya, oynatma kodunu çözmek için herhangi bir yüklü medya kod çözücüyü kullanma izni verir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Uygulamaların kablosuz erişim noktalarına bağlanıp bunlarla bağlantısını kesmesine ve yapılandırılmış kablosuz ağlarda değişiklikler yapmasına izin verir."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Kablosuz Çoklu Yayın alımına izin ver"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Bir uygulamaya doğrudan cihazınıza yönlendirilmemiş paketleri alma izni verir. Yakın yerlerde sunulan hizmetlerin keşfedilmesi sırasında faydalı olabilir. Birden fazla noktaya yayın yapmayan moda göre daha fazla güç harcar."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX durumunu görüntüle"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Uygulamanın, WiMAX\'ın durumuyla ilgili bilgileri görüntülemesine izin verir."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX durumunu değiştir"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Uygulamanın, WiMAX ağına bağlanmasına veya bağlantısını kesmesine izin verir."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth yönetimi"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlar ile eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Şununla paylaş..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Cihaz kilitli."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

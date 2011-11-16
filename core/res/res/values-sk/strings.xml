@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"čítať citlivé údaje denníkov"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Umožňuje aplikácii čítať rôzne systémové súbory denníkov. Toto nastavenie aplikácie umožňuje získať všeobecné informácie o činnostiach s tabletom, ktoré by mohli obsahovať osobné alebo súkromné informácie."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Umožňuje aplikácii čítať rôzne systémové súbory denníkov. Toto nastavenie aplikácii umožňuje získať všeobecné informácie o činnostiach s telefónom, ktoré by mohli obsahovať osobné alebo súkromné informácie."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"použiť ľubovoľný dekódovač médií na reprodukciu"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Povoľuje aplikácii používať ľubovoľný nainštalovaný dekódovač na dekódovanie pre reprodukciu."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čítanie alebo zápis do prostriedkov funkcie diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikácii čítať ľubovoľné prostriedky v skupine diag, napr. súbory v priečinku /dev, a zapisovať do nich. Môže dôjsť k ovplyvneniu stability a bezpečnosti systému. Toto nastavenie by mal používať IBA výrobca či operátor na diagnostiku hardvéru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolenie a zakázanie súčastí aplikácií"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Umožňuje aplikácii pripojiť sa k prístupovým bodom Wi-Fi alebo sa od nich odpojiť a uskutočňovať zmeny nakonfigurovaných sietí Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povoliť príjem viacsmerového vysielania Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Umožňuje aplikácii prijímať pakety, ktoré neboli adresované priamo vášmu zariadeniu. Pomocou tejto možnosti môžete objaviť služby ponúkané vo vašej blízkosti. Spotreba energie je vyššia ako v režime bez viacsmerového vysielania."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"zobraziť stav WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Umožňuje aplikácii zobraziť informácie o stave siete WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"zmeniť stav WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Umožňuje aplikácii pripojiť sa a odpojiť zo siete WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"správa rozhrania Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Umožňuje aplikácii konfigurovať miestny tablet s rozhraním Bluetooth a vyhľadávať a párovať vzdialené zariadenia."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Umožňuje aplikácii konfigurovať miestny telefón s rozhraním Bluetooth a vyhľadávať a párovať vzdialené zariadenia."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Zdieľať s..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Zariadenie je zamknuté."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

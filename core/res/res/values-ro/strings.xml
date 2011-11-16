@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"citire date de jurnal problematice"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permite unei aplicaţii să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea computerului tablet PC de către dvs., şi probabil informaţii personale sau confidenţiale."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permite unei aplicaţii să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea telefonului de către dvs., dar nu şi informaţii personale sau confidenţiale."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilizaţi orice decodor media pentru redare"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite unei aplicaţii să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite unei aplicaţii să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată DOAR de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"activare sau dezactivare a componentelor aplicaţiei"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite unei aplicaţii să se conecteze la şi să se deconecteze de la punctele de acces Wi-Fi, precum şi să efectueze modificări în reţelele Wi-Fi configurate."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitere recepţionare difuzare multiplă Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite unei aplicaţii să primească pachete care nu sunt direct adresate dispozitivului dvs. Această permisiune poate fi utilă la descoperirea serviciilor oferite în apropiere. Consumă mai multă energie decât modul fără difuzare multiplă."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vizualizaţi starea WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite unei aplicaţii să vizualizeze informaţiile despre starea WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"schimbaţi starea WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite unei aplicaţii să se conecteze şi să se deconecteze de la reţeaua WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrare bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permite unei aplicaţii să configureze computerul tablet PC Bluetooth local, să descopere şi să se asocieze cu dispozitive la distanţă."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permite unei aplicaţii să configureze telefonul Bluetooth local, să descopere şi să se asocieze cu dispozitive la distanţă."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Distribuiţi cu..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispozitiv blocat."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

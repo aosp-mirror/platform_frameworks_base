@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"讀取機密記錄資料"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"允許應用程式讀取系統的各種記錄檔，這會允許應用程式查看平板電腦使用上的一般資訊，其中可能包含您的個人或隱私資訊。"</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的電話使用資訊，可能包含您的個人或私人資訊。"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒體解碼器進行播放"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"允許應用程式使用任何已安裝的媒體解碼器進行解碼以播放影片。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允許應用程式讀寫 diag 群組的資源；例如：/dev 裡的檔案。這可能會影響系統穩定性與安全性。此功能僅供製造商或技術人員用於硬體規格偵測。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"啟用或停用應用程式元件"</string>
@@ -444,7 +446,7 @@
     <string name="permdesc_manageAccounts" msgid="8804114016661104517">"允許應用程式執行新增、移除帳戶和刪除帳戶密碼等作業。"</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"使用帳戶的驗證認證"</string>
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"允許應用程式要求驗證憑證。"</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"檢視網路狀態"</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"查看網路狀態"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"允許應用程式檢視網路狀態。"</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"網際網路完整存取"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"允許應用程式建立網路設定。"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路設定。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允許接收 Wi-Fi 多點傳播封包"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"允許應用程式接收並非指定傳送給您裝置的封包，這在您發現附近有服務可使用時很有用，但消耗的電力比非多點傳播模式還要多。"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"查看 WiMAX 狀態"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允許應用程式查看 WiMAX 連線狀態相關資訊。"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"變更 WiMAX 狀態"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允許應用程式建立或中斷 WiMAX 網路連線。"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"藍牙管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"允許應用程式設定本機藍牙平板電腦，以及搜尋和配對遠端裝置。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享活動..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

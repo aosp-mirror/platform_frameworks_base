@@ -115,7 +115,7 @@
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"La autenticación mediante el servidor proxy no se ha realizado correctamente."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"La conexión con el servidor no se ha realizado correctamente."</string>
     <string name="httpErrorIO" msgid="4270874999047767599">"El servidor no ha podido establecer la comunicación. Inténtalo de nuevo más tarde."</string>
-    <string name="httpErrorTimeout" msgid="4743403703762883954">"Se ha agotado el tiempo de espera de conexión al servidor."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"Se ha agotado el tiempo de espera de conexión con el servidor."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"La página contiene demasiados redireccionamientos de servidor."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protocolo no admitido"</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"No se ha podido establecer una conexión segura."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"leer datos de registro personales"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Permite que una aplicación lea diversos archivos de registro del sistema. Con este permiso, la aplicación puede ver información general sobre las acciones que se realizan con el tablet (que puede incluir datos personales o privados)."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Permite que una aplicación lea distintos archivos de registro del sistema. Con este permiso, la aplicación puede ver información general sobre las acciones que realizas con el teléfono, que puede incluir datos personales o privados."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Utilizar cualquier decodificador de archivos multimedia para la reproducción"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite que una aplicación utilice cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite que una aplicación lea y escriba en cualquier recurso propiedad del grupo de diagnóstico como, por ejemplo, archivos in/dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SOLO se debe utilizar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"habilitar o inhabilitar componentes de la aplicación"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite que una aplicación se conecte a puntos de acceso Wi-Fi y se desconecte de ellos, y realice modificaciones en las redes Wi-Fi configuradas."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepción multidifusión Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite que una aplicación reciba paquetes no dirigidos directamente a tu dispositivo. Esta función puede resultar útil para descubrir servicios cercanos. Utiliza más energía que el modo de no multidifusión."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"ver estado de WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite que una aplicación acceda a la información sobre el estado de la conectividad WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"cambiar estado de WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a una aplicación conectarse a una red WiMAX y desconectarse de ella."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administración de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Permite que una aplicación configure el tablet Bluetooth local, vea dispositivos remotos y sincronice el tablet con ellos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Permite que una aplicación configure el teléfono Bluetooth local, y vea dispositivos remotos y sincronice el teléfono con ellos."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Compartir con..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>

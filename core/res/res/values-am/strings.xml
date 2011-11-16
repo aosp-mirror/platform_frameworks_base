@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"ወሳኝ የማስታወሻ ውሂብ አንብብ"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"ትግበራ ከተለያዩ የስርዓት ማስታወሻዎች ፋይሎችን ለማንበብ ይፈቅዳል።ይህ በጡባዊው ምን እያደረጉ እንደሆነ ጠቅላላመረጃ ለማግኘት ይፈቅዳል፣ ነገር ግን ማንኛውም የግል ወይም የብሕትወት መረጃ መያዝ የለበትም።"</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"ትግበራ ከስርዓቱ የተለያዩ የማስታወሻ ፋይሎች ውስጥ ለማንበብ ይፈቅዳል። ይህ ስለ ስልክዎ ምን እያደረጉበት እንደሆነ የብህታዊ ወይም የግል መረጃን ጨምሮ ጠቅላላ መረጃ ለማግኘት ይፈቅዳል።"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ለመልሰህ አጫውት ማንኛውምንም የማህደረ መረጃ ዲኮደር ተጠቀም"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"ለመልሰህ አጫውት ፍታን በማንኛውም የተጫኑ በማህደረ መረጃ ዲኮደር ለመጠቀም  ለመተግበሪያ ይፈቅዳል፡፡"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"በdiag ባለቤትነት ያሉ ንብረቶችን አንብብ/ፃፍ"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"ትግበራ በዲያግ ቡድን ባለቤትነት ወደ አለማንኛውም ንብረት ለምሳሌ በ/dev ያሉ ፋይሎች ለማንበብ  እና ለመፃፍ ይፈቅዳል። ይህ በመሰረቱ የስርዓት መረጋጋትን እና ደህንነትን ሊጎዳ ይችላል። ይህ ውስን የሀርድዌር-ተኮር ዲያግኖስቲክስ በአምራቹ ወይም ከዋኙ ብቻ መሆን አለበት።"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"የትግበራ ምንዝሮችን አንቃ ወይም አቦዝን"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"ከWi-Fi ድረስ ነጥቦች ለማያያዝ እና ላለማያያዝ ፣ እና ለተዋቀሩ የWi-Fi አውታረ መረቦች ለውጦች ለማድረግ ይፈቅዳል።"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"የWi-Fi ብዙስምሪትተቀባይፍቀድ"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"ትግበራ ወደ እርስዎ መሣሪያ በቀጥታ ያልተመለከቱ ፓኬቶችን ለመቀበል ይፈቅዳል።ይህ አቅራቢያዎ የሚቀርቡ አገልገሎቶች ሲገኙ ጠቃሚ መሆን ይችላል።ብዙስምሪት ካልሆነሁነታ የበለጠ ተጨማሪ ኃይል ይጠቀማል።"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"የ WiMAX ሁኔታን ዕይ"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"ትግበራ ስለWi-Fi ሁኔታ መረጃን ለማየት ይፈቅዳል።"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"የWiMAX ሁኔታ ለውጥ"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"ትግበራ ከ WiMAX አውታረመረብ ለመያያዝ እና ለመለያየት ይፈቅዳል።"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"የብሉቱዝ አስተዳደር"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"ትግበራየአካባቢውን ብሉቱዝ ጡባዊ ለማዋቀር እናአግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ይፈቅዳል።"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"የአካባቢውን ብሉቱዝ ስልክ ለማዋቀር እናአግኝቶ ከሩቅ መሣሪያዎች ጋር ለማጣመር ትግበራ ይፈቅዳል።"</string>
@@ -1212,4 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">" ያጋሩ  ከ"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"መሣሪያ ተቆልፏል።"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"፣ "</string>
+    <string name="sending" msgid="8715108995741758718">"በመላክ ላይ......."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"ማሰሺያን አስነሳ?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"ጥሪ ተቀበል?"</string>
 </resources>

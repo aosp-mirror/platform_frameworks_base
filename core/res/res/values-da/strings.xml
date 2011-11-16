@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"læse følsomme logdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Tillader, at en applikation læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med tabletcomputeren, registreres, også personlige eller private oplysninger."</string>
     <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Tillader, at en applikation læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, registreres, også personlige eller private oplysninger."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"brug enhver mediedekoder til afspilning"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Tillader, at en applikation bruger enhver installeret mediedekoder til at afkode til afspilning."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillader, at en applikation læser og skriver til alle ressourcer, der ejes af diag-gruppen, som f.eks. flier i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifikke diagnosticeringer foretaget af producent eller udbyder."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktiver eller deaktiver programkomponenter"</string>
@@ -462,6 +464,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillader, at en applikation opretter og afbryder forbindelsen fra Wi-Fi-adgangspunkter og foretager ændringer i konfigurerede Wi-Fi-netværk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillad Wi-Fi-multicastmodtagelse"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillader, at en applikation modtager pakker, der ikke er direkte adresseret til din enhed. Dette kan være nyttigt, hvis du finder tjenester, der tilbydes i nærheden. Det bruger mere strøm end multicasttilstanden."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vise WiMAX-tilstand"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Tillader, at en applikation viser oplysninger om WiMAX-tilstanden."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"skifte WiMAX-tilstand"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Tillader, at en applikation opretter og afbryder forbindelsen til WiMAX-netværk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-administration"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Tillader, at en applikation konfigurerer den lokale Bluetooth-tabletcomputer samt opdager og parrer med fjerne enheder."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Tillader, at en applikation konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
@@ -1212,4 +1218,10 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Del med:"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enhed låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <!-- no translation found for sending (8715108995741758718) -->
+    <skip />
+    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
+    <skip />
+    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
+    <skip />
 </resources>
