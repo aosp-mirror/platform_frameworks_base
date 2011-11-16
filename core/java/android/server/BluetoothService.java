@@ -145,7 +145,12 @@ public class BluetoothService extends IBluetooth.Stub {
     private final ArrayList<String> mUuidIntentTracker;
     private final HashMap<RemoteService, IBluetoothCallback> mUuidCallbackTracker;
 
-    private final HashMap<Integer, Pair<Integer, IBinder>> mServiceRecordToPid;
+    private static class ServiceRecordClient {
+        int pid;
+        IBinder binder;
+        IBinder.DeathRecipient death;
+    }
+    private final HashMap<Integer, ServiceRecordClient> mServiceRecordToPid;
 
     private final HashMap<String, BluetoothDeviceProfileState> mDeviceProfileState;
     private final BluetoothProfileState mA2dpProfileState;
@@ -221,7 +226,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceOobData = new HashMap<String, Pair<byte[], byte[]>>();
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
-        mServiceRecordToPid = new HashMap<Integer, Pair<Integer, IBinder>>();
+        mServiceRecordToPid = new HashMap<Integer, ServiceRecordClient>();
         mDeviceProfileState = new HashMap<String, BluetoothDeviceProfileState>();
         mA2dpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.A2DP);
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
@@ -1528,11 +1533,17 @@ public class BluetoothService extends IBluetooth.Stub {
             return -1;
         }
 
-        int pid = Binder.getCallingPid();
-        mServiceRecordToPid.put(new Integer(handle), new Pair<Integer, IBinder>(pid, b));
+        ServiceRecordClient client = new ServiceRecordClient();
+        client.pid = Binder.getCallingPid();
+        client.binder = b;
+        client.death = new Reaper(handle, client.pid, RFCOMM_RECORD_REAPER);
+        mServiceRecordToPid.put(new Integer(handle), client);
         try {
-            b.linkToDeath(new Reaper(handle, pid, RFCOMM_RECORD_REAPER), 0);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+            b.linkToDeath(client.death, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            client.death = null;
+        }
         return handle;
     }
 
@@ -1547,10 +1558,15 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     private synchronized void checkAndRemoveRecord(int handle, int pid) {
-        Pair<Integer, IBinder> pidPair = mServiceRecordToPid.get(handle);
-        if (pidPair != null && pid == pidPair.first) {
+        ServiceRecordClient client = mServiceRecordToPid.get(handle);
+        if (client != null && pid == client.pid) {
             if (DBG) Log.d(TAG, "Removing service record " +
                 Integer.toHexString(handle) + " for pid " + pid);
+
+            if (client.death != null) {
+                client.binder.unlinkToDeath(client.death, 0);
+            }
+
             mServiceRecordToPid.remove(handle);
             removeServiceRecordNative(handle);
         }
@@ -1880,7 +1896,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private void dumpApplicationServiceRecords(PrintWriter pw) {
         pw.println("\n--Application Service Records--");
         for (Integer handle : mServiceRecordToPid.keySet()) {
-            Integer pid = mServiceRecordToPid.get(handle).first;
+            Integer pid = mServiceRecordToPid.get(handle).pid;
             pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
         }
     }
