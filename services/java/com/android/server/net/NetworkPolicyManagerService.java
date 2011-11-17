@@ -393,6 +393,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified
             // READ_NETWORK_USAGE_HISTORY permission above.
 
+            maybeRefreshTrustedTime();
             synchronized (mRulesLock) {
                 updateNetworkEnabledLocked();
                 updateNotificationsLocked();
@@ -445,7 +446,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // cycle boundary to recompute notifications.
 
         // examine stats for each active policy
-        final long currentTime = currentTimeMillis(true);
+        final long currentTime = currentTimeMillis();
         for (NetworkPolicy policy : mNetworkPolicy.values()) {
             // ignore policies that aren't relevant to user
             if (!isTemplateRelevant(policy.template)) continue;
@@ -683,6 +684,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
+
+            maybeRefreshTrustedTime();
             synchronized (mRulesLock) {
                 ensureActiveMobilePolicyLocked();
                 updateNetworkEnabledLocked();
@@ -702,7 +705,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: reset any policy-disabled networks when any policy is removed
         // completely, which is currently rare case.
 
-        final long currentTime = currentTimeMillis(true);
+        final long currentTime = currentTimeMillis();
         for (NetworkPolicy policy : mNetworkPolicy.values()) {
             // shortcut when policy has no limit
             if (policy.limitBytes == LIMIT_DISABLED) {
@@ -802,7 +805,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
-        final long currentTime = currentTimeMillis(true);
+        final long currentTime = currentTimeMillis();
         for (NetworkPolicy policy : mNetworkRules.keySet()) {
             final String[] ifaces = mNetworkRules.get(policy);
 
@@ -1092,6 +1095,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setNetworkPolicies(NetworkPolicy[] policies) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
+        maybeRefreshTrustedTime();
         synchronized (mRulesLock) {
             mNetworkPolicy.clear();
             for (NetworkPolicy policy : policies) {
@@ -1119,7 +1123,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void snoozePolicy(NetworkTemplate template) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
-        final long currentTime = currentTimeMillis(true);
+        maybeRefreshTrustedTime();
+        final long currentTime = currentTimeMillis();
         synchronized (mRulesLock) {
             // find and snooze local policy that matches
             final NetworkPolicy policy = mNetworkPolicy.get(template);
@@ -1140,6 +1145,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setRestrictBackground(boolean restrictBackground) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
+        maybeRefreshTrustedTime();
         synchronized (mRulesLock) {
             mRestrictBackground = restrictBackground;
             updateRulesForRestrictBackgroundLocked();
@@ -1193,7 +1199,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return null;
         }
 
-        final long currentTime = currentTimeMillis(false);
+        final long currentTime = currentTimeMillis();
 
         // find total bytes used under policy
         final long start = computeLastCycleBoundary(currentTime, policy);
@@ -1472,6 +1478,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case MSG_LIMIT_REACHED: {
                     final String iface = (String) msg.obj;
 
+                    maybeRefreshTrustedTime();
                     synchronized (mRulesLock) {
                         if (mMeteredIfaces.contains(iface)) {
                             try {
@@ -1551,12 +1558,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private long currentTimeMillis(boolean allowRefresh) {
-        // try refreshing time source when stale
-        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE && allowRefresh) {
+    /**
+     * Try refreshing {@link #mTime} when stale.
+     */
+    private void maybeRefreshTrustedTime() {
+        if (mTime.getCacheAge() > TIME_CACHE_MAX_AGE) {
             mTime.forceRefresh();
         }
+    }
 
+    private long currentTimeMillis() {
         return mTime.hasCache() ? mTime.currentTimeMillis() : System.currentTimeMillis();
     }
 
