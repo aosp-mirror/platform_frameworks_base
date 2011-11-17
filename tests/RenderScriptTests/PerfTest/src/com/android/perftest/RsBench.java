@@ -93,13 +93,27 @@ public class RsBench extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.benchmark_mode:
-                mView.setBenchmarkMode();
+            case R.id.benchmark_all:
+                mView.setBenchmarkMode(-1);
                 return true;
-            case R.id.debug_mode:
+            case R.id.benchmark_one:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Pick a Test");
                 builder.setItems(mView.getTestNames(),
+                                 new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        Toast.makeText(getApplicationContext(),
+                                       "Starting to benchmark: " + mView.getTestNames()[item],
+                                       Toast.LENGTH_SHORT).show();
+                        mView.setBenchmarkMode(item);
+                    }
+                });
+                builder.show();
+                return true;
+            case R.id.debug_mode:
+                AlertDialog.Builder debugBuilder = new AlertDialog.Builder(this);
+                debugBuilder.setTitle("Pick a Test");
+                debugBuilder.setItems(mView.getTestNames(),
                                  new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int item) {
                         Toast.makeText(getApplicationContext(),
@@ -108,7 +122,7 @@ public class RsBench extends Activity {
                         mView.setDebugMode(item);
                     }
                 });
-                builder.show();
+                debugBuilder.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
