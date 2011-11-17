@@ -100,9 +100,14 @@ application. </p>
 <h4>Application, Android Market client, and server</h4>
 
 <p>The licensing service is based on the capability of the Android Market server
-to determine whether a given user is licensed to use a given application. The
-server considers a user licensed if the user is recorded to have purchased the
-application, or if the application is available for free. To properly identify
+to determine whether a given user is licensed to use a given application. The licensing server
+considers a user to be licensed if the user is a recorded purchaser of an application. If a paid
+application has been uploaded to Android Market but saved only as a draft application (in
+other words, the app is unpublished), the licensing server considers all users to be licensed users
+of the application. Keep in mind, you cannot implement Android Market Licensing in a free
+application.</p>
+
+<p>To properly identify
 the user and determine the license status, the server requires information about
 the application and user &mdash; the application and the Android Market client
 work together to assemble the information and pass it to the server. </p>
@@ -243,7 +248,7 @@ application: </p>
 
 <ul>
 <li>Only paid applications published through Market can use the
-service. </li>
+service.</li>
 <li>An application can use the service only if the Android Market client is
 installed on its host device and the device is running Android 1.5 (API level 3)
 or higher.</li>
@@ -258,8 +263,8 @@ practices in this document, you can help ensure that your implementation will be
 secure.</li>
 <li>Adding licensing to an application does not affect the way the application
 functions when run on a device that does not offer Android Market.</li>
-<li>Licensing is currently for paid apps only, since free apps are considered
-licensed for all users. If your application is already published as free, 
+<li>Licensing is currently for paid apps only, since draft apps are
+licensed for all users. If your application is already published as a free app,
 you won't be able to upload a new version that uses licensing.</li>
 </ul>
 
@@ -698,7 +703,7 @@ haven't done that already, do it now before continuing. </p>
 <p>Next, open the application's project properties window, as shown below.
 Select the "Android" properties group and click <strong>Add</strong>, then
 choose the LVL library project (com_android_vending_licensing) and click
-<strong>OK</strong>. For more information, see 
+<strong>OK</strong>. For more information, see
 <a href="{@docRoot}guide/developing/projects/projects-eclipse.html#SettingUpLibraryProject">
 Managing Projects from Eclipse with ADT</a></p>.
 
@@ -727,7 +732,7 @@ properties, including the reference to the library project:</p>
 --library <em>path/to/my/library_project</em>
 </pre>
 
-<p>For more information about working with library projects, 
+<p>For more information about working with library projects,
 see <a href="{@docRoot}guide/developing/projects/projects-cmdline.html#SettingUpLibraryProject">
 Managing Projects from the Command Line</a></p>.
 
@@ -1226,6 +1231,8 @@ whether there is a valid license response cached locally, in
 <li>Otherwise, the LicenseChecker initiates a license check request that is sent
 to the licensing server.</li>
 </ul>
+<p class="note"><strong>Note:</strong> The licensing server always returns
+<code>LICENSED</code> when you perform a license check of a draft application.</p>
 </li>
 <li>When a response is received, LicenseChecker creates a LicenseValidator that
 verifies the signed license data and extracts the fields of the response, then
@@ -1384,7 +1391,7 @@ methods post to the Handler.</li>
 </ol>
 
 <p>If you want your LicenseCheckerCallback methods to update the UI thread,
-instantiate a {@link android.os.Handler} in the main Activity's 
+instantiate a {@link android.os.Handler} in the main Activity's
 {@link android.app.Activity#onCreate(android.os.Bundle) onCreate()} method,
 as shown below. In this example, the LVL sample application's
 LicenseCheckerCallback methods (see above) call <code>displayResult()</code> to
@@ -2338,7 +2345,7 @@ Policy <code>processServerResonse()</code> method with a "RETRY" response code.
 </p>
 
 <p>In general, the RETRY response code is a signal to the application that an
-error has occurred that has prevented a license check from completing. 
+error has occurred that has prevented a license check from completing.
 
 <p>The Android Market server helps an application to manage licensing under
 error conditions by setting a retry "grace period" and a recommended maximum
