@@ -360,7 +360,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
         final String sciId = info.getId();
         final InternalServiceConnection connection = new InternalServiceConnection(
-                sciId, locale, scListener, bundle);
+                sciId, locale, bundle);
         final Intent serviceIntent = new Intent(SpellCheckerService.SERVICE_INTERFACE);
         serviceIntent.setComponent(info.getComponent());
         if (DBG) {
@@ -704,15 +704,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     private class InternalServiceConnection implements ServiceConnection {
-        private final ISpellCheckerSessionListener mListener;
         private final String mSciId;
         private final String mLocale;
         private final Bundle mBundle;
         public InternalServiceConnection(
-                String id, String locale, ISpellCheckerSessionListener listener, Bundle bundle) {
+                String id, String locale, Bundle bundle) {
             mSciId = id;
             mLocale = locale;
-            mListener = listener;
             mBundle = bundle;
         }
 
