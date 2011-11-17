@@ -533,6 +533,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public ParcelUuid[] getUuids() {
+        if (getState() != STATE_ON) return null;
         try {
             return mService.getUuids();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
