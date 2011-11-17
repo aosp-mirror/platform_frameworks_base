@@ -150,6 +150,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     //True if a dialog is currently displaying on top of this window
     //Unlike other overlays, this does not close with a power button cycle
     private boolean mHasDialog = false;
+    //True if this device is currently plugged in
+    private boolean mPluggedIn;
 
 
     /**
@@ -312,6 +314,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mLockPatternUtils = lockPatternUtils;
         mWindowController = controller;
         mHasOverlay = false;
+        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
 
         mUpdateMonitor.registerInfoCallback(this);
 
@@ -717,10 +720,19 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         post(mRecreateRunnable);
     }
 
-    //Ignore these events; they are implemented only because they come from the same interface
+    /** When somebody plugs in or unplugs the device, we don't want to display faceunlock */
     @Override
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel)
-    {}
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+        mHasOverlay |= mPluggedIn != pluggedIn;
+        mPluggedIn = pluggedIn;
+        //If it's already running, don't close it down: the unplug didn't start it
+        if (!mFaceLockServiceRunning) {
+            stopAndUnbindFromFaceLock();
+            hideFaceLockArea();
+        }
+    }
+
+    //Ignore these events; they are implemented only because they come from the same interface
     @Override
     public void onTimeChanged() {}
     @Override
