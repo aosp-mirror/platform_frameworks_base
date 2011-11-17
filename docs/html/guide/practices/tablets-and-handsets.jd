@@ -372,9 +372,8 @@ tips to follow when creating your action bar:</p>
 value</strong>. In your <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>, use {@code "ifRoom"}
 for the {@code android:showAsAction} attribute if you'd like the menu item to appear in the action
-bar. However, you might need {@code "always"} when an action view does not provide an alternative
-action for the overflow menu (that is, it must appear as an action view) or when a menu item added
-by a fragment is low in the menu order and it must jump into the action bar at all times. However,
+bar. However, you might need {@code "always"} when an action view does not provide a default
+action for the overflow menu (that is, it must appear as an action view). However,
 you should not use {@code "always"} more than once or twice. In almost all other cases, use {@code
 "ifRoom"} as the value for {@code "android:showAsAction"} when you want the item to appear as an
 action item. Forcing too many action items into the action bar can create a cluttered UI and
