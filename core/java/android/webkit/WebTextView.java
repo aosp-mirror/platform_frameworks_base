@@ -17,8 +17,10 @@
 package android.webkit;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -49,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsoluteLayout;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -70,6 +73,9 @@ import java.util.ArrayList;
         implements AdapterView.OnItemClickListener {
 
     static final String LOGTAG = "webtextview";
+
+    private Paint mRingPaint;
+    private int mRingInset;
 
     private WebView         mWebView;
     private boolean         mSingle;
@@ -201,13 +207,53 @@ import java.util.ArrayList;
                 }
             }
         };
+        float ringWidth = 4f * context.getResources().getDisplayMetrics().density;
         mReceiver = new MyResultReceiver(mHandler);
+        mRingPaint = new Paint();
+        mRingPaint.setColor(0x6633b5e5);
+        mRingPaint.setStrokeWidth(ringWidth);
+        mRingPaint.setStyle(Style.FILL);
+        mRingInset = (int) ringWidth;
     }
 
     public void setAutoFillable(int queryId) {
         mAutoFillable = mWebView.getSettings().getAutoFillEnabled()
                 && (queryId != FORM_NOT_AUTOFILLABLE);
         mQueryId = queryId;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (isFocused()) {
+            final int ib = getHeight() - mRingInset;
+            canvas.drawRect(0, 0, getWidth(), mRingInset, mRingPaint);
+            canvas.drawRect(0, ib, getWidth(), getHeight(), mRingPaint);
+            canvas.drawRect(0, mRingInset, mRingInset, ib, mRingPaint);
+            canvas.drawRect(getWidth() - mRingInset, mRingInset, getWidth(), ib, mRingPaint);
+        }
+    }
+
+    private void growOrShrink(boolean grow) {
+        AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) getLayoutParams();
+        if (grow) {
+            Log.i("webtextview", "grow");
+            lp.x -= mRingInset;
+            lp.y -= mRingInset;
+            lp.width += 2 * mRingInset;
+            lp.height += 2 * mRingInset;
+            setPadding(getPaddingLeft() + mRingInset, getPaddingTop() + mRingInset,
+                    getPaddingRight() + mRingInset, getPaddingBottom() + mRingInset);
+        } else {
+            Log.i("webtextview", "shrink");
+            lp.x += mRingInset;
+            lp.y += mRingInset;
+            lp.width -= 2 * mRingInset;
+            lp.height -= 2 * mRingInset;
+            setPadding(getPaddingLeft() - mRingInset, getPaddingTop() - mRingInset,
+                    getPaddingRight() - mRingInset, getPaddingBottom() - mRingInset);
+        }
+        setLayoutParams(lp);
     }
 
     @Override
@@ -511,6 +557,7 @@ import java.util.ArrayList;
         } else if (!mInsideRemove) {
             mWebView.setActive(false);
         }
+        growOrShrink(focused);
         mFromFocusChange = false;
     }
 

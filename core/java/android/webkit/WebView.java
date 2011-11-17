@@ -5658,13 +5658,13 @@ public class WebView extends AbsoluteLayout
             if (hasFocus()) {
                 // If our window regained focus, and we have focus, then begin
                 // drawing the cursor ring
-                mDrawCursorRing = true;
+                mDrawCursorRing = !inEditingMode();
                 setFocusControllerActive(true);
             } else {
+                mDrawCursorRing = false;
                 if (!inEditingMode()) {
                     // If our window gained focus, but we do not have it, do not
                     // draw the cursor ring.
-                    mDrawCursorRing = false;
                     setFocusControllerActive(false);
                 }
                 // We do not call recordButtons here because we assume
@@ -5739,7 +5739,7 @@ public class WebView extends AbsoluteLayout
             // When we regain focus, if we have window focus, resume drawing
             // the cursor ring
             if (hasWindowFocus()) {
-                mDrawCursorRing = true;
+                mDrawCursorRing = !inEditingMode();
                 setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
@@ -5749,8 +5749,8 @@ public class WebView extends AbsoluteLayout
         } else {
             // When we lost focus, unless focus went to the TextView (which is
             // true if we are in editing mode), stop drawing the cursor ring.
+            mDrawCursorRing = false;
             if (!inEditingMode()) {
-                mDrawCursorRing = false;
                 setFocusControllerActive(false);
             }
             mKeysPressed.clear();
