@@ -220,15 +220,19 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
         if (end) {
             // length of the extension string
             const size_t len = end - start;
-            // NOTE: we could avoid the copy if we had strnstr.
-            const String8 ext(start, len);
-            // now go through all implementations and look for this extension
-            for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-                // if we find it, add this extension string to our list
-                // (and don't forget the space)
-                const char* match = strstr(disp[i].queryString.extensions, ext.string());
-                if (match && (match[len] == ' ' || match[len] == 0)) {
-                    mExtensionString.append(start, len+1);
+            if (len) {
+                // NOTE: we could avoid the copy if we had strnstr.
+                const String8 ext(start, len);
+                // now go through all implementations and look for this extension
+                for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
+                    if (disp[i].queryString.extensions) {
+                        // if we find it, add this extension string to our list
+                        // (and don't forget the space)
+                        const char* match = strstr(disp[i].queryString.extensions, ext.string());
+                        if (match && (match[len] == ' ' || match[len] == 0)) {
+                            mExtensionString.append(start, len+1);
+                        }
+                    }
                 }
             }
             // process the next extension string, and skip the space.
