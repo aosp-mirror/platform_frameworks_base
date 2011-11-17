@@ -85,7 +85,7 @@ void egl_cache_t::initialize(egl_display_t *display) {
             bool atStart = !strncmp(BC_EXT_STR " ", exts, bcExtLen+1);
             bool atEnd = (bcExtLen+1) < extsLen &&
                     !strcmp(" " BC_EXT_STR, exts + extsLen - (bcExtLen+1));
-            bool inMiddle = strstr(" " BC_EXT_STR " ", exts);
+            bool inMiddle = strstr(exts, " " BC_EXT_STR " ");
             if (equal || atStart || atEnd || inMiddle) {
                 PFNEGLSETBLOBCACHEFUNCSANDROIDPROC eglSetBlobCacheFuncsANDROID;
                 eglSetBlobCacheFuncsANDROID =
