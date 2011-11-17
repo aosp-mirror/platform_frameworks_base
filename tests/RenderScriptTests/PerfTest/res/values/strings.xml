@@ -19,6 +19,8 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <skip />
-    <string name="benchmark_mode">Benchmark Mode</string>
+    <string name="benchmark_all">Benchmark All</string>
+    <string name="benchmark_one">Benchmark One</string>
     <string name="debug_mode">Debug Mode</string>
 </resources>
+

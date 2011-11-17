@@ -248,8 +248,8 @@ public class RsBenchRS {
         mScript.invoke_setDebugMode(num);
     }
 
-    public void setBenchmarkMode() {
-        mScript.invoke_setBenchmarkMode();
+    public void setBenchmarkMode(int benchNum) {
+        mScript.invoke_setBenchmarkMode(benchNum);
     }
 
     private void initRS() {

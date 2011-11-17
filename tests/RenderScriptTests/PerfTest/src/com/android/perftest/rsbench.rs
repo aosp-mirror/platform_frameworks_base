@@ -122,6 +122,7 @@ static bool checkInit() {
 }
 
 static int benchMode = 0;
+static bool benchmarkSingleTest = false;
 static int benchSubMode = 0;
 static int runningLoops = 0;
 static bool sendMsgFlag = false;
@@ -133,9 +134,16 @@ void setDebugMode(int testNumber) {
     rsgClearAllRenderTargets();
 }
 
-void setBenchmarkMode() {
+void setBenchmarkMode(int testNumber) {
     gIsDebugMode = false;
-    benchMode = 0;
+    if (testNumber == -1) {
+        benchmarkSingleTest = false;
+        benchMode = 0;
+    } else {
+        benchmarkSingleTest = true;
+        benchMode = testNumber;
+    }
+
     runningLoops = 0;
 }
 
@@ -190,9 +198,13 @@ static void benchmark() {
     rsDebug("Finishes test ", fps);
 
     gResultBuffer[benchMode] = fps;
-    drawOffscreenResult(0, 0,
-                        gRenderSurfaceW / 2,
-                        gRenderSurfaceH / 2);
+    int bufferW = rsAllocationGetDimX(gRenderBufferColor);
+    int bufferH = rsAllocationGetDimY(gRenderBufferColor);
+
+    int quadW = gRenderSurfaceW / 2;
+    int quadH = (quadW * bufferH) / bufferW;
+    drawOffscreenResult(0, 0, quadW, quadH);
+
     int left = 0, right = 0, top = 0, bottom = 0;
     uint width = rsgGetWidth();
     uint height = rsgGetHeight();
@@ -201,6 +213,10 @@ static void benchmark() {
     rsgMeasureText(gTestScripts[benchMode].testName, &left, &right, &top, &bottom);
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgDrawText(gTestScripts[benchMode].testName, 2 -left, height - 2 + bottom);
+
+    if (benchmarkSingleTest) {
+        return;
+    }
 
     benchMode ++;
     int testCount = rsAllocationGetDimX(rsGetAllocation(gTestScripts));
