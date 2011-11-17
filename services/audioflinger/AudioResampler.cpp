@@ -33,7 +33,7 @@
 namespace android {
 
 #ifdef __ARM_HAVE_HALFWORD_MULTIPLY // optimized asm option
-    //#define ASM_ARM_RESAMP1 // enable asm optimisation for ResamplerOrder1
+    #define ASM_ARM_RESAMP1 // enable asm optimisation for ResamplerOrder1
 #endif // __ARM_HAVE_HALFWORD_MULTIPLY
 // ----------------------------------------------------------------------------
 
@@ -390,6 +390,7 @@ resampleMono16_exit:
 *       phaseFraction : phase fraction for next interpolation
 *
 *******************************************************************/
+__attribute__((noinline))
 void AudioResamplerOrder1::AsmMono16Loop(int16_t *in, int32_t* maxOutPt, int32_t maxInIdx,
             size_t &outputIndex, int32_t* out, size_t &inputIndex, int32_t vl, int32_t vr,
             uint32_t &phaseFraction, uint32_t phaseIncrement)
@@ -500,6 +501,7 @@ void AudioResamplerOrder1::AsmMono16Loop(int16_t *in, int32_t* maxOutPt, int32_t
 *       phaseFraction : phase fraction for next interpolation
 *
 *******************************************************************/
+__attribute__((noinline))
 void AudioResamplerOrder1::AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32_t maxInIdx,
             size_t &outputIndex, int32_t* out, size_t &inputIndex, int32_t vl, int32_t vr,
             uint32_t &phaseFraction, uint32_t phaseIncrement)
@@ -600,6 +602,5 @@ void AudioResamplerOrder1::AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32
 
 
 // ----------------------------------------------------------------------------
-}
-; // namespace android
 
+} // namespace android
