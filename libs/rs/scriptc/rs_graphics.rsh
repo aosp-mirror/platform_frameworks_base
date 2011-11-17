@@ -22,6 +22,56 @@
  */
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
+
+// These are API 15 once it get official
+typedef enum {
+    RS_DEPTH_FUNC_ALWAYS,
+    RS_DEPTH_FUNC_LESS,
+    RS_DEPTH_FUNC_LEQUAL,
+    RS_DEPTH_FUNC_GREATER,
+    RS_DEPTH_FUNC_GEQUAL,
+    RS_DEPTH_FUNC_EQUAL,
+    RS_DEPTH_FUNC_NOTEQUAL
+} rs_depth_func;
+
+typedef enum {
+    RS_BLEND_SRC_ZERO,                  // 0
+    RS_BLEND_SRC_ONE,                   // 1
+    RS_BLEND_SRC_DST_COLOR,             // 2
+    RS_BLEND_SRC_ONE_MINUS_DST_COLOR,   // 3
+    RS_BLEND_SRC_SRC_ALPHA,             // 4
+    RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA,   // 5
+    RS_BLEND_SRC_DST_ALPHA,             // 6
+    RS_BLEND_SRC_ONE_MINUS_DST_ALPHA,   // 7
+    RS_BLEND_SRC_SRC_ALPHA_SATURATE     // 8
+} rs_blend_src_func;
+
+typedef enum {
+    RS_BLEND_DST_ZERO,                  // 0
+    RS_BLEND_DST_ONE,                   // 1
+    RS_BLEND_DST_SRC_COLOR,             // 2
+    RS_BLEND_DST_ONE_MINUS_SRC_COLOR,   // 3
+    RS_BLEND_DST_SRC_ALPHA,             // 4
+    RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,   // 5
+    RS_BLEND_DST_DST_ALPHA,             // 6
+    RS_BLEND_DST_ONE_MINUS_DST_ALPHA    // 7
+} rs_blend_dst_func;
+
+typedef enum {
+    RS_CULL_BACK,
+    RS_CULL_FRONT,
+    RS_CULL_NONE
+} rs_cull_mode;
+
+typedef enum {
+    RS_SAMPLER_NEAREST,
+    RS_SAMPLER_LINEAR,
+    RS_SAMPLER_LINEAR_MIP_LINEAR,
+    RS_SAMPLER_WRAP,
+    RS_SAMPLER_CLAMP,
+    RS_SAMPLER_LINEAR_MIP_NEAREST,
+} rs_sampler_value;
+
 #if (defined(RS_VERSION) && (RS_VERSION >= 14))
 /**
  * Set the color target used for all subsequent rendering calls
@@ -82,6 +132,88 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgBindProgramStore(rs_program_store ps);
 
+
+/**
+ * @hide
+ * Get program store depth function
+ *
+ * @param ps
+ */
+extern rs_depth_func __attribute__((overloadable))
+    rsgProgramStoreGetDepthFunc(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store depth mask
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetDepthMask(rs_program_store ps);
+/**
+ * @hide
+ * Get program store red component color mask
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetColorMaskR(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store green component color mask
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetColorMaskG(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store blur component color mask
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetColorMaskB(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store alpha component color mask
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetColorMaskA(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store blend source function
+ *
+ * @param ps
+ */
+extern rs_blend_src_func __attribute__((overloadable))
+        rsgProgramStoreGetBlendSrcFunc(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store blend destination function
+ *
+ * @param ps
+ */
+extern rs_blend_dst_func __attribute__((overloadable))
+    rsgProgramStoreGetBlendDstFunc(rs_program_store ps);
+
+/**
+ * @hide
+ * Get program store dither state
+ *
+ * @param ps
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramStoreGetDitherEnabled(rs_program_store ps);
+
+
 /**
  * Bind a new ProgramVertex to the rendering context.
  *
@@ -99,6 +231,24 @@ extern void __attribute__((overloadable))
     rsgBindProgramRaster(rs_program_raster pr);
 
 /**
+ * @hide
+ * Get program raster point sprite state
+ *
+ * @param pr
+ */
+extern bool __attribute__((overloadable))
+    rsgProgramRasterGetPointSpriteEnabled(rs_program_raster pr);
+
+/**
+ * @hide
+ * Get program raster cull mode
+ *
+ * @param pr
+ */
+extern rs_cull_mode __attribute__((overloadable))
+    rsgProgramRasterGetCullMode(rs_program_raster pr);
+
+/**
  * Bind a new Sampler object to a ProgramFragment.  The sampler will
  * operate on the texture bound at the matching slot.
  *
@@ -106,6 +256,51 @@ extern void __attribute__((overloadable))
  */
 extern void __attribute__((overloadable))
     rsgBindSampler(rs_program_fragment, uint slot, rs_sampler);
+
+/**
+ * @hide
+ * Get sampler minification value
+ *
+ * @param pr
+ */
+extern rs_sampler_value __attribute__((overloadable))
+    rsgSamplerGetMinification(rs_sampler s);
+
+/**
+ * @hide
+ * Get sampler magnification value
+ *
+ * @param pr
+ */
+extern rs_sampler_value __attribute__((overloadable))
+    rsgSamplerGetMagnification(rs_sampler s);
+
+/**
+ * @hide
+ * Get sampler wrap S value
+ *
+ * @param pr
+ */
+extern rs_sampler_value __attribute__((overloadable))
+    rsgSamplerGetWrapS(rs_sampler s);
+
+/**
+ * @hide
+ * Get sampler wrap T value
+ *
+ * @param pr
+ */
+extern rs_sampler_value __attribute__((overloadable))
+    rsgSamplerGetWrapT(rs_sampler s);
+
+/**
+ * @hide
+ * Get sampler anisotropy
+ *
+ * @param pr
+ */
+extern float __attribute__((overloadable))
+    rsgSamplerGetAnisotropy(rs_sampler s);
 
 /**
  * Bind a new Allocation object to a ProgramFragment.  The
