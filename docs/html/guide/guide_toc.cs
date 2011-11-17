@@ -119,7 +119,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
                <span class="en">Action Bar</span>
-              </a></li>
+              </a> <span class="new">updated</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
                 <span class="en">Dialogs</span>
               </a></li>
@@ -739,21 +739,21 @@ applications</span>
         <ul>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
-                   <span class="en">Icon Design <span class="new">updated</span></span>
-                 </a></div>
+                   <span class="en">Icon Design</span>
+                 </a> <span class="new">updated</span></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_launcher.html">
-                    <span class="en">Launcher Icons <span class="new">updated</span></span>
-                  </a></li>
+                    <span class="en">Launcher Icons</span>
+                  </a> <span class="new">updated</span></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_menu.html">
                     <span class="en">Menu Icons</span>
                   </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_action_bar.html">
-                    <span class="en">Action Bar Icons <span class="new">new!</span></span>
-                  </a></li>
+                    <span class="en">Action Bar Icons</span>
+                  </a> <span class="new">new!</span></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_status_bar.html">
-                    <span class="en">Status Bar Icons <span class="new">updated</span></span>
-                  </a></li>
+                    <span class="en">Status Bar Icons</span>
+                  </a> <span class="new">updated</span></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_tab.html">
                     <span class="en">Tab Icons</span>
                   </a></li>
@@ -766,8 +766,8 @@ applications</span>
             </ul>
           </li>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">
-                <span class="en">App Widget Design <span class="new">updated</span></span>
-              </a></li>
+                <span class="en">App Widget Design</span>
+              </a> <span class="new">updated</span></li>
           <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/activity_task_design.html">
                 <span class="en">Activity and Task Design</span>
               </a></li>
@@ -844,8 +844,8 @@ applications</span>
             <span class="en">App Install Location</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
-            <span class="en">Supported Media Formats <span class="new">updated</span></span>
-          </a></li>
+            <span class="en">Supported Media Formats</span>
+          </a> <span class="new">updated</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
             <span class="en">Intents List: Google Apps</span>
           </a></li>
