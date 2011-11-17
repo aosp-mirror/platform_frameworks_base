@@ -741,4 +741,7 @@
     <string name="config_wimaxServiceClassname"></string>
     <!-- Name of the wimax state tracker clas -->
     <string name="config_wimaxStateTrackerClassname"></string>
+
+    <!-- Name of screensaver components to look for if none has been chosen by the user -->
+    <string name="config_defaultDreamComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 </resources>

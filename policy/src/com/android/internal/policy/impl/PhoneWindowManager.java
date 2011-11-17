@@ -3420,6 +3420,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             try {
                 String component = Settings.Secure.getString(
                         mContext.getContentResolver(), Settings.Secure.DREAM_COMPONENT);
+                if (component == null) {
+                    component = mContext.getResources().getString(R.string.config_defaultDreamComponent);
+                }
                 if (component != null) {
                     ComponentName cn = ComponentName.unflattenFromString(component);
                     Intent intent = new Intent(Intent.ACTION_MAIN)
