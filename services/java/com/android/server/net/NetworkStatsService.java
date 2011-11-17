@@ -203,6 +203,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of historical {@code xtables} stats for known UIDs. */
     private HashMap<UidStatsKey, NetworkStatsHistory> mUidStats = Maps.newHashMap();
 
+    /** Flag if {@link #mNetworkDevStats} have been loaded from disk. */
+    private boolean mNetworkStatsLoaded = false;
     /** Flag if {@link #mUidStats} have been loaded from disk. */
     private boolean mUidStatsLoaded = false;
 
@@ -272,6 +274,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // until actually needed.
             readNetworkDevStatsLocked();
             readNetworkXtStatsLocked();
+            mNetworkStatsLoaded = true;
         }
 
         // bootstrap initial stats to prevent double-counting later
@@ -322,14 +325,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         mTeleManager.listen(mPhoneListener, LISTEN_NONE);
 
-        writeNetworkDevStatsLocked();
-        writeNetworkXtStatsLocked();
+        if (mNetworkStatsLoaded) {
+            writeNetworkDevStatsLocked();
+            writeNetworkXtStatsLocked();
+        }
         if (mUidStatsLoaded) {
             writeUidStatsLocked();
         }
         mNetworkDevStats.clear();
         mNetworkXtStats.clear();
         mUidStats.clear();
+        mNetworkStatsLoaded = false;
         mUidStatsLoaded = false;
     }
 
