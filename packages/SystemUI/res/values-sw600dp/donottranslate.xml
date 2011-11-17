@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
- * Copyright (c) 2009, The Android Open Source Project
+ * Copyright (c) 2011, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -21,6 +21,7 @@
          We show both (DOW on one line, then the date) but this can be overridden for locales as
          necessary.
          -->
-    <string name="status_bar_date_formatter">%2$s</string>
+    <string name="status_bar_date_formatter">%1$s\n%2$s</string>
 
 </resources>
+
