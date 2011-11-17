@@ -1575,6 +1575,17 @@ public class PhoneNumberUtils
         // If the number passed in is null, just return false:
         if (number == null) return false;
 
+        // If the number passed in is a SIP address, return false, since the
+        // concept of "emergency numbers" is only meaningful for calls placed
+        // over the cell network.
+        // (Be sure to do this check *before* calling extractNetworkPortionAlt(),
+        // since the whole point of extractNetworkPortionAlt() is to filter out
+        // any non-dialable characters (which would turn 'abc911def@example.com'
+        // into '911', for example.))
+        if (isUriNumber(number)) {
+            return false;
+        }
+
         // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortionAlt(number);
