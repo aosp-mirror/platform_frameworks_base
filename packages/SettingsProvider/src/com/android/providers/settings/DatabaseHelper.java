@@ -723,6 +723,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 57;
         }
 
+        /************* The following are Honeycomb changes ************/
+
         if (upgradeVersion == 57) {
             /*
              * New settings to:
@@ -751,13 +753,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (upgradeVersion == 58) {
             /* Add default for new Auto Time Zone */
+            int autoTimeValue = getIntValueFromSystem(db, Settings.System.AUTO_TIME, 0);
             db.beginTransaction();
             SQLiteStatement stmt = null;
             try {
-                stmt = db.compileStatement("INSERT INTO secure(name,value)"
-                        + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.System.AUTO_TIME_ZONE,
-                        R.bool.def_auto_time_zone); // Sync timezone to NITZ
+                stmt = db.compileStatement("INSERT INTO system(name,value)" + " VALUES(?,?);");
+                loadSetting(stmt, Settings.System.AUTO_TIME_ZONE,
+                        autoTimeValue); // Sync timezone to NITZ if auto_time was enabled
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -784,18 +786,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 60) {
-            upgradeScreenTimeout(db);
+            // Don't do this for upgrades from Gingerbread
+            // Were only required for intra-Honeycomb upgrades for testing
+            // upgradeScreenTimeout(db);
             upgradeVersion = 61;
         }
 
         if (upgradeVersion == 61) {
-            upgradeScreenTimeout(db);
+            // Don't do this for upgrades from Gingerbread
+            // Were only required for intra-Honeycomb upgrades for testing
+            // upgradeScreenTimeout(db);
             upgradeVersion = 62;
         }
 
         // Change the default for screen auto-brightness mode
         if (upgradeVersion == 62) {
-            upgradeAutoBrightness(db);
+            // Don't do this for upgrades from Gingerbread
+            // Were only required for intra-Honeycomb upgrades for testing
+            // upgradeAutoBrightness(db);
             upgradeVersion = 63;
         }
 
@@ -838,6 +846,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 65;
         }
+
+        /************* The following are Ice Cream Sandwich changes ************/
 
         if (upgradeVersion == 65) {
             /*
@@ -1232,12 +1242,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                     + " VALUES(?,?);");
     
-            // Vibrate off by default for ringer, on for notification
+            // Vibrate on by default for ringer, on for notification
             int vibrate = 0;
             vibrate = AudioService.getValueForVibrateSetting(vibrate,
-                    AudioManager.VIBRATE_TYPE_NOTIFICATION, AudioManager.VIBRATE_SETTING_ON);
+                    AudioManager.VIBRATE_TYPE_NOTIFICATION,
+                    AudioManager.VIBRATE_SETTING_ONLY_SILENT);
             vibrate |= AudioService.getValueForVibrateSetting(vibrate,
-                    AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_OFF);
+                    AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
             loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
         } finally {
             if (stmt != null) stmt.close();
@@ -1508,5 +1519,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void loadFractionSetting(SQLiteStatement stmt, String key, int resid, int base) {
         loadSetting(stmt, key,
                 Float.toString(mContext.getResources().getFraction(resid, base, base)));
+    }
+
+    private int getIntValueFromSystem(SQLiteDatabase db, String name, int defaultValue) {
+        int value = defaultValue;
+        Cursor c = null;
+        try {
+            c = db.query("system", new String[] { Settings.System.VALUE }, "name='" + name + "'",
+                    null, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                String val = c.getString(0);
+                value = val == null ? defaultValue : Integer.parseInt(val);
+            }
+        } finally {
+            if (c != null) c.close();
+        }
+        return value;
     }
 }
