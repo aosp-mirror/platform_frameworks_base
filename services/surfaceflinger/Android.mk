@@ -30,10 +30,6 @@ ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 	LOCAL_CFLAGS += -DHAS_CONTEXT_PRIORITY -DNEVER_DEFAULT_TO_ASYNC_MODE
 endif
 
-ifneq (,$(findstring $(TARGET_DEVICE),tuna toro maguro))
-	LOCAL_CFLAGS += -DREFRESH_RATE=59
-endif
-
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
