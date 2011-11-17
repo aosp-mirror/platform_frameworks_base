@@ -12,14 +12,22 @@ import android.util.Slog;
 
 public class DreamsDockLauncher extends Activity {
     private static final String TAG = "DreamsDockLauncher";
+
+    // Launch the screen saver if started as an activity.
     @Override
     protected void onCreate (Bundle icicle) {
         super.onCreate(icicle);
+        launchDream(this);
+        finish();
+    }
+
+    private static void launchDream(Context context) {
         try {
             String component = Settings.Secure.getString(
-                    getContentResolver(), Settings.Secure.DREAM_COMPONENT);
+                    context.getContentResolver(), Settings.Secure.DREAM_COMPONENT);
             if (component == null) {
-                component = getResources().getString(com.android.internal.R.string.config_defaultDreamComponent);
+                component = context.getResources().getString(
+                    com.android.internal.R.string.config_defaultDreamComponent);
             }
             if (component != null) {
                 ComponentName cn = ComponentName.unflattenFromString(component);
@@ -29,7 +37,8 @@ public class DreamsDockLauncher extends Activity {
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                         | Intent.FLAG_ACTIVITY_NO_USER_ACTION
                         );
-                startActivity(zzz);
+                Slog.v(TAG, "Starting screen saver on dock event: " + component);
+                context.startActivity(zzz);
             } else {
                 Slog.e(TAG, "Couldn't start screen saver: none selected");
             }
@@ -37,6 +46,22 @@ public class DreamsDockLauncher extends Activity {
             // no screensaver? give up
             Slog.e(TAG, "Couldn't start screen saver: none installed");
         }
-        finish();
+    }
+
+    // Trap low-level dock events and launch the screensaver.
+    public static class DockEventReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
+                Bundle extras = intent.getExtras();
+                int state = extras
+                        .getInt(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                if (state == Intent.EXTRA_DOCK_STATE_DESK
+                        || state == Intent.EXTRA_DOCK_STATE_LE_DESK
+                        || state == Intent.EXTRA_DOCK_STATE_HE_DESK) {
+                    launchDream(context);
+                }
+            }
+        }
     }
 }
