@@ -100,7 +100,8 @@ int JetPlayer::init()
     {
         Mutex::Autolock l(mMutex);
         ALOGV("JetPlayer::init(): trying to start render thread");
-        createThreadEtc(renderThread, this, "jetRenderThread", ANDROID_PRIORITY_AUDIO);
+        mThread = new JetPlayerThread(this);
+        mThread->run("jetRenderThread", ANDROID_PRIORITY_AUDIO);
         mCondition.wait(mMutex);
     }
     if (mTid > 0) {
@@ -154,12 +155,6 @@ int JetPlayer::release()
     return EAS_SUCCESS;
 }
 
-
-//-------------------------------------------------------------------------------------------------
-int JetPlayer::renderThread(void* p) {
-
-    return ((JetPlayer*)p)->render();
-}
 
 //-------------------------------------------------------------------------------------------------
 int JetPlayer::render() {

@@ -65,7 +65,6 @@ public:
 
 
 private:
-    static  int         renderThread(void*);
     int                 render();
     void                fireUpdateOnStatusChange();
     void                fireEventsFromJetQueue();
@@ -97,6 +96,28 @@ private:
 
     char                mJetFilePath[256];
 
+    class JetPlayerThread : public Thread {
+    public:
+        JetPlayerThread(JetPlayer *player) : mPlayer(player) {
+        }
+
+    protected:
+        virtual ~JetPlayerThread() {}
+
+    private:
+        JetPlayer *mPlayer;
+
+        bool threadLoop() {
+            int result;
+            result = mPlayer->render();
+            return false;
+        }
+
+        JetPlayerThread(const JetPlayerThread &);
+        JetPlayerThread &operator=(const JetPlayerThread &);
+    };
+
+    sp<JetPlayerThread> mThread;
 
 }; // end class JetPlayer
 
