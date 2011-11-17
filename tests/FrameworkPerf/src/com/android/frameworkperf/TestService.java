@@ -33,6 +33,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -64,6 +65,9 @@ public class TestService extends Service {
             new MethodCallOp(), new ReadFileOp(),
             new SchedulerOp(), new SchedulerOp(),
             new GcOp(), new NoOp(),
+            new ObjectGcOp(), new NoOp(),
+            new FinalizingGcOp(), new NoOp(),
+            new PaintGcOp(), new NoOp(),
             new IpcOp(), new NoOp(),
             new IpcOp(), new CpuOp(),
             new IpcOp(), new SchedulerOp(),
@@ -111,6 +115,10 @@ public class TestService extends Service {
             new CpuOp(),
             new SchedulerOp(),
             new MethodCallOp(),
+            new GcOp(),
+            new ObjectGcOp(),
+            new FinalizingGcOp(),
+            new PaintGcOp(),
             new IpcOp(),
             new CreateFileOp(),
             new CreateWriteFileOp(),
@@ -463,6 +471,47 @@ public class TestService extends Service {
 
         boolean onRun() {
             byte[] stuff = new byte[1024*1024];
+            return true;
+        }
+    }
+
+    static class ObjectGcOp extends Op {
+        ObjectGcOp() {
+            super("ObjectGc", "Run garbage collector with simple objects");
+        }
+
+        boolean onRun() {
+            Object obj = new Object();
+            return true;
+        }
+    }
+
+    static class FinalizingGcOp extends Op {
+        class Finalizable {
+            Finalizable() {}
+            @Override
+            protected void finalize() throws Throwable {
+                super.finalize();
+            }
+        }
+
+        FinalizingGcOp() {
+            super("FinalizingGc", "Run garbage collector with finalizable objects");
+        }
+
+        boolean onRun() {
+            Finalizable obj = new Finalizable();
+            return true;
+        }
+    }
+
+    static class PaintGcOp extends Op {
+        PaintGcOp() {
+            super("PaintGc", "Run garbage collector with Paint objects");
+        }
+
+        boolean onRun() {
+            Paint p = new Paint();
             return true;
         }
     }
