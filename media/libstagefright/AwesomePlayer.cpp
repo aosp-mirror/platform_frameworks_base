@@ -224,17 +224,18 @@ AwesomePlayer::~AwesomePlayer() {
     mClient.disconnect();
 }
 
-void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
+void AwesomePlayer::cancelPlayerEvents(bool keepNotifications) {
     mQueue.cancelEvent(mVideoEvent->eventID());
     mVideoEventPending = false;
-    mQueue.cancelEvent(mStreamDoneEvent->eventID());
-    mStreamDoneEventPending = false;
-    mQueue.cancelEvent(mCheckAudioStatusEvent->eventID());
-    mAudioStatusEventPending = false;
     mQueue.cancelEvent(mVideoLagEvent->eventID());
     mVideoLagEventPending = false;
 
-    if (!keepBufferingGoing) {
+    if (!keepNotifications) {
+        mQueue.cancelEvent(mStreamDoneEvent->eventID());
+        mStreamDoneEventPending = false;
+        mQueue.cancelEvent(mCheckAudioStatusEvent->eventID());
+        mAudioStatusEventPending = false;
+
         mQueue.cancelEvent(mBufferingEvent->eventID());
         mBufferingEventPending = false;
     }
@@ -1095,7 +1096,7 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
         return OK;
     }
 
-    cancelPlayerEvents(true /* keepBufferingGoing */);
+    cancelPlayerEvents(true /* keepNotifications */);
 
     if (mAudioPlayer != NULL && (mFlags & AUDIO_RUNNING)) {
         if (at_eos) {
