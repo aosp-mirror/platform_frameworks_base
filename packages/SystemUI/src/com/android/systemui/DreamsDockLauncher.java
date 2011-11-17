@@ -18,6 +18,9 @@ public class DreamsDockLauncher extends Activity {
         try {
             String component = Settings.Secure.getString(
                     getContentResolver(), Settings.Secure.DREAM_COMPONENT);
+            if (component == null) {
+                component = getResources().getString(com.android.internal.R.string.config_defaultDreamComponent);
+            }
             if (component != null) {
                 ComponentName cn = ComponentName.unflattenFromString(component);
                 Intent zzz = new Intent(Intent.ACTION_MAIN)

@@ -48,6 +48,7 @@
 
         <!-- handle dock insertion, launch screensaver instead -->
         <activity android:name=".DreamsDockLauncher"
+                android:theme="@android:style/Theme.Dialog"
                 android:label="@string/dreams_dock_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -124,7 +125,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.DREAM" />
+<!--                <category android:name="android.intent.category.DREAM" />-->
             </intent-filter>
         </activity>
     </application>
