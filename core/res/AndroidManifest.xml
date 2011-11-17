@@ -263,8 +263,7 @@
         android:label="@string/permlab_writeProfile"
         android:description="@string/permdesc_writeProfile" />
 
-    <!-- Allows an application to read from the user's social stream.
-         @hide -->
+    <!-- Allows an application to read from the user's social stream. -->
     <permission android:name="android.permission.READ_SOCIAL_STREAM"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:protectionLevel="dangerous"
@@ -272,8 +271,7 @@
         android:description="@string/permdesc_readSocialStream" />
 
     <!-- Allows an application to write (but not read) the user's
-         social stream data.
-         @hide -->
+         social stream data. -->
     <permission android:name="android.permission.WRITE_SOCIAL_STREAM"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:protectionLevel="dangerous"
