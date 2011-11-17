@@ -86,7 +86,8 @@ MidiFile::MidiFile() :
     // create playback thread
     {
         Mutex::Autolock l(mMutex);
-        createThreadEtc(renderThread, this, "midithread", ANDROID_PRIORITY_AUDIO);
+        mThread = new MidiFileThread(this);
+        mThread->run("midithread", ANDROID_PRIORITY_AUDIO);
         mCondition.wait(mMutex);
         ALOGV("thread started");
     }
@@ -425,11 +426,6 @@ status_t MidiFile::createOutputTrack() {
         return ERROR_OPEN_FAILED;
     }
     return NO_ERROR;
-}
-
-int MidiFile::renderThread(void* p) {
-
-    return ((MidiFile*)p)->render();
 }
 
 int MidiFile::render() {
