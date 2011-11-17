@@ -23,9 +23,9 @@ import android.test.AndroidTestCase;
 import java.io.File;
 
 /**
- * Tests for {@link com.android.server.EntropyService}
+ * Tests for {@link com.android.server.EntropyMixer}
  */
-public class EntropyServiceTest extends AndroidTestCase {
+public class EntropyMixerTest extends AndroidTestCase {
 
     public void testInitialWrite() throws Exception {
         File dir = getContext().getDir("testInitialWrite", Context.MODE_PRIVATE);
@@ -34,7 +34,7 @@ public class EntropyServiceTest extends AndroidTestCase {
         assertEquals(0, FileUtils.readTextFile(file, 0, null).length());
 
         // The constructor has the side effect of writing to file
-        new EntropyService("/dev/null", file.getCanonicalPath());
+        new EntropyMixer("/dev/null", file.getCanonicalPath());
 
         assertTrue(FileUtils.readTextFile(file, 0, null).length() > 0);
     }
