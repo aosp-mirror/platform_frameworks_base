@@ -201,7 +201,7 @@ public class SpellCheckerSession {
         private static final int TASK_CLOSE = 3;
         private final Queue<SpellCheckerParams> mPendingTasks =
                 new LinkedList<SpellCheckerParams>();
-        private final Handler mHandler;
+        private Handler mHandler;
 
         private boolean mOpened;
         private ISpellCheckerSession mISpellCheckerSession;
@@ -334,6 +334,7 @@ public class SpellCheckerSession {
             try {
                 mISpellCheckerSession.onClose();
                 mISpellCheckerSession = null;
+                mHandler = null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to close " + e);
             }
