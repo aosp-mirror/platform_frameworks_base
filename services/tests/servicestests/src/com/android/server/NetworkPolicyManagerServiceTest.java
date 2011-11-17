@@ -693,12 +693,13 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
             expectMeteredIfacesChanged(TEST_IFACE);
 
-            expectClearNotifications();
+            future = expectClearNotifications();
             tagFuture = expectEnqueueNotification();
 
             replay();
             mService.snoozePolicy(sTemplateWifi);
             assertNotificationType(TYPE_LIMIT_SNOOZED, tagFuture.get());
+            future.get();
             verifyAndReset();
         }
     }
@@ -734,9 +735,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectLastCall().atLeastOnce();
     }
 
-    private void expectClearNotifications() throws Exception {
+    private Future<Void> expectClearNotifications() throws Exception {
+        final FutureAnswer future = new FutureAnswer();
         mNotifManager.cancelNotificationWithTag(isA(String.class), isA(String.class), anyInt());
-        expectLastCall().anyTimes();
+        expectLastCall().andAnswer(future).anyTimes();
+        return future;
     }
 
     private Future<String> expectEnqueueNotification() throws Exception {
