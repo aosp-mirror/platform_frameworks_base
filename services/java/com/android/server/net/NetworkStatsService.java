@@ -472,6 +472,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    private long getHistoryStartLocked(
+            NetworkTemplate template, HashMap<NetworkIdentitySet, NetworkStatsHistory> source) {
+        long start = Long.MAX_VALUE;
+        for (NetworkIdentitySet ident : source.keySet()) {
+            if (templateMatches(template, ident)) {
+                final NetworkStatsHistory history = source.get(ident);
+                start = Math.min(start, history.getStart());
+            }
+        }
+        return start;
+    }
+
     @Override
     public NetworkStats getSummaryForAllUid(
             NetworkTemplate template, long start, long end, boolean includeTags) {
@@ -771,6 +783,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performPoll(int flags) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
+
+            // try refreshing time source when stale
+            if (mTime.getCacheAge() > mSettings.getTimeCacheMaxAge()) {
+                mTime.forceRefresh();
+            }
+
             try {
                 performPollLocked(flags);
             } finally {
@@ -790,11 +808,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean persistNetwork = (flags & FLAG_PERSIST_NETWORK) != 0;
         final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
         final boolean persistForce = (flags & FLAG_PERSIST_FORCE) != 0;
-
-        // try refreshing time source when stale
-        if (mTime.getCacheAge() > mSettings.getTimeCacheMaxAge()) {
-            mTime.forceRefresh();
-        }
 
         // TODO: consider marking "untrusted" times in historical stats
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
@@ -981,6 +994,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final long start = end - largestBucketSize;
 
         final long trustedTime = mTime.hasCache() ? mTime.currentTimeMillis() : -1;
+        long devHistoryStart = Long.MAX_VALUE;
 
         NetworkTemplate template = null;
         NetworkStats.Entry devTotal = null;
@@ -990,24 +1004,27 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // collect mobile sample
         template = buildTemplateMobileAll(getActiveSubscriberId(mContext));
         devTotal = getSummaryForNetworkDev(template, start, end).getTotal(devTotal);
+        devHistoryStart = getHistoryStartLocked(template, mNetworkDevStats);
         xtTotal = getSummaryForNetworkXt(template, start, end).getTotal(xtTotal);
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
+
         EventLogTags.writeNetstatsMobileSample(
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,
-                trustedTime);
+                trustedTime, devHistoryStart);
 
         // collect wifi sample
         template = buildTemplateWifi();
         devTotal = getSummaryForNetworkDev(template, start, end).getTotal(devTotal);
+        devHistoryStart = getHistoryStartLocked(template, mNetworkDevStats);
         xtTotal = getSummaryForNetworkXt(template, start, end).getTotal(xtTotal);
         uidTotal = getSummaryForAllUid(template, start, end, false).getTotal(uidTotal);
         EventLogTags.writeNetstatsWifiSample(
                 devTotal.rxBytes, devTotal.rxPackets, devTotal.txBytes, devTotal.txPackets,
                 xtTotal.rxBytes, xtTotal.rxPackets, xtTotal.txBytes, xtTotal.txPackets,
                 uidTotal.rxBytes, uidTotal.rxPackets, uidTotal.txBytes, uidTotal.txPackets,
-                trustedTime);
+                trustedTime, devHistoryStart);
     }
 
     /**
@@ -1243,11 +1260,28 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // trim any history beyond max
         if (mTime.hasCache()) {
-            final long currentTime = Math.min(
-                    System.currentTimeMillis(), mTime.currentTimeMillis());
+            final long systemCurrentTime = System.currentTimeMillis();
+            final long trustedCurrentTime = mTime.currentTimeMillis();
+
+            final long currentTime = Math.min(systemCurrentTime, trustedCurrentTime);
             final long maxHistory = mSettings.getNetworkMaxHistory();
+
             for (NetworkStatsHistory history : input.values()) {
+                final int beforeSize = history.size();
                 history.removeBucketsBefore(currentTime - maxHistory);
+                final int afterSize = history.size();
+
+                if (beforeSize > 24 && afterSize < beforeSize / 2) {
+                    // yikes, dropping more than half of significant history
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append("yikes, dropping more than half of history").append('\n');
+                    builder.append("systemCurrentTime=").append(systemCurrentTime).append('\n');
+                    builder.append("trustedCurrentTime=").append(trustedCurrentTime).append('\n');
+                    builder.append("maxHistory=").append(maxHistory).append('\n');
+                    builder.append("beforeSize=").append(beforeSize).append('\n');
+                    builder.append("afterSize=").append(afterSize).append('\n');
+                    mDropBox.addText(TAG_NETSTATS_ERROR, builder.toString());
+                }
             }
         }
 
