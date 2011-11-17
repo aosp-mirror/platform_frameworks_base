@@ -63,6 +63,10 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     private static final String KEY_LAST_UPDATE_INTERVAL = "LAST_UPDATE_INTERVAL";
 
+    // Enable launching of applications when entering the dock.
+    private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
+    private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = false;
+
     private static final int MSG_UPDATE_TWILIGHT = 0;
     private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
     private static final int MSG_GET_NEW_LOCATION_UPDATE = 2;
@@ -139,14 +143,16 @@ class UiModeManagerService extends IUiModeManager.Stub {
                 if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
                     // Only launch car home when car mode is enabled and the caller
                     // has asked us to switch to it.
-                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                    if (ENABLE_LAUNCH_CAR_DOCK_APP
+                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
                         category = Intent.CATEGORY_CAR_DOCK;
                     }
                 } else if (UiModeManager.ACTION_ENTER_DESK_MODE.equals(intent.getAction())) {
                     // Only launch car home when desk mode is enabled and the caller
                     // has asked us to switch to it.  Currently re-using the car
                     // mode flag since we don't have a formal API for "desk mode".
-                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                    if (ENABLE_LAUNCH_DESK_DOCK_APP
+                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
                         category = Intent.CATEGORY_DESK_DOCK;
                     }
                 } else {
@@ -550,11 +556,13 @@ class UiModeManagerService extends IUiModeManager.Stub {
             } else {
                 Intent homeIntent = null;
                 if (mCarModeEnabled) {
-                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                    if (ENABLE_LAUNCH_CAR_DOCK_APP
+                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
                         homeIntent = buildHomeIntent(Intent.CATEGORY_CAR_DOCK);
                     }
                 } else if (isDeskDockState(mDockState)) {
-                    if ((enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
+                    if (ENABLE_LAUNCH_DESK_DOCK_APP
+                            && (enableFlags&UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME) != 0) {
                         homeIntent = buildHomeIntent(Intent.CATEGORY_DESK_DOCK);
                     }
                 } else {
