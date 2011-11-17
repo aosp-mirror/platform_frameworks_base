@@ -360,6 +360,10 @@ public final class NfcAdapter {
         /* use getSystemService() instead of just instantiating to take
          * advantage of the context's cached NfcManager & NfcAdapter */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
+        if (manager == null) {
+            // NFC not available
+            return null;
+        }
         return manager.getDefaultAdapter();
     }
 
