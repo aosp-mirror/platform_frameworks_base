@@ -7947,7 +7947,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (dumpState.isDumping(DumpState.DUMP_PROVIDERS)) {
                 boolean printedSomething = false;
-                for (PackageParser.Provider p : mProviders.values()) {
+                for (PackageParser.Provider p : mProvidersByComponent.values()) {
                     if (packageName != null && !packageName.equals(p.info.packageName)) {
                         continue;
                     }
@@ -7957,8 +7957,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pw.println("Registered ContentProviders:");
                         printedSomething = true;
                     }
-                    pw.print("  ["); pw.print(p.info.authority); pw.print("]: ");
-                            pw.println(p.toString());
+                    pw.print("  "); pw.print(p.getComponentShortName()); pw.println(":");
+                    pw.print("    "); pw.println(p.toString());
+                }
+                printedSomething = false;
+                for (Map.Entry<String, PackageParser.Provider> entry : mProviders.entrySet()) {
+                    PackageParser.Provider p = entry.getValue();
+                    if (packageName != null && !packageName.equals(p.info.packageName)) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (dumpState.onTitlePrinted())
+                            pw.println(" ");
+                        pw.println("ContentProvider Authorities:");
+                        printedSomething = true;
+                    }
+                    pw.print("  ["); pw.print(entry.getKey()); pw.println("]:");
+                    pw.print("    "); pw.println(p.toString());
                 }
             }
             
