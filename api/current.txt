@@ -83,6 +83,7 @@ package android {
     field public static final java.lang.String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
     field public static final java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
+    field public static final java.lang.String READ_SOCIAL_STREAM = "android.permission.READ_SOCIAL_STREAM";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
@@ -127,6 +128,7 @@ package android {
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final java.lang.String WRITE_SMS = "android.permission.WRITE_SMS";
+    field public static final java.lang.String WRITE_SOCIAL_STREAM = "android.permission.WRITE_SOCIAL_STREAM";
     field public static final java.lang.String WRITE_SYNC_SETTINGS = "android.permission.WRITE_SYNC_SETTINGS";
   }
 
