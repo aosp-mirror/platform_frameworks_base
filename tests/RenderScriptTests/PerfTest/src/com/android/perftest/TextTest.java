@@ -19,6 +19,7 @@ package com.android.perftest;
 import android.os.Environment;
 import android.content.res.Resources;
 import android.renderscript.*;
+import android.util.DisplayMetrics;
 
 import android.util.Log;
 
@@ -78,8 +79,12 @@ public class TextTest implements RsBenchBaseTest{
     }
 
     void initTextScript() {
+        DisplayMetrics metrics = mRes.getDisplayMetrics();
+
         mTextScript = new ScriptC_text_test(mRS, mRes, R.raw.text_test);
-        mTextScript.set_gFontSans(Font.create(mRS, mRes, "sans-serif", Font.Style.NORMAL, 8));
-        mTextScript.set_gFontSerif(Font.create(mRS, mRes, "serif", Font.Style.NORMAL, 8));
+        mTextScript.set_gFontSans(Font.create(mRS, mRes, "sans-serif",
+                                              Font.Style.NORMAL, 8.0f / metrics.density));
+        mTextScript.set_gFontSerif(Font.create(mRS, mRes, "serif",
+                                               Font.Style.NORMAL, 8.0f / metrics.density));
     }
 }
