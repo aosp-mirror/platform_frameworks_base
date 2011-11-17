@@ -1341,9 +1341,13 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /* package */void updateDefaultZoomDensity(int zoomDensity) {
+    /* package */ void adjustDefaultZoomDensity(int zoomDensity) {
         final float density = mContext.getResources().getDisplayMetrics().density
                 * 100 / zoomDensity;
+        updateDefaultZoomDensity(density);
+    }
+
+    /* package */ void updateDefaultZoomDensity(float density) {
         mNavSlop = (int) (16 * density);
         mZoomManager.updateDefaultZoomDensity(density);
     }
@@ -2469,7 +2473,9 @@ public class WebView extends AbsoluteLayout
      * Set the initial scale for the WebView. 0 means default. If
      * {@link WebSettings#getUseWideViewPort()} is true, it zooms out all the
      * way. Otherwise it starts with 100%. If initial scale is greater than 0,
-     * WebView starts will this value as initial scale.
+     * WebView starts with this value as initial scale.
+     * Please note that unlike the scale properties in the viewport meta tag,
+     * this method doesn't take the screen density into account.
      *
      * @param scaleInPercent The initial scale in percent.
      */
