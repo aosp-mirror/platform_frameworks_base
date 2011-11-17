@@ -472,6 +472,30 @@ void Context::setSurface(uint32_t w, uint32_t h, RsNativeWindow sur) {
     }
 }
 
+uint32_t Context::getCurrentSurfaceWidth() const {
+    for (uint32_t i = 0; i < mFBOCache.mHal.state.colorTargetsCount; i ++) {
+        if (mFBOCache.mHal.state.colorTargets[i] != NULL) {
+            return mFBOCache.mHal.state.colorTargets[i]->getType()->getDimX();
+        }
+    }
+    if (mFBOCache.mHal.state.depthTarget != NULL) {
+        return mFBOCache.mHal.state.depthTarget->getType()->getDimX();
+    }
+    return mWidth;
+}
+
+uint32_t Context::getCurrentSurfaceHeight() const {
+    for (uint32_t i = 0; i < mFBOCache.mHal.state.colorTargetsCount; i ++) {
+        if (mFBOCache.mHal.state.colorTargets[i] != NULL) {
+            return mFBOCache.mHal.state.colorTargets[i]->getType()->getDimY();
+        }
+    }
+    if (mFBOCache.mHal.state.depthTarget != NULL) {
+        return mFBOCache.mHal.state.depthTarget->getType()->getDimY();
+    }
+    return mHeight;
+}
+
 void Context::pause() {
     rsAssert(mIsGraphicsContext);
     mPaused = true;

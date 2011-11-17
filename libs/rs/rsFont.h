@@ -160,6 +160,9 @@ public:
 
 protected:
 
+    float mSurfaceWidth;
+    float mSurfaceHeight;
+
     friend class Font;
 
     struct CacheTextureLine {

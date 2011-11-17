@@ -79,23 +79,28 @@ void rsrBindProgramRaster(Context *rsc, Script *sc, ProgramRaster *pr) {
 void rsrBindFrameBufferObjectColorTarget(Context *rsc, Script *sc, Allocation *a, uint32_t slot) {
     CHECK_OBJ(va);
     rsc->mFBOCache.bindColorTarget(rsc, a, slot);
+    rsc->mStateVertex.updateSize(rsc);
 }
 
 void rsrBindFrameBufferObjectDepthTarget(Context *rsc, Script *sc, Allocation *a) {
     CHECK_OBJ(va);
     rsc->mFBOCache.bindDepthTarget(rsc, a);
+    rsc->mStateVertex.updateSize(rsc);
 }
 
 void rsrClearFrameBufferObjectColorTarget(Context *rsc, Script *sc, uint32_t slot) {
     rsc->mFBOCache.bindColorTarget(rsc, NULL, slot);
+    rsc->mStateVertex.updateSize(rsc);
 }
 
 void rsrClearFrameBufferObjectDepthTarget(Context *rsc, Script *sc) {
     rsc->mFBOCache.bindDepthTarget(rsc, NULL);
+    rsc->mStateVertex.updateSize(rsc);
 }
 
 void rsrClearFrameBufferObjectTargets(Context *rsc, Script *sc) {
     rsc->mFBOCache.resetAll(rsc);
+    rsc->mStateVertex.updateSize(rsc);
 }
 
 //////////////////////////////////////////////////////////////////////////////
