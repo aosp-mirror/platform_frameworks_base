@@ -22,6 +22,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLUtils;
+import android.opengl.ManagedEGLContext;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -409,7 +412,8 @@ public abstract class HardwareRenderer {
         static final Object[] sEglLock = new Object[0];
         int mWidth = -1, mHeight = -1;
 
-        static final ThreadLocal<EGLContext> sEglContextStorage = new ThreadLocal<EGLContext>();
+        static final ThreadLocal<Gl20Renderer.MyEGLContext> sEglContextStorage
+                = new ThreadLocal<Gl20Renderer.MyEGLContext>();
 
         EGLContext mEglContext;
         Thread mEglThread;
@@ -561,12 +565,13 @@ public abstract class HardwareRenderer {
                 }
             }
 
-            mEglContext = sEglContextStorage.get();
+            Gl20Renderer.MyEGLContext managedContext = sEglContextStorage.get();
+            mEglContext = managedContext != null ? managedContext.getContext() : null;
             mEglThread = Thread.currentThread();
 
             if (mEglContext == null) {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
-                sEglContextStorage.set(mEglContext);
+                sEglContextStorage.set(new Gl20Renderer.MyEGLContext(mEglContext));
             }
         }
 
@@ -904,6 +909,51 @@ public abstract class HardwareRenderer {
         private static EGLSurface sPbuffer;
         private static final Object[] sPbufferLock = new Object[0];
 
+        static class MyEGLContext extends ManagedEGLContext {
+            final Handler mHandler = new Handler();
+
+            public MyEGLContext(EGLContext context) {
+                super(context);
+            }
+
+            @Override
+            public void onTerminate(final EGLContext eglContext) {
+                // Make sure we do this on the correct thread.
+                if (mHandler.getLooper() != Looper.myLooper()) {
+                    mHandler.post(new Runnable() {
+                        @Override public void run() {
+                            onTerminate(eglContext);
+                        }
+                    });
+                    return;
+                }
+
+                synchronized (sEglLock) {
+                    if (sEgl == null) return;
+
+                    if (EGLImpl.getInitCount(sEglDisplay) == 1) {
+                        usePbufferSurface(eglContext);
+                        GLES20Canvas.terminateCaches();
+
+                        sEgl.eglDestroyContext(sEglDisplay, eglContext);
+                        sEglContextStorage.remove();
+
+                        sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
+                        sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+                        sEgl.eglReleaseThread();
+                        sEgl.eglTerminate(sEglDisplay);
+
+                        sEgl = null;
+                        sEglDisplay = null;
+                        sEglConfig = null;
+                        sPbuffer = null;
+                        sEglContextStorage.set(null);
+                    }
+                }
+            }
+        }
+
         Gl20Renderer(boolean translucent) {
             super(2, translucent);
         }
@@ -1020,12 +1070,12 @@ public abstract class HardwareRenderer {
         static void trimMemory(int level) {
             if (sEgl == null || sEglConfig == null) return;
 
-            EGLContext eglContext = sEglContextStorage.get();
+            Gl20Renderer.MyEGLContext managedContext = sEglContextStorage.get();
             // We do not have OpenGL objects
-            if (eglContext == null) {
+            if (managedContext == null) {
                 return;
             } else {
-                usePbufferSurface(eglContext);
+                usePbufferSurface(managedContext.getContext());
             }
 
             switch (level) {
@@ -1051,34 +1101,6 @@ public abstract class HardwareRenderer {
                 }
             }
             sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
-        }
-
-        static void terminate() {
-            synchronized (sEglLock) {
-                if (sEgl == null) return;
-    
-                if (EGLImpl.getInitCount(sEglDisplay) == 1) {
-                    EGLContext eglContext = sEglContextStorage.get();
-                    if (eglContext == null) return;
-
-                    usePbufferSurface(eglContext);
-                    GLES20Canvas.terminateCaches();
-
-                    sEgl.eglDestroyContext(sEglDisplay, eglContext);
-                    sEglContextStorage.remove();
-        
-                    sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
-                    sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-                    sEgl.eglReleaseThread();
-                    sEgl.eglTerminate(sEglDisplay);
-                    
-                    sEgl = null;
-                    sEglDisplay = null;
-                    sEglConfig = null;
-                    sPbuffer = null;
-                }
-            }
         }
     }
 }
