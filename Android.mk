@@ -412,6 +412,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/BackupRestore "Backup and Restore" \
 		-samplecode $(sample_dir)/BluetoothChat \
 		            resources/samples/BluetoothChat "Bluetooth Chat" \
+		-samplecode $(sample_dir)/BluetoothHDP \
+		            resources/samples/BluetoothHDP "Bluetooth HDP Demo" \
 		-samplecode $(sample_dir)/BusinessCard \
 		            resources/samples/BusinessCard "Business Card" \
 		-samplecode $(sample_dir)/ContactManager \
