@@ -567,7 +567,6 @@ import java.util.ArrayList;
                 mPreChange.substring(0, mMaxLength).equals(postChange))) {
             return;
         }
-        mPreChange = postChange;
         if (0 == count) {
             if (before > 0) {
                 // For this and all changes to the text, update our cache
@@ -605,9 +604,9 @@ import java.util.ArrayList;
         // Prefer sending javascript events, so when adding one character,
         // don't replace the unchanged text.
         if (count > 1 && before == count - 1) {
-            String replaceButOne =  s.subSequence(start,
+            String replaceButOne =  mPreChange.subSequence(start,
                     start + before).toString();
-            String replacedString = getText().subSequence(start,
+            String replacedString = s.subSequence(start,
                     start + before).toString();
             if (replaceButOne.equals(replacedString)) {
                 // we're just adding one character
@@ -616,6 +615,7 @@ import java.util.ArrayList;
                 count = 1;
             }
         }
+        mPreChange = postChange;
         // Find the last character being replaced.  If it can be represented by
         // events, we will pass them to native so we can see javascript events.
         // Otherwise, replace the text being changed in the textfield.
