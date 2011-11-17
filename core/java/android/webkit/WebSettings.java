@@ -799,7 +799,7 @@ public class WebSettings {
     public void setDefaultZoom(ZoomDensity zoom) {
         if (mDefaultZoom != zoom) {
             mDefaultZoom = zoom;
-            mWebView.updateDefaultZoomDensity(zoom.value);
+            mWebView.adjustDefaultZoomDensity(zoom.value);
         }
     }
 

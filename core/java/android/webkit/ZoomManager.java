@@ -349,7 +349,7 @@ class ZoomManager {
     }
 
     public final void setInitialScaleInPercent(int scaleInPercent) {
-        mInitialScale = scaleInPercent * mDisplayDensity * 0.01f;
+        mInitialScale = scaleInPercent * 0.01f;
     }
 
     public final float computeScaleWithLimits(float scale) {
