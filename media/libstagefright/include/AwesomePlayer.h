@@ -250,7 +250,7 @@ private:
     void notifyVideoSize_l();
     void seekAudioIfNecessary_l();
 
-    void cancelPlayerEvents(bool keepBufferingGoing = false);
+    void cancelPlayerEvents(bool keepNotifications = false);
 
     void setAudioSource(sp<MediaSource> source);
     status_t initAudioDecoder();
