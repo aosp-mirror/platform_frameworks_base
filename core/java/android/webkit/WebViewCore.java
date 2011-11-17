@@ -594,8 +594,6 @@ public final class WebViewCore {
 
     private native void nativeDumpNavTree();
 
-    private native void nativeDumpV8Counters();
-
     private native void nativeSetJsFlags(String flags);
 
     /**
