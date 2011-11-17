@@ -47,8 +47,8 @@ import android.util.Slog;
  * <p>TODO: Investigate attempting to write entropy data at shutdown time
  * instead of periodically.
  */
-public class EntropyService extends Binder {
-    private static final String TAG = "EntropyService";
+public class EntropyMixer extends Binder {
+    private static final String TAG = "EntropyMixer";
     private static final int ENTROPY_WHAT = 1;
     private static final int ENTROPY_WRITE_PERIOD = 3 * 60 * 60 * 1000;  // 3 hrs
     private static final long START_TIME = System.currentTimeMillis();
@@ -72,12 +72,12 @@ public class EntropyService extends Binder {
         }
     };
 
-    public EntropyService() {
+    public EntropyMixer() {
         this(getSystemDir() + "/entropy.dat", "/dev/urandom");
     }
 
     /** Test only interface, not for public use */
-    public EntropyService(String entropyFile, String randomDevice) {
+    public EntropyMixer(String entropyFile, String randomDevice) {
         if (randomDevice == null) { throw new NullPointerException("randomDevice"); }
         if (entropyFile == null) { throw new NullPointerException("entropyFile"); }
 

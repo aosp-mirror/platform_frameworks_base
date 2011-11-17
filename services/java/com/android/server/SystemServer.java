@@ -133,8 +133,8 @@ class ServerThread extends Thread {
 
         // Critical services...
         try {
-            Slog.i(TAG, "Entropy Service");
-            ServiceManager.addService("entropy", new EntropyService());
+            Slog.i(TAG, "Entropy Mixer");
+            ServiceManager.addService("entropy", new EntropyMixer());
 
             Slog.i(TAG, "Power Manager");
             power = new PowerManagerService();
