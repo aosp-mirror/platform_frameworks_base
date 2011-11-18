@@ -94,7 +94,7 @@ static MediaScanResult HandleMIDI(
     char buffer[20];
     sprintf(buffer, "%ld", temp);
     status_t status = client->addStringTag("duration", buffer);
-    if (status) {
+    if (status != OK) {
         return MEDIA_SCAN_RESULT_ERROR;
     }
     return MEDIA_SCAN_RESULT_OK;
@@ -178,7 +178,7 @@ MediaScanResult StagefrightMediaScanner::processFileInternal(
         const char *value;
         if ((value = mRetriever->extractMetadata(kKeyMap[i].key)) != NULL) {
             status = client.addStringTag(kKeyMap[i].tag, value);
-            if (status) {
+            if (status != OK) {
                 return MEDIA_SCAN_RESULT_ERROR;
             }
         }
