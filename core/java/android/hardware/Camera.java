@@ -2512,13 +2512,16 @@ public class Camera {
 
         /**
          * Sets the white balance. Changing the setting will release the
-         * auto-white balance lock.
+         * auto-white balance lock. It is recommended not to change white
+         * balance and AWB lock at the same time.
          *
          * @param value new white balance.
          * @see #getWhiteBalance()
          * @see #setAutoWhiteBalanceLock(boolean)
          */
         public void setWhiteBalance(String value) {
+            String oldValue = get(KEY_WHITE_BALANCE);
+            if (same(value, oldValue)) return;
             set(KEY_WHITE_BALANCE, value);
             set(KEY_AUTO_WHITEBALANCE_LOCK, FALSE);
         }
@@ -3492,6 +3495,12 @@ public class Camera {
             }
 
             return result;
+        }
+
+        private boolean same(String s1, String s2) {
+            if (s1 == null && s2 == null) return true;
+            if (s1 != null && s1.equals(s2)) return true;
+            return false;
         }
     };
 
