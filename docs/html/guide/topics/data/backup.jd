@@ -708,14 +708,6 @@ you must use synchronized statements each time you perform a read or write. For 
 in any Activity where you read and write the file, you need an object to use as the intrinsic
 lock for the synchronized statements:</p>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<p><strong>Interesting Fact:</strong></p>
-<p>A zero-length array is lighter-weight than a normal Object, so it's great for an
-intrinsic lock.</p>
-</div>
-</div>
-
 <pre>
 // Object for intrinsic lock
 static final Object[] sDataLock = new Object[0];
