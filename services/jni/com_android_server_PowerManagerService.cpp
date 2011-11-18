@@ -28,6 +28,8 @@
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 
+#include <private/gui/ComposerService.h>
+
 #include "com_android_server_PowerManagerService.h"
 
 namespace android {

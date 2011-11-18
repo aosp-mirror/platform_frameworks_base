@@ -39,6 +39,7 @@
 #include <private/surfaceflinger/LayerState.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
 
+#include <private/gui/ComposerService.h>
 
 namespace android {
 // ---------------------------------------------------------------------------

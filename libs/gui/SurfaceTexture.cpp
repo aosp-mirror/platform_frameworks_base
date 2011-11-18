@@ -29,6 +29,8 @@
 
 #include <hardware/hardware.h>
 
+#include <private/gui/ComposerService.h>
+
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <surfaceflinger/IGraphicBufferAlloc.h>
