@@ -4,6 +4,7 @@
     <uses-sdk android:minSdkVersion="5" />
 
     <application android:hardwareAccelerated="false">
+        <uses-library android:name="android.test.runner" />
         <activity android:name="FrameworkPerfActivity" android:label="Framework Perf">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,4 +21,9 @@
         <receiver android:name="Receiver" android:exported="true">
         </receiver>
     </application>
+
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.frameworkperf"
+        android:label="Framework Perf Runner"
+    />
 </manifest>
