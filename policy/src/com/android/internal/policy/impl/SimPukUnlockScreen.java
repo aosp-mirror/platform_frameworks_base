@@ -242,20 +242,24 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
 
         new CheckSimPuk(mPukText.getText().toString(),
                 mPinText.getText().toString()) {
-            void onSimLockChangedResponse(boolean success) {
-                if (mSimUnlockProgressDialog != null) {
-                    mSimUnlockProgressDialog.hide();
-                }
-                if (success) {
-                    // before closing the keyguard, report back that
-                    // the sim is unlocked so it knows right away
-                    mUpdateMonitor.reportSimUnlocked();
-                    mCallback.goToUnlockScreen();
-                } else {
-                    mHeaderText.setText(R.string.badPuk);
-                    mPukText.setText("");
-                    mPinText.setText("");
-                }
+            void onSimLockChangedResponse(final boolean success) {
+                mPinText.post(new Runnable() {
+                    public void run() {
+                        if (mSimUnlockProgressDialog != null) {
+                            mSimUnlockProgressDialog.hide();
+                        }
+                        if (success) {
+                            // before closing the keyguard, report back that
+                            // the sim is unlocked so it knows right away
+                            mUpdateMonitor.reportSimUnlocked();
+                            mCallback.goToUnlockScreen();
+                        } else {
+                            mHeaderText.setText(R.string.badPuk);
+                            mPukText.setText("");
+                            mPinText.setText("");
+                        }
+                    }
+                });
             }
         }.start();
     }
