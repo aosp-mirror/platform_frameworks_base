@@ -558,9 +558,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mScreenOn = false;
         mForgotPattern = false;
         mHasOverlay = mUpdateMonitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE;
-        if (mMode == Mode.LockScreen) {
+
+        // Emulate activity life-cycle for both lock and unlock screen.
+        if (mLockScreen != null) {
             ((KeyguardScreen) mLockScreen).onPause();
-        } else {
+        }
+        if (mUnlockScreen != null) {
             ((KeyguardScreen) mUnlockScreen).onPause();
         }
 
@@ -651,9 +654,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
     @Override
     public void show() {
-        if (mMode == Mode.LockScreen) {
+        // Emulate activity life-cycle for both lock and unlock screen.
+        if (mLockScreen != null) {
             ((KeyguardScreen) mLockScreen).onResume();
-        } else {
+        }
+        if (mUnlockScreen != null) {
             ((KeyguardScreen) mUnlockScreen).onResume();
         }
 
