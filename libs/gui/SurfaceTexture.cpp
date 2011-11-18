@@ -434,6 +434,11 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
             mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
         }
+        if (mCurrentTexture == buf) {
+            // The current texture no longer references the buffer in this slot
+            // since we just allocated a new buffer.
+            mCurrentTexture = INVALID_BUFFER_SLOT;
+        }
         returnFlags |= ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
     }
     ST_LOGV("dequeueBuffer: returning slot=%d buf=%p flags=%#x", buf,
