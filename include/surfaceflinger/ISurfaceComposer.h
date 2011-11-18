@@ -33,8 +33,9 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-class IMemoryHeap;
 class ComposerState;
+class IDisplayEventConnection;
+class IMemoryHeap;
 
 class ISurfaceComposer : public IInterface
 {
@@ -124,13 +125,19 @@ public:
             uint32_t reqWidth, uint32_t reqHeight,
             uint32_t minLayerZ, uint32_t maxLayerZ) = 0;
 
+    /* triggers screen off animation */
     virtual status_t turnElectronBeamOff(int32_t mode) = 0;
+
+    /* triggers screen on animation */
     virtual status_t turnElectronBeamOn(int32_t mode) = 0;
 
     /* verify that an ISurfaceTexture was created by SurfaceFlinger.
      */
     virtual bool authenticateSurfaceTexture(
             const sp<ISurfaceTexture>& surface) const = 0;
+
+    /* return an IDisplayEventConnection */
+    virtual sp<IDisplayEventConnection> createDisplayEventConnection() = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -151,6 +158,7 @@ public:
         TURN_ELECTRON_BEAM_OFF,
         TURN_ELECTRON_BEAM_ON,
         AUTHENTICATE_SURFACE,
+        CREATE_DISPLAY_EVENT_CONNECTION,
     };
 
     virtual status_t    onTransact( uint32_t code,
