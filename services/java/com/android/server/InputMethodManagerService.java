@@ -382,6 +382,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 mScreenOn = true;
+                refreshImeWindowVisibilityLocked();
             } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
                 setImeWindowVisibilityStatusHiddenLocked();
@@ -637,6 +638,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setImeWindowVisibilityStatusHiddenLocked() {
         mImeWindowVis = 0;
+        updateImeWindowStatusLocked();
+    }
+
+    private void refreshImeWindowVisibilityLocked() {
+        final Configuration conf = mRes.getConfiguration();
+        final boolean haveHardKeyboard = conf.keyboard
+                != Configuration.KEYBOARD_NOKEYS;
+        final boolean hardKeyShown = haveHardKeyboard
+                && conf.hardKeyboardHidden
+                        != Configuration.HARDKEYBOARDHIDDEN_YES;
+        final boolean isScreenLocked = mKeyguardManager != null
+                && mKeyguardManager.isKeyguardLocked()
+                && mKeyguardManager.isKeyguardSecure();
+        mImeWindowVis = (!isScreenLocked && (mInputShown || hardKeyShown)) ?
+                (InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE) : 0;
         updateImeWindowStatusLocked();
     }
 
@@ -1285,16 +1301,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     if (mCurMethod != null) {
                         try {
-                            final Configuration conf = mRes.getConfiguration();
-                            final boolean haveHardKeyboard = conf.keyboard
-                                    != Configuration.KEYBOARD_NOKEYS;
-                            final boolean hardKeyShown = haveHardKeyboard
-                                    && conf.hardKeyboardHidden
-                                            != Configuration.HARDKEYBOARDHIDDEN_YES;
-                            mImeWindowVis = (mInputShown || hardKeyShown) ? (
-                                    InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE)
-                                    : 0;
-                            updateImeWindowStatusLocked();
+                            refreshImeWindowVisibilityLocked();
                             // If subtype is null, try to find the most applicable one from
                             // getCurrentInputMethodSubtype.
                             if (subtype == null) {
