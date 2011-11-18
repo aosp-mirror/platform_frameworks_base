@@ -737,11 +737,13 @@ generate_result_dispatcher_method(const method_type* method,
     // The return value
     {
         Type* t = NAMES.Search(method->type.type.data);
-        Variable* rv = new Variable(t, "rv");
-        dispatchMethod->statements->Add(new VariableDeclaration(rv));
-        generate_create_from_data(t, dispatchMethod->statements, "_result", rv,
-                resultData, &classLoader);
-        realCall->arguments.push_back(rv);
+        if (t != VOID_TYPE) {
+            Variable* rv = new Variable(t, "rv");
+            dispatchMethod->statements->Add(new VariableDeclaration(rv));
+            generate_create_from_data(t, dispatchMethod->statements, "_result", rv,
+                    resultData, &classLoader);
+            realCall->arguments.push_back(rv);
+        }
     }
 
     VariableFactory stubArgs("arg");
