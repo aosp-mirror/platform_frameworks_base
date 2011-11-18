@@ -6,7 +6,7 @@ page.title=Multimedia and Camera
 
 <h2>Topics</h2>
 <ol>
-<li><a href="{@docRoot}guide/topics/media/mediaplayer.html">MediaPlayer</a></li>
+<li><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></li>
 <li><a href="{@docRoot}guide/topics/media/jetplayer.html">JetPlayer</a></li>
 <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
 <li><a href="{@docRoot}guide/topics/media/audio-capture.html">Audio Capture</a></li>
@@ -46,7 +46,8 @@ hardware.</p>
 and playback.</p>
 
 <dl>
-  <dt><strong><a href="{@docRoot}guide/topics/media/mediaplayer.html">MediaPlayer</a></strong></dt>
+  <dt><strong><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></strong>
+  </dt>
   <dd>How to play audio and video in your application.</dd>
 
   <dt><strong><a href="{@docRoot}guide/topics/media/jetplayer.html">JetPlayer</a></strong></dt>
