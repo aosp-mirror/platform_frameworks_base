@@ -18,8 +18,10 @@ package com.android.server;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
+import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.Manifest.permission.SHUTDOWN;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
@@ -28,7 +30,6 @@ import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -193,11 +194,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
     }
 
+    @Override
     public void registerObserver(INetworkManagementEventObserver obs) {
         Slog.d(TAG, "Registering observer");
         mObservers.add(obs);
     }
 
+    @Override
     public void unregisterObserver(INetworkManagementEventObserver obs) {
         Slog.d(TAG, "Unregistering observer");
         mObservers.remove(mObservers.indexOf(obs));
@@ -351,10 +354,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     // INetworkManagementService members
     //
 
-    public String[] listInterfaces() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-
+    @Override
+    public String[] listInterfaces() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             return mConnector.doListCommand("interface list", NetdResponseCode.InterfaceListResult);
         } catch (NativeDaemonConnectorException e) {
@@ -363,7 +365,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public InterfaceConfiguration getInterfaceConfig(String iface) throws IllegalStateException {
+    @Override
+    public InterfaceConfiguration getInterfaceConfig(String iface) {
         mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         String rsp;
         try {
@@ -417,8 +420,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return cfg;
     }
 
-    public void setInterfaceConfig(
-            String iface, InterfaceConfiguration cfg) throws IllegalStateException {
+    @Override
+    public void setInterfaceConfig(String iface, InterfaceConfiguration cfg) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         LinkAddress linkAddr = cfg.addr;
         if (linkAddr == null || linkAddr.getAddress() == null) {
@@ -436,7 +439,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setInterfaceDown(String iface) throws IllegalStateException {
+    @Override
+    public void setInterfaceDown(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             InterfaceConfiguration ifcg = getInterfaceConfig(iface);
@@ -448,7 +452,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setInterfaceUp(String iface) throws IllegalStateException {
+    @Override
+    public void setInterfaceUp(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             InterfaceConfiguration ifcg = getInterfaceConfig(iface);
@@ -460,8 +465,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable)
-            throws IllegalStateException {
+    @Override
+    public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         String cmd = String.format("interface ipv6privacyextensions %s %s", iface,
                 enable ? "enable" : "disable");
@@ -473,11 +478,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-
-
     /* TODO: This is right now a IPv4 only function. Works for wifi which loses its
        IPv6 addresses on interface down, but we need to do full clean up here */
-    public void clearInterfaceAddresses(String iface) throws IllegalStateException {
+    @Override
+    public void clearInterfaceAddresses(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         String cmd = String.format("interface clearaddrs %s", iface);
         try {
@@ -488,9 +492,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void enableIpv6(String iface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void enableIpv6(String iface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand(String.format("interface ipv6 %s enable", iface));
         } catch (NativeDaemonConnectorException e) {
@@ -499,9 +503,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void disableIpv6(String iface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void disableIpv6(String iface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand(String.format("interface ipv6 %s disable", iface));
         } catch (NativeDaemonConnectorException e) {
@@ -510,21 +514,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
     public void addRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, ADD, route, DEFAULT);
     }
 
+    @Override
     public void removeRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, REMOVE, route, DEFAULT);
     }
 
+    @Override
     public void addSecondaryRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, ADD, route, SECONDARY);
     }
 
+    @Override
     public void removeSecondaryRoute(String interfaceName, RouteInfo route) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         modifyRoute(interfaceName, REMOVE, route, SECONDARY);
@@ -609,6 +617,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return list;
     }
 
+    @Override
     public RouteInfo[] getRoutes(String interfaceName) {
         mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
@@ -683,19 +692,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return (RouteInfo[]) routes.toArray(new RouteInfo[0]);
     }
 
+    @Override
     public void shutdown() {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.SHUTDOWN)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires SHUTDOWN permission");
-        }
+        // TODO: remove from aidl if nobody calls externally
+        mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
 
         Slog.d(TAG, "Shutting down");
     }
 
+    @Override
     public boolean getIpForwardingEnabled() throws IllegalStateException{
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
 
         ArrayList<String> rsp;
         try {
@@ -723,16 +730,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         throw new IllegalStateException("Got an empty response");
     }
 
-    public void setIpForwardingEnabled(boolean enable) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void setIpForwardingEnabled(boolean enable) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         mConnector.doCommand(String.format("ipfwd %sable", (enable ? "en" : "dis")));
     }
 
-    public void startTethering(String[] dhcpRange)
-             throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void startTethering(String[] dhcpRange) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         // cmd is "tether start first_start first_stop second_start second_stop ..."
         // an odd number of addrs will fail
         String cmd = "tether start";
@@ -747,9 +753,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void stopTethering() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void stopTethering() {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand("tether stop");
         } catch (NativeDaemonConnectorException e) {
@@ -757,9 +763,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public boolean isTetheringStarted() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public boolean isTetheringStarted() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
 
         ArrayList<String> rsp;
         try {
@@ -785,9 +791,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         throw new IllegalStateException("Got an empty response");
     }
 
-    public void tetherInterface(String iface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void tetherInterface(String iface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand("tether interface add " + iface);
         } catch (NativeDaemonConnectorException e) {
@@ -796,9 +802,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
     public void untetherInterface(String iface) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand("tether interface remove " + iface);
         } catch (NativeDaemonConnectorException e) {
@@ -807,9 +813,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public String[] listTetheredInterfaces() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public String[] listTetheredInterfaces() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             return mConnector.doListCommand(
                     "tether interface list", NetdResponseCode.TetherInterfaceListResult);
@@ -819,9 +825,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setDnsForwarders(String[] dns) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void setDnsForwarders(String[] dns) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             String cmd = "tether dns set";
             for (String s : dns) {
@@ -838,9 +844,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public String[] getDnsForwarders() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public String[] getDnsForwarders() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             return mConnector.doListCommand(
                     "tether dns list", NetdResponseCode.TetherDnsFwdTgtListResult);
@@ -868,10 +874,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mConnector.doCommand(cmd);
     }
 
-    public void enableNat(String internalInterface, String externalInterface)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void enableNat(String internalInterface, String externalInterface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         if (DBG) Log.d(TAG, "enableNat(" + internalInterface + ", " + externalInterface + ")");
         try {
             modifyNat("enable", internalInterface, externalInterface);
@@ -882,10 +887,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void disableNat(String internalInterface, String externalInterface)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void disableNat(String internalInterface, String externalInterface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         if (DBG) Log.d(TAG, "disableNat(" + internalInterface + ", " + externalInterface + ")");
         try {
             modifyNat("disable", internalInterface, externalInterface);
@@ -896,9 +900,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public String[] listTtys() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public String[] listTtys() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
         } catch (NativeDaemonConnectorException e) {
@@ -907,11 +911,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void attachPppd(String tty, String localAddr, String remoteAddr, String dns1Addr,
-            String dns2Addr) throws IllegalStateException {
+    @Override
+    public void attachPppd(
+            String tty, String localAddr, String remoteAddr, String dns1Addr, String dns2Addr) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
             mConnector.doCommand(String.format("pppd attach %s %s %s %s %s", tty,
                     NetworkUtils.numericToInetAddress(localAddr).getHostAddress(),
                     NetworkUtils.numericToInetAddress(remoteAddr).getHostAddress(),
@@ -924,9 +928,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void detachPppd(String tty) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void detachPppd(String tty) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand(String.format("pppd detach %s", tty));
         } catch (NativeDaemonConnectorException e) {
@@ -934,12 +938,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void startAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface)
-             throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+    @Override
+    public void startAccessPoint(
+            WifiConfiguration wifiConfig, String wlanIface, String softapIface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
         try {
             wifiFirmwareReload(wlanIface, "AP");
             mConnector.doCommand(String.format("softap start " + wlanIface));
@@ -989,12 +992,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     /* @param mode can be "AP", "STA" or "P2P" */
-    public void wifiFirmwareReload(String wlanIface, String mode) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
-
+    @Override
+    public void wifiFirmwareReload(String wlanIface, String mode) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
         try {
             mConnector.doCommand(String.format("softap fwreload " + wlanIface + " " + mode));
         } catch (NativeDaemonConnectorException e) {
@@ -1002,11 +1003,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void stopAccessPoint(String wlanIface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+    @Override
+    public void stopAccessPoint(String wlanIface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
         try {
             mConnector.doCommand("softap stopap");
             mConnector.doCommand("softap stop " + wlanIface);
@@ -1017,12 +1017,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        mContext.enforceCallingOrSelfPermission(
-            android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+    @Override
+    public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
         try {
             if (wifiConfig == null) {
                 mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
@@ -1040,8 +1038,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private long getInterfaceCounter(String iface, boolean rx) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             String rsp;
             try {
@@ -1081,15 +1078,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public NetworkStats getNetworkStatsSummary() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         return mStatsFactory.readNetworkStatsSummary();
     }
 
     @Override
     public NetworkStats getNetworkStatsDetail() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         return mStatsFactory.readNetworkStatsDetail(UID_ALL);
     }
 
@@ -1272,16 +1267,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public NetworkStats getNetworkStatsUidDetail(int uid) {
         if (Binder.getCallingUid() != uid) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+            mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         }
         return mStatsFactory.readNetworkStatsDetail(uid);
     }
 
     @Override
     public NetworkStats getNetworkStatsTethering(String[] ifacePairs) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
 
         if (ifacePairs.length % 2 != 0) {
             throw new IllegalArgumentException(
@@ -1345,9 +1338,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
+    @Override
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             mConnector.doCommand(String.format(
                     "interface setthrottle %s %d %d", iface, rxKbps, txKbps));
@@ -1357,8 +1350,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private int getInterfaceThrottle(String iface, boolean rx) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         try {
             String rsp;
             try {
@@ -1396,17 +1388,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return -1;
     }
 
+    @Override
     public int getInterfaceRxThrottle(String iface) {
         return getInterfaceThrottle(iface, true);
     }
 
+    @Override
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
     }
 
-    public void setDefaultInterfaceForDns(String iface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void setDefaultInterfaceForDns(String iface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             String cmd = "resolver setdefaultif " + iface;
 
@@ -1417,10 +1411,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void setDnsServersForInterface(String iface, String[] servers)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE,
-                "NetworkManagementService");
+    @Override
+    public void setDnsServersForInterface(String iface, String[] servers) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             String cmd = "resolver setifdns " + iface;
             for (String s : servers) {
@@ -1438,9 +1431,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void flushDefaultDnsCache() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void flushDefaultDnsCache() {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             String cmd = "resolver flushdefaultif";
 
@@ -1451,9 +1444,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    public void flushInterfaceDnsCache(String iface) throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+    @Override
+    public void flushInterfaceDnsCache(String iface) {
+        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         try {
             String cmd = "resolver flushif " + iface;
 
