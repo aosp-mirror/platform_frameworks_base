@@ -383,6 +383,9 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
 
         public void onClick(View v) {
             if (v == mCancelButton) {
+                // clear the PIN/PUK entry fields if the user cancels
+                mPinText.setText("");
+                mPukText.setText("");
                 mCallback.goToLockScreen();
                 return;
             }
