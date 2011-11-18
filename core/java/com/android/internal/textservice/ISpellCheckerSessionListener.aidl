@@ -23,4 +23,5 @@ import android.view.textservice.SuggestionsInfo;
  */
 oneway interface ISpellCheckerSessionListener {
     void onGetSuggestions(in SuggestionsInfo[] results);
+    void onGetSuggestionsForSentence(in SuggestionsInfo[] results);
 }
