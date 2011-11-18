@@ -13634,16 +13634,19 @@ package android.opengl {
     field public static final int GL_RENDERBUFFER_RED_SIZE_OES = 36176; // 0x8d50
     field public static final int GL_RENDERBUFFER_STENCIL_SIZE_OES = 36181; // 0x8d55
     field public static final int GL_RENDERBUFFER_WIDTH_OES = 36162; // 0x8d42
+    field public static final int GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES = 36200; // 0x8d68
     field public static final int GL_RGB565_OES = 36194; // 0x8d62
     field public static final int GL_RGB5_A1_OES = 32855; // 0x8057
     field public static final int GL_RGB8_OES = 32849; // 0x8051
     field public static final int GL_RGBA4_OES = 32854; // 0x8056
     field public static final int GL_RGBA8_OES = 32856; // 0x8058
+    field public static final int GL_SAMPLER_EXTERNAL_OES = 36198; // 0x8d66
     field public static final int GL_STENCIL_ATTACHMENT_OES = 36128; // 0x8d20
     field public static final int GL_STENCIL_INDEX1_OES = 36166; // 0x8d46
     field public static final int GL_STENCIL_INDEX4_OES = 36167; // 0x8d47
     field public static final int GL_STENCIL_INDEX8_OES = 36168; // 0x8d48
     field public static final int GL_TEXTURE_BINDING_CUBE_MAP_OES = 34068; // 0x8514
+    field public static final int GL_TEXTURE_BINDING_EXTERNAL_OES = 36199; // 0x8d67
     field public static final int GL_TEXTURE_CROP_RECT_OES = 35741; // 0x8b9d
     field public static final int GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES = 34070; // 0x8516
     field public static final int GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES = 34072; // 0x8518
@@ -13652,6 +13655,7 @@ package android.opengl {
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES = 34069; // 0x8515
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES = 34071; // 0x8517
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES = 34073; // 0x8519
+    field public static final int GL_TEXTURE_EXTERNAL_OES = 36197; // 0x8d65
     field public static final int GL_TEXTURE_GEN_MODE_OES = 9472; // 0x2500
     field public static final int GL_TEXTURE_GEN_STR_OES = 36192; // 0x8d60
     field public static final int GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES = 35215; // 0x898f
