@@ -198,10 +198,11 @@ public boolean onCreateOptionsMenu(Menu menu) {
 }
 </pre>
 
-<div class="figure" style="width:500px">
-<img src="{@docRoot}images/ui/actionbar.png" height="34" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> Screenshot of the Action Bar in the Email
-application, with two action items from the Options Menu, plus the overflow menu.</p>
+<div class="figure" style="width:450px">
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> Action bar from the <a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app, including
+navigation tabs and a camera action item (plus the overflow menu button).</p>
 </div>
 
 <p>You can also populate the menu in code, using {@link android.view.Menu#add(int,int,int,int)
