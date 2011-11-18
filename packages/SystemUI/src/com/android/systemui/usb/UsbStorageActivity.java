@@ -114,15 +114,10 @@ public class UsbStorageActivity extends Activity
         thr.start();
         mAsyncStorageHandler = new Handler(thr.getLooper());
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setProgressBarIndeterminateVisibility(true);
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         if (Environment.isExternalStorageRemovable()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         }
-
-        setTitle(getString(com.android.internal.R.string.usb_storage_activity_title));
 
         setContentView(com.android.internal.R.layout.usb_storage_activity);
 
