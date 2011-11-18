@@ -174,7 +174,7 @@ private:
     static unsigned shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* paint,
             size_t count, bool isRTL);
 
-    static SkTypeface* getCachedTypeface(SkTypeface* typeface, const char path[]);
+    static SkTypeface* getCachedTypeface(SkTypeface** typeface, const char path[]);
 
     static void deleteGlyphArrays(HB_ShaperItem& shaperItem);
 
