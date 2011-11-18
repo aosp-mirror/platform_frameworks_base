@@ -73,6 +73,8 @@ public class FrameworkPerfActivity extends Activity
 
     final ArrayList<RunResult> mResults = new ArrayList<RunResult>();
 
+    Object mResultNotifier = new Object();
+
     class TestConnection implements ServiceConnection, IBinder.DeathRecipient {
         Messenger mService;
         boolean mLinked;
@@ -266,7 +268,9 @@ public class FrameworkPerfActivity extends Activity
         log(String.format("%s: fg=%d*%gms/op (%dms) / bg=%d*%gms/op (%dms)",
                 result.name, result.fgOps, result.getFgMsPerOp(), result.fgTime,
                 result.bgOps, result.getBgMsPerOp(), result.bgTime));
-        mResults.add(result);
+        synchronized (mResults) {
+            mResults.add(result);
+        }
         if (!mStarted) {
             log("Stop");
             stopRunning();
@@ -376,7 +380,9 @@ public class FrameworkPerfActivity extends Activity
             startService(new Intent(this, SchedulerService.class));
             mCurOpIndex = 0;
             mMaxRunTime = Integer.parseInt(mTestTime.getText().toString());
-            mResults.clear();
+            synchronized (mResults) {
+                mResults.clear();
+            }
             startCurOp();
         }
     }
@@ -393,17 +399,22 @@ public class FrameworkPerfActivity extends Activity
             mBgSpinner.setEnabled(true);
             updateWakeLock();
             stopService(new Intent(this, SchedulerService.class));
-            for (int i=0; i<mResults.size(); i++) {
-                RunResult result = mResults.get(i);
-                float fgMsPerOp = result.getFgMsPerOp();
-                float bgMsPerOp = result.getBgMsPerOp();
-                String fgMsPerOpStr = fgMsPerOp != 0 ? Float.toString(fgMsPerOp) : "";
-                String bgMsPerOpStr = bgMsPerOp != 0 ? Float.toString(bgMsPerOp) : "";
-                Log.i("PerfRes", "\t" + result.name + "\t" + result.fgOps
-                        + "\t" + result.getFgMsPerOp() + "\t" + result.fgTime
-                        + "\t" + result.fgLongName + "\t" + result.bgOps
-                        + "\t" + result.getBgMsPerOp() + "\t" + result.bgTime
-                        + "\t" + result.bgLongName);
+            synchronized (mResults) {
+                for (int i=0; i<mResults.size(); i++) {
+                    RunResult result = mResults.get(i);
+                    float fgMsPerOp = result.getFgMsPerOp();
+                    float bgMsPerOp = result.getBgMsPerOp();
+                    String fgMsPerOpStr = fgMsPerOp != 0 ? Float.toString(fgMsPerOp) : "";
+                    String bgMsPerOpStr = bgMsPerOp != 0 ? Float.toString(bgMsPerOp) : "";
+                    Log.i("PerfRes", "\t" + result.name + "\t" + result.fgOps
+                            + "\t" + result.getFgMsPerOp() + "\t" + result.fgTime
+                            + "\t" + result.fgLongName + "\t" + result.bgOps
+                            + "\t" + result.getBgMsPerOp() + "\t" + result.bgTime
+                            + "\t" + result.bgLongName);
+                }
+            }
+            synchronized (mResultNotifier) {
+                mResultNotifier.notifyAll();
             }
         }
     }
