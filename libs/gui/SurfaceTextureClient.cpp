@@ -36,6 +36,12 @@ SurfaceTextureClient::SurfaceTextureClient() {
     SurfaceTextureClient::init();
 }
 
+SurfaceTextureClient::~SurfaceTextureClient() {
+    if (mConnectedToCpu) {
+        SurfaceTextureClient::disconnect(NATIVE_WINDOW_API_CPU);
+    }
+}
+
 void SurfaceTextureClient::init() {
     // Initialize the ANativeWindow function pointers.
     ANativeWindow::setSwapInterval  = hook_setSwapInterval;
