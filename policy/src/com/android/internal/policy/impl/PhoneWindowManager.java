@@ -39,6 +39,7 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -161,6 +162,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // No longer recommended for desk docks; still useful in car docks.
     static final boolean ENABLE_CAR_DOCK_HOME_CAPTURE = true;
     static final boolean ENABLE_DESK_DOCK_HOME_CAPTURE = false;
+
+    // Should screen savers use their own timeout, or the SCREEN_OFF_TIMEOUT?
+    static final boolean SEPARATE_TIMEOUT_FOR_SCREEN_SAVER = false;
 
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
@@ -397,6 +401,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // visual screen saver support
     int mScreenSaverTimeout = 0;
     boolean mScreenSaverEnabled = true;
+    boolean mPluggedIn;
 
     // Behavior of ENDCALL Button.  (See Settings.System.END_BUTTON_BEHAVIOR.)
     int mEndcallBehavior;
@@ -460,8 +465,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     "fancy_rotation_anim"), false, this);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DREAM_TIMEOUT), false, this);
+            if (SEPARATE_TIMEOUT_FOR_SCREEN_SAVER) {
+                resolver.registerContentObserver(Settings.Secure.getUriFor(
+                        Settings.Secure.DREAM_TIMEOUT), false, this);
+            } // otherwise SCREEN_OFF_TIMEOUT will do nicely
             updateSettings();
         }
 
@@ -768,6 +775,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDockMode = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
         }
+
+        // watch the plug to know whether to trigger the screen saver
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        intent = context.registerReceiver(mPowerReceiver, filter);
+        if (intent != null) {
+            mPluggedIn = (0 != intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
+        }
+
         mVibrator = new Vibrator();
         mLongPressVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_longPressVibePattern);
@@ -917,8 +933,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
 
-            mScreenSaverTimeout = Settings.Secure.getInt(resolver,
-                    Settings.Secure.DREAM_TIMEOUT, 0);
+            if (SEPARATE_TIMEOUT_FOR_SCREEN_SAVER) {
+                mScreenSaverTimeout = Settings.Secure.getInt(resolver,
+                        Settings.Secure.DREAM_TIMEOUT, 0);
+            } else {
+                mScreenSaverTimeout = Settings.System.getInt(resolver,
+                        Settings.System.SCREEN_OFF_TIMEOUT, 0);
+                if (mScreenSaverTimeout > 0) {
+                    // We actually want to activate the screensaver just before the
+                    // power manager's screen timeout
+                    mScreenSaverTimeout -= 5000;
+                }
+            }
             updateScreenSaverTimeoutLocked();
         }
         if (updateRotation) {
@@ -2957,6 +2983,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    BroadcastReceiver mPowerReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                mPluggedIn = (0 != intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
+                if (localLOGV) Log.v(TAG, "BATTERY_CHANGED: " + intent + " plugged=" + mPluggedIn);
+            }
+        }
+    };
+
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
@@ -3423,8 +3458,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Log.w(TAG, "mScreenSaverActivator ran, but the screensaver should not be showing. Who's driving this thing?");
                 return;
             }
+            if (!mPluggedIn) {
+                if (localLOGV) Log.v(TAG, "mScreenSaverActivator: not running screen saver when not plugged in");
+                return;
+            }
 
             if (localLOGV) Log.v(TAG, "mScreenSaverActivator entering dreamland");
+
             try {
                 String component = Settings.Secure.getString(
                         mContext.getContentResolver(), Settings.Secure.DREAM_COMPONENT);
