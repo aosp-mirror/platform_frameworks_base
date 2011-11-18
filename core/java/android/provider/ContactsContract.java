@@ -6747,6 +6747,39 @@ public final class ContactsContract {
              */
             public static final String NAMESPACE = DataColumns.DATA2;
         }
+
+        /**
+         * <p>
+         * Convenient functionalities for "callable" data. Note that, this is NOT a separate data
+         * kind.
+         * </p>
+         * <p>
+         * This URI allows the ContactsProvider to return a unified result for "callable" data
+         * that users can use for calling purposes. {@link Phone} and {@link SipAddress} are the
+         * current examples for "callable", but may be expanded to the other types.
+         * </p>
+         * <p>
+         * Each returned row may have a different MIMETYPE and thus different interpretation for
+         * each column. For example the meaning for {@link Phone}'s type is different than
+         * {@link SipAddress}'s.
+         * </p>
+         *
+         * @hide
+         */
+        public static final class Callable implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * Similar to {@link Phone#CONTENT_URI}, but returns callable data instead of only
+             * phone numbers.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
+                    "callables");
+            /**
+             * Similar to {@link Phone#CONTENT_FILTER_URI}, but allows users to filter callable
+             * data.
+             */
+            public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
+                    "filter");
+        }
     }
 
     /**
