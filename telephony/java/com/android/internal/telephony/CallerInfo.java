@@ -288,7 +288,7 @@ public class CallerInfo {
             String number, CallerInfo previousResult) {
         if (!previousResult.contactExists
                 && PhoneNumberUtils.isUriNumber(number)) {
-            String username = number.substring(0, number.indexOf('@'));
+            String username = PhoneNumberUtils.getUsernameFromUriNumber(number);
             if (PhoneNumberUtils.isGlobalPhoneNumber(username)) {
                 previousResult = getCallerInfo(context,
                         Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
