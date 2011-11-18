@@ -14,13 +14,33 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <EditText android:id="@+id/wifi_p2p_wps_pin"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
-    />
-</LinearLayout>
+        android:orientation="vertical">
+
+        <LinearLayout android:id="@+id/info"
+            style="@style/wifi_section" />
+
+        <LinearLayout android:id="@+id/enter_pin_section"
+            style="@style/wifi_section"
+            android:visibility="gone">
+
+            <LinearLayout
+                style="@style/wifi_item">
+                <TextView
+                    android:text="@string/wifi_p2p_enter_pin_message"
+                    style="@style/wifi_item_label" />
+
+                <EditText android:id="@+id/wifi_p2p_wps_pin"
+                    android:inputType="textNoSuggestions"
+                    style="@style/wifi_item_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

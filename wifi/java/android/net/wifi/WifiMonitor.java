@@ -20,6 +20,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pProvDiscEvent;
 import android.net.wifi.StateChangeResult;
 import android.os.Message;
 import android.util.Log;
@@ -181,6 +182,10 @@ public class WifiMonitor {
        pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
        group_capab=0x0 */
     private static final String P2P_PROV_DISC_PBC_REQ_STR = "P2P-PROV-DISC-PBC-REQ";
+
+    /* P2P-PROV-DISC-PBC-RESP 02:12:47:f2:5a:36 */
+    private static final String P2P_PROV_DISC_PBC_RSP_STR = "P2P-PROV-DISC-PBC-RESP";
+
     /* P2P-PROV-DISC-ENTER-PIN 42:fc:89:e1:e2:27 p2p_dev_addr=42:fc:89:e1:e2:27
        pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
        group_capab=0x0 */
@@ -233,8 +238,9 @@ public class WifiMonitor {
     public static final int P2P_INVITATION_RECEIVED_EVENT        = BASE + 31;
     public static final int P2P_INVITATION_RESULT_EVENT          = BASE + 32;
     public static final int P2P_PROV_DISC_PBC_REQ_EVENT          = BASE + 33;
-    public static final int P2P_PROV_DISC_ENTER_PIN_EVENT        = BASE + 34;
-    public static final int P2P_PROV_DISC_SHOW_PIN_EVENT         = BASE + 35;
+    public static final int P2P_PROV_DISC_PBC_RSP_EVENT          = BASE + 34;
+    public static final int P2P_PROV_DISC_ENTER_PIN_EVENT        = BASE + 35;
+    public static final int P2P_PROV_DISC_SHOW_PIN_EVENT         = BASE + 36;
 
     /* hostap events */
     public static final int AP_STA_DISCONNECTED_EVENT            = BASE + 41;
@@ -480,10 +486,16 @@ public class WifiMonitor {
                 mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, nameValue[1]);
             } else if (dataString.startsWith(P2P_PROV_DISC_PBC_REQ_STR)) {
                 mStateMachine.sendMessage(P2P_PROV_DISC_PBC_REQ_EVENT,
-                        new WifiP2pDevice(dataString));
+                        new WifiP2pProvDiscEvent(dataString));
+            } else if (dataString.startsWith(P2P_PROV_DISC_PBC_RSP_STR)) {
+                mStateMachine.sendMessage(P2P_PROV_DISC_PBC_RSP_EVENT,
+                        new WifiP2pProvDiscEvent(dataString));
             } else if (dataString.startsWith(P2P_PROV_DISC_ENTER_PIN_STR)) {
                 mStateMachine.sendMessage(P2P_PROV_DISC_ENTER_PIN_EVENT,
-                        new WifiP2pDevice(dataString));
+                        new WifiP2pProvDiscEvent(dataString));
+            } else if (dataString.startsWith(P2P_PROV_DISC_SHOW_PIN_STR)) {
+                mStateMachine.sendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT,
+                        new WifiP2pProvDiscEvent(dataString));
             }
         }
 
