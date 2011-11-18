@@ -40,6 +40,7 @@ public:
 
 protected:
     SurfaceTextureClient();
+    virtual ~SurfaceTextureClient();
     void setISurfaceTexture(const sp<ISurfaceTexture>& surfaceTexture);
 
 private:
