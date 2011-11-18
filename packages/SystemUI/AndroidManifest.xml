@@ -67,7 +67,8 @@
 
 
         <activity android:name=".usb.UsbStorageActivity"
-                android:excludeFromRecents="true">
+                  android:label="@*android:string/usb_storage_activity_title"
+                  android:excludeFromRecents="true">
         </activity>
         <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
                 android:theme="@*android:style/Theme.Dialog.Alert"
