@@ -2118,6 +2118,31 @@ public class PhoneNumberUtils
     }
 
     /**
+     * @return the "username" part of the specified SIP address,
+     *         i.e. the part before the "@" character (or "%40").
+     *
+     * @param number SIP address of the form "username@domainname"
+     *               (or the URI-escaped equivalent "username%40domainname")
+     * @see isUriNumber
+     *
+     * @hide
+     */
+    public static String getUsernameFromUriNumber(String number) {
+        // The delimiter between username and domain name can be
+        // either "@" or "%40" (the URI-escaped equivalent.)
+        int delimiterIndex = number.indexOf('@');
+        if (delimiterIndex < 0) {
+            delimiterIndex = number.indexOf("%40");
+        }
+        if (delimiterIndex < 0) {
+            Log.w(LOG_TAG,
+                  "getUsernameFromUriNumber: no delimiter found in SIP addr '" + number + "'");
+            delimiterIndex = number.length();
+        }
+        return number.substring(0, delimiterIndex);
+    }
+
+    /**
      * This function handles the plus code conversion within NANP CDMA network
      * If the number format is
      * 1)+1NANP,remove +,
