@@ -109,9 +109,43 @@ padding: .25em 1em;
 </style>
 
 
+
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 15.0.1</a> <em>(November 2011)</em>
+  <div class="toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+  
+  <dd>ADT 15.0.1 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r15</a>.
+  If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK and AVD Manager to
+  do so.</dd>
+  
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed how source files are attached to library project <code>.jar</code> files.</li>
+      <li>Fixed how the <code>bin/</code> folder for library projects are refreshed. This ensures that parent projects pick up changes in library projects.</li>
+      <li>Fixed how a parent project's library container is updated when a library project is recompiled. This ensures that parent projects are
+      recompiled when code in a library project changes.</li>
+      <li>Fixed how <code>res/</code> folders are checked in library projects. This ensures that all <code>res</code> folders are properly included
+      even if Eclipse is not aware of them due to refresh issues.</li>
+      <li>Fixed issue that prevented <code>aapt</code> from running when editing certain XML files.</li>
+      <li>Fixed minor XML formatting issues.</li>
+    </ul>
+  </dd>
+</dl>
+
+</div>
+</div>
+
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
 width="9px" />
 ADT 15.0.0</a> <em>(October 2011)</em>
   <div class="toggleme">
