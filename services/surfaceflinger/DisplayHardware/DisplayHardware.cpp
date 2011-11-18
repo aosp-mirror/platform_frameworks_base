@@ -140,6 +140,7 @@ void DisplayHardware::init(uint32_t dpy)
     mDpiX = mNativeWindow->xdpi;
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps;
+    mNextFakeVSync = 0;
 
 
 /* FIXME: this is a temporary HACK until we are able to report the refresh rate
@@ -151,6 +152,8 @@ void DisplayHardware::init(uint32_t dpy)
     mRefreshRate = REFRESH_RATE;
 #warning "refresh rate set via makefile to REFRESH_RATE"
 #endif
+
+    mRefreshPeriod = nsecs_t(1e9 / mRefreshRate);
 
     EGLint w, h, dummy;
     EGLint numConfigs=0;
@@ -344,6 +347,37 @@ void DisplayHardware::acquireScreen() const
 
 uint32_t DisplayHardware::getPageFlipCount() const {
     return mPageFlipCount;
+}
+
+// this needs to be thread safe
+nsecs_t DisplayHardware::waitForVSync() const {
+    nsecs_t timestamp;
+    if (mVSync.wait(&timestamp) < 0) {
+        // vsync not supported!
+        usleep( getDelayToNextVSyncUs(&timestamp) );
+    }
+    return timestamp;
+}
+
+int32_t DisplayHardware::getDelayToNextVSyncUs(nsecs_t* timestamp) const {
+    Mutex::Autolock _l(mFakeVSyncMutex);
+    const nsecs_t period = mRefreshPeriod;
+    const nsecs_t now = systemTime(CLOCK_MONOTONIC);
+    nsecs_t next_vsync = mNextFakeVSync;
+    nsecs_t sleep = next_vsync - now;
+    if (sleep < 0) {
+        // we missed, find where the next vsync should be
+        sleep = (period - ((now - next_vsync) % period));
+        next_vsync = now + sleep;
+    }
+    mNextFakeVSync = next_vsync + period;
+    timestamp[0] = next_vsync;
+
+    // round to next microsecond
+    int32_t sleep_us = (sleep + 999LL) / 1000LL;
+
+    // guaranteed to be > 0
+    return sleep_us;
 }
 
 status_t DisplayHardware::compositionComplete() const {
