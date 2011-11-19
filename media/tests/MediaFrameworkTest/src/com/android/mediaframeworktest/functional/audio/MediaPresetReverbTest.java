@@ -198,6 +198,8 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
         AudioEffect vc = null;
         MediaPlayer mp = null;
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = am.getRingerMode();
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
                            am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
@@ -254,6 +256,7 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
                 probe.release();
             }
             am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+            am.setRingerMode(ringerMode);
         }
         assertTrue(msg, result);
     }
@@ -268,6 +271,8 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
         MediaPlayer mp = null;
         AudioEffect rvb = null;
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = am.getRingerMode();
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
                            am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
@@ -336,6 +341,7 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
                 probe.release();
             }
             am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+            am.setRingerMode(ringerMode);
         }
         assertTrue(msg, result);
     }
