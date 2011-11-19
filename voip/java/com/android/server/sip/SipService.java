@@ -68,8 +68,7 @@ import javax.sip.SipException;
  */
 public final class SipService extends ISipService.Stub {
     static final String TAG = "SipService";
-    static final boolean DEBUGV = false;
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     private static final int EXPIRY_TIME = 3600;
     private static final int SHORT_EXPIRY_TIME = 10;
     private static final int MIN_EXPIRY_TIME = 60;
@@ -581,7 +580,7 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onRinging(ISipSession s, SipProfile caller,
                 String sessionDescription) {
-            if (DEBUGV) Log.d(TAG, "<<<<< onRinging()");
+            if (DEBUG) Log.d(TAG, "<<<<< onRinging()");
             SipSessionGroup.SipSessionImpl session =
                     (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
@@ -778,7 +777,6 @@ public final class SipService extends ISipService.Stub {
         private void restartLater() {
             synchronized (SipService.this) {
                 int interval = NAT_MEASUREMENT_RETRY_INTERVAL;
-                Log.d(TAG, "Retry measurement " + interval + "s later.");
                 mTimer.cancel(this);
                 mTimer.set(interval * 1000, this);
             }
@@ -788,7 +786,7 @@ public final class SipService extends ISipService.Stub {
     private class AutoRegistrationProcess extends SipSessionAdapter
             implements Runnable, SipSessionGroup.KeepAliveProcessCallback {
         private static final int MIN_KEEPALIVE_SUCCESS_COUNT = 10;
-        private String TAG = "SipAudoReg";
+        private String TAG = "SipAutoReg";
 
         private SipSessionGroup.SipSessionImpl mSession;
         private SipSessionGroup.SipSessionImpl mKeepAliveSession;
@@ -820,13 +818,12 @@ public final class SipService extends ISipService.Stub {
                 // in registration to avoid adding duplicate entries to server
                 mMyWakeLock.acquire(mSession);
                 mSession.unregister();
-                if (DEBUG) TAG = mSession.getLocalProfile().getUriString();
-                if (DEBUG) Log.d(TAG, "start AutoRegistrationProcess");
+                TAG = "SipAutoReg:" + mSession.getLocalProfile().getUriString();
             }
         }
 
         private void startKeepAliveProcess(int interval) {
-            Log.d(TAG, "start keepalive w interval=" + interval);
+            if (DEBUG) Log.d(TAG, "start keepalive w interval=" + interval);
             if (mKeepAliveSession == null) {
                 mKeepAliveSession = mSession.duplicate();
             } else {
@@ -864,9 +861,11 @@ public final class SipService extends ISipService.Stub {
                             mKeepAliveSuccessCount = 0;
                         }
                     } else {
-                        Log.i(TAG, "keep keepalive going with interval "
-                                + interval + ", past success count="
-                                + mKeepAliveSuccessCount);
+                        if (DEBUG) {
+                            Log.i(TAG, "keep keepalive going with interval "
+                                    + interval + ", past success count="
+                                    + mKeepAliveSuccessCount);
+                        }
                         mKeepAliveSuccessCount /= 2;
                     }
                 } else {
@@ -894,7 +893,9 @@ public final class SipService extends ISipService.Stub {
         // SipSessionGroup.KeepAliveProcessCallback
         @Override
         public void onError(int errorCode, String description) {
-            Log.e(TAG, "keepalive error: " + description);
+            if (DEBUG) {
+                Log.e(TAG, "keepalive error: " + description);
+            }
             onResponse(true); // re-register immediately
         }
 
@@ -917,7 +918,7 @@ public final class SipService extends ISipService.Stub {
         public void onKeepAliveIntervalChanged() {
             if (mKeepAliveSession != null) {
                 int newInterval = getKeepAliveInterval();
-                if (DEBUGV) {
+                if (DEBUG) {
                     Log.v(TAG, "restart keepalive w interval=" + newInterval);
                 }
                 mKeepAliveSuccessCount = 0;
@@ -987,7 +988,7 @@ public final class SipService extends ISipService.Stub {
         }
 
         private void restart(int duration) {
-            if (DEBUG) Log.d(TAG, "Refresh registration " + duration + "s later.");
+            Log.d(TAG, "Refresh registration " + duration + "s later.");
             mTimer.cancel(this);
             mTimer.set(duration * 1000, this);
         }

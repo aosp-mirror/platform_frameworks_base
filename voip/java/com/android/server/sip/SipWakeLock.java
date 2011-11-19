@@ -22,8 +22,8 @@ import android.util.Log;
 import java.util.HashSet;
 
 class SipWakeLock {
-    private static final boolean DEBUGV = SipService.DEBUGV;
-    private static final String TAG = SipService.TAG;
+    private static final boolean DEBUG = false;
+    private static final String TAG = "SipWakeLock";
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private PowerManager.WakeLock mTimerWakeLock;
@@ -34,9 +34,9 @@ class SipWakeLock {
     }
 
     synchronized void reset() {
+        if (DEBUG) Log.v(TAG, "reset count=" + mHolders.size());
         mHolders.clear();
         release(null);
-        if (DEBUGV) Log.v(TAG, "~~~ hard reset wakelock");
     }
 
     synchronized void acquire(long timeout) {
@@ -55,8 +55,7 @@ class SipWakeLock {
                     PowerManager.PARTIAL_WAKE_LOCK, "SipWakeLock");
         }
         if (!mWakeLock.isHeld()) mWakeLock.acquire();
-        if (DEBUGV) Log.v(TAG, "acquire wakelock: holder count="
-                + mHolders.size());
+        if (DEBUG) Log.v(TAG, "acquire count=" + mHolders.size());
     }
 
     synchronized void release(Object holder) {
@@ -65,7 +64,6 @@ class SipWakeLock {
                 && mWakeLock.isHeld()) {
             mWakeLock.release();
         }
-        if (DEBUGV) Log.v(TAG, "release wakelock: holder count="
-                + mHolders.size());
+        if (DEBUG) Log.v(TAG, "release count=" + mHolders.size());
     }
 }

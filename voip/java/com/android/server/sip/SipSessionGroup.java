@@ -89,8 +89,8 @@ import javax.sip.message.Response;
  */
 class SipSessionGroup implements SipListener {
     private static final String TAG = "SipSession";
-    private static final boolean DEBUG = true;
-    private static final boolean DEBUG_PING = DEBUG && false;
+    private static final boolean DEBUG = false;
+    private static final boolean DEBUG_PING = false;
     private static final String ANONYMOUS = "anonymous";
     // Limit the size of thread pool to 1 for the order issue when the phone is
     // waken up from sleep and there are many packets to be processed in the SIP
@@ -205,7 +205,9 @@ class SipSessionGroup implements SipListener {
     }
 
     synchronized void resetExternalAddress() {
-        Log.d(TAG, " reset external addr on " + mSipStack);
+        if (DEBUG) {
+            Log.d(TAG, " reset external addr on " + mSipStack);
+        }
         mExternalIp = null;
         mExternalPort = 0;
     }
@@ -362,7 +364,7 @@ class SipSessionGroup implements SipListener {
                         + SipSession.State.toString(session.mState));
             }
         } catch (Throwable e) {
-            Log.w(TAG, "event process error: " + event, e);
+            Log.w(TAG, "event process error: " + event, getRootCause(e));
             session.onError(e);
         }
     }
@@ -393,9 +395,20 @@ class SipSessionGroup implements SipListener {
         if ((rport > 0) && (externalIp != null)) {
             mExternalIp = externalIp;
             mExternalPort = rport;
-            Log.d(TAG, " got external addr " + externalIp + ":" + rport
-                    + " on " + mSipStack);
+            if (DEBUG) {
+                Log.d(TAG, " got external addr " + externalIp + ":" + rport
+                        + " on " + mSipStack);
+            }
         }
+    }
+
+    private Throwable getRootCause(Throwable exception) {
+        Throwable cause = exception.getCause();
+        while (cause != null) {
+            exception = cause;
+            cause = exception.getCause();
+        }
+        return exception;
     }
 
     private SipSessionImpl createNewSession(RequestEvent event,
@@ -890,7 +903,9 @@ class SipSessionGroup implements SipListener {
             if (expires != null && time < expires.getExpires()) {
                 time = expires.getExpires();
             }
-            Log.v(TAG, "Expiry time = " + time);
+            if (DEBUG) {
+                Log.v(TAG, "Expiry time = " + time);
+            }
             return time;
         }
 
@@ -1409,15 +1424,6 @@ class SipSessionGroup implements SipListener {
             }
         }
 
-        private Throwable getRootCause(Throwable exception) {
-            Throwable cause = exception.getCause();
-            while (cause != null) {
-                exception = cause;
-                cause = exception.getCause();
-            }
-            return exception;
-        }
-
         private int getErrorCode(Throwable exception) {
             String message = exception.getMessage();
             if (exception instanceof UnknownHostException) {
@@ -1555,8 +1561,10 @@ class SipSessionGroup implements SipListener {
                     try {
                         sendKeepAlive();
                     } catch (Throwable t) {
-                        Log.w(TAG, "keepalive error: "
-                                + mLocalProfile.getUriString(), getRootCause(t));
+                        if (DEBUG) {
+                            Log.w(TAG, "keepalive error: "
+                                    + mLocalProfile.getUriString(), getRootCause(t));
+                        }
                         // It's possible that the keepalive process is being stopped
                         // during session.sendKeepAlive() so need to check mRunning
                         // again here.
