@@ -608,7 +608,7 @@ public abstract class WallpaperService extends Service {
 
                     final int relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
-                            View.VISIBLE, false, mWinFrame, mContentInsets,
+                            View.VISIBLE, 0, mWinFrame, mContentInsets,
                             mVisibleInsets, mConfiguration, mSurfaceHolder.mSurface);
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
@@ -654,7 +654,7 @@ public abstract class WallpaperService extends Service {
                         }
 
                         redrawNeeded |= creating
-                                || (relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0;
+                                || (relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0;
 
                         if (forceReport || creating || surfaceCreating
                                 || formatChanged || sizeChanged) {

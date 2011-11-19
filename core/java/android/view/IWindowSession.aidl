@@ -54,9 +54,8 @@ interface IWindowSession {
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
      * @param viewVisibility Window root view's visibility.
-     * @param insetsPending Set to true if the client will be later giving
-     * internal insets; as a result, the window will not impact other window
-     * layouts until the insets are given.
+     * @param flags Request flags: {@link WindowManagerImpl#RELAYOUT_INSETS_PENDING},
+     * {@link WindowManagerImpl#RELAYOUT_DEFER_SURFACE_DESTROY}.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -80,9 +79,15 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            boolean insetsPending, out Rect outFrame, out Rect outContentInsets,
+            int flags, out Rect outFrame, out Rect outContentInsets,
             out Rect outVisibleInsets, out Configuration outConfig,
             out Surface outSurface);
+
+    /**
+     * If a call to relayout() asked to have the surface destroy deferred,
+     * it must call this once it is okay to destroy that surface.
+     */
+    void performDeferredDestroy(IWindow window);
 
     /**
      * Called by a client to report that it ran out of graphics memory.
