@@ -416,7 +416,7 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     FontData* data = reinterpret_cast<FontData*>(shaperItem.font->userData);
     switch(shaperItem.item.script) {
         case HB_Script_Arabic:
-            data->typeFace = getCachedTypeface(gArabicTypeface, TYPEFACE_ARABIC);
+            data->typeFace = getCachedTypeface(&gArabicTypeface, TYPEFACE_ARABIC);
 #if DEBUG_GLYPHS
             LOGD("Using Arabic Typeface");
 #endif
@@ -428,21 +428,21 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
                     case SkTypeface::kNormal:
                     case SkTypeface::kItalic:
                     default:
-                        data->typeFace = getCachedTypeface(gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
+                        data->typeFace = getCachedTypeface(&gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Regular/Italic Typeface");
 #endif
                         break;
                     case SkTypeface::kBold:
                     case SkTypeface::kBoldItalic:
-                        data->typeFace = getCachedTypeface(gHebrewBoldTypeface, TYPE_FACE_HEBREW_BOLD);
+                        data->typeFace = getCachedTypeface(&gHebrewBoldTypeface, TYPE_FACE_HEBREW_BOLD);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Bold/BoldItalic Typeface");
 #endif
                         break;
                 }
             } else {
-                data->typeFace = getCachedTypeface(gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
+                data->typeFace = getCachedTypeface(&gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
 #if DEBUG_GLYPHS
                         LOGD("Using Hebrew Regular Typeface");
 #endif
@@ -482,11 +482,14 @@ unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* 
     return result;
 }
 
-SkTypeface* TextLayoutCacheValue::getCachedTypeface(SkTypeface* typeface, const char path[]) {
-    if (!typeface) {
-        typeface = SkTypeface::CreateFromFile(path);
+SkTypeface* TextLayoutCacheValue::getCachedTypeface(SkTypeface** typeface, const char path[]) {
+    if (!*typeface) {
+        *typeface = SkTypeface::CreateFromFile(path);
+#if DEBUG_GLYPHS
+        LOGD("Created SkTypeface from file: %s", path);
+#endif
     }
-    return typeface;
+    return *typeface;
 }
 
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
