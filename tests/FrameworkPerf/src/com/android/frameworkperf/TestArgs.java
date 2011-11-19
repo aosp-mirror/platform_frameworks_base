@@ -21,6 +21,7 @@ import android.os.Parcelable;
 
 public class TestArgs implements Parcelable {
     long maxTime;
+    long maxOps = -1;
     int combOp = -1;
     int fgOp = -1;
     int bgOp = -1;
@@ -30,6 +31,7 @@ public class TestArgs implements Parcelable {
 
     public TestArgs(Parcel source) {
         maxTime = source.readLong();
+        maxOps = source.readLong();
         combOp = source.readInt();
         fgOp = source.readInt();
         bgOp = source.readInt();
@@ -43,6 +45,7 @@ public class TestArgs implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(maxTime);
+        dest.writeLong(maxOps);
         dest.writeInt(combOp);
         dest.writeInt(fgOp);
         dest.writeInt(bgOp);
