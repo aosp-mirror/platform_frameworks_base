@@ -240,21 +240,28 @@ public:
         return static_cast <status_t> (reply.readInt32());
     }
 
-    virtual status_t setStreamVolumeIndex(audio_stream_type_t stream, int index)
+    virtual status_t setStreamVolumeIndex(audio_stream_type_t stream,
+                                          int index,
+                                          audio_devices_t device)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(static_cast <uint32_t>(stream));
         data.writeInt32(index);
+        data.writeInt32(static_cast <uint32_t>(device));
         remote()->transact(SET_STREAM_VOLUME, data, &reply);
         return static_cast <status_t> (reply.readInt32());
     }
 
-    virtual status_t getStreamVolumeIndex(audio_stream_type_t stream, int *index)
+    virtual status_t getStreamVolumeIndex(audio_stream_type_t stream,
+                                          int *index,
+                                          audio_devices_t device)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(static_cast <uint32_t>(stream));
+        data.writeInt32(static_cast <uint32_t>(device));
+
         remote()->transact(GET_STREAM_VOLUME, data, &reply);
         int lIndex = reply.readInt32();
         if (index) *index = lIndex;
@@ -525,7 +532,10 @@ status_t BnAudioPolicyService::onTransact(
             audio_stream_type_t stream =
                     static_cast <audio_stream_type_t>(data.readInt32());
             int index = data.readInt32();
-            reply->writeInt32(static_cast <uint32_t>(setStreamVolumeIndex(stream, index)));
+            audio_devices_t device = static_cast <audio_devices_t>(data.readInt32());
+            reply->writeInt32(static_cast <uint32_t>(setStreamVolumeIndex(stream,
+                                                                          index,
+                                                                          device)));
             return NO_ERROR;
         } break;
 
@@ -533,8 +543,9 @@ status_t BnAudioPolicyService::onTransact(
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             audio_stream_type_t stream =
                     static_cast <audio_stream_type_t>(data.readInt32());
+            audio_devices_t device = static_cast <audio_devices_t>(data.readInt32());
             int index;
-            status_t status = getStreamVolumeIndex(stream, &index);
+            status_t status = getStreamVolumeIndex(stream, &index, device);
             reply->writeInt32(index);
             reply->writeInt32(static_cast <uint32_t>(status));
             return NO_ERROR;

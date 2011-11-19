@@ -73,8 +73,12 @@ public:
     virtual status_t initStreamVolume(audio_stream_type_t stream,
                                       int indexMin,
                                       int indexMax) = 0;
-    virtual status_t setStreamVolumeIndex(audio_stream_type_t stream, int index) = 0;
-    virtual status_t getStreamVolumeIndex(audio_stream_type_t stream, int *index) = 0;
+    virtual status_t setStreamVolumeIndex(audio_stream_type_t stream,
+                                          int index,
+                                          audio_devices_t device) = 0;
+    virtual status_t getStreamVolumeIndex(audio_stream_type_t stream,
+                                          int *index,
+                                          audio_devices_t device) = 0;
     virtual uint32_t getStrategyForStream(audio_stream_type_t stream) = 0;
     virtual uint32_t getDevicesForStream(audio_stream_type_t stream) = 0;
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc) = 0;

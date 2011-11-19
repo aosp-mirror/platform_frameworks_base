@@ -668,18 +668,22 @@ status_t AudioSystem::initStreamVolume(audio_stream_type_t stream,
     return aps->initStreamVolume(stream, indexMin, indexMax);
 }
 
-status_t AudioSystem::setStreamVolumeIndex(audio_stream_type_t stream, int index)
+status_t AudioSystem::setStreamVolumeIndex(audio_stream_type_t stream,
+                                           int index,
+                                           audio_devices_t device)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
-    return aps->setStreamVolumeIndex(stream, index);
+    return aps->setStreamVolumeIndex(stream, index, device);
 }
 
-status_t AudioSystem::getStreamVolumeIndex(audio_stream_type_t stream, int *index)
+status_t AudioSystem::getStreamVolumeIndex(audio_stream_type_t stream,
+                                           int *index,
+                                           audio_devices_t device)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
-    return aps->getStreamVolumeIndex(stream, index);
+    return aps->getStreamVolumeIndex(stream, index, device);
 }
 
 uint32_t AudioSystem::getStrategyForStream(audio_stream_type_t stream)
