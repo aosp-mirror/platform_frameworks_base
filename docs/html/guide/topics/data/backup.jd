@@ -710,7 +710,7 @@ lock for the synchronized statements:</p>
 
 <pre>
 // Object for intrinsic lock
-static final Object[] sDataLock = new Object[0];
+static final Object sDataLock = new Object();
 </pre>
 
 <p>Then create a synchronized statement with this lock each time you read or write the files. For
