@@ -47,25 +47,14 @@ extern "C" {
 
 namespace android {
 
-static void setupPaintWithFontData(SkPaint* paint, FontData* data) {
-    paint->setTypeface(data->typeFace);
-    paint->setTextSize(data->textSize);
-    paint->setTextSkewX(data->textSkewX);
-    paint->setTextScaleX(data->textScaleX);
-    paint->setFlags(data->flags);
-    paint->setHinting(data->hinting);
-}
-
 static HB_Bool stringToGlyphs(HB_Font hbFont, const HB_UChar16* characters, hb_uint32 length,
         HB_Glyph* glyphs, hb_uint32* glyphsSize, HB_Bool isRTL)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
+    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
 
-    paint.setTextEncoding(SkPaint::kUTF16_TextEncoding);
     uint16_t* skiaGlyphs = reinterpret_cast<uint16_t*>(glyphs);
-    int numGlyphs = paint.textToGlyphs(characters, length * sizeof(uint16_t), skiaGlyphs);
+    int numGlyphs = paint->textToGlyphs(characters, length * sizeof(uint16_t), skiaGlyphs);
 
     // HB_Glyph is 32-bit, but Skia outputs only 16-bit numbers. So our
     // |glyphs| array needs to be converted.
@@ -80,11 +69,8 @@ static HB_Bool stringToGlyphs(HB_Font hbFont, const HB_UChar16* characters, hb_u
 static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 numGlyphs,
         HB_Fixed* advances, int flags)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
-
-    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
     uint16_t* glyphs16 = new uint16_t[numGlyphs];
     if (!glyphs16)
@@ -92,7 +78,7 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
     for (unsigned i = 0; i < numGlyphs; ++i)
         glyphs16[i] = glyphs[i];
     SkScalar* scalarAdvances = reinterpret_cast<SkScalar*>(advances);
-    paint.getTextWidths(glyphs16, numGlyphs * sizeof(uint16_t), scalarAdvances);
+    paint->getTextWidths(glyphs16, numGlyphs * sizeof(uint16_t), scalarAdvances);
 
     // The |advances| values which Skia outputs are SkScalars, which are floats
     // in Chromium. However, Harfbuzz wants them in 26.6 fixed point format.
@@ -108,14 +94,11 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
 
 static HB_Bool canRender(HB_Font hbFont, const HB_UChar16* characters, hb_uint32 length)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
-
-    paint.setTextEncoding(SkPaint::kUTF16_TextEncoding);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
+    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
 
     uint16_t* glyphs16 = new uint16_t[length];
-    int numGlyphs = paint.textToGlyphs(characters, length * sizeof(uint16_t), glyphs16);
+    int numGlyphs = paint->textToGlyphs(characters, length * sizeof(uint16_t), glyphs16);
 
     bool result = true;
     for (int i = 0; i < numGlyphs; ++i) {
@@ -131,22 +114,20 @@ static HB_Bool canRender(HB_Font hbFont, const HB_UChar16* characters, hb_uint32
 static HB_Error getOutlinePoint(HB_Font hbFont, HB_Glyph glyph, int flags, hb_uint32 point,
         HB_Fixed* xPos, HB_Fixed* yPos, hb_uint32* resultingNumPoints)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
-
     if (flags & HB_ShaperFlag_UseDesignMetrics)
         // This is requesting pre-hinted positions. We can't support this.
         return HB_Err_Invalid_Argument;
 
-    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+
     uint16_t glyph16 = glyph;
     SkPath path;
-    paint.getTextPath(&glyph16, sizeof(glyph16), 0, 0, &path);
+    paint->getTextPath(&glyph16, sizeof(glyph16), 0, 0, &path);
     uint32_t numPoints = path.getPoints(0, 0);
     if (point >= numPoints)
         return HB_Err_Invalid_SubTable;
-    SkPoint* points = reinterpret_cast<SkPoint*>(malloc(sizeof(SkPoint) * (point + 1)));
+    SkPoint* points = static_cast<SkPoint*>(malloc(sizeof(SkPoint) * (point + 1)));
     if (!points)
         return HB_Err_Invalid_SubTable;
     // Skia does let us get a single point from the path.
@@ -161,15 +142,13 @@ static HB_Error getOutlinePoint(HB_Font hbFont, HB_Glyph glyph, int flags, hb_ui
 
 static void getGlyphMetrics(HB_Font hbFont, HB_Glyph glyph, HB_GlyphMetrics* metrics)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
-    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     uint16_t glyph16 = glyph;
     SkScalar width;
     SkRect bounds;
-    paint.getTextWidths(&glyph16, sizeof(glyph16), &width, &bounds);
+    paint->getTextWidths(&glyph16, sizeof(glyph16), &width, &bounds);
 
     metrics->x = SkScalarToHBFixed(bounds.fLeft);
     metrics->y = SkScalarToHBFixed(bounds.fTop);
@@ -185,12 +164,10 @@ static void getGlyphMetrics(HB_Font hbFont, HB_Glyph glyph, HB_GlyphMetrics* met
 
 static HB_Fixed getFontMetric(HB_Font hbFont, HB_FontMetric metric)
 {
-    FontData* data = reinterpret_cast<FontData*>(hbFont->userData);
-    SkPaint paint;
-    setupPaintWithFontData(&paint, data);
+    SkPaint* paint = static_cast<SkPaint*>(hbFont->userData);
 
     SkPaint::FontMetrics skiaMetrics;
-    paint.getFontMetrics(&skiaMetrics);
+    paint->getFontMetrics(&skiaMetrics);
 
     switch (metric) {
     case HB_FontAscent:
@@ -211,10 +188,9 @@ const HB_FontClass harfbuzzSkiaClass = {
     getFontMetric,
 };
 
-HB_Error harfbuzzSkiaGetTable(void* voidface, const HB_Tag tag, HB_Byte* buffer, HB_UInt* len)
+HB_Error harfbuzzSkiaGetTable(void* font, const HB_Tag tag, HB_Byte* buffer, HB_UInt* len)
 {
-    FontData* data = reinterpret_cast<FontData*>(voidface);
-    SkTypeface* typeface = data->typeFace;
+    SkTypeface* typeface = static_cast<SkTypeface*>(font);
 
     if (!typeface) {
         LOGD("Typeface cannot be null");

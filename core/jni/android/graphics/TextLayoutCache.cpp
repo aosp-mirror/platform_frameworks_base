@@ -34,15 +34,10 @@ namespace android {
 #if USE_TEXT_LAYOUT_CACHE
 
     ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutCache);
-
-    static SkTypeface* gDefaultTypeface = SkFontHost::CreateTypeface(
-            NULL, NULL, NULL, 0, SkTypeface::kNormal);
-
-    static SkTypeface* gArabicTypeface = NULL;
-    static SkTypeface* gHebrewRegularTypeface = NULL;
-    static SkTypeface* gHebrewBoldTypeface = NULL;
+    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
 #endif
+
 //--------------------------------------------------------------------------------------------------
 
 TextLayoutCache::TextLayoutCache() :
@@ -113,10 +108,12 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             startTime = systemTime(SYSTEM_TIME_MONOTONIC);
         }
 
-        value = new TextLayoutCacheValue();
+        value = new TextLayoutCacheValue(contextCount);
 
         // Compute advances and store them
-        value->computeValues(paint, text, start, count, contextCount, dirFlags);
+        TextLayoutEngine::getInstance().computeValues(value.get(), paint,
+                reinterpret_cast<const UChar*>(text), start, count,
+                size_t(contextCount), int(dirFlags));
 
         if (mDebugEnabled) {
             value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
@@ -193,7 +190,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                         value->getElapsedTime() * 0.000001f,
                         elapsedTimeThruCacheGet * 0.000001f,
                         deltaPercent,
-                        String8(text, count).string());
+                        String8(text + start, count).string());
             }
             if (mCacheHitCount % DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL == 0) {
                 dumpCacheStats();
@@ -311,8 +308,16 @@ size_t TextLayoutCacheKey::getSize() const {
 /**
  * TextLayoutCacheValue
  */
-TextLayoutCacheValue::TextLayoutCacheValue() :
+TextLayoutCacheValue::TextLayoutCacheValue(size_t contextCount) :
         mTotalAdvance(0), mElapsedTime(0) {
+    // Give a hint for advances and glyphs vectors size
+    mAdvances.setCapacity(contextCount);
+    mGlyphs.setCapacity(contextCount);
+}
+
+size_t TextLayoutCacheValue::getSize() const {
+    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
+            sizeof(jchar) * mGlyphs.capacity();
 }
 
 void TextLayoutCacheValue::setElapsedTime(uint32_t time) {
@@ -323,176 +328,51 @@ uint32_t TextLayoutCacheValue::getElapsedTime() {
     return mElapsedTime;
 }
 
-void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars,
+//HB_ShaperItem TextLayoutEngine::mShaperItem;
+//HB_FontRec TextLayoutEngine::mFontRec;
+//SkPaint TextLayoutEngine::mShapingPaint;
+
+TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0),
+        mShaperItemLogClustersArraySize(0) {
+    mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
+    mArabicTypeface = NULL;
+    mHebrewRegularTypeface = NULL;
+    mHebrewBoldTypeface = NULL;
+
+    mFontRec.klass = &harfbuzzSkiaClass;
+    mFontRec.userData = 0;
+
+    // The values which harfbuzzSkiaClass returns are already scaled to
+    // pixel units, so we just set all these to one to disable further
+    // scaling.
+    mFontRec.x_ppem = 1;
+    mFontRec.y_ppem = 1;
+    mFontRec.x_scale = 1;
+    mFontRec.y_scale = 1;
+
+    memset(&mShaperItem, 0, sizeof(mShaperItem));
+
+    mShaperItem.font = &mFontRec;
+    mShaperItem.font->userData = &mShapingPaint;
+}
+
+TextLayoutEngine::~TextLayoutEngine() {
+    // FIXME should free fonts and caches but since this class is a singleton,
+    // we don't bother at the moment
+}
+
+void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags) {
-    // Give a hint for advances, glyphs and log clusters vectors size
-    mAdvances.setCapacity(contextCount);
-    mGlyphs.setCapacity(contextCount);
 
     computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
-            &mAdvances, &mTotalAdvance, &mGlyphs);
+            &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs);
 #if DEBUG_ADVANCES
     LOGD("Advances - start=%d, count=%d, contextCount=%d, totalAdvance=%f", start, count,
             contextCount, mTotalAdvance);
 #endif
 }
 
-size_t TextLayoutCacheValue::getSize() const {
-    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
-            sizeof(jchar) * mGlyphs.capacity();
-}
-
-void TextLayoutCacheValue::initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec* font,
-        FontData* fontData, SkPaint* paint, const UChar* chars, size_t count) {
-    font->klass = &harfbuzzSkiaClass;
-    font->userData = 0;
-
-    // The values which harfbuzzSkiaClass returns are already scaled to
-    // pixel units, so we just set all these to one to disable further
-    // scaling.
-    font->x_ppem = 1;
-    font->y_ppem = 1;
-    font->x_scale = 1;
-    font->y_scale = 1;
-
-    // Reset kerning
-    shaperItem.kerning_applied = false;
-
-    // Define font data
-    fontData->textSize = paint->getTextSize();
-    fontData->textSkewX = paint->getTextSkewX();
-    fontData->textScaleX = paint->getTextScaleX();
-    fontData->flags = paint->getFlags();
-    fontData->hinting = paint->getHinting();
-
-    shaperItem.font = font;
-    shaperItem.font->userData = fontData;
-
-    // We cannot know, ahead of time, how many glyphs a given script run
-    // will produce. We take a guess that script runs will not produce more
-    // than twice as many glyphs as there are code points plus a bit of
-    // padding and fallback if we find that we are wrong.
-    createGlyphArrays(shaperItem, (count + 2) * 2);
-
-    // Create log clusters array
-    shaperItem.log_clusters = new unsigned short[count];
-
-    // Set the string properties
-    shaperItem.string = chars;
-    shaperItem.stringLength = count;
-}
-
-void TextLayoutCacheValue::freeShaperItem(HB_ShaperItem& shaperItem) {
-    deleteGlyphArrays(shaperItem);
-    delete[] shaperItem.log_clusters;
-    HB_FreeFace(shaperItem.face);
-}
-
-unsigned TextLayoutCacheValue::shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* paint,
-        size_t count, bool isRTL) {
-    // Update Harfbuzz Shaper
-    shaperItem.item.pos = 0;
-    shaperItem.item.length = count;
-    shaperItem.item.bidiLevel = isRTL;
-
-    // Get the glyphs base count for offsetting the glyphIDs returned by Harfbuzz
-    // This is needed as the Typeface used for shaping can be not the default one
-    // when we are shapping any script that needs to use a fallback Font.
-    // If we are a "common" script we dont need to shift
-    unsigned result = 0;
-    switch(shaperItem.item.script) {
-        case HB_Script_Arabic:
-        case HB_Script_Hebrew: {
-            const uint16_t* text16 = (const uint16_t*)shaperItem.string;
-            SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
-            result = paint->getBaseGlyphCount(firstUnichar);
-            break;
-        }
-        default:
-            break;
-    }
-
-    // Set the correct Typeface depending on the script
-    FontData* data = reinterpret_cast<FontData*>(shaperItem.font->userData);
-    switch(shaperItem.item.script) {
-        case HB_Script_Arabic:
-            data->typeFace = getCachedTypeface(&gArabicTypeface, TYPEFACE_ARABIC);
-#if DEBUG_GLYPHS
-            LOGD("Using Arabic Typeface");
-#endif
-            break;
-
-        case HB_Script_Hebrew:
-            if(paint->getTypeface()) {
-                switch(paint->getTypeface()->style()) {
-                    case SkTypeface::kNormal:
-                    case SkTypeface::kItalic:
-                    default:
-                        data->typeFace = getCachedTypeface(&gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
-#if DEBUG_GLYPHS
-                        LOGD("Using Hebrew Regular/Italic Typeface");
-#endif
-                        break;
-                    case SkTypeface::kBold:
-                    case SkTypeface::kBoldItalic:
-                        data->typeFace = getCachedTypeface(&gHebrewBoldTypeface, TYPE_FACE_HEBREW_BOLD);
-#if DEBUG_GLYPHS
-                        LOGD("Using Hebrew Bold/BoldItalic Typeface");
-#endif
-                        break;
-                }
-            } else {
-                data->typeFace = getCachedTypeface(&gHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
-#if DEBUG_GLYPHS
-                        LOGD("Using Hebrew Regular Typeface");
-#endif
-            }
-            break;
-
-        default:
-            if(paint->getTypeface()) {
-                data->typeFace = paint->getTypeface();
-#if DEBUG_GLYPHS
-            LOGD("Using Paint Typeface");
-#endif
-            } else {
-                data->typeFace = gDefaultTypeface;
-#if DEBUG_GLYPHS
-            LOGD("Using Default Typeface");
-#endif
-            }
-            break;
-    }
-
-    shaperItem.face = HB_NewFace(data, harfbuzzSkiaGetTable);
-
-#if DEBUG_GLYPHS
-    LOGD("Run typeFace = %p", data->typeFace);
-    LOGD("Run typeFace->uniqueID = %d", data->typeFace->uniqueID());
-#endif
-
-    // Shape
-    while (!HB_ShapeItem(&shaperItem)) {
-        // We overflowed our arrays. Resize and retry.
-        // HB_ShapeItem fills in shaperItem.num_glyphs with the needed size.
-        deleteGlyphArrays(shaperItem);
-        createGlyphArrays(shaperItem, shaperItem.num_glyphs << 1);
-    }
-
-    return result;
-}
-
-SkTypeface* TextLayoutCacheValue::getCachedTypeface(SkTypeface** typeface, const char path[]) {
-    if (!*typeface) {
-        *typeface = SkTypeface::CreateFromFile(path);
-#if DEBUG_GLYPHS
-        LOGD("Created SkTypeface from file: %s", path);
-#endif
-    }
-    return *typeface;
-}
-
-void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -509,13 +389,6 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
             case kBidi_Force_LTR: forceLTR = true; break; // every char is LTR
             case kBidi_Force_RTL: forceRTL = true; break; // every char is RTL
         }
-
-        HB_ShaperItem shaperItem;
-        HB_FontRec font;
-        FontData fontData;
-
-        // Initialize Harfbuzz Shaper
-        initShaperItem(shaperItem, &font, &fontData, paint, chars, contextCount);
 
         bool useSingleRun = false;
         bool isRTL = forceRTL;
@@ -627,45 +500,43 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
     }
 }
 
-void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
 
-    unsigned glyphBaseCount = 0;
-
     *outTotalAdvance = 0;
     jfloat totalAdvance = 0;
 
-    unsigned numCodePoints = 0;
+    // Set the string properties
+    mShaperItem.string = chars;
+    mShaperItem.stringLength = count;
 
-    ssize_t startFontRun = 0;
-    ssize_t endFontRun = 0;
+    // Define shaping paint properties
+    mShapingPaint.setTextSize(paint->getTextSize());
+    mShapingPaint.setTextSkewX(paint->getTextSkewX());
+    mShapingPaint.setTextScaleX(paint->getTextScaleX());
+    mShapingPaint.setFlags(paint->getFlags());
+    mShapingPaint.setHinting(paint->getHinting());
+
+    // Split the BiDi run into Script runs. Harfbuzz will populate the pos, length and script
+    // into the shaperItem
     ssize_t indexFontRun = isRTL ? count - 1 : 0;
-    size_t countFontRun = 0;
-
-    HB_ShaperItem shaperItem;
-    HB_FontRec font;
-    FontData fontData;
-
-    // Zero the Shaper struct
-    memset(&shaperItem, 0, sizeof(shaperItem));
-
-    // Split the BiDi run into Script runs. Harfbuzz will populate the script into the shaperItem
-    while((isRTL) ?
-            hb_utf16_script_run_prev(&numCodePoints, &shaperItem.item, chars,
+    unsigned numCodePoints = 0;
+    while ((isRTL) ?
+            hb_utf16_script_run_prev(&numCodePoints, &mShaperItem.item, chars,
                     count, &indexFontRun):
-            hb_utf16_script_run_next(&numCodePoints, &shaperItem.item, chars,
+            hb_utf16_script_run_next(&numCodePoints, &mShaperItem.item, chars,
                     count, &indexFontRun)) {
 
-        startFontRun = shaperItem.item.pos;
-        countFontRun = shaperItem.item.length;
-        endFontRun = startFontRun + countFontRun;
+        ssize_t startFontRun = mShaperItem.item.pos;
+        size_t countFontRun = mShaperItem.item.length;
+        ssize_t endFontRun = startFontRun + countFontRun;
 
 #if DEBUG_GLYPHS
-        LOGD("Shaped Font Run with");
+        LOGD("Shaping Font Run with");
         LOGD("         -- isRTL=%d", isRTL);
-        LOGD("         -- HB script=%d", shaperItem.item.script);
+        LOGD("         -- HB script=%d", mShaperItem.item.script);
         LOGD("         -- startFontRun=%d", startFontRun);
         LOGD("         -- endFontRun=%d", endFontRun);
         LOGD("         -- countFontRun=%d", countFontRun);
@@ -673,19 +544,17 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
         LOGD("         -- string='%s'", String8(chars, count).string());
 #endif
 
-        // Initialize Harfbuzz Shaper
-        initShaperItem(shaperItem, &font, &fontData, paint, chars + startFontRun, countFontRun);
-
-        // Shape the Font run and get the base glyph count for offsetting the glyphIDs later on
-        glyphBaseCount = shapeFontRun(shaperItem, paint, countFontRun, isRTL);
+        // Initialize Harfbuzz Shaper and get the base glyph count for offsetting the glyphIDs
+        // and shape the Font run
+        size_t glyphBaseCount = shapeFontRun(paint, isRTL);
 
 #if DEBUG_GLYPHS
-        LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
-                shaperItem.kerning_applied);
+        LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", mShaperItem.num_glyphs,
+                mShaperItem.kerning_applied);
         LOGD("         -- isDevKernText=%d", paint->isDevKernText());
         LOGD("         -- glyphBaseCount=%d", glyphBaseCount);
 
-        logGlyphs(shaperItem);
+        logGlyphs(mShaperItem);
 #endif
         if (isRTL) {
             endFontRun = startFontRun;
@@ -699,7 +568,7 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
 #endif
         }
 
-        if (shaperItem.advances == NULL || shaperItem.num_glyphs == 0) {
+        if (mShaperItem.advances == NULL || mShaperItem.num_glyphs == 0) {
 #if DEBUG_GLYPHS
             LOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
 #endif
@@ -708,16 +577,16 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
         }
 
         // Get Advances and their total
-        jfloat currentAdvance = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[0]]);
+        jfloat currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[0]]);
         jfloat totalFontRunAdvance = currentAdvance;
         outAdvances->add(currentAdvance);
         for (size_t i = 1; i < countFontRun; i++) {
-            size_t clusterPrevious = shaperItem.log_clusters[i - 1];
-            size_t cluster = shaperItem.log_clusters[i];
+            size_t clusterPrevious = mShaperItem.log_clusters[i - 1];
+            size_t cluster = mShaperItem.log_clusters[i];
             if (cluster == clusterPrevious) {
                 outAdvances->add(0);
             } else {
-                currentAdvance = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[i]]);
+                currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[i]]);
                 totalFontRunAdvance += currentAdvance;
                 outAdvances->add(currentAdvance);
             }
@@ -733,38 +602,188 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
 
         // Get Glyphs and reverse them in place if RTL
         if (outGlyphs) {
-            size_t countGlyphs = shaperItem.num_glyphs;
+            size_t countGlyphs = mShaperItem.num_glyphs;
             for (size_t i = 0; i < countGlyphs; i++) {
                 jchar glyph = glyphBaseCount +
-                        (jchar) shaperItem.glyphs[(!isRTL) ? i : countGlyphs - 1 - i];
+                        (jchar) mShaperItem.glyphs[(!isRTL) ? i : countGlyphs - 1 - i];
 #if DEBUG_GLYPHS
                 LOGD("HARFBUZZ  -- glyph[%d]=%d", i, glyph);
 #endif
                 outGlyphs->add(glyph);
             }
         }
-        // Cleaning
-        freeShaperItem(shaperItem);
     }
     *outTotalAdvance = totalAdvance;
 }
 
-void TextLayoutCacheValue::deleteGlyphArrays(HB_ShaperItem& shaperItem) {
-    delete[] shaperItem.glyphs;
-    delete[] shaperItem.attributes;
-    delete[] shaperItem.advances;
-    delete[] shaperItem.offsets;
+
+size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
+    // Reset kerning
+    mShaperItem.kerning_applied = false;
+
+    // Update Harfbuzz Shaper
+    mShaperItem.item.bidiLevel = isRTL;
+
+    SkTypeface* typeface = paint->getTypeface();
+
+    // Set the correct Typeface depending on the script
+    switch (mShaperItem.item.script) {
+    case HB_Script_Arabic:
+        typeface = getCachedTypeface(&mArabicTypeface, TYPEFACE_ARABIC);
+#if DEBUG_GLYPHS
+        LOGD("Using Arabic Typeface");
+#endif
+        break;
+
+    case HB_Script_Hebrew:
+        if (typeface) {
+            switch (typeface->style()) {
+            case SkTypeface::kBold:
+            case SkTypeface::kBoldItalic:
+                typeface = getCachedTypeface(&mHebrewBoldTypeface, TYPE_FACE_HEBREW_BOLD);
+#if DEBUG_GLYPHS
+                LOGD("Using Hebrew Bold/BoldItalic Typeface");
+#endif
+                break;
+
+            case SkTypeface::kNormal:
+            case SkTypeface::kItalic:
+            default:
+                typeface = getCachedTypeface(&mHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
+#if DEBUG_GLYPHS
+                LOGD("Using Hebrew Regular/Italic Typeface");
+#endif
+                break;
+            }
+        } else {
+            typeface = getCachedTypeface(&mHebrewRegularTypeface, TYPE_FACE_HEBREW_REGULAR);
+#if DEBUG_GLYPHS
+            LOGD("Using Hebrew Regular Typeface");
+#endif
+        }
+        break;
+
+    default:
+        if (!typeface) {
+            typeface = mDefaultTypeface;
+#if DEBUG_GLYPHS
+            LOGD("Using Default Typeface");
+#endif
+        } else {
+#if DEBUG_GLYPHS
+            LOGD("Using Paint Typeface");
+#endif
+        }
+        break;
+    }
+
+    mShapingPaint.setTypeface(typeface);
+    mShaperItem.face = getCachedHBFace(typeface);
+
+#if DEBUG_GLYPHS
+    LOGD("Run typeFace = %p, uniqueID = %d, hb_face = %p",
+            typeface, typeface->uniqueID(), mShaperItem.face);
+#endif
+
+    // Get the glyphs base count for offsetting the glyphIDs returned by Harfbuzz
+    // This is needed as the Typeface used for shaping can be not the default one
+    // when we are shaping any script that needs to use a fallback Font.
+    // If we are a "common" script we dont need to shift
+    size_t baseGlyphCount = 0;
+    switch (mShaperItem.item.script) {
+    case HB_Script_Arabic:
+    case HB_Script_Hebrew: {
+        const uint16_t* text16 = (const uint16_t*)mShaperItem.string;
+        SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
+        baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
+        break;
+    }
+    default:
+        break;
+    }
+
+    // Shape
+    ensureShaperItemLogClustersArray(mShaperItem.item.length);
+    ensureShaperItemGlyphArrays(mShaperItem.item.length * 3 / 2);
+    mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
+    while (!HB_ShapeItem(&mShaperItem)) {
+        // We overflowed our glyph arrays. Resize and retry.
+        // HB_ShapeItem fills in shaperItem.num_glyphs with the needed size.
+        ensureShaperItemGlyphArrays(mShaperItem.num_glyphs * 2);
+        mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
+    }
+    return baseGlyphCount;
 }
 
-void TextLayoutCacheValue::createGlyphArrays(HB_ShaperItem& shaperItem, int size) {
+void TextLayoutEngine::ensureShaperItemGlyphArrays(size_t size) {
+    if (size > mShaperItemGlyphArraySize) {
+        deleteShaperItemGlyphArrays();
+        createShaperItemGlyphArrays(size);
+    }
+}
+
+void TextLayoutEngine::createShaperItemGlyphArrays(size_t size) {
 #if DEBUG_GLYPHS
     LOGD("createGlyphArrays  -- size=%d", size);
 #endif
-    shaperItem.glyphs = new HB_Glyph[size];
-    shaperItem.attributes = new HB_GlyphAttributes[size];
-    shaperItem.advances = new HB_Fixed[size];
-    shaperItem.offsets = new HB_FixedPoint[size];
-    shaperItem.num_glyphs = size;
+    mShaperItemGlyphArraySize = size;
+    mShaperItem.glyphs = new HB_Glyph[size];
+    mShaperItem.attributes = new HB_GlyphAttributes[size];
+    mShaperItem.advances = new HB_Fixed[size];
+    mShaperItem.offsets = new HB_FixedPoint[size];
+}
+
+void TextLayoutEngine::deleteShaperItemGlyphArrays() {
+    delete[] mShaperItem.glyphs;
+    delete[] mShaperItem.attributes;
+    delete[] mShaperItem.advances;
+    delete[] mShaperItem.offsets;
+}
+
+void TextLayoutEngine::ensureShaperItemLogClustersArray(size_t size) {
+    if (size > mShaperItemLogClustersArraySize) {
+        deleteShaperItemLogClustersArray();
+        createShaperItemLogClustersArray(size);
+    }
+}
+
+void TextLayoutEngine::createShaperItemLogClustersArray(size_t size) {
+#if DEBUG_GLYPHS
+    LOGD("createLogClustersArray  -- size=%d", size);
+#endif
+    mShaperItemLogClustersArraySize = size;
+    mShaperItem.log_clusters = new unsigned short[size];
+}
+
+void TextLayoutEngine::deleteShaperItemLogClustersArray() {
+    delete[] mShaperItem.log_clusters;
+}
+
+SkTypeface* TextLayoutEngine::getCachedTypeface(SkTypeface** typeface, const char path[]) {
+    if (!*typeface) {
+        *typeface = SkTypeface::CreateFromFile(path);
+        (*typeface)->ref();
+#if DEBUG_GLYPHS
+        LOGD("Created SkTypeface from file: %s", path);
+#endif
+    }
+    return *typeface;
+}
+
+HB_Face TextLayoutEngine::getCachedHBFace(SkTypeface* typeface) {
+    SkFontID fontId = typeface->uniqueID();
+    ssize_t index = mCachedHBFaces.indexOfKey(fontId);
+    if (index >= 0) {
+        return mCachedHBFaces.valueAt(index);
+    }
+    HB_Face face = HB_NewFace(typeface, harfbuzzSkiaGetTable);
+    if (face) {
+#if DEBUG_GLYPHS
+        LOGD("Created HB_NewFace %p from paint typeface: %p", face, typeface);
+#endif
+        mCachedHBFaces.add(fontId, face);
+    }
+    return face;
 }
 
 } // namespace android
