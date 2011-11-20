@@ -24,7 +24,7 @@ public class DreamsDockLauncher extends Activity {
     private static void launchDream(Context context) {
         try {
             String component = Settings.Secure.getString(
-                    context.getContentResolver(), Settings.Secure.DREAM_COMPONENT);
+                    context.getContentResolver(), Settings.Secure.SCREENSAVER_COMPONENT);
             if (component == null) {
                 component = context.getResources().getString(
                     com.android.internal.R.string.config_defaultDreamComponent);
@@ -52,6 +52,12 @@ public class DreamsDockLauncher extends Activity {
     public static class DockEventReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            final boolean activateOnDock = 0 != Settings.Secure.getInt(
+                context.getContentResolver(), 
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, 1);
+
+            if (!activateOnDock) return;
+
             if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
                 Bundle extras = intent.getExtras();
                 int state = extras
