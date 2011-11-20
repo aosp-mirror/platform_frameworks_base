@@ -1005,6 +1005,11 @@ uint32_t SurfaceTexture::getCurrentScalingMode() const {
     return mCurrentScalingMode;
 }
 
+bool SurfaceTexture::isSynchronousMode() const {
+    Mutex::Autolock lock(mMutex);
+    return mSynchronousMode;
+}
+
 int SurfaceTexture::query(int what, int* outValue)
 {
     Mutex::Autolock lock(mMutex);

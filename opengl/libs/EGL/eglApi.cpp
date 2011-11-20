@@ -370,6 +370,11 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
             }
         }
 
+        // the EGL spec requires that a new EGLSurface default to swap interval
+        // 1, so explicitly set that on the window here.
+        ANativeWindow* anw = reinterpret_cast<ANativeWindow*>(window);
+        anw->setSwapInterval(anw, 1);
+
         EGLSurface surface = cnx->egl.eglCreateWindowSurface(
                 iDpy, iConfig, window, attrib_list);
         if (surface != EGL_NO_SURFACE) {

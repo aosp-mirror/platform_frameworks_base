@@ -1245,6 +1245,31 @@ TEST_F(SurfaceTextureGLToGLTest, EglDestroySurfaceAfterAbandonUnrefsBuffers) {
     EXPECT_EQ(1, buffers[2]->getStrongCount());
 }
 
+TEST_F(SurfaceTextureGLToGLTest, EglSurfaceDefaultsToSynchronousMode) {
+    // This test requires 3 buffers to run on a single thread.
+    mST->setBufferCountServer(3);
+
+    ASSERT_TRUE(mST->isSynchronousMode());
+
+    for (int i = 0; i < 10; i++) {
+        // Produce a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mProducerEglSurface,
+                mProducerEglSurface, mProducerEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        glClear(GL_COLOR_BUFFER_BIT);
+        EXPECT_TRUE(eglSwapBuffers(mEglDisplay, mProducerEglSurface));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        // Consume a frame
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
+                mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_EQ(NO_ERROR, mST->updateTexImage());
+    }
+
+    ASSERT_TRUE(mST->isSynchronousMode());
+}
+
 /*
  * This test fixture is for testing GL -> GL texture streaming from one thread
  * to another.  It contains functionality to create a producer thread that will
