@@ -936,7 +936,11 @@ public class WebView extends AbsoluteLayout
          * Notify the listener that the picture has changed.
          * @param view The WebView that owns the picture.
          * @param picture The new picture.
-         * @deprecated This method is now obsolete.
+         * @deprecated Due to internal changes, the picture does not include
+         * composited layers such as fixed position elements or scrollable divs.
+         * While the PictureListener API can still be used to detect changes in
+         * the WebView content, you are advised against its usage until a replacement
+         * is provided in a future Android release
          */
         @Deprecated
         public void onNewPicture(WebView view, Picture picture);
