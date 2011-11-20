@@ -4020,21 +4020,26 @@ public final class Settings {
                 "setup_prepaid_detection_redir_host";
 
         /**
-         * The user's preferred "dream" (interactive screensaver) component.
-         *
-         * This component will be launched by the PhoneWindowManager after the user's chosen idle
-         * timeout (specified by {@link #DREAM_TIMEOUT}).
+         * Whether the screensaver is enabled.
          * @hide
          */
-        public static final String DREAM_COMPONENT =
-                "dream_component";
+        public static final String SCREENSAVER_ENABLED = "screensaver_enabled";
 
         /**
-         * The delay before a "dream" is started (set to 0 to disable).
+         * The user's chosen screensaver component.
+         *
+         * This component will be launched by the PhoneWindowManager after a timeout when not on
+         * battery, or upon dock insertion (if SCREENSAVER_ACTIVATE_ON_DOCK is set to 1).
          * @hide
          */
-        public static final String DREAM_TIMEOUT =
-                "dream_timeout";
+        public static final String SCREENSAVER_COMPONENT = "screensaver_component";
+
+        /**
+         * Whether the screensaver should be automatically launched when the device is inserted
+         * into a (desk) dock.
+         * @hide
+         */
+        public static final String SCREENSAVER_ACTIVATE_ON_DOCK = "screensaver_activate_on_dock";
 
         /** {@hide} */
         public static final String NETSTATS_ENABLED = "netstats_enabled";
