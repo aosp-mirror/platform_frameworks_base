@@ -1176,6 +1176,13 @@ TEST_F(SurfaceTextureGLToGLTest, TexturingFromGLFilledRGBABufferPow2) {
 TEST_F(SurfaceTextureGLToGLTest, EglDestroySurfaceUnrefsBuffers) {
     sp<GraphicBuffer> buffers[3];
 
+    // This test requires async mode to run on a single thread.
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mProducerEglSurface,
+            mProducerEglSurface, mProducerEglContext));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    EXPECT_TRUE(eglSwapInterval(mEglDisplay, 0));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
     for (int i = 0; i < 3; i++) {
         // Produce a frame
         EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mProducerEglSurface,
@@ -1205,11 +1212,24 @@ TEST_F(SurfaceTextureGLToGLTest, EglDestroySurfaceUnrefsBuffers) {
 
     EXPECT_EQ(1, buffers[0]->getStrongCount());
     EXPECT_EQ(1, buffers[1]->getStrongCount());
-    EXPECT_EQ(1, buffers[2]->getStrongCount());
+
+    // Depending on how lazily the GL driver dequeues buffers, we may end up
+    // with either two or three total buffers.  If there are three, make sure
+    // the last one was properly down-ref'd.
+    if (buffers[2] != buffers[0]) {
+        EXPECT_EQ(1, buffers[2]->getStrongCount());
+    }
 }
 
 TEST_F(SurfaceTextureGLToGLTest, EglDestroySurfaceAfterAbandonUnrefsBuffers) {
     sp<GraphicBuffer> buffers[3];
+
+    // This test requires async mode to run on a single thread.
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mProducerEglSurface,
+            mProducerEglSurface, mProducerEglContext));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    EXPECT_TRUE(eglSwapInterval(mEglDisplay, 0));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
 
     for (int i = 0; i < 3; i++) {
         // Produce a frame
@@ -1242,7 +1262,13 @@ TEST_F(SurfaceTextureGLToGLTest, EglDestroySurfaceAfterAbandonUnrefsBuffers) {
 
     EXPECT_EQ(1, buffers[0]->getStrongCount());
     EXPECT_EQ(1, buffers[1]->getStrongCount());
-    EXPECT_EQ(1, buffers[2]->getStrongCount());
+
+    // Depending on how lazily the GL driver dequeues buffers, we may end up
+    // with either two or three total buffers.  If there are three, make sure
+    // the last one was properly down-ref'd.
+    if (buffers[2] != buffers[0]) {
+        EXPECT_EQ(1, buffers[2]->getStrongCount());
+    }
 }
 
 TEST_F(SurfaceTextureGLToGLTest, EglSurfaceDefaultsToSynchronousMode) {
