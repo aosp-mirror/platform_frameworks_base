@@ -1219,6 +1219,6 @@
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Toestel gesluit."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="8715108995741758718">"Stuur tans..."</string>
-    <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin Browser?"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"Aanvaar Bel?"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aanvaar oproep?"</string>
 </resources>

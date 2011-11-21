@@ -102,7 +102,7 @@
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi: два деления."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi: три деления."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Надежный сигнал Wi-Fi."</string>
-    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Сигнал WiMAX отсутствует."</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Нет сигнала WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Сигнал WiMAX: одно деление."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Сигнал WiMAX: два деления."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Сигнал WiMAX: три деления."</string>

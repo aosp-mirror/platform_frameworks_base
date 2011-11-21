@@ -102,7 +102,7 @@
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Dua bar Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Tiga bar Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Isyarat WiFi penuh."</string>
-    <string name="accessibility_no_wimax" msgid="4329180129727630368">"No. WiMAX"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Tiada WiMAX"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX satu bar."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX dua bar."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX tiga bar."</string>

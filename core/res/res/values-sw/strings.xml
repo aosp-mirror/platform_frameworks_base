@@ -266,11 +266,11 @@
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"funganisha kwa mbinu ya uingizaji"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha mbinu ya uingizaji. Haipaswi kuhitajika kwa programu za kawaida za kompyuta."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
-    <string name="permdesc_bindTextService" msgid="172508880651909350">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha pazia cha huduma ya maandishi (k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha mandhari cha huduma ya maandishi (k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
     <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Huruhusu kishikiliaji kufunga kusano cha kiwango cha juu cha huduma ya Vpn. Haipaswi kamwe kuhitajika kwa programu za kawaida."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"funga kwa pazia"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha pazia. Haipaswi kuhitajika kwa programu za kawaida za kompyuta."</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"funga kwa mandhari"</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha mandhari. Haipaswi kuhitajika kwa programu za kawaida za kompyuta."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"funga kwenye huduma ya widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha huduma ya wiji. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"jiunge na msimamizi wa kifaa"</string>
@@ -333,9 +333,9 @@
     <string name="permlab_writeProfile" msgid="4679878325177177400">"andika kwenye data ya maelezo yako mafupi"</string>
     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Inaruhusu programu kubadilisha au kuongeza maelezo binafsi ya maelezo yako mafupi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na maelezo ya anwani. Hii ina maanisha programu nyingine ziweze kukutambua na kutuma maelezo ya maelezo yako mafupi kwa wengine."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"soma mkondo wako wa kijamii"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Inaruhusu programu kufikia na kulandanisha usasisho kutoka kwako na marafiki wako. Prog hasidi zinaweza kutumia hizi kusoma mawasiliano ya kibinafsi kati yako na marafiki wako kwenye mitandao ya kijamii."</string>
+    <string name="permdesc_readSocialStream" product="default" msgid="6619997662735851111">"Inaruhusu programuramu kufikia na kulandanisha usasisho kutoka kwako na marafiki wako. Prog hasidi zinaweza kutumia hizi kusoma mawasiliano ya kibinafsi kati yako na marafiki wako kwenye mitandao ya kijamii."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"andika kwa mkondo wako wa kijamii"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Inaruhusu programu kuonyesha usasisho ya kijamii kutoka kwa marafiki wako. Prog hasidi zinaweza kutumia hizi zikijifanya kuwa rafiki na kukuhadaa kuonyesha nenosiri au taarifa zingine za siri."</string>
+    <string name="permdesc_writeSocialStream" product="default" msgid="2689083745826002521">"Inaruhusu programuramu kuonyesha usasisho ya kijamii kutoka kwa marafiki wako. Prog hasidi zinaweza kutumia hizi zikijifanya kuwa rafiki na kukuhadaa kuonyesha nenosiri au taarifa zingine za siri."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"soma matukio ya kalenda pamoja na maelezo ya siri"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako ndogo, pamoja na za marafiki au wafanyakazi wenza. Programu hasidi yenye kibali hiki kinaweza kuchukua maelezo ya kibinagsi kutoka kwa kalenda hizi bila ufahamu wa mmiliki."</string>
     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye simu yako, pamoja na za marafiki au marafiki wenza. Programu hasidi yenye kibali hiki inaweza kuchukua maelezo ya kibinafsi kutoka kwa kalenda hizi bila ufahamu wa mmiliki."</string>
@@ -423,10 +423,10 @@
     <string name="permlab_factoryTest" msgid="3715225492696416187">"endesha katika hali ya jaribio ya kiwanda"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Endesha kama jaribio la mtengenezaji la kiwango cha chini, kwa hivyo kuruhusu ufikiaji kamili wa maunzi ya kompyuta ndogo. Inapatikana tu wakati kompyuta ndogo inaendeshwa katika hali ya jaribio la mtengenezaji."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Endesha kama jaribio la kiwango cha chini cha mtengenezaji, kwa hivyo kuruhusu ufikiaji kamili wa maunzi ya simu. Inapatikana tu wakati simu inaendeshwa katika gumzo ya jaribio ya mtengenezaji."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"weka pazia"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Huruhusu programu kuweka pazia ya mfumo."</string>
-    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"weka vidokezo vya ukubwa wa pazia"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Huruhusu programu kuweka vidokezo vya ukubwa wa pazia ya mfumo."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"weka mandhari"</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Huruhusu programu kuweka mandhari ya mfumo."</string>
+    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"weka vidokezo vya ukubwa wa mandhari"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Huruhusu programu kuweka vidokezo vya ukubwa wa mandhari ya mfumo."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"weka upya mfumo kwa chaguo-msingi za kiwanda"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Huruhusu programu kuweka upya kabisa mfumo kwa mipangilio yake ya kiwanda, kwa hivyo kufuta data zote, usanidi, na programu za kompyuta zilizosanidiwa."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"weka muda"</string>
@@ -844,7 +844,7 @@
     <item quantity="one" msgid="2178576254385739855">"kesho"</item>
     <item quantity="other" msgid="2973062968038355991">"kati ya siku <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
-    <string name="preposition_for_date" msgid="9093949757757445117">"mnamo <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"tarehe <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"Saa <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ndani  ya <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"siku"</string>
@@ -1074,8 +1074,8 @@
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mbinu ya uingizaji"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sawazisha"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Ufikiaji"</string>
-    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Pazia"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Badilisha pazia"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Mandhari"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Badilisha mandhari"</string>
     <string name="vpn_title" msgid="8219003246858087489">"VPN imeamilishwa."</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN imeamilishwa na <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"Gonga ili kudhibiti mtandao."</string>
@@ -1218,10 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Shiriki na..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Kifaa kimefungwa."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <!-- no translation found for sending (8715108995741758718) -->
-    <skip />
-    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
-    <skip />
-    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
-    <skip />
+    <string name="sending" msgid="8715108995741758718">"Inatuma..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Zindua Kivinjari?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Kubali Simu?"</string>
 </resources>

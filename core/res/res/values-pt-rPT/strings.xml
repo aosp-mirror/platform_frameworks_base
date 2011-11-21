@@ -1020,7 +1020,7 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccione para desactivar depuração USB."</string>
-    <string name="select_input_method" msgid="6865512749462072765">"Selecionar método de entrada"</string>
+    <string name="select_input_method" msgid="6865512749462072765"></string>
     <string name="configure_input_methods" msgid="6324843080254191535">"Configurar métodos de entrada"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1218,10 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Partilhar com..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Aparelho bloqueado."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <!-- no translation found for sending (8715108995741758718) -->
-    <skip />
-    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
-    <skip />
-    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
-    <skip />
+    <string name="sending" msgid="8715108995741758718">"A enviar..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Iniciar Navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aceitar Chamada?"</string>
 </resources>
