@@ -73,11 +73,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"Insizakalo yedatha ivaliwe."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Insizakalo ephuthumayo ivimbelwe."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Insizakalo yezwi ivimbelwe."</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Zonke izinsizakalo Zezwi zivimbelwe."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Wonke amasevisi Wezwi avimbelwe."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"Insizakalo ye-SMS ivaliwe."</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Izinsizakalo Zezwi/Idatha zivimbelwe."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Izinsizakalo Zezwi/SMS zivimbelwe."</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"Zonke izinsizakalo Zezwi/Idatha/SMS zivimbelwe."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Amasevisi Wezwi/Idatha avimbelwe."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Amasevisi Wezwi/SMS avimbelwe."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Wonke amasevisi Wezwi/Idatha/SMS avimbelwe."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Izwi"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Idatha"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Ifeksi"</string>
@@ -99,7 +99,7 @@
     <string name="roamingText10" msgid="3992906999815316417">"Iyazulazula - Isici Sensizakalo Eyingxenye"</string>
     <string name="roamingText11" msgid="4154476854426920970">"Ibhena Yokuzulazula Ivuliwe"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Ibhena yokuzulazula ivaliwe"</string>
-    <string name="roamingTextSearching" msgid="8360141885972279963">"Iseshela Izinsizakalo"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Iseshela Isevisi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Akudlulisiwe"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> emuva kwamasekhondi angu-<xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
@@ -463,7 +463,7 @@
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"shintsha isimo se-WiFi"</string>
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Ivumela uhlelo lokusebena ukuxhuma futhi ingaxhumeki kumaphoyinti e-Wi-Fi, nokwenza izinguquko kumanethiwekhi e-Wi-Fi amisiwe."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ivumela isamukeli se-Wi-Fi Multicast"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ivumela uhlelo lokusebenza ukuthola amaphakhethe ngokungaqondile angeyona awedivaysi yakho. Lokhu kungaba usizo lapho uthola izinsizakalo ezinikezwa eduze. Kusebenzisa amandla amaninigi kunemodi yokungajikijeli okuningi."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ivumela uhlelo lokusebenza ukuthola amaphakhethe ngokungaqondile angeyona awedivaysi yakho. Lokhu kungaba usizo lapho uthola amasevisi anikezwa eduze. Kusebenzisa amandla amaninigi kunemodi yokungajikijeli okuningi."</string>
     <string name="permlab_accessWimaxState" msgid="2800410363171809280">"Buka isimo se-WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ivumela uhlelo lokusebenza ukubuka ulwazi mayelana nesimo se-WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"shintsha isimo se-WiMAX"</string>
@@ -852,7 +852,7 @@
     <string name="hour" msgid="2126771916426189481">"ihora"</string>
     <string name="hours" msgid="894424005266852993">"amahora"</string>
     <string name="minute" msgid="9148878657703769868">"Okuncane"</string>
-    <string name="minutes" msgid="5646001005827034509">"imizuzu"</string>
+    <string name="minutes" msgid="5646001005827034509">"amaminithi"</string>
     <string name="second" msgid="3184235808021478">"isekhondi"</string>
     <string name="seconds" msgid="3161515347216589235">"amasekhondi"</string>
     <string name="week" msgid="5617961537173061583">"iviki"</string>
@@ -968,7 +968,7 @@
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Isethaphu yoheloxhumano oluqondile lwe-WiFi lwesicelo kusuka ku <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Faka i-pin ukuze uqhubeke"</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"i-pin ye-WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> idinga ukufakiwa kudivayisi ye-peer <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> ukuze isethaphu yohleloxhumano iqhubeke"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"I-Wi-Fi Direct ivulekile"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Thinta ze uthole izisetho"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Thinta ukuze uthole izilungiselelo"</string>
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Uhlelo lokusebenza olungaziwa"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Ithumela imiyalezo ye-SMS"</string>

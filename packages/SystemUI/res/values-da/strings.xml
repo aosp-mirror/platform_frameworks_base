@@ -33,7 +33,7 @@
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen meddelelser"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"I gang"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelelser"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Underretninger"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Tilslut oplader"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Batteriet er ved at være fladt."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> tilbage"</string>
@@ -45,7 +45,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automatisk skærmrotation"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"LYDLØS"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Meddelelser"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Underretninger"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-tethering anvendt"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfigurer inputmetoder"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Brug fysisk tastatur"</string>
@@ -119,7 +119,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flytilstand."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Meddelelser."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd meddelelse."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktiveret."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS samler data."</string>
