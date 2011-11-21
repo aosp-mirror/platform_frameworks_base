@@ -68,7 +68,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Umfanekiso weskrini uqoshiwe"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Thinta ukubona imifanekiso yakho yeskrini"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Yehlulekile ukulondoloza umfanekiso weskrini."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Ayikwazanga ukulondoloza isithombe-skrini. Ukugcina kwangaphandle kungenzeka kuyasetshenziswa."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Ayikwazanga ukulondoloza isithombe-skrini. Isitoreji sangaphandle kungenzeka kuyasetshenziswa."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Okukhethwa kokudluliswa kwefayela ye-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lengisa njengesidlali semediya (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Lengisa ikhamera (PTP)"</string>
