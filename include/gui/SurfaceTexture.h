@@ -202,6 +202,10 @@ public:
     // getCurrentScalingMode returns the scaling mode of the current buffer
     uint32_t getCurrentScalingMode() const;
 
+    // isSynchronousMode returns whether the SurfaceTexture is currently in
+    // synchronous mode.
+    bool isSynchronousMode() const;
+
     // abandon frees all the buffers and puts the SurfaceTexture into the
     // 'abandoned' state.  Once put in this state the SurfaceTexture can never
     // leave it.  When in the 'abandoned' state, all methods of the
