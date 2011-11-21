@@ -25,10 +25,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifndef MAX_EGL_CACHE_ENTRY_SIZE
+#define MAX_EGL_CACHE_ENTRY_SIZE (16 * 1024);
+#endif
+
+#ifndef MAX_EGL_CACHE_SIZE
+#define MAX_EGL_CACHE_SIZE (64 * 1024);
+#endif
+
 // Cache size limits.
 static const size_t maxKeySize = 1024;
-static const size_t maxValueSize = 4096;
-static const size_t maxTotalSize = 64 * 1024;
+static const size_t maxValueSize = MAX_EGL_CACHE_ENTRY_SIZE;
+static const size_t maxTotalSize = MAX_EGL_CACHE_SIZE;
 
 // Cache file header
 static const char* cacheFileMagic = "EGL$";
