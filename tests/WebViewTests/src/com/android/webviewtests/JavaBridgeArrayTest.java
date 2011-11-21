@@ -165,7 +165,26 @@ public class JavaBridgeArrayTest extends JavaBridgeTestBase {
         // LIVECONNECT_COMPLIANCE: This should not count as an array, so we
         // should raise a JavaScript exception.
         executeJavaScript("testObject.setIntArray({length: \"foo\"});");
-        assertEquals(0, mTestObject.waitForIntArray().length);
+        assertNull(mTestObject.waitForIntArray());
+    }
+
+    public void testLengthOutOfBounds() throws Throwable {
+        // LIVECONNECT_COMPLIANCE: This should not count as an array, so we
+        // should raise a JavaScript exception.
+        executeJavaScript("testObject.setIntArray({length: -1});");
+        assertNull(mTestObject.waitForIntArray());
+
+        // LIVECONNECT_COMPLIANCE: This should not count as an array, so we
+        // should raise a JavaScript exception.
+        long length = (long)Integer.MAX_VALUE + 1L;
+        executeJavaScript("testObject.setIntArray({length: " + length + "});");
+        assertNull(mTestObject.waitForIntArray());
+
+        // LIVECONNECT_COMPLIANCE: This should not count as an array, so we
+        // should raise a JavaScript exception.
+        length = (long)Integer.MAX_VALUE + 1L - (long)Integer.MIN_VALUE + 1L;
+        executeJavaScript("testObject.setIntArray({length: " + length + "});");
+        assertNull(mTestObject.waitForIntArray());
     }
 
     public void testSparseArray() throws Throwable {
