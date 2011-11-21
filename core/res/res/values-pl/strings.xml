@@ -36,7 +36,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem z połączeniem lub błędny kod MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operacja jest ograniczona wyłącznie do numerów ustalonych."</string>
-    <string name="serviceEnabled" msgid="8147278346414714315">"Usługa była włączona."</string>
+    <string name="serviceEnabled" msgid="8147278346414714315">"Usługa została włączona."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usługa została włączona dla:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usługa została wyłączona."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Rejestracja powiodła się."</string>
@@ -1218,10 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Udostępnij..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Urządzenie zablokowane."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <!-- no translation found for sending (8715108995741758718) -->
-    <skip />
-    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
-    <skip />
-    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
-    <skip />
+    <string name="sending" msgid="8715108995741758718">"Wysyłanie..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Odebrać połączenie?"</string>
 </resources>

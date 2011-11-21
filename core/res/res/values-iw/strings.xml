@@ -901,7 +901,7 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"בחר יישום עבור מכשיר ה-USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"אין יישומים שיכולים לבצע פעולה זו."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"לצערנו ה<xliff:g id="APPLICATION">%1$s</xliff:g> הפסיק לפעול."</string>
+    <string name="aerr_application" msgid="932628488013092776">"לצערנו, פעולת ה<xliff:g id="APPLICATION">%1$s</xliff:g> הופסקה."</string>
     <string name="aerr_process" msgid="4507058997035697579">"לצערנו, התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הופסק."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> אינו מגיב."\n\n" האם ברצונך לסגור אותו?"</string>

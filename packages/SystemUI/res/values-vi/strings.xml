@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Giao diện người dùng hệ thống"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xoá"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xóa"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Không làm phiền"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Hiển thị thông báo"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa khỏi danh sách"</string>

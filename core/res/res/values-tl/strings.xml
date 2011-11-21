@@ -1218,10 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ibahagi kay..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naka-lock ang device."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <!-- no translation found for sending (8715108995741758718) -->
-    <skip />
-    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
-    <skip />
-    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
-    <skip />
+    <string name="sending" msgid="8715108995741758718">"Ipinapadala..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Tanggapin ang Tawag?"</string>
 </resources>

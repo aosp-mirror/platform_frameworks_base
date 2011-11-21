@@ -1096,7 +1096,7 @@
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Durch Berühren weitere Informationen zur Mobildatennutzung aufrufen"</string>
     <string name="no_matches" msgid="8129421908915840737">"Keine Treffer"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Auf Seite suchen"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Suchen"</string>
   <plurals name="matches_found">
     <item quantity="one" msgid="8167147081136579439">"1 Treffer"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g>"</item>
@@ -1218,10 +1218,7 @@
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Teilen mit..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Gerät gesperrt"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <!-- no translation found for sending (8715108995741758718) -->
-    <skip />
-    <!-- no translation found for launchBrowserDefault (2057951947297614725) -->
-    <skip />
-    <!-- no translation found for SetupCallDefault (6870275517518479651) -->
-    <skip />
+    <string name="sending" msgid="8715108995741758718">"Wird gesendet..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Anruf annehmen?"</string>
 </resources>
