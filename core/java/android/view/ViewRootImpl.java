@@ -576,6 +576,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    void terminateHardwareResources() {
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
+            mAttachInfo.mHardwareRenderer.destroy(false);
+        }
+    }
+
     void destroyHardwareLayers() {
         if (mThread != Thread.currentThread()) {
             if (mAttachInfo.mHardwareRenderer != null &&

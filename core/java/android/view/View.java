@@ -10073,7 +10073,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
                 destroyLayer();
-                // fall through - unaccelerated views may use software layer mechanism instead
+                // fall through - non-accelerated views may use software layer mechanism instead
             case LAYER_TYPE_SOFTWARE:
                 destroyDrawingCache();
                 break;
@@ -10235,9 +10235,28 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         if (mHardwareLayer != null) {
             mHardwareLayer.destroy();
             mHardwareLayer = null;
+
+            invalidate(true);
+            invalidateParentCaches();
+
             return true;
         }
         return false;
+    }
+
+    /**
+     * Destroys all hardware rendering resources. This method is invoked
+     * when the system needs to reclaim resources. Upon execution of this
+     * method, you should free any OpenGL resources created by the view.
+     * 
+     * Note: you <strong>must</strong> call
+     * <code>super.destroyHardwareResources()</code> when overriding
+     * this method.
+     * 
+     * @hide
+     */
+    protected void destroyHardwareResources() {
+        destroyLayer();
     }
 
     /**
