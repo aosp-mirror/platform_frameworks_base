@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.annotation.Widget;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipboardManager;
@@ -61,6 +62,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.HardwareCanvas;
@@ -77,6 +79,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -8455,7 +8458,11 @@ public class WebView extends AbsoluteLayout
                     // nativeCreate sets mNativeClass to a non-zero value
                     String drawableDir = BrowserFrame.getRawResFilename(
                             BrowserFrame.DRAWABLEDIR, mContext);
-                    nativeCreate(msg.arg1, drawableDir);
+                    WindowManager windowManager =
+                            (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+                    Display display = windowManager.getDefaultDisplay();
+                    nativeCreate(msg.arg1, drawableDir,
+                            ActivityManager.isHighEndGfx(display));
                     if (mDelaySetPicture != null) {
                         setNewPicture(mDelaySetPicture, true);
                         mDelaySetPicture = null;
@@ -9484,7 +9491,7 @@ public class WebView extends AbsoluteLayout
     private native Rect nativeCacheHitNodeBounds();
     private native int nativeCacheHitNodePointer();
     /* package */ native void nativeClearCursor();
-    private native void     nativeCreate(int ptr, String drawableDir);
+    private native void     nativeCreate(int ptr, String drawableDir, boolean isHighEndGfx);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
     private native int nativeCursorNodePointer();
