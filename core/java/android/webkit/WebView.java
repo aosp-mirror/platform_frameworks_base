@@ -742,6 +742,7 @@ public class WebView extends AbsoluteLayout
     static final int SCREEN_ON                          = 136;
     static final int ENTER_FULLSCREEN_VIDEO             = 137;
     static final int UPDATE_SELECTION                   = 138;
+    static final int UPDATE_ZOOM_DENSITY                = 139;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -797,7 +798,9 @@ public class WebView extends AbsoluteLayout
         "AUTOFILL_COMPLETE", //              = 134;
         "SELECT_AT", //                      = 135;
         "SCREEN_ON", //                      = 136;
-        "ENTER_FULLSCREEN_VIDEO" //          = 137;
+        "ENTER_FULLSCREEN_VIDEO", //         = 137;
+        "UPDATE_SELECTION", //               = 138;
+        "UPDATE_ZOOM_DENSITY" //             = 139;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -8433,6 +8436,11 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.ViewState viewState = (WebViewCore.ViewState) msg.obj;
                     // mScrollX contains the new minPrefWidth
                     mZoomManager.updateZoomRange(viewState, getViewWidth(), viewState.mScrollX);
+                    break;
+                }
+                case UPDATE_ZOOM_DENSITY: {
+                    final float density = (Float) msg.obj;
+                    mZoomManager.updateDefaultZoomDensity(density);
                     break;
                 }
                 case REPLACE_BASE_CONTENT: {
