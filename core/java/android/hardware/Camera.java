@@ -22,12 +22,9 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -157,7 +154,6 @@ public class Camera {
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
-    private boolean mReleased = false;
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -322,15 +318,6 @@ public class Camera {
     public final void release() {
         native_release();
         mFaceDetectionRunning = false;
-        if (mCameraSoundPlayers != null) {
-            for (CameraSoundPlayer csp: mCameraSoundPlayers) {
-                if (csp != null) {
-                    csp.release();
-                }
-            }
-            mCameraSoundPlayers = null;
-        }
-        mReleased = true;
     }
 
     /**
@@ -3503,194 +3490,4 @@ public class Camera {
             return false;
         }
     };
-
-    /**
-     * <p>The set of default system sounds for camera actions. Use this with
-     * {@link #playSound} to play an appropriate sound when implementing a
-     * custom still or video recording mechanism through the preview
-     * callbacks.</p>
-     *
-     * <p>There is no need to play sounds when using {@link #takePicture} or
-     * {@link android.media.MediaRecorder} for still images or video,
-     * respectively, as these play their own sounds when needed.</p>
-     *
-     * @see #playSound
-     * @hide
-     */
-    public static class Sound {
-        /**
-         * The sound used by {@link android.hardware.Camera#takePicture} to
-         * indicate still image capture.
-         */
-        public static final int SHUTTER_CLICK         = 0;
-
-        /**
-         * A sound to indicate that focusing has completed. Because deciding
-         * when this occurs is application-dependent, this sound is not used by
-         * any methods in the Camera class.
-         */
-        public static final int FOCUS_COMPLETE        = 1;
-
-        /**
-         * The sound used by {@link android.media.MediaRecorder#start} to
-         * indicate the start of video recording.
-         */
-        public static final int START_VIDEO_RECORDING = 2;
-
-        /**
-         * The sound used by {@link android.media.MediaRecorder#stop} to
-         * indicate the end of video recording.
-         */
-        public static final int STOP_VIDEO_RECORDING  = 3;
-
-        private static final int NUM_SOUNDS           = 4;
-    };
-
-    /**
-     * <p>Play one of the predefined platform sounds for camera actions.</p>
-     *
-     * <p>Use this method to play a platform-specific sound for various camera
-     * actions. The sound playing is done asynchronously, with the same behavior
-     * and content as the sounds played by {@link #takePicture takePicture},
-     * {@link android.media.MediaRecorder#start MediaRecorder.start}, and
-     * {@link android.media.MediaRecorder#stop MediaRecorder.stop}.</p>
-     *
-     * <p>Using this method makes it easy to match the default device sounds
-     * when recording or capturing data through the preview callbacks
-     * ({@link #setPreviewCallback setPreviewCallback},
-     * {@link #setPreviewTexture setPreviewTexture}).</p>
-     *
-     * @param soundId The type of sound to play, selected from the options in
-     *   {@link android.hardware.Camera.Sound}
-     * @see android.hardware.Camera.Sound
-     * @see #takePicture
-     * @see android.media.MediaRecorder
-     * @hide
-     */
-    public void playSound(int soundId) {
-        if (mReleased) return;
-        if (mCameraSoundPlayers == null) {
-            mCameraSoundPlayers = new CameraSoundPlayer[Sound.NUM_SOUNDS];
-        }
-        if (mCameraSoundPlayers[soundId] == null) {
-            mCameraSoundPlayers[soundId] = new CameraSoundPlayer(soundId);
-        }
-        mCameraSoundPlayers[soundId].play();
-    }
-
-    private CameraSoundPlayer[] mCameraSoundPlayers;
-
-    private static class CameraSoundPlayer implements Runnable {
-        private int mSoundId;
-        private int mAudioStreamType;
-        private MediaPlayer mPlayer;
-        private Thread mThread;
-        private boolean mExit;
-        private int mPlayCount;
-
-        private static final String mShutterSound    =
-                "/system/media/audio/ui/camera_click.ogg";
-        private static final String mFocusSound      =
-                "/system/media/audio/ui/camera_focus.ogg";
-        private static final String mVideoStartSound =
-                "/system/media/audio/ui/VideoRecord.ogg";
-        private static final String mVideoStopSound  =
-                "/system/media/audio/ui/VideoRecord.ogg";
-
-        @Override
-        public void run() {
-            String soundFilePath;
-            switch (mSoundId) {
-                case Sound.SHUTTER_CLICK:
-                    soundFilePath = mShutterSound;
-                    break;
-                case Sound.FOCUS_COMPLETE:
-                    soundFilePath = mFocusSound;
-                    break;
-                case Sound.START_VIDEO_RECORDING:
-                    soundFilePath = mVideoStartSound;
-                    break;
-                case Sound.STOP_VIDEO_RECORDING:
-                    soundFilePath = mVideoStopSound;
-                    break;
-                default:
-                    Log.e(TAG, "Unknown sound " + mSoundId + " requested.");
-                    return;
-            }
-            mPlayer = new MediaPlayer();
-            try {
-                mPlayer.setAudioStreamType(mAudioStreamType);
-                mPlayer.setDataSource(soundFilePath);
-                mPlayer.setLooping(false);
-                mPlayer.prepare();
-            } catch(IOException e) {
-                Log.e(TAG, "Error setting up sound " + mSoundId, e);
-                return;
-            }
-
-            while(true) {
-                try {
-                    synchronized (this) {
-                        while(true) {
-                            if (mExit) {
-                                return;
-                            } else if (mPlayCount <= 0) {
-                                wait();
-                            } else {
-                                mPlayCount--;
-                                break;
-                            }
-                        }
-                    }
-                    mPlayer.start();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error playing sound " + mSoundId, e);
-                }
-            }
-        }
-
-        public CameraSoundPlayer(int soundId) {
-            mSoundId = soundId;
-            if (SystemProperties.get("ro.camera.sound.forced", "0").equals("0")) {
-                mAudioStreamType = AudioManager.STREAM_MUSIC;
-            } else {
-                mAudioStreamType = AudioManager.STREAM_SYSTEM_ENFORCED;
-            }
-        }
-
-        public void play() {
-            if (mThread == null) {
-                mThread = new Thread(this);
-                mThread.start();
-            }
-            synchronized (this) {
-                mPlayCount++;
-                notifyAll();
-            }
-        }
-
-        public void release() {
-            if (mThread != null) {
-                synchronized (this) {
-                    mExit = true;
-                    notifyAll();
-                }
-                try {
-                    mThread.join();
-                } catch (InterruptedException e) {
-                }
-                mThread = null;
-            }
-            if (mPlayer != null) {
-                mPlayer.release();
-                mPlayer = null;
-            }
-        }
-
-        @Override
-        protected void finalize() {
-            release();
-        }
-    }
-
 }
