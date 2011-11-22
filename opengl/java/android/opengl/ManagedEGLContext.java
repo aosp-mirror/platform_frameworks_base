@@ -43,6 +43,8 @@ import com.google.android.gles_jni.EGLImpl;
  * of the currently created EGL contexts in the process are being managed
  * through this class, then they will all be asked to terminate through the
  * call to {@link #onTerminate}.
+ * 
+ * @hide
  */
 public abstract class ManagedEGLContext {
     static final String TAG = "ManagedEGLContext";
