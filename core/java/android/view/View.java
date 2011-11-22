@@ -10196,7 +10196,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                getHardwareLayer();
+                if (mAttachInfo.mHardwareRenderer != null &&
+                        mAttachInfo.mHardwareRenderer.isEnabled() &&
+                        mAttachInfo.mHardwareRenderer.validate()) {
+                    getHardwareLayer();
+                }
                 break;
             case LAYER_TYPE_SOFTWARE:
                 buildDrawingCache(true);
