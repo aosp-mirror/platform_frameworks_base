@@ -38,6 +38,7 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * {@hide}
@@ -120,6 +121,20 @@ public class MtpDatabase {
         mMediaStoragePath = storagePath;
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
+
+        // Set locale to MediaScanner.
+        Locale locale = context.getResources().getConfiguration().locale;
+        if (locale != null) {
+            String language = locale.getLanguage();
+            String country = locale.getCountry();
+            if (language != null) {
+                if (country != null) {
+                    mMediaScanner.setLocale(language + "_" + country);
+                } else {
+                    mMediaScanner.setLocale(language);
+                }
+            }
+        }
         initDeviceProperties(context);
     }
 
