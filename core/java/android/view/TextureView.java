@@ -203,7 +203,10 @@ public class TextureView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        destroySurface();
+    }
 
+    private void destroySurface() {
         if (mLayer != null) {
             boolean shouldRelease = true;
             if (mListener != null) {
@@ -298,6 +301,14 @@ public class TextureView extends View {
     @Override
     boolean destroyLayer() {
         return false;
+    }
+
+    @Override
+    protected void destroyHardwareResources() {
+        super.destroyHardwareResources();
+        destroySurface();
+        invalidateParentCaches();
+        invalidate(true);
     }
 
     @Override

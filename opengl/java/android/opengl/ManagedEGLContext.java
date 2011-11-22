@@ -47,8 +47,7 @@ import com.google.android.gles_jni.EGLImpl;
 public abstract class ManagedEGLContext {
     static final String TAG = "ManagedEGLContext";
 
-    static final ArrayList<ManagedEGLContext> sActive
-            = new ArrayList<ManagedEGLContext>();
+    static final ArrayList<ManagedEGLContext> sActive = new ArrayList<ManagedEGLContext>();
 
     final EGLContext mContext;
 
@@ -127,7 +126,7 @@ public abstract class ManagedEGLContext {
             sActive.clear();
         }
 
-        for (int i=0; i<active.size(); i++) {
+        for (int i = 0; i < active.size(); i++) {
             active.get(i).execTerminate();
         }
 
