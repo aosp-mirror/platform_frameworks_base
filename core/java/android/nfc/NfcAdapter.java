@@ -357,8 +357,11 @@ public final class NfcAdapter {
             throw new IllegalArgumentException("context cannot be null");
         }
         context = context.getApplicationContext();
-        /* use getSystemService() instead of just instantiating to take
-         * advantage of the context's cached NfcManager & NfcAdapter */
+        if (context == null) {
+            throw new IllegalArgumentException(
+                    "context not associated with any application (using a mock context?)");
+        }
+        /* use getSystemService() for consistency */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
         return manager.getDefaultAdapter();
     }
