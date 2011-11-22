@@ -302,6 +302,12 @@ public class Camera {
         native_setup(new WeakReference<Camera>(this), cameraId);
     }
 
+    /**
+     * An empty Camera for testing purpose.
+     */
+    Camera() {
+    }
+
     protected void finalize() {
         release();
     }
@@ -1307,6 +1313,18 @@ public class Camera {
         String s = native_getParameters();
         p.unflatten(s);
         return p;
+    }
+
+    /**
+     * Returns an empty {@link Parameters} for testing purpose.
+     *
+     * @return an Parameter object.
+     *
+     * @hide
+     */
+    public static Parameters getEmptyParameters() {
+        Camera camera = new Camera();
+        return camera.new Parameters();
     }
 
     /**
