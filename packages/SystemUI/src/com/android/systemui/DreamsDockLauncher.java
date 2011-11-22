@@ -30,12 +30,17 @@ public class DreamsDockLauncher extends Activity {
                     com.android.internal.R.string.config_defaultDreamComponent);
             }
             if (component != null) {
+                // dismiss the notification shade, recents, etc.
+                context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
                 ComponentName cn = ComponentName.unflattenFromString(component);
                 Intent zzz = new Intent(Intent.ACTION_MAIN)
                     .setComponent(cn)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                        | Intent.FLAG_ACTIVITY_NO_USER_ACTION
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                            | Intent.FLAG_ACTIVITY_NO_USER_ACTION
+                            | Intent.FLAG_FROM_BACKGROUND
+                            | Intent.FLAG_ACTIVITY_NO_HISTORY
                         );
                 Slog.v(TAG, "Starting screen saver on dock event: " + component);
                 context.startActivity(zzz);
