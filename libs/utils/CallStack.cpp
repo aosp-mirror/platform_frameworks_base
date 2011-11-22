@@ -101,17 +101,10 @@ void CallStack::dump(const char* prefix) const {
 
     get_backtrace_symbols(mStack, mCount, symbols);
     for (size_t i = 0; i < mCount; i++) {
-        const backtrace_frame_t& frame = mStack[i];
-        const backtrace_symbol_t& symbol = symbols[i];
-        const char* mapName = symbol.map_name ? symbol.map_name : "<unknown>";
-        const char* symbolName = symbol.demangled_name ? symbol.demangled_name : symbol.name;
-        if (symbolName) {
-            LOGD("%s#%02d  pc %08x  %s (%s)\n", prefix,
-                    int(i), uint32_t(symbol.relative_pc), mapName, symbolName);
-        } else {
-            LOGD("%s#%02d  pc %08x  %s\n", prefix,
-                    int(i), uint32_t(symbol.relative_pc), mapName);
-        }
+        char line[MAX_BACKTRACE_LINE_LENGTH];
+        format_backtrace_line(i, &mStack[i], &symbols[i],
+                line, MAX_BACKTRACE_LINE_LENGTH);
+        LOGD("%s%s", prefix, line);
     }
     free_backtrace_symbols(symbols, mCount);
 }
@@ -122,17 +115,12 @@ String8 CallStack::toString(const char* prefix) const {
 
     get_backtrace_symbols(mStack, mCount, symbols);
     for (size_t i = 0; i < mCount; i++) {
-        const backtrace_frame_t& frame = mStack[i];
-        const backtrace_symbol_t& symbol = symbols[i];
-        const char* mapName = symbol.map_name ? symbol.map_name : "<unknown>";
-        const char* symbolName = symbol.demangled_name ? symbol.demangled_name : symbol.name;
-        if (symbolName) {
-            str.appendFormat("%s#%02d  pc %08x  %s (%s)\n", prefix,
-                    int(i), uint32_t(symbol.relative_pc), mapName, symbolName);
-        } else {
-            str.appendFormat("%s#%02d  pc %08x  %s\n", prefix,
-                    int(i), uint32_t(symbol.relative_pc), mapName);
-        }
+        char line[MAX_BACKTRACE_LINE_LENGTH];
+        format_backtrace_line(i, &mStack[i], &symbols[i],
+                line, MAX_BACKTRACE_LINE_LENGTH);
+        str.append(prefix);
+        str.append(line);
+        str.append("\n");
     }
     free_backtrace_symbols(symbols, mCount);
     return str;
