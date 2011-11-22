@@ -213,7 +213,8 @@ public:
     Layer* layer;
 
     /**
-     * Only set when the flag kFlagIsFboLayer is set.
+     * Target FBO used for rendering. Set to 0 when rendering directly
+     * into the framebuffer.
      */
     GLuint fbo;
 
