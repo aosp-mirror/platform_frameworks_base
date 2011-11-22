@@ -29,6 +29,7 @@ import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -392,7 +393,11 @@ public class ScrollingTabContainerView extends HorizontalScrollView
             final ActionBar.Tab tab = mTab;
             final View custom = tab.getCustomView();
             if (custom != null) {
-                addView(custom);
+                final ViewParent customParent = custom.getParent();
+                if (customParent != this) {
+                    if (customParent != null) ((ViewGroup) customParent).removeView(custom);
+                    addView(custom);
+                }
                 mCustomView = custom;
                 if (mTextView != null) mTextView.setVisibility(GONE);
                 if (mIconView != null) {
