@@ -23,6 +23,7 @@
 #include <utils/threads.h>
 #include <utils/String16.h>
 #include <utils/GenerationCache.h>
+#include <utils/KeyedVector.h>
 #include <utils/Compare.h>
 #include <utils/RefBase.h>
 #include <utils/Singleton.h>
@@ -116,13 +117,10 @@ inline int compare_type(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey&
  */
 class TextLayoutCacheValue : public RefBase {
 public:
-    TextLayoutCacheValue();
+    TextLayoutCacheValue(size_t contextCount);
 
     void setElapsedTime(uint32_t time);
     uint32_t getElapsedTime();
-
-    void computeValues(SkPaint* paint, const UChar* chars, size_t start, size_t count,
-            size_t contextCount, int dirFlags);
 
     inline const jfloat* getAdvances() const { return mAdvances.array(); }
     inline size_t getAdvancesCount() const { return mAdvances.size(); }
@@ -130,12 +128,6 @@ public:
     inline const jchar* getGlyphs() const { return mGlyphs.array(); }
     inline size_t getGlyphsCount() const { return mGlyphs.size(); }
 
-    /**
-     * Get the size of the Cache entry
-     */
-    size_t getSize() const;
-
-private:
     /**
      * Advances vector
      */
@@ -152,33 +144,15 @@ private:
     Vector<jchar> mGlyphs;
 
     /**
+     * Get the size of the Cache entry
+     */
+    size_t getSize() const;
+
+private:
+    /**
      * Time for computing the values (in milliseconds)
      */
     uint32_t mElapsedTime;
-
-    static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
-            size_t start, size_t count, size_t contextCount, int dirFlags,
-            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
-
-    static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
-            size_t count, bool isRTL,
-            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
-            Vector<jchar>* const outGlyphs);
-
-    static void initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec* font, FontData* fontData,
-            SkPaint* paint, const UChar* chars, size_t count);
-
-    static void freeShaperItem(HB_ShaperItem& shaperItem);
-
-    static unsigned shapeFontRun(HB_ShaperItem& shaperItem, SkPaint* paint,
-            size_t count, bool isRTL);
-
-    static SkTypeface* getCachedTypeface(SkTypeface** typeface, const char path[]);
-
-    static void deleteGlyphArrays(HB_ShaperItem& shaperItem);
-
-    static void createGlyphArrays(HB_ShaperItem& shaperItem, int size);
 
 }; // TextLayoutCacheValue
 
@@ -239,6 +213,72 @@ private:
     void dumpCacheStats();
 
 }; // TextLayoutCache
+
+/**
+ * The TextLayoutEngine is responsible for shaping with Harfbuzz library
+ */
+class TextLayoutEngine : public Singleton<TextLayoutEngine> {
+public:
+    TextLayoutEngine();
+    virtual ~TextLayoutEngine();
+
+    void computeValues(TextLayoutCacheValue* value, SkPaint* paint, const UChar* chars,
+            size_t start, size_t count, size_t contextCount, int dirFlags);
+
+private:
+    /**
+     * Harfbuzz shaper item
+     */
+    HB_ShaperItem mShaperItem;
+
+    /**
+     * Harfbuzz font
+     */
+    HB_FontRec mFontRec;
+
+    /**
+     * Skia Paint used for shaping
+     */
+    SkPaint mShapingPaint;
+
+    /**
+     * Skia typefaces cached for shaping
+     */
+    SkTypeface* mDefaultTypeface;
+    SkTypeface* mArabicTypeface;
+    SkTypeface* mHebrewRegularTypeface;
+    SkTypeface* mHebrewBoldTypeface;
+
+    KeyedVector<SkFontID, HB_Face> mCachedHBFaces;
+
+    size_t mShaperItemGlyphArraySize;
+    size_t mShaperItemLogClustersArraySize;
+
+    size_t shapeFontRun(SkPaint* paint, bool isRTL);
+
+    void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+            size_t start, size_t count, size_t contextCount, int dirFlags,
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jchar>* const outGlyphs);
+
+    void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+            size_t count, bool isRTL,
+            Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
+            Vector<jchar>* const outGlyphs);
+
+    SkTypeface* getCachedTypeface(SkTypeface** typeface, const char path[]);
+    HB_Face getCachedHBFace(SkTypeface* typeface);
+
+    void ensureShaperItemGlyphArrays(size_t size);
+    void createShaperItemGlyphArrays(size_t size);
+    void deleteShaperItemGlyphArrays();
+
+    void ensureShaperItemLogClustersArray(size_t size);
+    void createShaperItemLogClustersArray(size_t size);
+    void deleteShaperItemLogClustersArray();
+
+}; // TextLayoutEngine
+
 
 } // namespace android
 #endif /* ANDROID_TEXT_LAYOUT_CACHE_H */
