@@ -336,7 +336,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         (uint32_t(buffer->height) != h) ||
         (uint32_t(buffer->format) != format) ||
         ((uint32_t(buffer->usage) & usage) != usage)) {
-            usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+            usage |= GraphicBuffer::USAGE_HW_VIDEO_ENCODER;
             status_t error;
             sp<GraphicBuffer> graphicBuffer(
                     mGraphicBufferAlloc->createGraphicBuffer(
