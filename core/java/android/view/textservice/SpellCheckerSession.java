@@ -88,14 +88,17 @@ public class SpellCheckerSession {
      * This meta-data must reference an XML resource.
      **/
     public static final String SERVICE_META_DATA = "android.view.textservice.scs";
+    private static final String SUPPORT_SENTENCE_SPELL_CHECK = "SupportSentenceSpellCheck";
 
 
     private static final int MSG_ON_GET_SUGGESTION_MULTIPLE = 1;
+    private static final int MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE = 2;
 
     private final InternalListener mInternalListener;
     private final ITextServicesManager mTextServicesManager;
     private final SpellCheckerInfo mSpellCheckerInfo;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
+    private final SpellCheckerSubtype mSubtype;
 
     private boolean mIsUsed;
     private SpellCheckerSessionListener mSpellCheckerSessionListener;
@@ -108,6 +111,9 @@ public class SpellCheckerSession {
                 case MSG_ON_GET_SUGGESTION_MULTIPLE:
                     handleOnGetSuggestionsMultiple((SuggestionsInfo[]) msg.obj);
                     break;
+                case MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE:
+                    handleOnGetSuggestionsMultipleForSentence((SuggestionsInfo[]) msg.obj);
+                    break;
             }
         }
     };
@@ -117,7 +123,8 @@ public class SpellCheckerSession {
      * @hide
      */
     public SpellCheckerSession(
-            SpellCheckerInfo info, ITextServicesManager tsm, SpellCheckerSessionListener listener) {
+            SpellCheckerInfo info, ITextServicesManager tsm, SpellCheckerSessionListener listener,
+            SpellCheckerSubtype subtype) {
         if (info == null || listener == null || tsm == null) {
             throw new NullPointerException();
         }
@@ -127,6 +134,7 @@ public class SpellCheckerSession {
         mTextServicesManager = tsm;
         mIsUsed = true;
         mSpellCheckerSessionListener = listener;
+        mSubtype = subtype;
     }
 
     /**
@@ -167,6 +175,14 @@ public class SpellCheckerSession {
     }
 
     /**
+     * @hide
+     */
+    public void getSuggestionsForSentence(TextInfo textInfo, int suggestionsLimit) {
+        mSpellCheckerSessionListenerImpl.getSuggestionsMultipleForSentence(
+                new TextInfo[] {textInfo}, suggestionsLimit);
+    }
+
+    /**
      * Get candidate strings for a substring of the specified text.
      * @param textInfo text metadata for a spell checker
      * @param suggestionsLimit the number of limit of suggestions returned
@@ -195,10 +211,15 @@ public class SpellCheckerSession {
         mSpellCheckerSessionListener.onGetSuggestions(suggestionInfos);
     }
 
+    private void handleOnGetSuggestionsMultipleForSentence(SuggestionsInfo[] suggestionInfos) {
+        mSpellCheckerSessionListener.onGetSuggestionsForSentence(suggestionInfos);
+    }
+
     private static class SpellCheckerSessionListenerImpl extends ISpellCheckerSessionListener.Stub {
         private static final int TASK_CANCEL = 1;
         private static final int TASK_GET_SUGGESTIONS_MULTIPLE = 2;
         private static final int TASK_CLOSE = 3;
+        private static final int TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE = 4;
         private final Queue<SpellCheckerParams> mPendingTasks =
                 new LinkedList<SpellCheckerParams>();
         private Handler mHandler;
@@ -236,6 +257,9 @@ public class SpellCheckerSession {
                 case TASK_CLOSE:
                     processClose();
                     break;
+                case TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE:
+                    processGetSuggestionsMultipleForSentence(scp);
+                    break;
             }
         }
 
@@ -264,6 +288,15 @@ public class SpellCheckerSession {
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE, textInfos,
                             suggestionsLimit, sequentialWords));
+        }
+
+        public void getSuggestionsMultipleForSentence(TextInfo[] textInfos, int suggestionsLimit) {
+            if (DBG) {
+                Log.w(TAG, "getSuggestionsMultipleForSentence");
+            }
+            processOrEnqueueTask(
+                    new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE_FOR_SENTENCE,
+                            textInfos, suggestionsLimit, false));
         }
 
         public void close() {
@@ -355,9 +388,33 @@ public class SpellCheckerSession {
             }
         }
 
+        private void processGetSuggestionsMultipleForSentence(SpellCheckerParams scp) {
+            if (!checkOpenConnection()) {
+                return;
+            }
+            if (DBG) {
+                Log.w(TAG, "Get suggestions from the spell checker.");
+            }
+            if (scp.mTextInfos.length != 1) {
+                throw new IllegalArgumentException();
+            }
+            try {
+                mISpellCheckerSession.onGetSuggestionsMultipleForSentence(
+                        scp.mTextInfos, scp.mSuggestionsLimit);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to get suggestions " + e);
+            }
+        }
+
         @Override
         public void onGetSuggestions(SuggestionsInfo[] results) {
             mHandler.sendMessage(Message.obtain(mHandler, MSG_ON_GET_SUGGESTION_MULTIPLE, results));
+        }
+
+        @Override
+        public void onGetSuggestionsForSentence(SuggestionsInfo[] results) {
+            mHandler.sendMessage(
+                    Message.obtain(mHandler, MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
         }
     }
 
@@ -370,6 +427,10 @@ public class SpellCheckerSession {
          * @param results an array of results of getSuggestions
          */
         public void onGetSuggestions(SuggestionsInfo[] results);
+        /**
+         * @hide
+         */
+        public void onGetSuggestionsForSentence(SuggestionsInfo[] results);
     }
 
     private static class InternalListener extends ITextServicesSessionListener.Stub {
@@ -410,5 +471,12 @@ public class SpellCheckerSession {
      */
     public ISpellCheckerSessionListener getSpellCheckerSessionListener() {
         return mSpellCheckerSessionListenerImpl;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isSentenceSpellCheckSupported() {
+        return mSubtype.containsExtraValueKey(SUPPORT_SENTENCE_SPELL_CHECK);
     }
 }

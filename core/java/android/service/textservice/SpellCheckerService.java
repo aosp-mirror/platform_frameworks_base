@@ -138,6 +138,25 @@ public abstract class SpellCheckerService extends Service {
         }
 
         /**
+         * @hide
+         * The default implementation returns an array of SuggestionsInfo by simply calling
+         * onGetSuggestions().
+         * When you override this method, make sure that suggestionsLimit is applied to suggestions
+         * that share the same start position and length.
+         */
+        public SuggestionsInfo[] onGetSuggestionsMultipleForSentence(TextInfo[] textInfos,
+                int suggestionsLimit) {
+            final int length = textInfos.length;
+            final SuggestionsInfo[] retval = new SuggestionsInfo[length];
+            for (int i = 0; i < length; ++i) {
+                retval[i] = onGetSuggestions(textInfos[i], suggestionsLimit);
+                retval[i].setCookieAndSequence(
+                        textInfos[i].getCookie(), textInfos[i].getSequence());
+            }
+            return retval;
+        }
+
+        /**
          * Request to abort all tasks executed in SpellChecker.
          * This function will run on the incoming IPC thread.
          * So, this is not called on the main thread,
@@ -191,6 +210,16 @@ public abstract class SpellCheckerService extends Service {
                 mListener.onGetSuggestions(
                         mSession.onGetSuggestionsMultiple(
                                 textInfos, suggestionsLimit, sequentialWords));
+            } catch (RemoteException e) {
+            }
+        }
+
+        @Override
+        public void onGetSuggestionsMultipleForSentence(
+                TextInfo[] textInfos, int suggestionsLimit) {
+            try {
+                mListener.onGetSuggestionsForSentence(
+                        mSession.onGetSuggestionsMultipleForSentence(textInfos, suggestionsLimit));
             } catch (RemoteException e) {
             }
         }

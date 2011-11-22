@@ -249,6 +249,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     @Override
+    public void onGetSuggestionsForSentence(SuggestionsInfo[] results) {
+        // TODO: Handle the position and length for each suggestion
+        onGetSuggestions(results);
+    }
+
+    @Override
     public void onGetSuggestions(SuggestionsInfo[] results) {
         Editable editable = (Editable) mTextView.getText();
 

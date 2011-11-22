@@ -21,11 +21,14 @@ import com.android.internal.util.ArrayUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+
 /**
  * This class contains a metadata of suggestions from the text service
  */
 public final class SuggestionsInfo implements Parcelable {
     private static final String[] EMPTY = ArrayUtils.emptyArray(String.class);
+    private static final int NOT_A_LENGTH = -1;
 
     /**
      * Flag of the attributes of the suggestions that can be obtained by
@@ -47,6 +50,8 @@ public final class SuggestionsInfo implements Parcelable {
     public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 0x0004;
     private final int mSuggestionsAttributes;
     private final String[] mSuggestions;
+    private final int[] mStartPosArray;
+    private final int[] mLengthArray;
     private final boolean mSuggestionsAvailable;
     private int mCookie;
     private int mSequence;
@@ -57,16 +62,7 @@ public final class SuggestionsInfo implements Parcelable {
      * @param suggestions from the text service
      */
     public SuggestionsInfo(int suggestionsAttributes, String[] suggestions) {
-        mSuggestionsAttributes = suggestionsAttributes;
-        if (suggestions == null) {
-            mSuggestions = EMPTY;
-            mSuggestionsAvailable = false;
-        } else {
-            mSuggestions = suggestions;
-            mSuggestionsAvailable = true;
-        }
-        mCookie = 0;
-        mSequence = 0;
+        this(suggestionsAttributes, suggestions, 0, 0);
     }
 
     /**
@@ -78,12 +74,46 @@ public final class SuggestionsInfo implements Parcelable {
      */
     public SuggestionsInfo(
             int suggestionsAttributes, String[] suggestions, int cookie, int sequence) {
+        this(suggestionsAttributes, suggestions, cookie, sequence, null, null);
+    }
+
+    /**
+     * @hide
+     * Constructor.
+     * @param suggestionsAttributes from the text service
+     * @param suggestions from the text service
+     * @param cookie the cookie of the input TextInfo
+     * @param sequence the cookie of the input TextInfo
+     * @param startPosArray the array of start positions of suggestions
+     * @param lengthArray the array of length of suggestions
+     */
+    public SuggestionsInfo(
+            int suggestionsAttributes, String[] suggestions, int cookie, int sequence,
+            int[] startPosArray, int[] lengthArray) {
+        final int suggestsLen;
         if (suggestions == null) {
             mSuggestions = EMPTY;
             mSuggestionsAvailable = false;
+            suggestsLen = 0;
+            mStartPosArray = new int[0];
+            mLengthArray = new int[0];
         } else {
             mSuggestions = suggestions;
             mSuggestionsAvailable = true;
+            suggestsLen = suggestions.length;
+            if (startPosArray == null || lengthArray == null) {
+                mStartPosArray = new int[suggestsLen];
+                mLengthArray = new int[suggestsLen];
+                for (int i = 0; i < suggestsLen; ++i) {
+                    mStartPosArray[i] = 0;
+                    mLengthArray[i] = NOT_A_LENGTH;
+                }
+            } else if (suggestsLen != startPosArray.length || suggestsLen != lengthArray.length) {
+                throw new IllegalArgumentException();
+            } else {
+                mStartPosArray = Arrays.copyOf(startPosArray, suggestsLen);
+                mLengthArray = Arrays.copyOf(lengthArray, suggestsLen);
+            }
         }
         mSuggestionsAttributes = suggestionsAttributes;
         mCookie = cookie;
@@ -96,6 +126,10 @@ public final class SuggestionsInfo implements Parcelable {
         mCookie = source.readInt();
         mSequence = source.readInt();
         mSuggestionsAvailable = source.readInt() == 1;
+        mStartPosArray = new int[mSuggestions.length];
+        mLengthArray = new int[mSuggestions.length];
+        source.readIntArray(mStartPosArray);
+        source.readIntArray(mLengthArray);
     }
 
     /**
@@ -111,6 +145,8 @@ public final class SuggestionsInfo implements Parcelable {
         dest.writeInt(mCookie);
         dest.writeInt(mSequence);
         dest.writeInt(mSuggestionsAvailable ? 1 : 0);
+        dest.writeIntArray(mStartPosArray);
+        dest.writeIntArray(mLengthArray);
     }
 
     /**
@@ -190,5 +226,25 @@ public final class SuggestionsInfo implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * @hide
+     */
+    public int getSuggestionStartPosAt(int i) {
+        if (i >= 0 && i < mStartPosArray.length) {
+            return mStartPosArray[i];
+        }
+        return -1;
+    }
+
+    /**
+     * @hide
+     */
+    public int getSuggestionLengthAt(int i) {
+        if (i >= 0 && i < mLengthArray.length) {
+            return mLengthArray[i];
+        }
+        return -1;
     }
 }
