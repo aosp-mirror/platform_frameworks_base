@@ -3494,12 +3494,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     component = mContext.getResources().getString(R.string.config_defaultDreamComponent);
                 }
                 if (component != null) {
+                    // dismiss the notification shade, recents, etc.
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
                     ComponentName cn = ComponentName.unflattenFromString(component);
                     Intent intent = new Intent(Intent.ACTION_MAIN)
                         .setComponent(cn)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                             | Intent.FLAG_ACTIVITY_NO_USER_ACTION
+                            | Intent.FLAG_FROM_BACKGROUND
+                            | Intent.FLAG_ACTIVITY_NO_HISTORY
                             );
                     mContext.startActivity(intent);
                 } else {
