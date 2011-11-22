@@ -115,8 +115,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
 
-    private final SparseArray<IAccessibilityInteractionConnection> mWindowIdToInteractionConnectionMap =
-        new SparseArray<IAccessibilityInteractionConnection>();
+    private final SparseArray<AccessibilityConnectionWrapper> mWindowIdToInteractionConnectionWrapperMap =
+        new SparseArray<AccessibilityConnectionWrapper>();
 
     private final SparseArray<IBinder> mWindowIdToWindowTokenMap = new SparseArray<IBinder>();
 
@@ -439,16 +439,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final IWindow addedWindowToken = windowToken;
             final IAccessibilityInteractionConnection addedConnection = connection;
             final int windowId = sNextWindowId++;
-            addedConnection.asBinder().linkToDeath(new DeathRecipient() {
-                public void binderDied() {
-                    synchronized (mLock) {
-                        addedConnection.asBinder().unlinkToDeath(this, 0);
-                        removeAccessibilityInteractionConnection(addedWindowToken);
-                    }
-                }
-            }, 0);
+            AccessibilityConnectionWrapper wrapper = new AccessibilityConnectionWrapper(windowId,
+                    connection);
+            wrapper.linkToDeath();
             mWindowIdToWindowTokenMap.put(windowId, addedWindowToken.asBinder());
-            mWindowIdToInteractionConnectionMap.put(windowId, connection);
+            mWindowIdToInteractionConnectionWrapperMap.put(windowId, wrapper);
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Adding interaction connection to windowId: " + windowId);
             }
@@ -462,18 +457,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             for (int i = 0; i < count; i++) {
                 if (mWindowIdToWindowTokenMap.valueAt(i) == windowToken.asBinder()) {
                     final int windowId = mWindowIdToWindowTokenMap.keyAt(i);
-                    mWindowIdToWindowTokenMap.remove(windowId);
-                    mWindowIdToInteractionConnectionMap.remove(windowId);
-                    if (DEBUG) {
-                        Slog.i(LOG_TAG, "Removing interaction connection to windowId: " + windowId);
-                    }
+                    AccessibilityConnectionWrapper wrapper =
+                        mWindowIdToInteractionConnectionWrapperMap.get(windowId);
+                    wrapper.unlinkToDeath();
+                    removeAccessibilityInteractionConnectionLocked(windowId);
                     return;
                 }
             }
         }
     }
 
-    public IAccessibilityServiceConnection registerEventListener(IEventListener listener) {
+    public void registerEventListener(IEventListener listener) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_EVENT_LISTENER);
         ComponentName componentName = new ComponentName("foo.bar",
@@ -501,7 +495,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         accessibilityServiceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         Service service = new Service(componentName, accessibilityServiceInfo, true);
         service.onServiceConnected(componentName, listener.asBinder());
-        return service;
+    }
+
+    /**
+     * Removes an AccessibilityInteractionConnection.
+     *
+     * @param windowId The id of the window to which the connection is targeted.
+     */
+    private void removeAccessibilityInteractionConnectionLocked(int windowId) {
+        mWindowIdToWindowTokenMap.remove(windowId);
+        mWindowIdToInteractionConnectionWrapperMap.remove(windowId);
+        if (DEBUG) {
+            Slog.i(LOG_TAG, "Removing interaction connection to windowId: " + windowId);
+        }
     }
 
     /**
@@ -594,6 +600,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void notifyEventListenerLocked(Service service, int eventType) {
         IEventListener listener = service.mServiceInterface;
+
+        // If the service died/was disabled while the message for dispatching
+        // the accessibility event was propagating the listener may be null.
+        if (listener == null) {
+            return;
+        }
+
         AccessibilityEvent event = service.mPendingEvents.get(eventType);
 
         // Check for null here because there is a concurrent scenario in which this
@@ -618,7 +631,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         service.mPendingEvents.remove(eventType);
         try {
             if (mSecurityPolicy.canRetrieveWindowContent(service)) {
-                event.setConnection(service);
+                event.setConnectionId(service.mId);
             } else {
                 event.setSource(null);
             }
@@ -666,6 +679,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mComponentNameToServiceMap.remove(service.mComponentName);
         mHandler.removeMessages(service.mId);
         service.unlinkToOwnDeath();
+        service.dispose();
         updateInputFilterLocked();
         return removed;
     }
@@ -895,6 +909,33 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         sendStateToClientsLocked();
     }
 
+    private class AccessibilityConnectionWrapper implements DeathRecipient {
+        private final int mWindowId;
+        private final IAccessibilityInteractionConnection mConnection;
+
+        public AccessibilityConnectionWrapper(int windowId,
+                IAccessibilityInteractionConnection connection) {
+            mWindowId = windowId;
+            mConnection = connection;
+        }
+
+        public void linkToDeath() throws RemoteException {
+            mConnection.asBinder().linkToDeath(this, 0);
+        }
+
+        public void unlinkToDeath() {
+            mConnection.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            unlinkToDeath();
+            synchronized (mLock) {
+                removeAccessibilityInteractionConnectionLocked(mWindowId);
+            }
+        }
+    }
+
     /**
      * This class represents an accessibility service. It stores all per service
      * data required for the service management, provides API for starting/stopping the
@@ -997,7 +1038,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!mIsAutomation) {
                     mContext.unbindService(this);
                 }
-                mService = null;
                 return true;
             }
             return false;
@@ -1021,7 +1061,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mService = service;
             mServiceInterface = IEventListener.Stub.asInterface(service);
             try {
-                mServiceInterface.setConnection(this);
+                mServiceInterface.setConnection(this, mId);
                 synchronized (mLock) {
                     tryAddServiceLocked(this);
                 }
@@ -1123,14 +1163,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!permissionGranted) {
                     return 0;
                 } else {
-                    connection = mWindowIdToInteractionConnectionMap.get(accessibilityWindowId);
-                    if (connection == null) {
+                    AccessibilityConnectionWrapper wrapper =
+                        mWindowIdToInteractionConnectionWrapperMap.get(accessibilityWindowId);
+                    if (wrapper == null) {
                         if (DEBUG) {
                             Slog.e(LOG_TAG, "No interaction connection to window: "
                                     + accessibilityWindowId);
                         }
                         return 0;
                     }
+                    connection = wrapper.mConnection;
                 }
             }
             final int interrogatingPid = Binder.getCallingPid();
@@ -1159,14 +1201,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!permissionGranted) {
                     return false;
                 } else {
-                    connection = mWindowIdToInteractionConnectionMap.get(accessibilityWindowId);
-                    if (connection == null) {
+                    AccessibilityConnectionWrapper wrapper =
+                        mWindowIdToInteractionConnectionWrapperMap.get(accessibilityWindowId);
+                    if (wrapper == null) {
                         if (DEBUG) {
                             Slog.e(LOG_TAG, "No interaction connection to window: "
                                     + accessibilityWindowId);
                         }
                         return false;
                     }
+                    connection = wrapper.mConnection;
                 }
             }
             final int interrogatingPid = Binder.getCallingPid();
@@ -1197,9 +1241,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mService.unlinkToDeath(this, 0);
         }
 
+        public void dispose() {
+            try {
+                // Clear the proxy in the other process so this
+                // IAccessibilityServiceConnection can be garbage collected.
+                mServiceInterface.setConnection(null, mId);
+            } catch (RemoteException re) {
+                /* ignore */
+            }
+            mService = null;
+            mServiceInterface = null;
+        }
+
         public void binderDied() {
             synchronized (mLock) {
-                mService.unlinkToDeath(this, 0);
+                unlinkToOwnDeath();
                 tryRemoveServiceLocked(this);
                 // We no longer have an automation service, so restore
                 // the state based on values in the settings database.
@@ -1214,7 +1270,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Trying to get interaction connection to windowId: " + windowId);
             }
-            return mWindowIdToInteractionConnectionMap.get(windowId);
+            AccessibilityConnectionWrapper wrapper =
+                mWindowIdToInteractionConnectionWrapperMap.get(windowId);
+            return (wrapper != null) ? wrapper.mConnection : null;
         }
 
         private float getCompatibilityScale(int windowId) {

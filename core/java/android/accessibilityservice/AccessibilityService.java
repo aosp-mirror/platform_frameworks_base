@@ -16,8 +16,6 @@
 
 package android.accessibilityservice;
 
-import com.android.internal.os.HandlerCaller;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -25,7 +23,10 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.android.internal.os.HandlerCaller;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -219,7 +220,7 @@ public abstract class AccessibilityService extends Service {
 
     private AccessibilityServiceInfo mInfo;
 
-    IAccessibilityServiceConnection mConnection;
+    private int mConnectionId;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -264,9 +265,11 @@ public abstract class AccessibilityService extends Service {
      * AccessibilityManagerService.
      */
     private void sendServiceInfo() {
-        if (mInfo != null && mConnection != null) {
+        IAccessibilityServiceConnection connection =
+            AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (mInfo != null && connection != null) {
             try {
-                mConnection.setServiceInfo(mInfo);
+                connection.setServiceInfo(mInfo);
             } catch (RemoteException re) {
                 Log.w(LOG_TAG, "Error while setting AccessibilityServiceInfo", re);
             }
@@ -302,8 +305,9 @@ public abstract class AccessibilityService extends Service {
             mCaller = new HandlerCaller(context, this);
         }
 
-        public void setConnection(IAccessibilityServiceConnection connection) {
-            Message message = mCaller.obtainMessageO(DO_SET_SET_CONNECTION, connection);
+        public void setConnection(IAccessibilityServiceConnection connection, int connectionId) {
+            Message message = mCaller.obtainMessageIO(DO_SET_SET_CONNECTION, connectionId,
+                    connection);
             mCaller.sendMessage(message);
         }
 
@@ -330,8 +334,19 @@ public abstract class AccessibilityService extends Service {
                     mTarget.onInterrupt();
                     return;
                 case DO_SET_SET_CONNECTION :
-                    mConnection = ((IAccessibilityServiceConnection) message.obj);
-                    mTarget.onServiceConnected();
+                    final int connectionId = message.arg1;
+                    IAccessibilityServiceConnection connection =
+                        (IAccessibilityServiceConnection) message.obj;
+                    if (connection != null) {
+                        AccessibilityInteractionClient.getInstance().addConnection(connectionId,
+                                connection);
+                        mConnectionId = connectionId;
+                        mTarget.onServiceConnected();
+                    } else {
+                        AccessibilityInteractionClient.getInstance().removeConnection(connectionId);
+                        mConnectionId = AccessibilityInteractionClient.NO_ID;
+                        // TODO: Do we need a onServiceDisconnected callback?
+                    }
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
