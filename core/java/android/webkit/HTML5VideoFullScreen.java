@@ -261,6 +261,8 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mLayout.addView(getSurfaceView(), layoutParams);
 
         mLayout.setVisibility(View.VISIBLE);
+        mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         WebChromeClient client = webView.getWebChromeClient();
         if (client != null) {
