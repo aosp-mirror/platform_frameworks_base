@@ -26,6 +26,7 @@ Script::Script(Context *rsc) : ObjectBase(rsc) {
 
     mSlots = NULL;
     mTypes = NULL;
+    mInitialized = false;
 }
 
 Script::~Script() {
