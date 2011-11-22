@@ -39,12 +39,12 @@ CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(
         Size videoSize,
         int32_t videoFrameRate,
         const sp<Surface>& surface,
-        int64_t timeBetweenTimeLapseFrameCaptureUs) {
+        int64_t timeBetweenFrameCaptureUs) {
 
     CameraSourceTimeLapse *source = new
             CameraSourceTimeLapse(camera, proxy, cameraId,
                 videoSize, videoFrameRate, surface,
-                timeBetweenTimeLapseFrameCaptureUs);
+                timeBetweenFrameCaptureUs);
 
     if (source != NULL) {
         if (source->initCheck() != OK) {
@@ -62,15 +62,15 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(
         Size videoSize,
         int32_t videoFrameRate,
         const sp<Surface>& surface,
-        int64_t timeBetweenTimeLapseFrameCaptureUs)
+        int64_t timeBetweenFrameCaptureUs)
     : CameraSource(camera, proxy, cameraId, videoSize, videoFrameRate, surface, true),
-      mTimeBetweenTimeLapseFrameCaptureUs(timeBetweenTimeLapseFrameCaptureUs),
       mTimeBetweenTimeLapseVideoFramesUs(1E6/videoFrameRate),
       mLastTimeLapseFrameRealTimestampUs(0),
       mSkipCurrentFrame(false) {
 
+    mTimeBetweenFrameCaptureUs = timeBetweenFrameCaptureUs;
     LOGD("starting time lapse mode: %lld us",
-        mTimeBetweenTimeLapseFrameCaptureUs);
+        mTimeBetweenFrameCaptureUs);
 
     mVideoWidth = videoSize.width;
     mVideoHeight = videoSize.height;
@@ -271,14 +271,14 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
     // The first 2 output frames from the encoder are: decoder specific info and
     // the compressed video frame data for the first input video frame.
     if (mNumFramesEncoded >= 1 && *timestampUs <
-        (mLastTimeLapseFrameRealTimestampUs + mTimeBetweenTimeLapseFrameCaptureUs)) {
+        (mLastTimeLapseFrameRealTimestampUs + mTimeBetweenFrameCaptureUs)) {
         // Skip all frames from last encoded frame until
-        // sufficient time (mTimeBetweenTimeLapseFrameCaptureUs) has passed.
+        // sufficient time (mTimeBetweenFrameCaptureUs) has passed.
         // Tell the camera to release its recording frame and return.
         LOGV("dataCallbackTimestamp timelapse: skipping intermediate frame");
         return true;
     } else {
-        // Desired frame has arrived after mTimeBetweenTimeLapseFrameCaptureUs time:
+        // Desired frame has arrived after mTimeBetweenFrameCaptureUs time:
         // - Reset mLastTimeLapseFrameRealTimestampUs to current time.
         // - Artificially modify timestampUs to be one frame time (1/framerate) ahead
         // of the last encoded frame's time stamp.
