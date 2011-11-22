@@ -2330,7 +2330,8 @@ public final class WebViewCore {
                     / mViewportDensityDpi;
         }
         if (adjust != mWebView.getDefaultZoomScale()) {
-            mWebView.updateDefaultZoomDensity(adjust);
+            Message.obtain(mWebView.mPrivateHandler,
+                    WebView.UPDATE_ZOOM_DENSITY, adjust).sendToTarget();
         }
         int defaultScale = (int) (adjust * 100);
 
