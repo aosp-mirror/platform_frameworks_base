@@ -14244,13 +14244,6 @@ package android.opengl {
     method public static void texSubImage2D(int, int, int, int, android.graphics.Bitmap, int, int);
   }
 
-  public abstract class ManagedEGLContext {
-    ctor public ManagedEGLContext(javax.microedition.khronos.egl.EGLContext);
-    method public javax.microedition.khronos.egl.EGLContext getContext();
-    method public abstract void onTerminate(javax.microedition.khronos.egl.EGLContext);
-    method public void terminate();
-  }
-
   public class Matrix {
     ctor public Matrix();
     method public static void frustumM(float[], int, float, float, float, float, float, float);
@@ -18434,14 +18427,14 @@ package android.renderscript {
     ctor public RSSurfaceView(android.content.Context);
     ctor public RSSurfaceView(android.content.Context, android.util.AttributeSet);
     method public android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
-    method public synchronized void destroyRenderScriptGL();
+    method public void destroyRenderScriptGL();
     method public android.renderscript.RenderScriptGL getRenderScriptGL();
     method public void pause();
     method public void resume();
     method public void setRenderScriptGL(android.renderscript.RenderScriptGL);
-    method public synchronized void surfaceChanged(android.view.SurfaceHolder, int, int, int);
+    method public void surfaceChanged(android.view.SurfaceHolder, int, int, int);
     method public void surfaceCreated(android.view.SurfaceHolder);
-    method public synchronized void surfaceDestroyed(android.view.SurfaceHolder);
+    method public void surfaceDestroyed(android.view.SurfaceHolder);
   }
 
   public class RSTextureView extends android.view.TextureView implements android.view.TextureView.SurfaceTextureListener {
