@@ -484,8 +484,8 @@ public:
 
         jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
 
-        TextLayoutCacheValue value;
-        value.computeValues(paint, text, start, count, contextCount, flags);
+        TextLayoutCacheValue value(contextCount);
+        TextLayoutEngine::getInstance().computeValues(&value, paint, text, start, count, contextCount, flags);
         const jchar* shapedGlyphs = value.getGlyphs();
         size_t glyphsCount = value.getGlyphsCount();
         memcpy(glyphsArray, shapedGlyphs, sizeof(jchar) * glyphsCount);
