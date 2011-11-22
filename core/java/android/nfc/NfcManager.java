@@ -40,6 +40,10 @@ public final class NfcManager {
     public NfcManager(Context context) {
         NfcAdapter adapter;
         context = context.getApplicationContext();
+        if (context == null) {
+            throw new IllegalArgumentException(
+                    "context not associated with any application (using a mock context?)");
+        }
         try {
             adapter = NfcAdapter.getNfcAdapter(context);
         } catch (UnsupportedOperationException e) {
