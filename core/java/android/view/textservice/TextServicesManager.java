@@ -157,7 +157,8 @@ public final class TextServicesManager {
         if (subtypeInUse == null) {
             return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(sci, sService, listener);
+        final SpellCheckerSession session = new SpellCheckerSession(
+                sci, sService, listener, subtypeInUse);
         try {
             sService.getSpellCheckerService(sci.getId(), subtypeInUse.getLocale(),
                     session.getTextServicesSessionListener(),
