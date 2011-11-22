@@ -162,12 +162,20 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
     /**
-     * Destoys the layers used by the specified view hierarchy.
+     * Destroys the layers used by the specified view hierarchy.
      * 
      * @param view The root of the view hierarchy
      */
     abstract void destroyLayers(View view);
 
+    /**
+     * Destroys all hardware rendering resources associated with the specified
+     * view hierarchy.
+     * 
+     * @param view The root of the view hierarchy
+     */
+    abstract void destroyHardwareResources(View view);
+    
     /**
      * This method should be invoked whenever the current hardware renderer
      * context should be reset.
@@ -348,15 +356,6 @@ public abstract class HardwareRenderer {
     }
 
     /**
-     * Invoke this method when the system needs to clean up all resources
-     * associated with hardware rendering.
-     */
-    static void terminate() {
-        Log.d(LOG_TAG, "Terminating hardware rendering");
-        Gl20Renderer.terminate();
-    }    
-    
-    /**
      * Indicates whether hardware acceleration is currently enabled.
      * 
      * @return True if hardware acceleration is in use, false otherwise.
@@ -412,8 +411,8 @@ public abstract class HardwareRenderer {
         static final Object[] sEglLock = new Object[0];
         int mWidth = -1, mHeight = -1;
 
-        static final ThreadLocal<Gl20Renderer.MyEGLContext> sEglContextStorage
-                = new ThreadLocal<Gl20Renderer.MyEGLContext>();
+        static final ThreadLocal<Gl20Renderer.Gl20RendererEglContext> sEglContextStorage
+                = new ThreadLocal<Gl20Renderer.Gl20RendererEglContext>();
 
         EGLContext mEglContext;
         Thread mEglThread;
@@ -565,13 +564,13 @@ public abstract class HardwareRenderer {
                 }
             }
 
-            Gl20Renderer.MyEGLContext managedContext = sEglContextStorage.get();
+            Gl20Renderer.Gl20RendererEglContext managedContext = sEglContextStorage.get();
             mEglContext = managedContext != null ? managedContext.getContext() : null;
             mEglThread = Thread.currentThread();
 
             if (mEglContext == null) {
                 mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
-                sEglContextStorage.set(new Gl20Renderer.MyEGLContext(mEglContext));
+                sEglContextStorage.set(new Gl20Renderer.Gl20RendererEglContext(mEglContext));
             }
         }
 
@@ -909,10 +908,10 @@ public abstract class HardwareRenderer {
         private static EGLSurface sPbuffer;
         private static final Object[] sPbufferLock = new Object[0];
 
-        static class MyEGLContext extends ManagedEGLContext {
+        static class Gl20RendererEglContext extends ManagedEGLContext {
             final Handler mHandler = new Handler();
 
-            public MyEGLContext(EGLContext context) {
+            public Gl20RendererEglContext(EGLContext context) {
                 super(context);
             }
 
@@ -939,7 +938,8 @@ public abstract class HardwareRenderer {
                         sEglContextStorage.remove();
 
                         sEgl.eglDestroySurface(sEglDisplay, sPbuffer);
-                        sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                        sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
+                                EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
                         sEgl.eglReleaseThread();
                         sEgl.eglTerminate(sEglDisplay);
@@ -1046,16 +1046,45 @@ public abstract class HardwareRenderer {
             }
         }
 
-        private void destroyHardwareLayer(View view) {
-            if (view.destroyLayer()) {
-                view.invalidate(true);
-            }
+        private static void destroyHardwareLayer(View view) {
+            view.destroyLayer();
+
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
 
                 int count = group.getChildCount();
                 for (int i = 0; i < count; i++) {
                     destroyHardwareLayer(group.getChildAt(i));
+                }
+            }
+        }
+        
+        @Override
+        void destroyHardwareResources(View view) {
+            if (view != null) {
+                boolean needsContext = true;
+                if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
+
+                if (needsContext) {
+                    Gl20RendererEglContext managedContext = sEglContextStorage.get();
+                    if (managedContext == null) return;
+                    usePbufferSurface(managedContext.getContext());
+                }
+
+                destroyResources(view);
+                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+            }
+        }
+        
+        private static void destroyResources(View view) {
+            view.destroyHardwareResources();
+
+            if (view instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) view;
+
+                int count = group.getChildCount();
+                for (int i = 0; i < count; i++) {
+                    destroyResources(group.getChildAt(i));
                 }
             }
         }
@@ -1070,7 +1099,7 @@ public abstract class HardwareRenderer {
         static void trimMemory(int level) {
             if (sEgl == null || sEglConfig == null) return;
 
-            Gl20Renderer.MyEGLContext managedContext = sEglContextStorage.get();
+            Gl20RendererEglContext managedContext = sEglContextStorage.get();
             // We do not have OpenGL objects
             if (managedContext == null) {
                 return;

@@ -425,7 +425,7 @@ public class WindowManagerImpl implements WindowManager {
                             if (mViews == null) return;
                             int count = mViews.length;
                             for (int i = 0; i < count; i++) {
-                                mRoots[i].destroyHardwareResources();
+                                mRoots[i].terminateHardwareResources();
                             }
                         }
                         // Terminate the hardware renderer to free all resources
