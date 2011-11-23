@@ -51,6 +51,7 @@ final class SynthesisMessageParams extends MessageParams {
     int mAudioBufferSize;
     // Always synchronized on "this".
     int mUnconsumedBytes;
+    volatile boolean mIsError;
 
     private final LinkedList<ListEntry> mDataBufferList = new LinkedList<ListEntry>();
 
@@ -74,6 +75,7 @@ final class SynthesisMessageParams extends MessageParams {
         mAudioTrack = null;
         mBytesWritten = 0;
         mAudioBufferSize = 0;
+        mIsError = false;
     }
 
     @Override
@@ -118,6 +120,14 @@ final class SynthesisMessageParams extends MessageParams {
 
     AudioTrack getAudioTrack() {
         return mAudioTrack;
+    }
+
+    void setIsError(boolean isError) {
+        mIsError = isError;
+    }
+
+    boolean isError() {
+        return mIsError;
     }
 
     // Must be called synchronized on this.

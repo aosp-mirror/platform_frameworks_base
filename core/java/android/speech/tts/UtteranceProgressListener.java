@@ -57,12 +57,16 @@ public abstract class UtteranceProgressListener {
                 listener.onUtteranceCompleted(utteranceId);
             }
 
-            // The following methods are left unimplemented.
             @Override
-            public void onStart(String utteranceId) { }
+            public void onError(String utteranceId) {
+                listener.onUtteranceCompleted(utteranceId);
+            }
 
             @Override
-            public void onError(String utteranceId) { }
+            public void onStart(String utteranceId) {
+                // Left unimplemented, has no equivalent in the old
+                // API.
+            }
         };
     }
 }
