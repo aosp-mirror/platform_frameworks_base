@@ -89,6 +89,12 @@ static const int kRecordThreadSleepUs = 5000;
 
 static const nsecs_t kSetParametersTimeout = seconds(2);
 
+// minimum sleep time for the mixer thread loop when tracks are active but in underrun
+static const uint32_t kMinThreadSleepTimeUs = 5000;
+// maximum divider applied to the active sleep time in the mixer thread loop
+static const uint32_t kMaxThreadSleepTimeShift = 2;
+
+
 // ----------------------------------------------------------------------------
 
 static bool recordingAllowed() {
@@ -1846,6 +1852,7 @@ bool AudioFlinger::MixerThread::threadLoop()
     uint32_t activeSleepTime = activeSleepTimeUs();
     uint32_t idleSleepTime = idleSleepTimeUs();
     uint32_t sleepTime = idleSleepTime;
+    uint32_t sleepTimeShift = 0;
     Vector< sp<EffectChain> > effectChains;
 #ifdef DEBUG_CPU_USAGE
     ThreadCpuUsage cpu;
@@ -1937,6 +1944,7 @@ bool AudioFlinger::MixerThread::threadLoop()
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
                     sleepTime = idleSleepTime;
+                    sleepTimeShift = 0;
                     continue;
                 }
             }
@@ -1953,6 +1961,10 @@ bool AudioFlinger::MixerThread::threadLoop()
             // mix buffers...
             mAudioMixer->process();
             sleepTime = 0;
+            // increase sleep time progressively when application underrun condition clears
+            if (sleepTimeShift > 0) {
+                sleepTimeShift--;
+            }
             standbyTime = systemTime() + kStandbyTimeInNsecs;
             //TODO: delay standby when effects have a tail
         } else {
@@ -1960,7 +1972,17 @@ bool AudioFlinger::MixerThread::threadLoop()
             // buffer size, then write 0s to the output
             if (sleepTime == 0) {
                 if (mixerStatus == MIXER_TRACKS_ENABLED) {
-                    sleepTime = activeSleepTime;
+                    sleepTime = activeSleepTime >> sleepTimeShift;
+                    if (sleepTime < kMinThreadSleepTimeUs) {
+                        sleepTime = kMinThreadSleepTimeUs;
+                    }
+                    // reduce sleep time in case of consecutive application underruns to avoid
+                    // starving the audio HAL. As activeSleepTimeUs() is larger than a buffer
+                    // duration we would end up writing less data than needed by the audio HAL if
+                    // the condition persists.
+                    if (sleepTimeShift < kMaxThreadSleepTimeShift) {
+                        sleepTimeShift++;
+                    }
                 } else {
                     sleepTime = idleSleepTime;
                 }
