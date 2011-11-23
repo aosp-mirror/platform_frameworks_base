@@ -1848,8 +1848,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             DataConnection dc = apnContext.getDataConnection();
 
             if (DBG) {
-                log(String.format("onDataSetupComplete: success apn=%s",
-                    apnContext.getWaitingApns().get(0).apn));
+                // TODO We may use apnContext.getApnSetting() directly
+                // instead of getWaitingApns().get(0)
+                String apnStr = "<unknown>";
+                if (apnContext.getWaitngApns() != null
+                        && !apnContext.getWatingApns().isEmpty()){
+                    apnStr = apnContext.getWaitingApns().get(0).apn;
+                }
+                log("onDataSetupComplete: success apn=" + apnStr);
             }
             ApnSetting apn = apnContext.getApnSetting();
             if (apn.proxy != null && apn.proxy.length() != 0) {
