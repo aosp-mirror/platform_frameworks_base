@@ -128,7 +128,7 @@ status_t TimedTextParser::readNextLine(off64_t *offset, AString *data) {
  *  Subtitle number
  *  Start time --> End time
  *  Text of subtitle (one or more lines)
- *  Blank line
+ *  Blank lines
  *
  * .srt file example:
  *  1
@@ -143,15 +143,20 @@ status_t TimedTextParser::getNextInSrtFileFormat(
         off64_t *offset, int64_t *startTimeUs, TextInfo *info) {
     AString data;
     status_t err;
+
+    // To skip blank lines.
+    do {
+        if ((err = readNextLine(offset, &data)) != OK) {
+            return err;
+        }
+        data.trim();
+    } while(data.empty());
+
+    // Just ignore the first non-blank line which is subtitle sequence number.
+
     if ((err = readNextLine(offset, &data)) != OK) {
         return err;
     }
-
-    // to skip the first line
-    if ((err = readNextLine(offset, &data)) != OK) {
-        return err;
-    }
-
     int hour1, hour2, min1, min2, sec1, sec2, msec1, msec2;
     // the start time format is: hours:minutes:seconds,milliseconds
     // 00:00:24,600 --> 00:00:27,800
