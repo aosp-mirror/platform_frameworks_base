@@ -85,6 +85,7 @@ public:
     virtual void setupScript(Context *rsc) = 0;
     virtual uint32_t run(Context *) = 0;
 protected:
+    bool mInitialized;
     ObjectBaseRef<Allocation> *mSlots;
     ObjectBaseRef<const Type> *mTypes;
 

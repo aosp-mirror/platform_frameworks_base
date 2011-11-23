@@ -44,8 +44,10 @@ ScriptC::~ScriptC() {
         BT = NULL;
     }
 #endif
-    mRSC->mHal.funcs.script.invokeFreeChildren(mRSC, this);
-    mRSC->mHal.funcs.script.destroy(mRSC, this);
+    if (mInitialized) {
+        mRSC->mHal.funcs.script.invokeFreeChildren(mRSC, this);
+        mRSC->mHal.funcs.script.destroy(mRSC, this);
+    }
 }
 
 void ScriptC::setupScript(Context *rsc) {
@@ -212,8 +214,11 @@ bool ScriptC::runCompiler(Context *rsc,
     bitcodeLen = BT->getTranslatedBitcodeSize();
 #endif
 
-    rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0);
+    if (!rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0)) {
+        return false;
+    }
 
+    mInitialized = true;
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
     mEnviroment.mFragmentStore.set(rsc->getDefaultProgramStore());
