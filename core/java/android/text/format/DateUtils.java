@@ -1415,7 +1415,7 @@ public class DateUtils
             }
         }
 
-        if (noMonthDay && startMonthNum == endMonthNum) {
+        if (noMonthDay && startMonthNum == endMonthNum && startYear == endYear) {
             // Example: "January, 2008"
             return formatter.format("%s", startDate.format(defaultDateFormat));
         }
