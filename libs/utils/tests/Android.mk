@@ -4,9 +4,10 @@ include $(CLEAR_VARS)
 
 # Build the unit tests.
 test_src_files := \
+	BasicHashtable_test.cpp \
 	BlobCache_test.cpp \
-	ObbFile_test.cpp \
 	Looper_test.cpp \
+	ObbFile_test.cpp \
 	String8_test.cpp \
 	Unicode_test.cpp \
 	ZipFileRO_test.cpp \
