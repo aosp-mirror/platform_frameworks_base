@@ -280,11 +280,9 @@ Calendars.ACCOUNT_NAME}, you must also include
 {@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
 in the selection. That is because a given account is
 only considered unique given both its <code>ACCOUNT_NAME</code> and its
-<code>ACCOUNT_TYPE</code>. The <code>ACCOUNT_TYPE</code> refers to the way that
-the account is being  synced. It is often but not always the domain. For
-example, an account could be  synced through a corporate pop3 sync adapter, in which
-case the <code>ACCOUNT_TYPE</code> would not be a domain. There is also a
-special type of account called {@link
+<code>ACCOUNT_TYPE</code>. The <code>ACCOUNT_TYPE</code> is the string corresponding to the
+account authenticator that was used when the account was registered with the
+{@link android.accounts.AccountManager}. There is also a special type of account called {@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} for calendars not
 associated with a device account. {@link
 android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} accounts do not get
