@@ -862,13 +862,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         NetworkInterface internalNetworkInterface =
                 NetworkInterface.getByName(internalInterface);
-        Collection<InterfaceAddress>interfaceAddresses =
-                internalNetworkInterface.getInterfaceAddresses();
-        cmd += " " + interfaceAddresses.size();
-        for (InterfaceAddress ia : interfaceAddresses) {
-            InetAddress addr = NetworkUtils.getNetworkPart(ia.getAddress(),
-                    ia.getNetworkPrefixLength());
-            cmd = cmd + " " + addr.getHostAddress() + "/" + ia.getNetworkPrefixLength();
+        if (internalNetworkInterface == null) {
+            cmd += " 0";
+        } else {
+            Collection<InterfaceAddress>interfaceAddresses =
+                    internalNetworkInterface.getInterfaceAddresses();
+            cmd += " " + interfaceAddresses.size();
+            for (InterfaceAddress ia : interfaceAddresses) {
+                InetAddress addr = NetworkUtils.getNetworkPart(ia.getAddress(),
+                        ia.getNetworkPrefixLength());
+                cmd = cmd + " " + addr.getHostAddress() + "/" + ia.getNetworkPrefixLength();
+            }
         }
 
         mConnector.doCommand(cmd);
