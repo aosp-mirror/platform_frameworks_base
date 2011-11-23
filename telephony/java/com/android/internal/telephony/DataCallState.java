@@ -126,6 +126,8 @@ public class DataCallState {
                 // set link addresses
                 if (addresses != null && addresses.length > 0) {
                     for (String addr : addresses) {
+                        addr = addr.trim();
+                        if (addr.isEmpty()) continue;
                         LinkAddress la;
                         int addrPrefixLen;
 
@@ -159,6 +161,8 @@ public class DataCallState {
                 // set dns servers
                 if (dnses != null && dnses.length > 0) {
                     for (String addr : dnses) {
+                        addr = addr.trim();
+                        if (addr.isEmpty()) continue;
                         InetAddress ia;
                         try {
                             ia = NetworkUtils.numericToInetAddress(addr);
@@ -174,6 +178,8 @@ public class DataCallState {
                     dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
                     dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
                     for (String dnsAddr : dnsServers) {
+                        dnsAddr = dnsAddr.trim();
+                        if (dnsAddr.isEmpty()) continue;
                         InetAddress ia;
                         try {
                             ia = NetworkUtils.numericToInetAddress(dnsAddr);
@@ -198,6 +204,8 @@ public class DataCallState {
                     }
                 }
                 for (String addr : gateways) {
+                    addr = addr.trim();
+                    if (addr.isEmpty()) continue;
                     InetAddress ia;
                     try {
                         ia = NetworkUtils.numericToInetAddress(addr);
