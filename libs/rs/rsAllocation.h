@@ -55,6 +55,8 @@ public:
             bool hasMipmaps;
             bool hasFaces;
             bool hasReferences;
+
+            void * usrPtr;
         };
         State state;
 
@@ -66,7 +68,8 @@ public:
     Hal mHal;
 
     static Allocation * createAllocation(Context *rsc, const Type *, uint32_t usages,
-                                  RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
+                                         RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE,
+                                         void *ptr = 0);
     virtual ~Allocation();
     void updateCache();
 
@@ -134,7 +137,7 @@ protected:
 
 private:
     void freeChildrenUnlocked();
-    Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc);
+    Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc, void *ptr);
 
     uint32_t getPackedSize() const;
     static void writePackedData(const Type *type, uint8_t *dst, const uint8_t *src, bool dstPadded);

@@ -42,6 +42,7 @@ AllocationCreateTyped {
     param RsType vtype
     param RsAllocationMipmapControl mips
     param uint32_t usages
+    param uint32_t ptr
     ret RsAllocation
 }
 

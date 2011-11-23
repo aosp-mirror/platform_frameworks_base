@@ -212,10 +212,13 @@ bool rsdAllocationInit(const Context *rsc, Allocation *alloc, bool forceZero) {
         return false;
     }
 
-    void * ptr = malloc(alloc->mHal.state.type->getSizeBytes());
+    void * ptr = alloc->mHal.state.usrPtr;
     if (!ptr) {
-        free(drv);
-        return false;
+        ptr = malloc(alloc->mHal.state.type->getSizeBytes());
+        if (!ptr) {
+            free(drv);
+            return false;
+        }
     }
 
     drv->glTarget = GL_NONE;
@@ -269,7 +272,7 @@ void rsdAllocationDestroy(const Context *rsc, Allocation *alloc) {
         drv->renderTargetID = 0;
     }
 
-    if (drv->mallocPtr) {
+    if (drv->mallocPtr && !alloc->mHal.state.usrPtr) {
         free(drv->mallocPtr);
         drv->mallocPtr = NULL;
     }

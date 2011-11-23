@@ -870,7 +870,31 @@ public class Allocation extends BaseObj {
         if (type.getID() == 0) {
             throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.getID(), mips.mID, usage);
+        int id = rs.nAllocationCreateTyped(type.getID(), mips.mID, usage, 0);
+        if (id == 0) {
+            throw new RSRuntimeException("Allocation creation failed.");
+        }
+        return new Allocation(id, rs, type, usage);
+    }
+
+    /**
+     * @hide
+     * This API is hidden and only intended to be used for
+     * transitional purposes.
+     *
+     * @param type renderscript type describing data layout
+     * @param mips specifies desired mipmap behaviour for the
+     *             allocation
+     * @param usage bit field specifying how the allocation is
+     *              utilized
+     */
+    static public Allocation createTyped(RenderScript rs, Type type, MipmapControl mips,
+                                         int usage, int pointer) {
+        rs.validate();
+        if (type.getID() == 0) {
+            throw new RSInvalidStateException("Bad Type");
+        }
+        int id = rs.nAllocationCreateTyped(type.getID(), mips.mID, usage, pointer);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }
@@ -925,7 +949,7 @@ public class Allocation extends BaseObj {
         b.setX(count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.getID(), MipmapControl.MIPMAP_NONE.mID, usage);
+        int id = rs.nAllocationCreateTyped(t.getID(), MipmapControl.MIPMAP_NONE.mID, usage, 0);
         if (id == 0) {
             throw new RSRuntimeException("Allocation creation failed.");
         }

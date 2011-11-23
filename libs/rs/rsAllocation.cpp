@@ -22,21 +22,22 @@ using namespace android;
 using namespace android::renderscript;
 
 Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages,
-                       RsAllocationMipmapControl mc)
+                       RsAllocationMipmapControl mc, void * ptr)
     : ObjectBase(rsc) {
 
     memset(&mHal, 0, sizeof(mHal));
     mHal.state.mipmapControl = RS_ALLOCATION_MIPMAP_NONE;
     mHal.state.usageFlags = usages;
     mHal.state.mipmapControl = mc;
+    mHal.state.usrPtr = ptr;
 
     setType(type);
     updateCache();
 }
 
 Allocation * Allocation::createAllocation(Context *rsc, const Type *type, uint32_t usages,
-                              RsAllocationMipmapControl mc) {
-    Allocation *a = new Allocation(rsc, type, usages, mc);
+                              RsAllocationMipmapControl mc, void * ptr) {
+    Allocation *a = new Allocation(rsc, type, usages, mc, ptr);
 
     if (!rsc->mHal.funcs.allocation.init(rsc, a, type->getElement()->getHasReferences())) {
         rsc->setError(RS_ERROR_FATAL_DRIVER, "Allocation::Allocation, alloc failure");
@@ -570,8 +571,8 @@ static void AllocationGenerateScriptMips(RsContext con, RsAllocation va) {
 
 RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype,
                                        RsAllocationMipmapControl mips,
-                                       uint32_t usages) {
-    Allocation * alloc = Allocation::createAllocation(rsc, static_cast<Type *>(vtype), usages, mips);
+                                       uint32_t usages, uint32_t ptr) {
+    Allocation * alloc = Allocation::createAllocation(rsc, static_cast<Type *>(vtype), usages, mips, (void *)ptr);
     if (!alloc) {
         return NULL;
     }
@@ -584,7 +585,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, RsType vtype,
                                             const void *data, size_t data_length, uint32_t usages) {
     Type *t = static_cast<Type *>(vtype);
 
-    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages);
+    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages, 0);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
@@ -608,7 +609,7 @@ RsAllocation rsi_AllocationCubeCreateFromBitmap(Context *rsc, RsType vtype,
     // Cubemap allocation's faces should be Width by Width each.
     // Source data should have 6 * Width by Width pixels
     // Error checking is done in the java layer
-    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages);
+    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages, 0);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
