@@ -21,6 +21,7 @@
 
 #ifndef ANDROID_RS_SERIALIZE
 #include <bcinfo/BitcodeTranslator.h>
+#include <bcinfo/BitcodeWrapper.h>
 #endif
 
 using namespace android;
@@ -196,7 +197,24 @@ bool ScriptC::runCompiler(Context *rsc,
 
     //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
 #ifndef ANDROID_RS_SERIALIZE
-    uint32_t sdkVersion = rsc->getTargetSdkVersion();
+    uint32_t sdkVersion = 0;
+    bcinfo::BitcodeWrapper bcWrapper((const char *)bitcode, bitcodeLen);
+    if (!bcWrapper.unwrap()) {
+        LOGE("Bitcode is not in proper container format (raw or wrapper)");
+        return false;
+    }
+
+    rsAssert(bcWrapper.getHeaderVersion() == 0);
+    if (bcWrapper.getBCFileType() == bcinfo::BC_WRAPPER) {
+        sdkVersion = bcWrapper.getTargetAPI();
+    }
+
+    if (sdkVersion == 0) {
+        // This signals that we didn't have a wrapper containing information
+        // about the bitcode.
+        sdkVersion = rsc->getTargetSdkVersion();
+    }
+
     if (BT) {
         delete BT;
     }
