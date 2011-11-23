@@ -293,6 +293,10 @@ class KeyguardStatusViewManager implements OnClickListener {
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
         mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
         resetStatusInfo();
+        //Issue the faceunlock failure message in a centralized place
+        if (mUpdateMonitor.getMaxFaceUnlockAttemptsReached()) {
+            setInstructionText(getContext().getString(R.string.faceunlock_multiple_failures));
+        }
     }
 
     void resetStatusInfo() {
