@@ -62,8 +62,8 @@
 
     <!-- Default padding to apply to AppWidgetHostViews containing widgets targeting API level 14 and up. -->
     <dimen name="default_app_widget_padding_left">12dp</dimen>
-    <dimen name="default_app_widget_padding_top">12dp</dimen>
-    <dimen name="default_app_widget_padding_right">4dp</dimen>
+    <dimen name="default_app_widget_padding_top">4dp</dimen>
+    <dimen name="default_app_widget_padding_right">12dp</dimen>
     <dimen name="default_app_widget_padding_bottom">20dp</dimen>
 
     <!-- Minimum width for an action button in the menu area of an action bar -->
