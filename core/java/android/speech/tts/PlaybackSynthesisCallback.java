@@ -80,27 +80,23 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     @Override
     void stop() {
+        stopImpl(false);
+    }
+
+    void stopImpl(boolean wasError) {
         if (DBG) Log.d(TAG, "stop()");
 
         // Note that mLogger.mError might be true too at this point.
         mLogger.onStopped();
 
-        SynthesisMessageParams token = null;
+        SynthesisMessageParams token;
         synchronized (mStateLock) {
             if (mStopped) {
                 Log.w(TAG, "stop() called twice");
                 return;
             }
 
-            // mToken will be null if the engine encounters
-            // an error before it called start().
-            if (mToken == null) {
-                // In all other cases, mAudioTrackHandler.stop() will
-                // result in onComplete being called.
-                mLogger.onWriteData();
-            } else {
-                token = mToken;
-            }
+            token = mToken;
             mStopped = true;
         }
 
@@ -109,7 +105,24 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             // point it will write an additional buffer to the token - but we
             // won't worry about that because the audio playback queue will be cleared
             // soon after (see SynthHandler#stop(String).
+            token.setIsError(wasError);
             token.clearBuffers();
+            if (wasError) {
+                // Also clean up the audio track if an error occurs.
+                mAudioTrackHandler.enqueueSynthesisDone(token);
+            }
+        } else {
+            // This happens when stop() or error() were called before start() was.
+
+            // In all other cases, mAudioTrackHandler.stop() will
+            // result in onSynthesisDone being called, and we will
+            // write data there.
+            mLogger.onWriteData();
+
+            if (wasError) {
+                // We have to dispatch the error ourselves.
+                mDispatcher.dispatchOnError();
+            }
         }
     }
 
@@ -219,7 +232,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         // Currently, this call will not be logged if error( ) is called
         // before start.
         mLogger.onError();
-        stop();
+        stopImpl(true);
     }
 
 }

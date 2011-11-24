@@ -509,6 +509,7 @@ public abstract class TextToSpeechService extends Service {
     }
 
     class SynthesisSpeechItem extends SpeechItem {
+        // Never null.
         private final String mText;
         private final SynthesisRequest mSynthesisRequest;
         private final String[] mDefaultLocale;
@@ -532,8 +533,8 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         public boolean isValid() {
-            if (TextUtils.isEmpty(mText)) {
-                Log.w(TAG, "Got empty text");
+            if (mText == null) {
+                Log.wtf(TAG, "Got null text");
                 return false;
             }
             if (mText.length() >= MAX_SPEECH_ITEM_CHAR_LENGTH) {
