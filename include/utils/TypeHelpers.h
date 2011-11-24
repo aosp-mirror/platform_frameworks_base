@@ -272,14 +272,14 @@ hash_t hash_type(const TKey& key);
                 return hash_type(*reinterpret_cast<const R*>(&value)); }
 
 ANDROID_INT32_HASH(bool)
-ANDROID_INT32_HASH(char)
-ANDROID_INT32_HASH(unsigned char)
-ANDROID_INT32_HASH(short)
-ANDROID_INT32_HASH(unsigned short)
-ANDROID_INT32_HASH(int)
-ANDROID_INT32_HASH(unsigned int)
-ANDROID_INT64_HASH(long)
-ANDROID_INT64_HASH(unsigned long)
+ANDROID_INT32_HASH(int8_t)
+ANDROID_INT32_HASH(uint8_t)
+ANDROID_INT32_HASH(int16_t)
+ANDROID_INT32_HASH(uint16_t)
+ANDROID_INT32_HASH(int32_t)
+ANDROID_INT32_HASH(uint32_t)
+ANDROID_INT64_HASH(int64_t)
+ANDROID_INT64_HASH(uint64_t)
 ANDROID_REINTERPRET_HASH(float, uint32_t)
 ANDROID_REINTERPRET_HASH(double, uint64_t)
 
