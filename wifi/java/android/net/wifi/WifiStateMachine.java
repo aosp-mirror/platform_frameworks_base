@@ -123,6 +123,8 @@ public class WifiStateMachine extends StateMachine {
     private final LruCache<String, ScanResult> mScanResultCache;
 
     private String mInterfaceName;
+    /* Tethering interface could be seperate from wlan interface */
+    private String mTetherInterfaceName;
 
     private int mLastSignalLevel = -1;
     private String mLastBssid;
@@ -155,6 +157,14 @@ public class WifiStateMachine extends StateMachine {
     private int mSupplicantRestartCount = 0;
     /* Tracks sequence number on stop failure message */
     private int mSupplicantStopFailureToken = 0;
+
+    /**
+     * Tether state change notification time out
+     */
+    private static final int TETHER_NOTIFICATION_TIME_OUT_MSECS = 5000;
+
+    /* Tracks sequence number on a tether notification time out */
+    private int mTetherToken = 0;
 
     private LinkProperties mLinkProperties;
 
@@ -240,10 +250,12 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_REQUEST_AP_CONFIG                = BASE + 27;
     /* Response to access point configuration request */
     static final int CMD_RESPONSE_AP_CONFIG               = BASE + 28;
-    /* Set configuration on tether interface */
-    static final int CMD_TETHER_INTERFACE                 = BASE + 29;
+    /* Invoked when getting a tether state change notification */
+    static final int CMD_TETHER_STATE_CHANGE              = BASE + 29;
+    /* A delayed message sent to indicate tether state change failed to arrive */
+    static final int CMD_TETHER_NOTIFICATION_TIMED_OUT    = BASE + 30;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 30;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 31;
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
@@ -455,11 +467,24 @@ public class WifiStateMachine extends StateMachine {
     private State mSoftApStartingState = new SoftApStartingState();
     /* Soft ap is running */
     private State mSoftApStartedState = new SoftApStartedState();
+    /* Soft ap is running and we are waiting for tether notification */
+    private State mTetheringState = new TetheringState();
     /* Soft ap is running and we are tethered through connectivity service */
     private State mTetheredState = new TetheredState();
+    /* Waiting for untether confirmation to stop soft Ap */
+    private State mSoftApStoppingState = new SoftApStoppingState();
 
     /* Wait till p2p is disabled */
     private State mWaitForP2pDisableState = new WaitForP2pDisableState();
+
+    private class TetherStateChange {
+        ArrayList<String> available;
+        ArrayList<String> active;
+        TetherStateChange(ArrayList<String> av, ArrayList<String> ac) {
+            available = av;
+            active = ac;
+        }
+    }
 
 
     /**
@@ -562,7 +587,9 @@ public class WifiStateMachine extends StateMachine {
                 public void onReceive(Context context, Intent intent) {
                     ArrayList<String> available = intent.getStringArrayListExtra(
                             ConnectivityManager.EXTRA_AVAILABLE_TETHER);
-                    sendMessage(CMD_TETHER_INTERFACE, available);
+                    ArrayList<String> active = intent.getStringArrayListExtra(
+                            ConnectivityManager.EXTRA_ACTIVE_TETHER);
+                    sendMessage(CMD_TETHER_STATE_CHANGE, new TetherStateChange(available, active));
                 }
             },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
 
@@ -603,7 +630,9 @@ public class WifiStateMachine extends StateMachine {
             addState(mSupplicantStoppingState, mDefaultState);
             addState(mSoftApStartingState, mDefaultState);
             addState(mSoftApStartedState, mDefaultState);
+                addState(mTetheringState, mSoftApStartedState);
                 addState(mTetheredState, mSoftApStartedState);
+            addState(mSoftApStoppingState, mDefaultState);
             addState(mWaitForP2pDisableState, mDefaultState);
 
         setInitialState(mInitialState);
@@ -1139,6 +1168,7 @@ public class WifiStateMachine extends StateMachine {
                         loge("Error tethering on " + intf);
                         return false;
                     }
+                    mTetherInterfaceName = intf;
                     return true;
                 }
             }
@@ -1165,9 +1195,25 @@ public class WifiStateMachine extends StateMachine {
             loge("Error resetting interface " + mInterfaceName + ", :" + e);
         }
 
-        if (mCm.untether(mInterfaceName) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+        if (mCm.untether(mTetherInterfaceName) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
             loge("Untether initiate failed!");
         }
+    }
+
+    private boolean isWifiTethered(ArrayList<String> active) {
+
+        checkAndSetConnectivityInstance();
+
+        String[] wifiRegexs = mCm.getTetherableWifiRegexs();
+        for (String intf : active) {
+            for (String regex : wifiRegexs) {
+                if (intf.matches(regex)) {
+                    return true;
+                }
+            }
+        }
+        // We found no interfaces that are tethered
+        return false;
     }
 
     /**
@@ -1800,7 +1846,8 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_AP_SUCCESS:
                 case CMD_START_AP_FAILURE:
                 case CMD_STOP_AP:
-                case CMD_TETHER_INTERFACE:
+                case CMD_TETHER_STATE_CHANGE:
+                case CMD_TETHER_NOTIFICATION_TIMED_OUT:
                 case CMD_START_SCAN:
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
@@ -3284,7 +3331,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                case CMD_TETHER_INTERFACE:
+                case CMD_TETHER_STATE_CHANGE:
                 case WifiP2pService.P2P_ENABLE_PENDING:
                     deferMessage(message);
                     break;
@@ -3326,7 +3373,8 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_AP:
                     if (DBG) log("Stopping Soft AP");
                     setWifiApState(WIFI_AP_STATE_DISABLING);
-                    stopTethering();
+
+                    /* We have not tethered at this point, so we just shutdown soft Ap */
                     try {
                         mNwService.stopAccessPoint(mInterfaceName);
                     } catch(Exception e) {
@@ -3342,10 +3390,10 @@ public class WifiStateMachine extends StateMachine {
                    loge("Cannot start supplicant with a running soft AP");
                     setWifiState(WIFI_STATE_UNKNOWN);
                     break;
-                case CMD_TETHER_INTERFACE:
-                    ArrayList<String> available = (ArrayList<String>) message.obj;
-                    if (startTethering(available)) {
-                        transitionTo(mTetheredState);
+                case CMD_TETHER_STATE_CHANGE:
+                    TetherStateChange stateChange = (TetherStateChange) message.obj;
+                    if (startTethering(stateChange.available)) {
+                        transitionTo(mTetheringState);
                     }
                     break;
                 case WifiP2pService.P2P_ENABLE_PENDING:
@@ -3405,6 +3453,58 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
+    class TetheringState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            /* Send ourselves a delayed message to shut down if tethering fails to notify */
+            sendMessageDelayed(obtainMessage(CMD_TETHER_NOTIFICATION_TIMED_OUT,
+                    ++mTetherToken, 0), TETHER_NOTIFICATION_TIME_OUT_MSECS);
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch(message.what) {
+                case CMD_TETHER_STATE_CHANGE:
+                    TetherStateChange stateChange = (TetherStateChange) message.obj;
+                    if (isWifiTethered(stateChange.active)) {
+                        transitionTo(mTetheredState);
+                    }
+                    return HANDLED;
+                case CMD_TETHER_NOTIFICATION_TIMED_OUT:
+                    if (message.arg1 == mTetherToken) {
+                        loge("Failed to get tether update, shutdown soft access point");
+                        setWifiApEnabled(null, false);
+                    }
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
     class TetheredState extends State {
         @Override
         public void enter() {
@@ -3415,13 +3515,89 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             switch(message.what) {
-               case CMD_TETHER_INTERFACE:
-                    // Ignore any duplicate interface available notifications
-                    // when in tethered state
+                case CMD_TETHER_STATE_CHANGE:
+                    TetherStateChange stateChange = (TetherStateChange) message.obj;
+                    if (!isWifiTethered(stateChange.active)) {
+                        loge("Tethering reports wifi as untethered!, shut down soft Ap");
+                        setWifiApEnabled(null, false);
+                    }
                     return HANDLED;
+                case CMD_STOP_AP:
+                    if (DBG) log("Untethering before stopping AP");
+                    setWifiApState(WIFI_AP_STATE_DISABLING);
+                    stopTethering();
+                    transitionTo(mSoftApStoppingState);
+                    break;
                 default:
                     return NOT_HANDLED;
             }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class SoftApStoppingState extends State {
+        @Override
+        public void enter() {
+            if (DBG) log(getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            /* Send ourselves a delayed message to shut down if tethering fails to notify */
+            sendMessageDelayed(obtainMessage(CMD_TETHER_NOTIFICATION_TIMED_OUT,
+                    ++mTetherToken, 0), TETHER_NOTIFICATION_TIME_OUT_MSECS);
+
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString() + "\n");
+            switch(message.what) {
+                case CMD_TETHER_STATE_CHANGE:
+                    TetherStateChange stateChange = (TetherStateChange) message.obj;
+
+                    /* Wait till wifi is untethered */
+                    if (isWifiTethered(stateChange.active)) break;
+
+                    try {
+                        mNwService.stopAccessPoint(mInterfaceName);
+                    } catch(Exception e) {
+                        loge("Exception in stopAccessPoint()");
+                    }
+                    transitionTo(mDriverLoadedState);
+                    break;
+                case CMD_TETHER_NOTIFICATION_TIMED_OUT:
+                    if (message.arg1 == mTetherToken) {
+                        loge("Failed to get tether update, force stop access point");
+                        try {
+                            mNwService.stopAccessPoint(mInterfaceName);
+                        } catch(Exception e) {
+                            loge("Exception in stopAccessPoint()");
+                        }
+                        transitionTo(mDriverLoadedState);
+                    }
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
         }
     }
 
