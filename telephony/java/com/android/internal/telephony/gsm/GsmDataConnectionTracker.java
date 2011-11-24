@@ -1851,8 +1851,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // TODO We may use apnContext.getApnSetting() directly
                 // instead of getWaitingApns().get(0)
                 String apnStr = "<unknown>";
-                if (apnContext.getWaitngApns() != null
-                        && !apnContext.getWatingApns().isEmpty()){
+                if (apnContext.getWaitingApns() != null
+                        && !apnContext.getWaitingApns().isEmpty()){
                     apnStr = apnContext.getWaitingApns().get(0).apn;
                 }
                 log("onDataSetupComplete: success apn=" + apnStr);
