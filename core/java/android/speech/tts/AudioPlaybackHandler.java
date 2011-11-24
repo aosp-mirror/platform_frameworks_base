@@ -118,12 +118,26 @@ class AudioPlaybackHandler {
         if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
             stop(current);
         }
+
+        final MessageParams lastSynthesis = mLastSynthesisRequest;
+
+        if (lastSynthesis != null && lastSynthesis != current &&
+                TextUtils.equals(callingApp, lastSynthesis.getCallingApp())) {
+            stop(lastSynthesis);
+        }
     }
 
     synchronized public void removeAllItems() {
         if (DBG_THREADING) Log.d(TAG, "Removing all items");
         removeAllMessages();
-        stop(getCurrentParams());
+
+        final MessageParams current = getCurrentParams();
+        final MessageParams lastSynthesis = mLastSynthesisRequest;
+        stop(current);
+
+        if (lastSynthesis != null && lastSynthesis != current) {
+            stop(lastSynthesis);
+        }
     }
 
     /**
@@ -350,7 +364,7 @@ class AudioPlaybackHandler {
         // extra trouble to clean the data to prevent the AudioTrack resources
         // from being leaked.
         if (mLastSynthesisRequest != null) {
-            Log.w(TAG, "Error : Missing call to done() for request : " +
+            Log.e(TAG, "Error : Missing call to done() for request : " +
                     mLastSynthesisRequest);
             handleSynthesisDone(mLastSynthesisRequest);
         }
@@ -443,7 +457,11 @@ class AudioPlaybackHandler {
             audioTrack.release();
             params.setAudioTrack(null);
         }
-        params.getDispatcher().dispatchOnDone();
+        if (params.isError()) {
+            params.getDispatcher().dispatchOnError();
+        } else {
+            params.getDispatcher().dispatchOnDone();
+        }
         mLastSynthesisRequest = null;
         params.mLogger.onWriteData();
     }
