@@ -23,7 +23,7 @@
 
 #include <utils/threads.h>
 #include <utils/Timers.h>
-#include <utils/List.h>
+#include <utils/Looper.h>
 
 #include "Barrier.h"
 
@@ -31,92 +31,39 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class MessageBase;
-
-class MessageList 
-{
-    List< sp<MessageBase> > mList;
-    typedef List< sp<MessageBase> > LIST;
-public:
-    inline LIST::iterator begin()                { return mList.begin(); }
-    inline LIST::const_iterator begin() const    { return mList.begin(); }
-    inline LIST::iterator end()                  { return mList.end(); }
-    inline LIST::const_iterator end() const      { return mList.end(); }
-    inline bool isEmpty() const { return mList.empty(); }
-    void insert(const sp<MessageBase>& node);
-    void remove(LIST::iterator pos);
-};
-
-// ============================================================================
-
-class MessageBase : 
-    public LightRefBase<MessageBase>
+class MessageBase : public MessageHandler
 {
 public:
-    nsecs_t     when;
-    uint32_t    what;
-    int32_t     arg0;    
-
-    MessageBase() : when(0), what(0), arg0(0) { }
-    MessageBase(uint32_t what, int32_t arg0=0)
-        : when(0), what(what), arg0(arg0) { }
+    MessageBase();
     
     // return true if message has a handler
-    virtual bool handler() { return false; }
+    virtual bool handler() = 0;
 
     // waits for the handler to be processed
     void wait() const { barrier.wait(); }
-    
-    // releases all waiters. this is done automatically if
-    // handler returns true
-    void notify() const { barrier.open(); }
 
 protected:
-    virtual ~MessageBase() { }
+    virtual ~MessageBase();
 
 private:
-    mutable Barrier barrier;
-    friend class LightRefBase<MessageBase>;
-};
+    virtual void handleMessage(const Message& message);
 
-inline bool operator < (const MessageBase& lhs, const MessageBase& rhs) {
-    return lhs.when < rhs.when;
-}
+    mutable Barrier barrier;
+};
 
 // ---------------------------------------------------------------------------
 
-class MessageQueue
-{
-    typedef List< sp<MessageBase> > LIST;
-public:
+class MessageQueue {
+    sp<Looper> mLooper;
+    volatile int32_t mInvalidatePending;
 
+public:
     MessageQueue();
     ~MessageQueue();
 
-    // pre-defined messages
-    enum {
-        INVALIDATE = '_upd'
-    };
-
-    sp<MessageBase> waitMessage(nsecs_t timeout = -1);
-    
-    status_t postMessage(const sp<MessageBase>& message,
-            nsecs_t reltime=0, uint32_t flags = 0);
-
+    void waitMessage();
+    status_t postMessage(const sp<MessageBase>& message, nsecs_t reltime=0);
     status_t invalidate();
-    
-    void dump(const sp<MessageBase>& message);
-
-private:
-    status_t queueMessage(const sp<MessageBase>& message,
-            nsecs_t reltime, uint32_t flags);
-    void dumpLocked(const sp<MessageBase>& message);
-    
-    Mutex           mLock;
-    Condition       mCondition;
-    MessageList     mMessages;
-    bool            mInvalidate;
-    sp<MessageBase> mInvalidateMessage;
 };
 
 // ---------------------------------------------------------------------------

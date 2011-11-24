@@ -311,19 +311,8 @@ status_t SurfaceFlinger::readyToRun()
 #pragma mark Events Handler
 #endif
 
-void SurfaceFlinger::waitForEvent()
-{
-    while (true) {
-        nsecs_t timeout = -1;
-        sp<MessageBase> msg = mEventQueue.waitMessage(timeout);
-        if (msg != 0) {
-            switch (msg->what) {
-                case MessageQueue::INVALIDATE:
-                    // invalidate message, just return to the main loop
-                    return;
-            }
-        }
-    }
+void SurfaceFlinger::waitForEvent() {
+    mEventQueue.waitMessage();
 }
 
 void SurfaceFlinger::signalEvent() {
