@@ -72,7 +72,7 @@ bool rsdScriptInit(const Context *rsc,
     //LOGE("rsdScriptCreate %p %p %p %p %i %i %p", rsc, resName, cacheDir, bitcode, bitcodeSize, flags, lookupFunc);
 
     pthread_mutex_lock(&rsdgInitMutex);
-    char *cachePath = NULL;
+
     size_t exportFuncCount = 0;
     size_t exportVarCount = 0;
     size_t objectSlotCount = 0;
@@ -121,8 +121,6 @@ bool rsdScriptInit(const Context *rsc,
         LOGE("bcc: FAILS to prepare executable");
         goto error;
     }
-
-    free(cachePath);
 
     drv->mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root"));
     drv->mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, "init"));
