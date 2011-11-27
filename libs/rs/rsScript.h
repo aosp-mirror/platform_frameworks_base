@@ -67,7 +67,6 @@ public:
     };
     Enviroment_t mEnviroment;
 
-    void initSlots();
     void setSlot(uint32_t slot, Allocation *a);
     void setVar(uint32_t slot, const void *val, size_t len);
     void setVarObj(uint32_t slot, ObjectBase *val);
