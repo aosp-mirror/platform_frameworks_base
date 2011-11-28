@@ -450,7 +450,7 @@ public abstract class TextToSpeechService extends Service {
         @Override
         public void dispatchOnDone() {
             final String utteranceId = getUtteranceId();
-            if (!TextUtils.isEmpty(utteranceId)) {
+            if (utteranceId != null) {
                 mCallbacks.dispatchOnDone(getCallingApp(), utteranceId);
             }
         }
@@ -458,7 +458,7 @@ public abstract class TextToSpeechService extends Service {
         @Override
         public void dispatchOnStart() {
             final String utteranceId = getUtteranceId();
-            if (!TextUtils.isEmpty(utteranceId)) {
+            if (utteranceId != null) {
                 mCallbacks.dispatchOnStart(getCallingApp(), utteranceId);
             }
         }
@@ -466,7 +466,7 @@ public abstract class TextToSpeechService extends Service {
         @Override
         public void dispatchOnError() {
             final String utteranceId = getUtteranceId();
-            if (!TextUtils.isEmpty(utteranceId)) {
+            if (utteranceId != null) {
                 mCallbacks.dispatchOnError(getCallingApp(), utteranceId);
             }
         }
