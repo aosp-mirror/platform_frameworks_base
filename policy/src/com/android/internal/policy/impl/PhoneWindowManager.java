@@ -69,6 +69,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
@@ -230,7 +231,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Useful scan codes.
     private static final int SW_LID = 0x00;
     private static final int BTN_MOUSE = 0x110;
-    
+
+    /* Table of Application Launch keys.  Maps from key codes to intent categories.
+     *
+     * These are special keys that are used to launch particular kinds of applications,
+     * such as a web browser.  HID defines nearly a hundred of them in the Consumer (0x0C)
+     * usage page.  We don't support quite that many yet...
+     */
+    static SparseArray<String> sApplicationLaunchKeyCategories;
+    static {
+        sApplicationLaunchKeyCategories = new SparseArray<String>();
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_EXPLORER, Intent.CATEGORY_APP_BROWSER);
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_ENVELOPE, Intent.CATEGORY_APP_EMAIL);
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_CONTACTS, Intent.CATEGORY_APP_CONTACTS);
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_CALENDAR, Intent.CATEGORY_APP_CALENDAR);
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_MUSIC, Intent.CATEGORY_APP_MUSIC);
+        sApplicationLaunchKeyCategories.append(
+                KeyEvent.KEYCODE_CALCULATOR, Intent.CATEGORY_APP_CALCULATOR);
+    }
+
     /**
      * Lock protecting internal state.  Must not call out into window
      * manager with lock held.  (This lock will be acquired in places
@@ -1646,6 +1670,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 return -1;
+            }
+        }
+
+        // Handle application launch keys.
+        if (down && repeatCount == 0) {
+            String category = sApplicationLaunchKeyCategories.get(keyCode);
+            if (category != null) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(category);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException ex) {
+                    Slog.w(TAG, "Dropping application launch key because "
+                            + "the activity to which it is registered was not found: "
+                            + "keyCode=" + keyCode + ", category=" + category, ex);
+                }
             }
         }
 

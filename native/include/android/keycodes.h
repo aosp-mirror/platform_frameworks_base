@@ -250,6 +250,10 @@ enum {
     AKEYCODE_LANGUAGE_SWITCH = 204,
     AKEYCODE_MANNER_MODE     = 205,
     AKEYCODE_3D_MODE         = 206,
+    AKEYCODE_CONTACTS        = 207,
+    AKEYCODE_CALENDAR        = 208,
+    AKEYCODE_MUSIC           = 209,
+    AKEYCODE_CALCULATOR      = 210,
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.
