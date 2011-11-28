@@ -32,6 +32,8 @@ import android.test.InstrumentationTestCase;
 public class BluetoothStressTest extends InstrumentationTestCase {
     private static final String TAG = "BluetoothStressTest";
     private static final String OUTPUT_FILE = "BluetoothStressTestOutput.txt";
+    /** The amount of time to sleep between issuing start/stop SCO in ms. */
+    private static final long SCO_SLEEP_TIME = 2 * 1000;
 
     private BluetoothTestUtils mTestUtils;
 
@@ -380,11 +382,20 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("startStopSco iteration " + (i + 1) + " of " + iterations);
             mTestUtils.startSco(adapter, device);
+            sleep(SCO_SLEEP_TIME);
             mTestUtils.stopSco(adapter, device);
+            sleep(SCO_SLEEP_TIME);
         }
 
         mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET, null);
         mTestUtils.unpair(adapter, device);
         mTestUtils.disable(adapter);
+    }
+
+    private void sleep(long time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+        }
     }
 }
