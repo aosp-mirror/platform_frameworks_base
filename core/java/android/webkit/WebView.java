@@ -1306,8 +1306,15 @@ public class WebView extends AbsoluteLayout
         if (AccessibilityManager.getInstance(mContext).isEnabled()
                 && getSettings().getJavaScriptEnabled()) {
             // exposing the TTS for now ...
-            mTextToSpeech = new TextToSpeech(getContext(), null);
-            addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
+            final Context ctx = getContext();
+            if (ctx != null) {
+                final String packageName = ctx.getPackageName();
+                if (packageName != null) {
+                    mTextToSpeech = new TextToSpeech(getContext(), null, null,
+                            packageName + ".**webview**");
+                    addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
+                }
+            }
         }
     }
 
