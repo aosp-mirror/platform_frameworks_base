@@ -490,6 +490,7 @@ public class TextToSpeech {
     private final Map<String, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
+    private final String mPackageName;
     private volatile String mCurrentEngine = null;
 
     /**
@@ -518,19 +519,36 @@ public class TextToSpeech {
      * @param engine Package name of the TTS engine to use.
      */
     public TextToSpeech(Context context, OnInitListener listener, String engine) {
+        this(context, listener, engine, null);
+    }
+
+    /**
+     * Used by the framework to instantiate TextToSpeech objects with a supplied
+     * package name, instead of using {@link android.content.Context#getPackageName()}
+     *
+     * @hide
+     */
+    public TextToSpeech(Context context, OnInitListener listener, String engine,
+            String packageName) {
         mContext = context;
         mInitListener = listener;
         mRequestedEngine = engine;
 
         mEarcons = new HashMap<String, Uri>();
         mUtterances = new HashMap<String, Uri>();
+        mUtteranceProgressListener = null;
 
         mEnginesHelper = new TtsEngines(mContext);
+        if (packageName != null) {
+            mPackageName = packageName;
+        } else {
+            mPackageName = mContext.getPackageName();
+        }
         initTts();
     }
 
     private String getPackageName() {
-        return mContext.getPackageName();
+        return mPackageName;
     }
 
     private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method) {
