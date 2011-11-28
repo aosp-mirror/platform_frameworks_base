@@ -1216,7 +1216,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         disposeResizeBuffer();
 
                         boolean completed = false;
-                        HardwareCanvas canvas = null;
+                        HardwareCanvas hwRendererCanvas = mAttachInfo.mHardwareRenderer.getCanvas();
+                        HardwareCanvas layerCanvas = null;
                         try {
                             if (mResizeBuffer == null) {
                                 mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
@@ -1225,12 +1226,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                                     mResizeBuffer.getHeight() != mHeight) {
                                 mResizeBuffer.resize(mWidth, mHeight);
                             }
-                            canvas = mResizeBuffer.start(mAttachInfo.mHardwareCanvas);
-                            canvas.setViewport(mWidth, mHeight);
-                            canvas.onPreDraw(null);
-                            final int restoreCount = canvas.save();
+                            layerCanvas = mResizeBuffer.start(hwRendererCanvas);
+                            layerCanvas.setViewport(mWidth, mHeight);
+                            layerCanvas.onPreDraw(null);
+                            final int restoreCount = layerCanvas.save();
                             
-                            canvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
+                            layerCanvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
 
                             int yoff;
                             final boolean scrolling = mScroller != null
@@ -1242,27 +1243,27 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                                 yoff = mScrollY;
                             }
 
-                            canvas.translate(0, -yoff);
+                            layerCanvas.translate(0, -yoff);
                             if (mTranslator != null) {
-                                mTranslator.translateCanvas(canvas);
+                                mTranslator.translateCanvas(layerCanvas);
                             }
 
-                            mView.draw(canvas);
+                            mView.draw(layerCanvas);
 
                             mResizeBufferStartTime = SystemClock.uptimeMillis();
                             mResizeBufferDuration = mView.getResources().getInteger(
                                     com.android.internal.R.integer.config_mediumAnimTime);
                             completed = true;
 
-                            canvas.restoreToCount(restoreCount);
+                            layerCanvas.restoreToCount(restoreCount);
                         } catch (OutOfMemoryError e) {
                             Log.w(TAG, "Not enough memory for content change anim buffer", e);
                         } finally {
-                            if (canvas != null) {
-                                canvas.onPostDraw();
+                            if (layerCanvas != null) {
+                                layerCanvas.onPostDraw();
                             }
                             if (mResizeBuffer != null) {
-                                mResizeBuffer.end(mAttachInfo.mHardwareCanvas);
+                                mResizeBuffer.end(hwRendererCanvas);
                                 if (!completed) {
                                     mResizeBuffer.destroy();
                                     mResizeBuffer = null;
