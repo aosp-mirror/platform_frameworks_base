@@ -48,6 +48,9 @@ void show_wchan(int pid, const char *name);
 /* Runs "showmap" for a process */
 void do_showmap(int pid, const char *name);
 
+/* Gets the dmesg output for the kernel */
+void do_dmesg();
+
 /* Play a sound via Stagefright */
 void play_sound(const char* path);
 
