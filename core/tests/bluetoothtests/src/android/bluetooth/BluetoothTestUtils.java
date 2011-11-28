@@ -1425,7 +1425,7 @@ public class BluetoothTestUtils extends Assert {
     }
 
     private StartStopScoReceiver getStartStopScoReceiver(int expectedFlags) {
-        String[] actions = {AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED};
+        String[] actions = {AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED};
         StartStopScoReceiver receiver = new StartStopScoReceiver(expectedFlags);
         addReceiver(receiver, actions);
         return receiver;
