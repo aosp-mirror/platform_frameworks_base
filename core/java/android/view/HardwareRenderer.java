@@ -219,6 +219,13 @@ public abstract class HardwareRenderer {
     abstract int getHeight();
 
     /**
+     * Gets the current canvas associated with this HardwareRenderer.
+     *
+     * @return the current HardwareCanvas
+     */
+    abstract HardwareCanvas getCanvas();
+
+    /**
      * Sets the directory to use as a persistent storage for hardware rendering
      * resources.
      * 
@@ -781,6 +788,11 @@ public abstract class HardwareRenderer {
         @Override
         int getHeight() {
             return mHeight;
+        }
+
+        @Override
+        HardwareCanvas getCanvas() {
+            return mCanvas;
         }
 
         boolean canDraw() {
