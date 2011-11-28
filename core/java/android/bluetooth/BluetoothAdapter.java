@@ -1180,11 +1180,29 @@ public final class BluetoothAdapter {
      * @param proxy Profile proxy object
      */
     public void closeProfileProxy(int profile, BluetoothProfile proxy) {
-        if (profile == BluetoothProfile.HEADSET) {
-            BluetoothHeadset headset = (BluetoothHeadset)proxy;
-            if (headset != null) {
+        if (proxy == null) return;
+
+        switch (profile) {
+            case BluetoothProfile.HEADSET:
+                BluetoothHeadset headset = (BluetoothHeadset)proxy;
                 headset.close();
-            }
+                break;
+            case BluetoothProfile.A2DP:
+                BluetoothA2dp a2dp = (BluetoothA2dp)proxy;
+                a2dp.close();
+                break;
+            case BluetoothProfile.INPUT_DEVICE:
+                BluetoothInputDevice iDev = (BluetoothInputDevice)proxy;
+                iDev.close();
+                break;
+            case BluetoothProfile.PAN:
+                BluetoothPan pan = (BluetoothPan)proxy;
+                pan.close();
+                break;
+            case BluetoothProfile.HEALTH:
+                BluetoothHealth health = (BluetoothHealth)proxy;
+                health.close();
+                break;
         }
     }
 

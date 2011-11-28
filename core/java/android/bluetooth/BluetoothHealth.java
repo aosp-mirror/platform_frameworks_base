@@ -452,6 +452,10 @@ public final class BluetoothHealth implements BluetoothProfile {
         }
     }
 
+    /*package*/ void close() {
+        mServiceListener = null;
+    }
+
     private boolean isEnabled() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
