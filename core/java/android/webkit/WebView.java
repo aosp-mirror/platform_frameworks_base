@@ -1628,6 +1628,14 @@ public class WebView extends AbsoluteLayout
         clearTextEntry();
         clearActionModes();
         dismissFullScreenMode();
+        cancelSelectDialog();
+    }
+
+    private void cancelSelectDialog() {
+        if (mListBoxDialog != null) {
+            mListBoxDialog.cancel();
+            mListBoxDialog = null;
+        }
     }
 
     /**
@@ -3279,6 +3287,8 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass != 0) {
                 nativeSetPauseDrawing(mNativeClass, true);
             }
+
+            cancelSelectDialog();
         }
     }
 
