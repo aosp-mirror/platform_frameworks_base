@@ -113,7 +113,7 @@ public final class Tag implements Parcelable {
     /*package*/ final String[] mTechStringList;
     /*package*/ final Bundle[] mTechExtras;
     /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
-    /*package*/ final INfcTag mTagService;
+    /*package*/ final INfcTag mTagService; // interface to NFC service, will be null if mock tag
 
     /*package*/ int mConnectedTechnology;
 
@@ -148,7 +148,7 @@ public final class Tag implements Parcelable {
      * @hide
      */
     public static Tag createMockTag(byte[] id, int[] techList, Bundle[] techListExtras) {
-        // set serviceHandle to 0 to indicate mock tag
+        // set serviceHandle to 0 and tagService to null to indicate mock tag
         return new Tag(id, techList, techListExtras, 0, null);
     }
 
@@ -266,6 +266,9 @@ public final class Tag implements Parcelable {
             throw new IllegalStateException("Close connection to the technology first!");
         }
 
+        if (mTagService == null) {
+            throw new IOException("Mock tags don't support this operation.");
+        }
         try {
             Tag newTag = mTagService.rediscover(getServiceHandle());
             if (newTag != null) {
