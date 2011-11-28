@@ -498,6 +498,11 @@ class ZoomManager {
             if (mZoomScale == 0) {
                 // We've reached the end of the zoom animation.
                 mInHWAcceleratedZoom = false;
+
+                // Ensure that the zoom level is pushed to WebCore. This has not
+                // yet occurred because we prevent it from happening while
+                // mInHWAcceleratedZoom is true.
+                mWebView.sendViewSizeZoom(false);
             }
         } else {
             canvas.translate(tx, ty);
