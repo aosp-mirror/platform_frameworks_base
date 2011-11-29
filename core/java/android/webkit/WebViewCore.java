@@ -519,7 +519,12 @@ public final class WebViewCore {
     /**
      * Update the layers' content
      */
-    private native boolean nativeUpdateLayers(int baseLayer);
+    private native boolean nativeUpdateLayers(int nativeClass, int baseLayer);
+
+    /**
+     * Notify webkit that animations have begun (on the hardware accelerated content)
+     */
+    private native void nativeNotifyAnimationStarted(int nativeClass);
 
     private native boolean nativeFocusBoundsChanged();
 
@@ -1034,6 +1039,8 @@ public final class WebViewCore {
         static final int EXECUTE_JS = 194;
 
         static final int PLUGIN_SURFACE_READY = 195;
+
+        static final int NOTIFY_ANIMATION_STARTED = 196;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1594,6 +1601,10 @@ public final class WebViewCore {
                             nativePluginSurfaceReady();
                             break;
 
+                        case NOTIFY_ANIMATION_STARTED:
+                            nativeNotifyAnimationStarted(mNativeClass);
+                            break;
+
                         case ADD_PACKAGE_NAMES:
                             if (BrowserFrame.sJavaBridge == null) {
                                 throw new IllegalStateException("No WebView " +
@@ -2015,7 +2026,7 @@ public final class WebViewCore {
             return;
         }
         // Directly update the layers we last passed to the UI side
-        if (nativeUpdateLayers(mLastDrawData.mBaseLayer)) {
+        if (nativeUpdateLayers(mNativeClass, mLastDrawData.mBaseLayer)) {
             // If anything more complex than position has been touched, let's do a full draw
             webkitDraw();
         }
