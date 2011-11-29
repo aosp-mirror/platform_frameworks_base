@@ -23,6 +23,8 @@
 
 #include <utils/Log.h>
 
+#include <private/gui/ComposerService.h>
+
 namespace android {
 
 SurfaceTextureClient::SurfaceTextureClient(

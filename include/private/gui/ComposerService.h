@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,60 +14,40 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MESSAGE_QUEUE_H
-#define ANDROID_MESSAGE_QUEUE_H
+#ifndef ANDROID_PRIVATE_GUI_COMPOSER_SERVICE_H
+#define ANDROID_PRIVATE_GUI_COMPOSER_SERVICE_H
 
 #include <stdint.h>
-#include <errno.h>
 #include <sys/types.h>
 
-#include <utils/threads.h>
-#include <utils/Timers.h>
-#include <utils/Looper.h>
+#include <utils/Singleton.h>
+#include <utils/StrongPointer.h>
 
-#include "Barrier.h"
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-class MessageBase : public MessageHandler
+class IMemoryHeap;
+class ISurfaceComposer;
+class surface_flinger_cblk_t;
+
+// ---------------------------------------------------------------------------
+
+class ComposerService : public Singleton<ComposerService>
 {
+    // these are constants
+    sp<ISurfaceComposer> mComposerService;
+    sp<IMemoryHeap> mServerCblkMemory;
+    surface_flinger_cblk_t volatile* mServerCblk;
+    ComposerService();
+    friend class Singleton<ComposerService>;
 public:
-    MessageBase();
-    
-    // return true if message has a handler
-    virtual bool handler() = 0;
-
-    // waits for the handler to be processed
-    void wait() const { barrier.wait(); }
-
-protected:
-    virtual ~MessageBase();
-
-private:
-    virtual void handleMessage(const Message& message);
-
-    mutable Barrier barrier;
+    static sp<ISurfaceComposer> getComposerService();
+    static surface_flinger_cblk_t const volatile * getControlBlock();
 };
 
 // ---------------------------------------------------------------------------
-
-class MessageQueue {
-    sp<Looper> mLooper;
-    volatile int32_t mInvalidatePending;
-
-public:
-    MessageQueue();
-    ~MessageQueue();
-
-    void waitMessage();
-    status_t postMessage(const sp<MessageBase>& message, nsecs_t reltime=0);
-    status_t invalidate();
-};
-
-// ---------------------------------------------------------------------------
-
 }; // namespace android
 
-#endif /* ANDROID_MESSAGE_QUEUE_H */
+#endif // ANDROID_PRIVATE_GUI_COMPOSER_SERVICE_H

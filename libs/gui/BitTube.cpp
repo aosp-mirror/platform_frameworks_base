@@ -97,6 +97,11 @@ ssize_t BitTube::read(void* vaddr, size_t size)
         len = ::read(mReceiveFd, vaddr, size);
         err = len < 0 ? errno : 0;
     } while (err == EINTR);
+    if (err == EAGAIN || err == EWOULDBLOCK) {
+        // EAGAIN means that we have non-blocking I/O but there was
+        // no data to be read. Nothing the client should care about.
+        return 0;
+    }
     return err == 0 ? len : -err;
 }
 

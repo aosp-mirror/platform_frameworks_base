@@ -22,6 +22,8 @@
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <utils/String8.h>
 
+#include <private/gui/ComposerService.h>
+
 namespace android {
 
 class SurfaceTest : public ::testing::Test {

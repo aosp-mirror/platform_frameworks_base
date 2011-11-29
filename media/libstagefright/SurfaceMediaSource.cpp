@@ -32,6 +32,8 @@
 #include <utils/Log.h>
 #include <utils/String8.h>
 
+#include <private/gui/ComposerService.h>
+
 namespace android {
 
 SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
