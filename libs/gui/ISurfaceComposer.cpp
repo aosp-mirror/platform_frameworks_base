@@ -29,9 +29,6 @@
 
 #include <surfaceflinger/ISurfaceComposer.h>
 
-#include <gui/BitTube.h>
-#include <gui/IDisplayEventConnection.h>
-
 #include <ui/DisplayInfo.h>
 
 #include <gui/ISurfaceTexture.h>
@@ -46,8 +43,6 @@
 // ---------------------------------------------------------------------------
 
 namespace android {
-
-class IDisplayEventConnection;
 
 class BpSurfaceComposer : public BpInterface<ISurfaceComposer>
 {
@@ -179,27 +174,6 @@ public:
         }
         return result != 0;
     }
-
-    virtual sp<IDisplayEventConnection> createDisplayEventConnection()
-    {
-        Parcel data, reply;
-        sp<IDisplayEventConnection> result;
-        int err = data.writeInterfaceToken(
-                ISurfaceComposer::getInterfaceDescriptor());
-        if (err != NO_ERROR) {
-            return result;
-        }
-        err = remote()->transact(
-                BnSurfaceComposer::CREATE_DISPLAY_EVENT_CONNECTION,
-                data, &reply);
-        if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::createDisplayEventConnection: error performing "
-                    "transaction: %s (%d)", strerror(-err), -err);
-            return result;
-        }
-        result = interface_cast<IDisplayEventConnection>(reply.readStrongBinder());
-        return result;
-    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceComposer, "android.ui.ISurfaceComposer");
@@ -279,12 +253,6 @@ status_t BnSurfaceComposer::onTransact(
                     interface_cast<ISurfaceTexture>(data.readStrongBinder());
             int32_t result = authenticateSurfaceTexture(surfaceTexture) ? 1 : 0;
             reply->writeInt32(result);
-        } break;
-        case CREATE_DISPLAY_EVENT_CONNECTION: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            sp<IDisplayEventConnection> connection(createDisplayEventConnection());
-            reply->writeStrongBinder(connection->asBinder());
-            return NO_ERROR;
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
