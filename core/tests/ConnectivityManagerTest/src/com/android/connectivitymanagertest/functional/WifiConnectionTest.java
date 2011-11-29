@@ -136,7 +136,7 @@ public class WifiConnectionTest
 
         // step 2: verify Wifi state and network state;
         assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, 2 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                State.CONNECTED, 6 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
 
         // step 3: verify the current connected network is the given SSID
         assertNotNull("Wifi connection returns null", mAct.mWifiManager.getConnectionInfo());
@@ -166,8 +166,9 @@ public class WifiConnectionTest
             String ssid = networks.get(i).SSID;
             log("-- START Wi-Fi connection test to : " + ssid + " --");
             connectToWifi(networks.get(i));
-            sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT,
-                    "interruped while waiting for wifi disabled.");
+            // wait for 2 minutes between wifi stop and start
+            sleep(ConnectivityManagerTestActivity.WIFI_START_TIMER,
+                  "interruped while connected to wifi");
             log("-- END Wi-Fi connection test to " + ssid + " -- ");
         }
     }

@@ -77,10 +77,13 @@ public class NetworkState {
                 mReason = "no state is recorded.";
                 return false;
             } else if (mStateDepository.size() > 1) {
-                Log.v(LOG_TAG, "no broadcast is expected, " +
-                        "instead broadcast is probably received");
-                mReason = "no broadcast is expected, instead broadcast is probably received";
-                return false;
+                for (int i = 0; i < mStateDepository.size(); i++) {
+                    if (mStateDepository.get(i) != mTransitionTarget) {
+                        Log.v(LOG_TAG, "state changed.");
+                        mReason = "Unexpected state change";
+                        return false;
+                    }
+                }
             } else if (mStateDepository.get(0) != mTransitionTarget) {
                 Log.v(LOG_TAG, mTransitionTarget + " is expected, but it is " +
                         mStateDepository.get(0));
