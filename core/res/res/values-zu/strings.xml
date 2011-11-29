@@ -698,7 +698,7 @@
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Ukuvula, ngena ngemvumekwi-akhawunti ye-Google"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Igama lomsebenzisi (i-imeyli)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Iphasiwedi"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Ngena ngemvume"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Ngena"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Igama lomsebezisi elingalungile noma iphasiwedi."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Ukhohlwe igama lomsebenzisi noma iphasiwedi?"\n"Vakashela"<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Iyahlola..."</string>
@@ -768,8 +768,8 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"faka"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"susa"</string>
     <string name="search_go" msgid="8298016669822141719">"Sesha"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"Cinga"</string>
-    <string name="searchview_description_query" msgid="5911778593125355124">"Cinga umbuzo"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"Sesha"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"Umbuzo wosesho"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"xazulula umbuzo"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Thumela umbuzo"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Ukusesha ngezwi"</string>

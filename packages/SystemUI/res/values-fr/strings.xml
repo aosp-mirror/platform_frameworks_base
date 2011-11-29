@@ -106,7 +106,7 @@
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Signal WiMAX : faible"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Signal WiMAX : moyen"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Signal WiMAX : bon"</string>
-    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Signal WiMAX excellent"</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Signal WiMAX : excellent"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3G+"</string>
