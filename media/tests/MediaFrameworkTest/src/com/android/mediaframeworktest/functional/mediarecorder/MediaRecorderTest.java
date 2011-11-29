@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import com.android.mediaframeworktest.MediaProfileReader;
+import com.android.mediaframeworktest.MediaFrameworkTestRunner;
 
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
@@ -115,9 +116,16 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         int audioChannels = highQuality? audioCap.mMaxChannels: audioCap.mMinChannels ;
         int audioSamplingRate = highQuality? audioCap.mMaxSampleRate: audioCap.mMinSampleRate;
 
+        //Overide the fps if the min_camera_fps is set
+        if (MediaFrameworkTestRunner.mMinCameraFps != 0 &&
+            MediaFrameworkTestRunner.mMinCameraFps > videoFps){
+            videoFps = MediaFrameworkTestRunner.mMinCameraFps;
+        }
+
         if (videoFps < MIN_VIDEO_FPS) {
             videoFps = MIN_VIDEO_FPS;
         }
+
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         String filename = ("/sdcard/" + videoEncoder + "_" + audioEncoder + "_" + highQuality + ".3gp");
         try {
