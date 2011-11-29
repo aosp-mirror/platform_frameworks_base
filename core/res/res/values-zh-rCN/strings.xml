@@ -319,7 +319,7 @@
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"开机时自动启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"允许应用程序在系统完成启动后立即自行启动。这样会延长平板电脑的启动时间，而且如果应用程序一直运行，会降低平板电脑的整体速度。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"允许应用程序在系统完成启动后即自行启动。这样会延长手机的启动时间，而且如果应用程序一直运行，会降低手机的整体速度。"</string>
-    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送置顶广播"</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送持久广播"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"允许应用程序发送顽固广播，这些广播在结束后仍会保留。恶意应用程序可借此让平板电脑耗用太多内存，从而降低其速度或稳定性。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"允许应用程序发送顽固广播，这些广播在结束后仍会保留。恶意应用程序可能会借此使手机耗用太多内存，从而降低其速度或稳定性。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"读取联系人数据"</string>
@@ -904,9 +904,9 @@
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"抱歉，进程“<xliff:g id="PROCESS">%1$s</xliff:g>”已停止运行。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="8339738283149696827">"“<xliff:g id="APPLICATION">%2$s</xliff:g>”无响应。"\n\n"要将它关闭吗？"</string>
-    <string name="anr_activity_process" msgid="7018289416670457797">"活动“<xliff:g id="ACTIVITY">%1$s</xliff:g>”无响应。"\n\n"要将它关闭吗？"</string>
-    <string name="anr_application_process" msgid="7208175830253210526">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”无响应。要将它关闭吗？"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"活动 <xliff:g id="ACTIVITY">%1$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> 无响应。要将它关闭吗？"</string>
     <string name="anr_process" msgid="306819947562555821">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 无响应。"\n\n"要将它关闭吗？"</string>
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
@@ -1181,7 +1181,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"导航首页"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上导航"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"内存空间"</string>
+    <string name="storage_internal" msgid="7556050805474115618">"内部存储空间"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"编辑..."</string>

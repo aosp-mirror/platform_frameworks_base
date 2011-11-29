@@ -634,7 +634,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"Ouer"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Vennoot"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Verwys deur"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"Relatief"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Familielid"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Suster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Eggenoot"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Gepasmaakte"</string>
