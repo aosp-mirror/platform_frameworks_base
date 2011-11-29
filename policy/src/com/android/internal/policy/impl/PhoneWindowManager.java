@@ -3476,7 +3476,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (component != null) {
                     // dismiss the notification shade, recents, etc.
-                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT));
 
                     ComponentName cn = ComponentName.unflattenFromString(component);
                     Intent intent = new Intent(Intent.ACTION_MAIN)
