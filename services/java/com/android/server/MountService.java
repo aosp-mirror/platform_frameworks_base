@@ -1831,7 +1831,11 @@ class MountService extends IMountService.Stub
                 // to let the UI to clear itself
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
-                        mConnector.doCommand(String.format("cryptfs restart"));
+                        try {
+                            mConnector.doCommand(String.format("cryptfs restart"));
+                        } catch (NativeDaemonConnectorException e) {
+                            Slog.e(TAG, "problem executing in background", e);
+                        }
                     }
                 }, 1000); // 1 second
             }

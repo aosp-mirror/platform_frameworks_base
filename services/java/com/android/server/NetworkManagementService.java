@@ -442,27 +442,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void setInterfaceDown(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        try {
-            InterfaceConfiguration ifcg = getInterfaceConfig(iface);
-            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
-            setInterfaceConfig(iface, ifcg);
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon for interface down - " + e);
-        }
+        final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
+        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+        setInterfaceConfig(iface, ifcg);
     }
 
     @Override
     public void setInterfaceUp(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        try {
-            InterfaceConfiguration ifcg = getInterfaceConfig(iface);
-            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-            setInterfaceConfig(iface, ifcg);
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon for interface up - " + e);
-        }
+        final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
+        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+        setInterfaceConfig(iface, ifcg);
     }
 
     @Override
@@ -733,7 +723,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void setIpForwardingEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        mConnector.doCommand(String.format("ipfwd %sable", (enable ? "en" : "dis")));
+        try {
+            mConnector.doCommand(String.format("ipfwd %sable", (enable ? "en" : "dis")));
+        } catch (NativeDaemonConnectorException e) {
+            e.rethrowAsParcelableException();
+        }
     }
 
     @Override
@@ -875,7 +869,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
         }
 
-        mConnector.doCommand(cmd);
+        try {
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            e.rethrowAsParcelableException();
+        }
     }
 
     @Override
