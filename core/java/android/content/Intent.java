@@ -2310,6 +2310,74 @@ public class Intent implements Parcelable, Cloneable {
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
+    // Application launch intent categories (see addCategory()).
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the browser application.
+     * The activity should be able to browse the Internet.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_BROWSER = "android.intent.category.APP_BROWSER";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the calculator application.
+     * The activity should be able to perform standard arithmetic operations.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_CALCULATOR = "android.intent.category.APP_CALCULATOR";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the calendar application.
+     * The activity should be able to view and manipulate calendar entries.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_CALENDAR = "android.intent.category.APP_CALENDAR";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the contacts application.
+     * The activity should be able to view and manipulate address book entries.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_CONTACTS = "android.intent.category.APP_CONTACTS";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the email application.
+     * The activity should be able to send and receive email.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_EMAIL = "android.intent.category.APP_EMAIL";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the gallery application.
+     * The activity should be able to view and manipulate image and video files
+     * stored on the device.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_GALLERY = "android.intent.category.APP_GALLERY";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the maps application.
+     * The activity should be able to show the user's current location and surroundings.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_MAPS = "android.intent.category.APP_MAPS";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the messaging application.
+     * The activity should be able to send and receive text messages.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_MESSAGING = "android.intent.category.APP_MESSAGING";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the music application.
+     * The activity should be able to play, browse, or manipulate music files stored on the device.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_MUSIC = "android.intent.category.APP_MUSIC";
+
+    // ---------------------------------------------------------------------
+    // ---------------------------------------------------------------------
     // Standard extra data keys.
 
     /**

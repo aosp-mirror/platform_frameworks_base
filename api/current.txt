@@ -5502,7 +5502,16 @@ package android.content {
     field public static final java.lang.String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final java.lang.String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
     field public static final java.lang.String CATEGORY_ALTERNATIVE = "android.intent.category.ALTERNATIVE";
+    field public static final java.lang.String CATEGORY_APP_BROWSER = "android.intent.category.APP_BROWSER";
+    field public static final java.lang.String CATEGORY_APP_CALCULATOR = "android.intent.category.APP_CALCULATOR";
+    field public static final java.lang.String CATEGORY_APP_CALENDAR = "android.intent.category.APP_CALENDAR";
+    field public static final java.lang.String CATEGORY_APP_CONTACTS = "android.intent.category.APP_CONTACTS";
+    field public static final java.lang.String CATEGORY_APP_EMAIL = "android.intent.category.APP_EMAIL";
+    field public static final java.lang.String CATEGORY_APP_GALLERY = "android.intent.category.APP_GALLERY";
+    field public static final java.lang.String CATEGORY_APP_MAPS = "android.intent.category.APP_MAPS";
     field public static final java.lang.String CATEGORY_APP_MARKET = "android.intent.category.APP_MARKET";
+    field public static final java.lang.String CATEGORY_APP_MESSAGING = "android.intent.category.APP_MESSAGING";
+    field public static final java.lang.String CATEGORY_APP_MUSIC = "android.intent.category.APP_MUSIC";
     field public static final java.lang.String CATEGORY_BROWSABLE = "android.intent.category.BROWSABLE";
     field public static final java.lang.String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     field public static final java.lang.String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";
@@ -17057,7 +17066,7 @@ package android.provider {
     field public static final java.lang.String EXTRA_VIDEO_QUALITY = "android.intent.extra.videoQuality";
     field public static final java.lang.String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH = "android.media.action.MEDIA_PLAY_FROM_SEARCH";
     field public static final java.lang.String INTENT_ACTION_MEDIA_SEARCH = "android.intent.action.MEDIA_SEARCH";
-    field public static final java.lang.String INTENT_ACTION_MUSIC_PLAYER = "android.intent.action.MUSIC_PLAYER";
+    field public static final deprecated java.lang.String INTENT_ACTION_MUSIC_PLAYER = "android.intent.action.MUSIC_PLAYER";
     field public static final java.lang.String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
     field public static final java.lang.String INTENT_ACTION_VIDEO_CAMERA = "android.media.action.VIDEO_CAMERA";
     field public static final java.lang.String MEDIA_IGNORE_FILENAME = ".nomedia";
@@ -22217,6 +22226,8 @@ package android.view {
     field public static final int KEYCODE_BUTTON_Y = 100; // 0x64
     field public static final int KEYCODE_BUTTON_Z = 101; // 0x65
     field public static final int KEYCODE_C = 31; // 0x1f
+    field public static final int KEYCODE_CALCULATOR = 210; // 0xd2
+    field public static final int KEYCODE_CALENDAR = 208; // 0xd0
     field public static final int KEYCODE_CALL = 5; // 0x5
     field public static final int KEYCODE_CAMERA = 27; // 0x1b
     field public static final int KEYCODE_CAPS_LOCK = 115; // 0x73
@@ -22225,6 +22236,7 @@ package android.view {
     field public static final int KEYCODE_CHANNEL_UP = 166; // 0xa6
     field public static final int KEYCODE_CLEAR = 28; // 0x1c
     field public static final int KEYCODE_COMMA = 55; // 0x37
+    field public static final int KEYCODE_CONTACTS = 207; // 0xcf
     field public static final int KEYCODE_CTRL_LEFT = 113; // 0x71
     field public static final int KEYCODE_CTRL_RIGHT = 114; // 0x72
     field public static final int KEYCODE_D = 32; // 0x20
@@ -22292,6 +22304,7 @@ package android.view {
     field public static final int KEYCODE_MINUS = 69; // 0x45
     field public static final int KEYCODE_MOVE_END = 123; // 0x7b
     field public static final int KEYCODE_MOVE_HOME = 122; // 0x7a
+    field public static final int KEYCODE_MUSIC = 209; // 0xd1
     field public static final int KEYCODE_MUTE = 91; // 0x5b
     field public static final int KEYCODE_N = 42; // 0x2a
     field public static final int KEYCODE_NOTIFICATION = 83; // 0x53

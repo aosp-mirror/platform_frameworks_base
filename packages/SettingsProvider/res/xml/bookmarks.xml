@@ -19,6 +19,7 @@
      Bookmarks for vendor apps should be added to a bookmarks resource overlay; not here.
 
      Typical shortcuts (not necessarily defined here):
+       'a': Calculator
        'b': Browser
        'c': Contacts
        'e': Email
@@ -32,27 +33,27 @@
 -->
 <bookmarks>
     <bookmark
-        package="com.android.browser"
-        class="com.android.browser.BrowserActivity"
+        category="android.intent.category.APP_CALCULATOR"
+        shortcut="a" />
+    <bookmark
+        category="android.intent.category.APP_BROWSER"
         shortcut="b" />
     <bookmark
-        package="com.android.contacts"
-        class="com.android.contacts.activities.ContactsFrontDoor"
+        category="android.intent.category.APP_CONTACTS"
         shortcut="c" />
     <bookmark
-        package="com.google.android.email"
-        class="com.android.email.activity.Welcome"
+        category="android.intent.category.APP_EMAIL"
         shortcut="e" />
     <bookmark
-        package="com.google.android.calendar"
-        class="com.android.calendar.LaunchActivity"
+        category="android.intent.category.APP_CALENDAR"
         shortcut="l" />
     <bookmark
-        package="com.android.music"
-        class="com.android.music.MusicBrowserActivity"
+        category="android.intent.category.APP_MAPS"
+        shortcut="m" />
+    <bookmark
+        category="android.intent.category.APP_MUSIC"
         shortcut="p" />
     <bookmark
-        package="com.android.mms"
-        class="com.android.mms.ui.ConversationList"
+        category="android.intent.category.APP_MESSAGING"
         shortcut="s" />
 </bookmarks>
