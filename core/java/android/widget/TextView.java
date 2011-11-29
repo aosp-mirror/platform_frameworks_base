@@ -4313,15 +4313,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void invalidateCursor(int a, int b, int c) {
+        if (a >= 0 || b >= 0 || c >= 0) {
+            int start = Math.min(Math.min(a, b), c);
+            int end = Math.max(Math.max(a, b), c);
+            invalidateRegion(start, end);
+        }
+    }
+
+    /**
+     * Invalidates the region of text enclosed between the start and end text offsets.
+     *
+     * @hide
+     */
+    void invalidateRegion(int start, int end) {
         if (mLayout == null) {
             invalidate();
         } else {
-            if (a >= 0 || b >= 0 || c >= 0) {
-                int first = Math.min(Math.min(a, b), c);
-                int last = Math.max(Math.max(a, b), c);
-
-                int line = mLayout.getLineForOffset(first);
-                int top = mLayout.getLineTop(line);
+                int lineStart = mLayout.getLineForOffset(start);
+                int top = mLayout.getLineTop(lineStart);
 
                 // This is ridiculous, but the descent from the line above
                 // can hang down into the line we really want to redraw,
@@ -4329,36 +4338,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // sure everything that needs to be redrawn really is.
                 // (But not the whole line above, because that would cause
                 // the same problem with the descenders on the line above it!)
-                if (line > 0) {
-                    top -= mLayout.getLineDescent(line - 1);
+                if (lineStart > 0) {
+                    top -= mLayout.getLineDescent(lineStart - 1);
                 }
 
-                int line2;
+                int lineEnd;
 
-                if (first == last)
-                    line2 = line;
+                if (start == end)
+                    lineEnd = lineStart;
                 else
-                    line2 = mLayout.getLineForOffset(last);
+                    lineEnd = mLayout.getLineForOffset(end);
 
-                int bottom = mLayout.getLineTop(line2 + 1);
+                int bottom = mLayout.getLineBottom(lineEnd);
 
-                final int horizontalPadding = getCompoundPaddingLeft();
+                final int compoundPaddingLeft = getCompoundPaddingLeft();
                 final int verticalPadding = getExtendedPaddingTop() + getVerticalOffset(true);
-                
-                // If used, the cursor drawables can have an arbitrary dimension that can go beyond
-                // the invalidated lines specified above.
-                for (int i = 0; i < mCursorCount; i++) {
-                    Rect bounds = mCursorDrawable[i].getBounds();
-                    top = Math.min(top, bounds.top);
-                    bottom = Math.max(bottom, bounds.bottom);
-                    // Horizontal bounds are already full width, no need to update
+
+                int left, right;
+                if (lineStart == lineEnd) {
+                    left = (int) mLayout.getPrimaryHorizontal(start);
+                    right = (int) (mLayout.getPrimaryHorizontal(end) + 1.0);
+                    left += compoundPaddingLeft;
+                    right += compoundPaddingLeft;
+                } else {
+                    // Rectangle bounding box when the region spans several lines
+                    left = compoundPaddingLeft;
+                    right = getWidth() - getCompoundPaddingRight();
                 }
 
-                invalidate(horizontalPadding + mScrollX, top + verticalPadding,
-                        horizontalPadding + mScrollX + getWidth() -
-                        getCompoundPaddingLeft() - getCompoundPaddingRight(),
-                        bottom + verticalPadding);
-            }
+                invalidate(mScrollX + left, verticalPadding + top,
+                        mScrollX + right, verticalPadding + bottom);
         }
     }
 
@@ -5893,10 +5902,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (cursorOffsetVertical != 0) {
                     canvas.translate(0, -cursorOffsetVertical);
                 }
-                invalidate(true);
+                invalidate(true); // TODO invalidate cursor region only
             } else {
                 stopAnimation();
-                invalidate(false);
+                invalidate(false); // TODO invalidate cursor region only
             }
         }
 
@@ -7716,10 +7725,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 onSelectionChanged(newSelStart, newSelEnd);
             }
         }
-        
-        if (what instanceof UpdateAppearance || what instanceof ParagraphStyle
-                || (what instanceof SuggestionSpan && (((SuggestionSpan)what).getFlags()
-                        & SuggestionSpan.FLAG_AUTO_CORRECTION) != 0)) {
+
+        if (what instanceof UpdateAppearance || what instanceof ParagraphStyle) {
             if (ims == null || ims.mBatchEditNesting == 0) {
                 invalidate();
                 mHighlightPathBogus = true;
