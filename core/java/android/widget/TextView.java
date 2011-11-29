@@ -7961,16 +7961,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void onClick(View view) {
             if (view == mDeleteTextView) {
-                deleteText();
-            }
-        }
-
-        private void deleteText() {
-            Editable editable = (Editable) mText;
-            int start = editable.getSpanStart(mEasyEditSpan);
-            int end = editable.getSpanEnd(mEasyEditSpan);
-            if (start >= 0 && end >= 0) {
-                editable.delete(start, end);
+                Editable editable = (Editable) mText;
+                int start = editable.getSpanStart(mEasyEditSpan);
+                int end = editable.getSpanEnd(mEasyEditSpan);
+                if (start >= 0 && end >= 0) {
+                    deleteText_internal(start, end);
+                }
             }
         }
 
@@ -9094,7 +9090,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case ID_CUT:
                 setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
-                ((Editable) mText).delete(min, max);
+                deleteText_internal(min, max);
                 stopSelectionActionMode();
                 return true;
 
@@ -9125,7 +9121,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
                     // Two spaces at beginning of paste: remove one
                     final int originalLength = mText.length();
-                    ((Editable) mText).delete(min - 1, min);
+                    deleteText_internal(min - 1, min);
                     // Due to filters, there is no guarantee that exactly one character was
                     // removed: count instead.
                     final int delta = mText.length() - originalLength;
@@ -9135,7 +9131,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         !Character.isSpaceChar(charAfter) && charAfter != '\n') {
                     // No space at beginning of paste: add one
                     final int originalLength = mText.length();
-                    ((Editable) mText).replace(min, min, " ");
+                    replaceText_internal(min, min, " ");
                     // Taking possible filters into account as above.
                     final int delta = mText.length() - originalLength;
                     min += delta;
@@ -9149,11 +9145,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
                     // Two spaces at end of paste: remove one
-                    ((Editable) mText).delete(max, max + 1);
+                    deleteText_internal(max, max + 1);
                 } else if (!Character.isSpaceChar(charBefore) && charBefore != '\n' &&
                         !Character.isSpaceChar(charAfter) && charAfter != '\n') {
                     // No space at end of paste: add one
-                    ((Editable) mText).replace(max, max, " ");
+                    replaceText_internal(max, max, " ");
                 }
             }
         }
@@ -9865,9 +9861,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            TextView textView = (TextView) view;
             Editable editable = (Editable) mText;
-
             SuggestionInfo suggestionInfo = mSuggestionInfos[position];
 
             if (suggestionInfo.suggestionIndex == DELETE_TEXT) {
@@ -9881,7 +9875,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             Character.isSpaceChar(editable.charAt(spanUnionStart - 1)))) {
                         spanUnionEnd = spanUnionEnd + 1;
                     }
-                    editable.replace(spanUnionStart, spanUnionEnd, "");
+                    deleteText_internal(spanUnionStart, spanUnionEnd);
                 }
                 hide();
                 return;
@@ -9902,6 +9896,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(intent);
                 // There is no way to know if the word was indeed added. Re-check.
+                // TODO The ExtractEditText should remove the span in the original text instead
                 editable.removeSpan(suggestionInfo.suggestionSpan);
                 updateSpellCheckSpans(spanStart, spanEnd);
             } else {
@@ -9929,9 +9924,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 final int suggestionStart = suggestionInfo.suggestionStart;
                 final int suggestionEnd = suggestionInfo.suggestionEnd;
-                final String suggestion = textView.getText().subSequence(
+                final String suggestion = suggestionInfo.text.subSequence(
                         suggestionStart, suggestionEnd).toString();
-                editable.replace(spanStart, spanEnd, suggestion);
+                replaceText_internal(spanStart, spanEnd, suggestion);
 
                 // Notify source IME of the suggestion pick. Do this before swaping texts.
                 if (!TextUtils.isEmpty(
@@ -9955,6 +9950,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // way to assign them a valid range after replacement
                     if (suggestionSpansStarts[i] <= spanStart &&
                             suggestionSpansEnds[i] >= spanEnd) {
+                        // TODO The ExtractEditText should restore these spans in the original text
                         editable.setSpan(suggestionSpans[i], suggestionSpansStarts[i],
                                 suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
                     }
@@ -11235,7 +11231,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int max = extractRangeEndFromLong(minMax);
 
         Selection.setSelection((Spannable) mText, max);
-        ((Editable) mText).replace(min, max, content);
+        replaceText_internal(min, max, content);
 
         if (dragDropIntoItself) {
             int dragSourceStart = dragLocalState.start;
@@ -11248,7 +11244,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             // Delete original selection
-            ((Editable) mText).delete(dragSourceStart, dragSourceEnd);
+            deleteText_internal(dragSourceStart, dragSourceEnd);
 
             // Make sure we do not leave two adjacent spaces.
             if ((dragSourceStart == 0 ||
@@ -11257,7 +11253,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Character.isSpaceChar(mTransformed.charAt(dragSourceStart)))) {
                 final int pos = dragSourceStart == mText.length() ?
                         dragSourceStart - 1 : dragSourceStart;
-                ((Editable) mText).delete(pos, pos + 1);
+                deleteText_internal(pos, pos + 1);
             }
         }
     }
@@ -11416,6 +11412,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (imm != null) {
             imm.viewClicked(this);
         }
+    }
+
+    /**
+     * Deletes the range of text [start, end[.
+     * @hide
+     */
+    protected void deleteText_internal(int start, int end) {
+        ((Editable) mText).delete(start, end);
+    }
+
+    /**
+     * Replaces the range of text [start, end[ by replacement text
+     * @hide
+     */
+    protected void replaceText_internal(int start, int end, CharSequence text) {
+        ((Editable) mText).replace(start, end, text);
     }
 
     @ViewDebug.ExportedProperty(category = "text")
