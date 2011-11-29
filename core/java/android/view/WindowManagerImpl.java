@@ -63,15 +63,34 @@ public class WindowManagerImpl implements WindowManager {
      * The user is navigating with keys (not the touch screen), so
      * navigational focus should be shown.
      */
-    public static final int RELAYOUT_IN_TOUCH_MODE = 0x1;
+    public static final int RELAYOUT_RES_IN_TOUCH_MODE = 0x1;
     /**
      * This is the first time the window is being drawn,
      * so the client must call drawingFinished() when done
      */
-    public static final int RELAYOUT_FIRST_TIME = 0x2;
-    
+    public static final int RELAYOUT_RES_FIRST_TIME = 0x2;
+    /**
+     * The window manager has changed the surface from the last call.
+     */
+    public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
+
+    /**
+     * Flag for relayout: the client will be later giving
+     * internal insets; as a result, the window will not impact other window
+     * layouts until the insets are given.
+     */
+    public static final int RELAYOUT_INSETS_PENDING = 0x1;
+
+    /**
+     * Flag for relayout: the client may be currently using the current surface,
+     * so if it is to be destroyed as a part of the relayout the destroy must
+     * be deferred until later.  The client will call performDeferredDestroy()
+     * when it is okay.
+     */
+    public static final int RELAYOUT_DEFER_SURFACE_DESTROY = 0x2;
+
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
-    public static final int ADD_FLAG_IN_TOUCH_MODE = RELAYOUT_IN_TOUCH_MODE;
+    public static final int ADD_FLAG_IN_TOUCH_MODE = RELAYOUT_RES_IN_TOUCH_MODE;
     
     public static final int ADD_OKAY = 0;
     public static final int ADD_BAD_APP_TOKEN = -1;

@@ -1426,7 +1426,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
             if (!mStopped) {
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
-                        (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
+                        (relayoutResult&WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
                         || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
                     childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
@@ -1637,7 +1637,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mLastDrawDurationNanos = System.nanoTime() - drawStartTime;
             }
 
-            if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0
+            if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0
                     || mReportNextDraw) {
                 if (LOCAL_LOGV) {
                     Log.v(TAG, "FINISHED DRAWING: " + mWindowAttributes.getTitle());
@@ -1670,7 +1670,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
             // We were supposed to report when we are done drawing. Since we canceled the
             // draw, remember it here.
-            if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+            if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
                 mReportNextDraw = true;
             }
             if (fullRedrawNeeded) {
@@ -3586,8 +3586,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mWindow, mSeq, params,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
-                viewVisibility, insetsPending, mWinFrame,
-                mPendingContentInsets, mPendingVisibleInsets,
+                viewVisibility, insetsPending ? WindowManagerImpl.RELAYOUT_INSETS_PENDING : 0,
+                mWinFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);
         //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
@@ -3717,7 +3717,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     // animation info.
                     try {
                         if ((relayoutWindow(mWindowAttributes, viewVisibility, false)
-                                & WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0) {
+                                & WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
                             sWindowSession.finishDrawing(mWindow);
                         }
                     } catch (RemoteException e) {
