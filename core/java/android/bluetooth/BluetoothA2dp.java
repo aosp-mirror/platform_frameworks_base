@@ -129,6 +129,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
         }
     }
 
+    /*package*/ void close() {
+        mServiceListener = null;
+    }
+
     /**
      * Initiate connection to a profile of the remote bluetooth device.
      *
