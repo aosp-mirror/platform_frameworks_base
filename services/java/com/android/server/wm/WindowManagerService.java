@@ -2499,12 +2499,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int relayoutWindow(Session session, IWindow client, int seq,
             WindowManager.LayoutParams attrs, int requestedWidth,
-            int requestedHeight, int viewVisibility, boolean insetsPending,
+            int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
             Configuration outConfig, Surface outSurface) {
         boolean displayed = false;
         boolean inTouchMode;
         boolean configChanged;
+        boolean surfaceChanged = false;
 
         // if they don't have this permission, mask out the status bar bits
         int systemUiVisibility = 0;
@@ -2533,6 +2534,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 mPolicy.adjustWindowParamsLw(attrs);
             }
+
+            win.mSurfaceDestroyDeferred =
+                    (flags&WindowManagerImpl.RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
 
             int attrChanges = 0;
             int flagChanges = 0;
@@ -2630,8 +2634,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     // To change the format, we need to re-build the surface.
                     win.destroySurfaceLocked();
                     displayed = true;
+                    surfaceChanged = true;
                 }
                 try {
+                    if (win.mSurface == null) {
+                        surfaceChanged = true;
+                    }
                     Surface surface = win.createSurfaceLocked();
                     if (surface != null) {
                         outSurface.copyFrom(surface);
@@ -2683,6 +2691,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
                     if (!win.mExiting || win.mSurfacePendingDestroy) {
+                        surfaceChanged = true;
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
                         int transit = WindowManagerPolicy.TRANSIT_EXIT;
@@ -2715,10 +2724,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.mSurface == null || (win.getAttrs().flags
                         & WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING) == 0
                         || win.mSurfacePendingDestroy) {
-                    // We are being called from a local process, which
+                    // We could be called from a local process, which
                     // means outSurface holds its current surface.  Ensure the
-                    // surface object is cleared, but we don't want it actually
-                    // destroyed at this point.
+                    // surface object is cleared, but we don't necessarily want
+                    // it actually destroyed at this point.
                     win.mSurfacePendingDestroy = false;
                     outSurface.release();
                     if (DEBUG_VISIBILITY) Slog.i(TAG, "Releasing surface in: " + win);
@@ -2760,7 +2769,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mLayoutNeeded = true;
-            win.mGivenInsetsPending = insetsPending;
+            win.mGivenInsetsPending = (flags&WindowManagerImpl.RELAYOUT_INSETS_PENDING) != 0;
             if (assignLayers) {
                 assignLayersLocked();
             }
@@ -2797,8 +2806,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Binder.restoreCallingIdentity(origId);
 
-        return (inTouchMode ? WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE : 0)
-                | (displayed ? WindowManagerImpl.RELAYOUT_FIRST_TIME : 0);
+        return (inTouchMode ? WindowManagerImpl.RELAYOUT_RES_IN_TOUCH_MODE : 0)
+                | (displayed ? WindowManagerImpl.RELAYOUT_RES_FIRST_TIME : 0)
+                | (surfaceChanged ? WindowManagerImpl.RELAYOUT_RES_SURFACE_CHANGED : 0);
+    }
+
+    public void performDeferredDestroyWindow(Session session, IWindow client) {
+        long origId = Binder.clearCallingIdentity();
+
+        try {
+            synchronized(mWindowMap) {
+                WindowState win = windowForClientLocked(session, client, false);
+                if (win == null) {
+                    return;
+                }
+                win.destroyDeferredSurfaceLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     public boolean outOfMemoryWindow(Session session, IWindow client) {
@@ -3738,7 +3764,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            // If this is a translucent or wallpaper window, then don't
+            // If this is a translucent window, then don't
             // show a starting window -- the current effect (a full-screen
             // opaque starting window that fades away to the real contents
             // when it is ready) does not work for this.
@@ -3755,7 +3781,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowShowWallpaper, false)) {
-                    return;
+                    if (mWallpaperTarget == null) {
+                        // If this theme is requesting a wallpaper, and the wallpaper
+                        // is not curently visible, then this effectively serves as
+                        // an opaque window and our starting window transition animation
+                        // can still work.  We just need to make sure the starting window
+                        // is also showing the wallpaper.
+                        windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+                    } else {
+                        return;
+                    }
                 }
             }
 
@@ -7659,7 +7694,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         // a detached wallpaper animation.
                         if (nowAnimating) {
                             if (w.mAnimation != null) {
-                                if (w.mAnimation.getDetachWallpaper()) {
+                                if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
+                                        && w.mAnimation.getDetachWallpaper()) {
                                     windowDetachedWallpaper = w;
                                 }
                                 if (w.mAnimation.getBackgroundColor() != 0) {
@@ -7679,7 +7715,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         // displayed behind it.
                         if (w.mAppToken != null && w.mAppToken.animation != null
                                 && w.mAppToken.animating) {
-                            if (w.mAppToken.animation.getDetachWallpaper()) {
+                            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
+                                    && w.mAppToken.animation.getDetachWallpaper()) {
                                 windowDetachedWallpaper = w;
                             }
                             if (w.mAppToken.animation.getBackgroundColor() != 0) {

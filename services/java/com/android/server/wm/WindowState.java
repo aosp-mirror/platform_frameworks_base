@@ -85,6 +85,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppFreezing;
     Surface mSurface;
+    Surface mPendingDestroySurface;
     boolean mReportDestroySurface;
     boolean mSurfacePendingDestroy;
     boolean mAttachedHidden;    // is our parent window hidden?
@@ -121,7 +122,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * we must tell them application to resize (and thus redraw itself).
      */
     boolean mSurfaceResized;
-    
+
+    /**
+     * Set if the client has asked that the destroy of its surface be delayed
+     * until it explicitly says it is okay.
+     */
+    boolean mSurfaceDestroyDeferred;
+
     /**
      * Insets that determine the actually visible area.  These are in the application's
      * coordinate space (without compatibility scale applied).
@@ -764,15 +771,32 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Slog.w(WindowManagerService.TAG, "Window " + this + " destroying surface "
                             + mSurface + ", session " + mSession, e);
                 }
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    RuntimeException e = null;
-                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
+                if (mSurfaceDestroyDeferred) {
+                    if (mSurface != null && mPendingDestroySurface != mSurface) {
+                        if (mPendingDestroySurface != null) {
+                            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                                RuntimeException e = null;
+                                if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                                    e = new RuntimeException();
+                                    e.fillInStackTrace();
+                                }
+                                WindowManagerService.logSurface(this, "DESTROY PENDING", e);
+                            }
+                            mPendingDestroySurface.destroy();
+                        }
+                        mPendingDestroySurface = mSurface;
                     }
-                    WindowManagerService.logSurface(this, "DESTROY", e);
+                } else {
+                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                        RuntimeException e = null;
+                        if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                            e = new RuntimeException();
+                            e.fillInStackTrace();
+                        }
+                        WindowManagerService.logSurface(this, "DESTROY", e);
+                    }
+                    mSurface.destroy();
                 }
-                mSurface.destroy();
             } catch (RuntimeException e) {
                 Slog.w(WindowManagerService.TAG, "Exception thrown when destroying Window " + this
                     + " surface " + mSurface + " session " + mSession
@@ -782,6 +806,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mSurfaceShown = false;
             mSurface = null;
         }
+    }
+
+    void destroyDeferredSurfaceLocked() {
+        try {
+            if (mPendingDestroySurface != null) {
+                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                    RuntimeException e = null;
+                    if (!WindowManagerService.HIDE_STACK_CRAWLS) {
+                        e = new RuntimeException();
+                        e.fillInStackTrace();
+                    }
+                    mService.logSurface(this, "DESTROY PENDING", e);
+                }
+                mPendingDestroySurface.destroy();
+            }
+        } catch (RuntimeException e) {
+            Slog.w(WindowManagerService.TAG, "Exception thrown when destroying Window "
+                    + this + " surface " + mPendingDestroySurface
+                    + " session " + mSession + ": " + e.toString());
+        }
+        mSurfaceDestroyDeferred = false;
+        mPendingDestroySurface = null;
     }
 
     boolean finishDrawingLocked() {
@@ -976,6 +1022,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mAnimation != null) {
             mAnimation.cancel();
             mAnimation = null;
+        }
+        if (mService.mWindowDetachedWallpaper == this) {
+            mService.mWindowDetachedWallpaper = null;
         }
         mAnimLayer = mLayer;
         if (mIsImWindow) {
@@ -1415,6 +1464,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.DEBUG_ADD_REMOVE) Slog.v(WindowManagerService.TAG, "Removing " + this + " from " + mAttachedWindow);
             mAttachedWindow.mChildWindows.remove(this);
         }
+        destroyDeferredSurfaceLocked();
         destroySurfaceLocked();
         mSession.windowRemovedLocked();
         try {
@@ -1612,6 +1662,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(") "); pw.print(mSurfaceW);
                     pw.print(" x "); pw.println(mSurfaceH);
         }
+        if (mPendingDestroySurface != null) {
+            pw.print(prefix); pw.print("mPendingDestroySurface=");
+                    pw.println(mPendingDestroySurface);
+        }
         if (dumpAll) {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
             pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
@@ -1639,6 +1693,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         if (!mRelayoutCalled) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.println(mRelayoutCalled);
+        }
+        if (mSurfaceResized || mSurfaceDestroyDeferred) {
+            pw.print(prefix); pw.print("mSurfaceResized="); pw.print(mSurfaceResized);
+                    pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
         }
         if (mXOffset != 0 || mYOffset != 0) {
             pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
