@@ -137,7 +137,7 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"כבה אלחוטי"</string>
     <string name="screen_lock" msgid="799094655496098153">"נעילת מסך"</string>
     <string name="power_off" msgid="4266614107412865048">"כיבוי"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"מבצע כיבוי..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"מכבה..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"הטבלט שלך יכבה."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"קרא נתונים רגישים של יומן רישום"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"מאפשר ליישום לקרוא מקובצי היומן השונים של המערכת. כך מתאפשר ליישום לגלות מידע כללי על הפעולות שלך בטבלט, מידע שעשוי לכלול מידע אישי או פרטי."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"מאפשר ליישום לקרוא מקובצי היומן השונים של המערכת. כך מתאפשר ליישום לגלות מידע כללי על הפעולות שלך בטלפון, מידע שעשוי לכלול מידע אישי או פרטי."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"שימוש בכל מפענח מדיה שהוא להפעלה"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"אפשרות ליישום להשתמש בכל מפענח מדיה מותקן לצורך פענוח להפעלה."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"קרא/כתוב במשאבים בבעלות diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"מאפשר ליישום לקרוא ולכתוב בכל משאב שבבעלות קבוצת ה-diag; לדוגמה, קבצים ב-‎/dev. פעולה זו עשויה להשפיע על היציבות והאבטחה של המערכת. אפשרות זו צריכה לשמש רק את היצרן או המפעיל, לצורך אבחונים ספציפיים לחומרה."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"הפעלה או השבתה של רכיבי יישומים"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"ניהול Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"מאפשר ליישום להגדיר את תצורתו של הטבלט המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"מאפשר ליישום להגדיר את תצורתו של הטלפון המקומי מסוג Bluetooth וכן לגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"הצג את מצב WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"הצג את מצב WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"מאפשר ליישום להציג את המידע על המצב של WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"שנה את מצב WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"שנה את מצב WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"מאפשר ליישום להתחבר ולהתנתק מרשת WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"צור חיבורי Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"מאפשר ליישום להציג את התצורה של הטבלט המקומי מסוג Bluetooth וכן ליצור ולקבל חיבורים עם מכשירים מותאמים."</string>
@@ -899,7 +901,7 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"בחר יישום עבור התקן ה-USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"אין יישומים שיכולים לבצע פעולה זו."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"לצערנו ה<xliff:g id="APPLICATION">%1$s</xliff:g> הפסיק לפעול."</string>
+    <string name="aerr_application" msgid="932628488013092776">"לצערנו, פעולת ה<xliff:g id="APPLICATION">%1$s</xliff:g> הופסקה."</string>
     <string name="aerr_process" msgid="4507058997035697579">"לצערנו, התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הופסק."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> אינו מגיב."\n\n"תרצה לסגור אותו?"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"שתף עם"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"המכשיר נעול."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"שולח..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"להפעיל את הדפדפן?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"לקבל את השיחה?"</string>
 </resources>

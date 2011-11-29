@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lese sensitive loggdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med nettbrettet, og kan inneholde personlig eller privat informasjon."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Lar appen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, og kan inneholde personlig eller privat informasjon."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"bruke en hvilken som helst mediedekoder for avspilling"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Lar apper bruke en hvilken som helst installert mediedekoder for å dekode for avspilling."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Lar appen lese og skrive til alle ressurser som eies av gruppen «diag», som for eksempel filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør BARE brukes av produsenten eller operatøren til maskinvarespesifikk diagnostikk."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-administrasjon"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Lar appen konfigurere det lokale Bluetooth-nettbrettet, samt oppdage og koble sammen med eksterne enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Lar appen konfigurere den lokale Bluetooth-telefonen, samt oppdage og koble sammen med eksterne enheter."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"vis WiMAX-status"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Se WiMAX-status"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Dette gjør det mulig for en app å vise informasjon om WiMAX-statusen."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"endre WiMAX-status"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Endre WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Gjør at en app kan koble til og fra WiMAX-nettverk."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opprette Bluetooth-tilkoblinger"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Lar appen se konfigurasjonen av det lokale Bluetooth-nettbrettet samt opprette og godta tilkoblinger med sammenkoblede enheter."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deling med"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enheten er låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Sender …"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Vil du starte nettleseren?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vil du besvare anropet?"</string>
 </resources>

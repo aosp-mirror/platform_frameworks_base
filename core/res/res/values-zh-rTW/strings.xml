@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"讀取機密記錄資料"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的平板電腦使用資訊，可能包含您的個人或私人資訊。"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的手機使用資訊，可能包含您的個人或私人資訊。"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒體解碼器進行播放"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"允許應用程式使用任何已安裝的媒體解碼器進行解碼以播放影片。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允許應用程式讀取或寫入診斷群組擁有的任何資源，例如 /dev 底下的檔案。這可能會影響系統的穩定性和安全性，因此應由製造商或電信業者操作，且只用在特定硬體診斷。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"啟用或停用應用程式元件"</string>
@@ -444,7 +446,7 @@
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"允許應用程式執行新增、移除帳戶和刪除帳戶密碼等作業。"</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"使用帳戶的驗證認證"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"允許應用程式要求驗證憑證。"</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"檢視網路狀態"</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"查看網路狀態"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"允許應用程式查看所有網路狀態。"</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"網際網路完整存取"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"允許應用程式建立網路通訊端。"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"藍牙管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允許應用程式設定本機藍牙平板電腦，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允許應用程式設定本機藍牙手機，以及搜尋遠端裝置並配對連線。"</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"查看 WiMAX 狀態"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"查看 WiMAX 狀態"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允許應用程式查看 WiMAX 連線狀態相關資訊。"</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"變更 WiMAX 狀態"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"變更 WiMAX 狀態"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允許應用程式建立或中斷 WiMAX 網路連線。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"建立藍牙連線"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"允許應用程式查看本機藍牙平板電腦設定，並可建立及接受與其他配對裝置的連線。"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享活動"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <string name="sending" msgid="8715108995741758718">"傳送中..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"接聽電話嗎？"</string>
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"citire date de jurnal problematice"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permite aplicaţiei să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea tabletei de către dvs. şi probabil informaţii personale sau private."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite aplicaţiei să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea telefonului de către dvs., care ar putea include şi informaţii personale sau private."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilizaţi orice decodor media pentru redare"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite unei aplicaţii să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administrare Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite aplicaţiei să configureze tableta Bluetooth locală, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite aplicaţiei să configureze telefonul Bluetooth local, să descopere şi să se împerecheze cu dispozitive la distanţă."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"vizualizaţi starea WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Vizualizaţi starea WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite unei aplicaţii să vizualizeze informaţiile despre starea WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"schimbaţi starea WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite unei aplicaţii să se conecteze şi să se deconecteze de la reţeaua WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"creare conexiuni Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite aplicaţiei să vizualizeze configuraţia tabletei Bluetooth locale, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Distribuiţi pentru"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispozitiv blocat."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Se trimite..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Lansaţi browserul?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Acceptaţi apelul?"</string>
 </resources>

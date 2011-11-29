@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"查阅敏感日志数据"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"允许应用程序从系统的各种日志文件中读取信息。这样，应用程序就可以发现关于您平板电脑使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允许应用程序从系统的各个日志文件中读取信息。这样，应用程序就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒体解码器进行播放"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"允许应用程序使用任何已安装的媒体解码器进行解码，以便播放。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用程序读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用程序组件"</string>
@@ -317,9 +319,9 @@
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"开机时自动启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用程序在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用程序始终运行，从而导致平板电脑总体运行速度减慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"允许应用程序在系统完成引导后立即自动启动。这样可能会延长手机的启动时间，并允许应用程序始终运行，从而导致手机总体运行速度减慢。"</string>
-    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送置顶广播"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"允许应用程序发送置顶广播，此类广播在结束后仍会保留。恶意应用程序可能会导致平板电脑使用过多内存，从而使速度变慢或变得不稳定。"</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"允许应用程序发送置顶广播，此类广播在结束后仍会保留。恶意应用程序可能会导致手机使用过多内存，从而使速度变慢或变得不稳定。"</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"发送持久广播"</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="1181582512022829259">"允许应用程序发送持久广播，此类广播在结束后仍会保留。恶意应用程序可能会导致平板电脑使用过多内存，从而使速度变慢或变得不稳定。"</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="3287869131621514325">"允许应用程序发送持久广播，此类广播在结束后仍会保留。恶意应用程序可能会导致手机使用过多内存，从而使速度变慢或变得不稳定。"</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"读取联系人数据"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="4028657556924039119">"允许应用程序读取您平板电脑上存储的所有联系人（地址）数据。恶意应用程序可能借此将您的数据发送给其他人。"</string>
     <string name="permdesc_readContacts" product="default" msgid="2032222056456498547">"允许应用程序读取您手机上存储的所有联系人（地址）数据。恶意应用程序可能借此将您的数据发送给其他人。"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"蓝牙管理"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用程序配置本地蓝牙平板电脑，以及发现远程设备并进行配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用程序配置本地蓝牙手机，以及发现远程设备并进行配对。"</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"查看 WiMAX 状态"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"查看 WiMAX 状态"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允许应用程序查看有关 WiMAX 状态的信息。"</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"更改 WiMAX 状态"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"更改 WiMAX 状态"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允许应用程序连接到 WiMAX 网络以及从 WiMAX 网络断开连接。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"创建蓝牙连接"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"允许应用程序查看本地蓝牙平板电脑的配置，以及建立和接受与配对设备的连接。"</string>
@@ -902,10 +904,10 @@
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"抱歉，进程“<xliff:g id="PROCESS">%1$s</xliff:g>”已停止运行。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"“<xliff:g id="APPLICATION">%2$s</xliff:g>”无响应。"\n\n"要将其关闭吗？"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"“<xliff:g id="ACTIVITY">%1$s</xliff:g>”活动无响应。"\n\n"要将其关闭吗？"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”无响应。要将其关闭吗？"</string>
-    <string name="anr_process" msgid="6513209874880517125">"“<xliff:g id="PROCESS">%1$s</xliff:g>”进程无响应。"\n\n"要将其关闭吗？"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 无响应。"\n\n"要将其关闭吗？"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 活动无响应。"\n\n"要将其关闭吗？"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> 无响应。要将其关闭吗？"</string>
+    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 进程无响应。"\n\n"要将其关闭吗？"</string>
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
@@ -1182,7 +1184,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"导航首页"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上导航"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"内存空间"</string>
+    <string name="storage_internal" msgid="7556050805474115618">"内部存储空间"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"编辑..."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享对象"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"设备已锁定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <string name="sending" msgid="8715108995741758718">"正在发送..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"要接听电话吗？"</string>
 </resources>

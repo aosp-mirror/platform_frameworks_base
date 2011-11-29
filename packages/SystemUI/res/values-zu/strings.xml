@@ -68,7 +68,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Umfanekiso weskrini uqoshiwe"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Thinta ukubona imifanekiso yakho yeskrini"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Yehlulekile ukulondoloza umfanekiso weskrini."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Ayikwazanga ukulondoloza isithombe-skrini. Ukugcina kwangaphandle kungenzeka kuyasetshenziswa."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Ayikwazanga ukulondoloza isithombe-skrini. Isitoreji sangaphandle kungenzeka kuyasetshenziswa."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Okukhethwa kokudluliswa kwefayela ye-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lengisa njengesidlali semediya (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Lengisa ikhamera (PTP)"</string>
@@ -102,16 +102,11 @@
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"I-Wi-Fi imigqaa emibili."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"I-Wi-Fi imigqaa emithathu."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"i-signal ye-WiFi igcwele"</string>
-    <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_one_bar (4170994299011863648) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_two_bars (9176236858336502288) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_three_bars (6116551636752103927) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_signal_full (2768089986795579558) -->
-    <skip />
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ayikho i-WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Ibha eyodwa ye-WiMAX."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Amabha amabili we-WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Amabha amathathu we-WiMAX."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Isiginali ye-WiMAX egcwele."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
@@ -120,7 +115,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ekucupheleni"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"I-Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ayikho i-SIM"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ukusebenzisa i-Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Imodemu nge-Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Imodi yendiza."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Iphesenti <xliff:g id="NUMBER">%d</xliff:g> lebhetri"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Izilungiselelo zesistimu"</string>
@@ -143,6 +138,5 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Isesha i-GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Indawo ihlelwe i-GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Susa zonke izaziso."</string>
-    <!-- no translation found for dreams_dock_launcher (3541196417659166245) -->
-    <skip />
+    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Yenza ukuthi iskrini seyiva sisebenze"</string>
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"baca data log sensitif"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Mengizinkan apl membaca dari berbagai berkas log sistem. Izin ini memungkinkan apl menemukan informasi umum tentang hal-hal yang Anda lakukan dengan tablet, kemungkinan termasuk informasi pribadi."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Mengizinkan apl membaca dari berbagai berkas log sistem. Izin ini memungkinkan apl menemukan informasi umum tentang hal-hal yang Anda lakukan di ponsel, kemungkinan termasuk informasi pribadi."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"menggunakan media pengawasandi apa pun untuk pemutaran"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Mengizinkan aplikasi menggunakan pengawasandi media apa pun yang terpasang guna mengawasandikan media untuk diputar."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"baca/tulis ke sumber daya yang dimiliki oleh diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Mengizinkan apl membaca dan menulis ke sumber daya apa pun yang dimiliki oleh grup diag; misalnya, berkas dalam /dev. Izin ini berpotensi mempengaruhi kestabilan dan keamanan sistem. Sebaiknya ini HANYA digunakan untuk diagnostik khusus perangkat keras oleh pabrikan atau operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"mengaktifkan atau menonaktifkan komponen apl"</string>
@@ -444,7 +446,7 @@
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Mengizinkan apl melakukan operasi seperti menambah dan menghapus akun, serta menghapus sandinya."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"gunakan kredensial autentikasi dari suatu akun"</string>
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Mengizinkan apl meminta token autentikasi."</string>
-    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"lihat kondisi jaringan"</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"melihat keadaan jaringan"</string>
     <string name="permdesc_accessNetworkState" msgid="479772796952547198">"Mengizinkan apl melihat keadaan semua jaringan."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"akses internet penuh"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Mengizinkan apl membuat soket jaringan."</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administrasi Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Mengizinkan apl mengonfigurasi tablet Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Mengizinkan apl mengonfigurasi ponsel Bluetooth lokal, dan menemukan serta menyandingkan dengan perangkat jarak jauh."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"lihat status WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Lihat status WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Mengizinkan aplikasi melihat informasi tentang status WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ganti status WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Ubah status WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Mengizinkan aplikasi menyambung ke dan memutus dari jaringan WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"buat sambungan Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Mengizinkan apl melihat konfigurasi tablet Bluetooth lokal, dan membuat serta menerima sambungan dengan perangkat yang disandingkan."</string>
@@ -907,7 +909,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> tidak menanggapi. Anda ingin menutupnya?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> tidak menanggapi."\n\n"Anda ingin menutupnya?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Laporkan sebagai"</string>
+    <string name="report" msgid="4060218260984795706">"Laporkan"</string>
     <string name="wait" msgid="7147118217226317732">"Tunggu"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Apl dialihkan"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Berbagi dengan"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Perangkat tergembok."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Mengirim..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Luncurkan Peramban?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Terima Panggilan?"</string>
 </resources>

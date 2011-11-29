@@ -195,9 +195,9 @@
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"пријем хитних преноса"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
-    <string name="permdesc_sendSms" msgid="906546667507626156">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам  може створити трошкове."</string>
+    <string name="permdesc_sendSms" msgid="906546667507626156">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам  може изазвати трошкове."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"слање SMS порука без потврде"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам може створити трошкове."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозвољава апликацији да шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што вам може изазвати трошкове."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"читање SMS или MMS порука"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Дозвољава апликацији да чита SMS поруке сачуване на таблету или SIM картици. Злонамерне апликације могу да читају поверљиве поруке."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Дозвољава апликацији да чита SMS поруке сачуване на телефону или SIM картици. Злонамерне апликације могу да читају поверљиве поруке."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"читање поверљивих података из евиденције"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Дозвољава апликацији да чита разне системске датотеке евиденције. То јој омогућава увид у опште информације о начину на који користите таблет, при чему могу да буду обухваћене личне или приватне информације."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Дозвољава апликацији да чита разне системске датотеке евиденције. То јој омогућава увид у опште информације о начину на који користите телефон, при чему могу да буду обухваћене личне или приватне информације."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"користи било који декодер медија за репродукцију"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Омогућава апликацији да користи било који инсталирани декодер медија за декодирање за репродукцију."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"читање ресурса у власништву дијагностике и уписивање података у њих"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Дозвољава апликацији да чита и уписује податке у било који ресурс у власништву групе за дијагностиковање, на пример, датотеке у директоријуму /dev. То може да угрози стабилност и безбедност система и треба да је користе САМО произвођач или оператер у сврхе дијагностиковањa хардвера."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"омогућавање или онемогућавање компоненти апликације"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Администрирање преко Bluetooth-а"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да открије даљинске уређаје и упари се са њима."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозвољава апликацији да конфигурише локални Bluetooth телефон, као и да открије даљинске уређаје и упари се са њима."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"прикажи WiMAX статуса"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Прикажи WiMAX статус"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Омогућава апликацији преглед информација о WiMAX статусу."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"промени WiMAX статуса"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промени WiMAX статус"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Омогућава апликацији повезивање и прекид везе са WiMAX мрежом."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"креирање Bluetooth веза"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Дозвољава апликацији да конфигурише локални Bluetooth таблет, као и да успоставља и прихвата везе са упареним уређајима."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Дели са"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Уређај је закључан."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Слање..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Желите ли да покренете прегледач?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Желите ли да прихватите позив?"</string>
 </resources>
