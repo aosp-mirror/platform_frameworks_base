@@ -2741,6 +2741,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     if (!r.finishing) {
                         Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
+                        EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
+                                System.identityHashCode(r),
+                                r.task.taskId, r.shortComponentName,
+                                "proc died without state saved");
                     }
                     r.makeFinishing();
                     mMainStack.mHistory.remove(i);
@@ -13639,6 +13643,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "stopping";
                     }
+                    app.hidden = false;
                     app.foregroundActivities = true;
                 }
             }
