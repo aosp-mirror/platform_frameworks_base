@@ -493,6 +493,9 @@ class ZoomManager {
 
         if (mHardwareAccelerated) {
             mWebView.updateScrollCoordinates(mWebView.getScrollX() - tx, mWebView.getScrollY() - ty);
+            // By adding webView matrix, we need to offset the canvas a bit
+            // to make the animation smooth.
+            canvas.translate(tx, ty);
             setZoomScale(zoomScale, false);
 
             if (mZoomScale == 0) {
