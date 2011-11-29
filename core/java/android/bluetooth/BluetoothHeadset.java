@@ -245,6 +245,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
             mContext.unbindService(mConnection);
             mConnection = null;
         }
+        mServiceListener = null;
     }
 
     /**
