@@ -163,7 +163,6 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
                 0, 0, NULL);
     }
-
 }
 
 void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
@@ -615,7 +614,8 @@ void FontRenderer::issueDrawCommand() {
 void FontRenderer::appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2,
         float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3,
         float x4, float y4, float z4, float u4, float v4) {
-    if (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom) {
+    if (mClip &&
+            (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom)) {
         return;
     }
 
@@ -723,11 +723,16 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
         return image;
     }
 
+    mClip = NULL;
+    mBounds = NULL;
+
     Rect bounds;
     mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds);
+
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
     uint8_t* dataBuffer = new uint8_t[paddedWidth * paddedHeight];
+
     for (uint32_t i = 0; i < paddedWidth * paddedHeight; i++) {
         dataBuffer[i] = 0;
     }
@@ -765,8 +770,11 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
     mDrawn = false;
     mBounds = bounds;
     mClip = clip;
+
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y);
+
     mBounds = NULL;
+    mClip = NULL;
 
     if (mCurrentQuadIndex != 0) {
         issueDrawCommand();
