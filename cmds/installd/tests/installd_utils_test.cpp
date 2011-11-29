@@ -34,6 +34,16 @@ extern "C" {
 #define TEST_SYSTEM_DIR1 "/system/app/"
 #define TEST_SYSTEM_DIR2 "/vendor/app/"
 
+#define REALLY_LONG_APP_NAME "com.example." \
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa." \
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa." \
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+#define REALLY_LONG_LEAF_NAME "shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_" \
+        "shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_" \
+        "shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_" \
+        "shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_shared_prefs_"
+
 namespace android {
 
 class UtilsTest : public testing::Test {
@@ -210,7 +220,7 @@ TEST_F(UtilsTest, CheckSystemApp_BadPathEscapeFail) {
 
 TEST_F(UtilsTest, GetPathFromString_NullPathFail) {
     dir_rec_t test1;
-    EXPECT_EQ(-1, get_path_from_string(&test1, NULL))
+    EXPECT_EQ(-1, get_path_from_string(&test1, (const char *) NULL))
             << "Should not allow NULL as a path.";
 }
 
@@ -325,6 +335,50 @@ TEST_F(UtilsTest, CreatePkgPathInDir_ProtectedDir) {
 
     EXPECT_STREQ("/data/app-private/com.example.package.apk", path)
             << "Package path should be in /data/app-private/";
+}
+
+TEST_F(UtilsTest, CreatePersonaPath_Primary) {
+    char path[PKG_PATH_MAX];
+
+    EXPECT_EQ(0, create_persona_path(path, 0))
+            << "Should successfully build primary user path.";
+
+    EXPECT_STREQ("/data/data/", path)
+            << "Primary user should have correct path";
+}
+
+TEST_F(UtilsTest, CreatePersonaPath_Secondary) {
+    char path[PKG_PATH_MAX];
+
+    EXPECT_EQ(0, create_persona_path(path, 1))
+            << "Should successfully build primary user path.";
+
+    EXPECT_STREQ("/data/user/1/", path)
+            << "Primary user should have correct path";
+}
+
+TEST_F(UtilsTest, CreateMovePath_Primary) {
+    char path[PKG_PATH_MAX];
+
+    EXPECT_EQ(0, create_move_path(path, "com.android.test", "shared_prefs", 0))
+            << "Should be able to create move path for primary user";
+
+    EXPECT_STREQ("/data/data/com.android.test/shared_prefs", path)
+            << "Primary user package directory should be created correctly";
+}
+
+TEST_F(UtilsTest, CreateMovePath_Fail_AppTooLong) {
+    char path[PKG_PATH_MAX];
+
+    EXPECT_EQ(-1, create_move_path(path, REALLY_LONG_APP_NAME, "shared_prefs", 0))
+            << "Should fail to create move path for primary user";
+}
+
+TEST_F(UtilsTest, CreateMovePath_Fail_LeafTooLong) {
+    char path[PKG_PATH_MAX];
+
+    EXPECT_EQ(-1, create_move_path(path, "com.android.test", REALLY_LONG_LEAF_NAME, 0))
+            << "Should fail to create move path for primary user";
 }
 
 TEST_F(UtilsTest, CopyAndAppend_Normal) {

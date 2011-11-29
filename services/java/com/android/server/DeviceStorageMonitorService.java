@@ -163,7 +163,6 @@ public class DeviceStorageMonitorService extends Binder {
             } catch (IllegalArgumentException e) {
                 // ignore; report -1
             }
-            mCacheFileStats.restat(CACHE_PATH);
             EventLog.writeEvent(EventLogTags.FREE_STORAGE_LEFT,
                                 mFreeMem, mFreeSystem, mFreeCache);
         }

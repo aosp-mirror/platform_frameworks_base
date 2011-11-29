@@ -109,7 +109,7 @@ int create_persona_path(char path[PKG_PATH_MAX],
         uid_len = 0;
     } else {
         persona_prefix = SECONDARY_USER_PREFIX;
-        uid_len = snprintf(NULL, 0, "%d", persona);
+        uid_len = snprintf(NULL, 0, "%d/", persona);
     }
 
     char *dst = path;
@@ -126,12 +126,26 @@ int create_persona_path(char path[PKG_PATH_MAX],
             LOGE("Error building user path");
             return -1;
         }
-        int ret = snprintf(dst, dst_size, "%d", persona);
+        int ret = snprintf(dst, dst_size, "%d/", persona);
         if (ret < 0 || (size_t) ret != uid_len) {
             LOGE("Error appending persona id to path");
             return -1;
         }
     }
+    return 0;
+}
+
+int create_move_path(char path[PKG_PATH_MAX],
+    const char* pkgname,
+    const char* leaf,
+    uid_t persona)
+{
+    if ((android_data_dir.len + strlen(PRIMARY_USER_PREFIX) + strlen(pkgname) + strlen(leaf) + 1)
+            >= PKG_PATH_MAX) {
+        return -1;
+    }
+
+    sprintf(path, "%s%s%s/%s", android_data_dir.path, PRIMARY_USER_PREFIX, pkgname, leaf);
     return 0;
 }
 
