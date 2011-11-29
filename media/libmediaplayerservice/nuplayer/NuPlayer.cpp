@@ -462,11 +462,24 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
         {
             LOGV("kWhatReset");
 
+            if (mRenderer != NULL) {
+                // There's an edge case where the renderer owns all output
+                // buffers and is paused, therefore the decoder will not read
+                // more input data and will never encounter the matching
+                // discontinuity. To avoid this, we resume the renderer.
+
+                if (mFlushingAudio == AWAITING_DISCONTINUITY
+                        || mFlushingVideo == AWAITING_DISCONTINUITY) {
+                    mRenderer->resume();
+                }
+            }
+
             if (mFlushingAudio != NONE || mFlushingVideo != NONE) {
                 // We're currently flushing, postpone the reset until that's
                 // completed.
 
-                LOGV("postponing reset");
+                LOGV("postponing reset mFlushingAudio=%d, mFlushingVideo=%d",
+                        mFlushingAudio, mFlushingVideo);
 
                 mResetPostponed = true;
                 break;
