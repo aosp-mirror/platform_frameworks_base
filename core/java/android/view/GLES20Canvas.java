@@ -737,8 +737,21 @@ class GLES20Canvas extends HardwareCanvas {
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, src.left, src.top, src.right,
-                src.bottom, dst.left, dst.top, dst.right, dst.bottom, nativePaint);
+
+        float left, top, right, bottom;
+        if (src == null) {
+            left = top = 0;
+            right = bitmap.getWidth();
+            bottom = bitmap.getHeight();
+        } else {
+            left = src.left;
+            right = src.right;
+            top = src.top;
+            bottom = src.bottom;
+        }
+
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
     }
 
