@@ -123,6 +123,9 @@ private:
 
     void extractAACFrames(const sp<ABuffer> &buffer);
 
+    bool isAudio() const;
+    bool isVideo() const;
+
     DISALLOW_EVIL_CONSTRUCTORS(Stream);
 };
 
@@ -401,7 +404,7 @@ ATSParser::Stream::Stream(
         case STREAMTYPE_H264:
             mQueue = new ElementaryStreamQueue(ElementaryStreamQueue::H264);
             break;
-        case STREAMTYPE_MPEG2_AUDIO_ATDS:
+        case STREAMTYPE_MPEG2_AUDIO_ADTS:
             mQueue = new ElementaryStreamQueue(ElementaryStreamQueue::AAC);
             break;
         case STREAMTYPE_MPEG1_AUDIO:
@@ -486,6 +489,31 @@ status_t ATSParser::Stream::parse(
     return OK;
 }
 
+bool ATSParser::Stream::isVideo() const {
+    switch (mStreamType) {
+        case STREAMTYPE_H264:
+        case STREAMTYPE_MPEG1_VIDEO:
+        case STREAMTYPE_MPEG2_VIDEO:
+        case STREAMTYPE_MPEG4_VIDEO:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+bool ATSParser::Stream::isAudio() const {
+    switch (mStreamType) {
+        case STREAMTYPE_MPEG1_AUDIO:
+        case STREAMTYPE_MPEG2_AUDIO:
+        case STREAMTYPE_MPEG2_AUDIO_ADTS:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 void ATSParser::Stream::signalDiscontinuity(
         DiscontinuityType type, const sp<AMessage> &extra) {
     if (mQueue == NULL) {
@@ -495,34 +523,34 @@ void ATSParser::Stream::signalDiscontinuity(
     mPayloadStarted = false;
     mBuffer->setRange(0, 0);
 
-    switch (type) {
-        case DISCONTINUITY_SEEK:
-        case DISCONTINUITY_FORMATCHANGE:
-        {
-            bool isASeek = (type == DISCONTINUITY_SEEK);
-
-            mQueue->clear(!isASeek);
-
-            uint64_t resumeAtPTS;
-            if (extra != NULL
-                    && extra->findInt64(
-                        IStreamListener::kKeyResumeAtPTS,
-                        (int64_t *)&resumeAtPTS)) {
-                int64_t resumeAtMediaTimeUs =
-                    mProgram->convertPTSToTimestamp(resumeAtPTS);
-
-                extra->setInt64("resume-at-mediatimeUs", resumeAtMediaTimeUs);
-            }
-
-            if (mSource != NULL) {
-                mSource->queueDiscontinuity(type, extra);
-            }
-            break;
+    bool clearFormat = false;
+    if (isAudio()) {
+        if (type & DISCONTINUITY_AUDIO_FORMAT) {
+            clearFormat = true;
         }
+    } else {
+        if (type & DISCONTINUITY_VIDEO_FORMAT) {
+            clearFormat = true;
+        }
+    }
 
-        default:
-            TRESPASS();
-            break;
+    mQueue->clear(clearFormat);
+
+    if (type & DISCONTINUITY_TIME) {
+        uint64_t resumeAtPTS;
+        if (extra != NULL
+                && extra->findInt64(
+                    IStreamListener::kKeyResumeAtPTS,
+                    (int64_t *)&resumeAtPTS)) {
+            int64_t resumeAtMediaTimeUs =
+                mProgram->convertPTSToTimestamp(resumeAtPTS);
+
+            extra->setInt64("resume-at-mediatimeUs", resumeAtMediaTimeUs);
+        }
+    }
+
+    if (mSource != NULL) {
+        mSource->queueDiscontinuity(type, extra);
     }
 }
 
@@ -764,10 +792,7 @@ sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
     switch (type) {
         case VIDEO:
         {
-            if (mStreamType == STREAMTYPE_H264
-                    || mStreamType == STREAMTYPE_MPEG1_VIDEO
-                    || mStreamType == STREAMTYPE_MPEG2_VIDEO
-                    || mStreamType == STREAMTYPE_MPEG4_VIDEO) {
+            if (isVideo()) {
                 return mSource;
             }
             break;
@@ -775,9 +800,7 @@ sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
 
         case AUDIO:
         {
-            if (mStreamType == STREAMTYPE_MPEG1_AUDIO
-                    || mStreamType == STREAMTYPE_MPEG2_AUDIO
-                    || mStreamType == STREAMTYPE_MPEG2_AUDIO_ATDS) {
+            if (isAudio()) {
                 return mSource;
             }
             break;
