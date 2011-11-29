@@ -61,9 +61,12 @@ private:
     Mutex mLock;
     Condition mCondition;
 
+    bool mIsAudio;
     sp<MetaData> mFormat;
     List<sp<ABuffer> > mBuffers;
     status_t mEOSResult;
+
+    bool wasFormatChange(int32_t discontinuityType) const;
 
     DISALLOW_EVIL_CONSTRUCTORS(AnotherPacketSource);
 };
