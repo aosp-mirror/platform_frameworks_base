@@ -3949,8 +3949,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 } while (parent != null);
             } else {
                 // Check whether the child that requests the invalidate is fully opaque
+                // Views being animated or transformed are not considered opaque because we may
+                // be invalidating their old position and need the parent to paint behind them.
+                Matrix childMatrix = child.getMatrix();
                 final boolean isOpaque = child.isOpaque() && !drawAnimation &&
-                        child.getAnimation() == null;
+                        child.getAnimation() == null && childMatrix.isIdentity();
                 // Mark the child as dirty, using the appropriate flag
                 // Make sure we do not set both flags at the same time
                 int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
@@ -3964,7 +3967,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int[] location = attachInfo.mInvalidateChildLocation;
                 location[CHILD_LEFT_INDEX] = child.mLeft;
                 location[CHILD_TOP_INDEX] = child.mTop;
-                Matrix childMatrix = child.getMatrix();
                 if (!childMatrix.isIdentity()) {
                     RectF boundingRect = attachInfo.mTmpTransformRect;
                     boundingRect.set(dirty);
