@@ -130,18 +130,6 @@ public class WifiP2pDevice implements Parcelable {
      *
      *  fa:7b:7a:42:02:13
      *
-     *  P2P-PROV-DISC-PBC-REQ 42:fc:89:e1:e2:27 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
-     *  P2P-PROV-DISC-ENTER-PIN 42:fc:89:e1:e2:27 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
-     *  P2P-PROV-DISC-SHOW-PIN 42:fc:89:e1:e2:27 44490607 p2p_dev_addr=42:fc:89:e1:e2:27
-     *  pri_dev_type=1-0050F204-1 name='p2p-TEST2' config_methods=0x188 dev_capab=0x27
-     *  group_capab=0x0
-     *
      *  Note: The events formats can be looked up in the wpa_supplicant code
      * @hide
      */
@@ -160,7 +148,13 @@ public class WifiP2pDevice implements Parcelable {
 
         for (String token : tokens) {
             String[] nameValue = token.split("=");
-            if (nameValue.length != 2) continue;
+            if (nameValue.length != 2) {
+                //mac address without key is device address
+                if (token.matches("(([0-9a-f]{2}:){5}[0-9a-f]{2})")) {
+                    deviceAddress = token;
+                }
+                continue;
+            }
 
             if (nameValue[0].equals("p2p_dev_addr")) {
                 deviceAddress = nameValue[1];

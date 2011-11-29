@@ -2711,9 +2711,17 @@
     <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
     <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct operation. This will turn off Wi-Fi client/hotspot operation.</string>
     <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Click OK to accept. </string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Enter pin to proceed. </string>
-    <string name="wifi_p2p_pin_display_message">WPS pin <xliff:g id="p2p_wps_pin">%1$s</xliff:g> needs to be entered on the peer device <xliff:g id="p2p_client_address">%2$s</xliff:g> for connection setup to proceed </string>
+
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="wifi_p2p_invitation_sent_title">Invitation sent</string>
+    <string name="wifi_p2p_invitation_to_connect_title">Invitation to connect</string>
+
+    <string name="wifi_p2p_from_message">From: </string>
+    <string name="wifi_p2p_to_message">To: </string>
+    <string name="wifi_p2p_enter_pin_message">Enter the required PIN: </string>
+    <string name="wifi_p2p_show_pin_message">PIN: </string>
+
     <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
     <string name="wifi_p2p_enabled_notification_message">Touch for settings</string>
 

@@ -84,19 +84,19 @@ public class WifiP2pConfig implements Parcelable {
             } catch (NumberFormatException e) {
                 devPasswdId = 0;
             }
-            //As defined in wps/wps_defs.h
+            //Based on definitions in wps/wps_defs.h
             switch (devPasswdId) {
-                case 0x00:
-                    wps.setup = WpsInfo.LABEL;
-                    break;
+                //DEV_PW_USER_SPECIFIED = 0x0001,
                 case 0x01:
-                    wps.setup = WpsInfo.KEYPAD;
+                    wps.setup = WpsInfo.DISPLAY;
                     break;
+                //DEV_PW_PUSHBUTTON = 0x0004,
                 case 0x04:
                     wps.setup = WpsInfo.PBC;
                     break;
+                //DEV_PW_REGISTRAR_SPECIFIED = 0x0005
                 case 0x05:
-                    wps.setup = WpsInfo.DISPLAY;
+                    wps.setup = WpsInfo.KEYPAD;
                     break;
                 default:
                     wps.setup = WpsInfo.PBC;

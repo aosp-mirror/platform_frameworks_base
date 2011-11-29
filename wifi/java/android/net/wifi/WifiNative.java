@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.InputStream;
@@ -234,6 +235,10 @@ public class WifiNative {
         return WifiNative.doBooleanCommand("SET device_type " + type);
     }
 
+    public static boolean setConfigMethods(String cfg) {
+        return WifiNative.doBooleanCommand("SET config_methods " + cfg);
+    }
+
     public static boolean p2pFind() {
         return doBooleanCommand("P2P_FIND");
     }
@@ -273,8 +278,11 @@ public class WifiNative {
                 args.add("pbc");
                 break;
             case WpsInfo.DISPLAY:
-                //TODO: pass the pin back for display
-                args.add("pin");
+                if (TextUtils.isEmpty(wps.pin)) {
+                    args.add("pin");
+                } else {
+                    args.add(wps.pin);
+                }
                 args.add("display");
                 break;
             case WpsInfo.KEYPAD:
@@ -309,6 +317,24 @@ public class WifiNative {
 
     public static boolean p2pCancelConnect() {
         return doBooleanCommand("P2P_CANCEL");
+    }
+
+    public static boolean p2pProvisionDiscovery(WifiP2pConfig config) {
+        if (config == null) return false;
+
+        switch (config.wps.setup) {
+            case WpsInfo.PBC:
+                return doBooleanCommand("P2P_PROV_DISC " + config.deviceAddress + " pbc");
+            case WpsInfo.DISPLAY:
+                //We are doing display, so provision discovery is keypad
+                return doBooleanCommand("P2P_PROV_DISC " + config.deviceAddress + " keypad");
+            case WpsInfo.KEYPAD:
+                //We are doing keypad, so provision discovery is display
+                return doBooleanCommand("P2P_PROV_DISC " + config.deviceAddress + " display");
+            default:
+                break;
+        }
+        return false;
     }
 
     public static boolean p2pGroupAdd() {
