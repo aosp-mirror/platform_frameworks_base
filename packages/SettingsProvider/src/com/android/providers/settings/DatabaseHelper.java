@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 71;
+    private static final int DATABASE_VERSION = 72;
 
     private Context mContext;
 
@@ -947,6 +947,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 70) {
+            // Update all built-in bookmarks.  Some of the package names have changed.
+            loadBookmarks(db);
+            upgradeVersion = 71;
+        }
+
+        if (upgradeVersion == 71) {
             db.beginTransaction();
             SQLiteStatement stmt = null;
             Cursor c = null;
@@ -967,7 +973,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (c != null) c.close();
                 if (stmt != null) stmt.close();
             }
-            upgradeVersion = 71;
+            upgradeVersion = 72;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -1110,16 +1116,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Loads the default set of bookmarked shortcuts from an xml file.
      *
      * @param db The database to write the values into
-     * @param startingIndex The zero-based position at which bookmarks in this file should begin
      */
-    private int loadBookmarks(SQLiteDatabase db, int startingIndex) {
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+    private void loadBookmarks(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
 
         PackageManager packageManager = mContext.getPackageManager();
-        int i = startingIndex;
-
         try {
             XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
             XmlUtils.beginDocument(parser, "bookmarks");
@@ -1142,54 +1143,60 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String pkg = parser.getAttributeValue(null, "package");
                 String cls = parser.getAttributeValue(null, "class");
                 String shortcutStr = parser.getAttributeValue(null, "shortcut");
+                String category = parser.getAttributeValue(null, "category");
 
                 int shortcutValue = shortcutStr.charAt(0);
                 if (TextUtils.isEmpty(shortcutStr)) {
                     Log.w(TAG, "Unable to get shortcut for: " + pkg + "/" + cls);
+                    continue;
                 }
 
-                ActivityInfo info = null;                
-                ComponentName cn = new ComponentName(pkg, cls);
-                try {
-                    info = packageManager.getActivityInfo(cn, 0);
-                } catch (PackageManager.NameNotFoundException e) {
-                    String[] packages = packageManager.canonicalToCurrentPackageNames(
-                            new String[] { pkg });
-                    cn = new ComponentName(packages[0], cls);
+                final Intent intent;
+                final String title;
+                if (pkg != null && cls != null) {
+                    ActivityInfo info = null;
+                    ComponentName cn = new ComponentName(pkg, cls);
                     try {
                         info = packageManager.getActivityInfo(cn, 0);
-                    } catch (PackageManager.NameNotFoundException e1) {
-                        Log.w(TAG, "Unable to add bookmark: " + pkg + "/" + cls, e);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        String[] packages = packageManager.canonicalToCurrentPackageNames(
+                                new String[] { pkg });
+                        cn = new ComponentName(packages[0], cls);
+                        try {
+                            info = packageManager.getActivityInfo(cn, 0);
+                        } catch (PackageManager.NameNotFoundException e1) {
+                            Log.w(TAG, "Unable to add bookmark: " + pkg + "/" + cls, e);
+                            continue;
+                        }
                     }
-                }
-                
-                if (info != null) {
+
+                    intent = new Intent(Intent.ACTION_MAIN, null);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intent.setComponent(cn);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    values.put(Settings.Bookmarks.INTENT, intent.toUri(0));
-                    values.put(Settings.Bookmarks.TITLE,
-                            info.loadLabel(packageManager).toString());
-                    values.put(Settings.Bookmarks.SHORTCUT, shortcutValue);
-                    db.insert("bookmarks", null, values);
-                    i++;
+                    title = info.loadLabel(packageManager).toString();
+                } else if (category != null) {
+                    intent = new Intent(Intent.ACTION_MAIN, null);
+                    intent.addCategory(category);
+                    title = "";
+                } else {
+                    Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutStr
+                            + ": missing package/class or category attributes");
+                    continue;
                 }
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                values.put(Settings.Bookmarks.INTENT, intent.toUri(0));
+                values.put(Settings.Bookmarks.TITLE, title);
+                values.put(Settings.Bookmarks.SHORTCUT, shortcutValue);
+                db.delete("bookmarks", "shortcut = ?",
+                        new String[] { Integer.toString(shortcutValue) });
+                db.insert("bookmarks", null, values);
             }
         } catch (XmlPullParserException e) {
             Log.w(TAG, "Got execption parsing bookmarks.", e);
         } catch (IOException e) {
             Log.w(TAG, "Got execption parsing bookmarks.", e);
         }
-
-        return i;
-    }
-
-    /**
-     * Loads the default set of bookmark packages.
-     *
-     * @param db The database to write the values into
-     */
-    private void loadBookmarks(SQLiteDatabase db) {
-        loadBookmarks(db, 0);
     }
 
     /**
