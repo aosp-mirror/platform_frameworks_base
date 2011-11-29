@@ -32,6 +32,7 @@
 #include "GLExtensions.h"
 
 #include "DisplayHardware/DisplayHardwareBase.h"
+#include "DisplayHardware/VSyncBarrier.h"
 
 namespace android {
 
@@ -74,6 +75,9 @@ public:
     uint32_t    getMaxTextureSize() const;
     uint32_t    getMaxViewportDims() const;
 
+    // waits for the next vsync and returns the timestamp of when it happened
+    nsecs_t        waitForVSync() const;
+
     uint32_t getPageFlipCount() const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
 
@@ -95,6 +99,7 @@ public:
 private:
     void init(uint32_t displayIndex) __attribute__((noinline));
     void fini() __attribute__((noinline));
+    int32_t getDelayToNextVSyncUs(nsecs_t* timestamp) const;
 
     sp<SurfaceFlinger> mFlinger;
     EGLDisplay      mDisplay;
@@ -112,7 +117,12 @@ private:
     mutable uint32_t mPageFlipCount;
     GLint           mMaxViewportDims[2];
     GLint           mMaxTextureSize;
-    
+    VSyncBarrier    mVSync;
+
+    mutable Mutex   mFakeVSyncMutex;
+    mutable nsecs_t mNextFakeVSync;
+    nsecs_t         mRefreshPeriod;
+
     HWComposer*     mHwc;
 
     sp<FramebufferNativeWindow> mNativeWindow;
