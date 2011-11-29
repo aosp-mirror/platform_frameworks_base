@@ -30,8 +30,9 @@ import android.text.TextUtils;
  */
 class EventLogger {
     private final SynthesisRequest mRequest;
-    private final String mCallingApp;
     private final String mServiceApp;
+    private final int mCallerUid;
+    private final int mCallerPid;
     private final long mReceivedTime;
     private long mPlaybackStartTime = -1;
     private volatile long mRequestProcessingStartTime = -1;
@@ -42,10 +43,10 @@ class EventLogger {
     private volatile boolean mStopped = false;
     private boolean mLogWritten = false;
 
-    EventLogger(SynthesisRequest request, String callingApp,
-            String serviceApp) {
+    EventLogger(SynthesisRequest request, int callerUid, int callerPid, String serviceApp) {
         mRequest = request;
-        mCallingApp = callingApp;
+        mCallerUid = callerUid;
+        mCallerPid = callerPid;
         mServiceApp = serviceApp;
         mReceivedTime = SystemClock.elapsedRealtime();
     }
@@ -122,7 +123,7 @@ class EventLogger {
         // onPlaybackStart() should normally always be called if an
         // error does not occur.
         if (mError || mPlaybackStartTime == -1 || mEngineCompleteTime == -1) {
-            EventLogTags.writeTtsSpeakFailure(mServiceApp, mCallingApp,
+            EventLogTags.writeTtsSpeakFailure(mServiceApp, mCallerUid, mCallerPid,
                     getUtteranceLength(), getLocaleString(),
                     mRequest.getSpeechRate(), mRequest.getPitch());
             return;
@@ -138,7 +139,7 @@ class EventLogger {
         final long audioLatency = mPlaybackStartTime - mReceivedTime;
         final long engineLatency = mEngineStartTime - mRequestProcessingStartTime;
         final long engineTotal = mEngineCompleteTime - mRequestProcessingStartTime;
-        EventLogTags.writeTtsSpeakSuccess(mServiceApp, mCallingApp,
+        EventLogTags.writeTtsSpeakSuccess(mServiceApp, mCallerUid, mCallerPid,
                 getUtteranceLength(), getLocaleString(),
                 mRequest.getSpeechRate(), mRequest.getPitch(),
                 engineLatency, engineTotal, audioLatency);

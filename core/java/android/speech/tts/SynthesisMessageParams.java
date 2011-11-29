@@ -58,8 +58,8 @@ final class SynthesisMessageParams extends MessageParams {
     SynthesisMessageParams(int streamType, int sampleRate,
             int audioFormat, int channelCount,
             float volume, float pan, UtteranceProgressDispatcher dispatcher,
-            String callingApp, EventLogger logger) {
-        super(dispatcher, callingApp);
+            Object callerIdentity, EventLogger logger) {
+        super(dispatcher, callerIdentity);
 
         mStreamType = streamType;
         mSampleRateInHz = sampleRate;

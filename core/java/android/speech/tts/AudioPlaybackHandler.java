@@ -110,19 +110,19 @@ class AudioPlaybackHandler {
     // synchronization).
     // -----------------------------------------------------
 
-    synchronized public void removePlaybackItems(String callingApp) {
-        if (DBG_THREADING) Log.d(TAG, "Removing all callback items for : " + callingApp);
-        removeMessages(callingApp);
+    synchronized public void removePlaybackItems(Object callerIdentity) {
+        if (DBG_THREADING) Log.d(TAG, "Removing all callback items for : " + callerIdentity);
+        removeMessages(callerIdentity);
 
         final MessageParams current = getCurrentParams();
-        if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
+        if (current != null && (current.getCallerIdentity() == callerIdentity)) {
             stop(current);
         }
 
         final MessageParams lastSynthesis = mLastSynthesisRequest;
 
         if (lastSynthesis != null && lastSynthesis != current &&
-                TextUtils.equals(callingApp, lastSynthesis.getCallingApp())) {
+                (lastSynthesis.getCallerIdentity() == callerIdentity)) {
             stop(lastSynthesis);
         }
     }
@@ -232,7 +232,7 @@ class AudioPlaybackHandler {
     /*
      * Remove all messages that originate from a given calling app.
      */
-    synchronized private void removeMessages(String callingApp) {
+    synchronized private void removeMessages(Object callerIdentity) {
         Iterator<ListEntry> it = mQueue.iterator();
 
         while (it.hasNext()) {
@@ -240,7 +240,7 @@ class AudioPlaybackHandler {
             // The null check is to prevent us from removing control messages,
             // such as a shutdown message.
             if (current.mMessage != null &&
-                    callingApp.equals(current.mMessage.getCallingApp())) {
+                    current.mMessage.getCallerIdentity() == callerIdentity) {
                 it.remove();
             }
         }
