@@ -359,8 +359,8 @@
     <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Cho phép ứng dụng đọc nội dung của bộ đệm khung."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và định tuyến."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm thanh"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Cho phép ứng dụng truy cập vào đường dẫn bản ghi âm thanh."</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm"</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Cho phép ứng dụng truy cập vào đường dẫn bản ghi âm."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"Cho phép ứng dụng chụp ảnh và quay video bằng máy ảnh. Quyền này cho phép ứng dụng thu thập ảnh mà máy ảnh chụp vào bất kỳ thời điểm nào."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"vô hiệu hóa vĩnh viễn máy tính bảng"</string>

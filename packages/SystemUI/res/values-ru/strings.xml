@@ -131,7 +131,7 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" удалено из списка."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Передача данных по каналам 2G и 3G отключена"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Передача данных по каналу 4G отключена"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобильный Интернет отключен"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Моб. Интернет отключен"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Передача данных отключена"</string>
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Достигнут лимит трафика."\n\n"При восстановлении подключения оператор может взимать плату за передачу данных."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Восстановить подключение"</string>

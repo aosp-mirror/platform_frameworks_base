@@ -1219,6 +1219,6 @@
     <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
     <string name="sending" msgid="8715108995741758718">"傳送中..."</string>
-    <string name="launchBrowserDefault" msgid="2057951947297614725">"要啟動「瀏覽器」嗎？"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"要接受通話嗎？"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"接聽電話嗎？"</string>
 </resources>
