@@ -224,6 +224,7 @@ public class TestService extends Service {
     public class TestRunner {
         Handler mHandler;
         long mMaxRunTime;
+        long mMaxOps;
         Op mForegroundOp;
         Op mBackgroundOp;
         Runnable mDoneCallback;
@@ -277,6 +278,7 @@ public class TestService extends Service {
         public void run(Handler handler, TestArgs args, Runnable doneCallback) {
             mHandler = handler;
             mMaxRunTime = args.maxTime;
+            mMaxOps = args.maxOps;
             if (args.combOp >= 0) {
                 mForegroundOp = mOpPairs[args.combOp];
                 mBackgroundOp = mOpPairs[args.combOp+1];
@@ -352,9 +354,18 @@ public class TestService extends Service {
                 if (!mBackgroundRunning && !mForegroundRunning) {
                     return false;
                 }
-                long now = SystemClock.uptimeMillis();
-                if (now > (mStartTime+mMaxRunTime)) {
-                    return false;
+                if (mMaxOps > 0) {
+                    // iteration-limited case
+                    if (mForegroundOps >= mMaxOps) {
+                        return false;
+                    }
+                    mForegroundOps++;
+                } else {
+                    // time-limited case
+                    long now = SystemClock.uptimeMillis();
+                    if (now > (mStartTime+mMaxRunTime)) {
+                        return false;
+                    }
                 }
                 return true;
             }
