@@ -50,6 +50,8 @@ public class FrameworkPerfActivity extends Activity
 
     Spinner mFgSpinner;
     Spinner mBgSpinner;
+    Spinner mLimitSpinner;
+    TextView mLimitLabel;
     TextView mTestTime;
     Button mStartButton;
     Button mStopButton;
@@ -58,10 +60,12 @@ public class FrameworkPerfActivity extends Activity
     PowerManager.WakeLock mPartialWakeLock;
 
     long mMaxRunTime = 5000;
+    boolean mLimitIsIterations;
     boolean mStarted;
 
     final String[] mAvailOpLabels;
     final String[] mAvailOpDescriptions;
+    final String[] mLimitLabels = { "Time", "Iterations" };
 
     int mFgTestIndex = -1;
     int mBgTestIndex = -1;
@@ -169,8 +173,15 @@ public class FrameworkPerfActivity extends Activity
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBgSpinner.setAdapter(adapter);
         mBgSpinner.setOnItemSelectedListener(this);
+        mLimitSpinner = (Spinner) findViewById(R.id.limitspinner);
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, mLimitLabels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mLimitSpinner.setAdapter(adapter);
+        mLimitSpinner.setOnItemSelectedListener(this);
 
         mTestTime = (TextView)findViewById(R.id.testtime);
+        mLimitLabel = (TextView)findViewById(R.id.limitlabel);
 
         mStartButton = (Button)findViewById(R.id.start);
         mStartButton.setOnClickListener(new View.OnClickListener() {
@@ -196,16 +207,23 @@ public class FrameworkPerfActivity extends Activity
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (parent == mFgSpinner || parent == mBgSpinner) {
+        if (parent == mFgSpinner || parent == mBgSpinner || parent == mLimitSpinner) {
             TestService.Op op = TestService.mAvailOps[position];
             if (parent == mFgSpinner) {
                 mFgTestIndex = position;
                 mFgTest = op;
                 ((TextView)findViewById(R.id.fgtext)).setText(mAvailOpDescriptions[position]);
-            } else {
+            } else if (parent == mBgSpinner) {
                 mBgTestIndex = position;
                 mBgTest = op;
                 ((TextView)findViewById(R.id.bgtext)).setText(mAvailOpDescriptions[position]);
+            } else if (parent == mLimitSpinner) {
+                mLimitIsIterations = (position != 0);
+                if (mLimitIsIterations) {
+                    mLimitLabel.setText("Iterations: ");
+                } else {
+                    mLimitLabel.setText("Test time (ms): ");
+                }
             }
         }
     }
@@ -234,7 +252,11 @@ public class FrameworkPerfActivity extends Activity
             return;
         }
         TestArgs args = new TestArgs();
-        args.maxTime = mMaxRunTime;
+        if (mLimitIsIterations) {
+            args.maxOps = mMaxRunTime;
+        } else {
+            args.maxTime = mMaxRunTime;
+        }
         if (mFgTestIndex == 0 && mBgTestIndex == 0) {
             args.combOp = mCurOpIndex;
         } else if (mFgTestIndex != 0 && mBgTestIndex != 0) {
@@ -376,6 +398,7 @@ public class FrameworkPerfActivity extends Activity
             mTestTime.setEnabled(false);
             mFgSpinner.setEnabled(false);
             mBgSpinner.setEnabled(false);
+            mLimitSpinner.setEnabled(false);
             updateWakeLock();
             startService(new Intent(this, SchedulerService.class));
             mCurOpIndex = 0;
@@ -397,6 +420,7 @@ public class FrameworkPerfActivity extends Activity
             mTestTime.setEnabled(true);
             mFgSpinner.setEnabled(true);
             mBgSpinner.setEnabled(true);
+            mLimitSpinner.setEnabled(true);
             updateWakeLock();
             stopService(new Intent(this, SchedulerService.class));
             synchronized (mResults) {

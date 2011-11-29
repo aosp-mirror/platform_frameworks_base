@@ -66,7 +66,24 @@
         >
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Limit by: "
+            />
+        <Spinner android:id="@+id/limitspinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawSelectorOnTop="true"
+        />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        >
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Test time (ms): "
+            android:id="@+id/limitlabel"
             />
         <EditText android:id="@+id/testtime"
             android:layout_width="match_parent"
