@@ -7613,6 +7613,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 list.get(i).onTextChanged(text, start, before, after);
             }
         }
+
+        updateSpellCheckSpans(start, start + after);
+
+        // Hide the controllers as soon as text is modified (typing, procedural...)
+        // We do not hide the span controllers, since they can be added when a new text is
+        // inserted into the text view (voice IME).
+        hideCursorControllers();
     }
 
     /**
@@ -7652,15 +7659,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
-
-        updateSpellCheckSpans(start, start + after);
-
-        // Hide the controllers if the amount of content changed
-        if (before != after) {
-            // We do not hide the span controllers, as they can be added when a new text is
-            // inserted into the text view
-            hideCursorControllers();
-        }
     }
     
     /**
@@ -10823,7 +10821,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // Handles can not cross and selection is at least one character
             final int selectionEnd = getSelectionEnd();
-            if (offset >= selectionEnd) offset = selectionEnd - 1;
+            if (offset >= selectionEnd) offset = Math.max(0, selectionEnd - 1);
 
             positionAtCursorOffset(offset, false);
         }
@@ -10865,7 +10863,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // Handles can not cross and selection is at least one character
             final int selectionStart = getSelectionStart();
-            if (offset <= selectionStart) offset = selectionStart + 1;
+            if (offset <= selectionStart) offset = Math.min(selectionStart + 1, mText.length());
 
             positionAtCursorOffset(offset, false);
         }
