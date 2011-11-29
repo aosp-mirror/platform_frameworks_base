@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"llegir dades de registre personals"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permet que l\'aplicació llegeixi els diversos fitxers de registre del sistema. Això li permet descobrir informació general sobre què estàs fent amb la tauleta, i pot incloure informació personal o privada."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permet que l\'aplicació llegeixi els diversos fitxers de registre del sistema. Això li permet descobrir informació general sobre què estàs fent amb el telèfon i, potencialment, pot incloure informació personal o privada."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilitza qualsevol descodificador de mitjans per a la reproducció"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permet que una aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administració de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet que l\'aplicació configuri la tauleta Bluetooth local i que cerqui i emparelli dispositius remots."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet que l\'aplicació configuri el telèfon Bluetooth local i que cerqui i emparelli dispositius remots."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"visualitza l\'estat de WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Visualitza l\'estat de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet que una aplicació visualitzi la informació sobre l\'estat de WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"canvia l\'estat de WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Canvia l\'estat de WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet que una aplicació es connecti i es desconnecti d\'una xarxa WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear connexions Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permet que l\'aplicació mostri la configuració de la tauleta Bluetooth local i que estableixi i accepti connexions amb dispositius emparellats."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Comparteix amb"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositiu bloquejat."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"S\'està enviant..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Vols iniciar el navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vols acceptar la trucada?"</string>
 </resources>

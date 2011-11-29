@@ -115,7 +115,7 @@
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"La autenticación mediante el servidor proxy no se ha realizado correctamente."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"La conexión con el servidor no se ha realizado correctamente."</string>
     <string name="httpErrorIO" msgid="4270874999047767599">"El servidor no ha podido establecer la comunicación. Inténtalo de nuevo más tarde."</string>
-    <string name="httpErrorTimeout" msgid="4743403703762883954">"Se ha agotado el tiempo de espera de conexión al servidor."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"Se ha agotado el tiempo de espera de conexión con el servidor."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"La página contiene demasiados redireccionamientos de servidor."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protocolo no admitido"</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"No se ha podido establecer una conexión segura."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"leer datos de registro personales"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permite que la aplicación lea distintos archivos de registro del sistema. La aplicación puede usar este permiso para obtener información general sobre las acciones que haces con el tablet, que puede incluir datos personales o privados."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite que la aplicación consulte distintos archivos de registro del sistema. La aplicación puede usar este permiso para obtener información general sobre las acciones que realizas con el dispositivo, que puede incluir datos personales o privados."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Utilizar cualquier decodificador de archivos multimedia para la reproducción"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite que una aplicación utilice cualquier decodificador de archivos multimedia instalado para la reproducción."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que la aplicación consulte y escriba en cualquier recurso del grupo de diagnóstico como, por ejemplo, archivos en /dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SOLO se debe usar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"habilitar o inhabilitar componentes de la aplicación"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administración de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se sincronice con ellos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que la aplicación configure el teléfono Bluetooth local y que detecte dispositivos remotos y se sincronice con ellos."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ver estado de WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Ver estado de WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite que una aplicación acceda a la información sobre el estado de la conectividad WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"cambiar estado de WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar estado de WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a una aplicación conectarse a una red WiMAX y desconectarse de ella."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear conexiones de Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite que la aplicación acceda a la configuración del tablet Bluetooth local y que establezca y acepte conexiones con los dispositivos sincronizados."</string>
@@ -791,7 +793,7 @@
     <string name="last_month" msgid="3959346739979055432">"El mes pasado"</string>
     <string name="older" msgid="5211975022815554840">"Anterior"</string>
   <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ayer"</item>
+    <item quantity="one" msgid="861358534398115820">"Ayer"</item>
     <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
   <plurals name="in_num_seconds">
@@ -823,7 +825,7 @@
     <item quantity="other" msgid="6889970745748538901">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"ayer"</item>
+    <item quantity="one" msgid="8463161711492680309">"Ayer"</item>
     <item quantity="other" msgid="3453342639616481191">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
@@ -917,10 +919,10 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Para volver a habilitar esta opción, accede a Ajustes &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="smv_application" msgid="3307209192155442829">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha infringido su política StrictMode autoaplicable."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Actualizando Android..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Actualizando Android"</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>..."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicaciones"</string>
-    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando arranque"</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Finalizando inicio..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Toca esta opción para cambiar a la aplicación."</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"¿Cambiar aplicaciones?"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Compartir con"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Enviando..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Iniciar el navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"¿Aceptar la llamada?"</string>
 </resources>

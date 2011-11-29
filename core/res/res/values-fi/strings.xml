@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lukea arkaluonteisia lokitietoja"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Antaa sovelluksen lukea järjestelmän lokitiedostoja. Näin sovellus saa yleisiä tietoja siitä, mitä teet tablet-laitteella, sekä mahdollisia yksityisiä tai arkaluonteisia tietoja."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Antaa sovelluksen lukea järjestelmän lokitiedostoja. Näin sovellus saa yleisiä tietoja siitä, mitä teet puhelimella, sekä mahdollisia yksityisiä tai arkaluonteisia tietoja."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"käytä mitä tahansa tietovälineen koodin purkajaa toistoa varten"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Sallii sovelluksen käyttää mitä tahansa asennettua tietovälineen koodin purkajaa toistoa varten."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lue diag:in omistamia resursseja / kirjoita resursseihin"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Antaa sovelluksen lukea ja kirjoittaa diag-ryhmän omistamiin resursseihin, esimerkiksi /dev-hakemistossa oleviin tiedostoihin. Tämä voi vaikuttaa järjestelmän vakauteen ja turvallisuuteen. Tämä lupa tulee myöntää VAIN valmistajan tai operaattorin laitteistotesteille."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"sovelluskomponenttien ottaminen käyttöön tai pois käytöstä"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-hallinta"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"tarkastele WiMAX-verkon tilaa"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Tarkastele WiMAX-verkon tilaa"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Antaa sovelluksen tarkastella WiMAX-verkon tilaa."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"vaihda WiMAX-verkon tilaa"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Antaa sovelluksen muodostaa yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"luo Bluetooth-yhteyksiä"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Antaa sovelluksen tarkastella paikallisen Bluetooth-tabletin asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Jaa seuraavien kanssa"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Laite lukittu."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Lähetetään..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Käynnistetäänkö selain?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vastataanko puheluun?"</string>
 </resources>

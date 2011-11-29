@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"læse følsomme logdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Tillader, at appen kan læse de forskellige logfiler i systemet. Dermed kan generelle oplysninger om dine handlinger på tabletten registreres, f.eks. personlige eller private oplysninger."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Tillader, at appen kan læse i systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen registreres, også personlige eller private oplysninger."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"brug enhver mediedekoder til afspilning"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Tillader, at en applikation bruger enhver installeret mediedekoder til at afkode til afspilning."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Tillader, at appen kan læse og skrive til alle ressourcer, der ejes af diag-gruppen,  f.eks. filer i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifik diagnosticering, som foretages af producenten eller udbyderen."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivere eller deaktivere appkomponenter"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administration af Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillader, at appen kan konfigurere den lokale Bluetooth-tablet samt finde og parre med fjerne enheder."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillader, at appen kan konfigurere den lokale Bluetooth-telefon samt finde og parre med eksterne enheder."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"vise WiMAX-tilstand"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Få vist WiMAX-tilstand"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Tillader, at en applikation viser oplysninger om WiMAX-tilstanden."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"skifte WiMAX-tilstand"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Skift WiMAX-tilstand"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Tillader, at en applikation opretter og afbryder forbindelsen til WiMAX-netværk."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Tillader, at appen kan se konfigurationen af ​​den lokale Bluetooth-tablet og oprette og acceptere forbindelser med parrede enheder."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Del med"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Enhed låst."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Sender..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Vil du starte browseren?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vil du besvare opkaldet?"</string>
 </resources>

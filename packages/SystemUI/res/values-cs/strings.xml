@@ -102,16 +102,11 @@
     <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi – dvě čárky."</string>
     <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi – tři čárky."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Plný signál sítě Wi-Fi."</string>
-    <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_one_bar (4170994299011863648) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_two_bars (9176236858336502288) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_three_bars (6116551636752103927) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_signal_full (2768089986795579558) -->
-    <skip />
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Žádný signál sítě WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Jedna čárka signálu sítě WiMAX."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Dvě čárky signálu sítě WiMAX."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Tři čárky signálu sítě WiMAX."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Plný signál sítě WiMAX."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>

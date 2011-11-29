@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"مطالعه داده های گزارش حساس"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"به برنامه اجازه می‎دهد فایلهای مختلف گزارش سیستم را بخواند. با این کار، برنامه اطلاعات کلی مربوط به کاری که با رایانه لوحی انجام می‎دهید را کشف می کند، که ممکن است حاوی اطلاعات شخصی و خصوصی باشند."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"به برنامه اجازه می‎دهد تا فایلهای گزارش مختلف سیستم را بخواند. این کار به برنامه اجازه می‎دهد اطلاعات عمومی کاری که با تلفن انجام می‎دهید مثلا اطلاعات خصوصی و شخصی را کشف کند."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"استفاده از هر رمزگشای رسانه‎ای برای بازپخش"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"به یک برنامه اجازه می‌دهد تا از هر رمزگشای رسانه نصب شده برای رمزگشایی جهت بازپخش استفاده کند."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"خواندن/نوشتن منابع متعلق به تشخیص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"به برنامه اجازه می‌دهد هر منبعی را که متعلق به گروه تشخیص است بخواند و در آن بنویسد؛ بعنوان مثال، فایل‌های /dev. این امر بصورت بالقوه می‌تواند بر پایدار بودن و امنیت سیستم تأثیر بگذارد. این تنها باید برای تشخیص‎‌های مختص سخت‌افزار توسط تولیدکننده یا اپراتور استفاده شود."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"فعال یا غیر فعال کردن اجزای برنامه"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"مدیریت بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"به برنامه اجازه می‎دهد تا رایانه لوحی بلوتوث محلی را پیکربندی کرده، دستگاههای راه دور را شناسایی کرده و با آنها جفت شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاههای راه دور را پیدا کند و با آنها جفت شود."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"مشاهده وضعیت WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"مشاهده وضعیت WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"به یک برنامه کاربردی امکان می دهد اطلاعات مربوط به وضعیت WiMAX را مشاهده کند."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"تغییر وضعیت WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"تغییر وضعیت WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"به یک برنامه کاربردی امکان می دهد به شبکه WiMAX متصل یا از آن قطع شود."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ایجاد اتصال های بلوتوث"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"به برنامه اجازه می‎دهد تا پیکربندی رایانه لوحی بلوتوث محلی را مشاهده کند و اتصال با دستگاههای جفت شده را برقرار کرده و بپذیرد."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"اشتراک‌گذاری با"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل است."</string>
     <string name="list_delimeter" msgid="3975117572185494152">"، "</string>
+    <string name="sending" msgid="8715108995741758718">"در حال ارسال..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"مرورگر راه‌اندازی شود؟"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"تماس را می‌پذیرید؟"</string>
 </resources>

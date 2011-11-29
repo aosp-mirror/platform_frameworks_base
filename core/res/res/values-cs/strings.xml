@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"číst citlivá data v protokolech"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto oprávnění aplikaci umožní získat obecné informace o činnostech s tabletem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto oprávnění aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"použít jakýkoliv dekodér pro přehrávání médií"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Umožňuje aplikaci používat libovolný nainstalovaný dekodér médií k dekódování při přehrávání."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat POUZE výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"správa rozhraní Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Umožňuje aplikaci konfigurovat místní tablet s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"zobrazit stav připojení WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Zobrazit stav připojení WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Umožňuje aplikaci zobrazit informace o stavu připojení WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"měnit stav připojení WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Změnit stav připojení WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Umožňuje aplikaci připojovat se k síti WiMAX a odpojovat se od ní."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"vytvoření připojení Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Umožňuje aplikaci zobrazit konfiguraci místního tabletu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Sdílet s"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Zařízení je uzamčeno."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Odesílání..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Spustit prohlížeč?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Přijmout hovor?"</string>
 </resources>

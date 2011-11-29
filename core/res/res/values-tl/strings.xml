@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"magbasa ng sensitibong data ng tala"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Pinapayagan ang app na magbasa mula sa iba\'t ibang mga file ng log ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa tablet, potensyal na kabilang ang personal o pribadong impormasyon."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Pinapayagan ang app na magbasa mula sa iba\'t ibang mga file ng log ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa telepono, potensyal na kabilang ang personal o pribadong impormasyon."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gumamit ng anumang media decoder para sa pag-playback"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Pinapayagan ka ng application na gumamit ng anumang naka-install na media decoder upang mag-decode para sa pag-playback."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"magbasa/magsulat sa mga mapagkukunang pag-aari ng diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pinapayagan ang app na magbasa at magsulat sa anumang mapagkukunang pag-aari ng pangkat ng diag; halimbawa, mga file sa /dev. Maaaring potensyal na maapektuhan nito ang katatagan at seguridad ng system. Dapat LAMANG itong gamitin para sa diagnostics na tukoy sa hardware ng tagagawa o operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"paganahin o huwag paganahin ang mga bahagi ng app"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Pangangasiwa sa Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth tablet, at tumuklas ng at ipares sa mga malayuang device."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth na telepono, at tumuklas ng at ipares sa mga malayuang device."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"tingnan ang katayuan ng WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Tingnan ang katayuan ng WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Pinapayagan ang application na tingnan ang impormasyon tungkol sa katayuan ng WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"baguhin ang katayuan ng WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Baguhin ang katayuan ng WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Pinapayagan ang isang application na makakonekta sa at maalis sa pagkakakonekta mula sa network ng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"lumikha ng mga koneksyon ng Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Pinapayagan ang app na tingnan ang configuration ng lokal na Bluetooth tablet, at upang gumawa at tumanggap ng mga koneksyon sa mga nakapares na device."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ibahagi sa"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naka-lock ang device."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Ipinapadala..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Tanggapin ang Tawag?"</string>
 </resources>

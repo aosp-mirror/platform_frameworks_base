@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Giao diện người dùng hệ thống"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xoá"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xóa"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Không làm phiền"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Hiển thị thông báo"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa khỏi danh sách"</string>
@@ -49,8 +49,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth được dùng làm điểm truy cập Internet"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Thiết lập phương thức nhập"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Sử dụng bàn phím vật lý"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Cho phép ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập thiết bị USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Cho phép ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập phụ kiện USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Cho phép ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập thiết bị USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Cho phép ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập phụ kiện USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Mở <xliff:g id="ACTIVITY">%1$s</xliff:g> khi thiết bị USB này được kết nối?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Mở <xliff:g id="ACTIVITY">%1$s</xliff:g> khi phụ kiện USB này được kết nối?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Không có ứng dụng được cài đặt nào hoạt động với phụ kiện USB này. Tìm hiểu thêm về phụ kiện này tại <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -67,8 +67,8 @@
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Ảnh chụp màn hình đang được lưu."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Đã chụp ảnh màn hình."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Chạm để xem ảnh chụp màn hình của bạn."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Không thể chụp ảnh màn hình."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Không thể lưu ảnh chụp màn hình. Bộ lưu trữ có thể đang được sử dụng."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Không thể chụp ảnh màn hình."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Không thể lưu ảnh chụp màn hình. Bộ lưu trữ có thể đang được sử dụng."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Gắn như một trình phát đa phương tiện (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Gắn như một máy ảnh (PTP)"</string>
@@ -97,21 +97,16 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Tín hiệu dữ liệu hai vạch."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tín hiệu dữ liệu ba vạch."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Tín hiệu dữ liệu đầy đủ."</string>
-    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Không có Wi-Fi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi một vạch."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi hai vạch."</string>
-    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi ba vạch."</string>
+    <string name="accessibility_no_wifi" msgid="7455607460517331976">"Không có Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6854947280074467207">"Wi-Fi một vạch."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3344340012058984348">"Wi-Fi hai vạch."</string>
+    <string name="accessibility_wifi_three_bars" msgid="928322805193265041">"Wi-Fi ba vạch."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Tín hiệu WiFi đầy đủ."</string>
-    <!-- no translation found for accessibility_no_wimax (4329180129727630368) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_one_bar (4170994299011863648) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_two_bars (9176236858336502288) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_three_bars (6116551636752103927) -->
-    <skip />
-    <!-- no translation found for accessibility_wimax_signal_full (2768089986795579558) -->
-    <skip />
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"Không có WiMAX."</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX một vạch."</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX hai vạch."</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX ba vạch."</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Tín hiệu WiMAX đầy đủ."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
@@ -136,7 +131,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Đã tắt dữ liệu 4G"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dữ liệu di động bị vô hiệu hóa"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dữ liệu đã bị vô hiệu hóa"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Bạn đã đạt đến giới hạn sử dụng dữ liệu chỉ định."\n\n"Nếu bạn bật lại dữ liệu, bạn có thể bị nhà cung cấp tính phí."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Bạn đã đạt đến giới hạn sử dụng dữ liệu chỉ định."\n\n"Nếu bạn bật lại dữ liệu, bạn có thể bị nhà cung cấp tính phí."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Bật lại dữ liệu"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>

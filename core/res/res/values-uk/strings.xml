@@ -197,7 +197,7 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"надсил. SMS повідом."</string>
     <string name="permdesc_sendSms" msgid="906546667507626156">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, заставляючи вас платити."</string>
     <string name="permlab_sendSmsNoConfirmation" msgid="4781483105951730228">"надсилати SMS-повідомлення без підтвердження"</string>
-    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, заставляючи вас платити."</string>
+    <string name="permdesc_sendSmsNoConfirmation" msgid="3437759207020400204">"Дозволяє програмі надсилати SMS повідомлення. Шкідливі програми можуть надсилати повідомлення без вашого підтвердження, змушуючи вас платити."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"читати SMS або MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2341692916884515613">"Дозволяє програмі читати SMS повідомлення, збережені в планшетному ПК чи на SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
     <string name="permdesc_readSms" product="default" msgid="5653850482025875493">"Дозволяє програмі читати SMS повідомлення, збережені в телефоні чи на SIM-карті. Шкідливі програми можуть читати ваші конфіденційні повідомлення."</string>
@@ -233,7 +233,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"запобіг. зміні програм"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запобігати переходу користувача до іншої програми."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"відстежувати та контролювати запуски всіх програм"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дозволяє програмі відстежувати та контролювати, як саме система запускає дії. Шкідливі програми можуть повністю зламувати систему. Цей дозвіл потрібний лише для розробки, а не для звичайного користування."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дозволяє програмі відстежувати та контролювати, як саме система запускає дії. Шкідливі програми можуть отримати повний контроль над системою. Цей дозвіл потрібний лише для розробки, а не для звичайного користування."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"надсил. запис про видал. пакета"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Дозволяє програмі передавати сповіщення про видалення пакета програми. Шкідливі програми можуть використовувати це для примусового припинення роботи будь-якої іншої запущеної програми."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"надсил. запис, отрим. в SMS"</string>
@@ -242,7 +242,7 @@
     <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Дозволяє програмі передавати сповіщення про отримання повідомлення WAP PUSH. Шкідливі програми можуть використовувати це для підробки отримання MMS повідомлень або для непомітної заміни вмісту будь-якої веб-сторінки шкідливими варіантами."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"обмежувати кількість запущ. процесів"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Дозволяє програмі контролювати максимальну кількість процесів, які буде запущено. Ніколи не вимагається для звичайних програм."</string>
-    <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"заставляти всі фонові програми закриватися"</string>
+    <string name="permlab_setAlwaysFinish" msgid="238828158465736054">"примушувати всі фонові програми закриватися"</string>
     <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Дозволяє програмі контролювати обов’язкове завершення всіх дій, які переходять у фоновий режим. Ніколи не вимагається для звичайних програм."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"змінювати статистику батареї"</string>
     <string name="permdesc_batteryStats" msgid="6835186932305744068">"Дозволяє програмі змінювати зібрану статистику акумулятора. Не для використання звичайними програмами."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"зчит. закриті дані журн."</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Дозволяє програмі читати з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в планшетному ПК, яка потенційно може містити особисті чи конфіденційні дані."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Дозволяє програмі читати з різних файлів журналу системи. Це дозволяє дізнаватися загальну інформацію про ваші дії в телефоні, яка потенційно може містити особисті чи конфіденційні дані."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"використовувати будь-який медіа-декодер для відтворення"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Дозволяє програмі використовувати будь-який установлений медіа-декодер для декодування з метою відтворення."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"чит./зап. на ресури., якими вол. діаг."</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Дозволяє програмі читати та писати на будь-який ресурс, яким володіє діагностична група; наприклад, у файли в папці /dev. Це потенційно може вплинути на стабільність і безпеку системи. Потрібно використовувати ЛИШЕ для певної діагностики обладнання, яку виконує виробник чи оператор."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"вмикати чи вимикати компоненти програми"</string>
@@ -461,13 +463,13 @@
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"змінити стан Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7399961004537946240">"Дозволяє програмі підключатися та відключатися від точок доступу Wi-Fi, а також вносити зміни в налаштовані мережі Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"дозвол. отримання багатоадр. Wi-Fi"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Дозволяє програмі отримувати пакети, не адресовані безпосередньо вашому пристрою. Це може придатися для виявлення служб, які надаються поблизу. Використовує більше заряду, ніж режим не-багатоадресних пакетів."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="7633598524564320817">"Дозволяє програмі отримувати пакети, не адресовані безпосередньо вашому пристрою. Це може буди корисним для виявлення служб, які надаються поблизу. Використовує більше заряду, ніж режим не-багатоадресних пакетів."</string>
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"адміністрування Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Дозволяє програмі налаштовувати планшетний ПК із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Дозволяє програмі налаштовувати телефон із локальним Bluetooth, а також знаходити віддалені пристрої та створювати з ними пару."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"переглядати стан WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Переглянути стан WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Дозволяє програмі переглядати інформацію про стан WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"змінювати стан WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Змінити стан WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Дозволяє програмі підключатися та відключатися від мережі WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"створюв. підключення Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Дозволяє програмі переглядати конфігурацію планшетного ПК із локальним Bluetooth, а також створювати та приймати з’єднання зі спареними пристроями."</string>
@@ -492,7 +494,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Дозволяє програмі писати нові слова в словник користувача."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"змінювати/видаляти вміст носія USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"змінювати/видал. вміст карти SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозвол.прогр. пис.на носій USB"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Дозволяє програмі писати на носій USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"змінювати/видаляти вміст внутр. сховища даних"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Дозволяє програмі змінювати вміст внутрішнього сховища даних."</string>
@@ -858,7 +860,7 @@
     <string name="year" msgid="4001118221013892076">"рік"</string>
     <string name="years" msgid="6881577717993213522">"р."</string>
     <string name="VideoView_error_title" msgid="5927895235831021723">"Неможливо відтворити відео"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Відео не придатне для потокового передавання цьому пристрою."</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Відео не придатне для потокового передавання в цей пристрій."</string>
     <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Це відео неможливо відтворити."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -905,7 +907,7 @@
     <string name="anr_activity_application" msgid="1904477189057199066">"Програма <xliff:g id="APPLICATION">%2$s</xliff:g> не відповідає."\n\n"Закрити її?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Дія <xliff:g id="ACTIVITY">%1$s</xliff:g> не відповідає."\n\n"Закінчити її?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> не відповідає. Закрити її?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не відповідає."\n\n"Закінчити його?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не відповідає."\n\n"Завершити його?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Повідом."</string>
     <string name="wait" msgid="7147118217226317732">"Чекати"</string>
@@ -1167,7 +1169,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Вибрати програму"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Надіслати через"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Надіслати через <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Вказівник-повзунок. Торкніться й утримуйте/"</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Вказівник-повзунок. Торкніться й утримуйте."</string>
     <string name="description_direction_up" msgid="1983114130441878529">"Угору, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_down" msgid="4294993639091088240">"Униз, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="6814008463839915747">"Ліворуч, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Спільний доступ для:"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Пристрій заблоковано."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Надсилання..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Запустити веб-переглядач?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Прийняти виклик?"</string>
 </resources>

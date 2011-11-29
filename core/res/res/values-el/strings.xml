@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"ανάγνωση ευαίσθητων δεδομένων αρχείου καταγραφής"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Επιτρέπει στην εφαρμογή την ανάγνωση των αρχείων καταγραφής του συστήματος. Έτσι, μπορεί να ανακαλύψει γενικές πληροφορίες σχετικά με τις δραστηριότητές σας στο τηλέφωνο, συμπεριλαμβάνοντας πιθανώς και προσωπικές ή ιδιωτικές πληροφορίες."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Επιτρέπει στην εφαρμογή την ανάγνωση των αρχείων καταγραφής του συστήματος. Έτσι, μπορεί να ανακαλύψει γενικές πληροφορίες σχετικά με τις δραστηριότητές σας στο τηλέφωνο, συμπεριλαμβάνοντας πιθανώς και προσωπικές ή ιδιωτικές πληροφορίες."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"χρήση οποιουδήποτε αποκωδικοποιητή μέσων για αναπαραγωγή"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Επιτρέπει σε μια εφαρμογή να χρησιμοποιεί οποιοδήποτε εγκατεστημένο αποκωδικοποιητή μέσων προκειμένου να πραγματοποιήσει αποκωδικοποίηση για αναπαραγωγή."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ανάγνωση/εγγραφή σε πόρους που ανήκουν στο διαγνωστικό"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Επιτρέπει στην εφαρμογή την ανάγνωση και την εγγραφή σε οποιονδήποτε πόρο που ανήκει στην ομάδα διαγνωστικού (π.χ. αρχεία στον κατάλογο /dev). Αυτό ενδέχεται να επηρεάσει την σταθερότητα και την ασφάλεια του συστήματος. Θα πρέπει να χρησιμοποιείται ΜΟΝΟ για διαγνωστικά υλικού από τον κατασκευαστή ή τον χειριστή."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ενεργοποίηση ή απενεργοποίηση στοιχείων εφαρμογής"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"διαχείριση bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Επιτρέπει στην εφαρμογή τη διαμόρφωση του τοπικού tablet Bluetooth, τον εντοπισμό και τη σύζευξη με απομακρυσμένες συσκευές."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"προβολή κατάστασης WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Προβολή κατάστασης WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Επιτρέπει σε μια εφαρμογή την προβολή των πληροφοριών σχετικά με την κατάσταση του WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"αλλαγή κατάστασης WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Αλλαγή κατάστασης WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Επιτρέπει σε μια εφαρμογή τη σύνδεση και αποσύνδεση από το δίκτυο WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"δημιουργία συνδέσεων Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Επιτρέπει στην εφαρμογή να προβάλει τη διαμόρφωση του τοπικού tablet Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Κοινή χρήση με"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Η συσκευή κλειδώθηκε."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Αποστολή..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Εκκίνηση προγράμματος περιήγησης;"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Αποδοχή κλήσης;"</string>
 </resources>

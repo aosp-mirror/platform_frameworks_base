@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"Lesen vertraulicher Protokolldaten"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Tablet durchgeführten Aktionen eingesehen werden, darunter auch persönliche oder geheime Daten."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ermöglicht der App, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Telefon durchgeführten Aktionen eingesehen werden, darunter auch persönliche oder geheime Daten."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Für Wiedergabe beliebigen Mediendecodierer verwenden"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Ermöglicht einer App, einen beliebigen Mediendecodierer für die Wiedergabe zu verwenden"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ermöglicht der App, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für hardwarespezifische Diagnosen des Herstellers oder Mobilfunkanbieters verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"App-Komponenten aktivieren oder deaktivieren"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-Verwaltung"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ermöglicht der App, das lokale Bluetooth-Tablet zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ermöglicht der App, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen"</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-Status anzeigen"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-Status anzeigen"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ermöglicht einer App, die Informationen zum WiMAX-Status einzusehen"</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-Status ändern"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-Status ändern"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ermöglicht einer App, eine Verbindung mit dem WiMAX-Netzwerk herzustellen bzw. zu trennen"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-Verbindungen herstellen"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Ermöglicht der App, die Konfiguration des lokalen Bluetooth-Tablets einzusehen und Verbindungen zu Partnergeräten herzustellen und zu akzeptieren"</string>
@@ -1097,7 +1099,7 @@
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Durch Berühren weitere Informationen zur Mobildatennutzung aufrufen"</string>
     <string name="no_matches" msgid="8129421908915840737">"Keine Treffer"</string>
-    <string name="find_on_page" msgid="1946799233822820384">"Auf Seite suchen"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Suchen"</string>
   <plurals name="matches_found">
     <item quantity="one" msgid="8167147081136579439">"1 Treffer"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g>"</item>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Teilen mit"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Gerät gesperrt"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Wird gesendet..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Anruf annehmen?"</string>
 </resources>

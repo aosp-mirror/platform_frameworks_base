@@ -51,7 +51,7 @@
     <string name="needPuk" msgid="919668385956251611">"O seu cartão SIM está bloqueado com PUK. Introduza o código PUK para desbloqueá-lo."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID do Autor da Chamada"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"ID do autor da chamada efectuada"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"ID do autor da chamada efetuada"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Encaminhamento de chamadas"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Chamada em espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Barramento de chamadas"</string>
@@ -170,7 +170,7 @@
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"As suas contas"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Aceda às contas disponíveis."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controlos de hardware"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Aceda directamente ao hardware no telefone."</string>
+    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Aceda diretamente ao hardware no telefone."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Chamadas telefónicas"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Monitorize, grave e processe chamadas telefónicas."</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Ferramentas do sistema"</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"ler dados sensíveis de registo"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permite que a aplicação leia a partir dos diversos ficheiros de registo do sistema. Isto permite descobrir informações gerais sobre a forma como o utilizador utiliza o tablet, podendo, inclusive, incluir dados pessoais ou privados."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite que a aplicação leia a partir dos diversos ficheiros de registo do sistema. Isto permite descobrir informações gerais sobre a forma como o utilizador usa o telemóvel, podendo, inclusive, incluir dados pessoais ou privados."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Utilizar qualquer descodificador de multimédia para a reprodução"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permite que uma aplicação utilize qualquer descodificador de multimédia instalado para descodificar a reprodução."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ler/escrever em recursos propriedade de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite à aplicação ler e escrever em qualquer recurso que seja propriedade do grupo diag; por exemplo, ficheiros em /dev. Isto pode potencialmente afetar a estabilidade e a segurança do sistema e deve ser utilizado APENAS para diagnósticos específicos do hardware pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar componentes da aplicação"</string>
@@ -393,12 +395,12 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite o acesso ao controlador MTP de kernel para implementar o protocolo MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permite à aplicação controlar vários periféricos para fins de teste de hardware."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone directamente"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone diretamente"</string>
     <string name="permdesc_callPhone" msgid="6396463004110544744">"Permite que a aplicação marque números de telefone sem a intervenção do utilizador. As aplicações maliciosas podem provocar o aparecimento de chamadas inesperadas na sua conta telefónica. Tenha em atenção que isto não permite à aplicação marcar números de emergência."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"marcar directamente quaisquer números de telefone"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"marcar diretamente quaisquer números de telefone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permite que a aplicação marque qualquer número de telefone, incluindo números de emergência, sem a intervenção do utilizador. As aplicações maliciosas podem efetuar chamadas desnecessárias e ilegais para serviços de emergência."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"iniciar directamente a configuração do tablet CDMA"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"iniciar directamente a configuração do telefone CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"iniciar diretamente a configuração do tablet CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"iniciar diretamente a configuração do telefone CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permite que a aplicação inicie a administração CDMA. As aplicações maliciosas podem iniciar a administração CDMA desnecessariamente."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlar notificações de actualização de localização"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permite que a aplicação ative/desative as notificações de atualização de localização do rádio. Não se destina a utilização por aplicações normais."</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite à aplicação configurar o tablet Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que a aplicação configure o telemóvel Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ver estado do WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Ver estado do WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite a uma aplicação ver as informações acerca do estado do Wi-Fi."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"alterar estado do WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Alterar estado do WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a uma aplicação ligar-se e desligar-se da rede WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"criar ligações Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permite que a aplicação veja a configuração do tablet Bluetooth local, bem como efetuar e aceitar ligações com dispositivos emparelhados."</string>
@@ -933,7 +935,7 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume da campainha"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume de multimédia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"A reproduzir através de Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Toque silencioso seleccionado"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Toque silencioso selecionado"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume da chamada recebida"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume de chamada recebida em Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volume do alarme"</string>
@@ -1082,7 +1084,7 @@
     <string name="vpn_text" msgid="1610714069627824309">"Toque para gerir a rede."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Ligado a <xliff:g id="SESSION">%s</xliff:g>. Toque para gerir a rede."</string>
     <string name="upload_file" msgid="2897957172366730416">"Escolher ficheiro"</string>
-    <string name="no_file_chosen" msgid="6363648562170759465">"Não foi seleccionado nenhum ficheiro"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Não foi selecionado nenhum ficheiro"</string>
     <string name="reset" msgid="2448168080964209908">"Repor"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo automóvel activado"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Partilhar com"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Aparelho bloqueado."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"A enviar..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Iniciar Navegador?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aceitar Chamada?"</string>
 </resources>
