@@ -167,7 +167,7 @@ public class WifiConnectionTest
             log("-- START Wi-Fi connection test to : " + ssid + " --");
             connectToWifi(networks.get(i));
             // wait for 2 minutes between wifi stop and start
-            sleep(ConnectivityManagerTestActivity.WIFI_START_TIMER,
+            sleep(ConnectivityManagerTestActivity.WIFI_STOP_START_INTERVAL,
                   "interruped while connected to wifi");
             log("-- END Wi-Fi connection test to " + ssid + " -- ");
         }
