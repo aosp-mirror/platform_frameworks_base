@@ -28,7 +28,6 @@
 #include <utils/threads.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/Region.h>
 
 #include <surfaceflinger/Surface.h>
 
@@ -39,29 +38,10 @@ namespace android {
 class DisplayInfo;
 class Composer;
 class IMemoryHeap;
-class ISurfaceComposer;
+class ISurfaceComposerClient;
 class Region;
-class surface_flinger_cblk_t;
-struct layer_state_t;
 
 // ---------------------------------------------------------------------------
-
-class ComposerService : public Singleton<ComposerService>
-{
-    // these are constants
-    sp<ISurfaceComposer> mComposerService;
-    sp<IMemoryHeap> mServerCblkMemory;
-    surface_flinger_cblk_t volatile* mServerCblk;
-    ComposerService();
-    friend class Singleton<ComposerService>;
-public:
-    static sp<ISurfaceComposer> getComposerService();
-    static surface_flinger_cblk_t const volatile * getControlBlock();
-};
-
-// ---------------------------------------------------------------------------
-
-class Composer;
 
 class SurfaceComposerClient : public RefBase
 {

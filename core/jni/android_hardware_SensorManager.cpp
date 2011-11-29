@@ -126,7 +126,7 @@ sensors_data_poll(JNIEnv *env, jclass clazz, jint nativeQueue,
     ASensorEvent event;
 
     res = queue->read(&event, 1);
-    if (res == -EAGAIN) {
+    if (res == 0) {
         res = queue->waitForEvent();
         if (res != NO_ERROR)
             return -1;
