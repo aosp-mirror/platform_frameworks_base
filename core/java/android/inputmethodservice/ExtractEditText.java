@@ -156,4 +156,27 @@ public class ExtractEditText extends EditText {
             mIME.onViewClicked(false);
         }
     }
+
+    /**
+     * Delete the range of text, supposedly valid
+     * @hide
+     */
+    @Override
+    protected void deleteText_internal(int start, int end) {
+        // Do not call the super method. This will change the source TextView instead, which
+        // will update the ExtractTextView.
+        mIME.onExtractedDeleteText(start, end);
+    }
+
+    /**
+     * Replaces the range of text [start, end[ by replacement text
+     * @hide
+     */
+    @Override
+    protected void replaceText_internal(int start, int end, CharSequence text) {
+        // Do not call the super method. This will change the source TextView instead, which
+        // will update the ExtractTextView.
+        mIME.onExtractedReplaceText(start, end, text);
+    }
+
 }
