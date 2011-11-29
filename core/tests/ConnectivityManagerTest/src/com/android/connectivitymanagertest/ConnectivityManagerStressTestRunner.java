@@ -38,7 +38,8 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     public int mSoftapIterations = 100;
     public int mScanIterations = 100;
     public int mReconnectIterations = 100;
-    public int mSleepTime = 30 * 1000;  // default sleep time is 30 seconds
+    // sleep time before restart wifi, default is set to 2 minutes
+    public int mSleepTime = 2 * 60 * 1000;
     public String mReconnectSsid = "securenetdhcp";
     public String mReconnectPassword = "androidwifi";
 

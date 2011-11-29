@@ -92,6 +92,9 @@ public class WifiStressTest
         mPassword = mRunner.mReconnectPassword;
         mScanIterations = mRunner.mScanIterations;
         mWifiSleepTime = mRunner.mSleepTime;
+        log(String.format("mReconnectIterations(%d), mSsid(%s), mPassword(%s),"
+            + "mScanIterations(%d), mWifiSleepTime(%d)", mReconnectIterations, mSsid,
+            mPassword, mScanIterations, mWifiSleepTime));
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
         mAct.turnScreenOn();
@@ -248,6 +251,7 @@ public class WifiStressTest
         assertTrue("Wi-Fi is connected, but no data connection.", mAct.pingTest(null));
 
         int i;
+        long sum = 0;
         for (i = 0; i < mReconnectIterations; i++) {
             // 1. Put device into sleep mode
             // 2. Wait for the device to sleep for sometime, verify wi-fi is off and mobile is on.
@@ -284,12 +288,18 @@ public class WifiStressTest
 
             // Turn screen on again
             mAct.turnScreenOn();
+            // Measure the time for Wi-Fi to get connected
+            long startTime = System.currentTimeMillis();
             assertTrue("Wait for Wi-Fi enable timeout after wake up",
                     mAct.waitForWifiState(WifiManager.WIFI_STATE_ENABLED,
                     ConnectivityManagerTestActivity.SHORT_TIMEOUT));
             assertTrue("Wait for Wi-Fi connection timeout after wake up",
                     mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                    ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                    6 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
+            long connectionTime = System.currentTimeMillis() - startTime;
+            sum += connectionTime;
+            log("average reconnection time is: " + sum/(i+1));
+
             assertTrue("Reconnect to Wi-Fi network, but no data connection.", mAct.pingTest(null));
         }
         if (i == mReconnectIterations) {
