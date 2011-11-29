@@ -30,7 +30,7 @@ namespace android {
 const char *const IStreamListener::kKeyResumeAtPTS = "resume-at-PTS";
 
 // static
-const char *const IStreamListener::kKeyFormatChange = "format-change";
+const char *const IStreamListener::kKeyDiscontinuityMask = "discontinuity-mask";
 
 enum {
     // IStreamSource

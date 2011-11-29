@@ -63,17 +63,22 @@ status_t NuPlayer::StreamingSource::feedMoreTSData() {
             mFinalResult = ERROR_END_OF_STREAM;
             break;
         } else if (n == INFO_DISCONTINUITY) {
-            ATSParser::DiscontinuityType type = ATSParser::DISCONTINUITY_SEEK;
+            int32_t type = ATSParser::DISCONTINUITY_SEEK;
 
-            int32_t formatChange;
+            int32_t mask;
             if (extra != NULL
                     && extra->findInt32(
-                        IStreamListener::kKeyFormatChange, &formatChange)
-                    && formatChange != 0) {
-                type = ATSParser::DISCONTINUITY_FORMATCHANGE;
+                        IStreamListener::kKeyDiscontinuityMask, &mask)) {
+                if (mask == 0) {
+                    LOGE("Client specified an illegal discontinuity type.");
+                    return ERROR_UNSUPPORTED;
+                }
+
+                type = mask;
             }
 
-            mTSParser->signalDiscontinuity(type, extra);
+            mTSParser->signalDiscontinuity(
+                    (ATSParser::DiscontinuityType)type, extra);
         } else if (n < 0) {
             CHECK_EQ(n, -EWOULDBLOCK);
             break;
