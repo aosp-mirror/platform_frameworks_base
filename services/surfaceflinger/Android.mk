@@ -2,22 +2,19 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    EventThread.cpp                         \
-    Layer.cpp                               \
-    LayerBase.cpp                           \
-    LayerDim.cpp                            \
-    LayerScreenshot.cpp                     \
-    DdmConnection.cpp                       \
-    DisplayHardware/DisplayHardware.cpp     \
+    Layer.cpp 								\
+    LayerBase.cpp 							\
+    LayerDim.cpp 							\
+    LayerScreenshot.cpp						\
+    DdmConnection.cpp						\
+    DisplayHardware/DisplayHardware.cpp 	\
     DisplayHardware/DisplayHardwareBase.cpp \
-    DisplayHardware/HWComposer.cpp          \
-    DisplayHardware/VSyncBarrier.cpp        \
-    DisplayEventConnection.cpp              \
-    GLExtensions.cpp                        \
-    MessageQueue.cpp                        \
-    SurfaceFlinger.cpp                      \
-    SurfaceTextureLayer.cpp                 \
-    Transform.cpp                           \
+    DisplayHardware/HWComposer.cpp 			\
+    GLExtensions.cpp 						\
+    MessageQueue.cpp 						\
+    SurfaceFlinger.cpp 						\
+    SurfaceTextureLayer.cpp 				\
+    Transform.cpp 							\
     
 
 LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
