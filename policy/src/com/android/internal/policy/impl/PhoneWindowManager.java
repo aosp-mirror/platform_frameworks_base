@@ -3468,6 +3468,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (localLOGV) Log.v(TAG, "mScreenSaverActivator: not running screen saver when not plugged in");
                 return;
             }
+            // Quick fix for automation tests.
+            // The correct fix is to move this triggering logic to PowerManager, where more complete
+            // information about wakelocks (including StayOnWhilePluggedIn) is available.
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.STAY_ON_WHILE_PLUGGED_IN,
+                        BatteryManager.BATTERY_PLUGGED_AC) != 0) {
+                Log.v(TAG, "mScreenSaverActivator: not running screen saver when STAY_ON_WHILE_PLUGGED_IN");
+                return;
+            }
 
             if (localLOGV) Log.v(TAG, "mScreenSaverActivator entering dreamland");
 
