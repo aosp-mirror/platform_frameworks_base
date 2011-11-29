@@ -579,8 +579,20 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: 3D Mode key.
      * Toggles the display between 2D and 3D mode. */
     public static final int KEYCODE_3D_MODE         = 206;
+    /** Key code constant: Contacts special function key.
+     * Used to launch an address book application. */
+    public static final int KEYCODE_CONTACTS        = 207;
+    /** Key code constant: Calendar special function key.
+     * Used to launch a calendar application. */
+    public static final int KEYCODE_CALENDAR        = 208;
+    /** Key code constant: Music special function key.
+     * Used to launch a music player application. */
+    public static final int KEYCODE_MUSIC           = 209;
+    /** Key code constant: Calculator special function key.
+     * Used to launch a calculator application. */
+    public static final int KEYCODE_CALCULATOR      = 210;
 
-    private static final int LAST_KEYCODE           = KEYCODE_BUTTON_16;
+    private static final int LAST_KEYCODE           = KEYCODE_CALCULATOR;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -589,6 +601,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
     //  frameworks/base/core/res/res/values/attrs.xml
     //  emulator?
+    //  LAST_KEYCODE
+    //  KEYCODE_SYMBOLIC_NAMES
     //
     //  Also Android currently does not reserve code ranges for vendor-
     //  specific key codes.  If you have new key codes to have, you
@@ -807,6 +821,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_LANGUAGE_SWITCH, "KEYCODE_LANGUAGE_SWITCH");
         names.append(KEYCODE_MANNER_MODE, "KEYCODE_MANNER_MODE");
         names.append(KEYCODE_3D_MODE, "KEYCODE_3D_MODE");
+        names.append(KEYCODE_CONTACTS, "KEYCODE_CONTACTS");
+        names.append(KEYCODE_CALENDAR, "KEYCODE_CALENDAR");
+        names.append(KEYCODE_MUSIC, "KEYCODE_MUSIC");
+        names.append(KEYCODE_CALCULATOR, "KEYCODE_CALCULATOR");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.

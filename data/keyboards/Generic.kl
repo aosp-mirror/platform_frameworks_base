@@ -159,7 +159,7 @@ key 128   MEDIA_STOP
 # key 137 "KEY_CUT"
 # key 138 "KEY_HELP"
 key 139   MENU              WAKE_DROPPED
-# key 140 "KEY_CALC"
+key 140   CALCULATOR
 # key 141 "KEY_SETUP"
 key 142   POWER             WAKE
 key 143   POWER             WAKE
@@ -190,7 +190,7 @@ key 167   MEDIA_RECORD
 key 168   MEDIA_REWIND
 key 169   CALL
 # key 170 "KEY_ISO"
-# key 171 "KEY_CONFIG"
+key 171   MUSIC
 key 172   HOME
 # key 173 "KEY_REFRESH"
 # key 174 "KEY_EXIT"
@@ -232,7 +232,7 @@ key 208   MEDIA_FAST_FORWARD
 # key 210 "KEY_PRINT"
 # key 211 "KEY_HP"
 key 212   CAMERA
-# key 213 "KEY_SOUND"
+key 213   MUSIC
 # key 214 "KEY_QUESTION"
 key 215   ENVELOPE
 # key 216 "KEY_CHAT"
@@ -344,7 +344,7 @@ key 377   TV
 # key 394 "KEY_DIRECTORY"
 # key 395 "KEY_LIST"
 # key 396 "KEY_MEMO"
-# key 397 "KEY_CALENDAR"
+key 397   CALENDAR
 # key 398 "KEY_RED"
 # key 399 "KEY_GREEN"
 # key 400 "KEY_YELLOW"
@@ -364,6 +364,7 @@ key 403   CHANNEL_DOWN
 # key 414 "KEY_TEEN"
 # key 415 "KEY_TWEN"
 
+key 429   CONTACTS
 
 # key 448 "KEY_DEL_EOL"
 # key 449 "KEY_DEL_EOS"
