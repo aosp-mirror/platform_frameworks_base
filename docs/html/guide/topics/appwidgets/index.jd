@@ -346,7 +346,7 @@ following layout classes:</p>
 &lt;FrameLayout
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  <strong>android:layout_margin="@dimen/widget_margin"&gt;</strong>
+  <strong>android:padding="@dimen/widget_margin"&gt;</strong>
 
   &lt;LinearLayout
     android:layout_width="match_parent"
@@ -363,7 +363,7 @@ following layout classes:</p>
   <li>Create two dimensions resources, one in <code>res/values/</code> to provide the pre-Android 4.0 custom margins, and one in <code>res/values-v14/</code> to provide no extra padding for Android 4.0 widgets:
 
     <p><strong>res/values/dimens.xml</strong>:<br>
-    <pre>&lt;dimen name="widget_margin"&gt;15dp&lt;/dimen&gt;</pre></p>
+    <pre>&lt;dimen name="widget_margin"&gt;8dp&lt;/dimen&gt;</pre></p>
 
     <p><strong>res/values-v14/dimens.xml</strong>:<br>
     <pre>&lt;dimen name="widget_margin"&gt;0dp&lt;/dimen&gt;</pre></p>
