@@ -33,9 +33,18 @@ struct MediaSource;
 
 struct ATSParser : public RefBase {
     enum DiscontinuityType {
-        DISCONTINUITY_NONE,
-        DISCONTINUITY_SEEK,
-        DISCONTINUITY_FORMATCHANGE
+        DISCONTINUITY_NONE              = 0,
+        DISCONTINUITY_TIME              = 1,
+        DISCONTINUITY_AUDIO_FORMAT      = 2,
+        DISCONTINUITY_VIDEO_FORMAT      = 4,
+
+        DISCONTINUITY_SEEK              = DISCONTINUITY_TIME,
+
+        // For legacy reasons this also implies a time discontinuity.
+        DISCONTINUITY_FORMATCHANGE      =
+            DISCONTINUITY_AUDIO_FORMAT
+                | DISCONTINUITY_VIDEO_FORMAT
+                | DISCONTINUITY_TIME,
     };
 
     enum Flags {
@@ -71,7 +80,7 @@ struct ATSParser : public RefBase {
         STREAMTYPE_MPEG2_VIDEO          = 0x02,
         STREAMTYPE_MPEG1_AUDIO          = 0x03,
         STREAMTYPE_MPEG2_AUDIO          = 0x04,
-        STREAMTYPE_MPEG2_AUDIO_ATDS     = 0x0f,
+        STREAMTYPE_MPEG2_AUDIO_ADTS     = 0x0f,
         STREAMTYPE_MPEG4_VIDEO          = 0x10,
         STREAMTYPE_H264                 = 0x1b,
     };
