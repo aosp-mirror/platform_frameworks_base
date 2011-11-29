@@ -129,7 +129,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -1222,6 +1221,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                     @Override public void run() {
                         StringBuilder dropBuilder = new StringBuilder(1024);
                         StringBuilder logBuilder = new StringBuilder(1024);
+                        StringWriter oomSw = new StringWriter();
+                        PrintWriter oomPw = new PrintWriter(oomSw);
+                        StringWriter catSw = new StringWriter();
+                        PrintWriter catPw = new PrintWriter(catSw);
+                        String[] emptyArgs = new String[] { };
+                        StringBuilder tag = new StringBuilder(128);
+                        StringBuilder stack = new StringBuilder(128);
+                        tag.append("Low on memory -- ");
+                        dumpApplicationMemoryUsage(null, oomPw, "  ", emptyArgs, true, catPw,
+                                tag, stack);
+                        dropBuilder.append(stack);
+                        dropBuilder.append('\n');
+                        dropBuilder.append('\n');
+                        String oomString = oomSw.toString();
+                        dropBuilder.append(oomString);
+                        dropBuilder.append('\n');
+                        logBuilder.append(oomString);
                         try {
                             java.lang.Process proc = Runtime.getRuntime().exec(new String[] {
                                     "procrank", });
@@ -1244,27 +1260,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                             converter.close();
                         } catch (IOException e) {
                         }
-                        StringWriter sw = new StringWriter();
-                        PrintWriter pw = new PrintWriter(sw);
-                        StringWriter catSw = new StringWriter();
-                        PrintWriter catPw = new PrintWriter(catSw);
-                        String[] emptyArgs = new String[] { };
-                        StringBuilder tag = new StringBuilder(128);
                         synchronized (ActivityManagerService.this) {
+                            catPw.println();
                             dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null);
                             catPw.println();
                             dumpServicesLocked(null, catPw, emptyArgs, 0, false, false, null);
                             catPw.println();
                             dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
-                            catPw.println();
                         }
-                        tag.append("Low on memory -- ");
-                        dumpApplicationMemoryUsage(null, pw, "  ", emptyArgs, true, catPw, tag);
-                        String memUsage = sw.toString();
-                        dropBuilder.append('\n');
-                        dropBuilder.append(memUsage);
                         dropBuilder.append(catSw.toString());
-                        logBuilder.append(memUsage);
                         addErrorToDropBox("lowmem", null, "system_server", null,
                                 null, tag.toString(), dropBuilder.toString(), null, null);
                         Slog.i(TAG, logBuilder.toString());
@@ -1420,7 +1424,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args,
-                    false, null, null);
+                    false, null, null, null);
         }
     }
 
@@ -9416,7 +9420,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if (r.setAdj >= ProcessList.SERVICE_ADJ) {
                 oomAdj = buildOomTag("svc  ", null, r.setAdj, ProcessList.SERVICE_ADJ);
             } else if (r.setAdj >= ProcessList.BACKUP_APP_ADJ) {
-                oomAdj = buildOomTag("bckup", null, r.setAdj, ProcessList.BACKUP_APP_ADJ);
+                oomAdj = buildOomTag("bkup ", null, r.setAdj, ProcessList.BACKUP_APP_ADJ);
             } else if (r.setAdj >= ProcessList.HEAVY_WEIGHT_APP_ADJ) {
                 oomAdj = buildOomTag("hvy  ", null, r.setAdj, ProcessList.HEAVY_WEIGHT_APP_ADJ);
             } else if (r.setAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -9645,7 +9649,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         1*1024*1024, 2*1024*1024, 5*1024*1024, 10*1024*1024, 20*1024*1024
     };
 
-    static final void appendMemBucket(StringBuilder out, long memKB, String label) {
+    static final void appendMemBucket(StringBuilder out, long memKB, String label,
+            boolean stackLike) {
         int start = label.lastIndexOf('.');
         if (start >= 0) start++;
         else start = 0;
@@ -9654,13 +9659,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DUMP_MEM_BUCKETS[i] >= memKB) {
                 long bucket = DUMP_MEM_BUCKETS[i]/1024;
                 out.append(bucket);
-                out.append("MB ");
+                out.append(stackLike ? "MB." : "MB ");
                 out.append(label, start, end);
                 return;
             }
         }
         out.append(memKB/1024);
-        out.append("MB ");
+        out.append(stackLike ? "MB." : "MB ");
         out.append(label, start, end);
     }
 
@@ -9679,7 +9684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief,
-            PrintWriter categoryPw, StringBuilder outTag) {
+            PrintWriter categoryPw, StringBuilder outTag, StringBuilder outStack) {
         boolean dumpAll = false;
         boolean oomOnly = false;
         
@@ -9816,8 +9821,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            if (outTag != null) {
-                appendMemBucket(outTag, totalPss, "total");
+            if (outTag != null || outStack != null) {
+                if (outTag != null) {
+                    appendMemBucket(outTag, totalPss, "total", false);
+                }
+                if (outStack != null) {
+                    appendMemBucket(outStack, totalPss, "total", true);
+                }
+                boolean firstLine = true;
                 for (int i=0; i<oomMems.size(); i++) {
                     MemItem miCat = oomMems.get(i);
                     if (miCat.subitems == null || miCat.subitems.size() < 1) {
@@ -9826,13 +9837,47 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (miCat.id < ProcessList.SERVICE_ADJ
                             || miCat.id == ProcessList.HOME_APP_ADJ
                             || miCat.id == ProcessList.PREVIOUS_APP_ADJ) {
-                        outTag.append(" / ");
+                        if (outTag != null && miCat.id <= ProcessList.FOREGROUND_APP_ADJ) {
+                            outTag.append(" / ");
+                        }
+                        if (outStack != null) {
+                            if (miCat.id >= ProcessList.FOREGROUND_APP_ADJ) {
+                                if (firstLine) {
+                                    outStack.append(":");
+                                    firstLine = false;
+                                }
+                                outStack.append("\n\t at ");
+                            } else {
+                                outStack.append("$");
+                            }
+                        }
                         for (int j=0; j<miCat.subitems.size(); j++) {
                             MemItem mi = miCat.subitems.get(j);
                             if (j > 0) {
-                                outTag.append(" ");
+                                if (outTag != null) {
+                                    outTag.append(" ");
+                                }
+                                if (outStack != null) {
+                                    outStack.append("$");
+                                }
                             }
-                            appendMemBucket(outTag, mi.pss, mi.shortLabel);
+                            if (outTag != null && miCat.id <= ProcessList.FOREGROUND_APP_ADJ) {
+                                appendMemBucket(outTag, mi.pss, mi.shortLabel, false);
+                            }
+                            if (outStack != null) {
+                                appendMemBucket(outStack, mi.pss, mi.shortLabel, true);
+                            }
+                        }
+                        if (outStack != null && miCat.id >= ProcessList.FOREGROUND_APP_ADJ) {
+                            outStack.append("(");
+                            for (int k=0; k<DUMP_MEM_OOM_ADJ.length; k++) {
+                                if (DUMP_MEM_OOM_ADJ[k] == miCat.id) {
+                                    outStack.append(DUMP_MEM_OOM_LABEL[k]);
+                                    outStack.append(":");
+                                    outStack.append(DUMP_MEM_OOM_ADJ[k]);
+                                }
+                            }
+                            outStack.append(")");
                         }
                     }
                 }
