@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"อ่านข้อมูลบันทึกที่สำคัญ"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"อนุญาตให้แอปพลิเคชันอ่านจากไฟล์บันทึกต่างๆ ของระบบ เพื่อค้นหาข้อมูลทั่วไปเกี่ยวกับสิ่งที่คุณกำลังทำอยู่กับแท็บเล็ต ซึ่งอาจรวมไปถึงข้อมูลส่วนบุคคลหรือส่วนตัว"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"อนุญาตให้แอปพลิเคชันอ่านจากไฟล์บันทึกต่างๆ ของระบบ เพื่อค้นหาข้อมูลทั่วไปเกี่ยวกับสิ่งที่คุณกำลังทำอยู่กับโทรศัพท์ ซึ่งอาจรวมไปถึงข้อมูลส่วนบุคคลหรือส่วนตัว"</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ใช้ตัวถอดรหัสสื่อใดๆ ก็ได้สำหรับการเล่น"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"อนุญาตให้แอปพลิเคชันใช้ตัวถอดรหัสสื่อใดก็ได้ที่ติดตั้งไว้เพื่อถอดรหัสสำหรับการเล่น"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"อ่าน/เขียนไปยังรีซอร์สที่เป็นเจ้าของโดยกลุ่มวินิจฉัย"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"อนุญาตให้แอปพลิเคชันอ่านและเขียนไปยังทรัพยากรที่เป็นของกลุ่มวินิจฉัย เช่น ไฟล์ใน /dev การทำเช่นนี้อาจส่งผลต่อความเสถียรและความปลอดภัยของระบบ และควรใช้สำหรับการวินิจฉัยเกี่ยวกับฮาร์ดแวร์โดยเฉพาะที่ทำโดยผู้ผลิตหรือผู้ให้บริการเท่านั้น"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"เปิดหรือปิดใช้งานคอมโพเนนต์ของแอปพลิเคชัน"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"การจัดการบลูทูธ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"อนุญาตให้แอปพลิเคชันกำหนดค่าแท็บเล็ตบลูทูธในตัวเครื่อง รวมทั้งค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"อนุญาตให้แอปพลิเคชันกำหนดค่าโทรศัพท์บลูทูธในตัวเครื่อง ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ดูสถานะของ WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ดูสถานะของ WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับสถานะของ WiMAX"</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"เปลี่ยนสถานะของ WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"เปลี่ยนสถานะของ WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อกับเครือข่าย WiMAX"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"สร้างการเชื่อมต่อบลูทูธ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าของแท็บเล็ตบลูทูธในตัวเครื่อง ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"แบ่งปันกับ"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"ล็อกอุปกรณ์อยู่"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"กำลังส่ง..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"เปิดเบราว์เซอร์หรือไม่"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"รับสายหรือไม่"</string>
 </resources>

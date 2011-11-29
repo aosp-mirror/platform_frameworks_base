@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"O"</string>
+    <string name="byteShort" msgid="8340973892742019101">"o"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Ko"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Mo"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"Go"</string>
@@ -290,7 +290,7 @@
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"vider le cache des autres applications"</string>
     <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Permet à l\'application de supprimer les fichiers du cache."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"évaluer l\'espace de stockage de l\'application"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Permet à l\'application de récupérer la taille de son code, de ses données et de sa mémoire cache."</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Permet à l\'application de récupérer son code, ses données et la taille de sa mémoire cache."</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"installer directement les applications"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Permet à l\'application d\'installer des packages Android nouveaux ou mis à jour. Des applications malveillantes peuvent exploiter cette fonctionnalité pour ajouter de nouvelles applications à l\'aide d\'autorisations anormalement élevées."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"supprimer toutes les données du cache de l\'application"</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lire les données des journaux à caractère confidentiel"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permet à l\'application de lire les différents fichiers journaux du système afin d\'obtenir des informations générales sur la façon dont vous utilisez votre tablette. Celles-ci peuvent éventuellement inclure des informations d\'ordre personnel ou privé."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permet à l\'application de lire les différents fichiers journaux du système afin d\'obtenir des informations générales sur la façon dont vous utilisez votre téléphone. Celles-ci peuvent éventuellement inclure des informations d\'ordre personnel ou privé."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utiliser n\'importe quel décodeur pour lire les fichiers multimédias"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Permet à une application d\'utiliser n\'importe quel décodeur installé pour lire les fichiers multimédias."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lecture/écriture dans les ressources appartenant aux diagnostics"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet à l\'application d\'obtenir des droits en lecture/écriture concernant toute ressource appartenant au groupe de diagnostics (par exemple, les fichiers du répertoire /dev). Ceci peut affecter la stabilité et la sécurité du système. Cette fonctionnalité est UNIQUEMENT réservée aux diagnostics matériels effectués par le fabricant ou l\'opérateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activer ou désactiver les composants de l\'application"</string>
@@ -449,7 +451,7 @@
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Accès Internet complet"</string>
     <string name="permdesc_createNetworkSockets" msgid="5963922297444265950">"Permet à l\'application de créer des connecteurs réseau."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau dans le but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau ayant pour but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"Modification de la connectivité du réseau"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet à l\'application de modifier l\'état de la connectivité du réseau."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"changer la connectivité du partage de connexion"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"gestion Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permet à l\'application de configurer la tablette Bluetooth locale, d\'identifier des appareils distants et de les associer à la tablette."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permet à l\'application de configurer le téléphone Bluetooth local, d\'identifier des appareils distants et de les associer au téléphone."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"afficher l\'état du WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Afficher l\'état du WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet à une application d\'afficher les informations concernant l\'état du WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"modifier l\'état du WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Modifier l\'état du WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet à une application de se connecter au réseau WiMAX et de s\'en déconnecter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Création de connexions Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Permet à l\'application d\'obtenir la configuration de la tablette Bluetooth locale, de se connecter à des appareils associés et d\'accepter leur connexion."</string>
@@ -510,7 +512,7 @@
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Gérer le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le téléphone ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Contrôle le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouille le téléphone ou efface toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Verrouiller l\'écran"</string>
@@ -875,7 +877,7 @@
     <string name="replace" msgid="5781686059063148930">"Remplacer..."</string>
     <string name="delete" msgid="6098684844021697789">"Supprimer"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copier l\'URL"</string>
-    <string name="selectTextMode" msgid="1018691815143165326">"Sélectionner le texte"</string>
+    <string name="selectTextMode" msgid="1018691815143165326">"Sélectionner texte"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Sélection de texte"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"ajouter au dictionnaire"</string>
     <string name="deleteText" msgid="7070985395199629156">"supprimer"</string>
@@ -1014,7 +1016,7 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connecté en tant que programme d\'installation"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Appuyez pour accéder aux autres options USB."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater la mémoire ?"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formater mémoire ?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formater la carte SD ?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Tous les fichiers stockés sur la mémoire de stockage USB vont être effacés. Cette action est irréversible."</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Toutes les données stockées sur votre carte seront perdues."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Partager avec"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Appareil verrouillé"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Envoi en cours…"</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur ?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Prendre l\'appel ?"</string>
 </resources>

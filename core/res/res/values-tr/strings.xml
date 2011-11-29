@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"hassas günlük verilerini okuma"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Uygulamaya, sisteme ait çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, kişisel ve gizli bilgileriniz de dahil olmak üzere tablette yaptıklarınızla ilgili genel bilgileri bulmasına olanak verir."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Uygulamaya, sisteme ait çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, kişisel ve gizli bilgileriniz de dahil olmak üzere telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak verir."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"oynatma için herhangi bir medya kod çözücüyü kullan"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Uygulamaya, oynatma kodunu çözmek için herhangi bir yüklü medya kod çözücüyü kullanma izni verir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Uygulamaya, tanılama grubunun sahip olduğu tüm kaynaklara (örneğin /dev içindeki dosyalar) okuma ve yazma izni verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth yönetimi"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Uygulamaya, yerel Bluetooth tabletini yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Uygulamaya, yerel Bluetooth telefonunu yapılandırma ve uzak cihazları keşfedip bunlarla eşleşme izni verir."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX durumunu görüntüle"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX durumunu görüntüle"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Uygulamanın, WiMAX\'ın durumuyla ilgili bilgileri görüntülemesine izin verir."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX durumunu değiştir"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX durumunu değiştir"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Uygulamanın, WiMAX ağına bağlanmasına veya bağlantısını kesmesine izin verir."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth bağlantıları oluştur"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Uygulamaya, yerel Bluetooth tabletinin yapılandırmasını görüntüleme, eşleştirilmiş cihazlarla bağlantı yapma ve bu tür bağlantıları kabul etme izni verir."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Şununla paylaş:"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Cihaz kilitli."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Gönderiliyor..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Tarayıcı Başlatılsın mı?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Çağrı Kabul Edilsin mi?"</string>
 </resources>

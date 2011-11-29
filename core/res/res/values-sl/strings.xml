@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"branje občutljivih dnevniških podatkov"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v tabličnem računalniku, lahko tudi do osebnih podatkov."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Programu omogoča branje različnih sistemskih dnevniških datotek. To mu omogoča dostop do splošnih podatkov v telefonu, lahko tudi do osebnih podatkov."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"uporaba katerega koli predstavnostnega dekodirnika za predvajanje"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Programu dovoljuje uporabo katerega koli nameščenega predstavnostnega dekodirnika za dekodiranje pri predvajanju."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"branje/pisanje v sredstva, ki so v lasti skupine za diagnostiko"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Programu omogoča branje in pisanje na poljuben vir, ki je v lasti skupine za diagnostiko; na primer datoteke v mapi /dev. To lahko vpliva na stabilnost in varnost sistema. To naj uporablja SAMO izdelovalec ali operater za diagnostiko, specifično za strojno opremo."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogočanje ali onemogočanje komponent programa"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"skrbništvo storitve Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Programu omogoča konfiguriranje lokalnega tabličnega računalnika Bluetooth ter zaznavanje oddaljenih naprav in združevanje z njimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Programu omogoča konfiguriranje lokalnega telefona s tehnologijo Bluetooth ter odkrivanje oddaljenih naprav in povezovanje z njimi."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"prikaz stanja omrežja WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Prikaz stanja omrežja WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Programu omogoča prikaz podatkov o stanju omrežja WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"sprememba stanja omrežja WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Sprememba stanja omrežja WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Programu omogoča povezovanje v omrežje WiMAX in prekinitev povezave."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ustvarjanje povezav Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Programu omogoča ogled konfiguracije lokalnega tabličnega računalnika Bluetooth ter vzpostavljanje in sprejemanje povezave z združenimi napravami."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Delite z"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naprava zaklenjena."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Pošiljanje ..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Ali želite odpreti brskalnik?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Ali želite sprejeti klic?"</string>
 </resources>

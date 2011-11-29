@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"read sensitive log data"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Allows the app to read from the system\'s various log files. This allows it to discover general information about what you are doing with the tablet, potentially including personal or private information."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Allows the app to read from the system\'s various log files. This allows it to discover general information about what you are doing with the phone, potentially including personal or private information."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"use any media decoder for playback"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Allows an application to use any media decoder installed to decode for playback."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"read/write to resources owned by diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Allows the app to read and write to any resource owned by the diag group; for example, files in /dev. This could potentially affect system stability and security. This should ONLY be used for hardware-specific diagnostics by the manufacturer or operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"enable or disable app components"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth administration"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Allows the app to configure the local Bluetooth tablet and to discover and pair with remote devices."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Allows the app to configure the local Bluetooth phone and to discover and pair with remote devices."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"view WiMAX state"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"view WiMAX state"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Allows an application to view the information about the state of WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"change WiMAX state"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"change WiMAX state"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Allows an application to connect to and disconnect from WiMAX network."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"create Bluetooth connections"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Allows the app to view the configuration of the local Bluetooth tablet, and to make and accept connections with paired devices."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Share with"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Device locked."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Sending..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Launch Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Accept Call?"</string>
 </resources>

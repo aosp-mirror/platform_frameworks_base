@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lees sensitiewe logdata"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Laat die program toe om uit die stelsel se verskeie loglêers te lees. Dit laat \'n program toe om algemene inligting te ontdek oor wat jy met die tablet doen, wat moontlik persoonlike of private inligting kan insluit."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Laat die program toe om uit die stelsel se verskeie loglêers te lees. Dit laat \'n program toe om algemene inligting te ontdek oor wat jy met die foon doen, wat moontlik persoonlike of private inligting kan insluit."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gebruik enige mediadekodeerder vir terugspeel"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Hiermee kan \'n program enige geïnstalleerde mediadekodeerder gebruik om te dekodeer vir terugspeel."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-administrasie"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Laat die program toe om die plaaslike Bluetooth-tablet op te stel, en om met afstandbeheer toestelle saam te bind."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Laat die program toe om die plaaslike Bluetooth-foon op te stel en te ontdek en met afgeleë toestelle saam te bind."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"sien WiMAX-status"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Sien WiMAX-status"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Laat \'n program toe om die inligting oor die status van WiMAX te sien."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"verander WiMAX-status"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Laat \'n program toe om aan die WiMAX-netwerk te koppel en te ontkoppel."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"skep Bluetooth-verbindings"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Laat die program toe om die opstelling van die plaaslike Bluetooth-tablet te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
@@ -492,7 +494,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"verander/vee uit USB-berging se inhoud"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"wysig/vee uit SD-kaart se inhoud"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-berging te skryf."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Laat die program toe om na die SD-kaart te skryf."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"verander/vee uit interne mediabergingsinhoud"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Laat die program toe om die inhoud van die interne mediaberging te verander."</string>
@@ -632,7 +634,7 @@
     <string name="relationTypeParent" msgid="4755635567562925226">"Ouer"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Vennoot"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Verwys deur"</string>
-    <string name="relationTypeRelative" msgid="1799819930085610271">"Relatief"</string>
+    <string name="relationTypeRelative" msgid="1799819930085610271">"Familielid"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Suster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Eggenoot"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Gepasmaakte"</string>
@@ -998,15 +1000,15 @@
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Kon nie jou SD-kaart vir USB-massaberging gebruik nie."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB gekoppel"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Kies om lêers na/van jou rekenaar te kopieer."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Skakel USB-geheue af"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Kies om USB-geheue af te skakel."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Skakel USB-berging af"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Kies om USB-berging af te skakel."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-berging in gebruik"</string>
     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Voordat jy USB-berging afskakel, maak seker dat jy jou Android se USB-berging van jou rekenaar ontheg (\"uitgestoot\") het."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Voordat jy die USB-berging afskakel, maak seker dat jy jou Android se SD-kaart uit die rekenaar ontheg (uitgeskiet) het."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Skakel USB-berging af"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Kon nie USB-berging afskakel nie. Kontroleer of jy die USB-gasheer ontheg het, en probeer dan weer."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Skakel USB-berging aan"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"As jy die USB-geheue aanskakel, sal sekere programme wat jy gebruik, stop en onbeskikbaar wees totdat jy die USB-geheue afskakel."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"As jy die USB-berging aanskakel, sal sekere programme wat jy gebruik, stop en onbeskikbaar wees totdat jy die USB-berging afskakel."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-handeling was onsuksesvol"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Gekoppel as \'n mediatoestel"</string>
@@ -1014,9 +1016,9 @@
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Gekoppel as \'n installeerder"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Gekoppel aan \'n USB-toebehoorsel"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Raak vir ander USB-opsies"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-geheue?"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-berging?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formateer SD-kaart?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-geheue gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-berging gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data op jou kaart sal verlore gaan."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formaat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deel met"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Toestel gesluit."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Stuur tans..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Aanvaar oproep?"</string>
 </resources>

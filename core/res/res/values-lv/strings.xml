@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"lasīt sensitīvus žurnāla datus"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Ļauj lietotnei lasīt informāciju no dažādiem sistēmas žurnālfailiem. Šādi lietotne var atrast vispārīgu informāciju par jūsu darbībām planšetdatorā, tostarp arī personas vai privātu informāciju."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ļauj lietotnei lasīt informāciju no dažādiem sistēmas žurnālfailiem. Šādi lietotne var atrast vispārīgu informāciju par jūsu darbībām tālrunī, tostarp arī personas vai privātu informāciju."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"multivides failu atskaņošanai izmantot jebkuru dekodētāju"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Ļauj lietojumprogrammai izmantot jebkuru instalētu multivides failu dekodētāju, lai dekodētu failus atskaņošanai."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ļauj lietotnei lasīt un rakstīt jebkurā resursā, kas pieder diagnostikas grupai, piemēram, failiem mapē /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Var izmantot ražotājs vai operators TIKAI konkrētas aparatūras diagnostikai."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"iespējot vai atspējot lietotnes komponentus"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth administrēšana"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ļauj lietotnei konfigurēt vietējo Bluetooth planšetdatoru, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ļauj lietotnei konfigurēt vietējo Bluetooth tālruni, kā arī atklāt attālas ierīces un savienot tās pārī."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX statusa skatīšana"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX statusa skatīšana"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Ļauj lietojumprogrammai skatīt informāciju par WiMAX statusu."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX statusa mainīšana"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Ļauj lietojumprogrammai izveidot un pārtraukt savienojumu ar WiMAX tīklu."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"izveidot Bluetooth savienojumus"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Ļauj lietotnei skatīt vietējā Bluetooth planšetdatora konfigurāciju, kā arī veidot un pieņemt savienojumus ar pārī savienotām ierīcēm."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Kopīgošana ar:"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Ierīce ir bloķēta."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Notiek sūtīšana..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Vai palaist pārlūkprogrammu?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Vai pieņemt zvanu?"</string>
 </resources>

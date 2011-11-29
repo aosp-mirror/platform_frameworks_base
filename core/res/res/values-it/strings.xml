@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"Lettura dati di registro sensibili"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Consente all\'applicazione di leggere vari file di registro del sistema per trovare informazioni generali sulle operazioni effettuate con il tablet. Tali file potrebbero contenere informazioni personali o riservate."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Consente all\'applicazione di leggere vari file di registro del sistema per trovare informazioni generali sulle operazioni effettuate con il telefono. Tali file potrebbero contenere informazioni personali o riservate."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"uso di qualsiasi decoder multimediale per la riproduzione"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Consente a un\'applicazione di utilizzare qualsiasi decoder multimediale installato per la decodifica ai fini della riproduzione."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lettura/scrittura risorse di proprietà di diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Consente all\'applicazione di leggere le risorse del gruppo diag e scrivere in esse, ad esempio i file in /dev. Ciò potrebbe influire su stabilità e sicurezza del sistema. Dovrebbe essere utilizzata SOLTANTO per diagnostiche specifiche dell\'hardware effettuate dal produttore o dall\'operatore."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"attivazione/disattivazione componenti applicazioni"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"gestione Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Consente all\'applicazione di configurare il tablet Bluetooth locale e di rilevare ed effettuare l\'accoppiamento con dispositivi remoti."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Consente all\'applicazione di configurare il telefono Bluetooth locale e di rilevare ed effettuare l\'accoppiamento con dispositivi remoti."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"visualizzazione stato WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Visualizzazione stato WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Consente a un\'applicazione di visualizzare le informazioni relative allo stato della rete WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"modifica stato WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Modifica stato WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Consente a un\'applicazione di connettersi/disconnettersi dalla rete WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"creazione connessioni Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Consente all\'applicazione di visualizzare la configurazione del tablet Bluetooth locale e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Condividi con"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloccato."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Invio..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Avviare l\'applicazione Browser?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Accettare la chiamata?"</string>
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"skaityti slaptus žurnalo duomenis"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Leidžiama programai skaityti iš įvairių sistemos žurnalų failų. Taip galima atrasti bendrą informaciją apie tai, ką darote naudodami planšetinį kompiuterį, potencialiai įtraukiant asmeninę ar privačią informaciją."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Leidžiama programai skaityti iš įvairių sistemos žurnalų failų. Taip galima atrasti bendrą informaciją apie tai, ką darote telefonu, potencialiai įtraukiant asmeninę ar privačią informaciją."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"atkuriant naudoti bet kurį medijos dekoderį"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"„Bluetooth“ administravimas"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Leidžiama programai konfigūruoti vietinį „Bluetooth“ planšetinį kompiuterį ir atrasti nuotolinius įrenginius bei su jais susieti."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Leidžiama programai konfigūruoti vietinį „Bluetooth“ telefoną ir atrasti bei susieti su nuotoliniais įrenginiais."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"žiūrėti „WiMAX“ būseną"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Žiūrėti „WiMAX“ būseną"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Leidžiama programai matyti informaciją apie „WiMAX“ būseną."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"keisti „WiMAX“ būseną"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Keisti „WiMAX“ būseną"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Leidžiama programai prisijungti prie „WiMAX“ tinklo ir nuo jo atsijungti."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"kurti „Bluetooth“ ryšius"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Leidžiama programai peržiūrėti vietinio „Bluetooth“ planšetinio kompiuterio konfigūraciją ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Bendrinti su"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Įrenginys užrakintas."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Siunčiama..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Paleisti naršyklę?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Priimti skambutį?"</string>
 </resources>

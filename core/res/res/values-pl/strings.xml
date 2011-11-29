@@ -36,7 +36,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem z połączeniem lub błędny kod MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operacja jest ograniczona wyłącznie do numerów ustalonych."</string>
-    <string name="serviceEnabled" msgid="8147278346414714315">"Usługa była włączona."</string>
+    <string name="serviceEnabled" msgid="8147278346414714315">"Usługa została włączona."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Usługa została włączona dla:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Usługa została wyłączona."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Rejestracja powiodła się."</string>
@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"odczyt wrażliwych danych dziennika"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Pozwala aplikacji na odczyt różnych plików dzienników systemowych. Dzięki temu może ona uzyskać ogólne informacje na temat korzystania z tabletu, co potencjalnie może obejmować również informacje prywatne lub osobiste."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Pozwala aplikacji na odczyt różnych plików dzienników systemowych. Dzięki temu może ona poznać ogólne informacje na temat korzystania z telefonu, co potencjalnie może obejmować również informacje prywatne lub osobiste."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"użycie dowolnego dekodera multimediów w celu odtwarzania"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Zezwala aplikacji na użycie dowolnego zainstalowanego dekodera multimediów w celu odtwarzania."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"czytanie/zapisywanie w zasobach należących do diagnostyki"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pozwala aplikacji na czytanie i zapisywanie wszystkich zasobów należących do grupy diagnostyki, na przykład plików w katalogu /dev. Może to potencjalnie wpłynąć na stabilność i bezpieczeństwo systemu. Powinno być wykorzystywane WYŁĄCZNIE do diagnozowania sprzętu przez producenta lub operatora."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"włączanie lub wyłączanie składników aplikacji"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"administrowanie Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Pozwala aplikacji na konfigurowanie lokalnego tabletu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i parowanie z nimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Pozwala aplikacji na konfigurowanie lokalnego telefonu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i parowanie z nimi."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"wyświetlanie stanu WiMAX"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Wyświetl stan WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Zezwala aplikacji na dostęp do informacji o stanie połączenia WiMAX."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"zmiana stanu WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmień stan WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Zezwala aplikacji na łączenie się i rozłączanie z siecią WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"tworzenie połączeń Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Pozwala aplikacji na wyświetlanie konfiguracji lokalnego tabletu z funkcją Bluetooth oraz na nawiązywanie i akceptowanie połączeń ze sparowanymi urządzeniami."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Urządzenie zablokowane."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Wysyłanie..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Odebrać połączenie?"</string>
 </resources>

@@ -301,6 +301,8 @@
     <string name="permlab_readLogs" msgid="6615778543198967614">"gevoelige logbestandsgegevens lezen"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Hiermee kan de app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw tabletgebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Hiermee kan de app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw telefoongebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
+    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"elke mediadecoder gebruiken voor afspelen"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Hiermee kan een app alle geïnstalleerde mediadecoders gebruiken om te decoderen voor het afspelen."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Hiermee kan de app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of provider."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"componenten van apps in- of uitschakelen"</string>
@@ -465,9 +467,9 @@
     <string name="permlab_bluetoothAdmin" msgid="3606576270792236062">"Bluetooth-beheer"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
-    <!-- outdated translation 2800410363171809280 -->     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-status bekijken"</string>
+    <string name="permlab_accessWimaxState" msgid="1232061307208861588">"WiMAX-status bekijken"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Hiermee kan een app informatie over de WiMAX-status bekijken."</string>
-    <!-- outdated translation 340465839241528618 -->     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Hiermee kan een app verbinding maken met een WiMAX-netwerk en deze verbreken."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-verbindingen maken"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Hiermee kan de app de configuratie van een lokale Bluetooth-tablet bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
@@ -1219,4 +1221,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Delen met"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Apparaat vergrendeld."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
+    <string name="sending" msgid="8715108995741758718">"Verzenden..."</string>
+    <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
+    <string name="SetupCallDefault" msgid="6870275517518479651">"Oproep accepteren?"</string>
 </resources>
