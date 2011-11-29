@@ -418,7 +418,7 @@ public class StateMachine {
     public static final int SM_QUIT_CMD = -1;
 
     /** Message.what value when initializing */
-    public static final int SM_INIT_CMD = -1;
+    public static final int SM_INIT_CMD = -2;
 
     /**
      * Convenience constant that maybe returned by processMessage
@@ -569,6 +569,13 @@ public class StateMachine {
         }
 
         /**
+         * Clear the list of Processed Message Info.
+         */
+        void cleanup() {
+            mMessages.clear();
+        }
+
+        /**
          * @return the information on a particular record. 0 is the oldest
          * record and size()-1 is the newest record. If the index is to
          * large null is returned.
@@ -607,6 +614,7 @@ public class StateMachine {
             }
         }
     }
+
 
     private static class SmHandler extends Handler {
 
@@ -782,15 +790,8 @@ public class StateMachine {
              */
             if (destState != null) {
                 if (destState == mQuittingState) {
-                    /**
-                     * We are quitting so ignore all messages.
-                     */
-                    mSm.quitting();
-                    if (mSm.mSmThread != null) {
-                        // If we made the thread then quit looper which stops the thread.
-                        getLooper().quit();
-                        mSm.mSmThread = null;
-                    }
+                    cleanupAfterQuitting();
+
                 } else if (destState == mHaltingState) {
                     /**
                      * Call halting() if we've transitioned to the halting
@@ -800,6 +801,29 @@ public class StateMachine {
                     mSm.halting();
                 }
             }
+        }
+
+        /**
+         * Cleanup all the static variables and the looper after the SM has been quit.
+         */
+        private final void cleanupAfterQuitting() {
+            mSm.quitting();
+            if (mSm.mSmThread != null) {
+                // If we made the thread then quit looper which stops the thread.
+                getLooper().quit();
+                mSm.mSmThread = null;
+            }
+
+            mSm.mSmHandler = null;
+            mSm = null;
+            mMsg = null;
+            mProcessedMessages.cleanup();
+            mStateStack = null;
+            mTempStateStack = null;
+            mStateInfo.clear();
+            mInitialState = null;
+            mDestState = null;
+            mDeferredMessages.clear();
         }
 
         /**
