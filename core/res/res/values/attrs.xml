@@ -1493,6 +1493,10 @@
         <enum name="KEYCODE_LANGUAGE_SWITCH" value="204" />
         <enum name="KEYCODE_MANNER_MODE" value="205" />
         <enum name="KEYCODE_3D_MODE" value="206" />
+        <enum name="KEYCODE_CONTACTS" value="207" />
+        <enum name="KEYCODE_CALENDAR" value="208" />
+        <enum name="KEYCODE_MUSIC" value="209" />
+        <enum name="KEYCODE_CALCULATOR" value="210" />
     </attr>
 
     <!-- ***************************************************************** -->
