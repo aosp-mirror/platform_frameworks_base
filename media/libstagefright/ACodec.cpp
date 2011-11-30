@@ -342,6 +342,7 @@ void ACodec::initiateSetup(const sp<AMessage> &msg) {
 }
 
 void ACodec::signalFlush() {
+    LOGV("[%s] signalFlush", mComponentName.c_str());
     (new AMessage(kWhatFlush, id()))->post();
 }
 
@@ -1090,6 +1091,20 @@ status_t ACodec::initNativeWindow() {
 
     mOMX->enableGraphicBuffers(mNode, kPortIndexOutput, OMX_FALSE);
     return OK;
+}
+
+size_t ACodec::countBuffersOwnedByComponent(OMX_U32 portIndex) const {
+    size_t n = 0;
+
+    for (size_t i = 0; i < mBuffers[portIndex].size(); ++i) {
+        const BufferInfo &info = mBuffers[portIndex].itemAt(i);
+
+        if (info.mStatus == BufferInfo::OWNED_BY_COMPONENT) {
+            ++n;
+        }
+    }
+
+    return n;
 }
 
 bool ACodec::allYourBuffersAreBelongToUs(
@@ -2041,6 +2056,14 @@ bool ACodec::ExecutingState::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatFlush:
         {
+            LOGV("[%s] ExecutingState flushing now "
+                 "(codec owns %d/%d input, %d/%d output).",
+                    mCodec->mComponentName.c_str(),
+                    mCodec->countBuffersOwnedByComponent(kPortIndexInput),
+                    mCodec->mBuffers[kPortIndexInput].size(),
+                    mCodec->countBuffersOwnedByComponent(kPortIndexOutput),
+                    mCodec->mBuffers[kPortIndexOutput].size());
+
             mActive = false;
 
             CHECK_EQ(mCodec->mOMX->sendCommand(
@@ -2180,6 +2203,12 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
                          err);
 
                     mCodec->signalError();
+
+                    // This is technically not correct, since we were unable
+                    // to allocate output buffers and therefore the output port
+                    // remains disabled. It is necessary however to allow us
+                    // to shutdown the codec properly.
+                    mCodec->changeState(mCodec->mExecutingState);
                 }
 
                 return true;
@@ -2408,6 +2437,9 @@ bool ACodec::FlushingState::onMessageReceived(const sp<AMessage> &msg) {
 
 bool ACodec::FlushingState::onOMXEvent(
         OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
+    LOGV("[%s] FlushingState onOMXEvent(%d,%ld)",
+            mCodec->mComponentName.c_str(), event, data1);
+
     switch (event) {
         case OMX_EventCmdComplete:
         {
