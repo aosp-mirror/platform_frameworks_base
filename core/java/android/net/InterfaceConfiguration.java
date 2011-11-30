@@ -16,34 +16,100 @@
 
 package android.net;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.google.android.collect.Sets;
+
+import java.util.HashSet;
 
 /**
- * A simple object for retrieving / setting an interfaces configuration
+ * Configuration details for a network interface.
+ *
  * @hide
  */
 public class InterfaceConfiguration implements Parcelable {
-    public String hwAddr;
-    public LinkAddress addr;
-    public String interfaceFlags;
+    private String mHwAddr;
+    private LinkAddress mAddr;
+    private HashSet<String> mFlags = Sets.newHashSet();
 
-    public InterfaceConfiguration() {
-        super();
+    private static final String FLAG_UP = "up";
+    private static final String FLAG_DOWN = "down";
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("mHwAddr=").append(mHwAddr);
+        builder.append(" mAddr=").append(String.valueOf(mAddr));
+        builder.append(" mFlags=").append(getFlags());
+        return builder.toString();
     }
 
-    public String toString() {
-        StringBuffer str = new StringBuffer();
+    /**
+     * Return flags separated by spaces.
+     */
+    public String getFlags() {
+        final int size = mFlags.size();
+        if (size == 0) {
+            return "";
+        }
 
-        str.append("ipddress ");
-        str.append((addr != null) ? addr.toString() : "NULL");
-        str.append(" flags ").append(interfaceFlags);
-        str.append(" hwaddr ").append(hwAddr);
+        final String[] flags = mFlags.toArray(new String[size]);
+        final StringBuilder builder = new StringBuilder();
 
-        return str.toString();
+        builder.append(flags[0]);
+        for (int i = 1; i < flags.length; i++) {
+            builder.append(' ');
+            builder.append(flags[i]);
+        }
+        return builder.toString();
+    }
+
+    public boolean hasFlag(String flag) {
+        validateFlag(flag);
+        return mFlags.contains(flag);
+    }
+
+    public void clearFlag(String flag) {
+        validateFlag(flag);
+        mFlags.remove(flag);
+    }
+
+    public void setFlag(String flag) {
+        validateFlag(flag);
+        mFlags.add(flag);
+    }
+
+    /**
+     * Set flags to mark interface as up.
+     */
+    public void setInterfaceUp() {
+        mFlags.remove(FLAG_DOWN);
+        mFlags.add(FLAG_UP);
+    }
+
+    /**
+     * Set flags to mark interface as down.
+     */
+    public void setInterfaceDown() {
+        mFlags.remove(FLAG_UP);
+        mFlags.add(FLAG_DOWN);
+    }
+
+    public LinkAddress getLinkAddress() {
+        return mAddr;
+    }
+
+    public void setLinkAddress(LinkAddress addr) {
+        mAddr = addr;
+    }
+
+    public String getHardwareAddress() {
+        return mHwAddr;
+    }
+
+    public void setHardwareAddress(String hwAddr) {
+        mHwAddr = hwAddr;
     }
 
     /**
@@ -55,8 +121,8 @@ public class InterfaceConfiguration implements Parcelable {
      */
     public boolean isActive() {
         try {
-            if(interfaceFlags.contains("up")) {
-                for (byte b : addr.getAddress().getAddress()) {
+            if (hasFlag(FLAG_UP)) {
+                for (byte b : mAddr.getAddress().getAddress()) {
                     if (b != 0) return true;
                 }
             }
@@ -66,38 +132,49 @@ public class InterfaceConfiguration implements Parcelable {
         return false;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** {@inheritDoc} */
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface {@hide} */
+    /** {@inheritDoc} */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(hwAddr);
-        if (addr != null) {
+        dest.writeString(mHwAddr);
+        if (mAddr != null) {
             dest.writeByte((byte)1);
-            dest.writeParcelable(addr, flags);
+            dest.writeParcelable(mAddr, flags);
         } else {
             dest.writeByte((byte)0);
         }
-        dest.writeString(interfaceFlags);
+        dest.writeInt(mFlags.size());
+        for (String flag : mFlags) {
+            dest.writeString(flag);
+        }
     }
 
-    /** Implement the Parcelable interface {@hide} */
-    public static final Creator<InterfaceConfiguration> CREATOR =
-        new Creator<InterfaceConfiguration>() {
-            public InterfaceConfiguration createFromParcel(Parcel in) {
-                InterfaceConfiguration info = new InterfaceConfiguration();
-                info.hwAddr = in.readString();
-                if (in.readByte() == 1) {
-                    info.addr = in.readParcelable(null);
-                }
-                info.interfaceFlags = in.readString();
-                return info;
+    public static final Creator<InterfaceConfiguration> CREATOR = new Creator<
+            InterfaceConfiguration>() {
+        public InterfaceConfiguration createFromParcel(Parcel in) {
+            InterfaceConfiguration info = new InterfaceConfiguration();
+            info.mHwAddr = in.readString();
+            if (in.readByte() == 1) {
+                info.mAddr = in.readParcelable(null);
             }
+            final int size = in.readInt();
+            for (int i = 0; i < size; i++) {
+                info.mFlags.add(in.readString());
+            }
+            return info;
+        }
 
-            public InterfaceConfiguration[] newArray(int size) {
-                return new InterfaceConfiguration[size];
-            }
-        };
+        public InterfaceConfiguration[] newArray(int size) {
+            return new InterfaceConfiguration[size];
+        }
+    };
+
+    private static void validateFlag(String flag) {
+        if (flag.indexOf(' ') >= 0) {
+            throw new IllegalArgumentException("flag contains space: " + flag);
+        }
+    }
 }

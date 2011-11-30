@@ -395,7 +395,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
 
             cfg = new InterfaceConfiguration();
-            cfg.hwAddr = st.nextToken(" ");
+            cfg.setHardwareAddress(st.nextToken(" "));
             InetAddress addr = null;
             int prefixLength = 0;
             try {
@@ -410,27 +410,29 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 Slog.e(TAG, "Failed to parse prefixLength", nfe);
             }
 
-            cfg.addr = new LinkAddress(addr, prefixLength);
-            cfg.interfaceFlags = st.nextToken("]").trim() +"]";
+            cfg.setLinkAddress(new LinkAddress(addr, prefixLength));
+            while (st.hasMoreTokens()) {
+                cfg.setFlag(st.nextToken());
+            }
         } catch (NoSuchElementException nsee) {
             throw new IllegalStateException(
                     String.format("Invalid response from daemon (%s)", rsp));
         }
-        Slog.d(TAG, String.format("flags <%s>", cfg.interfaceFlags));
+        Slog.d(TAG, String.format("flags <%s>", cfg.getFlags()));
         return cfg;
     }
 
     @Override
     public void setInterfaceConfig(String iface, InterfaceConfiguration cfg) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        LinkAddress linkAddr = cfg.addr;
+        LinkAddress linkAddr = cfg.getLinkAddress();
         if (linkAddr == null || linkAddr.getAddress() == null) {
             throw new IllegalStateException("Null LinkAddress given");
         }
         String cmd = String.format("interface setcfg %s %s %d %s", iface,
                 linkAddr.getAddress().getHostAddress(),
                 linkAddr.getNetworkPrefixLength(),
-                cfg.interfaceFlags);
+                cfg.getFlags());
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
@@ -443,7 +445,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setInterfaceDown(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
-        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+        ifcg.setInterfaceDown();
         setInterfaceConfig(iface, ifcg);
     }
 
@@ -451,7 +453,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setInterfaceUp(String iface) {
         mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
-        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+        ifcg.setInterfaceUp();
         setInterfaceConfig(iface, ifcg);
     }
 
