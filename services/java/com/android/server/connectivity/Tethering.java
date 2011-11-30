@@ -545,14 +545,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     ifcg = mNMService.getInterfaceConfig(iface);
                     if (ifcg != null) {
                         InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
-                        ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
+                        ifcg.setLinkAddress(new LinkAddress(addr, USB_PREFIX_LENGTH));
                         if (enabled) {
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                            ifcg.setInterfaceUp();
                         } else {
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+                            ifcg.setInterfaceDown();
                         }
-                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                        ifcg.clearFlag("running");
                         mNMService.setInterfaceConfig(iface, ifcg);
                     }
                 } catch (Exception e) {

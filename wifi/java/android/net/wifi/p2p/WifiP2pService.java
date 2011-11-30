@@ -1230,9 +1230,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         InterfaceConfiguration ifcg = null;
         try {
             ifcg = mNwService.getInterfaceConfig(intf);
-            ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
-                        SERVER_ADDRESS), 24);
-            ifcg.interfaceFlags = "[up]";
+            ifcg.setLinkAddress(new LinkAddress(NetworkUtils.numericToInetAddress(
+                        SERVER_ADDRESS), 24));
+            ifcg.setInterfaceUp();
             mNwService.setInterfaceConfig(intf, ifcg);
             /* This starts the dnsmasq server */
             mNwService.startTethering(DHCP_RANGE);
