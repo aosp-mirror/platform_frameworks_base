@@ -110,9 +110,9 @@ public class ProfiledWebView extends WebView {
      * been redrawn.
      */
     @Override
-    protected void pageSwapCallback() {
+    protected void pageSwapCallback(boolean startAnim) {
         mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
-        super.pageSwapCallback();
+        super.pageSwapCallback(startAnim);
         Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis
                 + "millis");
         mIsTesting = true;
