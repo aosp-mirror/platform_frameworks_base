@@ -477,7 +477,7 @@ bool AudioTrack::muted() const
 
 status_t AudioTrack::setVolume(float left, float right)
 {
-    if (left > 1.0f || right > 1.0f) {
+    if (left < 0.0f || left > 1.0f || right < 0.0f || right > 1.0f) {
         return BAD_VALUE;
     }
 
