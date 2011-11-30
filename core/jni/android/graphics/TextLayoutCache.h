@@ -256,12 +256,12 @@ private:
 
     size_t shapeFontRun(SkPaint* paint, bool isRTL);
 
-    void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+    void computeValues(SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
-    void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+    void computeRunValues(SkPaint* paint, const UChar* chars,
             size_t count, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
