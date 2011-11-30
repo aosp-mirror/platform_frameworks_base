@@ -4604,14 +4604,15 @@ public class WebView extends AbsoluteLayout
         boolean UIAnimationsRunning = false;
         // Currently for each draw we compute the animation values;
         // We may in the future decide to do that independently.
-        if (mNativeClass != 0 && nativeEvaluateLayersAnimations(mNativeClass)) {
+        if (mNativeClass != 0 && !canvas.isHardwareAccelerated()
+                && nativeEvaluateLayersAnimations(mNativeClass)) {
             UIAnimationsRunning = true;
             // If we have unfinished (or unstarted) animations,
             // we ask for a repaint. We only need to do this in software
             // rendering (with hardware rendering we already have a different
             // method of requesting a repaint)
-            if (!canvas.isHardwareAccelerated())
-                invalidate();
+            mWebViewCore.sendMessage(EventHub.NOTIFY_ANIMATION_STARTED);
+            invalidate();
         }
 
         // decide which adornments to draw
@@ -8796,9 +8797,12 @@ public class WebView extends AbsoluteLayout
 
     /** @hide Called by JNI when pages are swapped (only occurs with hardware
      * acceleration) */
-    protected void pageSwapCallback() {
+    protected void pageSwapCallback(boolean notifyAnimationStarted) {
         if (inEditingMode()) {
             didUpdateWebTextViewDimensions(ANYWHERE);
+        }
+        if (notifyAnimationStarted) {
+            mWebViewCore.sendMessage(EventHub.NOTIFY_ANIMATION_STARTED);
         }
     }
 
