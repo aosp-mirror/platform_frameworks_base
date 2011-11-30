@@ -52,15 +52,20 @@ struct IStreamListener : public IInterface {
     static const char *const kKeyResumeAtPTS;
 
     // When signalling a discontinuity you can optionally
-    // signal that this is a "hard" discontinuity, i.e. the format
-    // or configuration of subsequent stream data differs from that
-    // currently active. To do so, include a non-zero int32_t value
-    // under the key "kKeyFormatChange" when issuing the DISCONTINUITY
+    // specify the type(s) of discontinuity, i.e. if the
+    // audio format has changed, the video format has changed,
+    // time has jumped or any combination thereof.
+    // To do so, include a non-zero int32_t value
+    // under the key "kKeyDiscontinuityMask" when issuing the DISCONTINUITY
     // command.
-    // The new logical stream must start with proper codec initialization
+    // If there is a change in audio/video format, The new logical stream
+    // must start with proper codec initialization
     // information for playback to continue, i.e. SPS and PPS in the case
     // of AVC video etc.
-    static const char *const kKeyFormatChange;
+    // If this key is not present, only a time discontinuity is assumed.
+    // The value should be a bitmask of values from
+    // ATSParser::DiscontinuityType.
+    static const char *const kKeyDiscontinuityMask;
 
     virtual void issueCommand(
             Command cmd, bool synchronous, const sp<AMessage> &msg = NULL) = 0;
