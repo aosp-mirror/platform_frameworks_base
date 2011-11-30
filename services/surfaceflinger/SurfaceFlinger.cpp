@@ -65,6 +65,8 @@
 #define AID_GRAPHICS 1003
 #endif
 
+#define EGL_VERSION_HW_ANDROID  0x3143
+
 #define DISPLAY_COUNT       1
 
 namespace android {
@@ -1527,7 +1529,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
          * Dump the layers in the purgatory
          */
 
-        const size_t purgatorySize =  mLayerPurgatory.size();
+        const size_t purgatorySize = mLayerPurgatory.size();
         snprintf(buffer, SIZE, "Purgatory state (%d entries)\n", purgatorySize);
         result.append(buffer);
         for (size_t i=0 ; i<purgatorySize ; i++) {
@@ -1548,6 +1550,12 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 extensions.getRenderer(),
                 extensions.getVersion());
         result.append(buffer);
+
+        snprintf(buffer, SIZE, "EGL : %s\n",
+                eglQueryString(graphicPlane(0).getEGLDisplay(),
+                        EGL_VERSION_HW_ANDROID));
+        result.append(buffer);
+
         snprintf(buffer, SIZE, "EXTS: %s\n", extensions.getExtension());
         result.append(buffer);
 
