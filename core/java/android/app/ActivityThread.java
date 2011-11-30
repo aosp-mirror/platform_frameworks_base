@@ -175,11 +175,11 @@ public final class ActivityThread {
     // These can be accessed by multiple threads; mPackages is the lock.
     // XXX For now we keep around information about all packages we have
     // seen, not removing entries from this map.
-    // NOTE: The activity manager in its process needs to call in to
+    // NOTE: The activity and window managers need to call in to
     // ActivityThread to do things like update resource configurations,
-    // which means this lock gets held while the activity manager holds its
-    // own lock.  Thus you MUST NEVER call back into the activity manager
-    // or anything that depends on it while holding this lock.
+    // which means this lock gets held while the activity and window managers
+    // holds their own lock.  Thus you MUST NEVER call back into the activity manager
+    // or window manager or anything that depends on them while holding this lock.
     final HashMap<String, WeakReference<LoadedApk>> mPackages
             = new HashMap<String, WeakReference<LoadedApk>>();
     final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
