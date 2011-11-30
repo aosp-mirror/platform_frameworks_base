@@ -27,30 +27,47 @@ import java.util.Vector;
 
 
 /**
- * This class is used to get Geolocation permissions from, and set them on the
- * WebView. For example, it could be used to allow a user to manage Geolocation
- * permissions from a browser's UI.
+ * This class is used to manage permissions for the WebView's Geolocation
+ * JavaScript API.
  *
- * Permissions are managed on a per-origin basis, as required by the
- * Geolocation spec - http://dev.w3.org/geo/api/spec-source.html. An origin
- * specifies the scheme, host and port of particular frame. An origin is
- * represented here as a string, using the output of
- * WebCore::SecurityOrigin::toString.
+ * Geolocation permissions are applied to an origin, which consists of the
+ * host, scheme and port of a URI. In order for web content to use the
+ * Geolocation API, permission must be granted for that content's origin.
  *
- * This class is the Java counterpart of the WebKit C++ GeolocationPermissions
- * class. It simply marshalls calls from the UI thread to the WebKit thread.
+ * This class stores Geolocation permissions. An origin's permission state can
+ * be either allowed or denied. This class uses Strings to represent
+ * an origin.
  *
- * Within WebKit, Geolocation permissions may be applied either temporarily
- * (for the duration of the page) or permanently. This class deals only with
- * permanent permissions.
+ * When an origin attempts to use the Geolocation API, but no permission state
+ * is currently set for that origin,
+ * {@link WebChromeClient#onGeolocationPermissionsShowPrompt(String,GeolocationPermissions.Callback) WebChromeClient.onGeolocationPermissionsShowPrompt()}
+ * is called. This allows the permission state to be set for that origin.
+ *
+ * The methods of this class can be used to modify and interrogate the stored
+ * Geolocation permissions at any time.
  */
+// This class is the Java counterpart of the WebKit C++ GeolocationPermissions
+// class. It simply marshalls calls from the UI thread to the WebKit thread.
+//
+// Within WebKit, Geolocation permissions may be applied either temporarily
+// (for the duration of the page) or permanently. This class deals only with
+// permanent permissions.
 public final class GeolocationPermissions {
     /**
-     * Callback interface used by the browser to report a Geolocation permission
-     * state set by the user in response to a permissions prompt.
+     * A callback interface used by the host application to set the Geolocation
+     * permission state for an origin.
      */
     public interface Callback {
-        public void invoke(String origin, boolean allow, boolean remember);
+        /**
+         * Set the Geolocation permission state for the supplied origin.
+         * @param origin The origin for which permissions are set.
+         * @param allow Whether or not the origin should be allowed to use the
+         *              Geolocation API.
+         * @param retain Whether the permission should be retained beyond the
+         *               lifetime of a page currently being displayed by a
+         *               WebView.
+         */
+        public void invoke(String origin, boolean allow, boolean retain);
     };
 
     // Log tag
@@ -82,7 +99,8 @@ public final class GeolocationPermissions {
     private static final String ALLOWED = "allowed";
 
     /**
-     * Gets the singleton instance of the class.
+     * Get the singleton instance of this class.
+     * @return The singleton {@link GeolocationPermissions} instance.
      */
     public static GeolocationPermissions getInstance() {
       if (sInstance == null) {
@@ -196,15 +214,18 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Gets the set of origins for which Geolocation permissions are stored.
-     * Note that we represent the origins as strings. These are created using
-     * WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
-     * (Database, Geolocation etc) do so, it's safe to match up origins based
-     * on this string.
-     *
-     * Callback is a ValueCallback object whose onReceiveValue method will be
-     * called asynchronously with the set of origins.
+     * Get the set of origins for which Geolocation permissions are stored.
+     * @param callback A {@link ValueCallback} to receive the result of this
+     *                 request. This object's
+     *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
+     *                 method will be invoked asynchronously with a set of
+     *                 Strings containing the origins for which Geolocation
+     *                 permissions are stored.
      */
+    // Note that we represent the origins as strings. These are created using
+    // WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
+    // (Database, Geolocation etc) do so, it's safe to match up origins based
+    // on this string.
     public void getOrigins(ValueCallback<Set<String> > callback) {
         if (callback != null) {
             if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
@@ -217,10 +238,14 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Gets the permission state for the specified origin.
-     *
-     * Callback is a ValueCallback object whose onReceiveValue method will be
-     * called asynchronously with the permission state for the origin.
+     * Get the Geolocation permission state for the specified origin.
+     * @param origin The origin for which Geolocation permission is requested.
+     * @param callback A {@link ValueCallback} to receive the result of this
+     *                 request. This object's
+     *                 {@link ValueCallback#onReceiveValue(T) onReceiveValue()}
+     *                 method will be invoked asynchronously with a boolean
+     *                 indicating whether or not the origin can use the
+     *                 Geolocation API.
      */
     public void getAllowed(String origin, ValueCallback<Boolean> callback) {
         if (callback == null) {
@@ -242,27 +267,31 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Clears the permission state for the specified origin. This method may be
-     * called before the WebKit thread has intialized the message handler.
-     * Messages will be queued until this time.
+     * Clear the Geolocation permission state for the specified origin.
+     * @param origin The origin for which Geolocation permissions are cleared.
      */
+    // This method may be called before the WebKit
+    // thread has intialized the message handler. Messages will be queued until
+    // this time.
     public void clear(String origin) {
         // Called on the UI thread.
         postMessage(Message.obtain(null, CLEAR, origin));
     }
 
     /**
-     * Allows the specified origin. This method may be called before the WebKit
-     * thread has intialized the message handler. Messages will be queued until
-     * this time.
+     * Allow the specified origin to use the Geolocation API.
+     * @param origin The origin for which Geolocation API use is allowed.
      */
+    // This method may be called before the WebKit
+    // thread has intialized the message handler. Messages will be queued until
+    // this time.
     public void allow(String origin) {
         // Called on the UI thread.
         postMessage(Message.obtain(null, ALLOW, origin));
     }
 
     /**
-     * Clears the permission state for all origins.
+     * Clear the Geolocation permission state for all origins.
      */
     public void clearAll() {
         // Called on the UI thread.
