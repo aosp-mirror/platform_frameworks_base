@@ -29,8 +29,17 @@
 namespace android {
 
 AnotherPacketSource::AnotherPacketSource(const sp<MetaData> &meta)
-    : mFormat(meta),
+    : mIsAudio(false),
+      mFormat(meta),
       mEOSResult(OK) {
+    const char *mime;
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    if (!strncasecmp("audio/", mime, 6)) {
+        mIsAudio = true;
+    } else {
+        CHECK(!strncasecmp("video/", mime, 6));
+    }
 }
 
 void AnotherPacketSource::setFormat(const sp<MetaData> &meta) {
@@ -67,8 +76,7 @@ status_t AnotherPacketSource::dequeueAccessUnit(sp<ABuffer> *buffer) {
 
         int32_t discontinuity;
         if ((*buffer)->meta()->findInt32("discontinuity", &discontinuity)) {
-
-            if (discontinuity == ATSParser::DISCONTINUITY_FORMATCHANGE) {
+            if (wasFormatChange(discontinuity)) {
                 mFormat.clear();
             }
 
@@ -96,7 +104,7 @@ status_t AnotherPacketSource::read(
 
         int32_t discontinuity;
         if (buffer->meta()->findInt32("discontinuity", &discontinuity)) {
-            if (discontinuity == ATSParser::DISCONTINUITY_FORMATCHANGE) {
+            if (wasFormatChange(discontinuity)) {
                 mFormat.clear();
             }
 
@@ -115,6 +123,15 @@ status_t AnotherPacketSource::read(
     }
 
     return mEOSResult;
+}
+
+bool AnotherPacketSource::wasFormatChange(
+        int32_t discontinuityType) const {
+    if (mIsAudio) {
+        return (discontinuityType & ATSParser::DISCONTINUITY_AUDIO_FORMAT) != 0;
+    }
+
+    return (discontinuityType & ATSParser::DISCONTINUITY_VIDEO_FORMAT) != 0;
 }
 
 void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
