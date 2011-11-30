@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /* //device/apps/common/assets/res/any/strings.xml
 **
@@ -1787,6 +1787,8 @@
     <string name="lockscreen_pattern_wrong">Try again</string>
     <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
     <string name="lockscreen_password_wrong">Try again</string>
+    <!-- Shown when face unlock failed multiple times so we're just using the backup -->
+    <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, show the current charge %.  -->
