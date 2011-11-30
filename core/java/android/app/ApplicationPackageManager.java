@@ -625,7 +625,7 @@ final class ApplicationPackageManager extends PackageManager {
             return info.activityInfo.loadIcon(this);
         }
 
-        throw new NameNotFoundException(intent.toURI());
+        throw new NameNotFoundException(intent.toUri(0));
     }
 
     @Override public Drawable getDefaultActivityIcon() {
@@ -728,15 +728,22 @@ final class ApplicationPackageManager extends PackageManager {
 
     private Drawable getCachedIcon(ResourceName name) {
         synchronized (sSync) {
-            WeakReference<Drawable> wr = sIconCache.get(name);
+            WeakReference<Drawable.ConstantState> wr = sIconCache.get(name);
             if (DEBUG_ICONS) Log.v(TAG, "Get cached weak drawable ref for "
                                    + name + ": " + wr);
             if (wr != null) {   // we have the activity
-                Drawable dr = wr.get();
-                if (dr != null) {
-                    if (DEBUG_ICONS) Log.v(TAG, "Get cached drawable for "
-                                           + name + ": " + dr);
-                    return dr;
+                Drawable.ConstantState state = wr.get();
+                if (state != null) {
+                    if (DEBUG_ICONS) {
+                        Log.v(TAG, "Get cached drawable state for " + name + ": " + state);
+                    }
+                    // Note: It's okay here to not use the newDrawable(Resources) variant
+                    //       of the API. The ConstantState comes from a drawable that was
+                    //       originally created by passing the proper app Resources instance
+                    //       which means the state should already contain the proper
+                    //       resources specific information (like density.) See
+                    //       BitmapDrawable.BitmapState for instance.
+                    return state.newDrawable();
                 }
                 // our entry has been purged
                 sIconCache.remove(name);
@@ -747,14 +754,12 @@ final class ApplicationPackageManager extends PackageManager {
 
     private void putCachedIcon(ResourceName name, Drawable dr) {
         synchronized (sSync) {
-            sIconCache.put(name, new WeakReference<Drawable>(dr));
-            if (DEBUG_ICONS) Log.v(TAG, "Added cached drawable for "
-                                   + name + ": " + dr);
+            sIconCache.put(name, new WeakReference<Drawable.ConstantState>(dr.getConstantState()));
+            if (DEBUG_ICONS) Log.v(TAG, "Added cached drawable state for " + name + ": " + dr);
         }
     }
 
-    static final void handlePackageBroadcast(int cmd, String[] pkgList,
-                                             boolean hasPkgInfo) {
+    static void handlePackageBroadcast(int cmd, String[] pkgList, boolean hasPkgInfo) {
         boolean immediateGc = false;
         if (cmd == IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE) {
             immediateGc = true;
@@ -1226,8 +1231,8 @@ final class ApplicationPackageManager extends PackageManager {
     private final IPackageManager mPM;
 
     private static final Object sSync = new Object();
-    private static HashMap<ResourceName, WeakReference<Drawable> > sIconCache
-            = new HashMap<ResourceName, WeakReference<Drawable> >();
-    private static HashMap<ResourceName, WeakReference<CharSequence> > sStringCache
-            = new HashMap<ResourceName, WeakReference<CharSequence> >();
+    private static HashMap<ResourceName, WeakReference<Drawable.ConstantState>> sIconCache
+            = new HashMap<ResourceName, WeakReference<Drawable.ConstantState>>();
+    private static HashMap<ResourceName, WeakReference<CharSequence>> sStringCache
+            = new HashMap<ResourceName, WeakReference<CharSequence>>();
 }
