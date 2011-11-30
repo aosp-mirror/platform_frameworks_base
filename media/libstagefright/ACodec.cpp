@@ -342,7 +342,7 @@ void ACodec::initiateSetup(const sp<AMessage> &msg) {
 }
 
 void ACodec::signalFlush() {
-    LOGV("[%s] signalFlush", mComponentName.c_str());
+    ALOGV("[%s] signalFlush", mComponentName.c_str());
     (new AMessage(kWhatFlush, id()))->post();
 }
 
@@ -2056,7 +2056,7 @@ bool ACodec::ExecutingState::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatFlush:
         {
-            LOGV("[%s] ExecutingState flushing now "
+            ALOGV("[%s] ExecutingState flushing now "
                  "(codec owns %d/%d input, %d/%d output).",
                     mCodec->mComponentName.c_str(),
                     mCodec->countBuffersOwnedByComponent(kPortIndexInput),
@@ -2437,7 +2437,7 @@ bool ACodec::FlushingState::onMessageReceived(const sp<AMessage> &msg) {
 
 bool ACodec::FlushingState::onOMXEvent(
         OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
-    LOGV("[%s] FlushingState onOMXEvent(%d,%ld)",
+    ALOGV("[%s] FlushingState onOMXEvent(%d,%ld)",
             mCodec->mComponentName.c_str(), event, data1);
 
     switch (event) {
