@@ -250,14 +250,24 @@ public class WebChromeClient {
     }
 
     /**
-     * Instructs the client to show a prompt to ask the user to set the
-     * Geolocation permission state for the specified origin.
+     * Notify the host application that web content from the specified origin
+     * is attempting to use the Geolocation API, but no permission state is
+     * currently set for that origin. The host application should invoke the
+     * specified callback with the desired permission state. See
+     * {@link GeolocationPermissions} for details.
+     * @param origin The origin of the web content attempting to use the
+     *               Geolocation API.
+     * @param callback The callback to use to set the permission state for the
+     *                 origin.
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
             GeolocationPermissions.Callback callback) {}
 
     /**
-     * Instructs the client to hide the Geolocation permissions prompt.
+     * Notify the host application that a request for Geolocation permissions,
+     * made with a previous call to
+     * {@link #onGeolocationPermissionsShowPrompt(String,GeolocationPermissions.Callback) onGeolocationPermissionsShowPrompt()}
+     * has been canceled. Any related UI should therefore be hidden.
      */
     public void onGeolocationPermissionsHidePrompt() {}
 

@@ -17,11 +17,12 @@
 package android.webkit;
 
 /**
- * A callback interface used to returns values asynchronously
+ * A callback interface used to provide values asynchronously.
  */
 public interface ValueCallback<T> {
     /**
-     * Invoked when we have the result
+     * Invoked when the value is available.
+     * @param value The value.
      */
     public void onReceiveValue(T value);
 };
