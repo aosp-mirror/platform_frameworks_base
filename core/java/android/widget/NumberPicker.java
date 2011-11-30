@@ -165,6 +165,11 @@ public class NumberPicker extends LinearLayout {
     };
 
     /**
+     * Constant for unspecified size.
+     */
+    private static final int SIZE_UNSPECIFIED = -1;
+
+    /**
      * Use a custom NumberPicker formatting callback to use two-digit minutes
      * strings like "01". Keeping a static formatter etc. is the most efficient
      * way to do this; it avoids creating temporary objects on every call to
@@ -542,16 +547,20 @@ public class NumberPicker extends LinearLayout {
                 getResources().getDisplayMetrics());
         mSelectionDividerHeight = attributesArray.getDimensionPixelSize(
                 R.styleable.NumberPicker_selectionDividerHeight, defSelectionDividerHeight);
-        mMinHeight = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_minHeight, 0);
+        mMinHeight = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_minHeight,
+                SIZE_UNSPECIFIED);
         mMaxHeight = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_maxHeight,
-                Integer.MAX_VALUE);
-        if (mMinHeight > mMaxHeight) {
+                SIZE_UNSPECIFIED);
+        if (mMinHeight != SIZE_UNSPECIFIED && mMaxHeight != SIZE_UNSPECIFIED
+                && mMinHeight > mMaxHeight) {
             throw new IllegalArgumentException("minHeight > maxHeight");
         }
-        mMinWidth = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_minWidth, 0);
+        mMinWidth = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_minWidth,
+                SIZE_UNSPECIFIED);
         mMaxWidth = attributesArray.getDimensionPixelSize(R.styleable.NumberPicker_maxWidth,
-                Integer.MAX_VALUE);
-        if (mMinWidth > mMaxWidth) {
+                SIZE_UNSPECIFIED);
+        if (mMinWidth != SIZE_UNSPECIFIED && mMaxWidth != SIZE_UNSPECIFIED
+                && mMinWidth > mMaxWidth) {
             throw new IllegalArgumentException("minWidth > maxWidth");
         }
         mComputeMaxWidth = (mMaxWidth == Integer.MAX_VALUE);
@@ -744,10 +753,10 @@ public class NumberPicker extends LinearLayout {
         final int newHeightMeasureSpec = makeMeasureSpec(heightMeasureSpec, mMaxHeight);
         super.onMeasure(newWidthMeasureSpec, newHeightMeasureSpec);
         // Flag if we are measured with width or height less than the respective min.
-        final int desiredWidth = Math.max(mMinWidth, getMeasuredWidth());
-        final int desiredHeight = Math.max(mMinHeight, getMeasuredHeight());
-        final int widthSize = resolveSizeAndState(desiredWidth, newWidthMeasureSpec, 0);
-        final int heightSize = resolveSizeAndState(desiredHeight, newHeightMeasureSpec, 0);
+        final int widthSize = resolveSizeAndStateRespectingMinSize(mMinWidth, getMeasuredWidth(),
+                widthMeasureSpec);
+        final int heightSize = resolveSizeAndStateRespectingMinSize(mMinHeight, getMeasuredHeight(),
+                heightMeasureSpec);
         setMeasuredDimension(widthSize, heightSize);
     }
 
@@ -1254,6 +1263,7 @@ public class NumberPicker extends LinearLayout {
         }
         updateInputTextView();
         initializeSelectorWheelIndices();
+        tryComputeMaxWidth();
     }
 
     @Override
@@ -1379,6 +1389,9 @@ public class NumberPicker extends LinearLayout {
      * @return A measure spec greedily imposing the max size.
      */
     private int makeMeasureSpec(int measureSpec, int maxSize) {
+        if (maxSize == SIZE_UNSPECIFIED) {
+            return measureSpec;
+        }
         final int size = MeasureSpec.getSize(measureSpec);
         final int mode = MeasureSpec.getMode(measureSpec);
         switch (mode) {
@@ -1390,6 +1403,26 @@ public class NumberPicker extends LinearLayout {
                 return MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.EXACTLY);
             default:
                 throw new IllegalArgumentException("Unknown measure mode: " + mode);
+        }
+    }
+
+    /**
+     * Utility to reconcile a desired size and state, with constraints imposed by
+     * a MeasureSpec. Tries to respect the min size, unless a different size is
+     * imposed by the constraints.
+     *
+     * @param minSize The minimal desired size.
+     * @param measuredSize The currently measured size.
+     * @param measureSpec The current measure spec.
+     * @return The resolved size and state.
+     */
+    private int resolveSizeAndStateRespectingMinSize(int minSize, int measuredSize,
+            int measureSpec) {
+        if (minSize != SIZE_UNSPECIFIED) {
+            final int desiredWidth = Math.max(minSize, measuredSize);
+            return resolveSizeAndState(desiredWidth, measureSpec, 0);
+        } else {
+            return measuredSize;
         }
     }
 
