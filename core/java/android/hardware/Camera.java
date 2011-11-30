@@ -138,7 +138,7 @@ public class Camera {
     private static final int CAMERA_MSG_COMPRESSED_IMAGE = 0x100;
     private static final int CAMERA_MSG_RAW_IMAGE_NOTIFY = 0x200;
     private static final int CAMERA_MSG_PREVIEW_METADATA = 0x400;
-    private static final int CAMERA_MSG_ALL_MSGS         = 0x4FF;
+    private static final int CAMERA_MSG_FOCUS_MOVE       = 0x800;
 
     private int mNativeContext; // accessed by native methods
     private EventHandler mEventHandler;
@@ -148,6 +148,7 @@ public class Camera {
     private PreviewCallback mPreviewCallback;
     private PictureCallback mPostviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
+    private AutoFocusMoveCallback mAutoFocusMoveCallback;
     private OnZoomChangeListener mZoomListener;
     private FaceDetectionListener mFaceListener;
     private ErrorCallback mErrorCallback;
@@ -492,6 +493,7 @@ public class Camera {
         mPostviewCallback = null;
         mJpegCallback = null;
         mAutoFocusCallback = null;
+        mAutoFocusMoveCallback = null;
     }
 
     private native final void _stopPreview();
@@ -737,6 +739,12 @@ public class Camera {
                 }
                 return;
 
+            case CAMERA_MSG_FOCUS_MOVE:
+                if (mAutoFocusMoveCallback != null) {
+                    mAutoFocusMoveCallback.onAutoFocusMoving(msg.arg1 == 0 ? false : true, mCamera);
+                }
+                return;
+
             default:
                 Log.e(TAG, "Unknown message type " + msg.what);
                 return;
@@ -847,6 +855,39 @@ public class Camera {
         native_cancelAutoFocus();
     }
     private native final void native_cancelAutoFocus();
+
+    /**
+     * Callback interface used to notify on auto focus start and stop.
+     *
+     * <p>This is useful for continuous autofocus -- {@link Parameters#FOCUS_MODE_CONTINUOUS_VIDEO}
+     * and {@link Parameters#FOCUS_MODE_CONTINUOUS_PICTURE}. Applications can
+     * show autofocus animation.</p>
+     *
+     * @hide
+     */
+    public interface AutoFocusMoveCallback
+    {
+        /**
+         * Called when the camera auto focus starts or stops.
+         *
+         * @param start true if focus starts to move, false if focus stops to move
+         * @param camera  the Camera service object
+         */
+        void onAutoFocusMoving(boolean start, Camera camera);
+    }
+
+    /**
+     * Sets camera auto-focus move callback.
+     *
+     * @param cb the callback to run
+     * @hide
+     */
+    public void setAutoFocusMoveCallback(AutoFocusMoveCallback cb) {
+        mAutoFocusMoveCallback = cb;
+        enableFocusMoveCallback((mAutoFocusMoveCallback != null) ? 1 : 0);
+    }
+
+    private native void enableFocusMoveCallback(int enable);
 
     /**
      * Callback interface used to signal the moment of actual image capture.
