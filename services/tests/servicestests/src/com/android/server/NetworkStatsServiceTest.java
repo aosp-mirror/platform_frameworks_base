@@ -802,6 +802,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().atLeastOnce();
+
+        expect(mNetManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
     }
 
     private void expectNetworkState(NetworkState... state) throws Exception {

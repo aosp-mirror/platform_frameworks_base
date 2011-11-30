@@ -39,16 +39,18 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public long warningBytes;
     public long limitBytes;
     public long lastSnooze;
+    public boolean metered;
 
     private static final long DEFAULT_MTU = 1500;
 
     public NetworkPolicy(NetworkTemplate template, int cycleDay, long warningBytes, long limitBytes,
-            long lastSnooze) {
+            long lastSnooze, boolean metered) {
         this.template = checkNotNull(template, "missing NetworkTemplate");
         this.cycleDay = cycleDay;
         this.warningBytes = warningBytes;
         this.limitBytes = limitBytes;
         this.lastSnooze = lastSnooze;
+        this.metered = metered;
     }
 
     public NetworkPolicy(Parcel in) {
@@ -57,6 +59,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         warningBytes = in.readLong();
         limitBytes = in.readLong();
         lastSnooze = in.readLong();
+        metered = in.readInt() != 0;
     }
 
     /** {@inheritDoc} */
@@ -66,6 +69,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         dest.writeLong(warningBytes);
         dest.writeLong(limitBytes);
         dest.writeLong(lastSnooze);
+        dest.writeInt(metered ? 1 : 0);
     }
 
     /** {@inheritDoc} */
@@ -99,16 +103,16 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(template, cycleDay, warningBytes, limitBytes, lastSnooze);
+        return Objects.hashCode(template, cycleDay, warningBytes, limitBytes, lastSnooze, metered);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof NetworkPolicy) {
             final NetworkPolicy other = (NetworkPolicy) obj;
-            return Objects.equal(template, other.template) && cycleDay == other.cycleDay
-                    && warningBytes == other.warningBytes && limitBytes == other.limitBytes
-                    && lastSnooze == other.lastSnooze;
+            return cycleDay == other.cycleDay && warningBytes == other.warningBytes
+                    && limitBytes == other.limitBytes && lastSnooze == other.lastSnooze
+                    && metered == other.metered && Objects.equal(template, other.template);
         }
         return false;
     }
@@ -116,7 +120,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     @Override
     public String toString() {
         return "NetworkPolicy[" + template + "]: cycleDay=" + cycleDay + ", warningBytes="
-                + warningBytes + ", limitBytes=" + limitBytes + ", lastSnooze=" + lastSnooze;
+                + warningBytes + ", limitBytes=" + limitBytes + ", lastSnooze=" + lastSnooze
+                + ", metered=" + metered;
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {
