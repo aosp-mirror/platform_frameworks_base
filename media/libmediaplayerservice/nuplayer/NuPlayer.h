@@ -112,6 +112,10 @@ private:
         SHUT_DOWN,
     };
 
+    // Once the current flush is complete this indicates whether the
+    // notion of time has changed.
+    bool mTimeDiscontinuityPending;
+
     FlushStatus mFlushingAudio;
     FlushStatus mFlushingVideo;
     bool mResetInProgress;
