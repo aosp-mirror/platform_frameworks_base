@@ -23,19 +23,19 @@ abstract class MessageParams {
     static final int TYPE_SILENCE = 3;
 
     private final UtteranceProgressDispatcher mDispatcher;
-    private final String mCallingApp;
+    private final Object mCallerIdentity;
 
-    MessageParams(UtteranceProgressDispatcher dispatcher, String callingApp) {
+    MessageParams(UtteranceProgressDispatcher dispatcher, Object callerIdentity) {
         mDispatcher = dispatcher;
-        mCallingApp = callingApp;
+        mCallerIdentity = callerIdentity;
     }
 
     UtteranceProgressDispatcher getDispatcher() {
         return mDispatcher;
     }
 
-    String getCallingApp() {
-        return mCallingApp;
+    Object getCallerIdentity() {
+        return mCallerIdentity;
     }
 
     @Override

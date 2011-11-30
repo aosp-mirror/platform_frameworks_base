@@ -30,47 +30,47 @@ interface ITextToSpeechService {
     /**
      * Tells the engine to synthesize some speech and play it back.
      *
-     * @param callingApp The package name of the calling app. Used to connect requests
-     *         callbacks and to clear requests when the calling app is stopping.
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param text The text to synthesize.
      * @param queueMode Determines what to do to requests already in the queue.
      * @param param Request parameters.
      */
-    int speak(in String callingApp, in String text, in int queueMode, in Bundle params);
+    int speak(in IBinder callingInstance, in String text, in int queueMode, in Bundle params);
 
     /**
      * Tells the engine to synthesize some speech and write it to a file.
      *
-     * @param callingApp The package name of the calling app. Used to connect requests
-     *         callbacks and to clear requests when the calling app is stopping.
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param text The text to synthesize.
      * @param filename The file to write the synthesized audio to.
      * @param param Request parameters.
      */
-    int synthesizeToFile(in String callingApp, in String text,
+    int synthesizeToFile(in IBinder callingInstance, in String text,
         in String filename, in Bundle params);
 
     /**
      * Plays an existing audio resource.
      *
-     * @param callingApp The package name of the calling app. Used to connect requests
-     *         callbacks and to clear requests when the calling app is stopping.
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param audioUri URI for the audio resource (a file or android.resource URI)
      * @param queueMode Determines what to do to requests already in the queue.
      * @param param Request parameters.
      */
-    int playAudio(in String callingApp, in Uri audioUri, in int queueMode, in Bundle params);
+    int playAudio(in IBinder callingInstance, in Uri audioUri, in int queueMode, in Bundle params);
 
     /**
      * Plays silence.
      *
-     * @param callingApp The package name of the calling app. Used to connect requests
-     *         callbacks and to clear requests when the calling app is stopping.
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
      * @param duration Number of milliseconds of silence to play.
      * @param queueMode Determines what to do to requests already in the queue.
      * @param param Request parameters.
      */
-    int playSilence(in String callingApp, in long duration, in int queueMode, in Bundle params);
+    int playSilence(in IBinder callingInstance, in long duration, in int queueMode, in Bundle params);
 
     /**
      * Checks whether the service is currently playing some audio.
@@ -81,10 +81,10 @@ interface ITextToSpeechService {
      * Interrupts the current utterance (if from the given app) and removes any utterances
      * in the queue that are from the given app.
      *
-     * @param callingApp Package name of the app whose utterances
-     *        should be interrupted and cleared.
+     * @param callingInstance a binder representing the identity of the calling
+     *        TextToSpeech object.
      */
-    int stop(in String callingApp);
+    int stop(in IBinder callingInstance);
 
     /**
      * Returns the language, country and variant currently being used by the TTS engine.
@@ -150,6 +150,6 @@ interface ITextToSpeechService {
      * @param callingApp Package name for the app whose utterance the callback will handle.
      * @param cb The callback.
      */
-    void setCallback(in String callingApp, ITextToSpeechCallback cb);
+    void setCallback(in IBinder caller, ITextToSpeechCallback cb);
 
 }

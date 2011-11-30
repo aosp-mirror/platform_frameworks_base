@@ -23,8 +23,8 @@ class SilenceMessageParams extends MessageParams {
     private final long mSilenceDurationMs;
 
     SilenceMessageParams(UtteranceProgressDispatcher dispatcher,
-            String callingApp, long silenceDurationMs) {
-        super(dispatcher, callingApp);
+            Object callerIdentity, long silenceDurationMs) {
+        super(dispatcher, callerIdentity);
         mSilenceDurationMs = silenceDurationMs;
     }
 

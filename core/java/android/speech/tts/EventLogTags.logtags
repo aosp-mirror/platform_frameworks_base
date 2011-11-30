@@ -2,5 +2,5 @@
 
 option java_package android.speech.tts;
 
-76001 tts_speak_success (engine|3),(caller|3),(length|1),(locale|3),(rate|1),(pitch|1),(engine_latency|2|3),(engine_total|2|3),(audio_latency|2|3)
-76002 tts_speak_failure (engine|3),(caller|3),(length|1),(locale|3),(rate|1),(pitch|1)
+76001 tts_speak_success (engine|3),(caller_uid|1),(caller_pid|1),(length|1),(locale|3),(rate|1),(pitch|1),(engine_latency|2|3),(engine_total|2|3),(audio_latency|2|3)
+76002 tts_speak_failure (engine|3),(caller_uid|1),(caller_pid|1),(length|1),(locale|3),(rate|1),(pitch|1)
