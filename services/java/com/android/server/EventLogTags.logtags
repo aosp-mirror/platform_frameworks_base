@@ -50,12 +50,12 @@ option java_package com.android.server
 # NotificationManagerService.java
 # ---------------------------
 # when a NotificationManager.notify is called
-2750 notification_enqueue (pkg|3),(id|1|5),(notification|3)
+2750 notification_enqueue (pkg|3),(id|1|5),(tag|3),(notification|3)
 # when someone tries to cancel a notification, the notification manager sometimes
 # calls this with flags too
-2751 notification_cancel (pkg|3),(id|1|5),(required_flags|1)
+2751 notification_cancel (pkg|3),(id|1|5),(tag|3),(required_flags|1),(forbidden_flags|1)
 # when someone tries to cancel all of the notifications for a particular package
-2752 notification_cancel_all (pkg|3),(required_flags|1)
+2752 notification_cancel_all (pkg|3),(required_flags|1),(forbidden_flags|1)
 
 
 # ---------------------------
