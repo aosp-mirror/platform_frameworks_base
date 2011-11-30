@@ -34,6 +34,7 @@
 namespace android {
 
 static jboolean sScanModeActive = false;
+static jint DBG = false;
 
 static int doCommand(const char *cmd, char *replybuf, int replybuflen)
 {
@@ -527,6 +528,7 @@ static jboolean android_net_wifi_doBooleanCommand(JNIEnv* env, jobject, jstring 
     if (command.c_str() == NULL) {
         return JNI_FALSE;
     }
+    if (DBG) LOGD("doBoolean: %s", command.c_str());
     return doBooleanCommand("OK", "%s", command.c_str());
 }
 
@@ -536,6 +538,7 @@ static jint android_net_wifi_doIntCommand(JNIEnv* env, jobject, jstring javaComm
     if (command.c_str() == NULL) {
         return -1;
     }
+    if (DBG) LOGD("doInt: %s", command.c_str());
     return doIntCommand("%s", command.c_str());
 }
 
@@ -545,6 +548,7 @@ static jstring android_net_wifi_doStringCommand(JNIEnv* env, jobject, jstring ja
     if (command.c_str() == NULL) {
         return NULL;
     }
+    if (DBG) LOGD("doString: %s", command.c_str());
     return doStringCommand(env, "%s", command.c_str());
 }
 
