@@ -132,10 +132,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     // So the user has a consistent amount of time when brought to the backup method from FaceLock
     private final int BACKUP_LOCK_TIMEOUT = 5000;
 
-    // Needed to keep track of failed FaceUnlock attempts
-    private int mFailedFaceUnlockAttempts = 0;
-    private static final int FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 15;
-
     /**
      * The current {@link KeyguardScreen} will use this to communicate back to us.
      */
@@ -464,7 +460,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             public void reportSuccessfulUnlockAttempt() {
-                mFailedFaceUnlockAttempts = 0;
                 mLockPatternUtils.reportSuccessfulPasswordAttempt();
             }
         };
@@ -583,8 +578,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
      *  FaceLock, but only if we're not dealing with a call
     */
     private void activateFaceLockIfAble() {
-        final boolean tooManyFaceUnlockTries =
-                (mFailedFaceUnlockAttempts >= FAILED_FACE_UNLOCK_ATTEMPTS_BEFORE_BACKUP);
+        final boolean tooManyFaceUnlockTries = mUpdateMonitor.getMaxFaceUnlockAttemptsReached();
         final int failedBackupAttempts = mUpdateMonitor.getFailedAttempts();
         final boolean backupIsTimedOut =
                 (failedBackupAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
@@ -1398,7 +1392,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         @Override
         public void reportFailedAttempt() {
             if (DEBUG) Log.d(TAG, "FaceLock reportFailedAttempt()");
-            mFailedFaceUnlockAttempts++;
+            mUpdateMonitor.reportFailedFaceUnlockAttempt();
             hideFaceLockArea(); // Expose fallback
             stopFaceLock();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
