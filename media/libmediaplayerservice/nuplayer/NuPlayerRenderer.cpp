@@ -628,11 +628,16 @@ void NuPlayer::Renderer::onPause() {
         mAudioSink->pause();
     }
 
+    ALOGV("now paused audio queue has %d entries, video has %d entries",
+          mAudioQueue.size(), mVideoQueue.size());
+
     mPaused = true;
 }
 
 void NuPlayer::Renderer::onResume() {
-    CHECK(mPaused);
+    if (!mPaused) {
+        return;
+    }
 
     if (mHasAudio) {
         mAudioSink->start();
