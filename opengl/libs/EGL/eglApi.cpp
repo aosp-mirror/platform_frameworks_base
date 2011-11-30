@@ -49,6 +49,8 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 
+#define EGL_VERSION_HW_ANDROID  0x3143
+
 struct extention_map_t {
     const char* name;
     __eglMustCastToProperFunctionPointerType address;
@@ -972,6 +974,12 @@ const char* eglQueryString(EGLDisplay dpy, EGLint name)
             return dp->getExtensionString();
         case EGL_CLIENT_APIS:
             return dp->getClientApiString();
+        case EGL_VERSION_HW_ANDROID: {
+            if (gEGLImpl[IMPL_HARDWARE].dso) {
+                return dp->disp[IMPL_HARDWARE].queryString.version;
+            }
+            return dp->disp[IMPL_SOFTWARE].queryString.version;
+        }
     }
     return setError(EGL_BAD_PARAMETER, (const char *)0);
 }
