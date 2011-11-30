@@ -476,6 +476,13 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     ParcelFileDescriptor updateWallpaperBitmapLocked(String name) {
         if (name == null) name = "";
         try {
+            if (!WALLPAPER_DIR.exists()) {
+                WALLPAPER_DIR.mkdir();
+                FileUtils.setPermissions(
+                        WALLPAPER_DIR.getPath(),
+                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                        -1, -1);
+            }
             ParcelFileDescriptor fd = ParcelFileDescriptor.open(WALLPAPER_FILE,
                     MODE_CREATE|MODE_READ_WRITE);
             mName = name;
