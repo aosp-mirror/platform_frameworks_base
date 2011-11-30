@@ -428,7 +428,8 @@ class AudioPlaybackHandler {
         final AudioTrack audioTrack = params.getAudioTrack();
 
         if (audioTrack == null) {
-            params.getDispatcher().dispatchOnError();
+            // There was already a call to handleSynthesisDone for
+            // this token.
             return;
         }
 
