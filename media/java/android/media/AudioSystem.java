@@ -27,7 +27,7 @@ package android.media;
  */
 public class AudioSystem
 {
-    /* FIXME: Need to finalize this and correlate with native layer */
+    /* These values must be kept in sync with AudioSystem.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
