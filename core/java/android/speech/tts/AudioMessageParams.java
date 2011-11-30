@@ -21,8 +21,8 @@ class AudioMessageParams extends MessageParams {
     private final BlockingMediaPlayer mPlayer;
 
     AudioMessageParams(UtteranceProgressDispatcher dispatcher,
-            String callingApp, BlockingMediaPlayer player) {
-        super(dispatcher, callingApp);
+            Object callerIdentity, BlockingMediaPlayer player) {
+        super(dispatcher, callerIdentity);
         mPlayer = player;
     }
 

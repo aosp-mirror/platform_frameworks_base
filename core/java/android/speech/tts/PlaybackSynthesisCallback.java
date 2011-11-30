@@ -63,18 +63,18 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
     private volatile boolean mDone = false;
 
     private final UtteranceProgressDispatcher mDispatcher;
-    private final String mCallingApp;
+    private final Object mCallerIdentity;
     private final EventLogger mLogger;
 
     PlaybackSynthesisCallback(int streamType, float volume, float pan,
             AudioPlaybackHandler audioTrackHandler, UtteranceProgressDispatcher dispatcher,
-            String callingApp, EventLogger logger) {
+            Object callerIdentity, EventLogger logger) {
         mStreamType = streamType;
         mVolume = volume;
         mPan = pan;
         mAudioTrackHandler = audioTrackHandler;
         mDispatcher = dispatcher;
-        mCallingApp = callingApp;
+        mCallerIdentity = callerIdentity;
         mLogger = logger;
     }
 
@@ -158,7 +158,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             }
             SynthesisMessageParams params = new SynthesisMessageParams(
                     mStreamType, sampleRateInHz, audioFormat, channelCount, mVolume, mPan,
-                    mDispatcher, mCallingApp, mLogger);
+                    mDispatcher, mCallerIdentity, mLogger);
             mAudioTrackHandler.enqueueSynthesisStart(params);
 
             mToken = params;

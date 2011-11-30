@@ -547,10 +547,6 @@ public class TextToSpeech {
         initTts();
     }
 
-    private String getPackageName() {
-        return mPackageName;
-    }
-
     private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method) {
         return runAction(action, errorResult, method, false);
     }
@@ -630,6 +626,10 @@ public class TextToSpeech {
         }
     }
 
+    private IBinder getCallerIdentity() {
+        return mServiceConnection.getCallerIdentity();
+    }
+
     /**
      * Releases the resources used by the TextToSpeech engine.
      * It is good practice for instance to call this method in the onDestroy() method of an Activity
@@ -639,8 +639,8 @@ public class TextToSpeech {
         runActionNoReconnect(new Action<Void>() {
             @Override
             public Void run(ITextToSpeechService service) throws RemoteException {
-                service.setCallback(getPackageName(), null);
-                service.stop(getPackageName());
+                service.setCallback(getCallerIdentity(), null);
+                service.stop(getCallerIdentity());
                 mServiceConnection.disconnect();
                 // Context#unbindService does not result in a call to
                 // ServiceConnection#onServiceDisconnected. As a result, the
@@ -800,10 +800,10 @@ public class TextToSpeech {
             public Integer run(ITextToSpeechService service) throws RemoteException {
                 Uri utteranceUri = mUtterances.get(text);
                 if (utteranceUri != null) {
-                    return service.playAudio(getPackageName(), utteranceUri, queueMode,
+                    return service.playAudio(getCallerIdentity(), utteranceUri, queueMode,
                             getParams(params));
                 } else {
-                    return service.speak(getPackageName(), text, queueMode, getParams(params));
+                    return service.speak(getCallerIdentity(), text, queueMode, getParams(params));
                 }
             }
         }, ERROR, "speak");
@@ -836,7 +836,7 @@ public class TextToSpeech {
                 if (earconUri == null) {
                     return ERROR;
                 }
-                return service.playAudio(getPackageName(), earconUri, queueMode,
+                return service.playAudio(getCallerIdentity(), earconUri, queueMode,
                         getParams(params));
             }
         }, ERROR, "playEarcon");
@@ -863,7 +863,7 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.playSilence(getPackageName(), durationInMs, queueMode,
+                return service.playSilence(getCallerIdentity(), durationInMs, queueMode,
                         getParams(params));
             }
         }, ERROR, "playSilence");
@@ -926,7 +926,7 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.stop(getPackageName());
+                return service.stop(getCallerIdentity());
             }
         }, ERROR, "stop");
     }
@@ -1091,7 +1091,7 @@ public class TextToSpeech {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
-                return service.synthesizeToFile(getPackageName(), text, filename,
+                return service.synthesizeToFile(getCallerIdentity(), text, filename,
                         getParams(params));
             }
         }, ERROR, "synthesizeToFile");
@@ -1275,13 +1275,17 @@ public class TextToSpeech {
                 mServiceConnection = this;
                 mService = ITextToSpeechService.Stub.asInterface(service);
                 try {
-                    mService.setCallback(getPackageName(), mCallback);
+                    mService.setCallback(getCallerIdentity(), mCallback);
                     dispatchOnInit(SUCCESS);
                 } catch (RemoteException re) {
                     Log.e(TAG, "Error connecting to service, setCallback() failed");
                     dispatchOnInit(ERROR);
                 }
             }
+        }
+
+        public IBinder getCallerIdentity() {
+            return mCallback;
         }
 
         public void onServiceDisconnected(ComponentName name) {
