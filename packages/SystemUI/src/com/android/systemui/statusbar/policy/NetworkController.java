@@ -898,7 +898,7 @@ public class NetworkController extends BroadcastReceiver {
             combinedSignalIconId = mDataSignalIconId; // set by updateDataIcon()
             mContentDescriptionCombinedSignal = mContentDescriptionDataType;
         }
-        
+
         if (mWifiConnected) {
             if (mWifiSsid == null) {
                 label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
@@ -932,19 +932,23 @@ public class NetworkController extends BroadcastReceiver {
             mContentDescriptionCombinedSignal = mContext.getString(
                     R.string.accessibility_bluetooth_tether);
         }
-        
+
         if (mAirplaneMode &&
                 (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly()))) {
             // Only display the flight-mode icon if not in "emergency calls only" mode.
-            label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal
-                = mContext.getString(R.string.accessibility_airplane_mode);
-            
+
             // look again; your radios are now airplanes
+            mContentDescriptionPhoneSignal = mContext.getString(
+                    R.string.accessibility_airplane_mode);
             mPhoneSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
             mDataTypeIconId = 0;
 
-            combinedSignalIconId = mDataSignalIconId;
+            // combined values from connected wifi take precedence over airplane mode
+            if (!mWifiConnected) {
+                label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+                mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal;
+                combinedSignalIconId = mDataSignalIconId;
+            }
         }
         else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected) {
             // pretty much totally disconnected
