@@ -92,16 +92,16 @@ public class TimePickerDialog extends AlertDialog
         mInitialMinute = minute;
         mIs24HourView = is24HourView;
 
-        setCanceledOnTouchOutside(false);
         setIcon(0);
         setTitle(R.string.time_picker_dialog_title);
 
-        setButton(BUTTON_POSITIVE, context.getText(R.string.date_time_set), this);
-        setButton(BUTTON_NEGATIVE, context.getText(R.string.cancel),
+        Context themeContext = getContext();
+        setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_set), this);
+        setButton(BUTTON_NEGATIVE, themeContext.getText(R.string.cancel),
                 (OnClickListener) null);
 
         LayoutInflater inflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
         setView(view);
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);

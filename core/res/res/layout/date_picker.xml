@@ -32,7 +32,6 @@
     <LinearLayout android:id="@+id/pickers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="22dip"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="center">
@@ -77,7 +76,7 @@
         android:id="@+id/calendar_view"
         android:layout_width="245dip"
         android:layout_height="280dip"
-        android:layout_marginLeft="22dip"
+        android:layout_marginLeft="44dip"
         android:layout_weight="1"
         android:focusable="true"
         android:focusableInTouchMode="true"
