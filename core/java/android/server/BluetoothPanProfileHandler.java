@@ -377,16 +377,16 @@ final class BluetoothPanProfileHandler {
         try {
             ifcg = service.getInterfaceConfig(iface);
             if (ifcg != null) {
+                final LinkAddress linkAddr = ifcg.getLinkAddress();
                 InetAddress addr = null;
-                if (ifcg.addr == null || (addr = ifcg.addr.getAddress()) == null ||
+                if (linkAddr == null || (addr = linkAddr.getAddress()) == null ||
                         addr.equals(NetworkUtils.numericToInetAddress("0.0.0.0")) ||
                         addr.equals(NetworkUtils.numericToInetAddress("::0"))) {
                     addr = NetworkUtils.numericToInetAddress(address);
                 }
-                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                ifcg.addr = new LinkAddress(addr, BLUETOOTH_PREFIX_LENGTH);
-                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                ifcg.setInterfaceUp();
+                ifcg.clearFlag("running");
+                ifcg.setLinkAddress(new LinkAddress(addr, BLUETOOTH_PREFIX_LENGTH));
                 service.setInterfaceConfig(iface, ifcg);
                 if (cm.tether(iface) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                     Log.e(TAG, "Error tethering "+iface);
