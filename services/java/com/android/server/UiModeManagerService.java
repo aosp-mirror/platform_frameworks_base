@@ -65,7 +65,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
-    private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = false;
+    private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
 
     private static final int MSG_UPDATE_TWILIGHT = 0;
     private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
