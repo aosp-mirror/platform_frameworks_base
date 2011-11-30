@@ -536,6 +536,20 @@ void fillRGBA8Buffer(uint8_t* buf, int w, int h, int stride) {
     }
 }
 
+void fillRGBA8BufferSolid(uint8_t* buf, int w, int h, int stride, uint8_t r,
+        uint8_t g, uint8_t b, uint8_t a) {
+    const size_t PIXEL_SIZE = 4;
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < h; x++) {
+            off_t offset = (y * stride + x) * PIXEL_SIZE;
+            buf[offset + 0] = r;
+            buf[offset + 1] = g;
+            buf[offset + 2] = b;
+            buf[offset + 3] = a;
+        }
+    }
+}
+
 TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
     const int texWidth = 64;
     const int texHeight = 66;
@@ -1614,6 +1628,103 @@ TEST_F(SurfaceTextureGLThreadToGLTest,
         mST->updateTexImage();
         LOGV("-updateTexImage");
     }
+}
+
+class SurfaceTextureFBOTest : public SurfaceTextureGLTest {
+protected:
+
+    virtual void SetUp() {
+        SurfaceTextureGLTest::SetUp();
+
+        glGenFramebuffers(1, &mFbo);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+
+        glGenTextures(1, &mFboTex);
+        glBindTexture(GL_TEXTURE_2D, mFboTex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, getSurfaceWidth(),
+                getSurfaceHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_2D, mFboTex, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+    }
+
+    virtual void TearDown() {
+        SurfaceTextureGLTest::TearDown();
+
+        glDeleteTextures(1, &mFboTex);
+        glDeleteFramebuffers(1, &mFbo);
+    }
+
+    GLuint mFbo;
+    GLuint mFboTex;
+};
+
+// This test is intended to verify that proper synchronization is done when
+// rendering into an FBO.
+TEST_F(SurfaceTextureFBOTest, BlitFromCpuFilledBufferToFbo) {
+    const int texWidth = 64;
+    const int texHeight = 64;
+
+    ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
+            texWidth, texHeight, HAL_PIXEL_FORMAT_RGBA_8888));
+    ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
+            GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
+
+    android_native_buffer_t* anb;
+    ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    ASSERT_TRUE(anb != NULL);
+
+    sp<GraphicBuffer> buf(new GraphicBuffer(anb, false));
+    ASSERT_EQ(NO_ERROR, mANW->lockBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    // Fill the buffer with green
+    uint8_t* img = NULL;
+    buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
+    fillRGBA8BufferSolid(img, texWidth, texHeight, buf->getStride(), 0, 255,
+            0, 255);
+    buf->unlock();
+    ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    ASSERT_EQ(NO_ERROR, mST->updateTexImage());
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
+    drawTexture();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    for (int i = 0; i < 4; i++) {
+        SCOPED_TRACE(String8::format("frame %d", i).string());
+
+        ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+        ASSERT_TRUE(anb != NULL);
+
+        buf = new GraphicBuffer(anb, false);
+        ASSERT_EQ(NO_ERROR, mANW->lockBuffer(mANW.get(),
+                buf->getNativeBuffer()));
+
+        // Fill the buffer with red
+        ASSERT_EQ(NO_ERROR, buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN,
+                (void**)(&img)));
+        fillRGBA8BufferSolid(img, texWidth, texHeight, buf->getStride(), 255, 0,
+                0, 255);
+        ASSERT_EQ(NO_ERROR, buf->unlock());
+        ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(),
+                buf->getNativeBuffer()));
+
+        ASSERT_EQ(NO_ERROR, mST->updateTexImage());
+
+        drawTexture();
+
+        EXPECT_TRUE(checkPixel( 24, 39, 255, 0, 0, 255));
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
+
+    EXPECT_TRUE(checkPixel( 24, 39, 0, 255, 0, 255));
 }
 
 } // namespace android
