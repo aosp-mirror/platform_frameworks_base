@@ -1,0 +1,14 @@
+TODO:
+    - Context - Currently, we don't do anything regarding the contexts that are created.
+    Need to maintain more state regarding contexts, and figure out what happens in the
+    presence of multiple contexts.
+
+    - Transport: Each GLMessage is sent via a socket as soon as the message is received.
+    i.e., there is no buffering of messages. Buffering should improve performance.
+
+    - Initialization: On first connection, send some basic information that includes:
+        1. version of the trace library
+        2. implementation dependent GL state variables such as # of vertex arrays etc.
+
+    - eglSwapBuffers: The images are lzf compressed, but there is no mode that transfers
+    only the differences from the previous images.
