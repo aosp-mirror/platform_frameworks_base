@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <sys/klog.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -93,6 +94,30 @@ void show_wchan(int pid, const char *name) {
 
 out_close:
     close(fd);
+    return;
+}
+
+void do_dmesg() {
+    printf("------ KERNEL LOG (dmesg) ------\n");
+    int size = klogctl(10, NULL, 0); /* Get size of kernel buffer */
+    if (size <= 0) {
+        printf("Unexpected klogctl return value: %d\n\n", size);
+        return;
+    }
+    char *buf = (char *) malloc(size + 1);
+    if (buf == NULL) {
+        printf("memory allocation failed\n\n");
+        return;
+    }
+    int retval = klogctl(KLOG_READ_ALL, buf, size);
+    if (retval < 0) {
+        printf("klogctl failure\n\n");
+        free(buf);
+        return;
+    }
+    buf[retval] = '\0';
+    printf("%s\n\n", buf);
+    free(buf);
     return;
 }
 

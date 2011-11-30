@@ -25,6 +25,8 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <linux/capability.h>
+#include <linux/prctl.h>
 
 #include <cutils/properties.h>
 
@@ -169,7 +171,7 @@ static void dumpstate() {
 
     print_properties();
 
-    run_command("KERNEL LOG", 20, "dmesg", NULL);
+    do_dmesg();
 
     dump_file("KERNEL WAKELOCKS", "/proc/wakelocks");
     dump_file("KERNEL CPUFREQ", "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
@@ -192,6 +194,7 @@ static void dumpstate() {
     dump_file("PACKAGE SETTINGS", "/data/system/packages.xml");
     dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
 
+    /* TODO: Make last_kmsg CAP_SYSLOG protected. b/5555691 */
     dump_file("LAST KMSG", "/proc/last_kmsg");
     run_command("LAST RADIO LOG", 10, "parse_radio_log", "/proc/last_radio_log", NULL);
     dump_file("LAST PANIC CONSOLE", "/data/dontpanic/apanic_console");
@@ -315,6 +318,11 @@ int main(int argc, char *argv[]) {
     }
 
     if (getuid() == 0) {
+        if (prctl(PR_SET_KEEPCAPS, 1) < 0) {
+            LOGE("prctl(PR_SET_KEEPCAPS) failed: %s\n", strerror(errno));
+            return -1;
+        }
+
         /* switch to non-root user and group */
         gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT, AID_INET };
         if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
@@ -327,6 +335,23 @@ int main(int argc, char *argv[]) {
         }
         if (setuid(AID_SHELL) != 0) {
             LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
+            return -1;
+        }
+
+        struct __user_cap_header_struct capheader;
+        struct __user_cap_data_struct capdata[2];
+        memset(&capheader, 0, sizeof(capheader));
+        memset(&capdata, 0, sizeof(capdata));
+        capheader.version = _LINUX_CAPABILITY_VERSION_3;
+        capheader.pid = 0;
+
+        capdata[CAP_TO_INDEX(CAP_SYSLOG)].permitted = CAP_TO_MASK(CAP_SYSLOG);
+        capdata[CAP_TO_INDEX(CAP_SYSLOG)].effective = CAP_TO_MASK(CAP_SYSLOG);
+        capdata[0].inheritable = 0;
+        capdata[1].inheritable = 0;
+
+        if (capset(&capheader, &capdata[0]) < 0) {
+            LOGE("capset failed: %s\n", strerror(errno));
             return -1;
         }
     }
