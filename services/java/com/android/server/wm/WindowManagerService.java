@@ -429,6 +429,18 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSystemBooted = false;
     boolean mForceDisplayEnabled = false;
     boolean mShowingBootMessages = false;
+
+    // This protects the following display size properties, so that
+    // getDisplaySize() doesn't need to acquire the global lock.  This is
+    // needed because the window manager sometimes needs to use ActivityThread
+    // while it has its global state locked (for example to load animation
+    // resources), but the ActivityThread also needs get the current display
+    // size sometimes when it has its package lock held.
+    //
+    // These will only be modified with both mWindowMap and mDisplaySizeLock
+    // held (in that order) so the window manager doesn't need to acquire this
+    // lock when needing these values in its normal operation.
+    final Object mDisplaySizeLock = new Object();
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mBaseDisplayWidth = 0;
@@ -437,6 +449,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mCurDisplayHeight = 0;
     int mAppDisplayWidth = 0;
     int mAppDisplayHeight = 0;
+
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
@@ -6006,25 +6019,27 @@ public class WindowManagerService extends IWindowManager.Stub
         final int realdw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
         final int realdh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
 
-        if (mAltOrientation) {
-            mCurDisplayWidth = realdw;
-            mCurDisplayHeight = realdh;
-            if (realdw > realdh) {
-                // Turn landscape into portrait.
-                int maxw = (int)(realdh/1.3f);
-                if (maxw < realdw) {
-                    mCurDisplayWidth = maxw;
+        synchronized(mDisplaySizeLock) {
+            if (mAltOrientation) {
+                mCurDisplayWidth = realdw;
+                mCurDisplayHeight = realdh;
+                if (realdw > realdh) {
+                    // Turn landscape into portrait.
+                    int maxw = (int)(realdh/1.3f);
+                    if (maxw < realdw) {
+                        mCurDisplayWidth = maxw;
+                    }
+                } else {
+                    // Turn portrait into landscape.
+                    int maxh = (int)(realdw/1.3f);
+                    if (maxh < realdh) {
+                        mCurDisplayHeight = maxh;
+                    }
                 }
             } else {
-                // Turn portrait into landscape.
-                int maxh = (int)(realdw/1.3f);
-                if (maxh < realdh) {
-                    mCurDisplayHeight = maxh;
-                }
+                mCurDisplayWidth = realdw;
+                mCurDisplayHeight = realdh;
             }
-        } else {
-            mCurDisplayWidth = realdw;
-            mCurDisplayHeight = realdh;
         }
 
         final int dw = mCurDisplayWidth;
@@ -6043,8 +6058,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Update application display metrics.
         final DisplayMetrics dm = mDisplayMetrics;
-        mAppDisplayWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
-        mAppDisplayHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+        synchronized(mDisplaySizeLock) {
+            mAppDisplayWidth = appWidth;
+            mAppDisplayHeight = appHeight;
+        }
         if (false) {
             Slog.i(TAG, "Set app display size: " + mAppDisplayWidth
                     + " x " + mAppDisplayHeight);
@@ -6414,18 +6433,20 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
             mDisplay = wm.getDefaultDisplay();
-            mInitialDisplayWidth = mDisplay.getRawWidth();
-            mInitialDisplayHeight = mDisplay.getRawHeight();
-            int rot = mDisplay.getRotation();
-            if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                // If the screen is currently rotated, we need to swap the
-                // initial width and height to get the true natural values.
-                int tmp = mInitialDisplayWidth;
-                mInitialDisplayWidth = mInitialDisplayHeight;
-                mInitialDisplayHeight = tmp;
+            synchronized(mDisplaySizeLock) {
+                mInitialDisplayWidth = mDisplay.getRawWidth();
+                mInitialDisplayHeight = mDisplay.getRawHeight();
+                int rot = mDisplay.getRotation();
+                if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+                    // If the screen is currently rotated, we need to swap the
+                    // initial width and height to get the true natural values.
+                    int tmp = mInitialDisplayWidth;
+                    mInitialDisplayWidth = mInitialDisplayHeight;
+                    mInitialDisplayHeight = tmp;
+                }
+                mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
+                mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
             }
-            mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
-            mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
             mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
                     mDisplay.getRawWidth(), mDisplay.getRawHeight(),
                     mDisplay.getRawExternalWidth(), mDisplay.getRawExternalHeight());
@@ -6963,28 +6984,28 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void getDisplaySize(Point size) {
-        synchronized(mWindowMap) {
+        synchronized(mDisplaySizeLock) {
             size.x = mAppDisplayWidth;
             size.y = mAppDisplayHeight;
         }
     }
 
     public void getRealDisplaySize(Point size) {
-        synchronized(mWindowMap) {
+        synchronized(mDisplaySizeLock) {
             size.x = mCurDisplayWidth;
             size.y = mCurDisplayHeight;
         }
     }
 
     public void getInitialDisplaySize(Point size) {
-        synchronized(mWindowMap) {
+        synchronized(mDisplaySizeLock) {
             size.x = mInitialDisplayWidth;
             size.y = mInitialDisplayHeight;
         }
     }
 
     public int getMaximumSizeDimension() {
-        synchronized(mWindowMap) {
+        synchronized(mDisplaySizeLock) {
             // Do this based on the raw screen size, until we are smarter.
             return mBaseDisplayWidth > mBaseDisplayHeight
                     ? mBaseDisplayWidth : mBaseDisplayHeight;
@@ -7077,8 +7098,10 @@ public class WindowManagerService extends IWindowManager.Stub
     private void setForcedDisplaySizeLocked(int width, int height) {
         Slog.i(TAG, "Using new display size: " + width + "x" + height);
 
-        mBaseDisplayWidth = width;
-        mBaseDisplayHeight = height;
+        synchronized(mDisplaySizeLock) {
+            mBaseDisplayWidth = width;
+            mBaseDisplayHeight = height;
+        }
         mPolicy.setInitialDisplaySize(mBaseDisplayWidth, mBaseDisplayHeight);
 
         mLayoutNeeded = true;
