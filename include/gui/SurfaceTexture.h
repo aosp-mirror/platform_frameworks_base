@@ -60,10 +60,16 @@ public:
         virtual void onFrameAvailable() = 0;
     };
 
-    // tex indicates the name OpenGL texture to which images are to be streamed.
-    // This texture name cannot be changed once the SurfaceTexture is created.
+    // SurfaceTexture constructs a new SurfaceTexture object. tex indicates the
+    // name of the OpenGL ES texture to which images are to be streamed. This
+    // texture name cannot be changed once the SurfaceTexture is created.
+    // allowSynchronousMode specifies whether or not synchronous mode can be
+    // enabled. texTarget specifies the OpenGL ES texture target to which the
+    // texture will be bound in updateTexImage. useFenceSync specifies whether
+    // fences should be used to synchronize access to buffers if that behavior
+    // is enabled at compile-time.
     SurfaceTexture(GLuint tex, bool allowSynchronousMode = true,
-            GLenum texTarget = GL_TEXTURE_EXTERNAL_OES);
+            GLenum texTarget = GL_TEXTURE_EXTERNAL_OES, bool useFenceSync = true);
 
     virtual ~SurfaceTexture();
 
@@ -276,7 +282,8 @@ private:
               mTransform(0),
               mScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
               mTimestamp(0),
-              mFrameNumber(0) {
+              mFrameNumber(0),
+              mFence(EGL_NO_SYNC_KHR) {
             mCrop.makeInvalid();
         }
 
@@ -349,6 +356,11 @@ private:
         // mFrameNumber is the number of the queued frame for this slot.
         uint64_t mFrameNumber;
 
+        // mFence is the EGL sync object that must signal before the buffer
+        // associated with this buffer slot may be dequeued. It is initialized
+        // to EGL_NO_SYNC_KHR when the buffer is created and (optionally, based
+        // on a compile-time option) set to a new sync object in updateTexImage.
+        EGLSyncKHR mFence;
     };
 
     // mSlots is the array of buffer slots that must be mirrored on the client
@@ -471,6 +483,12 @@ private:
     // mName is a string used to identify the SurfaceTexture in log messages.
     // It is set by the setName method.
     String8 mName;
+
+    // mUseFenceSync indicates whether creation of the EGL_KHR_fence_sync
+    // extension should be used to prevent buffers from being dequeued before
+    // it's safe for them to be written. It gets set at construction time and
+    // never changes.
+    const bool mUseFenceSync;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the
