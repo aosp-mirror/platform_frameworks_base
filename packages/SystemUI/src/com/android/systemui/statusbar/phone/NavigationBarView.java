@@ -293,9 +293,9 @@ public class NavigationBarView extends LinearLayout {
                         mCurrentView.getWidth(), mCurrentView.getHeight(),
                         visibilityToString(mCurrentView.getVisibility())));
 
-        pw.println(String.format("      disabled=0x%08x vertical=%s hidden=%s low=%s menu=%s",
+        pw.println(String.format("      disabled=0x%08x portrait=%s hidden=%s low=%s menu=%s",
                         mDisabledFlags,
-                        mVertical ? "true" : "false",
+                        mNaturallyPortrait ? "true" : "false",
                         mHidden ? "true" : "false",
                         mLowProfile ? "true" : "false",
                         mShowMenu ? "true" : "false"));
