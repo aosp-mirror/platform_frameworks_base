@@ -121,8 +121,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 R.string.global_action_silent_mode_off_status) {
 
             void willCreate() {
-                mEnabledIconResId = (Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.VIBRATE_IN_SILENT, 1) == 1)
+                mEnabledIconResId =
+                    mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE
                     ? R.drawable.ic_audio_ring_notif_vibrate
                     : R.drawable.ic_audio_vol_mute;
             }
