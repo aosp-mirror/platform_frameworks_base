@@ -1845,7 +1845,7 @@ class MediaArtistNativeHelper {
 
     @SuppressWarnings("unused")
     private void onPreviewProgressUpdate(int progress, boolean isFinished,
-                  boolean updateOverlay, String filename, int renderingMode) {
+                  boolean updateOverlay, String filename, int renderingMode, int error) {
         if (mPreviewProgressListener != null) {
             if (mIsFirstProgress) {
                 mPreviewProgressListener.onStart(mVideoEditor);
@@ -1870,6 +1870,8 @@ class MediaArtistNativeHelper {
 
             if (isFinished) {
                 mPreviewProgressListener.onStop(mVideoEditor);
+            } else if (error != 0) {
+                mPreviewProgressListener.onError(mVideoEditor, error);
             } else {
                 mPreviewProgressListener.onProgress(mVideoEditor, progress, overlayData);
             }
