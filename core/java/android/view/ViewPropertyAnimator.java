@@ -837,6 +837,11 @@ public class ViewPropertyAnimator {
          */
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
+            PropertyBundle propertyBundle = mAnimatorMap.get(animation);
+            if (propertyBundle == null) {
+                // Shouldn't happen, but just to play it safe
+                return;
+            }
             // alpha requires slightly different treatment than the other (transform) properties.
             // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
             // logic is dependent on how the view handles an internal call to onSetAlpha().
@@ -845,7 +850,6 @@ public class ViewPropertyAnimator {
             boolean alphaHandled = false;
             mView.invalidateParentCaches();
             float fraction = animation.getAnimatedFraction();
-            PropertyBundle propertyBundle = mAnimatorMap.get(animation);
             int propertyMask = propertyBundle.mPropertyMask;
             if ((propertyMask & TRANSFORM_MASK) != 0) {
                 mView.invalidate(false);
