@@ -40,7 +40,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.BatteryManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -72,6 +71,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.IApplicationToken;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -344,6 +344,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
+    IApplicationToken mFocusedApp;
 
     private final InputHandler mPointerLocationInputHandler = new BaseInputHandler() {
         @Override
@@ -3835,11 +3836,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int diff = visibility ^ mLastSystemUiFlags;
         final boolean needsMenu = (mFocusedWindow.getAttrs().flags
                 & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
-        if (diff == 0 && mLastFocusNeedsMenu == needsMenu) {
+        if (diff == 0 && mLastFocusNeedsMenu == needsMenu
+                && mFocusedApp == mFocusedWindow.getAppToken()) {
             return 0;
         }
         mLastSystemUiFlags = visibility;
         mLastFocusNeedsMenu = needsMenu;
+        mFocusedApp = mFocusedWindow.getAppToken();
         mHandler.post(new Runnable() {
                 public void run() {
                     if (mStatusBarService == null) {
