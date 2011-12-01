@@ -29,6 +29,7 @@ import com.google.android.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charsets;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -122,13 +123,15 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
-                        final String rawEvent = new String(buffer, start, i - start);
+                        final String rawEvent = new String(
+                                buffer, start, i - start, Charsets.UTF_8);
                         if (LOGD) Slog.d(TAG, "RCV <- " + rawEvent);
 
                         try {
                             final NativeDaemonEvent event = NativeDaemonEvent.parseRawEvent(
                                     rawEvent);
                             if (event.isClassUnsolicited()) {
+                                // TODO: migrate to sending NativeDaemonEvent instances
                                 mCallbackHandler.sendMessage(mCallbackHandler.obtainMessage(
                                         event.getCode(), event.getRawEvent()));
                             } else {
@@ -213,7 +216,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             throw new NativeDaemonConnectorException("missing output stream");
         } else {
             try {
-                mOutputStream.write(builder.toString().getBytes());
+                mOutputStream.write(builder.toString().getBytes(Charsets.UTF_8));
             } catch (IOException e) {
                 throw new NativeDaemonConnectorException("problem sending command", e);
             }
@@ -223,9 +226,62 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
-     * Issue a command to the native daemon and return the responses.
+     * Issue the given command to the native daemon and return a single expected
+     * response.
+     *
+     * @throws NativeDaemonConnectorException when problem communicating with
+     *             native daemon, or if the response matches
+     *             {@link NativeDaemonEvent#isClassClientError()} or
+     *             {@link NativeDaemonEvent#isClassServerError()}.
      */
-    public NativeDaemonEvent[] execute(String cmd, Object... args)
+    public NativeDaemonEvent execute(Command cmd) throws NativeDaemonConnectorException {
+        return execute(cmd.mCmd, cmd.mArguments.toArray());
+    }
+
+    /**
+     * Issue the given command to the native daemon and return a single expected
+     * response.
+     *
+     * @throws NativeDaemonConnectorException when problem communicating with
+     *             native daemon, or if the response matches
+     *             {@link NativeDaemonEvent#isClassClientError()} or
+     *             {@link NativeDaemonEvent#isClassServerError()}.
+     */
+    public NativeDaemonEvent execute(String cmd, Object... args)
+            throws NativeDaemonConnectorException {
+        final NativeDaemonEvent[] events = executeForList(cmd, args);
+        if (events.length != 1) {
+            throw new NativeDaemonConnectorException(
+                    "Expected exactly one response, but received " + events.length);
+        }
+        return events[0];
+    }
+
+    /**
+     * Issue the given command to the native daemon and return any
+     * {@link NativeDaemonEvent#isClassContinue()} responses, including the
+     * final terminal response.
+     *
+     * @throws NativeDaemonConnectorException when problem communicating with
+     *             native daemon, or if the response matches
+     *             {@link NativeDaemonEvent#isClassClientError()} or
+     *             {@link NativeDaemonEvent#isClassServerError()}.
+     */
+    public NativeDaemonEvent[] executeForList(Command cmd) throws NativeDaemonConnectorException {
+        return executeForList(cmd.mCmd, cmd.mArguments.toArray());
+    }
+
+    /**
+     * Issue the given command to the native daemon and return any
+     * {@link NativeDaemonEvent#isClassContinue()} responses, including the
+     * final terminal response.
+     *
+     * @throws NativeDaemonConnectorException when problem communicating with
+     *             native daemon, or if the response matches
+     *             {@link NativeDaemonEvent#isClassClientError()} or
+     *             {@link NativeDaemonEvent#isClassServerError()}.
+     */
+    public NativeDaemonEvent[] executeForList(String cmd, Object... args)
             throws NativeDaemonConnectorException {
         synchronized (mDaemonLock) {
             return executeLocked(cmd, args);
@@ -270,7 +326,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     @Deprecated
     public ArrayList<String> doCommand(String cmd) throws NativeDaemonConnectorException {
         final ArrayList<String> rawEvents = Lists.newArrayList();
-        final NativeDaemonEvent[] events = execute(cmd);
+        final NativeDaemonEvent[] events = executeForList(cmd);
         for (NativeDaemonEvent event : events) {
             rawEvents.add(event.getRawEvent());
         }
@@ -281,11 +337,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      * Issues a list command and returns the cooked list of all
      * {@link NativeDaemonEvent#getMessage()} which match requested code.
      */
+    @Deprecated
     public String[] doListCommand(String cmd, int expectedCode)
             throws NativeDaemonConnectorException {
         final ArrayList<String> list = Lists.newArrayList();
 
-        final NativeDaemonEvent[] events = execute(cmd);
+        final NativeDaemonEvent[] events = executeForList(cmd);
         for (int i = 0; i < events.length - 1; i++) {
             final NativeDaemonEvent event = events[i];
             final int code = event.getCode();
@@ -348,6 +405,26 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private static class NativeDaemonFailureException extends NativeDaemonConnectorException {
         public NativeDaemonFailureException(String command, NativeDaemonEvent event) {
             super(command, event);
+        }
+    }
+
+    /**
+     * Command builder that handles argument list building.
+     */
+    public static class Command {
+        private String mCmd;
+        private ArrayList<Object> mArguments = Lists.newArrayList();
+
+        public Command(String cmd, Object... args) {
+            mCmd = cmd;
+            for (Object arg : args) {
+                appendArg(arg);
+            }
+        }
+
+        public Command appendArg(Object arg) {
+            mArguments.add(arg);
+            return this;
         }
     }
 
