@@ -26,7 +26,7 @@ import android.view.accessibility.AccessibilityEvent;
  */
  oneway interface IEventListener {
 
-    void setConnection(in IAccessibilityServiceConnection connection);
+    void setConnection(in IAccessibilityServiceConnection connection, int connectionId);
 
     void onAccessibilityEvent(in AccessibilityEvent event);
 
