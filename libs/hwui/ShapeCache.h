@@ -584,8 +584,8 @@ void ShapeCache<Entry>::generateTexture(SkBitmap& bitmap, Texture* texture) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, texture->width, texture->height, 0,
             GL_ALPHA, GL_UNSIGNED_BYTE, bitmap.getPixels());
 
-    texture->setFilter(GL_LINEAR, GL_LINEAR);
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texture->setFilter(GL_LINEAR);
+    texture->setWrap(GL_CLAMP_TO_EDGE);
 }
 
 }; // namespace uirenderer

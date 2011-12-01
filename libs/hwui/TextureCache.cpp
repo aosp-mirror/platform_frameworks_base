@@ -217,11 +217,15 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     texture->height = bitmap->height();
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
+    if (!regenerate) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
+    }
 
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        if (!regenerate) {
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        }
         uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height,
                 GL_UNSIGNED_BYTE, bitmap->getPixels());
         texture->blend = true;
@@ -248,8 +252,10 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         break;
     }
 
-    texture->setFilter(GL_LINEAR, GL_LINEAR);
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    if (!regenerate) {
+        texture->setFilter(GL_NEAREST);
+        texture->setWrap(GL_CLAMP_TO_EDGE);
+    }
 }
 
 void TextureCache::uploadLoFiTexture(bool resize, SkBitmap* bitmap,
