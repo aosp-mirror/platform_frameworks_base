@@ -2581,6 +2581,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Returns whether the text is allowed to be wider than the View is.
+     * If false, the text will be wrapped to the width of the View.
+     *
+     * @attr ref android.R.styleable#TextView_scrollHorizontally
+     * @hide
+     */
+    public boolean getHorizontallyScrolling() {
+        return mHorizontallyScrolling;
+    }
+
+    /**
      * Makes the TextView at least this many lines tall.
      *
      * Setting this value overrides any other (minimum) height setting. A single line TextView will
