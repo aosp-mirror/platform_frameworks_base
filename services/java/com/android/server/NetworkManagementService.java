@@ -360,8 +360,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             return mConnector.doListCommand("interface list", NetdResponseCode.InterfaceListResult);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Cannot communicate with native daemon to list interfaces");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -372,8 +371,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             rsp = mConnector.doCommand("interface getcfg " + iface).get(0);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Cannot communicate with native daemon to get interface config");
+            throw e.rethrowAsParcelableException();
         }
         Slog.d(TAG, String.format("rsp <%s>", rsp));
 
@@ -436,8 +434,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon to interface setcfg - " + e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -465,8 +462,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon to set ipv6privacyextensions - " + e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -479,8 +475,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon to interface clearallips - " + e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -490,8 +485,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(String.format("interface ipv6 %s enable", iface));
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for enabling ipv6");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -501,8 +495,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(String.format("interface ipv6 %s disable", iface));
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for disabling ipv6");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -569,9 +562,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             rsp = mConnector.doCommand(cmd.toString());
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native dameon to add routes - "
-                    + e);
+            throw e.rethrowAsParcelableException();
         }
 
         if (DBG) {
@@ -700,8 +691,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             rsp = mConnector.doCommand("ipfwd status");
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate with native daemon to ipfwd status");
+            throw e.rethrowAsParcelableException();
         }
 
         for (String line : rsp) {
@@ -728,7 +718,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(String.format("ipfwd %sable", (enable ? "en" : "dis")));
         } catch (NativeDaemonConnectorException e) {
-            e.rethrowAsParcelableException();
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -745,7 +735,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Unable to communicate to native daemon");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -755,7 +745,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand("tether stop");
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Unable to communicate to native daemon to stop tether");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -767,8 +757,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             rsp = mConnector.doCommand("tether status");
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon to get tether status");
+            throw e.rethrowAsParcelableException();
         }
 
         for (String line : rsp) {
@@ -793,8 +782,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand("tether interface add " + iface);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for adding tether interface");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -804,8 +792,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand("tether interface remove " + iface);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for removing tether interface");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -816,8 +803,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             return mConnector.doListCommand(
                     "tether interface list", NetdResponseCode.TetherInterfaceListResult);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for listing tether interfaces");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -832,8 +818,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             try {
                 mConnector.doCommand(cmd);
             } catch (NativeDaemonConnectorException e) {
-                throw new IllegalStateException(
-                        "Unable to communicate to native daemon for setting tether dns");
+                throw e.rethrowAsParcelableException();
             }
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Error resolving dns name", e);
@@ -847,8 +832,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             return mConnector.doListCommand(
                     "tether dns list", NetdResponseCode.TetherDnsFwdTgtListResult);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for listing tether dns");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -874,7 +858,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            e.rethrowAsParcelableException();
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -910,8 +894,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             return mConnector.doListCommand("list_ttys", NetdResponseCode.TtyListResult);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Unable to communicate to native daemon for listing TTYs");
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -928,7 +911,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Error resolving addr", e);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon to attach pppd", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -938,7 +921,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(String.format("pppd detach %s", tty));
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon to detach pppd", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -972,7 +955,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
             mConnector.doCommand(String.format("softap startap"));
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon to start softap", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1003,7 +986,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(String.format("softap fwreload " + wlanIface + " " + mode));
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon ", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1016,8 +999,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mConnector.doCommand("softap stop " + wlanIface);
             wifiFirmwareReload(wlanIface, "STA");
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon to stop soft AP",
-                    e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1036,8 +1018,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.doCommand(str);
             }
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon to set soft AP",
-                    e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1113,7 +1094,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.doCommand(command.toString());
                 mActiveQuotaIfaces.add(iface);
             } catch (NativeDaemonConnectorException e) {
-                throw new IllegalStateException("Error communicating to native daemon", e);
+                throw e.rethrowAsParcelableException();
             }
         }
     }
@@ -1142,8 +1123,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 // TODO: support quota shared across interfaces
                 mConnector.doCommand(command.toString());
             } catch (NativeDaemonConnectorException e) {
-                // TODO: include current iptables state
-                throw new IllegalStateException("Error communicating to native daemon", e);
+                throw e.rethrowAsParcelableException();
             }
         }
     }
@@ -1175,7 +1155,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.doCommand(command.toString());
                 mActiveAlertIfaces.add(iface);
             } catch (NativeDaemonConnectorException e) {
-                throw new IllegalStateException("Error communicating to native daemon", e);
+                throw e.rethrowAsParcelableException();
             }
         }
     }
@@ -1202,7 +1182,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.doCommand(command.toString());
                 mActiveAlertIfaces.remove(iface);
             } catch (NativeDaemonConnectorException e) {
-                throw new IllegalStateException("Error communicating to native daemon", e);
+                throw e.rethrowAsParcelableException();
             }
         }
     }
@@ -1221,7 +1201,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mConnector.doCommand(command.toString());
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1257,7 +1237,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     mUidRejectOnQuota.delete(uid);
                 }
             } catch (NativeDaemonConnectorException e) {
-                throw new IllegalStateException("Error communicating to native daemon", e);
+                throw e.rethrowAsParcelableException();
             }
         }
     }
@@ -1304,7 +1284,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             rsp = mConnector.doCommand(command.toString()).get(0);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon", e);
+            throw e.rethrowAsParcelableException();
         }
 
         final String[] tok = rsp.split(" ");
@@ -1349,7 +1329,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mConnector.doCommand(String.format(
                     "interface setthrottle %s %d %d", iface, rxKbps, txKbps));
         } catch (NativeDaemonConnectorException e) {
-            Slog.e(TAG, "Error communicating with native daemon to set throttle", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1362,8 +1342,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         String.format("interface getthrottle %s %s", iface,
                                 (rx ? "rx" : "tx"))).get(0);
             } catch (NativeDaemonConnectorException e) {
-                Slog.e(TAG, "Error communicating with native daemon to getthrottle", e);
-                return -1;
+                throw e.rethrowAsParcelableException();
             }
 
             String[] tok = rsp.split(" ");
@@ -1410,8 +1389,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native daemon to set default interface", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1430,8 +1408,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Error setting dnsn for interface", e);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native daemon to set dns for interface", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1443,8 +1420,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native deamon to flush default interface", e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
@@ -1456,8 +1432,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating with native daemon to flush interface " + iface, e);
+            throw e.rethrowAsParcelableException();
         }
     }
 
