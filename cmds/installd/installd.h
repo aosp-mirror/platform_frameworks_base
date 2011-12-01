@@ -105,6 +105,11 @@ int create_pkg_path(char path[PKG_PATH_MAX],
 int create_persona_path(char path[PKG_PATH_MAX],
                     uid_t persona);
 
+int create_move_path(char path[PKG_PATH_MAX],
+                     const char* pkgname,
+                     const char* leaf,
+                     uid_t persona);
+
 int is_valid_package_name(const char* pkgname);
 
 int create_cache_path(char path[PKG_PATH_MAX], const char *src);
