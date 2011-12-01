@@ -328,10 +328,6 @@ uint32_t TextLayoutCacheValue::getElapsedTime() {
     return mElapsedTime;
 }
 
-//HB_ShaperItem TextLayoutEngine::mShaperItem;
-//HB_FontRec TextLayoutEngine::mFontRec;
-//SkPaint TextLayoutEngine::mShapingPaint;
-
 TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0),
         mShaperItemLogClustersArraySize(0) {
     mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
@@ -487,7 +483,7 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
         // Default single run case
         if (useSingleRun){
 #if DEBUG_GLYPHS
-            LOGD("Using a SINGLE ICURun "
+            LOGD("Using a SINGLE BiDi Run "
                     "-- run-start = %d, run-len = %d, isRTL = %d", start, count, isRTL);
 #endif
             computeRunValues(paint, chars + start, count, isRTL,
