@@ -239,6 +239,10 @@ public class WifiNative {
         return WifiNative.doBooleanCommand("SET config_methods " + cfg);
     }
 
+    public static boolean setP2pSsidPostfix(String postfix) {
+        return WifiNative.doBooleanCommand("SET p2p_ssid_postfix " + postfix);
+    }
+
     public static boolean p2pFind() {
         return doBooleanCommand("P2P_FIND");
     }

@@ -1088,16 +1088,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
-                    if (device.equals(mGroup.getOwner())) {
-                        logd("Lost the group owner, killing p2p connection");
-                        WifiNative.p2pGroupRemove(mGroup.getInterface());
-                    } else if (mGroup.removeClient(device)) {
-                        if (!mPersistGroup && mGroup.isClientListEmpty()) {
-                            Slog.d(TAG, "Client list empty, removing a non-persistent p2p group");
-                            WifiNative.p2pGroupRemove(mGroup.getInterface());
-                        }
+                    //Device loss for a connected device indicates it is not in discovery any more
+                    if (mGroup.contains(device)) {
+                        if (DBG) logd("Lost " + device +" , do nothing");
+                        return HANDLED;
                     }
-                    return NOT_HANDLED; // Do the regular device lost handling
+                    // Do the regular device lost handling
+                    return NOT_HANDLED;
                 case WifiP2pManager.DISABLE_P2P:
                     sendMessage(WifiP2pManager.REMOVE_GROUP);
                     deferMessage(message);
@@ -1401,6 +1398,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private void initializeP2pSettings() {
         WifiNative.setPersistentReconnect(true);
         WifiNative.setDeviceName(mThisDevice.deviceName);
+        //DIRECT-XY-DEVICENAME (XY is randomly generated)
+        WifiNative.setP2pSsidPostfix("-" + mThisDevice.deviceName);
         WifiNative.setDeviceType(mThisDevice.primaryDeviceType);
         //The supplicant default is to support everything, but a bug necessitates
         //the framework to specify this explicitly
