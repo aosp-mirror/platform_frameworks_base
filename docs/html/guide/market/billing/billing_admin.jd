@@ -39,12 +39,12 @@ few administrative tasks, including setting up and maintaining your product list
 site, registering test accounts, and handling refunds when necessary.</p>
 
 <p>You must have an Android Market publisher account to register test accounts. And you must have a
-Google Checkout Merchant account to create a product list and issue refunds to your users. If you
+Google Checkout merchant account to create a product list and issue refunds to your users. If you
 already have a publisher account on Android Market, you can use your existing account. You do not
 need to register for a new account to support in-app billing. If you do not have a publisher
 account, you can register as an Android Market developer and set up a publisher account at the
 Android Market <a href="http://market.android.com/publish">publisher site</a>. If you do not have a
-Google Checkout Merchant account, you can register for one at the <a
+Google Checkout merchant account, you can register for one at the <a
 href="http://checkout.google.com">Google Checkout site</a>.</p>
 
 <h2 id="billing-list-setup">Creating a Product List</h2>
@@ -57,7 +57,7 @@ items that are listed in another application's product list.</p>
 <p>You can access an application's product list by clicking the <strong>In-App Products</strong>
 link that appears under each of the applications that are listed for your publisher account (see
 figure 1). The <strong>In-App Products</strong> link appears only if you have a Google Checkout
-Merchant account and an application's manifest includes the <code>com.android.vending.BILLING</code>
+merchant account and an application's manifest includes the <code>com.android.vending.BILLING</code>
 permission.</p>
 
 <img src="{@docRoot}images/billing_product_list_entry.png" height="548" id="figure1" />
@@ -71,20 +71,37 @@ product description, and price (see figure 2). The product list stores only meta
 you are selling in your application. It does not store any digital content. You are responsible for
 storing and delivering the digital content that you sell in your applications.</p>
 
-<img src="{@docRoot}images/billing_product_list.png" height="560" id="figure2" />
+<img src="{@docRoot}images/billing_product_list.png" height="658" id="figure2" />
 <p class="img-caption">
   <strong>Figure 2.</strong> An application's product list.
 </p>
 
-<p>You can create a product list for a published application or a draft application that's been
-uploaded and saved to the Android Market site. However, you must have a Google Checkout Merchant
+<p>You can create a product list for any published application or any draft application that's been
+uploaded and saved to the Android Market site. However, you must have a Google Checkout merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
 existing items in the product list but you will not be able to add new items to the list. For more
-information, see <a href="#billing-permission">Modifying your application's AndroidManifest.xml
-file</a>.</p>
+information about this permission, see
+<a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-permission">Updating Your
+Application's Manifest</a>.</p>
 
-<p>To create a product list for an application, follow these steps:</p>
+<p>In addition, an application package can have only one product list. If you create a product
+list for an application, and you use the <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html">multiple APK feature</a> to distribute
+more than one APK for that application, the product list applies to all APK versions that are
+associated with the application listing. You cannot create individual product lists for each APK if
+you are using the multiple APK feature.</p>
+
+<p>You can add items to a product list two ways: you can add items one at a time by using the In-app
+Products UI (see figure 3), or you can add a batch of items by importing the items from a
+comma-separated values (CSV) file (see figure 2). Adding items one at a time is useful if your
+application has only a few in-app items or you are adding only a few items to a
+product list for testing purposes. The CSV file method is useful if your application has a large
+number of in-app items.</p>
+
+<h3 id="billing-form-add">Adding items one at a time to a product list</h3>
+
+<p>To add an item to a product list using the In-app Products UI, follow these steps:</p>
 
 <ol>
   <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
@@ -92,7 +109,7 @@ file</a>.</p>
   <strong>In-app Products</strong>.</li>
   <li>On the In-app Products List page, click <strong>Add in-app product</strong>.</li>
   <li>On the Create New In-app Product page (see figure 3), provide details about the item you are
-  selling and then click <strong>Save</strong>.</li>
+  selling and then click <strong>Save</strong> or <strong>Publish</strong>.</li>
 </ol>
 
 <img src="{@docRoot}images/billing_list_form.png" height="840" id="figure3" />
@@ -109,25 +126,31 @@ file</a>.</p>
     (0-9), underlines (_), and dots (.). The product ID "android.test" is reserved, as are all
     product IDs that start with "android.test."</p>
     <p>In addition, you cannot modify an item's product ID after it is created, and you cannot reuse
-    a product ID, even if you delete the item previously using the product ID.</p>
+    a product ID.</p>
   </li>
-  <li><strong>Purchase type</strong>
-    <p>The purchase type can be "managed per user account" or "unmanaged." You can specify an item's
-    purchase type only through the publisher site and you can never change an item's purchase type
-    once you specify it. For more information, see <a href="#billing_purchase_type">Choosing a
-    purchase type</a> later in this document.</p>
+  <li><strong>Purchase Type</strong>
+    <p>The purchase type can be <strong>Managed per user account</strong> or <strong>
+    Unmanaged</strong>. You can never change an item's purchase type after you set it. For more
+    information, see <a href="#billing-purchase-type">Choosing a purchase type</a> later in this
+    document.</p>
   </li>
   <li><strong>Publishing State</strong>
-    <p>An item's publishing state can be "published" or "unpublished." However, to be visible to a
-    user during checkout, an item's publishing state must be set to "published" and the item's
-    application must be published on Android Market.</p>
+    <p>An item's publishing state can be <strong>Published</strong> or <strong>Unpublished
+    </strong>. To be visible to a user during checkout, an item's publishing state must be set to
+    <strong>Published</strong> and the item's application must be published on Android Market.</p>
     <p class="note"><strong>Note:</strong> This is not true for test accounts. An item is visible to
     a test account if the application is not published and the item is published. See <a
     href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-real">Testing In-app
     Billing</a> for more information.</p>
   </li>
   <li><strong>Language</strong>
-    <p>A product list inherits its language from the parent application.</p>
+    <p>The language setting determines which languages are used to display the item title and
+    item description during checkout. A product list inherits its default language from the
+    parent application. You can add more languages by clicking <strong>add language</strong>. You
+    can also choose to have the title and description automatically translated from the default
+    language by selecting the <strong>Fill fields with auto translation</strong> checkbox (see
+    figure 4). If you do not use the auto translation feature, you must provide the translated
+    versions of the title and description.</p>
   </li>
   <li><strong>Title</strong>
     <p>The title is a short descriptor for the item. For example, "Sleeping potion." Titles must be
@@ -141,9 +164,20 @@ file</a>.</p>
     visible to users during checkout. Descriptions can be up to 80 characters in length.</p>
   </li>
   <li><strong>Price</strong>
-    <p>Every item must have a price greater than zero; you cannot set a price of "0" (free).</p>
+    <p>You must provide a default price in your home currency. You can also provide prices in other
+    currencies, but you can do this only if a currency's corresponding country is listed as a
+    target country for your application. You can specify target countries on the Edit Application
+    page in the Android Market developer console.</p>
+    <p>To specify prices in other currencies, you can manually enter the price for each
+    currency or you can click <strong>Auto Fill</strong> and let Android Market do a one-time
+    conversion from your home currency to the currencies you are targeting (see figure 4).</p>
   </li>
 </ul>
+<img src="{@docRoot}images/billing_list_form_2.png" height="1226" id="figure4" />
+<p class="img-caption">
+  <strong>Figure 4.</strong> Specifying additional currencies and additional languages for the
+  item title and description.
+</p>
 
 <p>For more information about product IDs and product lists, see <a
 href="http://market.android.com/support/bin/answer.py?answer=1072599">Creating In-App Product
@@ -153,6 +187,197 @@ Pricing</a>.</p>
 
 <p class="note"><strong>Note</strong>: Be sure to plan your product ID namespace. You cannot reuse
 or modify product IDs after you save them.</p>
+
+<h3 id="billing-bulk-add">Adding a batch of items to a product list</h3>
+
+<p>To add a batch of items to a product list using a CSV file, you first need to create your CSV
+file. The data values that you specify in the CSV file represent the same data values you specify
+manually through the In-app Products UI (see <a href="#billing-form-add">Adding items one at a time
+to a product list</a>). The CSV file uses commas (,) and semi-colons (;) to separate data values.
+Commas are used to separate primary data values, and semi-colons are used to separate subvalues. For
+example, the syntax for the CSV file is as follows:</p>
+
+<p>"<em>product_id</em>","<em>publish_state</em>","<em>purchase_type</em>","<em>autotranslate</em>
+","<em>locale</em>; <em>title</em>; <em>description</em>","<em>autofill</em>","<em>country</em>;
+<em>price</em>"
+</p>
+
+<p>Descriptions and usage details are provided below.</p>
+
+<ul>
+  <li><em>product_id</em>
+    <p>This is equivalent to the In-app Product ID setting in the In-app Products UI. If you specify
+    a <em>product_id</em> that already exists in a product list, and you choose to overwrite
+    the product list while importing the CSV file, the data for the existing item is overwritten with
+    the values specified in the CSV file. The overwrite feature does not delete items that are on a
+    product list but not present in the CSV file.</p>
+  </li>
+  <li><em>publish_state</em>
+    <p>This is equivalent to the Publishing State setting in the In-app Products UI. Can be <code>
+    published</code> or <code>unpublished</code>.</p>
+  </li>
+  <li><em>purchase_type</em>
+    <p>This is equivalent to the Purchase Type setting in the In-app Products UI. Can be <code>
+    managed_by_android</code>, which is equivalent to <strong>Managed per user account
+    </strong> in the In-app Products UI, or <code>managed_by_publisher</code>, which is equivalent
+    to <strong>Unmanaged</strong> in the In-app Products UI.</p>
+  </li>
+  <li><em>autotranslate</em>
+    <p>This is equivalent to selecting the <strong>Fill fields with auto translation</strong>
+    checkbox in the In-app Products UI. Can be <code>true</code> or <code>false</code>.</p>
+  </li>
+  <li><em>locale</em>
+    <p>This is equivalent to the Language setting in the In-app Products UI. You must have an entry
+    for the default locale. The default locale must be the first entry in the list of
+    locales, and it must include a <em>title</em> and <em>description</em>. If you want to provide
+    translated versions of the <em>title</em> and <em>description</em> in addition to the default,
+    you must use the following syntax rules:</p>
+    <p>If <em>autotranslate</em> is <code>true</code>, you must specify the default locale,
+    default title, default description, and other locales using the following format:</p>
+    <p>"true,"<em>default_locale</em>; <em>default_locale_title</em>;
+    <em>default_locale_description</em>; <em>locale_2</em>;    <em>locale_3</em>, ..."</p>
+    <p>If <em>autotranslate</em> is <code>false</code>, you must specify the default locale,
+    default title, and default description as well as the translated titles and descriptions using
+    the following format:</p>
+    <p>"false,"<em>default_locale</em>; <em>default_locale_title</em>;
+    <em>default_locale_description</em>; <em>locale_2</em>; <em>locale_2_title</em>;
+    <em>local_2_description</em>; <em>locale_3</em>; <em>locale_3_title</em>;
+     <em>locale_3_description</em>; ..."</p>
+    <p>See table 1 for a list of the language codes you can use with the <em>locale</em> field.</p>
+  </li>
+  <li><em>title</em>
+    <p>This is equivalent to the Title setting in the In-app Products UI. If the <em>title</em>
+    contains a semicolon, it must be escaped with a backslash (for example, "\;"). A backslash
+    should also be escaped with a backslash (for example, "\\">.</p>
+  </li>
+  <li><em>description</em>
+    <p>This is equivalent to the Description in the In-app Products UI. If the <em>description</em>
+    contains a semicolon, it must be escaped with a backslash (for example, "\;"). A backslash
+    should also be escaped with a backslash (for example, "\\">.</p>
+  </li>
+  <li><em>autofill</em>
+    <p>This is equivalent to clicking <strong>Auto Fill</strong> in the In-app Products UI. Can be
+    <code>true</code> or <code>false</code>. The syntax for specifying the <em>country</em>
+    and <em>price</em> varies depending on which <em>autofill</em> setting you use.</p>
+    <p>If <em>autofill</em> is set to <code>true</code>, you need to specify only the default
+    price in your home currency and you must use this syntax:</p>
+    <p>"true","<em>default_price_in_home_currency</em>"
+    <p>If <em>autofill</em> is set to <code>false</code>, you need to specify a <em>country</em>
+    and a <em>price</em> for each currency and you must use the following syntax:</p>
+    <p>"false", "<em>home_country</em>; <em>default_price_in_home_currency</em>; <em>country_2</em>;
+    <em>country_2_price</em>; <em>country_3</em>; <em>country_3_price</em>; ..."</p>
+  </li>
+  <li><em>country</em>
+    <p>The country for which you are specifying a price. You can only list countries that your
+    application is targeting. The country codes are two-letter uppercase
+    ISO country codes (such as "US") as defined by
+    <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-2</a>.</p>
+  </li>
+  <li><em>price</em>
+    <p>This is equivalent to the Price in the In-app Products UI. The price must be specified in
+    micro-units. To convert a currency value to micro-units, you multiply the real value by 1,000,000.
+    For example, if you want to sell an in-app item for $1.99 you specify 1990000 in the
+    <em>price</em> field.</p>
+  </li>
+</ul>
+
+<p class="table-caption" id="language-table"><strong>Table 1.</strong> Language codes you can use
+with the <em>locale</em> field.</p>
+
+<table>
+
+<tr>
+<th>Language</th>
+<th>Code</th>
+<th>Language</th>
+<th>Code</th>
+</tr>
+<tr>
+<td>Chinese</td>
+<td>zh_TW</td>
+<td>Italian</td>
+<td>it_IT</td>
+</tr>
+<tr>
+<td>Czech</td>
+<td>cs_CZ</td>
+<td>Japanese</td>
+<td>ja_JP</td>
+</tr>
+<tr>
+<td>Danish</td>
+<td>da_DK</td>
+<td>Korean</td>
+<td>ko_KR</td>
+</tr>
+<tr>
+<td>Dutch</td>
+<td>nl_NL</td>
+<td>Norwegian</td>
+<td>no_NO</td>
+</tr>
+<tr>
+<td>English</td>
+<td>en_US</td>
+<td>Polish</td>
+<td>pl_PL</td>
+</tr>
+<tr>
+<td>French</td>
+<td>fr_FR</td>
+<td>Portuguese</td>
+<td>pt_PT</td>
+</tr>
+<tr>
+<td>Finnish</td>
+<td>fi_FI</td>
+<td>Russian</td>
+<td>ru_RU</td>
+</tr>
+<tr>
+<td>German</td>
+<td>de_DE</td>
+<td>Spanish</td>
+<td>es_ES</td>
+</tr>
+<tr>
+<td>Hebrew</td>
+<td>iw_IL</td>
+<td>Swedish</td>
+<td>sv_SE</td>
+</tr>
+<tr>
+<td>Hindi</td>
+<td>hi_IN</td>
+<td>--</td>
+<td>--</td>
+</tr>
+</table>
+
+<p>To import the items that are specified in your CSV file, do the following:</p>
+
+<ol>
+  <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
+  <li>In the <strong>All Android Market listings</strong> panel, under the application name, click
+  <strong>In-app Products</strong>.</li>
+  <li>On the In-app Products List page, click <strong>Choose File</strong> and select your CSV
+file.
+    <p>The CSV file must be on your local computer or on a local disk that is connected to your
+    computer.</p>
+  </li>
+  <li>Select the <strong>Overwrite</strong> checkbox if you want to overwrite existing items in
+  your product list.
+    <p>This option overwrites values of existing items only if the value of the <em>product_id</em>
+    in the CSV file matches the In-app Product ID for an existing item in the product list.
+    Overwriting does not delete items that are on a product list but not present in the CSV
+    file.</p>
+  </li>
+  <li>On the In-app Products List page, click <strong>Import from CSV</strong>.</li>
+</ol>
+
+<p>You can also export an existing product list to a CSV file by clicking <strong>Export to CSV
+</strong> on the In-app Product List page. This is useful if you have manually added items to
+a product list and you want to start managing the product list through a CSV file.</p>
 
 <h3 id="billing-purchase-type">Choosing a Purchase Type</h3>
 
@@ -194,7 +419,7 @@ times.</p>
 
 <p>In-app billing does not allow users to send a refund request to Android Market. Refunds for
 in-app purchases must be directed to you (the application developer). You can then process the
-refund through your Google Checkout Merchant account. When you do this, Android Market receives a
+refund through your Google Checkout merchant account. When you do this, Android Market receives a
 refund notification from Google Checkout, and Android Market sends a refund message to your
 application. For more information, see <a
 href="{@docRoot}guide/market/billing/billing_overview.html#billing-action-notify">Handling
@@ -236,15 +461,15 @@ accounts yourself and distribute the credentials to your developers or testers.<
   <li><a href="http://market.android.com/publish">Log in</a> to your publisher account.</li>
   <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
   <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure
-  4).</li>
+  5).</li>
   <li>In Test Accounts, add the email addresses for the test accounts you want to register,
   separating each account with a comma.</li>
   <li>Click <strong>Save</strong> to save your profile changes.</li>
 </ol>
 
-<img src="{@docRoot}images/billing_public_key.png" height="510" id="figure4" />
+<img src="{@docRoot}images/billing_public_key.png" height="510" id="figure5" />
 <p class="img-caption">
-  <strong>Figure 4.</strong> The Licensing and In-app Billing panel of your account's Edit Profile
+  <strong>Figure 5.</strong> The Licensing and In-app Billing panel of your account's Edit Profile
   page lets you register test accounts.
 </p>
 
