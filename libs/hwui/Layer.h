@@ -147,12 +147,12 @@ struct Layer {
         this->renderTarget = renderTarget;
     }
 
-    void setWrap(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false) {
-        texture.setWrap(wrapS, wrapT, bindTexture, force, renderTarget);
+    void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
+        texture.setWrap(wrap, bindTexture, force, renderTarget);
     }
 
-    void setFilter(GLenum min, GLenum mag, bool bindTexture = false, bool force = false) {
-        texture.setFilter(min, mag,bindTexture, force, renderTarget);
+    void setFilter(GLenum filter, bool bindTexture = false, bool force = false) {
+        texture.setFilter(filter, bindTexture, force, renderTarget);
     }
 
     inline bool isCacheable() {

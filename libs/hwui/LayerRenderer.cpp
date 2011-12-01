@@ -294,8 +294,8 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
         if (renderTarget != layer->getRenderTarget()) {
             layer->setRenderTarget(renderTarget);
             layer->bindTexture();
-            layer->setFilter(GL_NEAREST, GL_NEAREST, false, true);
-            layer->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, false, true);
+            layer->setFilter(GL_NEAREST, false, true);
+            layer->setWrap(GL_CLAMP_TO_EDGE, false, true);
         }
     }
 }

@@ -47,6 +47,8 @@ namespace uirenderer {
 // TODO: This should be set in properties
 #define ALPHA_THRESHOLD (0x7f / PANEL_BIT_DEPTH)
 
+#define FILTER(paint) (paint && paint->isFilterBitmap() ? GL_LINEAR : GL_NEAREST)
+
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
@@ -665,10 +667,10 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
         const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
 
-        layer->setFilter(GL_NEAREST, GL_NEAREST);
+        layer->setFilter(GL_NEAREST);
         setupDrawModelView(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
     } else {
-        layer->setFilter(GL_LINEAR, GL_LINEAR);
+        layer->setFilter(GL_LINEAR);
         setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
     }
     setupDrawTextureTransformUniforms(layer->getTexTransform());
@@ -702,9 +704,9 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
                 y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
             }
 
-            layer->setFilter(GL_NEAREST, GL_NEAREST, true);
+            layer->setFilter(GL_NEAREST, true);
         } else {
-            layer->setFilter(GL_LINEAR, GL_LINEAR, true);
+            layer->setFilter(GL_LINEAR, true);
         }
 
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
@@ -760,10 +762,10 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
             const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
 
-            layer->setFilter(GL_NEAREST, GL_NEAREST);
+            layer->setFilter(GL_NEAREST);
             setupDrawModelViewTranslate(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
         } else {
-            layer->setFilter(GL_LINEAR, GL_LINEAR);
+            layer->setFilter(GL_LINEAR);
             setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
         }
         setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0]);
@@ -1320,6 +1322,8 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
         y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
         ignoreTransform = true;
         filter = GL_NEAREST;
+    } else {
+        filter = FILTER(paint);
     }
 
     setupDraw();
@@ -1334,8 +1338,8 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     setupDrawModelView(x, y, x + texture->width, y + texture->height, ignoreTransform);
 
     setupDrawTexture(texture->id);
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    texture->setFilter(filter, filter);
+    texture->setWrap(GL_CLAMP_TO_EDGE);
+    texture->setFilter(filter);
 
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
@@ -1401,8 +1405,8 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_LINEAR, GL_LINEAR, true);
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(FILTER(paint), true);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -1485,7 +1489,6 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
 
     const float width = texture->width;
     const float height = texture->height;
@@ -1502,6 +1505,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+
     if (mSnapshot->transform->isPureTranslate()) {
         const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
@@ -1509,17 +1514,16 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         GLenum filter = GL_NEAREST;
         // Enable linear filtering if the source rectangle is scaled
         if (srcRight - srcLeft != dstRight - dstLeft || srcBottom - srcTop != dstBottom - dstTop) {
-            filter = GL_LINEAR;
+            filter = FILTER(paint);
         }
-        texture->setFilter(filter, filter, true);
 
+        texture->setFilter(filter, true);
         drawTextureMesh(x, y, x + (dstRight - dstLeft), y + (dstBottom - dstTop),
                 texture->id, alpha / 255.0f, mode, texture->blend,
                 &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
-        texture->setFilter(GL_LINEAR, GL_LINEAR, true);
-
+        texture->setFilter(FILTER(paint), true);
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
                 mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount);
@@ -1539,8 +1543,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_LINEAR, GL_LINEAR, true);
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_LINEAR, true);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2250,11 +2254,11 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
                 x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
                 y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
 
-                layer->setFilter(GL_NEAREST, GL_NEAREST);
+                layer->setFilter(GL_NEAREST);
                 setupDrawModelViewTranslate(x, y,
                         x + layer->layer.getWidth(), y + layer->layer.getHeight(), true);
             } else {
-                layer->setFilter(GL_LINEAR, GL_LINEAR);
+                layer->setFilter(GL_LINEAR);
                 setupDrawModelViewTranslate(x, y,
                         x + layer->layer.getWidth(), y + layer->layer.getHeight());
             }
@@ -2447,18 +2451,18 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     if (mSnapshot->transform->isPureTranslate()) {
         const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
 
-        texture->setFilter(GL_NEAREST, GL_NEAREST, true);
+        texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
                 alpha / 255.0f, mode, texture->blend, (GLvoid*) NULL,
                 (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
-        texture->setFilter(GL_LINEAR, GL_LINEAR, true);
+        texture->setFilter(FILTER(paint), true);
         drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
                 texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
                 GL_TRIANGLE_STRIP, gMeshCount);
