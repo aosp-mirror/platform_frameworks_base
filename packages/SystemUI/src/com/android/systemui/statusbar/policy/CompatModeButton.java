@@ -49,6 +49,10 @@ public class CompatModeButton extends ImageView {
 
     public void refresh() {
         int mode = mAM.getFrontActivityScreenCompatMode();
+        if (mode == ActivityManager.COMPAT_MODE_UNKNOWN) {
+            // If in an unknown state, don't change.
+            return;
+        }
         final boolean vis = (mode != ActivityManager.COMPAT_MODE_NEVER
                           && mode != ActivityManager.COMPAT_MODE_ALWAYS);
         if (DEBUG) Slog.d(TAG, "compat mode is " + mode + "; icon will " + (vis ? "show" : "hide"));
