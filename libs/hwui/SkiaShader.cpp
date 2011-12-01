@@ -77,7 +77,7 @@ void SkiaShader::setupProgram(Program* program, const mat4& modelView, const Sna
 
 void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    texture->setWrap(wrapS, wrapT);
+    texture->setWrapST(wrapS, wrapT);
 }
 
 void SkiaShader::computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView) {
@@ -148,7 +148,7 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
     // ::updateTransforms() but we don't have the texture object
     // available at that point. The optimization is not worth the
     // effort for now.
-    texture->setFilter(GL_LINEAR, GL_LINEAR);
+    texture->setFilter(GL_LINEAR);
 
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,

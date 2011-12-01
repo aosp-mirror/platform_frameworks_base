@@ -40,7 +40,12 @@ struct Texture {
         firstWrap = true;
     }
 
-    void setWrap(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false,
+    void setWrap(GLenum wrap, bool bindTexture = false, bool force = false,
+                GLenum renderTarget = GL_TEXTURE_2D) {
+        setWrapST(wrap, wrap, bindTexture, force, renderTarget);
+    }
+
+    void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false,
             GLenum renderTarget = GL_TEXTURE_2D) {
 
         if (firstWrap || force || wrapS != this->wrapS || wrapT != this->wrapT) {
@@ -58,7 +63,12 @@ struct Texture {
         }
     }
 
-    void setFilter(GLenum min, GLenum mag, bool bindTexture = false, bool force = false,
+    void setFilter(GLenum filter, bool bindTexture = false, bool force = false,
+                GLenum renderTarget = GL_TEXTURE_2D) {
+        setFilterMinMag(filter, filter, bindTexture, force, renderTarget);
+    }
+
+    void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false, bool force = false,
             GLenum renderTarget = GL_TEXTURE_2D) {
 
         if (firstFilter || force || min != minFilter || mag != magFilter) {
