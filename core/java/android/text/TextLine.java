@@ -119,6 +119,7 @@ class TextLine {
      * @param hasTabs true if the line might contain tabs or emoji
      * @param tabStops the tabStops. Can be null.
      */
+    @SuppressWarnings("null")
     void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
             Directions directions, boolean hasTabs, TabStops tabStops) {
         mPaint = paint;
@@ -134,11 +135,12 @@ class TextLine {
         mSpanned = null;
 
         boolean hasReplacement = false;
+        SpanSet<ReplacementSpan> replacementSpans = null;
         if (text instanceof Spanned) {
             mSpanned = (Spanned) text;
-            ReplacementSpan[] spans = mSpanned.getSpans(start, limit, ReplacementSpan.class);
-            spans = TextUtils.removeEmptySpans(spans, mSpanned, ReplacementSpan.class);
-            hasReplacement = spans.length > 0;
+            replacementSpans = new SpanSet<ReplacementSpan>(mSpanned, start, limit,
+                    ReplacementSpan.class);
+            hasReplacement = replacementSpans.numberOfSpans > 0;
         }
 
         mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
@@ -156,10 +158,9 @@ class TextLine {
                 // zero-width characters.
                 char[] chars = mChars;
                 for (int i = start, inext; i < limit; i = inext) {
-                    inext = mSpanned.nextSpanTransition(i, limit, ReplacementSpan.class);
-                    ReplacementSpan[] spans = mSpanned.getSpans(i, inext, ReplacementSpan.class);
-                    spans = TextUtils.removeEmptySpans(spans, mSpanned, ReplacementSpan.class);
-                    if (spans.length > 0) {
+                    // replacementSpans cannot be null if hasReplacement is true
+                    inext = replacementSpans.getNextTransition(i, limit);
+                    if (replacementSpans.hasSpansIntersecting(i, inext)) {
                         // transition into a span
                         chars[i - start] = '\ufffc';
                         for (int j = i - start + 1, e = inext - start; j < e; ++j) {
@@ -906,6 +907,15 @@ class TextLine {
                 count++;
             }
             numberOfSpans = count;
+        }
+
+        public boolean hasSpansIntersecting(int start, int end) {
+            for (int i = 0; i < numberOfSpans; i++) {
+                // equal test is valid since both intervals are not empty by construction
+                if (spanStarts[i] >= end || spanEnds[i] <= start) continue;
+                return true;
+            }
+            return false;
         }
 
         int getNextTransition(int start, int limit) {
