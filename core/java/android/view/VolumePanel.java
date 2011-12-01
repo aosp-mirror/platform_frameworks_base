@@ -335,10 +335,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     private void createSliders() {
-        final int silentableStreams = System.getInt(mContext.getContentResolver(),
-                System.MODE_RINGER_STREAMS_AFFECTED,
-                ((1 << AudioSystem.STREAM_NOTIFICATION) | (1 << AudioSystem.STREAM_RING)));
-
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mStreamControls = new HashMap<Integer, StreamControl>(STREAMS.length);
@@ -354,9 +350,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sc.group = (ViewGroup) inflater.inflate(R.layout.volume_adjust_item, null);
             sc.group.setTag(sc);
             sc.icon = (ImageView) sc.group.findViewById(R.id.stream_icon);
-            if ((silentableStreams & (1 << sc.streamType)) != 0) {
-                sc.icon.setOnClickListener(this);
-            }
             sc.icon.setTag(sc);
             sc.icon.setContentDescription(res.getString(streamRes.descRes));
             sc.iconRes = streamRes.iconRes;
@@ -413,7 +406,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 && mAudioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
             sc.icon.setImageResource(R.drawable.ic_audio_ring_notif_vibrate);
         }
-        sc.seekbarView.setEnabled(!muted);
     }
 
     private boolean isExpanded() {
@@ -522,8 +514,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 getLastAudibleStreamVolume(streamType)
                 : getStreamVolume(streamType);
 
-//        int message = UNKNOWN_VOLUME_TEXT;
-//        int additionalMessage = 0;
         mRingIsSilent = false;
 
         if (LOGD) {
@@ -789,18 +779,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     public void onClick(View v) {
         if (v == mMoreButton) {
             expand();
-        } else if (v.getTag() instanceof StreamControl) {
-            StreamControl sc = (StreamControl) v.getTag();
-            boolean vibeInSilent = Settings.System.getInt(mContext.getContentResolver(),
-                    System.VIBRATE_IN_SILENT, 1) == 1;
-            int newMode = mAudioManager.isSilentMode()
-                    ? AudioManager.RINGER_MODE_NORMAL
-                    : (vibeInSilent
-                            ? AudioManager.RINGER_MODE_VIBRATE 
-                            : AudioManager.RINGER_MODE_SILENT);
-            mAudioManager.setRingerMode(newMode);
-            // Expand the dialog if it hasn't been expanded yet.
-            if (mShowCombinedVolumes && !isExpanded()) expand();
         }
         resetTimeout();
     }
