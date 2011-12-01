@@ -1735,9 +1735,9 @@ public class PhoneStatusBar extends StatusBar {
         return anim;
     }
 
-    public String viewInfo(View v) {
-        return "(" + v.getLeft() + "," + v.getTop() + ")(" + v.getRight() + "," + v.getBottom()
-                + " " + v.getWidth() + "x" + v.getHeight() + ")";
+    public static String viewInfo(View v) {
+        return "[(" + v.getLeft() + "," + v.getTop() + ")(" + v.getRight() + "," + v.getBottom()
+                + ") " + v.getWidth() + "x" + v.getHeight() + "]";
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -1766,6 +1766,13 @@ public class PhoneStatusBar extends StatusBar {
             pw.println("  mTickerView: " + viewInfo(mTickerView));
             pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
+        }
+
+        pw.print("  mNavigationBarView=");
+        if (mNavigationBarView == null) {
+            pw.println("null");
+        } else {
+            mNavigationBarView.dump(fd, pw, args);
         }
 
         if (DUMPTRUCK) {
