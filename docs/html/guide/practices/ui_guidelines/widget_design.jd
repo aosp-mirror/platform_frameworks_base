@@ -250,13 +250,15 @@ android.widget.FrameLayout}. Just as your activity layouts must adapt to differe
 sizes, widget layouts must adapt to different Home screen grid cell sizes.</p>
 
 <p>Below is an example layout that a music widget showing text information and two buttons can use.
-It builds upon the previous discussion of adding margins depending on OS version.</p>
+It builds upon the previous discussion of adding margins depending on OS version. Note that the
+most robust and resilient way to add margins to the widget is to wrap the widget frame and contents
+in a padded {@link android.widget.FrameLayout}.</p>
 
 <pre>
 &lt;FrameLayout
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:layout_margin="@dimen/widget_margin"&gt;
+  android:padding="@dimen/widget_margin"&gt;
 
   &lt;LinearLayout
     android:layout_width="match_parent"
@@ -295,16 +297,16 @@ use flexible layouts attributes like so:</p>
 
 
 <p>When a user adds the widget to their home screen, on an example Android 4.0 device where each
-grid cell is 80dp &times; 100dp in size and 16dp of margins are automatically applied on all sizes,
+grid cell is 80dp &times; 100dp in size and 8dp of margins are automatically applied on all sizes,
 the widget will be stretched, like so:</p>
 
 
 <img src="{@docRoot}images/widget_design/music_example_stretched.png"
-  alt="Music widget sitting on an example 80dp x 100dp grid with 16dp of automatic margins
+  alt="Music widget sitting on an example 80dp x 100dp grid with 8dp of automatic margins
   added by the system" id="music_example_stretched">
 
 <p class="img-caption"><strong>Figure 7.</strong> Music widget sitting on an example 80dp x 100dp
-grid with 16dp of automatic margins added by the system.</p>
+grid with 8dp of automatic margins added by the system.</p>
 
 
 <h2 id="templates">Using the App Widget Templates Pack</h2>
