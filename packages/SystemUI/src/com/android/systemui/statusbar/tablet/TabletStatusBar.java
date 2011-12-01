@@ -534,6 +534,7 @@ public class TabletStatusBar extends StatusBar implements
 
         mCompatModeButton = (CompatModeButton) sb.findViewById(R.id.compatModeButton);
         mCompatModeButton.setOnClickListener(mOnClickListener);
+        mCompatModeButton.setVisibility(View.GONE);
 
         // for redirecting errant bar taps to the IME
         mFakeSpaceBar = sb.findViewById(R.id.fake_space_bar);
