@@ -150,7 +150,7 @@ public final class AccessibilityInteractionClient
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
     public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
-            int accessibilityWindowId, int accessibilityNodeId) {
+            int accessibilityWindowId, long accessibilityNodeId) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
@@ -269,8 +269,8 @@ public final class AccessibilityInteractionClient
      *        where to start the search. Use {@link android.view.View#NO_ID} to start from the root.
      * @return A list of found {@link AccessibilityNodeInfo}s.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(int connectionId,
-            String text, int accessibilityWindowId, int accessibilityNodeId) {
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(int connectionId,
+            String text, int accessibilityWindowId, long accessibilityNodeId) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
@@ -309,7 +309,7 @@ public final class AccessibilityInteractionClient
      * @return Whether the action was performed.
      */
     public boolean performAccessibilityAction(int connectionId, int accessibilityWindowId,
-            int accessibilityNodeId, int action) {
+            long accessibilityNodeId, int action) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
