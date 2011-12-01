@@ -56,12 +56,12 @@ void TextLayoutCache::init() {
 
     mDebugLevel = readRtlDebugLevel();
     mDebugEnabled = mDebugLevel & kRtlDebugCaches;
-    LOGD("Using debug level: %d - Debug Enabled: %d", mDebugLevel, mDebugEnabled);
+    LOGD("Using debug level = %d - Debug Enabled = %d", mDebugLevel, mDebugEnabled);
 
     mCacheStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
     if (mDebugEnabled) {
-        LOGD("Initialization is done - Start time: %lld", mCacheStartTime);
+        LOGD("Initialization is done - Start time = %lld", mCacheStartTime);
     }
 
     mInitialized = true;
@@ -132,7 +132,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                     bool removedOne = mCache.removeOldest();
                     LOG_ALWAYS_FATAL_IF(!removedOne, "The cache is non-empty but we "
                             "failed to remove the oldest entry.  "
-                            "mSize=%u, size=%u, mMaxSize=%u, mCache.size()=%u",
+                            "mSize = %u, size = %u, mMaxSize = %u, mCache.size() = %u",
                             mSize, size, mMaxSize, mCache.size());
                 }
             }
@@ -147,15 +147,15 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             LOG_ALWAYS_FATAL_IF(!putOne, "Failed to put an entry into the cache.  "
                     "This indicates that the cache already has an entry with the "
                     "same key but it should not since we checked earlier!"
-                    " - start=%d count=%d contextCount=%d - Text='%s'",
+                    " - start = %d, count = %d, contextCount = %d - Text = '%s'",
                     start, count, contextCount, String8(text + start, count).string());
 
             if (mDebugEnabled) {
                 nsecs_t totalTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
                 LOGD("CACHE MISS: Added entry %p "
-                        "with start=%d count=%d contextCount=%d, "
+                        "with start = %d, count = %d, contextCount = %d, "
                         "entry size %d bytes, remaining space %d bytes"
-                        " - Compute time %0.6f ms - Put time %0.6f ms - Text='%s'",
+                        " - Compute time %0.6f ms - Put time %0.6f ms - Text = '%s'",
                         value.get(), start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
                         (totalTime - value->getElapsedTime()) * 0.000001f,
@@ -164,9 +164,9 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
         } else {
             if (mDebugEnabled) {
                 LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
-                        "with start=%d count=%d contextCount=%d, "
+                        "with start = %d, count = %d, contextCount = %d, "
                         "entry size %d bytes, remaining space %d bytes"
-                        " - Compute time %0.6f ms - Text='%s'",
+                        " - Compute time %0.6f ms - Text = '%s'",
                         start, count, contextCount, size, mMaxSize - mSize,
                         value->getElapsedTime() * 0.000001f,
                         String8(text + start, count).string());
@@ -183,9 +183,9 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             if (value->getElapsedTime() > 0) {
                 float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
                         / ((float)value->getElapsedTime()));
-                LOGD("CACHE HIT #%d with start=%d count=%d contextCount=%d"
+                LOGD("CACHE HIT #%d with start = %d, count = %d, contextCount = %d"
                         "- Compute time %0.6f ms - "
-                        "Cache get time %0.6f ms - Gain in percent: %2.2f - Text='%s' ",
+                        "Cache get time %0.6f ms - Gain in percent: %2.2f - Text = '%s'",
                         mCacheHitCount, start, count, contextCount,
                         value->getElapsedTime() * 0.000001f,
                         elapsedTimeThruCacheGet * 0.000001f,
@@ -364,15 +364,15 @@ TextLayoutEngine::~TextLayoutEngine() {
 void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags) {
 
-    computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+    computeValues(paint, chars, start, count, contextCount, dirFlags,
             &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs);
 #if DEBUG_ADVANCES
-    LOGD("Advances - start=%d, count=%d, contextCount=%d, totalAdvance=%f", start, count,
+    LOGD("Advances - start = %d, count = %d, contextCount = %d, totalAdvance = %f", start, count,
             contextCount, mTotalAdvance);
 #endif
 }
 
-void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -399,22 +399,30 @@ void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* ch
             if (bidi) {
                 UErrorCode status = U_ZERO_ERROR;
 #if DEBUG_GLYPHS
-                LOGD("computeValuesWithHarfbuzz -- bidiReq=%d", bidiReq);
+                LOGD("******** ComputeValues -- start");
+                LOGD("      -- string = '%s'", String8(chars + start, count).string());
+                LOGD("      -- start = %d", start);
+                LOGD("      -- count = %d", count);
+                LOGD("      -- contextCount = %d", contextCount);
+                LOGD("      -- bidiReq = %d", bidiReq);
 #endif
                 ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
                 if (U_SUCCESS(status)) {
                     int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
                     ssize_t rc = ubidi_countRuns(bidi, &status);
 #if DEBUG_GLYPHS
-                    LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
-                            dirFlags, rc, paraDir);
+                    LOGD("      -- dirFlags = %d", dirFlags);
+                    LOGD("      -- paraDir = %d", paraDir);
+                    LOGD("      -- run-count = %d", rc);
 #endif
                     if (U_SUCCESS(status) && rc == 1) {
                         // Normal case: one run, status is ok
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
                     } else if (!U_SUCCESS(status) || rc < 1) {
-                        LOGW("computeValuesWithHarfbuzz -- need to force to single run");
+                        LOGW("Need to force to single run -- string = '%s',"
+                                " status = %d, rc = %d",
+                                String8(chars + start, count).string(), status, rc);
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
                     } else {
@@ -427,7 +435,7 @@ void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* ch
                             if (startRun == -1 || lengthRun == -1) {
                                 // Something went wrong when getting the visual run, need to clear
                                 // already computed data before doing a single run pass
-                                LOGW("computeValuesWithHarfbuzz -- visual run is not valid");
+                                LOGW("Visual run is not valid");
                                 outGlyphs->clear();
                                 outAdvances->clear();
                                 *outTotalAdvance = 0;
@@ -454,23 +462,23 @@ void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* ch
                             isRTL = (runDir == UBIDI_RTL);
                             jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
-                            LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
-                                    startRun, lengthRun, isRTL);
+                            LOGD("Processing Bidi Run = %d -- run-start = %d, run-len = %d, isRTL = %d",
+                                    i, startRun, lengthRun, isRTL);
 #endif
-                            computeRunValuesWithHarfbuzz(paint, chars + startRun, lengthRun, isRTL,
+                            computeRunValues(paint, chars + startRun, lengthRun, isRTL,
                                     outAdvances, &runTotalAdvance, outGlyphs);
 
                             *outTotalAdvance += runTotalAdvance;
                         }
                     }
                 } else {
-                    LOGW("computeValuesWithHarfbuzz -- cannot set Para");
+                    LOGW("Cannot set Para");
                     useSingleRun = true;
                     isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
                 }
                 ubidi_close(bidi);
             } else {
-                LOGW("computeValuesWithHarfbuzz -- cannot ubidi_open()");
+                LOGW("Cannot ubidi_open()");
                 useSingleRun = true;
                 isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
             }
@@ -479,28 +487,29 @@ void TextLayoutEngine::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* ch
         // Default single run case
         if (useSingleRun){
 #if DEBUG_GLYPHS
-            LOGD("computeValuesWithHarfbuzz -- Using a SINGLE Run "
-                    "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
+            LOGD("Using a SINGLE ICURun "
+                    "-- run-start = %d, run-len = %d, isRTL = %d", start, count, isRTL);
 #endif
-            computeRunValuesWithHarfbuzz(paint, chars + start, count, isRTL,
+            computeRunValues(paint, chars + start, count, isRTL,
                     outAdvances, outTotalAdvance, outGlyphs);
         }
 
 #if DEBUG_GLYPHS
-        LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", outGlyphs->size());
+        LOGD("      -- Total returned glyphs-count = %d", outGlyphs->size());
+        LOGD("******** ComputeValues -- end");
 #endif
 }
 
 static void logGlyphs(HB_ShaperItem shaperItem) {
-    LOGD("Got glyphs - count=%d", shaperItem.num_glyphs);
+    LOGD("         -- glyphs count=%d", shaperItem.num_glyphs);
     for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
-        LOGD("      glyph[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
+        LOGD("         -- glyph[%d] = %d, offset.x = %f, offset.y = %f", i, shaperItem.glyphs[i],
                 HBFixedToFloat(shaperItem.offsets[i].x),
                 HBFixedToFloat(shaperItem.offsets[i].y));
     }
 }
 
-void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -529,19 +538,20 @@ void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar*
             hb_utf16_script_run_next(&numCodePoints, &mShaperItem.item, chars,
                     count, &indexFontRun)) {
 
-        ssize_t startFontRun = mShaperItem.item.pos;
-        size_t countFontRun = mShaperItem.item.length;
-        ssize_t endFontRun = startFontRun + countFontRun;
+        ssize_t startScriptRun = mShaperItem.item.pos;
+        size_t countScriptRun = mShaperItem.item.length;
+        ssize_t endScriptRun = startScriptRun + countScriptRun;
 
 #if DEBUG_GLYPHS
-        LOGD("Shaping Font Run with");
-        LOGD("         -- isRTL=%d", isRTL);
-        LOGD("         -- HB script=%d", mShaperItem.item.script);
-        LOGD("         -- startFontRun=%d", startFontRun);
-        LOGD("         -- endFontRun=%d", endFontRun);
-        LOGD("         -- countFontRun=%d", countFontRun);
-        LOGD("         -- run='%s'", String8(chars + startFontRun, countFontRun).string());
-        LOGD("         -- string='%s'", String8(chars, count).string());
+        LOGD("-------- Start of Script Run --------");
+        LOGD("Shaping Script Run with");
+        LOGD("         -- isRTL = %d", isRTL);
+        LOGD("         -- HB script = %d", mShaperItem.item.script);
+        LOGD("         -- startFontRun = %d", startScriptRun);
+        LOGD("         -- endFontRun = %d", endScriptRun);
+        LOGD("         -- countFontRun = %d", countScriptRun);
+        LOGD("         -- run = '%s'", String8(chars + startScriptRun, countScriptRun).string());
+        LOGD("         -- string = '%s'", String8(chars, count).string());
 #endif
 
         // Initialize Harfbuzz Shaper and get the base glyph count for offsetting the glyphIDs
@@ -549,30 +559,31 @@ void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar*
         size_t glyphBaseCount = shapeFontRun(paint, isRTL);
 
 #if DEBUG_GLYPHS
-        LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", mShaperItem.num_glyphs,
-                mShaperItem.kerning_applied);
-        LOGD("         -- isDevKernText=%d", paint->isDevKernText());
-        LOGD("         -- glyphBaseCount=%d", glyphBaseCount);
+        LOGD("Got from Harfbuzz");
+        LOGD("         -- glyphBaseCount = %d", glyphBaseCount);
+        LOGD("         -- num_glypth = %d", mShaperItem.num_glyphs);
+        LOGD("         -- kerning_applied = %d", mShaperItem.kerning_applied);
+        LOGD("         -- isDevKernText = %d", paint->isDevKernText());
 
         logGlyphs(mShaperItem);
 #endif
         if (isRTL) {
-            endFontRun = startFontRun;
+            endScriptRun = startScriptRun;
 #if DEBUG_GLYPHS
-            LOGD("         -- updated endFontRun=%d", endFontRun);
+            LOGD("Updated endScriptRun = %d", endScriptRun);
 #endif
         } else {
-            startFontRun = endFontRun;
+            startScriptRun = endScriptRun;
 #if DEBUG_GLYPHS
-            LOGD("         -- updated startFontRun=%d", startFontRun);
+            LOGD("Updated startScriptRun = %d", startScriptRun);
 #endif
         }
 
         if (mShaperItem.advances == NULL || mShaperItem.num_glyphs == 0) {
 #if DEBUG_GLYPHS
-            LOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
+            LOGD("Advances array is empty or num_glypth = 0");
 #endif
-            outAdvances->insertAt(0, outAdvances->size(), countFontRun);
+            outAdvances->insertAt(0, outAdvances->size(), countScriptRun);
             continue;
         }
 
@@ -580,7 +591,7 @@ void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar*
         jfloat currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[0]]);
         jfloat totalFontRunAdvance = currentAdvance;
         outAdvances->add(currentAdvance);
-        for (size_t i = 1; i < countFontRun; i++) {
+        for (size_t i = 1; i < countScriptRun; i++) {
             size_t clusterPrevious = mShaperItem.log_clusters[i - 1];
             size_t cluster = mShaperItem.log_clusters[i];
             if (cluster == clusterPrevious) {
@@ -594,8 +605,9 @@ void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar*
         totalAdvance += totalFontRunAdvance;
 
 #if DEBUG_ADVANCES
-        for (size_t i = 0; i < countFontRun; i++) {
-            LOGD("hb-adv[%d] = %f - log_clusters = %d - total = %f", i,
+        LOGD("Returned advances");
+        for (size_t i = 0; i < countScriptRun; i++) {
+            LOGD("         -- hb-adv[%d] = %f, log_clusters = %d, total = %f", i,
                     (*outAdvances)[i], shaperItem.log_clusters[i], totalFontRunAdvance);
         }
 #endif
@@ -603,17 +615,23 @@ void TextLayoutEngine::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar*
         // Get Glyphs and reverse them in place if RTL
         if (outGlyphs) {
             size_t countGlyphs = mShaperItem.num_glyphs;
+#if DEBUG_GLYPHS
+            LOGD("Returned script run glyphs -- count = %d", countGlyphs);
+#endif
             for (size_t i = 0; i < countGlyphs; i++) {
                 jchar glyph = glyphBaseCount +
                         (jchar) mShaperItem.glyphs[(!isRTL) ? i : countGlyphs - 1 - i];
 #if DEBUG_GLYPHS
-                LOGD("HARFBUZZ  -- glyph[%d]=%d", i, glyph);
+                LOGD("         -- glyph[%d] = %d", i, glyph);
 #endif
                 outGlyphs->add(glyph);
             }
         }
     }
     *outTotalAdvance = totalAdvance;
+#if DEBUG_GLYPHS
+    LOGD("-------- End of Script Run --------");
+#endif
 }
 
 
@@ -681,7 +699,7 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     mShaperItem.face = getCachedHBFace(typeface);
 
 #if DEBUG_GLYPHS
-    LOGD("Run typeFace = %p, uniqueID = %d, hb_face = %p",
+    LOGD("Run typeface = %p, uniqueID = %d, hb_face = %p",
             typeface, typeface->uniqueID(), mShaperItem.face);
 #endif
 
@@ -724,7 +742,7 @@ void TextLayoutEngine::ensureShaperItemGlyphArrays(size_t size) {
 
 void TextLayoutEngine::createShaperItemGlyphArrays(size_t size) {
 #if DEBUG_GLYPHS
-    LOGD("createGlyphArrays  -- size=%d", size);
+    LOGD("Creating Glyph Arrays with size = %d", size);
 #endif
     mShaperItemGlyphArraySize = size;
     mShaperItem.glyphs = new HB_Glyph[size];
@@ -749,7 +767,7 @@ void TextLayoutEngine::ensureShaperItemLogClustersArray(size_t size) {
 
 void TextLayoutEngine::createShaperItemLogClustersArray(size_t size) {
 #if DEBUG_GLYPHS
-    LOGD("createLogClustersArray  -- size=%d", size);
+    LOGD("Creating LogClusters Array with size = %d", size);
 #endif
     mShaperItemLogClustersArraySize = size;
     mShaperItem.log_clusters = new unsigned short[size];
@@ -764,7 +782,7 @@ SkTypeface* TextLayoutEngine::getCachedTypeface(SkTypeface** typeface, const cha
         *typeface = SkTypeface::CreateFromFile(path);
         (*typeface)->ref();
 #if DEBUG_GLYPHS
-        LOGD("Created SkTypeface from file: %s", path);
+        LOGD("Created SkTypeface from file '%s' with uniqueID = %d", path, (*typeface)->uniqueID());
 #endif
     }
     return *typeface;
@@ -779,7 +797,7 @@ HB_Face TextLayoutEngine::getCachedHBFace(SkTypeface* typeface) {
     HB_Face face = HB_NewFace(typeface, harfbuzzSkiaGetTable);
     if (face) {
 #if DEBUG_GLYPHS
-        LOGD("Created HB_NewFace %p from paint typeface: %p", face, typeface);
+        LOGD("Created HB_NewFace %p from paint typeface = %p", face, typeface);
 #endif
         mCachedHBFaces.add(fontId, face);
     }
