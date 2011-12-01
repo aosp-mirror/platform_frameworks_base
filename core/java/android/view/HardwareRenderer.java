@@ -837,10 +837,37 @@ public abstract class HardwareRenderer {
                                 (view.mPrivateFlags & View.INVALIDATED) == View.INVALIDATED;
                         view.mPrivateFlags &= ~View.INVALIDATED;
 
+                        final long getDisplayListStartTime;
+                        if (ViewDebug.DEBUG_LATENCY) {
+                            getDisplayListStartTime = System.nanoTime();
+                        }
+
                         DisplayList displayList = view.getDisplayList();
+
+                        if (ViewDebug.DEBUG_LATENCY) {
+                            long now = System.nanoTime();
+                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took "
+                                    + ((now - getDisplayListStartTime) * 0.000001f) + "ms");
+                        }
+
                         if (displayList != null) {
-                            if (canvas.drawDisplayList(displayList, view.getWidth(),
-                                    view.getHeight(), mRedrawClip)) {
+                            final long drawDisplayListStartTime;
+                            if (ViewDebug.DEBUG_LATENCY) {
+                                drawDisplayListStartTime = System.nanoTime();
+                            }
+
+                            boolean invalidateNeeded = canvas.drawDisplayList(
+                                    displayList, view.getWidth(),
+                                    view.getHeight(), mRedrawClip);
+
+                            if (ViewDebug.DEBUG_LATENCY) {
+                                long now = System.nanoTime();
+                                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- drawDisplayList() took "
+                                        + ((now - drawDisplayListStartTime) * 0.000001f)
+                                        + "ms, invalidateNeeded=" + invalidateNeeded + ".");
+                            }
+
+                            if (invalidateNeeded) {
                                 if (mRedrawClip.isEmpty() || view.getParent() == null) {
                                     view.invalidate();
                                 } else {
@@ -872,7 +899,19 @@ public abstract class HardwareRenderer {
 
                     attachInfo.mIgnoreDirtyState = false;
 
+                    final long eglSwapBuffersStartTime;
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        eglSwapBuffersStartTime = System.nanoTime();
+                    }
+
                     sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        long now = System.nanoTime();
+                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- eglSwapBuffers() took "
+                                + ((now - eglSwapBuffersStartTime) * 0.000001f) + "ms");
+                    }
+
                     checkEglErrors();
 
                     return dirty == null;
