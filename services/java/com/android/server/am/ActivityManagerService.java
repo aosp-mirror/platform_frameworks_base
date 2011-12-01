@@ -414,7 +414,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      * is in a different process from the one they are currently in.
      */
     ProcessRecord mPreviousProcess;
-    
+
+    /**
+     * The time at which the previous process was last visible.
+     */
+    long mPreviousProcessVisibleTime;
+
     /**
      * Packages that the user has asked to have run in screen size
      * compatibility mode instead of filling the screen.
@@ -8361,6 +8366,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
         pw.println("  mPreviousProcess: " + mPreviousProcess);
+        if (dumpAll) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("  mPreviousProcessVisibleTime: ");
+            TimeUtils.formatDuration(mPreviousProcessVisibleTime, sb);
+            pw.println(sb);
+        }
         if (mHeavyWeightProcess != null) {
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
