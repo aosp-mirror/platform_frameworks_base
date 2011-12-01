@@ -1225,7 +1225,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private static KeyEvent gRecyclerTop;
 
     private KeyEvent mNext;
-    private boolean mRecycled;
 
     private int mDeviceId;
     private int mSource;
@@ -1535,8 +1534,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
             gRecyclerTop = ev.mNext;
             gRecyclerUsed -= 1;
         }
-        ev.mRecycled = false;
         ev.mNext = null;
+        ev.prepareForReuse();
         return ev;
     }
 
@@ -1598,10 +1597,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public final void recycle() {
-        if (mRecycled) {
-            throw new RuntimeException(toString() + " recycled twice!");
-        }
-        mRecycled = true;
+        super.recycle();
         mCharacters = null;
 
         synchronized (gRecyclerLock) {

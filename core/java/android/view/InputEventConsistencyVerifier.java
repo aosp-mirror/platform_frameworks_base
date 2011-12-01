@@ -58,7 +58,7 @@ public final class InputEventConsistencyVerifier {
     // so that the verifier can detect when it has been asked to verify the same event twice.
     // It does not make sense to examine the contents of the last event since it may have
     // been recycled.
-    private InputEvent mLastEvent;
+    private int mLastEventSeq;
     private String mLastEventType;
     private int mLastNestingLevel;
 
@@ -140,7 +140,7 @@ public final class InputEventConsistencyVerifier {
      * Resets the state of the input event consistency verifier.
      */
     public void reset() {
-        mLastEvent = null;
+        mLastEventSeq = -1;
         mLastNestingLevel = 0;
         mTrackballDown = false;
         mTrackballUnhandled = false;
@@ -573,17 +573,18 @@ public final class InputEventConsistencyVerifier {
 
     private boolean startEvent(InputEvent event, int nestingLevel, String eventType) {
         // Ignore the event if we already checked it at a higher nesting level.
-        if (event == mLastEvent && nestingLevel < mLastNestingLevel
+        final int seq = event.getSequenceNumber();
+        if (seq == mLastEventSeq && nestingLevel < mLastNestingLevel
                 && eventType == mLastEventType) {
             return false;
         }
 
         if (nestingLevel > 0) {
-            mLastEvent = event;
+            mLastEventSeq = seq;
             mLastEventType = eventType;
             mLastNestingLevel = nestingLevel;
         } else {
-            mLastEvent = null;
+            mLastEventSeq = -1;
             mLastEventType = null;
             mLastNestingLevel = 0;
         }

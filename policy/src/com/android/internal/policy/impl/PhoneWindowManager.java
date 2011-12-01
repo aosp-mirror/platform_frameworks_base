@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.LocalPowerManager;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
@@ -75,8 +76,7 @@ import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputQueue;
-import android.view.InputHandler;
+import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -345,10 +345,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
-    private final InputHandler mPointerLocationInputHandler = new InputHandler() {
+    final class PointerLocationInputEventReceiver extends InputEventReceiver {
+        public PointerLocationInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
         @Override
-        public void handleInputEvent(InputEvent event,
-                InputQueue.FinishedCallback finishedCallback) {
+        public void onInputEvent(InputEvent event) {
             boolean handled = false;
             try {
                 if (event instanceof MotionEvent
@@ -362,11 +365,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             } finally {
-                finishedCallback.finished(handled);
+                finishInputEvent(event, handled);
             }
         }
-    };
-    
+    }
+    PointerLocationInputEventReceiver mPointerLocationInputEventReceiver;
+
     // The current size of the screen; really; (ir)regardless of whether the status
     // bar can be hidden or not
     int mUnrestrictedScreenLeft, mUnrestrictedScreenTop;
@@ -1003,9 +1007,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mPointerLocationInputChannel == null) {
                 try {
                     mPointerLocationInputChannel =
-                        mWindowManager.monitorInput("PointerLocationView");
-                    InputQueue.registerInputChannel(mPointerLocationInputChannel,
-                            mPointerLocationInputHandler, mHandler.getLooper().getQueue());
+                            mWindowManager.monitorInput("PointerLocationView");
+                    mPointerLocationInputEventReceiver =
+                            new PointerLocationInputEventReceiver(
+                                    mPointerLocationInputChannel, mHandler.getLooper());
                 } catch (RemoteException ex) {
                     Slog.e(TAG, "Could not set up input monitoring channel for PointerLocation.",
                             ex);
@@ -1013,8 +1018,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         if (removeView != null) {
+            if (mPointerLocationInputEventReceiver != null) {
+                mPointerLocationInputEventReceiver.dispose();
+                mPointerLocationInputEventReceiver = null;
+            }
             if (mPointerLocationInputChannel != null) {
-                InputQueue.unregisterInputChannel(mPointerLocationInputChannel);
                 mPointerLocationInputChannel.dispose();
                 mPointerLocationInputChannel = null;
             }
@@ -1839,10 +1847,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * to determine when the nav bar should be shown and prevent applications from
      * receiving those touches.
      */
-    final InputHandler mHideNavInputHandler = new InputHandler() {
+    final class HideNavInputEventReceiver extends InputEventReceiver {
+        public HideNavInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
         @Override
-        public void handleInputEvent(InputEvent event,
-                InputQueue.FinishedCallback finishedCallback) {
+        public void onInputEvent(InputEvent event) {
             boolean handled = false;
             try {
                 if (event instanceof MotionEvent
@@ -1885,8 +1896,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             } finally {
-                finishedCallback.finished(handled);
+                finishInputEvent(event, handled);
             }
+        }
+    }
+    final InputEventReceiver.Factory mHideNavInputEventReceiverFactory =
+            new InputEventReceiver.Factory() {
+        @Override
+        public InputEventReceiver createInputEventReceiver(
+                InputChannel inputChannel, Looper looper) {
+            return new HideNavInputEventReceiver(inputChannel, looper);
         }
     };
 
@@ -1951,7 +1970,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else if (mHideNavFakeWindow == null) {
             mHideNavFakeWindow = mWindowManagerFuncs.addFakeWindow(
-                    mHandler.getLooper(), mHideNavInputHandler,
+                    mHandler.getLooper(), mHideNavInputEventReceiverFactory,
                     "hidden nav", WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER,
                     0, false, false, true);
         }

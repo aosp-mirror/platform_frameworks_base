@@ -106,8 +106,7 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputHandler;
-import android.view.InputQueue;
+import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -570,10 +569,14 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mTurnOnScreen;
 
     DragState mDragState = null;
-    final InputHandler mDragInputHandler = new InputHandler() {
+
+    final class DragInputEventReceiver extends InputEventReceiver {
+        public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
+        }
+
         @Override
-        public void handleInputEvent(InputEvent event,
-                InputQueue.FinishedCallback finishedCallback) {
+        public void onInputEvent(InputEvent event) {
             boolean handled = false;
             try {
                 if (event instanceof MotionEvent
@@ -625,10 +628,10 @@ public class WindowManagerService extends IWindowManager.Stub
             } catch (Exception e) {
                 Slog.e(TAG, "Exception caught by drag handleMotion", e);
             } finally {
-                finishedCallback.finished(handled);
+                finishInputEvent(event, handled);
             }
         }
-    };
+    }
 
     /**
      * Whether the UI is currently running in touch mode (not showing
@@ -9380,11 +9383,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public FakeWindow addFakeWindow(Looper looper, InputHandler inputHandler,
+    public FakeWindow addFakeWindow(Looper looper,
+            InputEventReceiver.Factory inputEventReceiverFactory,
             String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
             boolean hasFocus, boolean touchFullscreen) {
         synchronized (mWindowMap) {
-            FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputHandler, name, windowType,
+            FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputEventReceiverFactory,
+                    name, windowType,
                     layoutParamsFlags, canReceiveKeys, hasFocus, touchFullscreen);
             int i=0;
             while (i<mFakeWindows.size()) {

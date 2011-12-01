@@ -168,7 +168,7 @@ extern int register_android_app_backup_FullBackup(JNIEnv *env);
 extern int register_android_app_ActivityThread(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
 extern int register_android_view_InputChannel(JNIEnv* env);
-extern int register_android_view_InputQueue(JNIEnv* env);
+extern int register_android_view_InputEventReceiver(JNIEnv* env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_view_PointerIcon(JNIEnv* env);
@@ -1192,7 +1192,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_app_ActivityThread),
     REG_JNI(register_android_app_NativeActivity),
     REG_JNI(register_android_view_InputChannel),
-    REG_JNI(register_android_view_InputQueue),
+    REG_JNI(register_android_view_InputEventReceiver),
     REG_JNI(register_android_view_KeyEvent),
     REG_JNI(register_android_view_MotionEvent),
     REG_JNI(register_android_view_PointerIcon),

@@ -20,7 +20,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.util.Slog;
 import android.view.InputChannel;
-import android.view.InputHandler;
+import android.view.InputEventReceiver;
 import android.view.InputQueue;
 import android.view.WindowManagerPolicy;
 
@@ -29,11 +29,13 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
     final InputChannel mServerChannel, mClientChannel;
     final InputApplicationHandle mApplicationHandle;
     final InputWindowHandle mWindowHandle;
+    final InputEventReceiver mInputEventReceiver;
     final int mWindowLayer;
 
     boolean mTouchFullscreen;
 
-    public FakeWindowImpl(WindowManagerService service, Looper looper, InputHandler inputHandler,
+    public FakeWindowImpl(WindowManagerService service,
+            Looper looper, InputEventReceiver.Factory inputEventReceiverFactory,
             String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
             boolean hasFocus, boolean touchFullscreen) {
         mService = service;
@@ -42,7 +44,9 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
         mServerChannel = channels[0];
         mClientChannel = channels[1];
         mService.mInputManager.registerInputChannel(mServerChannel, null);
-        InputQueue.registerInputChannel(mClientChannel, inputHandler, looper.getQueue());
+
+        mInputEventReceiver = inputEventReceiverFactory.createInputEventReceiver(
+                mClientChannel, looper);
 
         mApplicationHandle = new InputApplicationHandle(null);
         mApplicationHandle.name = name;
@@ -87,8 +91,8 @@ public final class FakeWindowImpl implements WindowManagerPolicy.FakeWindow {
     public void dismiss() {
         synchronized (mService.mWindowMap) {
             if (mService.removeFakeWindowLocked(this)) {
+                mInputEventReceiver.dispose();
                 mService.mInputManager.unregisterInputChannel(mServerChannel);
-                InputQueue.unregisterInputChannel(mClientChannel);
                 mClientChannel.dispose();
                 mServerChannel.dispose();
             }
