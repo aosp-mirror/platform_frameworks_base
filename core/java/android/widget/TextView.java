@@ -3785,7 +3785,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return;
                 }
             }
-            
+
             // This is the handling for some default action.
             // Note that for backwards compatibility we don't do this
             // default handling if explicit ime options have not been given,
@@ -3816,7 +3816,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (imm != null && imm.isActive(this)) {
                     imm.hideSoftInputFromWindow(getWindowToken(), 0);
                 }
-                clearFocus();
                 return;
             }
         }
@@ -3838,7 +3837,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | KeyEvent.FLAG_EDITOR_ACTION)));
         }
     }
-    
+
     /**
      * Set the private content type of the text, which is the
      * {@link EditorInfo#privateImeOptions EditorInfo.privateImeOptions}
