@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -52,6 +51,8 @@ import java.util.List;
 public class AccessibilityNodeInfo implements Parcelable {
 
     private static final boolean DEBUG = false;
+
+    private static final int UNDEFINED = -1;
 
     // Actions.
 
@@ -160,9 +161,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private long mSourceNodeId = makeNodeId(View.NO_ID, View.NO_ID);
-    private int mWindowId = View.NO_ID;
-    private long mParentNodeId = makeNodeId(View.NO_ID, View.NO_ID);
+    private int mWindowId = UNDEFINED;
+    private long mSourceNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+    private long mParentNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
     private final Rect mBoundsInScreen = new Rect();
@@ -175,7 +177,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private SparseLongArray mChildIds = new SparseLongArray();
     private int mActions;
 
-    private IAccessibilityServiceConnection mConnection;
+    private int mConnectionId = UNDEFINED;
 
     /**
      * Hide constructor from clients.
@@ -195,7 +197,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param source The info source.
      */
     public void setSource(View source) {
-        setSource(source, View.NO_ID);
+        setSource(source, UNDEFINED);
     }
 
     /**
@@ -219,9 +221,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        mWindowId = (root != null) ? root.getAccessibilityWindowId() : View.NO_ID;
+        mWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED;
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -264,7 +266,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         final long childId = mChildIds.get(index);
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection, mWindowId, childId);
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mWindowId, childId);
     }
 
     /**
@@ -280,7 +282,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void addChild(View child) {
-        addChild(child, View.NO_ID);
+        addChild(child, UNDEFINED);
     }
 
     /**
@@ -301,7 +303,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         enforceNotSealed();
         final int index = mChildIds.size();
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         final long childNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
         mChildIds.put(index, childNodeId);
     }
@@ -355,7 +357,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             return false;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.performAccessibilityAction(mConnection, mWindowId, mSourceNodeId, action);
+        return client.performAccessibilityAction(mConnectionId, mWindowId, mSourceNodeId, action);
     }
 
     /**
@@ -378,7 +380,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             return Collections.emptyList();
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfosByText(mConnection, text, mWindowId, mSourceNodeId);
+        return client.findAccessibilityNodeInfosByText(mConnectionId, text, mWindowId,
+                mSourceNodeId);
     }
 
     /**
@@ -397,7 +400,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection,
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
                 mWindowId, mParentNodeId);
     }
 
@@ -414,7 +417,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParent(View parent) {
-        setParent(parent, View.NO_ID);
+        setParent(parent, UNDEFINED);
     }
 
     /**
@@ -439,7 +442,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void setParent(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId =
-            (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+            (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mParentNodeId = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
     }
 
@@ -880,15 +883,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Sets the connection for interacting with the system.
+     * Sets the unique id of the IAccessibilityServiceConnection over which
+     * this instance can send requests to the system.
      *
-     * @param connection The client token.
+     * @param connectionId The connection id.
      *
      * @hide
      */
-    public final void setConnection(IAccessibilityServiceConnection connection) {
+    public void setConnectionId(int connectionId) {
         enforceNotSealed();
-        mConnection = connection;
+        mConnectionId = connectionId;
     }
 
     /**
@@ -1042,16 +1046,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      */
     public void writeToParcel(Parcel parcel, int flags) {
-        if (mConnection == null) {
-            parcel.writeInt(0);
-        } else {
-            parcel.writeInt(1);
-            parcel.writeStrongBinder(mConnection.asBinder());
-        }
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeLong(mSourceNodeId);
         parcel.writeInt(mWindowId);
         parcel.writeLong(mParentNodeId);
+        parcel.writeInt(mConnectionId);
 
         SparseLongArray childIds = mChildIds;
         final int childIdsSize = childIds.size();
@@ -1091,10 +1090,10 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private void init(AccessibilityNodeInfo other) {
         mSealed = other.mSealed;
-        mConnection = other.mConnection;
         mSourceNodeId = other.mSourceNodeId;
         mParentNodeId = other.mParentNodeId;
         mWindowId = other.mWindowId;
+        mConnectionId = other.mConnectionId;
         mBoundsInParent.set(other.mBoundsInParent);
         mBoundsInScreen.set(other.mBoundsInScreen);
         mPackageName = other.mPackageName;
@@ -1112,14 +1111,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param parcel A parcel containing the state of a {@link AccessibilityNodeInfo}.
      */
     private void initFromParcel(Parcel parcel) {
-        if (parcel.readInt() == 1) {
-            mConnection = IAccessibilityServiceConnection.Stub.asInterface(
-                    parcel.readStrongBinder());
-        }
         mSealed = (parcel.readInt()  == 1);
         mSourceNodeId = parcel.readLong();
         mWindowId = parcel.readInt();
         mParentNodeId = parcel.readLong();
+        mConnectionId = parcel.readInt();
 
         SparseLongArray childIds = mChildIds;
         final int childrenSize = parcel.readInt();
@@ -1153,10 +1149,10 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private void clear() {
         mSealed = false;
-        mConnection = null;
-        mSourceNodeId = makeNodeId(View.NO_ID, View.NO_ID);
-        mParentNodeId = makeNodeId(View.NO_ID, View.NO_ID);
-        mWindowId = View.NO_ID;
+        mSourceNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+        mParentNodeId = makeNodeId(UNDEFINED, UNDEFINED);
+        mWindowId = UNDEFINED;
+        mConnectionId = UNDEFINED;
         mChildIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
@@ -1190,9 +1186,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     private boolean canPerformRequestOverConnection(long accessibilityNodeId) {
-        return (mWindowId != View.NO_ID
-                && getAccessibilityViewId(accessibilityNodeId) != View.NO_ID
-                && mConnection != null);
+        return (mWindowId != UNDEFINED
+                && getAccessibilityViewId(accessibilityNodeId) != UNDEFINED
+                && mConnectionId != UNDEFINED);
     }
 
     @Override

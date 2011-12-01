@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcelable;
 import android.view.View;
 
@@ -78,8 +77,8 @@ public class AccessibilityRecord {
 
     int mAddedCount= UNDEFINED;
     int mRemovedCount = UNDEFINED;
-    long mSourceNodeId = AccessibilityNodeInfo.makeNodeId(View.NO_ID, View.NO_ID);
-    int mSourceWindowId = View.NO_ID;
+    long mSourceNodeId = AccessibilityNodeInfo.makeNodeId(UNDEFINED, UNDEFINED);
+    int mSourceWindowId = UNDEFINED;
 
     CharSequence mClassName;
     CharSequence mContentDescription;
@@ -87,7 +86,8 @@ public class AccessibilityRecord {
     Parcelable mParcelableData;
 
     final List<CharSequence> mText = new ArrayList<CharSequence>();
-    IAccessibilityServiceConnection mConnection;
+
+    int mConnectionId = UNDEFINED;
 
     /*
      * Hide constructor.
@@ -103,7 +103,7 @@ public class AccessibilityRecord {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setSource(View source) {
-        setSource(source, View.NO_ID);
+        setSource(source, UNDEFINED);
     }
 
     /**
@@ -122,8 +122,8 @@ public class AccessibilityRecord {
      */
     public void setSource(View root, int virtualDescendantId) {
         enforceNotSealed();
-        mSourceWindowId = (root != null) ? root.getAccessibilityWindowId() : View.NO_ID;
-        final int rootViewId = (root != null) ? root.getAccessibilityViewId() : View.NO_ID;
+        mSourceWindowId = (root != null) ? root.getAccessibilityWindowId() : UNDEFINED;
+        final int rootViewId = (root != null) ? root.getAccessibilityViewId() : UNDEFINED;
         mSourceNodeId = AccessibilityNodeInfo.makeNodeId(rootViewId, virtualDescendantId);
     }
 
@@ -133,31 +133,18 @@ public class AccessibilityRecord {
      *   <strong>Note:</strong> It is a client responsibility to recycle the received info
      *   by calling {@link AccessibilityNodeInfo#recycle() AccessibilityNodeInfo#recycle()}
      *   to avoid creating of multiple instances.
-     *
      * </p>
      * @return The info of the source.
      */
     public AccessibilityNodeInfo getSource() {
         enforceSealed();
-        if (mConnection == null || mSourceWindowId == View.NO_ID
-                || AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId) == View.NO_ID) {
+        if (mConnectionId == UNDEFINED || mSourceWindowId == UNDEFINED
+                || AccessibilityNodeInfo.getAccessibilityViewId(mSourceNodeId) == UNDEFINED) {
             return null;
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnection, mSourceWindowId,
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId, mSourceWindowId,
                 mSourceNodeId);
-    }
-
-    /**
-     * Sets the connection for interacting with the AccessibilityManagerService.
-     *
-     * @param connection The connection.
-     *
-     * @hide
-     */
-    public void setConnection(IAccessibilityServiceConnection connection) {
-        enforceNotSealed();
-        mConnection = connection;
     }
 
     /**
@@ -577,6 +564,19 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Sets the unique id of the IAccessibilityServiceConnection over which
+     * this instance can send requests to the system.
+     *
+     * @param connectionId The connection id.
+     *
+     * @hide
+     */
+    public void setConnectionId(int connectionId) {
+        enforceNotSealed();
+        mConnectionId = connectionId;
+    }
+
+    /**
      * Sets if this instance is sealed.
      *
      * @param sealed Whether is sealed.
@@ -724,7 +724,7 @@ public class AccessibilityRecord {
         mText.addAll(record.mText);
         mSourceWindowId = record.mSourceWindowId;
         mSourceNodeId = record.mSourceNodeId;
-        mConnection = record.mConnection;
+        mConnectionId = record.mConnectionId;
     }
 
     /**
@@ -748,8 +748,9 @@ public class AccessibilityRecord {
         mBeforeText = null;
         mParcelableData = null;
         mText.clear();
-        mSourceNodeId = AccessibilityNodeInfo.makeNodeId(View.NO_ID, View.NO_ID);
-        mSourceWindowId = View.NO_ID;
+        mSourceNodeId = AccessibilityNodeInfo.makeNodeId(UNDEFINED, UNDEFINED);
+        mSourceWindowId = UNDEFINED;
+        mConnectionId = UNDEFINED;
     }
 
     @Override
