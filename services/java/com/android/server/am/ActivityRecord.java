@@ -80,6 +80,7 @@ final class ActivityRecord {
     ThumbnailHolder thumbHolder; // where our thumbnails should go.
     long launchTime;        // when we starting launching this activity
     long startTime;         // last time this activity was started
+    long lastVisibleTime;   // last time this activity became visible
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
     CompatibilityInfo compat;// last used compatibility mode
@@ -187,6 +188,10 @@ final class ActivityRecord {
             pw.print(prefix); pw.print("launchTime=");
                     TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
                     TimeUtils.formatDuration(startTime, pw); pw.println("");
+        }
+        if (lastVisibleTime != 0) {
+            pw.print(prefix); pw.print("lastVisibleTime=");
+                    TimeUtils.formatDuration(lastVisibleTime, pw); pw.println("");
         }
         if (waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
@@ -632,6 +637,7 @@ final class ActivityRecord {
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
             if (!nowVisible) {
                 nowVisible = true;
+                lastVisibleTime = SystemClock.uptimeMillis();
                 if (!idle) {
                     // Instead of doing the full stop routine here, let's just
                     // hide any activities we now can, and let them stop when
