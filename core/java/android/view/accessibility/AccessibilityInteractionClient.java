@@ -91,7 +91,8 @@ public final class AccessibilityInteractionClient
 
     private final Rect mTempBounds = new Rect();
 
-    private final SparseArray<IAccessibilityServiceConnection> mConnectionCache =
+    // The connection cache is shared between all interrogating threads.
+    private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
         new SparseArray<IAccessibilityServiceConnection>();
 
     /**
@@ -517,8 +518,8 @@ public final class AccessibilityInteractionClient
      * @return The cached connection if such.
      */
     public IAccessibilityServiceConnection getConnection(int connectionId) {
-        synchronized (mConnectionCache) {
-            return mConnectionCache.get(connectionId);
+        synchronized (sConnectionCache) {
+            return sConnectionCache.get(connectionId);
         }
     }
 
@@ -529,8 +530,8 @@ public final class AccessibilityInteractionClient
      * @param connection The connection.
      */
     public void addConnection(int connectionId, IAccessibilityServiceConnection connection) {
-        synchronized (mConnectionCache) {
-            mConnectionCache.put(connectionId, connection);
+        synchronized (sConnectionCache) {
+            sConnectionCache.put(connectionId, connection);
         }
     }
 
@@ -540,8 +541,8 @@ public final class AccessibilityInteractionClient
      * @param connectionId The connection id.
      */
     public void removeConnection(int connectionId) {
-        synchronized (mConnectionCache) {
-            mConnectionCache.remove(connectionId);
+        synchronized (sConnectionCache) {
+            sConnectionCache.remove(connectionId);
         }
     }
 }
