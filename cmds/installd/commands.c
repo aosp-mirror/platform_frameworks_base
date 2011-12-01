@@ -184,6 +184,7 @@ int free_cache(int64_t free_size)
     DIR *d;
     struct dirent *de;
     int64_t avail;
+    char datadir[PKG_PATH_MAX];
 
     avail = disk_free();
     if (avail < 0) return -1;
@@ -191,9 +192,14 @@ int free_cache(int64_t free_size)
     LOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
     if (avail >= free_size) return 0;
 
-    d = opendir(android_data_dir.path);
+    if (create_persona_path(datadir, 0)) {
+        LOGE("couldn't get directory for persona 0");
+        return -1;
+    }
+
+    d = opendir(datadir);
     if (d == NULL) {
-        LOGE("cannot open %s: %s\n", android_data_dir.path, strerror(errno));
+        LOGE("cannot open %s: %s\n", datadir, strerror(errno));
         return -1;
     }
     dfd = dirfd(d);
@@ -576,19 +582,6 @@ fail:
         close(zip_fd);
     }
     return -1;
-}
-
-int create_move_path(char path[PKG_PATH_MAX],
-    const char* pkgname,
-    const char* leaf,
-    uid_t persona)
-{
-    if ((android_data_dir.len + strlen(pkgname) + strlen(leaf) + 1) >= PKG_PATH_MAX) {
-        return -1;
-    }
-    
-    sprintf(path, "%s%s%s/%s", android_data_dir.path, PRIMARY_USER_PREFIX, pkgname, leaf);
-    return 0;
 }
 
 void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid,
