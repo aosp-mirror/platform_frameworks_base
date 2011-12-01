@@ -1094,7 +1094,7 @@ status_t AVIExtractor::addH264CodecSpecificData(size_t trackIndex) {
     CHECK(meta->findData(kKeyAVCC, &type, &csd, &csdSize));
 
     track->mMeta->setInt32(kKeyWidth, width);
-    track->mMeta->setInt32(kKeyHeight, width);
+    track->mMeta->setInt32(kKeyHeight, height);
     track->mMeta->setData(kKeyAVCC, type, csd, csdSize);
 
     return OK;
