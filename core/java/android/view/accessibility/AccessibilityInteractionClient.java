@@ -226,7 +226,7 @@ public final class AccessibilityInteractionClient
      * @param text The searched text.
      * @return A list of found {@link AccessibilityNodeInfo}s.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByTextInActiveWindow(
             int connectionId, String text) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
