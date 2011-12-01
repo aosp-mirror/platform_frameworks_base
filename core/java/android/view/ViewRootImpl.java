@@ -154,9 +154,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     final TypedValue mTmpValue = new TypedValue();
     
     final InputMethodCallback mInputMethodCallback;
-    final SparseArray<Object> mPendingEvents = new SparseArray<Object>();
-    int mPendingEventSeq = 0;
-
     final Thread mThread;
 
     final WindowLeaked mLocation;
@@ -219,7 +216,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
-    InputEventMessage mPendingInputEvents = null;
+
+    // Pool of queued input events.
+    private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
+    private QueuedInputEvent mQueuedInputEventPool;
+    private int mQueuedInputEventPoolSize;
+    private int mQueuedInputEventNextSeq;
+
+    // Input event queue.
+    QueuedInputEvent mFirstPendingInputEvent;
+    QueuedInputEvent mCurrentInputEvent;
+    boolean mProcessInputEventsPending;
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -841,23 +848,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    private void processInputEvents(boolean outOfOrder) {
-        while (mPendingInputEvents != null) {
-            handleMessage(mPendingInputEvents.mMessage);
-            InputEventMessage tmpMessage = mPendingInputEvents;
-            mPendingInputEvents = mPendingInputEvents.mNext;
-            tmpMessage.recycle();
-            if (outOfOrder) {
-                removeMessages(PROCESS_INPUT_EVENTS);
-            }
-        }
-    }
-
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
 
-        processInputEvents(true);
+        processInputEvents();
 
         if (DBG) {
             System.out.println("======================================");
@@ -2366,7 +2361,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public final static int DISPATCH_TRACKBALL = 1007;
     public final static int DISPATCH_APP_VISIBILITY = 1008;
     public final static int DISPATCH_GET_NEW_SURFACE = 1009;
-    public final static int FINISHED_EVENT = 1010;
+    public final static int IME_FINISHED_EVENT = 1010;
     public final static int DISPATCH_KEY_FROM_IME = 1011;
     public final static int FINISH_INPUT_CONNECTION = 1012;
     public final static int CHECK_FOCUS = 1013;
@@ -2380,7 +2375,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID = 1021;
     public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID = 1022;
     public final static int DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT = 1023;
-    public final static int PROCESS_INPUT_EVENTS = 1024;
+    public final static int DO_PROCESS_INPUT_EVENTS = 1024;
 
     @Override
     public String getMessageName(Message message) {
@@ -2405,8 +2400,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 return "DISPATCH_APP_VISIBILITY";
             case DISPATCH_GET_NEW_SURFACE:
                 return "DISPATCH_GET_NEW_SURFACE";
-            case FINISHED_EVENT:
-                return "FINISHED_EVENT";
+            case IME_FINISHED_EVENT:
+                return "IME_FINISHED_EVENT";
             case DISPATCH_KEY_FROM_IME:
                 return "DISPATCH_KEY_FROM_IME";
             case FINISH_INPUT_CONNECTION:
@@ -2433,8 +2428,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 return "DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID";
             case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT:
                 return "DO_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT";
-            case PROCESS_INPUT_EVENTS:
-                return "PROCESS_INPUT_EVENTS";
+            case DO_PROCESS_INPUT_EVENTS:
+                return "DO_PROCESS_INPUT_EVENTS";
         }
         return super.getMessageName(message);
     }
@@ -2483,23 +2478,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 mProfile = false;
             }
             break;
-        case FINISHED_EVENT:
-            handleFinishedEvent(msg.arg1, msg.arg2 != 0);
+        case IME_FINISHED_EVENT:
+            handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
             break;
-        case DISPATCH_KEY:
-            deliverKeyEvent((KeyEvent)msg.obj, msg.arg1 != 0);
-            break;
-        case DISPATCH_POINTER:
-            deliverPointerEvent((MotionEvent) msg.obj, msg.arg1 != 0);
-            break;
-        case DISPATCH_TRACKBALL:
-            deliverTrackballEvent((MotionEvent) msg.obj, msg.arg1 != 0);
-            break;
-        case DISPATCH_GENERIC_MOTION:
-            deliverGenericMotionEvent((MotionEvent) msg.obj, msg.arg1 != 0);
-            break;
-        case PROCESS_INPUT_EVENTS:
-            processInputEvents(false);
+        case DO_PROCESS_INPUT_EVENTS:
+            mProcessInputEventsPending = false;
+            processInputEvents();
             break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
@@ -2621,7 +2605,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 //noinspection UnusedAssignment
                 event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
             }
-            deliverKeyEventPostIme((KeyEvent)msg.obj, false);
+            enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME);
         } break;
         case FINISH_INPUT_CONNECTION: {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -2683,70 +2667,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    private void startInputEvent(InputQueue.FinishedCallback finishedCallback) {
-        if (mFinishedCallback != null) {
-            Slog.w(TAG, "Received a new input event from the input queue but there is "
-                    + "already an unfinished input event in progress.");
-        }
-
-        if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventReceiveTimeNanos = System.nanoTime();
-            mInputEventDeliverTimeNanos = 0;
-            mInputEventDeliverPostImeTimeNanos = 0;
-        }
-
-        mFinishedCallback = finishedCallback;
-    }
-
-    private void finishInputEvent(InputEvent event, boolean handled) {
-        if (LOCAL_LOGV) Log.v(TAG, "Telling window manager input event is finished");
-
-        if (mFinishedCallback == null) {
-            Slog.w(TAG, "Attempted to tell the input queue that the current input event "
-                    + "is finished but there is no input event actually in progress.");
-            return;
-        }
-
-        if (ViewDebug.DEBUG_LATENCY) {
-            final long now = System.nanoTime();
-            final long eventTime = event.getEventTimeNano();
-            final StringBuilder msg = new StringBuilder();
-            msg.append("Latency: Spent ");
-            msg.append((now - mInputEventReceiveTimeNanos) * 0.000001f);
-            msg.append("ms processing ");
-            if (event instanceof KeyEvent) {
-                final KeyEvent  keyEvent = (KeyEvent)event;
-                msg.append("key event, action=");
-                msg.append(KeyEvent.actionToString(keyEvent.getAction()));
-            } else {
-                final MotionEvent motionEvent = (MotionEvent)event;
-                msg.append("motion event, action=");
-                msg.append(MotionEvent.actionToString(motionEvent.getAction()));
-                msg.append(", historySize=");
-                msg.append(motionEvent.getHistorySize());
-            }
-            msg.append(", handled=");
-            msg.append(handled);
-            msg.append(", received at +");
-            msg.append((mInputEventReceiveTimeNanos - eventTime) * 0.000001f);
-            if (mInputEventDeliverTimeNanos != 0) {
-                msg.append("ms, delivered at +");
-                msg.append((mInputEventDeliverTimeNanos - eventTime) * 0.000001f);
-            }
-            if (mInputEventDeliverPostImeTimeNanos != 0) {
-                msg.append("ms, delivered post IME at +");
-                msg.append((mInputEventDeliverPostImeTimeNanos - eventTime) * 0.000001f);
-            }
-            msg.append("ms, finished at +");
-            msg.append((now - eventTime) * 0.000001f);
-            msg.append("ms.");
-            Log.d(TAG, msg.toString());
-        }
-
-        mFinishedCallback.finished(handled);
-        mFinishedCallback = null;
-    }
-    
     /**
      * Something in the current window tells us we need to change the touch mode.  For
      * example, we are not in touch mode, and the user touches the screen.
@@ -2868,11 +2788,27 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         return false;
     }
 
-    private void deliverPointerEvent(MotionEvent event, boolean sendDone) {
+    private void deliverInputEvent(QueuedInputEvent q) {
         if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventDeliverTimeNanos = System.nanoTime();
+            q.mDeliverTimeNanos = System.nanoTime();
         }
 
+        if (q.mEvent instanceof KeyEvent) {
+            deliverKeyEvent(q);
+        } else {
+            final int source = q.mEvent.getSource();
+            if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                deliverPointerEvent(q);
+            } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                deliverTrackballEvent(q);
+            } else {
+                deliverGenericMotionEvent(q);
+            }
+        }
+    }
+
+    private void deliverPointerEvent(QueuedInputEvent q) {
+        final MotionEvent event = (MotionEvent)q.mEvent;
         final boolean isTouchEvent = event.isTouchEvent();
         if (mInputEventConsistencyVerifier != null) {
             if (isTouchEvent) {
@@ -2884,7 +2820,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishMotionEvent(event, sendDone, false);
+            finishInputEvent(q, false);
             return;
         }
 
@@ -2919,41 +2855,23 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             lt.sample("B Dispatched PointerEvents ", System.nanoTime() - event.getEventTimeNano());
         }
         if (handled) {
-            finishMotionEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             return;
         }
 
         // Pointer event was unhandled.
-        finishMotionEvent(event, sendDone, false);
+        finishInputEvent(q, false);
     }
 
-    private void finishMotionEvent(MotionEvent event, boolean sendDone, boolean handled) {
-        event.recycle();
-        if (sendDone) {
-            finishInputEvent(event, handled);
-        }
-        //noinspection ConstantConditions
-        if (LOCAL_LOGV || WATCH_POINTER) {
-            if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                Log.i(TAG, "Done dispatching!");
-            }
-        }
-    }
-
-    private void deliverTrackballEvent(MotionEvent event, boolean sendDone) {
-        if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventDeliverTimeNanos = System.nanoTime();
-        }
-
-        if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
-
+    private void deliverTrackballEvent(QueuedInputEvent q) {
+        final MotionEvent event = (MotionEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
         }
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishMotionEvent(event, sendDone, false);
+            finishInputEvent(q, false);
             return;
         }
 
@@ -2965,7 +2883,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             // touch mode here.
             ensureTouchMode(false);
 
-            finishMotionEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             mLastTrackballTime = Integer.MIN_VALUE;
             return;
         }
@@ -2989,18 +2907,18 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             case MotionEvent.ACTION_DOWN:
                 x.reset(2);
                 y.reset(2);
-                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                dispatchKey(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD), false);
+                        InputDevice.SOURCE_KEYBOARD));
                 break;
             case MotionEvent.ACTION_UP:
                 x.reset(2);
                 y.reset(2);
-                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                dispatchKey(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD), false);
+                        InputDevice.SOURCE_KEYBOARD));
                 break;
         }
 
@@ -3051,38 +2969,35 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         + keycode);
                 movement--;
                 int repeatCount = accelMovement - movement;
-                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                dispatchKey(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_MULTIPLE, keycode, repeatCount, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD), false);
+                        InputDevice.SOURCE_KEYBOARD));
             }
             while (movement > 0) {
                 if (DEBUG_TRACKBALL) Log.v("foo", "Delivering fake DPAD: "
                         + keycode);
                 movement--;
                 curTime = SystemClock.uptimeMillis();
-                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                dispatchKey(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_DOWN, keycode, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD), false);
-                deliverKeyEvent(new KeyEvent(curTime, curTime,
+                        InputDevice.SOURCE_KEYBOARD));
+                dispatchKey(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_UP, keycode, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
-                        InputDevice.SOURCE_KEYBOARD), false);
-                }
+                        InputDevice.SOURCE_KEYBOARD));
+            }
             mLastTrackballTime = curTime;
         }
 
         // Unfortunately we can't tell whether the application consumed the keys, so
         // we always consider the trackball event handled.
-        finishMotionEvent(event, sendDone, true);
+        finishInputEvent(q, true);
     }
 
-    private void deliverGenericMotionEvent(MotionEvent event, boolean sendDone) {
-        if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventDeliverTimeNanos = System.nanoTime();
-        }
-
+    private void deliverGenericMotionEvent(QueuedInputEvent q) {
+        final MotionEvent event = (MotionEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
         }
@@ -3095,7 +3010,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (isJoystick) {
                 updateJoystickDirection(event, false);
             }
-            finishMotionEvent(event, sendDone, false);
+            finishInputEvent(q, false);
             return;
         }
 
@@ -3104,16 +3019,16 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (isJoystick) {
                 updateJoystickDirection(event, false);
             }
-            finishMotionEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             return;
         }
 
         if (isJoystick) {
             // Translate the joystick event into DPAD keys and try to deliver those.
             updateJoystickDirection(event, true);
-            finishMotionEvent(event, sendDone, true);
+            finishInputEvent(q, true);
         } else {
-            finishMotionEvent(event, sendDone, false);
+            finishInputEvent(q, false);
         }
     }
 
@@ -3135,9 +3050,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (xDirection != mLastJoystickXDirection) {
             if (mLastJoystickXKeyCode != 0) {
-                deliverKeyEvent(new KeyEvent(time, time,
+                dispatchKey(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
                 mLastJoystickXKeyCode = 0;
             }
 
@@ -3146,17 +3061,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (xDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickXKeyCode = xDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-                deliverKeyEvent(new KeyEvent(time, time,
+                dispatchKey(new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
             }
         }
 
         if (yDirection != mLastJoystickYDirection) {
             if (mLastJoystickYKeyCode != 0) {
-                deliverKeyEvent(new KeyEvent(time, time,
+                dispatchKey(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
                 mLastJoystickYKeyCode = 0;
             }
 
@@ -3165,9 +3080,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (yDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickYKeyCode = yDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-                deliverKeyEvent(new KeyEvent(time, time,
+                dispatchKey(new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
-                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
             }
         }
     }
@@ -3258,91 +3173,80 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         return false;
     }
 
-    int enqueuePendingEvent(Object event, boolean sendDone) {
-        int seq = mPendingEventSeq+1;
-        if (seq < 0) seq = 0;
-        mPendingEventSeq = seq;
-        mPendingEvents.put(seq, event);
-        return sendDone ? seq : -seq;
-    }
-
-    Object retrievePendingEvent(int seq) {
-        if (seq < 0) seq = -seq;
-        Object event = mPendingEvents.get(seq);
-        if (event != null) {
-            mPendingEvents.remove(seq);
-        }
-        return event;
-    }
-
-    private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
-        if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventDeliverTimeNanos = System.nanoTime();
-        }
-
+    private void deliverKeyEvent(QueuedInputEvent q) {
+        final KeyEvent event = (KeyEvent)q.mEvent;
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
         }
 
-        // If there is no view, then the event will not be handled.
-        if (mView == null || !mAdded) {
-            finishKeyEvent(event, sendDone, false);
-            return;
-        }
-
-        if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
-
-        // Perform predispatching before the IME.
-        if (mView.dispatchKeyEventPreIme(event)) {
-            finishKeyEvent(event, sendDone, true);
-            return;
-        }
-
-        // Dispatch to the IME before propagating down the view hierarchy.
-        // The IME will eventually call back into handleFinishedEvent.
-        if (mLastWasImTarget) {
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) {
-                int seq = enqueuePendingEvent(event, sendDone);
-                if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
-                        + seq + " event=" + event);
-                imm.dispatchKeyEvent(mView.getContext(), seq, event, mInputMethodCallback);
+        if ((q.mFlags & QueuedInputEvent.FLAG_DELIVER_POST_IME) == 0) {
+            // If there is no view, then the event will not be handled.
+            if (mView == null || !mAdded) {
+                finishInputEvent(q, false);
                 return;
+            }
+
+            if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
+
+            // Perform predispatching before the IME.
+            if (mView.dispatchKeyEventPreIme(event)) {
+                finishInputEvent(q, true);
+                return;
+            }
+
+            // Dispatch to the IME before propagating down the view hierarchy.
+            // The IME will eventually call back into handleImeFinishedEvent.
+            if (mLastWasImTarget) {
+                InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
+                            + q.mSeq + " event=" + event);
+                    imm.dispatchKeyEvent(mView.getContext(), q.mSeq, event, mInputMethodCallback);
+                    return;
+                }
             }
         }
 
         // Not dispatching to IME, continue with post IME actions.
-        deliverKeyEventPostIme(event, sendDone);
+        deliverKeyEventPostIme(q);
     }
 
-    private void handleFinishedEvent(int seq, boolean handled) {
-        final KeyEvent event = (KeyEvent)retrievePendingEvent(seq);
-        if (DEBUG_IMF) Log.v(TAG, "IME finished event: seq=" + seq
-                + " handled=" + handled + " event=" + event);
-        if (event != null) {
-            final boolean sendDone = seq >= 0;
+    void handleImeFinishedEvent(int seq, boolean handled) {
+        final QueuedInputEvent q = mCurrentInputEvent;
+        if (q != null && q.mSeq == seq) {
+            final KeyEvent event = (KeyEvent)q.mEvent;
+            if (DEBUG_IMF) {
+                Log.v(TAG, "IME finished event: seq=" + seq
+                        + " handled=" + handled + " event=" + event);
+            }
             if (handled) {
-                finishKeyEvent(event, sendDone, true);
+                finishInputEvent(q, true);
             } else {
-                deliverKeyEventPostIme(event, sendDone);
+                deliverKeyEventPostIme(q);
+            }
+        } else {
+            if (DEBUG_IMF) {
+                Log.v(TAG, "IME finished event: seq=" + seq
+                        + " handled=" + handled + ", event not found!");
             }
         }
     }
 
-    private void deliverKeyEventPostIme(KeyEvent event, boolean sendDone) {
+    private void deliverKeyEventPostIme(QueuedInputEvent q) {
+        final KeyEvent event = (KeyEvent)q.mEvent;
         if (ViewDebug.DEBUG_LATENCY) {
-            mInputEventDeliverPostImeTimeNanos = System.nanoTime();
+            q.mDeliverPostImeTimeNanos = System.nanoTime();
         }
 
         // If the view went away, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishKeyEvent(event, sendDone, false);
+            finishInputEvent(q, false);
             return;
         }
 
         // If the key's purpose is to exit touch mode then we consume it and consider it handled.
         if (checkForLeavingTouchModeAndConsume(event)) {
-            finishKeyEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             return;
         }
 
@@ -3352,7 +3256,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         // Deliver the key to the view hierarchy.
         if (mView.dispatchKeyEvent(event)) {
-            finishKeyEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             return;
         }
 
@@ -3361,14 +3265,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 && event.isCtrlPressed()
                 && !KeyEvent.isModifierKey(event.getKeyCode())) {
             if (mView.dispatchKeyShortcutEvent(event)) {
-                finishKeyEvent(event, sendDone, true);
+                finishInputEvent(q, true);
                 return;
             }
         }
 
         // Apply the fallback event policy.
         if (mFallbackEventHandler.dispatchKeyEvent(event)) {
-            finishKeyEvent(event, sendDone, true);
+            finishInputEvent(q, true);
             return;
         }
 
@@ -3423,14 +3327,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         if (v.requestFocus(direction, mTempRect)) {
                             playSoundEffect(
                                     SoundEffectConstants.getContantForFocusDirection(direction));
-                            finishKeyEvent(event, sendDone, true);
+                            finishInputEvent(q, true);
                             return;
                         }
                     }
 
                     // Give the focused view a last chance to handle the dpad key.
                     if (mView.dispatchUnhandledMove(focused, direction)) {
-                        finishKeyEvent(event, sendDone, true);
+                        finishInputEvent(q, true);
                         return;
                     }
                 }
@@ -3438,13 +3342,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         // Key was unhandled.
-        finishKeyEvent(event, sendDone, false);
-    }
-
-    private void finishKeyEvent(KeyEvent event, boolean sendDone, boolean handled) {
-        if (sendDone) {
-            finishInputEvent(event, handled);
-        }
+        finishInputEvent(q, false);
     }
 
     /* drag/drop */
@@ -3769,8 +3667,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    public void dispatchFinishedEvent(int seq, boolean handled) {
-        Message msg = obtainMessage(FINISHED_EVENT);
+    void dispatchImeFinishedEvent(int seq, boolean handled) {
+        Message msg = obtainMessage(IME_FINISHED_EVENT);
         msg.arg1 = seq;
         msg.arg2 = handled ? 1 : 0;
         sendMessage(msg);
@@ -3799,152 +3697,185 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         sendMessage(msg);
     }
 
-    private long mInputEventReceiveTimeNanos;
-    private long mInputEventDeliverTimeNanos;
-    private long mInputEventDeliverPostImeTimeNanos;
-    private InputQueue.FinishedCallback mFinishedCallback;
-    
-    private final InputHandler mInputHandler = new InputHandler() {
-        public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(finishedCallback);
-            dispatchKey(event, true);
+    /**
+     * Represents a pending input event that is waiting in a queue.
+     *
+     * Input events are processed in serial order by the timestamp specified by
+     * {@link InputEvent#getEventTime()}.  In general, the input dispatcher delivers
+     * one input event to the application at a time and waits for the application
+     * to finish handling it before delivering the next one.
+     *
+     * However, because the application or IME can synthesize and inject multiple
+     * key events at a time without going through the input dispatcher, we end up
+     * needing a queue on the application's side.
+     */
+    private static final class QueuedInputEvent {
+        public static final int FLAG_DELIVER_POST_IME = 1 << 0;
+
+        public QueuedInputEvent mNext;
+
+        public InputEvent mEvent;
+        public InputQueue.FinishedCallback mFinishedCallback;
+        public int mFlags;
+        public int mSeq;
+
+        // Used for latency calculations.
+        public long mReceiveTimeNanos;
+        public long mDeliverTimeNanos;
+        public long mDeliverPostImeTimeNanos;
+    }
+
+    private QueuedInputEvent obtainQueuedInputEvent(InputEvent event,
+            InputQueue.FinishedCallback finishedCallback, int flags) {
+        QueuedInputEvent q = mQueuedInputEventPool;
+        if (q != null) {
+            mQueuedInputEventPoolSize -= 1;
+            mQueuedInputEventPool = q.mNext;
+            q.mNext = null;
+        } else {
+            q = new QueuedInputEvent();
         }
 
-        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(finishedCallback);
-            dispatchMotion(event, true);
+        q.mEvent = event;
+        q.mFinishedCallback = finishedCallback;
+        q.mFlags = flags;
+        q.mSeq = mQueuedInputEventNextSeq++;
+        return q;
+    }
+
+    private void recycleQueuedInputEvent(QueuedInputEvent q) {
+        q.mEvent = null;
+        q.mFinishedCallback = null;
+
+        if (mQueuedInputEventPoolSize < MAX_QUEUED_INPUT_EVENT_POOL_SIZE) {
+            mQueuedInputEventPoolSize += 1;
+            q.mNext = mQueuedInputEventPool;
+            mQueuedInputEventPool = q;
+        }
+    }
+
+    void enqueueInputEvent(InputEvent event,
+            InputQueue.FinishedCallback finishedCallback, int flags) {
+        QueuedInputEvent q = obtainQueuedInputEvent(event, finishedCallback, flags);
+
+        if (ViewDebug.DEBUG_LATENCY) {
+            q.mReceiveTimeNanos = System.nanoTime();
+            q.mDeliverTimeNanos = 0;
+            q.mDeliverPostImeTimeNanos = 0;
+        }
+
+        // Always enqueue the input event in order, regardless of its time stamp.
+        // We do this because the application or the IME may inject key events
+        // in response to touch events and we want to ensure that the injected keys
+        // are processed in the order they were received and we cannot trust that
+        // the time stamp of injected events are monotonic.
+        QueuedInputEvent last = mFirstPendingInputEvent;
+        if (last == null) {
+            mFirstPendingInputEvent = q;
+        } else {
+            while (last.mNext != null) {
+                last = last.mNext;
+            }
+            last.mNext = q;
+        }
+
+        scheduleProcessInputEvents();
+    }
+
+    private void scheduleProcessInputEvents() {
+        if (!mProcessInputEventsPending) {
+            mProcessInputEventsPending = true;
+            sendEmptyMessage(DO_PROCESS_INPUT_EVENTS);
+        }
+    }
+
+    void processInputEvents() {
+        while (mCurrentInputEvent == null && mFirstPendingInputEvent != null) {
+            QueuedInputEvent q = mFirstPendingInputEvent;
+            mFirstPendingInputEvent = q.mNext;
+            q.mNext = null;
+            mCurrentInputEvent = q;
+            deliverInputEvent(q);
+        }
+
+        // We are done processing all input events that we can process right now
+        // so we can clear the pending flag immediately.
+        if (mProcessInputEventsPending) {
+            mProcessInputEventsPending = false;
+            removeMessages(DO_PROCESS_INPUT_EVENTS);
+        }
+    }
+
+    private void finishInputEvent(QueuedInputEvent q, boolean handled) {
+        if (q != mCurrentInputEvent) {
+            throw new IllegalStateException("finished input event out of order");
+        }
+
+        if (ViewDebug.DEBUG_LATENCY) {
+            final long now = System.nanoTime();
+            final long eventTime = q.mEvent.getEventTimeNano();
+            final StringBuilder msg = new StringBuilder();
+            msg.append("Spent ");
+            msg.append((now - q.mReceiveTimeNanos) * 0.000001f);
+            msg.append("ms processing ");
+            if (q.mEvent instanceof KeyEvent) {
+                final KeyEvent  keyEvent = (KeyEvent)q.mEvent;
+                msg.append("key event, action=");
+                msg.append(KeyEvent.actionToString(keyEvent.getAction()));
+            } else {
+                final MotionEvent motionEvent = (MotionEvent)q.mEvent;
+                msg.append("motion event, action=");
+                msg.append(MotionEvent.actionToString(motionEvent.getAction()));
+                msg.append(", historySize=");
+                msg.append(motionEvent.getHistorySize());
+            }
+            msg.append(", handled=");
+            msg.append(handled);
+            msg.append(", received at +");
+            msg.append((q.mReceiveTimeNanos - eventTime) * 0.000001f);
+            if (q.mDeliverTimeNanos != 0) {
+                msg.append("ms, delivered at +");
+                msg.append((q.mDeliverTimeNanos - eventTime) * 0.000001f);
+            }
+            if (q.mDeliverPostImeTimeNanos != 0) {
+                msg.append("ms, delivered post IME at +");
+                msg.append((q.mDeliverPostImeTimeNanos - eventTime) * 0.000001f);
+            }
+            msg.append("ms, finished at +");
+            msg.append((now - eventTime) * 0.000001f);
+            msg.append("ms.");
+            Log.d(ViewDebug.DEBUG_LATENCY_TAG, msg.toString());
+        }
+
+        if (q.mFinishedCallback != null) {
+            q.mFinishedCallback.finished(handled);
+        }
+
+        if (q.mEvent instanceof MotionEvent) {
+            // Event though key events are also recyclable, we only recycle motion events.
+            // Historically, key events were not recyclable and applications expect
+            // them to be immutable.  We only ever recycle key events behind the
+            // scenes where an application never sees them (so, not here).
+            q.mEvent.recycle();
+        }
+
+        recycleQueuedInputEvent(q);
+
+        mCurrentInputEvent = null;
+        if (mFirstPendingInputEvent != null) {
+            scheduleProcessInputEvents();
+        }
+    }
+
+    private final InputHandler mInputHandler = new InputHandler() {
+        public void handleInputEvent(InputEvent event,
+                InputQueue.FinishedCallback finishedCallback) {
+            enqueueInputEvent(event, finishedCallback, 0);
         }
     };
 
-    /**
-     * Utility class used to queue up input events which are then handled during
-     * performTraversals(). Doing it this way allows us to ensure that we are up to date with
-     * all input events just prior to drawing, instead of placing those events on the regular
-     * handler queue, potentially behind a drawing event.
-     */
-    static class InputEventMessage {
-        Message mMessage;
-        InputEventMessage mNext;
-
-        private static final Object sPoolSync = new Object();
-        private static InputEventMessage sPool;
-        private static int sPoolSize = 0;
-
-        private static final int MAX_POOL_SIZE = 10;
-
-        private InputEventMessage(Message m) {
-            mMessage = m;
-            mNext = null;
-        }
-
-        /**
-         * Return a new Message instance from the global pool. Allows us to
-         * avoid allocating new objects in many cases.
-         */
-        public static InputEventMessage obtain(Message msg) {
-            synchronized (sPoolSync) {
-                if (sPool != null) {
-                    InputEventMessage m = sPool;
-                    sPool = m.mNext;
-                    m.mNext = null;
-                    sPoolSize--;
-                    m.mMessage = msg;
-                    return m;
-                }
-            }
-            return new InputEventMessage(msg);
-        }
-
-        /**
-         * Return the message to the pool.
-         */
-        public void recycle() {
-            mMessage.recycle();
-            synchronized (sPoolSync) {
-                if (sPoolSize < MAX_POOL_SIZE) {
-                    mNext = sPool;
-                    sPool = this;
-                    sPoolSize++;
-                }
-            }
-
-        }
-    }
-
-    /**
-     * Place the input event message at the end of the current pending list
-     */
-    private void enqueueInputEvent(Message msg, long when) {
-        InputEventMessage inputMessage = InputEventMessage.obtain(msg);
-        if (mPendingInputEvents == null) {
-            mPendingInputEvents = inputMessage;
-        } else {
-            InputEventMessage currMessage = mPendingInputEvents;
-            while (currMessage.mNext != null) {
-                currMessage = currMessage.mNext;
-            }
-            currMessage.mNext = inputMessage;
-        }
-        sendEmptyMessageAtTime(PROCESS_INPUT_EVENTS, when);
-    }
-
     public void dispatchKey(KeyEvent event) {
-        dispatchKey(event, false);
-    }
-
-    private void dispatchKey(KeyEvent event, boolean sendDone) {
-        //noinspection ConstantConditions
-        if (false && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_CAMERA) {
-                if (DBG) Log.d("keydisp", "===================================================");
-                if (DBG) Log.d("keydisp", "Focused view Hierarchy is:");
-
-                debug();
-
-                if (DBG) Log.d("keydisp", "===================================================");
-            }
-        }
-
-        Message msg = obtainMessage(DISPATCH_KEY);
-        msg.obj = event;
-        msg.arg1 = sendDone ? 1 : 0;
-
-        if (LOCAL_LOGV) Log.v(
-            TAG, "sending key " + event + " to " + mView);
-
-        enqueueInputEvent(msg, event.getEventTime());
-    }
-    
-    private void dispatchMotion(MotionEvent event, boolean sendDone) {
-        int source = event.getSource();
-        if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            dispatchPointer(event, sendDone);
-        } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-            dispatchTrackball(event, sendDone);
-        } else {
-            dispatchGenericMotion(event, sendDone);
-        }
-    }
-
-    private void dispatchPointer(MotionEvent event, boolean sendDone) {
-        Message msg = obtainMessage(DISPATCH_POINTER);
-        msg.obj = event;
-        msg.arg1 = sendDone ? 1 : 0;
-        enqueueInputEvent(msg, event.getEventTime());
-    }
-
-    private void dispatchTrackball(MotionEvent event, boolean sendDone) {
-        Message msg = obtainMessage(DISPATCH_TRACKBALL);
-        msg.obj = event;
-        msg.arg1 = sendDone ? 1 : 0;
-        enqueueInputEvent(msg, event.getEventTime());
-    }
-
-    private void dispatchGenericMotion(MotionEvent event, boolean sendDone) {
-        Message msg = obtainMessage(DISPATCH_GENERIC_MOTION);
-        msg.obj = event;
-        msg.arg1 = sendDone ? 1 : 0;
-        enqueueInputEvent(msg, event.getEventTime());
+        enqueueInputEvent(event, null, 0);
     }
 
     public void dispatchAppVisibility(boolean visible) {
@@ -4126,7 +4057,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public void finishedEvent(int seq, boolean handled) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
-                viewAncestor.dispatchFinishedEvent(seq, handled);
+                viewAncestor.dispatchImeFinishedEvent(seq, handled);
             }
         }
 
