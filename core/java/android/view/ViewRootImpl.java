@@ -96,7 +96,8 @@ import java.util.List;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl extends Handler implements ViewParent,
-        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
+        View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks,
+        Choreographer.OnDrawListener {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -110,7 +111,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private static final boolean DEBUG_IMF = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_FPS = false;
-    private static final boolean WATCH_POINTER = false;
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -201,13 +201,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
     FallbackEventHandler mFallbackEventHandler;
+    Choreographer mChoreographer;
     
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
     boolean mTraversalScheduled;
     long mLastTraversalFinishedTimeNanos;
-    long mLastDrawDurationNanos;
+    long mLastDrawFinishedTimeNanos;
     boolean mWillDrawSoon;
     boolean mLayoutRequested;
     boolean mFirst;
@@ -225,7 +226,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     // Input event queue.
     QueuedInputEvent mFirstPendingInputEvent;
     QueuedInputEvent mCurrentInputEvent;
-    boolean mProcessInputEventsPending;
+    boolean mProcessInputEventsScheduled;
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -374,6 +375,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
         mProfileRendering = Boolean.parseBoolean(
                 SystemProperties.get(PROPERTY_PROFILE_RENDERING, "false"));
+        mChoreographer = Choreographer.getInstance();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -425,6 +427,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) {
         synchronized (this) {
             if (mView == null) {
+                mChoreographer.addOnDrawListener(this);
+
                 mView = view;
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -794,23 +798,19 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
-
-            //noinspection ConstantConditions
-            if (ViewDebug.DEBUG_LATENCY && mLastTraversalFinishedTimeNanos != 0) {
-                final long now = System.nanoTime();
-                Log.d(TAG, "Latency: Scheduled traversal, it has been "
-                        + ((now - mLastTraversalFinishedTimeNanos) * 0.000001f)
-                        + "ms since the last traversal finished.");
-            }
-
-            sendEmptyMessage(DO_TRAVERSAL);
+            mChoreographer.scheduleDraw();
         }
     }
 
     public void unscheduleTraversals() {
+        mTraversalScheduled = false;
+    }
+
+    @Override
+    public void onDraw() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
-            removeMessages(DO_TRAVERSAL);
+            doTraversal();
         }
     }
 
@@ -847,11 +847,44 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    private void doTraversal() {
+        doProcessInputEvents();
+
+        if (mProfile) {
+            Debug.startMethodTracing("ViewAncestor");
+        }
+
+        final long traversalStartTime;
+        if (ViewDebug.DEBUG_LATENCY) {
+            traversalStartTime = System.nanoTime();
+            if (mLastTraversalFinishedTimeNanos != 0) {
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
+                        + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
+                        + "ms since the last traversals finished.");
+            } else {
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
+            }
+        }
+
+        performTraversals();
+
+        if (ViewDebug.DEBUG_LATENCY) {
+            long now = System.nanoTime();
+            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
+                    + ((now - traversalStartTime) * 0.000001f)
+                    + "ms.");
+            mLastTraversalFinishedTimeNanos = now;
+        }
+
+        if (mProfile) {
+            Debug.stopMethodTracing();
+            mProfile = false;
+        }
+    }
+
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
-
-        processInputEvents();
 
         if (DBG) {
             System.out.println("======================================");
@@ -862,10 +895,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         if (host == null || !mAdded)
             return;
 
-        mTraversalScheduled = false;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
-        boolean fullRedrawNeeded = mFullRedrawNeeded;
         boolean newSurface = false;
         boolean surfaceChanged = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
@@ -890,7 +921,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
             params = lp;
-            fullRedrawNeeded = true;
+            mFullRedrawNeeded = true;
             mLayoutRequested = true;
             if (mLastInCompatMode) {
                 params.flags &= ~WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
@@ -905,7 +936,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         
         Rect frame = mWinFrame;
         if (mFirst) {
-            fullRedrawNeeded = true;
+            mFullRedrawNeeded = true;
             mLayoutRequested = true;
 
             if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
@@ -949,7 +980,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (desiredWindowWidth != mWidth || desiredWindowHeight != mHeight) {
                 if (DEBUG_ORIENTATION) Log.v(TAG,
                         "View " + host + " resized to: " + frame);
-                fullRedrawNeeded = true;
+                mFullRedrawNeeded = true;
                 mLayoutRequested = true;
                 windowSizeMayChange = true;
             }
@@ -1287,7 +1318,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         // before actually drawing them, so it can display then
                         // all at once.
                         newSurface = true;
-                        fullRedrawNeeded = true;
+                        mFullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
                         if (mAttachInfo.mHardwareRenderer != null) {
@@ -1323,7 +1354,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     }
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
-                    fullRedrawNeeded = true;
+                    mFullRedrawNeeded = true;
                     try {
                         mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
                     } catch (Surface.OutOfResourcesException e) {
@@ -1609,6 +1640,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
 
+        // Remember if we must report the next draw.
+        if ((relayoutResult & WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
+            mReportNextDraw = true;
+        }
+
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw() ||
                 viewVisibility != View.VISIBLE;
 
@@ -1619,42 +1655,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            mFullRedrawNeeded = false;
 
-            final long drawStartTime;
-            if (ViewDebug.DEBUG_LATENCY) {
-                drawStartTime = System.nanoTime();
-            }
-
-            draw(fullRedrawNeeded);
-
-            if (ViewDebug.DEBUG_LATENCY) {
-                mLastDrawDurationNanos = System.nanoTime() - drawStartTime;
-            }
-
-            if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0
-                    || mReportNextDraw) {
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "FINISHED DRAWING: " + mWindowAttributes.getTitle());
-                }
-                mReportNextDraw = false;
-                if (mSurfaceHolder != null && mSurface.isValid()) {
-                    mSurfaceHolderCallback.surfaceRedrawNeeded(mSurfaceHolder);
-                    SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
-                    if (callbacks != null) {
-                        for (SurfaceHolder.Callback c : callbacks) {
-                            if (c instanceof SurfaceHolder.Callback2) {
-                                ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
-                                        mSurfaceHolder);
-                            }
-                        }
-                    }
-                }
-                try {
-                    sWindowSession.finishDrawing(mWindow);
-                } catch (RemoteException e) {
-                }
-            }
+            performDraw();
         } else {
             // End any pending transitions on this non-visible window
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -1662,14 +1664,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     mPendingTransitions.get(i).endChangingAnimations();
                 }
                 mPendingTransitions.clear();
-            }
-            // We were supposed to report when we are done drawing. Since we canceled the
-            // draw, remember it here.
-            if ((relayoutResult&WindowManagerImpl.RELAYOUT_RES_FIRST_TIME) != 0) {
-                mReportNextDraw = true;
-            }
-            if (fullRedrawNeeded) {
-                mFullRedrawNeeded = true;
             }
 
             if (viewVisibility == View.VISIBLE) {
@@ -1814,6 +1808,56 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    private void performDraw() {
+        final long drawStartTime;
+        if (ViewDebug.DEBUG_LATENCY) {
+            drawStartTime = System.nanoTime();
+            if (mLastDrawFinishedTimeNanos != 0) {
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting draw(); it has been "
+                        + ((drawStartTime - mLastDrawFinishedTimeNanos) * 0.000001f)
+                        + "ms since the last draw finished.");
+            } else {
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting draw().");
+            }
+        }
+
+        final boolean fullRedrawNeeded = mFullRedrawNeeded;
+        mFullRedrawNeeded = false;
+        draw(fullRedrawNeeded);
+
+        if (ViewDebug.DEBUG_LATENCY) {
+            long now = System.nanoTime();
+            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performDraw() took "
+                    + ((now - drawStartTime) * 0.000001f)
+                    + "ms.");
+            mLastDrawFinishedTimeNanos = now;
+        }
+
+        if (mReportNextDraw) {
+            mReportNextDraw = false;
+
+            if (LOCAL_LOGV) {
+                Log.v(TAG, "FINISHED DRAWING: " + mWindowAttributes.getTitle());
+            }
+            if (mSurfaceHolder != null && mSurface.isValid()) {
+                mSurfaceHolderCallback.surfaceRedrawNeeded(mSurfaceHolder);
+                SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
+                if (callbacks != null) {
+                    for (SurfaceHolder.Callback c : callbacks) {
+                        if (c instanceof SurfaceHolder.Callback2) {
+                            ((SurfaceHolder.Callback2)c).surfaceRedrawNeeded(
+                                    mSurfaceHolder);
+                        }
+                    }
+                }
+            }
+            try {
+                sWindowSession.finishDrawing(mWindow);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (surface == null || !surface.isValid()) {
@@ -1852,8 +1896,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             mCurScrollY = yoff;
             fullRedrawNeeded = true;
         }
-        float appScale = mAttachInfo.mApplicationScale;
-        boolean scalingRequired = mAttachInfo.mScalingRequired;
+
+        final float appScale = mAttachInfo.mApplicationScale;
+        final boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
         if (mResizeBuffer != null) {
@@ -1868,7 +1913,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
 
-        Rect dirty = mDirty;
+        final Rect dirty = mDirty;
         if (mSurfaceHolder != null) {
             // The app owns the surface, we won't draw.
             dirty.setEmpty();
@@ -1886,35 +1931,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             dirty.set(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
-        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
-            if (!dirty.isEmpty() || mIsAnimating) {
-                mIsAnimating = false;
-                mHardwareYOffset = yoff;
-                mResizeAlpha = resizeAlpha;
-
-                mCurrentDirty.set(dirty);
-                mCurrentDirty.union(mPreviousDirty);
-                mPreviousDirty.set(dirty);
-                dirty.setEmpty();
-
-                Rect currentDirty = mCurrentDirty;
-                if (animating) {
-                    currentDirty = null;
-                }
-
-                if (mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, currentDirty)) {
-                    mPreviousDirty.set(0, 0, mWidth, mHeight);
-                }
-            }
-
-            if (animating) {
-                mFullRedrawNeeded = true;
-                scheduleTraversals();
-            }
-
-            return;
-        }
-
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
             Log.v(TAG, "Draw " + mView + "/"
                     + mWindowAttributes.getTitle()
@@ -1925,64 +1941,79 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         if (!dirty.isEmpty() || mIsAnimating) {
-            Canvas canvas;
-            try {
-                int left = dirty.left;
-                int top = dirty.top;
-                int right = dirty.right;
-                int bottom = dirty.bottom;
+            if (mAttachInfo.mHardwareRenderer != null
+                    && mAttachInfo.mHardwareRenderer.isEnabled()) {
+                // Draw with hardware renderer.
+                mIsAnimating = false;
+                mHardwareYOffset = yoff;
+                mResizeAlpha = resizeAlpha;
 
-                final long lockCanvasStartTime;
-                if (ViewDebug.DEBUG_LATENCY) {
-                    lockCanvasStartTime = System.nanoTime();
+                mCurrentDirty.set(dirty);
+                mCurrentDirty.union(mPreviousDirty);
+                mPreviousDirty.set(dirty);
+                dirty.setEmpty();
+
+                if (mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this,
+                        animating ? null : mCurrentDirty)) {
+                    mPreviousDirty.set(0, 0, mWidth, mHeight);
                 }
-
-                canvas = surface.lockCanvas(dirty);
-
-                if (ViewDebug.DEBUG_LATENCY) {
-                    long now = System.nanoTime();
-                    Log.d(TAG, "Latency: Spent "
-                            + ((now - lockCanvasStartTime) * 0.000001f)
-                            + "ms waiting for surface.lockCanvas()");
-                }
-
-                if (left != dirty.left || top != dirty.top || right != dirty.right ||
-                        bottom != dirty.bottom) {
-                    mAttachInfo.mIgnoreDirtyState = true;
-                }
-
-                // TODO: Do this in native
-                canvas.setDensity(mDensity);
-            } catch (Surface.OutOfResourcesException e) {
-                Log.e(TAG, "OutOfResourcesException locking surface", e);
+            } else {
+                // Draw with software renderer.
+                Canvas canvas;
                 try {
-                    if (!sWindowSession.outOfMemory(mWindow)) {
-                        Slog.w(TAG, "No processes killed for memory; killing self");
-                        Process.killProcess(Process.myPid());
+                    int left = dirty.left;
+                    int top = dirty.top;
+                    int right = dirty.right;
+                    int bottom = dirty.bottom;
+
+                    final long lockCanvasStartTime;
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        lockCanvasStartTime = System.nanoTime();
                     }
-                } catch (RemoteException ex) {
+
+                    canvas = mSurface.lockCanvas(dirty);
+
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        long now = System.nanoTime();
+                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- lockCanvas() took "
+                                + ((now - lockCanvasStartTime) * 0.000001f) + "ms");
+                    }
+
+                    if (left != dirty.left || top != dirty.top || right != dirty.right ||
+                            bottom != dirty.bottom) {
+                        mAttachInfo.mIgnoreDirtyState = true;
+                    }
+
+                    // TODO: Do this in native
+                    canvas.setDensity(mDensity);
+                } catch (Surface.OutOfResourcesException e) {
+                    Log.e(TAG, "OutOfResourcesException locking surface", e);
+                    try {
+                        if (!sWindowSession.outOfMemory(mWindow)) {
+                            Slog.w(TAG, "No processes killed for memory; killing self");
+                            Process.killProcess(Process.myPid());
+                        }
+                    } catch (RemoteException ex) {
+                    }
+                    mLayoutRequested = true;    // ask wm for a new surface next time.
+                    return;
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "IllegalArgumentException locking surface", e);
+                    // Don't assume this is due to out of memory, it could be
+                    // something else, and if it is something else then we could
+                    // kill stuff (or ourself) for no reason.
+                    mLayoutRequested = true;    // ask wm for a new surface next time.
+                    return;
                 }
-                mLayoutRequested = true;    // ask wm for a new surface next time.
-                return;
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "IllegalArgumentException locking surface", e);
-                // Don't assume this is due to out of memory, it could be
-                // something else, and if it is something else then we could
-                // kill stuff (or ourself) for no reason.
-                mLayoutRequested = true;    // ask wm for a new surface next time.
-                return;
-            }
 
-            try {
-                if (!dirty.isEmpty() || mIsAnimating) {
-                    long startTime = 0L;
-
+                try {
                     if (DEBUG_ORIENTATION || DEBUG_DRAW) {
                         Log.v(TAG, "Surface " + surface + " drawing to bitmap w="
                                 + canvas.getWidth() + ", h=" + canvas.getHeight());
                         //canvas.drawARGB(255, 255, 0, 0);
                     }
 
+                    long startTime = 0L;
                     if (ViewDebug.DEBUG_PROFILE_DRAWING) {
                         startTime = SystemClock.elapsedRealtime();
                     }
@@ -2045,23 +2076,23 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     if (ViewDebug.DEBUG_PROFILE_DRAWING) {
                         EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                     }
-                }
-            } finally {
-                final long unlockCanvasAndPostStartTime;
-                if (ViewDebug.DEBUG_LATENCY) {
-                    unlockCanvasAndPostStartTime = System.nanoTime();
-                }
+                } finally {
+                    final long unlockCanvasAndPostStartTime;
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        unlockCanvasAndPostStartTime = System.nanoTime();
+                    }
 
-                surface.unlockCanvasAndPost(canvas);
+                    surface.unlockCanvasAndPost(canvas);
 
-                if (ViewDebug.DEBUG_LATENCY) {
-                    long now = System.nanoTime();
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
-                            + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
-                }
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        long now = System.nanoTime();
+                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
+                                + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
+                    }
 
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
+                    }
                 }
             }
         }
@@ -2297,6 +2328,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             mInputChannel.dispose();
             mInputChannel = null;
         }
+
+        mChoreographer.removeOnDrawListener(this);
     }
 
     void updateConfiguration(Configuration config, boolean force) {
@@ -2351,7 +2384,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    public final static int DO_TRAVERSAL = 1000;
     public final static int DIE = 1001;
     public final static int RESIZED = 1002;
     public final static int RESIZED_REPORT = 1003;
@@ -2380,8 +2412,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     @Override
     public String getMessageName(Message message) {
         switch (message.what) {
-            case DO_TRAVERSAL:
-                return "DO_TRAVERSAL";
             case DIE:
                 return "DIE";
             case RESIZED:
@@ -2445,45 +2475,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             info.target.invalidate(info.left, info.top, info.right, info.bottom);
             info.release();
             break;
-        case DO_TRAVERSAL:
-            if (mProfile) {
-                Debug.startMethodTracing("ViewAncestor");
-            }
-
-            final long traversalStartTime;
-            if (ViewDebug.DEBUG_LATENCY) {
-                traversalStartTime = System.nanoTime();
-                mLastDrawDurationNanos = 0;
-                if (mLastTraversalFinishedTimeNanos != 0) {
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
-                            + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
-                            + "ms since the last traversals finished.");
-                } else {
-                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
-                }
-            }
-
-            performTraversals();
-
-            if (ViewDebug.DEBUG_LATENCY) {
-                long now = System.nanoTime();
-                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
-                        + ((now - traversalStartTime) * 0.000001f)
-                        + "ms.");
-                mLastTraversalFinishedTimeNanos = now;
-            }
-
-            if (mProfile) {
-                Debug.stopMethodTracing();
-                mProfile = false;
-            }
-            break;
         case IME_FINISHED_EVENT:
             handleImeFinishedEvent(msg.arg1, msg.arg2 != 0);
             break;
         case DO_PROCESS_INPUT_EVENTS:
-            mProcessInputEventsPending = false;
-            processInputEvents();
+            mProcessInputEventsScheduled = false;
+            doProcessInputEvents();
             break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
@@ -3782,13 +3779,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     private void scheduleProcessInputEvents() {
-        if (!mProcessInputEventsPending) {
-            mProcessInputEventsPending = true;
+        if (!mProcessInputEventsScheduled) {
+            mProcessInputEventsScheduled = true;
             sendEmptyMessage(DO_PROCESS_INPUT_EVENTS);
         }
     }
 
-    void processInputEvents() {
+    private void doProcessInputEvents() {
         while (mCurrentInputEvent == null && mFirstPendingInputEvent != null) {
             QueuedInputEvent q = mFirstPendingInputEvent;
             mFirstPendingInputEvent = q.mNext;
@@ -3799,8 +3796,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         // We are done processing all input events that we can process right now
         // so we can clear the pending flag immediately.
-        if (mProcessInputEventsPending) {
-            mProcessInputEventsPending = false;
+        if (mProcessInputEventsScheduled) {
+            mProcessInputEventsScheduled = false;
             removeMessages(DO_PROCESS_INPUT_EVENTS);
         }
     }
