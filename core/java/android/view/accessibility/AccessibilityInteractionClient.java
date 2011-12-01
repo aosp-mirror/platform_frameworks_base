@@ -16,11 +16,13 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.graphics.Rect;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.SparseArray;
 
 import java.util.Collections;
@@ -231,7 +233,7 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final float windowScale =
-                    connection.findAccessibilityNodeInfosByViewTextInActiveWindow(text,
+                    connection.findAccessibilityNodeInfosByTextInActiveWindow(text,
                             interactionId, this, Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
                 if (windowScale > 0) {
@@ -273,7 +275,7 @@ public final class AccessibilityInteractionClient
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.findAccessibilityNodeInfosByViewText(text,
+                final float windowScale = connection.findAccessibilityNodeInfosByText(text,
                         accessibilityWindowId, accessibilityNodeId, interactionId, this,
                         Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
