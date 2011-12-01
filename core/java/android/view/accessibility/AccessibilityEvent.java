@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -590,24 +589,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Sets the connection for interacting with the AccessibilityManagerService.
-     *
-     * @param connection The connection.
-     *
-     * @hide
-     */
-    @Override
-    public void setConnection(IAccessibilityServiceConnection connection) {
-        super.setConnection(connection);
-        List<AccessibilityRecord> records = mRecords;
-        final int recordCount = records.size();
-        for (int i = 0; i < recordCount; i++) {
-            AccessibilityRecord record = records.get(i);
-            record.setConnection(connection);
-        }
-    }
-
-    /**
      * Sets if this instance is sealed.
      *
      * @param sealed Whether is sealed.
@@ -821,23 +802,19 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @param parcel A parcel containing the state of a {@link AccessibilityEvent}.
      */
     public void initFromParcel(Parcel parcel) {
-        if (parcel.readInt() == 1) {
-            mConnection = IAccessibilityServiceConnection.Stub.asInterface(
-                    parcel.readStrongBinder());
-        }
-        setSealed(parcel.readInt() == 1);
+        mSealed = (parcel.readInt() == 1);
         mEventType = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
+        mConnectionId = parcel.readInt();
         readAccessibilityRecordFromParcel(this, parcel);
 
         // Read the records.
         final int recordCount = parcel.readInt();
         for (int i = 0; i < recordCount; i++) {
             AccessibilityRecord record = AccessibilityRecord.obtain();
-            // Do this to write the connection only once.
-            record.setConnection(mConnection);
             readAccessibilityRecordFromParcel(record, parcel);
+            record.mConnectionId = mConnectionId;
             mRecords.add(record);
         }
     }
@@ -875,16 +852,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * {@inheritDoc}
      */
     public void writeToParcel(Parcel parcel, int flags) {
-        if (mConnection == null) {
-            parcel.writeInt(0);
-        } else {
-            parcel.writeInt(1);
-            parcel.writeStrongBinder(mConnection.asBinder());
-        }
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeInt(mEventType);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
+        parcel.writeInt(mConnectionId);
         writeAccessibilityRecordToParcel(this, parcel, flags);
 
         // Write the records.
