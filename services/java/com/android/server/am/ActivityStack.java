@@ -949,6 +949,22 @@ final class ActivityStack {
             if (r.configDestroy) {
                 destroyActivityLocked(r, true, false, "stop-config");
                 resumeTopActivityLocked(null);
+            } else {
+                // Now that this process has stopped, we may want to consider
+                // it to be the previous app to try to keep around in case
+                // the user wants to return to it.
+                ProcessRecord fgApp = null;
+                if (mResumedActivity != null) {
+                    fgApp = mResumedActivity.app;
+                } else if (mPausingActivity != null) {
+                    fgApp = mPausingActivity.app;
+                }
+                if (r.app != null && fgApp != null && r.app != fgApp
+                        && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
+                        && r.app != mService.mHomeProcess) {
+                    mService.mPreviousProcess = r.app;
+                    mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
+                }
             }
         }
     }
@@ -1362,14 +1378,6 @@ final class ActivityStack {
                         + (prev != null ? prev.waitingVisible : null)
                         + ", nowVisible=" + next.nowVisible);
                 }
-            }
-
-            if (!prev.finishing && prev.app != null && prev.app != next.app
-                    && prev.app != mService.mHomeProcess) {
-                // We are switching to a new activity that is in a different
-                // process than the previous one.  Note the previous process,
-                // so we can try to keep it around.
-                mService.mPreviousProcess = prev.app;
             }
         }
 
