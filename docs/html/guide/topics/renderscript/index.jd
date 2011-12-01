@@ -151,10 +151,9 @@ page.title=RenderScript
     defining two-, three-, or four-vectors.</li>
   </ul>
 
-  <p>The <a href="{@docRoot}guide/topics/renderscript/rs-api/files.html">RenderScript header files</a>
-  and LLVM front-end libraries are located in the <code>include</code> and
-  <code>clang-include</code> directories in the
-  <code>&lt;sdk_root&gt;/platforms/android-11/renderscript</code> directory of the Android SDK. The
+  <p>The RenderScript header files and LLVM front-end libraries are located in the <code>include/</code> and
+  <code>clang-include/</code> directories in the
+  <code>&lt;sdk_root&gt;/platforms/android-11/renderscript/</code> directory of the Android SDK. The
   headers are automatically included for you, except for the RenderScript graphics specific header file, which
   you can include as follows:</p>
   <pre>
