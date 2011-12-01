@@ -9367,40 +9367,57 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPositionY = mTempCoords[1];
         }
 
-        public boolean isVisible(int positionX, int positionY) {
-            final TextView textView = TextView.this;
-
-            if (mTempRect == null) mTempRect = new Rect();
-            final Rect clip = mTempRect;
-            clip.left = getCompoundPaddingLeft();
-            clip.top = getExtendedPaddingTop();
-            clip.right = textView.getWidth() - getCompoundPaddingRight();
-            clip.bottom = textView.getHeight() - getExtendedPaddingBottom();
-
-            final ViewParent parent = textView.getParent();
-            if (parent == null || !parent.getChildVisibleRect(textView, clip, null)) {
-                return false;
-            }
-
-            int posX = mPositionX + positionX;
-            int posY = mPositionY + positionY;
-
-            // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
-            return posX >= clip.left - 1 && posX <= clip.right + 1 &&
-                    posY >= clip.top && posY <= clip.bottom;
-        }
-
-        public boolean isOffsetVisible(int offset) {
-            final int line = mLayout.getLineForOffset(offset);
-            final int lineBottom = mLayout.getLineBottom(line);
-            final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
-            return isVisible(primaryHorizontal + viewportToContentHorizontalOffset(),
-                    lineBottom + viewportToContentVerticalOffset());
-        }
-
         public void onScrollChanged() {
             mScrollHasChanged = true;
         }
+    }
+
+    public boolean isPositionVisible(int positionX, int positionY) {
+        synchronized (sTmpPosition) {
+            final float[] position = sTmpPosition;
+            position[0] = positionX;
+            position[1] = positionY;
+            View view = this;
+
+            while (view != null) {
+                if (view != this) {
+                    // Local scroll is already taken into account in positionX/Y
+                    position[0] -= view.getScrollX();
+                    position[1] -= view.getScrollY();
+                }
+
+                if (position[0] < 0 || position[1] < 0 ||
+                        position[0] > view.getWidth() || position[1] > view.getHeight()) {
+                    return false;
+                }
+
+                if (!view.getMatrix().isIdentity()) {
+                    view.getMatrix().mapPoints(position);
+                }
+
+                position[0] += view.getLeft();
+                position[1] += view.getTop();
+
+                final ViewParent parent = view.getParent();
+                if (parent instanceof View) {
+                    view = (View) parent;
+                } else {
+                    // We've reached the ViewRoot, stop iterating
+                    view = null;
+                }
+            }
+        }
+
+        // We've been able to walk up the view hierarchy and the position was never clipped
+        return true;
+    }
+
+    public boolean isOffsetVisible(int offset) {
+        final int line = mLayout.getLineForOffset(offset);
+        final int lineBottom = mLayout.getLineBottom(line);
+        final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
+        return isPositionVisible(primaryHorizontal + viewportToContentHorizontalOffset(),
+                lineBottom + viewportToContentVerticalOffset());
     }
 
     @Override
@@ -9501,7 +9518,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void updatePosition(int parentPositionX, int parentPositionY,
                 boolean parentPositionChanged, boolean parentScrolled) {
             // Either parentPositionChanged or parentScrolled is true, check if still visible
-            if (isShowing() && getPositionListener().isOffsetVisible(getTextOffset())) {
+            if (isShowing() && isOffsetVisible(getTextOffset())) {
                 if (parentScrolled) computeLocalPosition();
                 updatePosition(parentPositionX, parentPositionY);
             } else {
@@ -10525,7 +10542,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return false;
             }
 
-            return getPositionListener().isVisible(mPositionX + mHotspotX, mPositionY);
+            return TextView.this.isPositionVisible(mPositionX + mHotspotX, mPositionY);
         }
 
         public abstract int getCurrentCursorOffset();
@@ -11507,6 +11524,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Path                    mHighlightPath;
     private boolean                 mHighlightPathBogus = true;
     private static final RectF      sTempRect = new RectF();
+    private static final float[]    sTmpPosition = new float[2];
 
     // XXX should be much larger
     private static final int        VERY_WIDE = 1024*1024;
