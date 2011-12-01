@@ -392,9 +392,16 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             Slog.d(TAG, "FinishSpellCheckerService");
         }
         synchronized(mSpellCheckerMap) {
+            final ArrayList<SpellCheckerBindGroup> removeList =
+                    new ArrayList<SpellCheckerBindGroup>();
             for (SpellCheckerBindGroup group : mSpellCheckerBindGroups.values()) {
                 if (group == null) continue;
-                group.removeListener(listener);
+                // Use removeList to avoid modifying mSpellCheckerBindGroups in this loop.
+                removeList.add(group);
+            }
+            final int removeSize = removeList.size();
+            for (int i = 0; i < removeSize; ++i) {
+                removeList.get(i).removeListener(listener);
             }
         }
     }
@@ -669,6 +676,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
         }
 
+        // cleanLocked may remove elements from mSpellCheckerBindGroups
         private void cleanLocked() {
             if (DBG) {
                 Slog.d(TAG, "cleanLocked");
