@@ -56,6 +56,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private static final String TAG = "GlobalActions";
 
+    private static final boolean SHOW_SILENT_TOGGLE = false;
+
     private final Context mContext;
     private final AudioManager mAudioManager;
 
@@ -187,29 +189,35 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         };
 
-        mItems = Lists.newArrayList(
-                // silent mode
-                mSilentModeToggle,
-                // next: airplane mode
-                mAirplaneModeOn,
-                // last: power off
-                new SinglePressAction(
-                        com.android.internal.R.drawable.ic_lock_power_off,
-                        R.string.global_action_power_off) {
+        mItems = new ArrayList<Action>();
 
-                    public void onPress() {
-                        // shutdown by making sure radio and power are handled accordingly.
-                        ShutdownThread.shutdown(mContext, true);
-                    }
+        // silent mode
+        if (SHOW_SILENT_TOGGLE) {
+            mItems.add(mSilentModeToggle);
+        }
 
-                    public boolean showDuringKeyguard() {
-                        return true;
-                    }
+        // next: airplane mode
+        mItems.add(mAirplaneModeOn);
 
-                    public boolean showBeforeProvisioning() {
-                        return true;
-                    }
-                });
+        // last: power off
+        mItems.add(
+            new SinglePressAction(
+                    com.android.internal.R.drawable.ic_lock_power_off,
+                    R.string.global_action_power_off) {
+
+                public void onPress() {
+                    // shutdown by making sure radio and power are handled accordingly.
+                    ShutdownThread.shutdown(mContext, true);
+                }
+
+                public boolean showDuringKeyguard() {
+                    return true;
+                }
+
+                public boolean showBeforeProvisioning() {
+                    return true;
+                }
+            });
 
         mAdapter = new MyAdapter();
 

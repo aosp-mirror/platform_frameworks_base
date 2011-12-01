@@ -46,6 +46,10 @@ public abstract class KeyguardViewBase extends FrameLayout {
     private KeyguardViewCallback mCallback;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
+    // Whether the volume keys should be handled by keyguard. If true, then
+    // they will be handled here for specific media types such as music, otherwise
+    // the audio service will bring up the volume dialog.
+    private static final boolean KEYGUARD_MANAGES_VOLUME = false;
 
     // This is a faster way to draw the background on devices without hardware acceleration
     Drawable mBackgroundDrawable = new Drawable() {
@@ -203,24 +207,28 @@ public abstract class KeyguardViewBase extends FrameLayout {
                 case KeyEvent.KEYCODE_VOLUME_UP:
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
                 case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                    synchronized (this) {
-                        if (mAudioManager == null) {
-                            mAudioManager = (AudioManager) getContext().getSystemService(
-                                    Context.AUDIO_SERVICE);
+                    if (KEYGUARD_MANAGES_VOLUME) {
+                        synchronized (this) {
+                            if (mAudioManager == null) {
+                                mAudioManager = (AudioManager) getContext().getSystemService(
+                                        Context.AUDIO_SERVICE);
+                            }
                         }
+                        // Volume buttons should only function for music.
+                        if (mAudioManager.isMusicActive()) {
+                            // TODO: Actually handle MUTE.
+                            mAudioManager.adjustStreamVolume(
+                                        AudioManager.STREAM_MUSIC,
+                                        keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                                ? AudioManager.ADJUST_RAISE
+                                                : AudioManager.ADJUST_LOWER,
+                                        0);
+                        }
+                        // Don't execute default volume behavior
+                        return true;
+                    } else {
+                        return false;
                     }
-                    // Volume buttons should only function for music.
-                    if (mAudioManager.isMusicActive()) {
-                        // TODO: Actually handle MUTE.
-                        mAudioManager.adjustStreamVolume(
-                                    AudioManager.STREAM_MUSIC,
-                                    keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                            ? AudioManager.ADJUST_RAISE
-                                            : AudioManager.ADJUST_LOWER,
-                                    0);
-                    }
-                    // Don't execute default volume behavior
-                    return true;
                 }
             }
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
