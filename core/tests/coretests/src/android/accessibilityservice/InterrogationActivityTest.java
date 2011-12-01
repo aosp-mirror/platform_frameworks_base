@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.IAccessibilityManager;
 
 import com.android.frameworks.coretests.R;
 
