@@ -14787,6 +14787,7 @@ package android.os {
     field public static final int FLAG_ONEWAY = 1; // 0x1
     field public static final int INTERFACE_TRANSACTION = 1598968902; // 0x5f4e5446
     field public static final int LAST_CALL_TRANSACTION = 16777215; // 0xffffff
+    field public static final int LIKE_TRANSACTION = 1598835019; // 0x5f4c494b
     field public static final int PING_TRANSACTION = 1599098439; // 0x5f504e47
     field public static final int TWEET_TRANSACTION = 1599362900; // 0x5f545754
   }
