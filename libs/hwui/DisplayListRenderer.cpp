@@ -477,8 +477,9 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint();
-                LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
-                    text.text(), text.length(), count, x, y, paint);
+                float length = getFloat();
+                LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, x, y, paint, length);
             }
             break;
             case ResetShader: {
@@ -837,9 +838,10 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float x = getFloat();
                 float y = getFloat();
                 SkPaint* paint = getPaint();
-                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
-                    text.text(), text.length(), count, x, y, paint);
-                renderer.drawText(text.text(), text.length(), count, x, y, paint);
+                float length = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
+                        OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
+                renderer.drawText(text.text(), text.length(), count, x, y, paint, length);
             }
             break;
             case ResetShader: {
@@ -1196,13 +1198,14 @@ void DisplayListRenderer::drawPoints(float* points, int count, SkPaint* paint) {
 }
 
 void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, SkPaint* paint) {
+        float x, float y, SkPaint* paint, float length) {
     if (count <= 0) return;
     addOp(DisplayList::DrawText);
     addText(text, bytesCount);
     addInt(count);
     addPoint(x, y);
     addPaint(paint);
+    addFloat(length < 0.0f ? paint->measureText(text, bytesCount) : length);
 }
 
 void DisplayListRenderer::resetShader() {

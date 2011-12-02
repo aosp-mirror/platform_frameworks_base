@@ -123,7 +123,7 @@ public:
     virtual void drawLines(float* points, int count, SkPaint* paint);
     virtual void drawPoints(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
-            SkPaint* paint);
+            SkPaint* paint, float length = -1.0f);
 
     virtual void resetShader();
     virtual void setupShader(SkiaShader* shader);
