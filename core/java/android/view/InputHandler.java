@@ -20,24 +20,16 @@ package android.view;
  * Handles input messages that arrive on an input channel.
  * @hide
  */
-public interface InputHandler {
+public class InputHandler {
     /**
-     * Handle a key event.
+     * Handle an input event.
      * It is the responsibility of the callee to ensure that the finished callback is
      * eventually invoked when the event processing is finished and the input system
      * can send the next event.
-     * @param event The key event data.
+     * @param event The input event.
      * @param finishedCallback The callback to invoke when event processing is finished.
      */
-    public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback);
-    
-    /**
-     * Handle a motion event.
-     * It is the responsibility of the callee to ensure that the finished callback is
-     * eventually invoked when the event processing is finished and the input system
-     * can send the next event.
-     * @param event The motion event data.
-     * @param finishedCallback The callback to invoke when event processing is finished.
-     */
-    public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback);
+    public void handleInputEvent(InputEvent event, InputQueue.FinishedCallback finishedCallback) {
+        finishedCallback.finished(false);
+    }
 }

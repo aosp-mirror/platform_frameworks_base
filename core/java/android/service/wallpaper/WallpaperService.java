@@ -18,7 +18,6 @@ package android.service.wallpaper;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.BaseIWindow;
-import com.android.internal.view.BaseInputHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 
 import android.annotation.SdkConstant;
@@ -45,6 +44,7 @@ import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.InputHandler;
 import android.view.InputQueue;
 import android.view.MotionEvent;
@@ -229,15 +229,15 @@ public abstract class WallpaperService extends Service {
             
         };
         
-        final InputHandler mInputHandler = new BaseInputHandler() {
+        final InputHandler mInputHandler = new InputHandler() {
             @Override
-            public void handleMotion(MotionEvent event,
+            public void handleInputEvent(InputEvent event,
                     InputQueue.FinishedCallback finishedCallback) {
                 boolean handled = false;
                 try {
-                    int source = event.getSource();
-                    if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                        dispatchPointer(event);
+                    if (event instanceof MotionEvent
+                            && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                        dispatchPointer((MotionEvent)event);
                         handled = true;
                     }
                 } finally {
