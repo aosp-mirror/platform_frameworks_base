@@ -22,8 +22,6 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.database.ContentObserver;
-import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,7 +35,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
 
-import java.util.Iterator;
 import java.util.HashMap;
 
 /**
@@ -49,11 +46,9 @@ import java.util.HashMap;
 public class AudioManager {
 
     private final Context mContext;
-    private final Handler mHandler;
     private long mVolumeKeyUpTime;
     private int  mVolumeControlStream = -1;
     private static String TAG = "AudioManager";
-    private static boolean localLOGV = false;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -359,7 +354,6 @@ public class AudioManager {
      */
     public AudioManager(Context context) {
         mContext = context;
-        mHandler = new Handler(context.getMainLooper());
     }
 
     private static IAudioService getService()
