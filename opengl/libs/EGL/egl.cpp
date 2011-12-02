@@ -37,7 +37,7 @@
 #include "egldefs.h"
 #include "egl_impl.h"
 #include "egl_tls.h"
-#include "glesv2dbg.h"
+#include "glestrace.h"
 #include "hooks.h"
 #include "Loader.h"
 
@@ -67,7 +67,6 @@ static int sEGLTraceLevel;
 static int sEGLApplicationTraceLevel;
 
 extern gl_hooks_t gHooksTrace;
-extern gl_hooks_t gHooksDebug;
 
 static inline void setGlTraceThreadSpecific(gl_hooks_t const *value) {
     pthread_setspecific(gGLTraceKey, value);
@@ -89,27 +88,17 @@ void initEglTraceLevel() {
     char procPath[128] = {};
     sprintf(procPath, "/proc/%ld/cmdline", pid);
     FILE * file = fopen(procPath, "r");
-    if (file)
-    {
+    if (file) {
         char cmdline[256] = {};
-        if (fgets(cmdline, sizeof(cmdline) - 1, file))
-        {
+        if (fgets(cmdline, sizeof(cmdline) - 1, file)) {
             if (!strcmp(value, cmdline))
                 gEGLDebugLevel = 1;
         }
         fclose(file);
     }
 
-    if (gEGLDebugLevel > 0)
-    {
-        property_get("debug.egl.debug_port", value, "5039");
-        const unsigned short port = (unsigned short)atoi(value);
-        property_get("debug.egl.debug_forceUseFile", value, "0");
-        const bool forceUseFile = (bool)atoi(value);
-        property_get("debug.egl.debug_maxFileSize", value, "8");
-        const unsigned int maxFileSize = atoi(value) << 20;
-        property_get("debug.egl.debug_filePath", value, "/data/local/tmp/dump.gles2dbg");
-        StartDebugServer(port, forceUseFile, maxFileSize, value);
+    if (gEGLDebugLevel > 0) {
+        GLTrace_start();
     }
 }
 
@@ -119,7 +108,7 @@ void setGLHooksThreadSpecific(gl_hooks_t const *value) {
         setGlThreadSpecific(&gHooksTrace);
     } else if (gEGLDebugLevel > 0 && value != &gHooksNoContext) {
         setGlTraceThreadSpecific(value);
-        setGlThreadSpecific(&gHooksDebug);
+        setGlThreadSpecific(GLTrace_getGLHooks());
     } else {
         setGlThreadSpecific(value);
     }

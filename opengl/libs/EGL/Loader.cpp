@@ -28,7 +28,7 @@
 #include <EGL/egl.h>
 
 #include "egldefs.h"
-#include "glesv2dbg.h"
+#include "glestrace.h"
 #include "hooks.h"
 #include "Loader.h"
 
@@ -157,7 +157,7 @@ Loader::Loader()
 
 Loader::~Loader()
 {
-    StopDebugServer();
+    GLTrace_stop();
 }
 
 const char* Loader::getTag(int dpy, int impl)

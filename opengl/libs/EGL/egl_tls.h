@@ -37,7 +37,6 @@ class egl_tls_t {
     EGLint      error;
     EGLContext  ctx;
     EGLBoolean  logCallWithNoContext;
-    DbgContext* dbg;
 
     egl_tls_t();
     static void validateTLSKey();

@@ -37,7 +37,7 @@
 
 #include "egl_impl.h"
 #include "egl_tls.h"
-#include "glesv2dbg.h"
+#include "glestrace.h"
 #include "hooks.h"
 
 #include "egl_display.h"
@@ -112,7 +112,6 @@ extern EGLBoolean egl_init_drivers();
 extern const __eglMustCastToProperFunctionPointerType gExtensionForwarders[MAX_NUMBER_OF_GL_EXTENSIONS];
 extern int gEGLDebugLevel;
 extern gl_hooks_t gHooksTrace;
-extern gl_hooks_t gHooksDebug;
 } // namespace android;
 
 // ----------------------------------------------------------------------------
@@ -516,6 +515,10 @@ EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config,
             }
             egl_context_t* c = new egl_context_t(dpy, context, config,
                     dp->configs[intptr_t(config)].impl, cnx, version);
+#if EGL_TRACE
+            if (gEGLDebugLevel > 0)
+                GLTrace_eglCreateContext(version, c);
+#endif
             return c;
         }
     }
@@ -657,9 +660,10 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         if (ctx != EGL_NO_CONTEXT) {
             setGLHooksThreadSpecific(c->cnx->hooks[c->version]);
             egl_tls_t::setContext(ctx);
-            if (gEGLDebugLevel > 0) {
-                CreateDbgContext(c->version, c->cnx->hooks[c->version]);
-            }
+#if EGL_TRACE
+            if (gEGLDebugLevel > 0)
+                GLTrace_eglMakeCurrent(c->version, c->cnx->hooks[c->version]);
+#endif
             _c.acquire();
             _r.acquire();
             _d.acquire();
@@ -886,6 +890,10 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                 "no more slots for eglGetProcAddress(\"%s\")",
                 procname);
 
+#if EGL_TRACE
+        gl_hooks_t *debugHooks = GLTrace_getGLHooks();
+#endif
+
         if (!addr && (slot < MAX_NUMBER_OF_GL_EXTENSIONS)) {
             bool found = false;
             for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
@@ -896,7 +904,7 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                     cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
                     cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
 #if EGL_TRACE
-                    gHooksDebug.ext.extensions[slot] = gHooksTrace.ext.extensions[slot] =
+                    debugHooks->ext.extensions[slot] = gHooksTrace.ext.extensions[slot] =
 #endif
                             cnx->egl.eglGetProcAddress(procname);
                 }
@@ -924,10 +932,6 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
-    EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw);
-    if (gEGLDebugLevel > 0)
-        Debug_eglSwapBuffers(dpy, draw);
-
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);
@@ -936,6 +940,11 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
     SurfaceRef _s(dp, draw);
     if (!_s.get())
         return setError(EGL_BAD_SURFACE, EGL_FALSE);
+
+#if EGL_TRACE
+    if (gEGLDebugLevel > 0)
+        GLTrace_eglSwapBuffers(dpy, draw);
+#endif
 
     egl_surface_t const * const s = get_surface(draw);
     return s->cnx->egl.eglSwapBuffers(dp->disp[s->impl].dpy, s->surface);
@@ -1162,7 +1171,10 @@ EGLBoolean eglReleaseThread(void)
         }
     }
     egl_tls_t::clearTLS();
-    dbgReleaseThread();
+#if EGL_TRACE
+    if (gEGLDebugLevel > 0)
+        GLTrace_eglReleaseThread();
+#endif
     return EGL_TRUE;
 }
 
