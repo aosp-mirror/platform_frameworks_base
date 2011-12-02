@@ -143,15 +143,15 @@
     <!-- Displayed to tell the user that normal service is blocked by access control. -->
     <string name="RestrictedOnNormal">Voice service is blocked.</string>
     <!-- Displayed to tell the user that all emergency and normal voice services are blocked by access control. -->
-    <string name="RestrictedOnAllVoice">All Voice services are blocked.</string>
+    <string name="RestrictedOnAllVoice">All voice services are blocked.</string>
     <!-- Displayed to tell the user that sms service is blocked by access control. -->
     <string name="RestrictedOnSms">SMS service is blocked.</string>
     <!-- Displayed to tell the user that voice/data service is blocked by access control. -->
-    <string name="RestrictedOnVoiceData">Voice/Data services are blocked.</string>
+    <string name="RestrictedOnVoiceData">Voice/data services are blocked.</string>
     <!-- Displayed to tell the user that voice and sms service are blocked by access control. -->
     <string name="RestrictedOnVoiceSms">Voice/SMS services are blocked.</string>
     <!-- Displayed to tell the user that all service is blocked by access control. -->
-    <string name="RestrictedOnAll">All Voice/Data/SMS services are blocked.</string>
+    <string name="RestrictedOnAll">All voice/data/SMS services are blocked.</string>
 
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
@@ -217,19 +217,19 @@
     <!-- Displayed when a web request was successful. -->
     <string name="httpErrorOk">OK</string>
     <!-- Displayed when a web request failed with a generic network error. -->
-    <string name="httpError">A network error occurred.</string>
+    <string name="httpError">There was a network error.</string>
     <!-- Displayed when a web request failed because the URL could not be found. -->
-    <string name="httpErrorLookup">The URL could not be found.</string>
+    <string name="httpErrorLookup">Couldn\'t find the URL.</string>
     <!-- Displayed when a web request failed because the site's authentication scheme is not supported by us. -->
     <string name="httpErrorUnsupportedAuthScheme">The site authentication scheme isn\'t supported.</string>
     <!-- Displayed when a web request failed because the authentication failed. -->
-    <string name="httpErrorAuth">Authentication was unsuccessful.</string>
+    <string name="httpErrorAuth">Couldn\'t authenticate.</string>
     <!-- Displayed when a web request failed because the authentication with the proxy failed. -->
     <string name="httpErrorProxyAuth">Authentication via the proxy server was unsuccessful.</string>
     <!-- Displayed when a web request failed because there was a connection error. -->
-    <string name="httpErrorConnect">The connection to the server was unsuccessful.</string>
+    <string name="httpErrorConnect">Couldn\'t connect to the server.</string>
     <!-- Displayed when a web request failed because there was an input or output error. -->
-    <string name="httpErrorIO">The server couldn\'t communicate. Try again later.</string>
+    <string name="httpErrorIO">Couldn\'t communicate with the server. Try again later.</string>
     <!-- Displayed when a web request failed because the request timed out -->
     <string name="httpErrorTimeout">The connection to the server timed out.</string>
     <!-- Displayed when a web request failed because the site tried to redirect us one too many times -->
@@ -237,13 +237,13 @@
     <!-- Displayed when a web request failed because the protocol of the server is not supported. -->
     <string name="httpErrorUnsupportedScheme">The protocol isn\'t supported.</string>
     <!-- Displayed when a web request failed because the a secure connection couldn't be made to the server.-->
-    <string name="httpErrorFailedSslHandshake">A secure connection could not be established.</string>
+    <string name="httpErrorFailedSslHandshake">Couldn\'t establish a secure connection.</string>
     <!-- Displayed when a web request failed because the URL isn't in a valid form. -->
-    <string name="httpErrorBadUrl">The page could not be opened because the URL is invalid.</string>
+    <string name="httpErrorBadUrl">Couldn\'t open the page because the URL is invalid.</string>
     <!-- Displayed when a request failed because we failed to open the file. -->
-    <string name="httpErrorFile">The file could not be accessed.</string>
+    <string name="httpErrorFile">Couldn\'t access the file.</string>
     <!-- Displayed when a request failed because the file wasn't found. -->
-    <string name="httpErrorFileNotFound">The requested file was not found.</string>
+    <string name="httpErrorFileNotFound">Couldn\'t find the requested file.</string>
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
 
@@ -252,7 +252,7 @@
     supply an auth token without prompting the user to re-enter the
     password.  This is the text that will scroll through the
     notification bar (will be seen by the user as he uses another application). -->
-    <string name="notification_title">Sign-in error for <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g></string>
+    <string name="notification_title">Signin error for <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g></string>
 
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
@@ -263,9 +263,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc">Too many <xliff:g id="content_type">%s</xliff:g> deletes.</string>
 
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
-    <string name="low_memory" product="tablet">Tablet storage is full! Delete some files to free space.</string>
+    <string name="low_memory" product="tablet">Tablet storage is full. Delete some files to free space.</string>
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
-    <string name="low_memory" product="default">Phone storage is full! Delete some files to free space.</string>
+    <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
@@ -359,8 +359,7 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_costMoney">Allow apps to do things
-        that can cost you money.</string>
+    <string name="permgroupdesc_costMoney">Do things that can cost you money.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_messages">Your messages</string>
@@ -379,12 +378,12 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_location">Your location</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_location">Monitor your physical location</string>
+    <string name="permgroupdesc_location">Monitor your physical location.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_network">Network communication</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_network">Allow apps to access various network features.</string>
+    <string name="permgroupdesc_network">Access various network features.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_accounts">Your accounts</string>
@@ -433,8 +432,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_expandStatusBar">expand/collapse status bar</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_expandStatusBar">Allows the app to
-        expand or collapse the status bar.</string>
+    <string name="permdesc_expandStatusBar">Allows the app to expand or collapse the status bar.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_processOutgoingCalls">intercept outgoing calls</string>
@@ -524,21 +522,21 @@
     <!-- Title of an application permission, allowing an application to remove/kill tasks -->
     <string name="permlab_removeTasks">stop running apps</string>
     <!-- Description of an application permission, allowing an application to remove/kill tasks -->
-    <string name="permdesc_removeTasks">Allows an app to remove
+    <string name="permdesc_removeTasks">Allows the app to remove
         tasks and kill their apps. Malicious apps may disrupt
         the behavior of other apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setDebugApp">enable app debugging</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setDebugApp">Allows an app to turn
+    <string name="permdesc_setDebugApp">Allows the app to turn
         on debugging for another app. Malicious apps may use this
         to kill other apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_changeConfiguration">change your UI settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeConfiguration">Allows an app to
+    <string name="permdesc_changeConfiguration">Allows the app to
         change the current configuration, such as the locale or overall font
         size.</string>
 
@@ -659,7 +657,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_internalSystemWindow">Allows an app to create 
+    <string name="permdesc_internalSystemWindow">Allows the app to create
         windows that are intended to be used by the internal system
         user interface. Not for use by normal apps.</string>
 
@@ -673,7 +671,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setAnimationScale">modify global animation speed</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setAnimationScale">Allows an app to change
+    <string name="permdesc_setAnimationScale">Allows the app to change
         the global animation speed (faster or slower animations) at any time.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -824,7 +822,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_anyCodecForPlayback">use any media decoder for playback</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_anyCodecForPlayback">Allows an application to use any installed
+    <string name="permdesc_anyCodecForPlayback">Allows the app to use any installed
         media decoder to decode for playback.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1017,26 +1015,22 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessSurfaceFlinger">access SurfaceFlinger</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessSurfaceFlinger">Allows the app to use
-        SurfaceFlinger low-level features.</string>
+    <string name="permdesc_accessSurfaceFlinger">Allows the app to use SurfaceFlinger low-level features.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readFrameBuffer">read frame buffer</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readFrameBuffer">Allows the app to
-        read the content of the frame buffer.</string>
+    <string name="permdesc_readFrameBuffer">Allows the app to read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyAudioSettings">Allows the app to modify
-        global audio settings such as volume and routing.</string>
+    <string name="permdesc_modifyAudioSettings">Allows the app to modify global audio settings such as volume and routing.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_recordAudio">record audio</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_recordAudio">Allows the app to access
-        the audio record path.</string>
+    <string name="permdesc_recordAudio">Allows the app to access the audio record path.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_camera">take pictures and videos</string>
@@ -1061,11 +1055,9 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_reboot" product="default">force phone reboot</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot" product="tablet">Allows the app to
-        force the tablet to reboot.</string>
+    <string name="permdesc_reboot" product="tablet">Allows the app to force the tablet to reboot.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot" product="default">Allows the app to
-        force the phone to reboot.</string>
+    <string name="permdesc_reboot" product="default">Allows the app to force the phone to reboot.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_mount_unmount_filesystems">mount and unmount filesystems</string>
@@ -1106,14 +1098,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibrator</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_vibrate">Allows the app to control
-        the vibrator.</string>
+    <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_flashlight">control flashlight</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_flashlight">Allows the app to control
-        the flashlight.</string>
+    <string name="permdesc_flashlight">Allows the app to control the flashlight.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_manageUsb">manage preferences and permissions for USB devices</string>
@@ -1197,11 +1187,9 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent
-        the tablet from going to sleep.</string>
+    <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent the tablet from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_wakeLock" product="default">Allows the app to prevent
-        the phone from going to sleep.</string>
+    <string name="permdesc_wakeLock" product="default">Allows the app to prevent the phone from going to sleep.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_devicePower" product="tablet">power tablet on or off</string>
@@ -1211,8 +1199,7 @@
     <string name="permdesc_devicePower" product="tablet">Allows the app to turn the
         tablet on or off.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_devicePower" product="default">Allows the app to turn the
-        phone on or off.</string>
+    <string name="permdesc_devicePower" product="default">Allows the app to turn the phone on or off.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_factoryTest">run in factory test mode</string>
@@ -1259,16 +1246,14 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accountManagerService">act as the AccountManagerService</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accountManagerService">Allows an app to make calls to AccountAuthenticators.</string>
+    <string name="permdesc_accountManagerService">Allows the app to make calls to AccountAuthenticators.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getAccounts">discover known accounts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_getAccounts" product="tablet">Allows the app to get
-      the list of accounts known by the tablet.</string>
+    <string name="permdesc_getAccounts" product="tablet">Allows the app to get the list of accounts known by the tablet.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_getAccounts" product="default">Allows the app to get
-      the list of accounts known by the phone.</string>
+    <string name="permdesc_getAccounts" product="default">Allows the app to get the list of accounts known by the phone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_authenticateAccounts">act as an account authenticator</string>
@@ -1352,11 +1337,9 @@
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
 
     <string name="permlab_accessWimaxState">View WiMAX state</string>
-    <string name="permdesc_accessWimaxState">Allows an application to view
-      the information about the state of WiMAX.</string>
+    <string name="permdesc_accessWimaxState">Allows the app to view the information about the state of WiMAX.</string>
     <string name="permlab_changeWimaxState">Change WiMAX state</string>
-    <string name="permdesc_changeWimaxState">Allows an application to connect
-      to and disconnect from WiMAX network.</string>
+    <string name="permdesc_changeWimaxState">Allows the app to connect to and disconnect from WiMAX network.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">create Bluetooth connections</string>
@@ -1461,14 +1444,14 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyNetworkAccounting">modify network usage accounting</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyNetworkAccounting">Allows an app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
+    <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
 
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
     <string name="policylab_limitPassword">Set password rules</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_limitPassword">Control the length and the characters allowed in screen-unlock passwords</string>
+    <string name="policydesc_limitPassword">Control the length and the characters allowed in screen-unlock passwords.</string>
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
@@ -1482,19 +1465,17 @@
     <!-- Title of policy access to reset user's password -->
     <string name="policylab_resetPassword">Change the screen-unlock password</string>
     <!-- Description of policy access to reset user's password -->
-    <string name="policydesc_resetPassword">Change the screen-unlock password</string>
+    <string name="policydesc_resetPassword">Change the screen-unlock password.</string>
     <!-- Title of policy access to force lock the device -->
     <string name="policylab_forceLock">Lock the screen</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_forceLock">Control how and when the screen locks</string>
+    <string name="policydesc_forceLock">Control how and when the screen locks.</string>
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning,
-    by performing a factory data reset</string>
+    <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning,
-    by performing a factory data reset</string>
+    <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning by performing a factory data reset.</string>
     <string name="policylab_setGlobalProxy">Set the device global proxy</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_setGlobalProxy">Set the device global proxy
@@ -1503,17 +1484,15 @@
     <!-- Title of policy access to enforce password expiration [CHAR LIMIT=30]-->
     <string name="policylab_expirePassword">Set lock-screen password expiration</string>
     <!-- Description of policy access to enforce password expiration [CHAR LIMIT=110]-->
-    <string name="policydesc_expirePassword">Control how frequently the lock-screen password must be
-  changed</string>
+    <string name="policydesc_expirePassword">Control how frequently the lock-screen password must be changed.</string>
     <!-- Title of policy access to require encrypted storage [CHAR LIMIT=30]-->
     <string name="policylab_encryptedStorage">Set storage encryption</string>
     <!-- Description of policy access to require encrypted storage [CHAR LIMIT=110]-->
-    <string name="policydesc_encryptedStorage">Require that stored app data be encrypted
-        </string>
+    <string name="policydesc_encryptedStorage">Require that stored app data be encrypted.</string>
     <!-- Title of policy access to disable all device cameras [CHAR LIMIT=30]-->
     <string name="policylab_disableCamera">Disable cameras</string>
     <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
-    <string name="policydesc_disableCamera">Prevent use of all device cameras</string>
+    <string name="policydesc_disableCamera">Prevent use of all device cameras.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
@@ -1751,7 +1730,7 @@
 
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
-    <string name="keyguard_password_wrong_pin_code">Incorrect PIN code!</string>
+    <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
     <!-- Instructions telling the user how to unlock the phone. -->
     <string name="keyguard_label_text">To unlock, press Menu then 0.</string>
@@ -1932,9 +1911,9 @@
     <string name="lockscreen_glogin_forgot_pattern">Account unlock</string>
     <!-- Title of the unlock screen that uses your Google login and password when the user attempted
          too many patterns and we are forcing them to use their account instead. -->
-    <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts!</string>
+    <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts</string>
     <!-- In the unlock screen, message telling the user that they need to use their Google login and password to unlock the phone -->
-    <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account</string>
+    <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account.</string>
     <!-- Hint caption for the username field when unlocking the phone using login and password -->
     <string name="lockscreen_glogin_username_hint">Username (email)</string>
     <!-- Hint caption for the password field when unlocking the phone using login and password -->
@@ -1944,10 +1923,10 @@
     <!-- Displayed to the user when unlocking the phone with a username and password fails. -->
     <string name="lockscreen_glogin_invalid_input">Invalid username or password.</string>
     <!-- Hint displayed on account unlock screen to advise the user on how to recover the account. -->
-    <string name="lockscreen_glogin_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b>.</string>
 
     <!-- Displayed in a progress dialog while a username and password are being checked. -->
-    <string name="lockscreen_glogin_checking_password">Checking...</string>
+    <string name="lockscreen_glogin_checking_password">Checking\u2026</string>
     <!-- Displayed on lock screen's left tab - unlock -->
     <string name="lockscreen_unlock_label">Unlock</string>
     <!-- Displayed on lock screen's right tab - turn sound on -->
@@ -1996,7 +1975,7 @@
     <string name="web_user_agent_target_content" translatable="false">"Mobile "</string>
 
     <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
-    <string name="js_dialog_title">The page at \'<xliff:g id="title">%s</xliff:g>\' says:</string>
+    <string name="js_dialog_title">The page at \"<xliff:g id="title">%s</xliff:g>\" says:</string>
     <!-- Default title for a javascript dialog -->
     <string name="js_dialog_title_default">JavaScript</string>
     <!-- Message in a javascript dialog asking if the user wishes to leave the
@@ -2010,9 +1989,9 @@
     <string name="double_tap_toast">Tip: Double-touch to zoom in and out.</string>
 
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8] -->
-    <string name="autofill_this_form">AutoFill</string>
+    <string name="autofill_this_form">Autofill</string>
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=16] -->
-    <string name="setup_autofill">Setup AutoFill</string>
+    <string name="setup_autofill">Set up Autofill</string>
 
     <!-- String used to separate FirstName and LastName when writing out a local name
          e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->
@@ -2439,11 +2418,11 @@
 
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
-    <string name="VideoView_error_title">Can\'t play video</string>
+    <string name="VideoView_error_title">Video problem</string>
     <!-- Text for error alert when a video container is not valid for progressive download/playback. -->
     <string name="VideoView_error_text_invalid_progressive_playback">This video isn\'t valid for streaming to this device.</string>
     <!-- Text for error alert when a video cannot be played. it can be used by any app. -->
-    <string name="VideoView_error_text_unknown">This video can\'t be played.</string>
+    <string name="VideoView_error_text_unknown">Can\'t play this video.</string>
     <!-- Button to close error alert when a video cannot be played -->
     <string name="VideoView_error_button">OK</string>
 
@@ -2554,7 +2533,7 @@
     <!-- Text displayed when the user selects the check box for setting default application.  See the "Use by default for this action" check box. -->
     <string name="clearDefaultHintMsg">Clear default in System settings &gt; Apps &gt; Downloaded.</string>
     <!-- Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing him to pick which activity should be used.  This is the title. -->
-    <string name="chooseActivity">Select an action</string>
+    <string name="chooseActivity">Choose an action</string>
     <!-- title for the USB activity chooser. -->
     <string name="chooseUsbActivity">Choose an app for the USB device</string>
     <!-- Text to display when there are no activities found to display in the
@@ -2640,7 +2619,7 @@
          is to be sent to another application. For example, I can send
          text through SMS or IM.  A dialog with those choices would be shown,
          and this would be the title. -->
-    <string name="sendText">Select an action for text</string>
+    <string name="sendText">Choose an action for text</string>
 
     <!-- Title of the dialog where the user is adjusting the phone ringer volume -->
     <string name="volume_ringtone">Ringer volume</string>
@@ -2649,7 +2628,7 @@
     <!-- Hint shown in the volume toast to inform the user that the media audio is playing through Bluetooth. -->
     <string name="volume_music_hint_playing_through_bluetooth">Playing through Bluetooth</string>
     <!-- Hint shown in the volume toast to inform the user that the current ringtone is the silent ringtone. -->
-    <string name="volume_music_hint_silent_ringtone_selected">Silent ringtone selected</string>
+    <string name="volume_music_hint_silent_ringtone_selected">Silent ringtone set</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume -->
     <string name="volume_call">In-call volume</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume when connected on bluetooth-->
@@ -2696,7 +2675,7 @@
     </plurals>
 
     <!-- A notification is shown when a captive portal network is detected.  This is the notification's title. -->
-    <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
+    <string name="wifi_available_sign_in">Sign into Wi-Fi network</string>
 
     <!-- A notification is shown when a captive portal network is detected.  This is the notification's message. -->
     <string name="wifi_available_sign_in_detailed"><xliff:g id="wifi_network_ssid">%1$s</xliff:g></string>
@@ -2704,15 +2683,15 @@
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
      <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  The complete alert msg is: <hotspot name> + this string, i.e. "Linksys has a poor internet connection" -->
-    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor internet connection.</string>
+    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor Internet connection.</string>
 
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
 
     <!-- Wi-Fi p2p dialog title-->
     <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
-    <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct operation. This will turn off Wi-Fi client/hotspot operation.</string>
-    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct</string>
+    <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
+    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>
 
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
@@ -2721,7 +2700,7 @@
 
     <string name="wifi_p2p_from_message">From: </string>
     <string name="wifi_p2p_to_message">To: </string>
-    <string name="wifi_p2p_enter_pin_message">Enter the required PIN: </string>
+    <string name="wifi_p2p_enter_pin_message">Type the required PIN: </string>
     <string name="wifi_p2p_show_pin_message">PIN: </string>
 
     <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
@@ -2752,7 +2731,7 @@
     <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
     <string name="sim_added_title">SIM card added</string>
     <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_added_message">You must restart your device to access the mobile network.</string>
+    <string name="sim_added_message">Restart your device to access the mobile network.</string>
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_restart_button">Restart</string>
 
@@ -2779,47 +2758,47 @@
 
     <!-- USB storage dialog strings -->
     <!-- This is the title for the activity's window. -->
-    <string name="usb_storage_activity_title">USB Mass Storage</string>
+    <string name="usb_storage_activity_title">USB mass storage</string>
 
     <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
     <string name="usb_storage_title">USB connected</string>
     <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="nosdcard">You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
+    <string name="usb_storage_message" product="nosdcard">You\'ve connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\'s USB storage.</string>
     <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="default">You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
+    <string name="usb_storage_message" product="default">You\'ve connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\'s SD card.</string>
     <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
     <string name="usb_storage_button_mount">Turn on USB storage</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_error_message" product="nosdcard">There is a problem using your USB storage for USB mass storage.</string>
+    <string name="usb_storage_error_message" product="nosdcard">There\'s a problem using your USB storage for USB mass storage.</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
-    <string name="usb_storage_error_message" product="default">There is a problem using your SD card for USB mass storage.</string>
+    <string name="usb_storage_error_message" product="default">There\'s a problem using your SD card for USB mass storage.</string>
     <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
     <!-- See USB_STORAGE. This is the message. -->
-    <string name="usb_storage_notification_message">Select to copy files to/from your computer.</string>
+    <string name="usb_storage_notification_message">Touch to copy files to/from your computer.</string>
 
     <!-- USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title -->
     <string name="usb_storage_stop_notification_title">Turn off USB storage</string>
     <!-- See USB_STORAGE. This is the message. -->
-    <string name="usb_storage_stop_notification_message">Select to turn off USB storage.</string>
+    <string name="usb_storage_stop_notification_message">Touch to turn off USB storage.</string>
 
     <!-- USB storage stop dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
     <!-- See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title. -->
     <string name="usb_storage_stop_title">USB storage in use</string>
     <!-- See USB_STORAGE_STOP.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_stop_message" product="nosdcard">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s USB storage from your computer.</string>
+    <string name="usb_storage_stop_message" product="nosdcard">Before turning off USB storage, unmount (\"eject\") your Android\'s USB storage from your computer.</string>
     <!-- See USB_STORAGE_STOP.    This is the message. -->
-    <string name="usb_storage_stop_message" product="default">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s SD card from your computer.</string>
+    <string name="usb_storage_stop_message" product="default">Before turning off USB storage, unmount (\"eject\") your Android\'s SD card from your computer.</string>
     <!-- See USB_STORAGE_STOP.    This is the button text to stop usb storage. -->
     <string name="usb_storage_stop_button_mount">Turn off USB storage</string>
     <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
-    <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+    <string name="usb_storage_stop_error_message">There was a problem turning off USB storage. Check that you\'ve unmounted the USB host, then try again.</string>
 
     <!-- USB_STORAGE_KILL_STORAGE_USERS dialog  -->
     <string name="dlg_confirm_kill_storage_users_title">Turn on USB storage</string>
     <!-- USB_STORAGE_KILL_STORAGE_USERS dialog message text -->
-    <string name="dlg_confirm_kill_storage_users_text">If you turn on USB storage, some apps you are using will stop and may be unavailable until you turn off USB storage.</string>
+    <string name="dlg_confirm_kill_storage_users_text">If you turn on USB storage, some apps you\'re using will stop and may be unavailable until you turn off USB storage.</string>
     <!-- USB_STORAGE_ERROR dialog  dialog-->
     <string name="dlg_error_title">USB operation unsuccessful</string>
     <!-- USB_STORAGE_ERROR dialog  ok button-->
@@ -2834,7 +2813,7 @@
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
     <!-- See USB_PREFERENCES. This is the message. -->
-    <string name="usb_notification_message">Touch for other USB options</string>
+    <string name="usb_notification_message">Touch for other USB options.</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
@@ -2883,16 +2862,16 @@
     <!-- Shown when external media is blank (or unsupported filesystem) -->
     <string name="ext_media_nofs_notification_title" product="default">Blank SD card</string>
     <!-- Shown when USB storage cannot be read.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_nofs_notification_message" product="nosdcard">USB storage blank or has unsupported filesystem.</string>
-    <string name="ext_media_nofs_notification_message" product="default">SD card blank or has unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard">USB storage is blank or has unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_message" product="default">SD card is blank or has unsupported filesystem.</string>
 
     <!-- Shown when external media is unmountable (corrupt)) [CHAR LIMIT=30] -->
     <string name="ext_media_unmountable_notification_title" product="nosdcard">Damaged USB storage</string>
     <!-- Shown when external media is unmountable (corrupt)) -->
     <string name="ext_media_unmountable_notification_title" product="default">Damaged SD card</string>
     <!-- Shown when USB storage cannot be read.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmountable_notification_message" product="nosdcard">USB storage damaged. You may have to reformat it.</string>
-    <string name="ext_media_unmountable_notification_message" product="default">SD card damaged. You may have to reformat it.</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard">USB storage is damaged. Try reformatting it.</string>
+    <string name="ext_media_unmountable_notification_message" product="default">SD card is damaged. Try reformatting it.</string>
 
     <!-- Shown when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title" product="nosdcard">USB storage unexpectedly removed</string>
@@ -2919,7 +2898,7 @@
     <string name="ext_media_nomedia_notification_message" product="default">SD card removed. Insert a new one.</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
-    <string name="activity_list_empty">No matching activities found</string>
+    <string name="activity_list_empty">No matching activities found.</string>
 
     <!-- permission attributes related to package usage statistics -->
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2939,7 +2918,7 @@
 
     <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
     the gadget. -->
-    <string name="gadget_host_error_inflating">Error inflating widget</string>
+    <string name="gadget_host_error_inflating">Couldn\'t add widget.</string>
 
     <!-- Long label for a button on a full-screen input method for the "Go" action. -->
     <string name="ime_action_go">Go</string>
@@ -2981,11 +2960,11 @@
 
     <string name="grant_credentials_permission_message_header">The following one or more apps request permission to access your account, now and in the future.</string>
     <string name="grant_credentials_permission_message_footer">Do you want to allow this request?</string>
-    <string name="grant_permissions_header_text">Access Request</string>
+    <string name="grant_permissions_header_text">Access request</string>
     <string name="allow">Allow</string>
     <string name="deny">Deny</string>
-    <string name="permission_request_notification_title">Permission Requested</string>
-    <string name="permission_request_notification_with_subtitle">Permission Requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
+    <string name="permission_request_notification_title">Permission requested</string>
+    <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
 
     <!-- Label to show for a service that is running because it is an input method. -->
     <string name="input_method_binding_label">Input method</string>
@@ -3002,13 +2981,13 @@
     <string name="alternate_eri_file">/data/eri.xml</string>
 
     <!-- The title of the notification when VPN is active. -->
-    <string name="vpn_title">VPN is activated.</string>
+    <string name="vpn_title">VPN activated</string>
     <!-- The title of the notification when VPN is active with an application name. -->
     <string name="vpn_title_long">VPN is activated by <xliff:g id="app" example="FooVPN client">%s</xliff:g></string>
     <!-- The text of the notification when VPN is active. -->
-    <string name="vpn_text">Tap to manage the network.</string>
+    <string name="vpn_text">Touch to manage the network.</string>
     <!-- The text of the notification when VPN is active with a session name. -->
-    <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Tap to manage the network.</string>
+    <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Touch to manage the network.</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
@@ -3023,12 +3002,12 @@
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->
     <string name="car_mode_disable_notification_title">Car mode enabled</string>
-    <string name="car_mode_disable_notification_message">Select to exit car mode.</string>
+    <string name="car_mode_disable_notification_message">Touch to exit car mode.</string>
 
     <!-- Strings for tethered notification -->
     <!-- Shown when the device is tethered -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
-    <string name="tethered_notification_message">Touch to configure</string>
+    <string name="tethered_notification_message">Touch to set up.</string>
 
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
@@ -3040,12 +3019,12 @@
     <!-- Strings for throttling notification -->
     <!-- Shown when the user is in danger of being throttled -->
     <string name="throttle_warning_notification_title">High mobile data use</string>
-    <string name="throttle_warning_notification_message">Touch to learn more about mobile data use</string>
+    <string name="throttle_warning_notification_message">Touch to learn more about mobile data use.</string>
 
     <!-- Strings for throttling notification -->
     <!-- Shown when the users bandwidth is reduced because of excessive data use -->
     <string name="throttled_notification_title">Mobile data limit exceeded</string>
-    <string name="throttled_notification_message">Touch to learn more about mobile data use</string>
+    <string name="throttled_notification_message">Touch to learn more about mobile data use.</string>
 
     <!-- Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]-->
     <string name="no_matches">No matches</string>
@@ -3067,13 +3046,13 @@
 
     <!-- Strings for ExternalStorageFormatter service. -->
     <!-- Text for progress dialog while unmounting USB storage volume [CHAR LIMIT=NONE] -->
-    <string name="progress_unmounting" product="nosdcard">Unmounting USB storage...</string>
+    <string name="progress_unmounting" product="nosdcard">Unmounting USB storage\u2026</string>
     <!-- Text for progress dialog while unmounting SD card [CHAR LIMIT=NONE] -->
-    <string name="progress_unmounting" product="default">Unmounting SD card...</string>
+    <string name="progress_unmounting" product="default">Unmounting SD card\u2026</string>
     <!-- Text for progress dialog while erasing USB storage volume [CHAR LIMIT=NONE] -->
-    <string name="progress_erasing" product="nosdcard">Erasing USB storage...</string>
+    <string name="progress_erasing" product="nosdcard">Erasing USB storage\u2026</string>
     <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->
-    <string name="progress_erasing" product="default">Erasing SD card...</string>
+    <string name="progress_erasing" product="default">Erasing SD card\u2026</string>
     <!-- Text for message to user that an error happened when formatting USB storage [CHAR LIMIT=NONE] -->
     <string name="format_error" product="nosdcard">Couldn\'t erase USB storage.</string>
     <!-- Text for message to user that an error happened when formatting SD card [CHAR LIMIT=NONE] -->
@@ -3120,19 +3099,19 @@
     <!-- Error message when the sync tried to delete too many things -->
     <string name="sync_too_many_deletes">Delete limit exceeded</string>
     <!-- Dialog message for when there are too many deletes that would take place and we want user confirmation -->
-    <string name="sync_too_many_deletes_desc">There are <xliff:g id="number_of_deleted_items">%1$d</xliff:g> deleted items for <xliff:g id="type_of_sync">%2$s</xliff:g>, account <xliff:g id="account_name">%3$s</xliff:g>. What would you like to do?</string>
+    <string name="sync_too_many_deletes_desc">There are <xliff:g id="number_of_deleted_items">%1$d</xliff:g> deleted items for <xliff:g id="type_of_sync">%2$s</xliff:g>, account <xliff:g id="account_name">%3$s</xliff:g>. What do you want to do?</string>
     <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to delete the items -->
-    <string name="sync_really_delete">Delete the items.</string>
+    <string name="sync_really_delete">Delete the items</string>
     <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to undo the deletions -->
-    <string name="sync_undo_deletes">Undo the deletes.</string>
+    <string name="sync_undo_deletes">Undo the deletes</string>
     <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to do nothing for now -->
-    <string name="sync_do_nothing">Do nothing for now.</string>
+    <string name="sync_do_nothing">Do nothing for now</string>
 
     <!-- Choose Account Activity label -->
     <string name="choose_account_label">Choose an account</string>
 
     <string name="add_account_label">"Add an account"</string>
-    <string name="choose_account_text">"Which account would you like to use?"</string>
+    <string name="choose_account_text">"Which account do you want to use?"</string>
 
     <!-- Button label to add an account [CHAR LIMIT=20] -->
     <string name="add_account_button_label">Add account</string>
@@ -3143,7 +3122,7 @@
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
     <!-- Description of the tap and hold action to get into scroll mode in NumberPicker. [CHAR LIMIT=NONE] -->
-    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> tap and hold.</string>
+    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> touch and hold.</string>
     <!-- Description of the scrolling action in NumberPicker. [CHAR LIMIT=NONE] -->
     <string name="number_picker_increment_scroll_action">Slide up to increment and down to decrement.</string>
 
@@ -3252,7 +3231,7 @@
     <string name="description_target_unlock_tablet">Swipe to unlock.</string>
 
     <!-- Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE] -->
-    <string name="keyboard_headset_required_to_hear_password">Plug in a headset to hear password keys spoken aloud.</string>
+    <string name="keyboard_headset_required_to_hear_password">Plug in a headset to hear password keys spoken.</string>
     <!-- The value of a keyboard key announced when accessibility is enabled and no headsed is used. [CHAR LIMIT=NONE] -->
     <string name="keyboard_password_character_no_headset">Dot.</string>
 
@@ -3264,21 +3243,21 @@
     <string name="action_menu_overflow_description">More options</string>
 
     <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
-    <string name="storage_internal">Internal Storage</string>
+    <string name="storage_internal">Internal storage</string>
 
     <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
-    <string name="storage_sd_card">SD Card</string>
+    <string name="storage_sd_card">SD card</string>
 
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>
 
     <!-- Button text for the edit menu in input method extract mode. [CHAR LIMIT=16] -->
-    <string name="extract_edit_menu_button">Edit...</string>
+    <string name="extract_edit_menu_button">Edit</string>
 
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_warning_title">Data usage warning</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_body">Touch to view usage and settings</string>
+    <string name="data_usage_warning_body">Touch to view usage and settings.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_title">2G-3G data disabled</string>
@@ -3289,7 +3268,7 @@
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_title">Wi-Fi data disabled</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_body">Touch to enable</string>
+    <string name="data_usage_limit_body">Touch to enable.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
@@ -3300,12 +3279,12 @@
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_wifi_limit_snoozed_title">Wi-Fi data limit exceeded</string>
     <!-- Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_snoozed_body"><xliff:g id="size" example="3.8GB">%s</xliff:g> over specified limit</string>
+    <string name="data_usage_limit_snoozed_body"><xliff:g id="size" example="3.8GB">%s</xliff:g> over specified limit.</string>
 
     <!-- Notification title when background data usage is limited. [CHAR LIMIT=32] -->
     <string name="data_usage_restricted_title">Background data restricted</string>
     <!-- Notification body when background data usage is limited. [CHAR LIMIT=32] -->
-    <string name="data_usage_restricted_body">Touch to remove restriction</string>
+    <string name="data_usage_restricted_body">Touch to remove restriction.</string>
 
     <!-- SSL Certificate dialogs -->
     <!-- Title for an SSL Certificate dialog -->
@@ -3354,12 +3333,12 @@
     <string name="list_delimeter">", "</string>
 
     <!-- STK sending DTMF, SMS, USSD, SS -->
-    <string name="sending">Sending...</string>
+    <string name="sending">Sending\u2026</string>
 
     <!-- STK launch Browser -->
     <string name="launchBrowserDefault">Launch Browser?</string>
 
     <!-- STK setup Call -->
-    <string name="SetupCallDefault">Accept Call?</string>
+    <string name="SetupCallDefault">Accept call?</string>
 
 </resources>
