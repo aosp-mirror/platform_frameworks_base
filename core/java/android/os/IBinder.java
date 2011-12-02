@@ -128,6 +128,19 @@ public interface IBinder {
     int TWEET_TRANSACTION   = ('_'<<24)|('T'<<16)|('W'<<8)|'T';
 
     /**
+     * IBinder protocol transaction code: tell an app asynchronously that the
+     * caller likes it.  The app is responsible for incrementing and maintaining
+     * its own like counter, and may display this value to the user to indicate the
+     * quality of the app.  This is an optional command that applications do not
+     * need to handle, so the default implementation is to do nothing.
+     * 
+     * <p>There is no response returned and nothing about the
+     * system will be functionally affected by it, but it will improve the
+     * app's self-esteem.
+     */
+    int LIKE_TRANSACTION   = ('_'<<24)|('L'<<16)|('I'<<8)|'K';
+
+    /**
      * Flag to {@link #transact}: this is a one-way call, meaning that the
      * caller returns immediately, without waiting for a result from the
      * callee. Applies only if the caller and callee are in different
