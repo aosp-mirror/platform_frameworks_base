@@ -2063,7 +2063,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 }
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
-        float x, float y, SkPaint* paint) {
+        float x, float y, SkPaint* paint, float length) {
     if (text == NULL || count == 0) {
         return;
     }
@@ -2080,18 +2080,24 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 #endif
 
-    float length = -1.0f;
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
-            length = paint->measureText(text, bytesCount);
+            if (length < 0.0f) length = paint->measureText(text, bytesCount);
             x -= length / 2.0f;
             break;
         case SkPaint::kRight_Align:
-            length = paint->measureText(text, bytesCount);
+            if (length < 0.0f) length = paint->measureText(text, bytesCount);
             x -= length;
             break;
         default:
             break;
+    }
+
+    SkPaint::FontMetrics metrics;
+    paint->getFontMetrics(&metrics, 0.0f);
+    if (quickReject(x, y + metrics.fTop,
+            x + (length >= 0.0f ? length : INT_MAX / 2), y + metrics.fBottom)) {
+        return;
     }
 
     const float oldX = x;
