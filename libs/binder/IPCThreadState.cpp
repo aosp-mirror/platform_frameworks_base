@@ -773,6 +773,7 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
         bwr.read_buffer = (long unsigned int)mIn.data();
     } else {
         bwr.read_size = 0;
+        bwr.read_buffer = 0;
     }
 
     IF_LOG_COMMANDS() {
