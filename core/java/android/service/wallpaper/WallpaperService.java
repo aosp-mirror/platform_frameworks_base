@@ -45,8 +45,7 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputHandler;
-import android.view.InputQueue;
+import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -228,24 +227,29 @@ public abstract class WallpaperService extends Service {
             }
             
         };
-        
-        final InputHandler mInputHandler = new InputHandler() {
+
+        final class WallpaperInputEventReceiver extends InputEventReceiver {
+            public WallpaperInputEventReceiver(InputChannel inputChannel, Looper looper) {
+                super(inputChannel, looper);
+            }
+
             @Override
-            public void handleInputEvent(InputEvent event,
-                    InputQueue.FinishedCallback finishedCallback) {
+            public void onInputEvent(InputEvent event) {
                 boolean handled = false;
                 try {
                     if (event instanceof MotionEvent
                             && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                        dispatchPointer((MotionEvent)event);
+                        MotionEvent dup = MotionEvent.obtainNoHistory((MotionEvent)event);
+                        dispatchPointer(dup);
                         handled = true;
                     }
                 } finally {
-                    finishedCallback.finished(handled);
+                    finishInputEvent(event, handled);
                 }
             }
-        };
-        
+        }
+        WallpaperInputEventReceiver mInputEventReceiver;
+
         final BaseIWindow mWindow = new BaseIWindow() {
             @Override
             public void resized(int w, int h, Rect coveredInsets,
@@ -534,6 +538,8 @@ public abstract class WallpaperService extends Service {
                 }
                 Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
                 mCaller.sendMessage(msg);
+            } else {
+                event.recycle();
             }
         }
 
@@ -599,8 +605,8 @@ public abstract class WallpaperService extends Service {
                         }
                         mCreated = true;
 
-                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                                Looper.myQueue());
+                        mInputEventReceiver = new WallpaperInputEventReceiver(
+                                mInputChannel, Looper.myLooper());
                     }
                     
                     mSurfaceHolder.mSurfaceLock.lock();
@@ -902,8 +908,9 @@ public abstract class WallpaperService extends Service {
                     if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
                             + mSurfaceHolder.getSurface() + " of: " + this);
                     
-                    if (mInputChannel != null) {
-                        InputQueue.unregisterInputChannel(mInputChannel);
+                    if (mInputEventReceiver != null) {
+                        mInputEventReceiver.dispose();
+                        mInputEventReceiver = null;
                     }
                     
                     mSession.remove(mWindow);
@@ -970,6 +977,8 @@ public abstract class WallpaperService extends Service {
         public void dispatchPointer(MotionEvent event) {
             if (mEngine != null) {
                 mEngine.dispatchPointer(event);
+            } else {
+                event.recycle();
             }
         }
 

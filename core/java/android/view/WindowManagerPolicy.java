@@ -340,7 +340,8 @@ public interface WindowManagerPolicy {
          * Add a fake window to the window manager.  This window sits
          * at the top of the other windows and consumes events.
          */
-        public FakeWindow addFakeWindow(Looper looper, InputHandler inputHandler,
+        public FakeWindow addFakeWindow(Looper looper,
+                InputEventReceiver.Factory inputEventReceiverFactory,
                 String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
                 boolean hasFocus, boolean touchFullscreen);
     }
