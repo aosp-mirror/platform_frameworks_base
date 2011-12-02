@@ -25,10 +25,12 @@
 #include "MtpDataPacket.h"
 #include "MtpStringBuffer.h"
 
+#define MTP_BUFFER_SIZE 16384
+
 namespace android {
 
 MtpDataPacket::MtpDataPacket()
-    :   MtpPacket(16384),   // MAX_USBFS_BUFFER_SIZE
+    :   MtpPacket(MTP_BUFFER_SIZE),   // MAX_USBFS_BUFFER_SIZE
         mOffset(MTP_CONTAINER_HEADER_SIZE)
 {
 }
@@ -345,7 +347,7 @@ void MtpDataPacket::putString(const uint16_t* string) {
 
 #ifdef MTP_DEVICE 
 int MtpDataPacket::read(int fd) {
-    int ret = ::read(fd, mBuffer, mBufferSize);
+    int ret = ::read(fd, mBuffer, MTP_BUFFER_SIZE);
     if (ret < MTP_CONTAINER_HEADER_SIZE)
         return -1;
     mPacketSize = ret;
