@@ -479,6 +479,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/TicTacToeLib "TicTacToeLib" \
 		-samplecode $(sample_dir)/TicTacToeMain \
 		            resources/samples/TicTacToeMain "TicTacToeMain" \
+		-samplecode $(sample_dir)/ToyVpn \
+		            resources/samples/ToyVpn "Toy VPN Client" \
 		-samplecode $(sample_dir)/USB \
 		            resources/samples/USB "USB" \
 		-samplecode $(sample_dir)/WeatherListWidget \

@@ -718,6 +718,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'communication', 'new'],
+    path: 'samples/ToyVpn/index.html',
+    title: {
+      en: 'Toy VPN Client'
+    },
+    description: {
+      en: 'A sample application that illustrates the creation of a custom VPN client.'
+    }
+  },
+  {
     tags: ['sample', 'newfeature'],
     path: 'samples/USB/index.html',
     title: {
