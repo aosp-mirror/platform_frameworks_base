@@ -522,11 +522,12 @@ class ZoomManager {
     }
 
     public void updateDoubleTapZoom(int doubleTapZoom) {
-        if (mInZoomOverview) {
-            mDoubleTapZoomFactor = doubleTapZoom / 100.0f;
-            mTextWrapScale = getReadingLevelScale();
-            refreshZoomScale(true);
-        }
+        boolean zoomIn = (mTextWrapScale - mActualScale) < .1f;
+        mDoubleTapZoomFactor = doubleTapZoom / 100.0f;
+        mTextWrapScale = getReadingLevelScale();
+        float newScale = zoomIn ? mTextWrapScale
+                : Math.min(mTextWrapScale, mActualScale);
+        setZoomScale(newScale, true, true);
     }
 
     public void refreshZoomScale(boolean reflowText) {
