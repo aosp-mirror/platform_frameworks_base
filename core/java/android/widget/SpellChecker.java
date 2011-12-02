@@ -68,6 +68,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
     // concurrently due to the asynchronous nature of onGetSuggestions.
     private WordIterator mWordIterator;
 
+    private TextServicesManager mTextServicesManager;
+
     public SpellChecker(TextView textView) {
         mTextView = textView;
 
@@ -81,20 +83,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mCookie = hashCode();
     }
 
-    private void setLocale(Locale locale) {
+    private void resetSession() {
         closeSession();
 
-        final TextServicesManager textServicesManager = (TextServicesManager)
-                mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        if (!textServicesManager.isSpellCheckerEnabled()) {
+        mTextServicesManager = (TextServicesManager) mTextView.getContext().
+                getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+        if (!mTextServicesManager.isSpellCheckerEnabled()) {
             mSpellCheckerSession = null;
         } else {
-            mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
+            mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
                     null /* Bundle not currently used by the textServicesManager */,
-                    locale, this,
+                    mCurrentLocale, this,
                     false /* means any available languages from current spell checker */);
         }
-        mCurrentLocale = locale;
 
         // Restore SpellCheckSpans in pool
         for (int i = 0; i < mLength; i++) {
@@ -103,11 +104,20 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
         mLength = 0;
 
-        // Change SpellParsers' wordIterator locale
-        mWordIterator = new WordIterator(locale);
-
         // Remove existing misspelled SuggestionSpans
         mTextView.removeMisspelledSpans((Editable) mTextView.getText());
+
+        // This class is the listener for locale change: warn other locale-aware objects
+        mTextView.onLocaleChanged();
+    }
+
+    private void setLocale(Locale locale) {
+        mCurrentLocale = locale;
+
+        resetSession();
+
+        // Change SpellParsers' wordIterator locale
+        mWordIterator = new WordIterator(locale);
 
         // This class is the listener for locale change: warn other locale-aware objects
         mTextView.onLocaleChanged();
@@ -179,6 +189,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
             // Re-check the entire text
             start = 0;
             end = mTextView.getText().length();
+        } else {
+            final boolean spellCheckerActivated = mTextServicesManager.isSpellCheckerEnabled();
+            if (isSessionActive() != spellCheckerActivated) {
+                // Spell checker has been turned of or off since last spellCheck
+                resetSession();
+            }
         }
 
         if (!isSessionActive()) return;
