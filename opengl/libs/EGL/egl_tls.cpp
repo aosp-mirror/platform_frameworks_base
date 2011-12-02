@@ -33,7 +33,7 @@ pthread_key_t egl_tls_t::sKey = -1;
 pthread_mutex_t egl_tls_t::sLockKey = PTHREAD_MUTEX_INITIALIZER;
 
 egl_tls_t::egl_tls_t()
-    : error(EGL_SUCCESS), ctx(0), logCallWithNoContext(EGL_TRUE), dbg(0) {
+    : error(EGL_SUCCESS), ctx(0), logCallWithNoContext(EGL_TRUE) {
 }
 
 const char *egl_tls_t::egl_strerror(EGLint err) {

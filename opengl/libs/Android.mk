@@ -18,7 +18,7 @@ LOCAL_SRC_FILES:= 	       \
 	EGL/Loader.cpp 	       \
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libGLESv2_dbg
+LOCAL_SHARED_LIBRARIES += libcutils libutils libGLES_trace
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
 LOCAL_LDFLAGS += -Wl,--exclude-libs=ALL
