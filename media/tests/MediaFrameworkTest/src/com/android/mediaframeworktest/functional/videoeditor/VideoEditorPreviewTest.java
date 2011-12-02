@@ -93,6 +93,7 @@ public class VideoEditorPreviewTest extends
 
     private boolean previewStart;
     private boolean previewStop;
+    private boolean previewError;
 
     /* Minimum waiting time for Semaphore to wait for release */
     private final long minWaitingTime = 3000;
@@ -141,7 +142,9 @@ public class VideoEditorPreviewTest extends
     protected void setPreviewStop() {
         previewStop = true;
     }
-
+    protected void setPreviewError() {
+        previewError = true;
+    }
     protected void validatePreviewProgress(int startMs, int endMs,
         boolean loop, long duration) throws Exception {
 
@@ -149,6 +152,7 @@ public class VideoEditorPreviewTest extends
         final Semaphore blockTillPreviewCompletes = new Semaphore(1);
         previewStart = false;
         previewStop = false;
+        previewError = false;
         mVideoEditor.generatePreview(new MediaProcessingProgressListener() {
             int i = 0;
             public void onProgress(Object item, int action, int progress) {
@@ -187,6 +191,10 @@ public class VideoEditorPreviewTest extends
                     setPreviewStop();
                     blockTillPreviewCompletes.release();
                 }
+                public void onError(VideoEditor videoEditor, int error) {
+                    setPreviewError();
+                    blockTillPreviewCompletes.release();
+                }
         });
         } catch (Exception e) {
             blockTillPreviewCompletes.release();
@@ -196,6 +204,7 @@ public class VideoEditorPreviewTest extends
         mVideoEditor.stopPreview();
         assertTrue("Preview Failed to start", previewStart);
         assertTrue("Preview Failed to stop", previewStop);
+        assertFalse("Preview Error occurred", previewError);
 
         blockTillPreviewCompletes.release();
     }
@@ -399,6 +408,7 @@ public class VideoEditorPreviewTest extends
             "TransitionSpiral_QVGA.jpg";
         previewStart = false;
         previewStop = false;
+        previewError = false;
 
         final Semaphore blockTillPreviewCompletes = new Semaphore(1);
 
@@ -490,6 +500,10 @@ public class VideoEditorPreviewTest extends
                     setPreviewStop();
                     blockTillPreviewCompletes.release();
                 }
+                public void onError(VideoEditor videoEditor, int error) {
+                    setPreviewError();
+                    blockTillPreviewCompletes.release();
+                }
         });
         } catch (Exception e) {
             blockTillPreviewCompletes.release();
@@ -499,6 +513,7 @@ public class VideoEditorPreviewTest extends
         blockTillPreviewCompletes.release();
         assertTrue("Preview Failed to start", previewStart);
         assertTrue("Preview Failed to stop", previewStop);
+        assertFalse("Preview Error occurred", previewError);
 
         assertEquals("Removing Transition " + transition1And2CrossFade.getId(),
             transition1And2CrossFade,
@@ -677,6 +692,7 @@ public class VideoEditorPreviewTest extends
         final Semaphore blockTillPreviewCompletes = new Semaphore(1);
         previewStart = false;
         previewStop = false;
+        previewError = false;
 
         final MediaVideoItem mediaVideoItem1 =
             mVideoEditorHelper.createMediaItem(mVideoEditor, "m1",
@@ -727,6 +743,10 @@ public class VideoEditorPreviewTest extends
                     setPreviewStop();
                     blockTillPreviewCompletes.release();
                 }
+                public void onError(VideoEditor videoEditor, int error) {
+                    setPreviewError();
+                    blockTillPreviewCompletes.release();
+                }
             });
 
         } catch (Exception e) {
@@ -736,6 +756,8 @@ public class VideoEditorPreviewTest extends
         mVideoEditor.stopPreview();
         assertTrue("Preview Failed to start", previewStart);
         assertTrue("Preview Failed to stop", previewStop);
+        assertFalse("Preview Error occurred", previewError);
+
         blockTillPreviewCompletes.release();
     }
 
@@ -782,6 +804,10 @@ public class VideoEditorPreviewTest extends
                 }
                 public void onStop(VideoEditor videoEditor) {
                     setPreviewStop();
+                    blockTillPreviewCompletes.release();
+                }
+                public void onError(VideoEditor videoEditor, int error) {
+                    setPreviewError();
                     blockTillPreviewCompletes.release();
                 }
         });
@@ -1023,7 +1049,10 @@ public class VideoEditorPreviewTest extends
                     }
                     public void onStop(VideoEditor videoEditor) {
                         setPreviewStop();
-                }
+                    }
+                    public void onError(VideoEditor videoEditor, int error) {
+                        setPreviewError();
+                    }
             });
         }catch (IllegalArgumentException e) {
             flagForException = true;
@@ -1089,7 +1118,10 @@ public class VideoEditorPreviewTest extends
                     }
                     public void onStop(VideoEditor videoEditor) {
                         setPreviewStop();
-                }
+                    }
+                    public void onError(VideoEditor videoEditor, int error) {
+                        setPreviewError();
+                    }
             });
         }catch (IllegalArgumentException e) {
             flagForException = true;

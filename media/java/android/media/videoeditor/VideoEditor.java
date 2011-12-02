@@ -107,6 +107,17 @@ public interface VideoEditor {
          * @param videoEditor The VideoEditor instance
          */
         public void onStop(VideoEditor videoEditor);
+
+        /**
+         * This method notifies the listener when error has occurred during
+         * previewing a project.
+         *
+         * @param videoEditor The VideoEditor instance
+         * @param error The error that has occurred
+         * FIXME: We should pass well-defined error code to the application;
+         * but for now, we just pass whatever error code reported by the native layer.
+         */
+        public void onError(VideoEditor videoEditor, int error);
     }
 
     /**
