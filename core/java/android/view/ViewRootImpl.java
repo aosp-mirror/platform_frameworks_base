@@ -2024,7 +2024,19 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         canvas.setScreenDensity(scalingRequired
                                 ? DisplayMetrics.DENSITY_DEVICE : 0);
                         mAttachInfo.mSetIgnoreDirtyState = false;
+
+                        final long drawStartTime;
+                        if (ViewDebug.DEBUG_LATENCY) {
+                            drawStartTime = System.nanoTime();
+                        }
+
                         mView.draw(canvas);
+
+                        if (ViewDebug.DEBUG_LATENCY) {
+                            long now = System.nanoTime();
+                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- draw() took "
+                                    + ((now - drawStartTime) * 0.000001f) + "ms");
+                        }
                     } finally {
                         if (!mAttachInfo.mSetIgnoreDirtyState) {
                             // Only clear the flag if it was not set during the mView.draw() call
@@ -2040,14 +2052,24 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                     }
                 }
-
             } finally {
-                surface.unlockCanvasAndPost(canvas);
-            }
-        }
+                final long unlockCanvasAndPostStartTime;
+                if (ViewDebug.DEBUG_LATENCY) {
+                    unlockCanvasAndPostStartTime = System.nanoTime();
+                }
 
-        if (LOCAL_LOGV) {
-            Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
+                surface.unlockCanvasAndPost(canvas);
+
+                if (ViewDebug.DEBUG_LATENCY) {
+                    long now = System.nanoTime();
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- unlockCanvasAndPost() took "
+                            + ((now - unlockCanvasAndPostStartTime) * 0.000001f) + "ms");
+                }
+
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "Surface " + surface + " unlockCanvasAndPost");
+                }
+            }
         }
 
         if (animating) {
@@ -2437,17 +2459,22 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (ViewDebug.DEBUG_LATENCY) {
                 traversalStartTime = System.nanoTime();
                 mLastDrawDurationNanos = 0;
+                if (mLastTraversalFinishedTimeNanos != 0) {
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals(); it has been "
+                            + ((traversalStartTime - mLastTraversalFinishedTimeNanos) * 0.000001f)
+                            + "ms since the last traversals finished.");
+                } else {
+                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "Starting performTraversals().");
+                }
             }
 
             performTraversals();
 
             if (ViewDebug.DEBUG_LATENCY) {
                 long now = System.nanoTime();
-                Log.d(TAG, "Latency: Spent "
+                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "performTraversals() took "
                         + ((now - traversalStartTime) * 0.000001f)
-                        + "ms in performTraversals(), with "
-                        + (mLastDrawDurationNanos * 0.000001f)
-                        + "ms of that time in draw()");
+                        + "ms.");
                 mLastTraversalFinishedTimeNanos = now;
             }
 
