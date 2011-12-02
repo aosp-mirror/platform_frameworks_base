@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import com.google.android.collect.Lists;
+
+import java.util.ArrayList;
+
 /**
  * Parsed event from native side of {@link NativeDaemonConnector}.
  */
@@ -89,6 +93,17 @@ public class NativeDaemonEvent {
     }
 
     /**
+     * Verify this event matches the given code.
+     *
+     * @throws IllegalStateException if {@link #getCode()} doesn't match.
+     */
+    public void checkCode(int code) {
+        if (mCode != code) {
+            throw new IllegalStateException("Expected " + code + " but was: " + this);
+        }
+    }
+
+    /**
      * Parse the given raw event into {@link NativeDaemonEvent} instance.
      *
      * @throws IllegalArgumentException when line doesn't match format expected
@@ -109,5 +124,19 @@ public class NativeDaemonEvent {
 
         final String message = rawEvent.substring(splitIndex + 1);
         return new NativeDaemonEvent(code, message, rawEvent);
+    }
+
+    /**
+     * Filter the given {@link NativeDaemonEvent} list, returning
+     * {@link #getMessage()} for any events matching the requested code.
+     */
+    public static String[] filterMessageList(NativeDaemonEvent[] events, int matchCode) {
+        final ArrayList<String> result = Lists.newArrayList();
+        for (NativeDaemonEvent event : events) {
+            if (event.getCode() == matchCode) {
+                result.add(event.getMessage());
+            }
+        }
+        return result.toArray(new String[result.size()]);
     }
 }

@@ -45,24 +45,8 @@ public class InterfaceConfiguration implements Parcelable {
         return builder.toString();
     }
 
-    /**
-     * Return flags separated by spaces.
-     */
-    public String getFlags() {
-        final int size = mFlags.size();
-        if (size == 0) {
-            return "";
-        }
-
-        final String[] flags = mFlags.toArray(new String[size]);
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append(flags[0]);
-        for (int i = 1; i < flags.length; i++) {
-            builder.append(' ');
-            builder.append(flags[i]);
-        }
-        return builder.toString();
+    public Iterable<String> getFlags() {
+        return mFlags;
     }
 
     public boolean hasFlag(String flag) {
