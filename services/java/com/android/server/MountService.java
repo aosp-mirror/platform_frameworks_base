@@ -20,6 +20,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.NativeDaemonConnector.Command;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -564,8 +565,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.doCommand(String.format(
-                    "volume %sshare %s %s", (enable ? "" : "un"), path, method));
+            mConnector.execute("volume", enable ? "share" : "unshare", path, method);
         } catch (NativeDaemonConnectorException e) {
             Slog.e(TAG, "Failed to share/unshare", e);
         }
@@ -633,8 +633,9 @@ class MountService extends IMountService.Stub
                  * Determine media state and UMS detection status
                  */
                 try {
-                    String[] vols = mConnector.doListCommand(
-                        "volume list", VoldResponseCode.VolumeListResult);
+                    final String[] vols = NativeDaemonEvent.filterMessageList(
+                            mConnector.executeForList("volume", "list"),
+                            VoldResponseCode.VolumeListResult);
                     for (String volstr : vols) {
                         String[] tok = volstr.split(" ");
                         // FMT: <label> <mountpoint> <state>
@@ -839,7 +840,7 @@ class MountService extends IMountService.Stub
 
         if (DEBUG_EVENTS) Slog.i(TAG, "doMountVolume: Mouting " + path);
         try {
-            mConnector.doCommand(String.format("volume mount %s", path));
+            mConnector.execute("volume", "mount", path);
         } catch (NativeDaemonConnectorException e) {
             /*
              * Mount failed for some reason
@@ -909,10 +910,13 @@ class MountService extends IMountService.Stub
         // Redundant probably. But no harm in updating state again.
         mPms.updateExternalMediaStatus(false, false);
         try {
-            String arg = removeEncryption
-                    ? " force_and_revert"
-                    : (force ? " force" : "");
-            mConnector.doCommand(String.format("volume unmount %s%s", path, arg));
+            final Command cmd = new Command("volume", "unmount", path);
+            if (removeEncryption) {
+                cmd.appendArg("force_and_revert");
+            } else if (force) {
+                cmd.appendArg("force");
+            }
+            mConnector.execute(cmd);
             // We unmounted the volume. None of the asec containers are available now.
             synchronized (mAsecMountSet) {
                 mAsecMountSet.clear();
@@ -934,8 +938,7 @@ class MountService extends IMountService.Stub
 
     private int doFormatVolume(String path) {
         try {
-            String cmd = String.format("volume format %s", path);
-            mConnector.doCommand(cmd);
+            mConnector.execute("volume", "format", path);
             return StorageResultCode.OperationSucceeded;
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
@@ -950,39 +953,19 @@ class MountService extends IMountService.Stub
     }
 
     private boolean doGetVolumeShared(String path, String method) {
-        String cmd = String.format("volume shared %s %s", path, method);
-        ArrayList<String> rsp;
-
+        final NativeDaemonEvent event;
         try {
-            rsp = mConnector.doCommand(cmd);
+            event = mConnector.execute("volume", "shared", path, method);
         } catch (NativeDaemonConnectorException ex) {
             Slog.e(TAG, "Failed to read response to volume shared " + path + " " + method);
             return false;
         }
 
-        for (String line : rsp) {
-            String[] tok = line.split(" ");
-            if (tok.length < 3) {
-                Slog.e(TAG, "Malformed response to volume shared " + path + " " + method + " command");
-                return false;
-            }
-
-            int code;
-            try {
-                code = Integer.parseInt(tok[0]);
-            } catch (NumberFormatException nfe) {
-                Slog.e(TAG, String.format("Error parsing code %s", tok[0]));
-                return false;
-            }
-            if (code == VoldResponseCode.ShareEnabledResult) {
-                return "enabled".equals(tok[2]);
-            } else {
-                Slog.e(TAG, String.format("Unexpected response code %d", code));
-                return false;
-            }
+        if (event.getCode() == VoldResponseCode.ShareEnabledResult) {
+            return event.getMessage().endsWith("enabled");
+        } else {
+            return false;
         }
-        Slog.e(TAG, "Got an empty response");
-        return false;
     }
 
     private void notifyShareAvailabilityChange(final boolean avail) {
@@ -1410,13 +1393,14 @@ class MountService extends IMountService.Stub
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
         try {
-            String[] r = mConnector.doListCommand(
-                    String.format("storage users %s", path),
-                            VoldResponseCode.StorageUsersListResult);
+            final String[] r = NativeDaemonEvent.filterMessageList(
+                    mConnector.executeForList("storage", "users", path),
+                    VoldResponseCode.StorageUsersListResult);
+
             // FMT: <pid> <process name>
             int[] data = new int[r.length];
             for (int i = 0; i < r.length; i++) {
-                String []tok = r[i].split(" ");
+                String[] tok = r[i].split(" ");
                 try {
                     data[i] = Integer.parseInt(tok[0]);
                 } catch (NumberFormatException nfe) {
@@ -1443,7 +1427,8 @@ class MountService extends IMountService.Stub
         warnOnNotMounted();
 
         try {
-            return mConnector.doListCommand("asec list", VoldResponseCode.AsecListResult);
+            return NativeDaemonEvent.filterMessageList(
+                    mConnector.executeForList("asec", "list"), VoldResponseCode.AsecListResult);
         } catch (NativeDaemonConnectorException e) {
             return new String[0];
         }
@@ -1456,9 +1441,8 @@ class MountService extends IMountService.Stub
         warnOnNotMounted();
 
         int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("asec create %s %d %s %s %d", id, sizeMb, fstype, key, ownerUid);
         try {
-            mConnector.doCommand(cmd);
+            mConnector.execute("asec", "create", id, sizeMb, fstype, key, ownerUid);
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
@@ -1477,7 +1461,7 @@ class MountService extends IMountService.Stub
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.doCommand(String.format("asec finalize %s", id));
+            mConnector.execute("asec", "finalize", id);
             /*
              * Finalization does a remount, so no need
              * to update mAsecMountSet
@@ -1503,7 +1487,11 @@ class MountService extends IMountService.Stub
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.doCommand(String.format("asec destroy %s%s", id, (force ? " force" : "")));
+            final Command cmd = new Command("asec", "destroy", id);
+            if (force) {
+                cmd.appendArg("force");
+            }
+            mConnector.execute(cmd);
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageBusy) {
@@ -1536,9 +1524,8 @@ class MountService extends IMountService.Stub
         }
 
         int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("asec mount %s %s %d", id, key, ownerUid);
         try {
-            mConnector.doCommand(cmd);
+            mConnector.execute("asec", "mount", id, key, ownerUid);
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code != VoldResponseCode.OpFailedStorageBusy) {
@@ -1574,9 +1561,12 @@ class MountService extends IMountService.Stub
         Runtime.getRuntime().gc();
 
         int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("asec unmount %s%s", id, (force ? " force" : ""));
         try {
-            mConnector.doCommand(cmd);
+            final Command cmd = new Command("asec", "unmount", id);
+            if (force) {
+                cmd.appendArg("force");
+            }
+            mConnector.execute(cmd);
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageBusy) {
@@ -1620,9 +1610,8 @@ class MountService extends IMountService.Stub
         }
 
         int rc = StorageResultCode.OperationSucceeded;
-        String cmd = String.format("asec rename %s %s", oldId, newId);
         try {
-            mConnector.doCommand(cmd);
+            mConnector.execute("asec", "rename", oldId, newId);
         } catch (NativeDaemonConnectorException e) {
             rc = StorageResultCode.OperationFailedInternalError;
         }
@@ -1635,14 +1624,11 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> rsp = mConnector.doCommand(String.format("asec path %s", id));
-            String []tok = rsp.get(0).split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code != VoldResponseCode.AsecPathResult) {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-            return tok[1];
+            event = mConnector.execute("asec", "path", id);
+            event.checkCode(VoldResponseCode.AsecPathResult);
+            return event.getMessage();
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageNotFound) {
@@ -1659,14 +1645,11 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> rsp = mConnector.doCommand(String.format("asec fspath %s", id));
-            String []tok = rsp.get(0).split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code != VoldResponseCode.AsecPathResult) {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-            return tok[1];
+            event = mConnector.execute("asec", "fspath", id);
+            event.checkCode(VoldResponseCode.AsecPathResult);
+            return event.getMessage();
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageNotFound) {
@@ -1709,14 +1692,11 @@ class MountService extends IMountService.Stub
         waitForReady();
         warnOnNotMounted();
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> rsp = mConnector.doCommand(String.format("obb path %s", filename));
-            String []tok = rsp.get(0).split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code != VoldResponseCode.AsecPathResult) {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-            return tok[1];
+            event = mConnector.execute("obb", "path", filename);
+            event.checkCode(VoldResponseCode.AsecPathResult);
+            return event.getMessage();
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedStorageNotFound) {
@@ -1778,18 +1758,10 @@ class MountService extends IMountService.Stub
 
         waitForReady();
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> rsp = mConnector.doCommand("cryptfs cryptocomplete");
-            String[] tokens = rsp.get(0).split(" ");
-
-            if (tokens == null || tokens.length != 2) {
-                // Unexpected.
-                Slog.w(TAG, "Unexpected result from cryptfs cryptocomplete");
-                return ENCRYPTION_STATE_ERROR_UNKNOWN;
-            }
-
-            return Integer.parseInt(tokens[1]);
-
+            event = mConnector.execute("cryptfs", "cryptocomplete");
+            return Integer.parseInt(event.getMessage());
         } catch (NumberFormatException e) {
             // Bad result - unexpected.
             Slog.w(TAG, "Unable to parse result from cryptfs cryptocomplete");
@@ -1816,23 +1788,18 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "decrypting storage...");
         }
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> rsp = mConnector.doCommand("cryptfs checkpw " + password);
-            String[] tokens = rsp.get(0).split(" ");
+            event = mConnector.execute("cryptfs", "checkpw", password);
 
-            if (tokens == null || tokens.length != 2) {
-                return -1;
-            }
-
-            int code = Integer.parseInt(tokens[1]);
-
+            final int code = event.getCode();
             if (code == 0) {
                 // Decrypt was successful. Post a delayed message before restarting in order
                 // to let the UI to clear itself
                 mHandler.postDelayed(new Runnable() {
                     public void run() {
                         try {
-                            mConnector.doCommand(String.format("cryptfs restart"));
+                            mConnector.execute("cryptfs", "restart");
                         } catch (NativeDaemonConnectorException e) {
                             Slog.e(TAG, "problem executing in background", e);
                         }
@@ -1862,7 +1829,7 @@ class MountService extends IMountService.Stub
         }
 
         try {
-            mConnector.doCommand(String.format("cryptfs enablecrypto inplace %s", password));
+            mConnector.execute("cryptfs", "enablecrypto", "inplace", password);
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -1885,16 +1852,10 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "changing encryption password...");
         }
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> response = mConnector.doCommand("cryptfs changepw " + password);
-
-            String[] tokens = response.get(0).split(" ");
-
-            if (tokens == null || tokens.length != 2) {
-                return -1;
-            }
-
-            return Integer.parseInt(tokens[1]);
+            event = mConnector.execute("cryptfs", "changepw", password);
+            return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -1924,24 +1885,11 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "validating encryption password...");
         }
 
+        final NativeDaemonEvent event;
         try {
-            ArrayList<String> response = mConnector.doCommand("cryptfs verifypw " + password);
-            String[] tokens = response.get(0).split(" ");
-
-            if (tokens == null || tokens.length != 2) {
-                String msg = "Unexpected result from cryptfs verifypw: {";
-                if (tokens == null) msg += "null";
-                else for (int i = 0; i < tokens.length; i++) {
-                    if (i != 0) msg += ',';
-                    msg += tokens[i];
-                }
-                msg += '}';
-                Slog.e(TAG, msg);
-                return -1;
-            }
-
-            Slog.i(TAG, "cryptfs verifypw => " + tokens[1]);
-            return Integer.parseInt(tokens[1]);
+            event = mConnector.execute("cryptfs", "verifypw", password);
+            Slog.i(TAG, "cryptfs verifypw => " + event.getMessage());
+            return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
@@ -2300,10 +2248,9 @@ class MountService extends IMountService.Stub
             }
 
             int rc = StorageResultCode.OperationSucceeded;
-            String cmd = String.format("obb mount %s %s %d", mObbState.filename, hashedKey,
-                    mObbState.callerUid);
             try {
-                mConnector.doCommand(cmd);
+                mConnector.execute(
+                        "obb", "mount", mObbState.filename, hashedKey, mObbState.callerUid);
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
                 if (code != VoldResponseCode.OpFailedStorageBusy) {
@@ -2384,10 +2331,12 @@ class MountService extends IMountService.Stub
             mObbState.filename = obbInfo.filename;
 
             int rc = StorageResultCode.OperationSucceeded;
-            String cmd = String.format("obb unmount %s%s", mObbState.filename,
-                    (mForceUnmount ? " force" : ""));
             try {
-                mConnector.doCommand(cmd);
+                final Command cmd = new Command("obb", "unmount", mObbState.filename);
+                if (mForceUnmount) {
+                    cmd.appendArg("force");
+                }
+                mConnector.execute(cmd);
             } catch (NativeDaemonConnectorException e) {
                 int code = e.getCode();
                 if (code == VoldResponseCode.OpFailedStorageBusy) {
