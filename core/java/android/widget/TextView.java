@@ -9383,7 +9383,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    public boolean isPositionVisible(int positionX, int positionY) {
+    private boolean isPositionVisible(int positionX, int positionY) {
         synchronized (sTmpPosition) {
             final float[] position = sTmpPosition;
             position[0] = positionX;
@@ -9423,7 +9423,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return true;
     }
 
-    public boolean isOffsetVisible(int offset) {
+    private boolean isOffsetVisible(int offset) {
         final int line = mLayout.getLineForOffset(offset);
         final int lineBottom = mLayout.getLineBottom(line);
         final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
