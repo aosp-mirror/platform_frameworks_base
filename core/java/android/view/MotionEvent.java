@@ -167,7 +167,6 @@ import android.util.SparseArray;
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
     private static final long NS_PER_MS = 1000000;
-    private static final boolean TRACK_RECYCLED_LOCATION = false;
 
     /**
      * An invalid pointer id.
@@ -1315,8 +1314,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private int mNativePtr;
 
     private MotionEvent mNext;
-    private RuntimeException mRecycledLocation;
-    private boolean mRecycled;
 
     private static native int nativeInitialize(int nativePtr,
             int deviceId, int source, int action, int flags, int edgeFlags,
@@ -1397,9 +1394,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             gRecyclerTop = ev.mNext;
             gRecyclerUsed -= 1;
         }
-        ev.mRecycledLocation = null;
-        ev.mRecycled = false;
         ev.mNext = null;
+        ev.prepareForReuse();
         return ev;
     }
 
@@ -1647,19 +1643,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * this function you must not ever touch the event again.
      */
     public final void recycle() {
-        // Ensure recycle is only called once!
-        if (TRACK_RECYCLED_LOCATION) {
-            if (mRecycledLocation != null) {
-                throw new RuntimeException(toString() + " recycled twice!", mRecycledLocation);
-            }
-            mRecycledLocation = new RuntimeException("Last recycled here");
-            //Log.w("MotionEvent", "Recycling event " + this, mRecycledLocation);
-        } else {
-            if (mRecycled) {
-                throw new RuntimeException(toString() + " recycled twice!");
-            }
-            mRecycled = true;
-        }
+        super.recycle();
 
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {

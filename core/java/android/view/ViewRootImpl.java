@@ -221,7 +221,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     private static final int MAX_QUEUED_INPUT_EVENT_POOL_SIZE = 10;
     private QueuedInputEvent mQueuedInputEventPool;
     private int mQueuedInputEventPoolSize;
-    private int mQueuedInputEventNextSeq;
 
     // Input event queue.
     QueuedInputEvent mFirstPendingInputEvent;
@@ -559,8 +558,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         mInputQueue = new InputQueue(mInputChannel);
                         mInputQueueCallback.onInputQueueCreated(mInputQueue);
                     } else {
-                        InputQueue.registerInputChannel(mInputChannel, mInputHandler,
-                                Looper.myQueue());
+                        mInputEventReceiver = new WindowInputEventReceiver(mInputChannel,
+                                Looper.myLooper());
                     }
                 }
 
@@ -2283,8 +2282,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             mInputQueueCallback.onInputQueueDestroyed(mInputQueue);
             mInputQueueCallback = null;
             mInputQueue = null;
-        } else if (mInputChannel != null) {
-            InputQueue.unregisterInputChannel(mInputChannel);
+        } else if (mInputEventReceiver != null) {
+            mInputEventReceiver.dispose();
+            mInputEventReceiver = null;
         }
         try {
             sWindowSession.remove(mWindow);
@@ -3199,9 +3199,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (mLastWasImTarget) {
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
+                    final int seq = event.getSequenceNumber();
                     if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
-                            + q.mSeq + " event=" + event);
-                    imm.dispatchKeyEvent(mView.getContext(), q.mSeq, event, mInputMethodCallback);
+                            + seq + " event=" + event);
+                    imm.dispatchKeyEvent(mView.getContext(), seq, event, mInputMethodCallback);
                     return;
                 }
             }
@@ -3213,7 +3214,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     void handleImeFinishedEvent(int seq, boolean handled) {
         final QueuedInputEvent q = mCurrentInputEvent;
-        if (q != null && q.mSeq == seq) {
+        if (q != null && q.mEvent.getSequenceNumber() == seq) {
             final KeyEvent event = (KeyEvent)q.mEvent;
             if (DEBUG_IMF) {
                 Log.v(TAG, "IME finished event: seq=" + seq
@@ -3715,9 +3716,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         public QueuedInputEvent mNext;
 
         public InputEvent mEvent;
-        public InputQueue.FinishedCallback mFinishedCallback;
+        public InputEventReceiver mReceiver;
         public int mFlags;
-        public int mSeq;
 
         // Used for latency calculations.
         public long mReceiveTimeNanos;
@@ -3726,7 +3726,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     private QueuedInputEvent obtainQueuedInputEvent(InputEvent event,
-            InputQueue.FinishedCallback finishedCallback, int flags) {
+            InputEventReceiver receiver, int flags) {
         QueuedInputEvent q = mQueuedInputEventPool;
         if (q != null) {
             mQueuedInputEventPoolSize -= 1;
@@ -3737,15 +3737,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         q.mEvent = event;
-        q.mFinishedCallback = finishedCallback;
+        q.mReceiver = receiver;
         q.mFlags = flags;
-        q.mSeq = mQueuedInputEventNextSeq++;
         return q;
     }
 
     private void recycleQueuedInputEvent(QueuedInputEvent q) {
         q.mEvent = null;
-        q.mFinishedCallback = null;
+        q.mReceiver = null;
 
         if (mQueuedInputEventPoolSize < MAX_QUEUED_INPUT_EVENT_POOL_SIZE) {
             mQueuedInputEventPoolSize += 1;
@@ -3755,8 +3754,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     void enqueueInputEvent(InputEvent event,
-            InputQueue.FinishedCallback finishedCallback, int flags) {
-        QueuedInputEvent q = obtainQueuedInputEvent(event, finishedCallback, flags);
+            InputEventReceiver receiver, int flags) {
+        QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
 
         if (ViewDebug.DEBUG_LATENCY) {
             q.mReceiveTimeNanos = System.nanoTime();
@@ -3847,11 +3846,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             Log.d(ViewDebug.DEBUG_LATENCY_TAG, msg.toString());
         }
 
-        if (q.mFinishedCallback != null) {
-            q.mFinishedCallback.finished(handled);
-        }
-
-        if (q.mEvent instanceof MotionEvent) {
+        if (q.mReceiver != null) {
+            q.mReceiver.finishInputEvent(q.mEvent, handled);
+        } else if (q.mEvent instanceof MotionEvent) {
             // Event though key events are also recyclable, we only recycle motion events.
             // Historically, key events were not recyclable and applications expect
             // them to be immutable.  We only ever recycle key events behind the
@@ -3867,12 +3864,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    private final InputHandler mInputHandler = new InputHandler() {
-        public void handleInputEvent(InputEvent event,
-                InputQueue.FinishedCallback finishedCallback) {
-            enqueueInputEvent(event, finishedCallback, 0);
+    final class WindowInputEventReceiver extends InputEventReceiver {
+        public WindowInputEventReceiver(InputChannel inputChannel, Looper looper) {
+            super(inputChannel, looper);
         }
-    };
+
+        @Override
+        public void onInputEvent(InputEvent event) {
+            enqueueInputEvent(event, this, 0);
+        }
+    }
+    WindowInputEventReceiver mInputEventReceiver;
 
     public void dispatchKey(KeyEvent event) {
         enqueueInputEvent(event, null, 0);
