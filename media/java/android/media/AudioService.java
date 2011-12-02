@@ -1642,49 +1642,83 @@ public class AudioService extends IAudioService.Stub {
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            synchronized (mScoClients) {
-                // Discard timeout message
-                mAudioHandler.removeMessages(MSG_BT_HEADSET_CNCT_FAILED);
-                mBluetoothHeadset = (BluetoothHeadset) proxy;
-                List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
+            BluetoothDevice btDevice;
+            List<BluetoothDevice> deviceList;
+            switch(profile) {
+            case BluetoothProfile.A2DP:
+                BluetoothA2dp a2dp = (BluetoothA2dp) proxy;
+                deviceList = a2dp.getConnectedDevices();
                 if (deviceList.size() > 0) {
-                    mBluetoothHeadsetDevice = deviceList.get(0);
-                } else {
-                    mBluetoothHeadsetDevice = null;
+                    btDevice = deviceList.get(0);
+                    handleA2dpConnectionStateChange(btDevice, a2dp.getConnectionState(btDevice));
                 }
-                // Refresh SCO audio state
-                checkScoAudioState();
-                // Continue pending action if any
-                if (mScoAudioState == SCO_STATE_ACTIVATE_REQ ||
-                        mScoAudioState == SCO_STATE_DEACTIVATE_REQ ||
-                        mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
-                    boolean status = false;
-                    if (mBluetoothHeadsetDevice != null) {
-                        switch (mScoAudioState) {
-                        case SCO_STATE_ACTIVATE_REQ:
-                            mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                            status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
-                                    mBluetoothHeadsetDevice);
-                            break;
-                        case SCO_STATE_DEACTIVATE_REQ:
-                            status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
-                                    mBluetoothHeadsetDevice);
-                            break;
-                        case SCO_STATE_DEACTIVATE_EXT_REQ:
-                            status = mBluetoothHeadset.stopVoiceRecognition(
-                                    mBluetoothHeadsetDevice);
+                break;
+
+            case BluetoothProfile.HEADSET:
+                synchronized (mScoClients) {
+                    // Discard timeout message
+                    mAudioHandler.removeMessages(MSG_BT_HEADSET_CNCT_FAILED);
+                    mBluetoothHeadset = (BluetoothHeadset) proxy;
+                    deviceList = mBluetoothHeadset.getConnectedDevices();
+                    if (deviceList.size() > 0) {
+                        mBluetoothHeadsetDevice = deviceList.get(0);
+                    } else {
+                        mBluetoothHeadsetDevice = null;
+                    }
+                    // Refresh SCO audio state
+                    checkScoAudioState();
+                    // Continue pending action if any
+                    if (mScoAudioState == SCO_STATE_ACTIVATE_REQ ||
+                            mScoAudioState == SCO_STATE_DEACTIVATE_REQ ||
+                            mScoAudioState == SCO_STATE_DEACTIVATE_EXT_REQ) {
+                        boolean status = false;
+                        if (mBluetoothHeadsetDevice != null) {
+                            switch (mScoAudioState) {
+                            case SCO_STATE_ACTIVATE_REQ:
+                                mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
+                                status = mBluetoothHeadset.startScoUsingVirtualVoiceCall(
+                                        mBluetoothHeadsetDevice);
+                                break;
+                            case SCO_STATE_DEACTIVATE_REQ:
+                                status = mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
+                                        mBluetoothHeadsetDevice);
+                                break;
+                            case SCO_STATE_DEACTIVATE_EXT_REQ:
+                                status = mBluetoothHeadset.stopVoiceRecognition(
+                                        mBluetoothHeadsetDevice);
+                            }
+                        }
+                        if (!status) {
+                            sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
+                                    SENDMSG_REPLACE, 0, 0, null, 0);
                         }
                     }
-                    if (!status) {
-                        sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
-                                SENDMSG_REPLACE, 0, 0, null, 0);
-                    }
                 }
+                break;
+
+            default:
+                break;
             }
         }
         public void onServiceDisconnected(int profile) {
-            synchronized (mScoClients) {
-                mBluetoothHeadset = null;
+            switch(profile) {
+            case BluetoothProfile.A2DP:
+                synchronized (mConnectedDevices) {
+                    if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
+                        makeA2dpDeviceUnavailableNow(
+                                mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                    }
+                }
+                break;
+
+            case BluetoothProfile.HEADSET:
+                synchronized (mScoClients) {
+                    mBluetoothHeadset = null;
+                }
+                break;
+
+            default:
+                break;
             }
         }
     };
@@ -2379,15 +2413,17 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setParameters("restarting=true");
 
                     // Restore device connection states
-                    Set set = mConnectedDevices.entrySet();
-                    Iterator i = set.iterator();
-                    while(i.hasNext()){
-                        Map.Entry device = (Map.Entry)i.next();
-                        AudioSystem.setDeviceConnectionState(((Integer)device.getKey()).intValue(),
-                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                             (String)device.getValue());
+                    synchronized (mConnectedDevices) {
+                        Set set = mConnectedDevices.entrySet();
+                        Iterator i = set.iterator();
+                        while(i.hasNext()){
+                            Map.Entry device = (Map.Entry)i.next();
+                            AudioSystem.setDeviceConnectionState(
+                                                            ((Integer)device.getKey()).intValue(),
+                                                            AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                            (String)device.getValue());
+                        }
                     }
-
                     // Restore call state
                     AudioSystem.setPhoneState(mMode);
 
@@ -2426,7 +2462,9 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_BTA2DP_DOCK_TIMEOUT:
                     // msg.obj  == address of BTA2DP device
-                    makeA2dpDeviceUnavailableNow( (String) msg.obj );
+                    synchronized (mConnectedDevices) {
+                        makeA2dpDeviceUnavailableNow( (String) msg.obj );
+                    }
                     break;
 
                 case MSG_SET_FORCE_USE:
@@ -2486,6 +2524,7 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceAvailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
@@ -2496,6 +2535,7 @@ public class AudioService extends IAudioService.Stub {
                 address);
     }
 
+    // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
         Intent noisyIntent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         mContext.sendBroadcast(noisyIntent);
@@ -2505,6 +2545,7 @@ public class AudioService extends IAudioService.Stub {
         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
     }
 
+    // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableLater(String address) {
         // prevent any activity on the A2DP audio output to avoid unwanted
         // reconnection of the sink.
@@ -2517,12 +2558,58 @@ public class AudioService extends IAudioService.Stub {
 
     }
 
+    // must be called synchronized on mConnectedDevices
     private void cancelA2dpDeviceTimeout() {
         mAudioHandler.removeMessages(MSG_BTA2DP_DOCK_TIMEOUT);
     }
 
+    // must be called synchronized on mConnectedDevices
     private boolean hasScheduledA2dpDockTimeout() {
         return mAudioHandler.hasMessages(MSG_BTA2DP_DOCK_TIMEOUT);
+    }
+
+    private void handleA2dpConnectionStateChange(BluetoothDevice btDevice, int state)
+    {
+        if (btDevice == null) {
+            return;
+        }
+        String address = btDevice.getAddress();
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            address = "";
+        }
+        synchronized (mConnectedDevices) {
+            boolean isConnected =
+                (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
+                 mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP).equals(address));
+
+            if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
+                if (btDevice.isBluetoothDock()) {
+                    if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                        // introduction of a delay for transient disconnections of docks when
+                        // power is rapidly turned off/on, this message will be canceled if
+                        // we reconnect the dock under a preset delay
+                        makeA2dpDeviceUnavailableLater(address);
+                        // the next time isConnected is evaluated, it will be false for the dock
+                    }
+                } else {
+                    makeA2dpDeviceUnavailableNow(address);
+                }
+            } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
+                if (btDevice.isBluetoothDock()) {
+                    // this could be a reconnection after a transient disconnection
+                    cancelA2dpDeviceTimeout();
+                    mDockAddress = address;
+                } else {
+                    // this could be a connection of another A2DP device before the timeout of
+                    // a dock: cancel the dock timeout, and make the dock unavailable now
+                    if(hasScheduledA2dpDockTimeout()) {
+                        cancelA2dpDeviceTimeout();
+                        makeA2dpDeviceUnavailableNow(mDockAddress);
+                    }
+                }
+                makeA2dpDeviceAvailable(address);
+            }
+        }
     }
 
     /* cache of the address of the last dock the device was connected to */
@@ -2562,44 +2649,8 @@ public class AudioService extends IAudioService.Stub {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (btDevice == null) {
-                    return;
-                }
-                String address = btDevice.getAddress();
-                if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-                    address = "";
-                }
-                boolean isConnected =
-                    (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
-                     mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP).equals(address));
 
-                if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                    if (btDevice.isBluetoothDock()) {
-                        if (state == BluetoothProfile.STATE_DISCONNECTED) {
-                            // introduction of a delay for transient disconnections of docks when
-                            // power is rapidly turned off/on, this message will be canceled if
-                            // we reconnect the dock under a preset delay
-                            makeA2dpDeviceUnavailableLater(address);
-                            // the next time isConnected is evaluated, it will be false for the dock
-                        }
-                    } else {
-                        makeA2dpDeviceUnavailableNow(address);
-                    }
-                } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                    if (btDevice.isBluetoothDock()) {
-                        // this could be a reconnection after a transient disconnection
-                        cancelA2dpDeviceTimeout();
-                        mDockAddress = address;
-                    } else {
-                        // this could be a connection of another A2DP device before the timeout of
-                        // a dock: cancel the dock timeout, and make the dock unavailable now
-                        if(hasScheduledA2dpDockTimeout()) {
-                            cancelA2dpDeviceTimeout();
-                            makeA2dpDeviceUnavailableNow(mDockAddress);
-                        }
-                    }
-                    makeA2dpDeviceAvailable(address);
-                }
+                handleA2dpConnectionStateChange(btDevice, state);
             } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothProfile.STATE_DISCONNECTED);
@@ -2628,103 +2679,126 @@ public class AudioService extends IAudioService.Stub {
                 if (!BluetoothAdapter.checkBluetoothAddress(address)) {
                     address = "";
                 }
-                boolean isConnected = (mConnectedDevices.containsKey(device) &&
-                                       mConnectedDevices.get(device).equals(address));
 
-                synchronized (mScoClients) {
-                    if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
-                        AudioSystem.setDeviceConnectionState(device,
+                synchronized (mConnectedDevices) {
+                    boolean isConnected = (mConnectedDevices.containsKey(device) &&
+                                           mConnectedDevices.get(device).equals(address));
+
+                    synchronized (mScoClients) {
+                        if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
+                            AudioSystem.setDeviceConnectionState(device,
                                                              AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                                              address);
-                        mConnectedDevices.remove(device);
-                        mBluetoothHeadsetDevice = null;
-                        resetBluetoothSco();
-                    } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                        AudioSystem.setDeviceConnectionState(device,
-                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                             address);
-                        mConnectedDevices.put(new Integer(device), address);
-                        mBluetoothHeadsetDevice = btDevice;
+                            mConnectedDevices.remove(device);
+                            mBluetoothHeadsetDevice = null;
+                            resetBluetoothSco();
+                        } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
+                            AudioSystem.setDeviceConnectionState(device,
+                                                                 AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                                 address);
+                            mConnectedDevices.put(new Integer(device), address);
+                            mBluetoothHeadsetDevice = btDevice;
+                        }
                     }
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 int microphone = intent.getIntExtra("microphone", 0);
 
-                if (microphone != 0) {
-                    boolean isConnected =
-                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
-                    if (state == 0 && isConnected) {
-                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                                AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                "");
-                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
-                    } else if (state == 1 && !isConnected)  {
-                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                                AudioSystem.DEVICE_STATE_AVAILABLE,
-                                "");
-                        mConnectedDevices.put(
-                                new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
-                    }
-                } else {
-                    boolean isConnected =
-                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
-                    if (state == 0 && isConnected) {
-                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
-                                AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                "");
-                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
-                    } else if (state == 1 && !isConnected)  {
-                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
-                                AudioSystem.DEVICE_STATE_AVAILABLE,
-                                "");
-                        mConnectedDevices.put(
-                                new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
+                synchronized (mConnectedDevices) {
+                    if (microphone != 0) {
+                        boolean isConnected =
+                            mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+                        if (state == 0 && isConnected) {
+                            AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                                    AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                    "");
+                            mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
+                        } else if (state == 1 && !isConnected)  {
+                            AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                                    AudioSystem.DEVICE_STATE_AVAILABLE,
+                                    "");
+                            mConnectedDevices.put(
+                                    new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
+                        }
+                    } else {
+                        boolean isConnected =
+                            mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+                        if (state == 0 && isConnected) {
+                            AudioSystem.setDeviceConnectionState(
+                                    AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
+                                    AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                    "");
+                            mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
+                        } else if (state == 1 && !isConnected)  {
+                            AudioSystem.setDeviceConnectionState(
+                                    AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
+                                    AudioSystem.DEVICE_STATE_AVAILABLE,
+                                    "");
+                            mConnectedDevices.put(
+                                    new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
+                        }
                     }
                 }
             } else if (action.equals(Intent.ACTION_USB_ANLG_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_ANLG_HEADSET_PLUG, state = "+state);
-                boolean isConnected =
-                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
-                if (state == 0 && isConnected) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
-                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
-                } else if (state == 1 && !isConnected)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
-                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
-                    mConnectedDevices.put(
-                            new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
+                synchronized (mConnectedDevices) {
+                    boolean isConnected =
+                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(
+                                                        AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
+                                                        AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                                        "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(
+                                                        AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
+                                                        AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                        "");
+                        mConnectedDevices.put(
+                                new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
+                    }
                 }
             } else if (action.equals(Intent.ACTION_HDMI_AUDIO_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_HDMI_AUDIO_PLUG, state = "+state);
-                boolean isConnected =
-                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
-                if (state == 0 && isConnected) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
-                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
-                } else if (state == 1 && !isConnected)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
-                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_AUX_DIGITAL), "");
+                synchronized (mConnectedDevices) {
+                    boolean isConnected =
+                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
+                                                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                                             "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_AUX_DIGITAL);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_AUX_DIGITAL,
+                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                             "");
+                        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_AUX_DIGITAL), "");
+                    }
                 }
             } else if (action.equals(Intent.ACTION_USB_DGTL_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
                 Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_DGTL_HEADSET_PLUG, state = "+state);
-                boolean isConnected =
-                    mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
-                if (state == 0 && isConnected) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
-                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
-                } else if (state == 1 && !isConnected)  {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
-                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
-                    mConnectedDevices.put(
-                            new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
+                synchronized (mConnectedDevices) {
+                    boolean isConnected =
+                        mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+                    if (state == 0 && isConnected) {
+                        AudioSystem.setDeviceConnectionState(
+                                                         AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                                                         "");
+                        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+                    } else if (state == 1 && !isConnected)  {
+                        AudioSystem.setDeviceConnectionState(
+                                                         AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                         "");
+                        mConnectedDevices.put(
+                                new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
+                    }
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
@@ -2788,6 +2862,12 @@ public class AudioService extends IAudioService.Stub {
                 newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
                         AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
                 mContext.sendStickyBroadcast(newIntent);
+
+                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                if (adapter != null) {
+                    adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                            BluetoothProfile.A2DP);
+                }
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                     // a package is being removed, not replaced
@@ -3589,7 +3669,7 @@ public class AudioService extends IAudioService.Stub {
         updateRemoteControlDisplay_syncAfRcs(infoChangedFlags);
     }
 
-    /** 
+    /**
      * see AudioManager.registerMediaButtonIntent(PendingIntent pi, ComponentName c)
      * precondition: mediaIntent != null, target != null
      */
@@ -3605,7 +3685,7 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** 
+    /**
      * see AudioManager.unregisterMediaButtonIntent(PendingIntent mediaIntent)
      * precondition: mediaIntent != null, eventReceiver != null
      */
