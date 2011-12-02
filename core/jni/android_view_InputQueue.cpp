@@ -45,8 +45,7 @@ namespace android {
 static struct {
     jclass clazz;
 
-    jmethodID dispatchKeyEvent;
-    jmethodID dispatchMotionEvent;
+    jmethodID dispatchInputEvent;
 } gInputQueueClassInfo;
 
 // ----------------------------------------------------------------------------
@@ -365,7 +364,6 @@ int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* dat
     int32_t inputEventType = inputEvent->getType();
 
     jobject inputEventObj;
-    jmethodID dispatchMethodId;
     switch (inputEventType) {
     case AINPUT_EVENT_TYPE_KEY:
 #if DEBUG_DISPATCH_CYCLE
@@ -373,7 +371,6 @@ int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* dat
 #endif
         inputEventObj = android_view_KeyEvent_fromNative(env,
                 static_cast<KeyEvent*>(inputEvent));
-        dispatchMethodId = gInputQueueClassInfo.dispatchKeyEvent;
         break;
 
     case AINPUT_EVENT_TYPE_MOTION:
@@ -382,7 +379,6 @@ int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* dat
 #endif
         inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
                 static_cast<MotionEvent*>(inputEvent));
-        dispatchMethodId = gInputQueueClassInfo.dispatchMotionEvent;
         break;
 
     default:
@@ -402,7 +398,7 @@ int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* dat
     LOGD("Invoking input handler.");
 #endif
     env->CallStaticVoidMethod(gInputQueueClassInfo.clazz,
-            dispatchMethodId, inputHandlerObjLocal, inputEventObj,
+            gInputQueueClassInfo.dispatchInputEvent, inputHandlerObjLocal, inputEventObj,
             jlong(finishedToken));
 #if DEBUG_DISPATCH_CYCLE
     LOGD("Returned from input handler.");
@@ -517,13 +513,9 @@ int register_android_view_InputQueue(JNIEnv* env) {
 
     FIND_CLASS(gInputQueueClassInfo.clazz, "android/view/InputQueue");
 
-    GET_STATIC_METHOD_ID(gInputQueueClassInfo.dispatchKeyEvent, gInputQueueClassInfo.clazz,
-            "dispatchKeyEvent",
-            "(Landroid/view/InputHandler;Landroid/view/KeyEvent;J)V");
-
-    GET_STATIC_METHOD_ID(gInputQueueClassInfo.dispatchMotionEvent, gInputQueueClassInfo.clazz,
-            "dispatchMotionEvent",
-            "(Landroid/view/InputHandler;Landroid/view/MotionEvent;J)V");
+    GET_STATIC_METHOD_ID(gInputQueueClassInfo.dispatchInputEvent, gInputQueueClassInfo.clazz,
+            "dispatchInputEvent",
+            "(Landroid/view/InputHandler;Landroid/view/InputEvent;J)V");
     return 0;
 }
 

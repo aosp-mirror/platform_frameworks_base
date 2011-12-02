@@ -36,7 +36,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
-import com.android.internal.view.BaseInputHandler;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -571,18 +570,21 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mTurnOnScreen;
 
     DragState mDragState = null;
-    final InputHandler mDragInputHandler = new BaseInputHandler() {
+    final InputHandler mDragInputHandler = new InputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+        public void handleInputEvent(InputEvent event,
+                InputQueue.FinishedCallback finishedCallback) {
             boolean handled = false;
             try {
-                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                if (event instanceof MotionEvent
+                        && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
                         && mDragState != null) {
+                    final MotionEvent motionEvent = (MotionEvent)event;
                     boolean endDrag = false;
-                    final float newX = event.getRawX();
-                    final float newY = event.getRawY();
+                    final float newX = motionEvent.getRawX();
+                    final float newY = motionEvent.getRawY();
 
-                    switch (event.getAction()) {
+                    switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         if (DEBUG_DRAG) {
                             Slog.w(TAG, "Unexpected ACTION_DOWN in drag layer");

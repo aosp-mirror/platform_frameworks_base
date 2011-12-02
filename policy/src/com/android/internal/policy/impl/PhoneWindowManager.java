@@ -61,7 +61,6 @@ import com.android.internal.app.ShutdownThread;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
 import android.util.DisplayMetrics;
@@ -75,6 +74,7 @@ import android.view.IApplicationToken;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.InputQueue;
 import android.view.InputHandler;
 import android.view.KeyCharacterMap;
@@ -345,15 +345,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
-    private final InputHandler mPointerLocationInputHandler = new BaseInputHandler() {
+    private final InputHandler mPointerLocationInputHandler = new InputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+        public void handleInputEvent(InputEvent event,
+                InputQueue.FinishedCallback finishedCallback) {
             boolean handled = false;
             try {
-                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                if (event instanceof MotionEvent
+                        && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                    final MotionEvent motionEvent = (MotionEvent)event;
                     synchronized (mLock) {
                         if (mPointerLocationView != null) {
-                            mPointerLocationView.addPointerEvent(event);
+                            mPointerLocationView.addPointerEvent(motionEvent);
                             handled = true;
                         }
                     }
@@ -1836,13 +1839,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * to determine when the nav bar should be shown and prevent applications from
      * receiving those touches.
      */
-    final InputHandler mHideNavInputHandler = new BaseInputHandler() {
+    final InputHandler mHideNavInputHandler = new InputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+        public void handleInputEvent(InputEvent event,
+                InputQueue.FinishedCallback finishedCallback) {
             boolean handled = false;
             try {
-                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (event instanceof MotionEvent
+                        && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                    final MotionEvent motionEvent = (MotionEvent)event;
+                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                         // When the user taps down, we re-show the nav bar.
                         boolean changed = false;
                         synchronized (mLock) {

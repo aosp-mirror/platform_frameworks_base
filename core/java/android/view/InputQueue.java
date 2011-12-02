@@ -114,19 +114,12 @@ public final class InputQueue {
     }
     
     @SuppressWarnings("unused")
-    private static void dispatchKeyEvent(InputHandler inputHandler,
-            KeyEvent event, long finishedToken) {
+    private static void dispatchInputEvent(InputHandler inputHandler,
+            InputEvent event, long finishedToken) {
         FinishedCallback finishedCallback = FinishedCallback.obtain(finishedToken);
-        inputHandler.handleKey(event, finishedCallback);
+        inputHandler.handleInputEvent(event, finishedCallback);
     }
 
-    @SuppressWarnings("unused")
-    private static void dispatchMotionEvent(InputHandler inputHandler,
-            MotionEvent event, long finishedToken) {
-        FinishedCallback finishedCallback = FinishedCallback.obtain(finishedToken);
-        inputHandler.handleMotion(event, finishedCallback);
-    }
-    
     /**
      * A callback that must be invoked to when finished processing an event.
      * @hide
