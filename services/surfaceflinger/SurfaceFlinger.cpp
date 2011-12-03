@@ -710,6 +710,14 @@ void SurfaceFlinger::computeVisibleRegions(
 
 void SurfaceFlinger::commitTransaction()
 {
+    if (!mLayersPendingRemoval.isEmpty()) {
+        // Notify removed layers now that they can't be drawn from
+        for (size_t i = 0; i < mLayersPendingRemoval.size(); i++) {
+            mLayersPendingRemoval[i]->onRemoved();
+        }
+        mLayersPendingRemoval.clear();
+    }
+
     mDrawingState = mCurrentState;
     mTransationPending = false;
     mTransactionCV.broadcast();
@@ -1162,7 +1170,7 @@ status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
         mLayerPurgatory.add(layerBase);
     }
 
-    layerBase->onRemoved();
+    mLayersPendingRemoval.push(layerBase);
 
     // it's possible that we don't find a layer, because it might
     // have been destroyed already -- this is not technically an error
