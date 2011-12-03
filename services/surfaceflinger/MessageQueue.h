@@ -55,7 +55,6 @@ private:
 
 class MessageQueue {
     sp<Looper> mLooper;
-    volatile int32_t mInvalidatePending;
 
 public:
     MessageQueue();
