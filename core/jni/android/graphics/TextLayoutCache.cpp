@@ -364,7 +364,7 @@ void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, SkPaint* paint
             &value->mAdvances, &value->mTotalAdvance, &value->mGlyphs);
 #if DEBUG_ADVANCES
     LOGD("Advances - start = %d, count = %d, contextCount = %d, totalAdvance = %f", start, count,
-            contextCount, mTotalAdvance);
+            contextCount, value->mTotalAdvance);
 #endif
 }
 
@@ -598,13 +598,14 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
                 outAdvances->add(currentAdvance);
             }
         }
+
         totalAdvance += totalFontRunAdvance;
 
 #if DEBUG_ADVANCES
         LOGD("Returned advances");
         for (size_t i = 0; i < countScriptRun; i++) {
             LOGD("         -- hb-adv[%d] = %f, log_clusters = %d, total = %f", i,
-                    (*outAdvances)[i], shaperItem.log_clusters[i], totalFontRunAdvance);
+                    (*outAdvances)[i], mShaperItem.log_clusters[i], totalFontRunAdvance);
         }
 #endif
 
@@ -624,7 +625,9 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
             }
         }
     }
+
     *outTotalAdvance = totalAdvance;
+
 #if DEBUG_GLYPHS
     LOGD("-------- End of Script Run --------");
 #endif
