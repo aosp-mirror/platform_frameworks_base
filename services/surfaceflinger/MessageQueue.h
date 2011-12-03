@@ -55,6 +55,7 @@ private:
 
 class MessageQueue {
     sp<Looper> mLooper;
+    volatile int32_t mWorkPending;
 
 public:
     MessageQueue();
