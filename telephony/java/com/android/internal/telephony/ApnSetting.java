@@ -189,4 +189,11 @@ public class ApnSetting {
         }
         return false;
     }
+
+    // TODO - if we have this function we should also have hashCode.
+    // Also should handle changes in type order and perhaps case-insensitivity
+    public boolean equals(Object o) {
+        if (o instanceof ApnSetting == false) return false;
+        return (this.toString().equals(o.toString()));
+    }
 }

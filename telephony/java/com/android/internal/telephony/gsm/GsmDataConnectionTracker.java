@@ -1720,11 +1720,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private DataConnection checkForConnectionForApnContext(ApnContext apnContext) {
         // Loop through all apnContexts looking for one with a conn that satisfies this apnType
         String apnType = apnContext.getApnType();
+        ApnSetting dunSetting = null;
+
+        if (Phone.APN_TYPE_DUN.equals(apnType)) {
+            dunSetting = fetchDunApn();
+        }
+
         for (ApnContext c : mApnContexts.values()) {
             DataConnection conn = c.getDataConnection();
             if (conn != null) {
                 ApnSetting apnSetting = c.getApnSetting();
-                if (apnSetting != null && apnSetting.canHandleType(apnType)) {
+                if (dunSetting != null) {
+                    if (dunSetting.equals(apnSetting)) {
+                        if (DBG) {
+                            log("checkForConnectionForApnContext: apnContext=" + apnContext +
+                                    " found conn=" + conn);
+                        }
+                        return conn;
+                    }
+                } else if (apnSetting != null && apnSetting.canHandleType(apnType)) {
                     if (DBG) {
                         log("checkForConnectionForApnContext: apnContext=" + apnContext +
                                 " found conn=" + conn);
