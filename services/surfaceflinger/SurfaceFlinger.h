@@ -352,6 +352,7 @@ private:
                 Condition               mTransactionCV;
                 SortedVector< sp<LayerBase> > mLayerPurgatory;
                 bool                    mTransationPending;
+                Vector< sp<LayerBase> > mLayersPendingRemoval;
 
                 // protected by mStateLock (but we could use another lock)
                 GraphicPlane                mGraphicPlanes[1];
