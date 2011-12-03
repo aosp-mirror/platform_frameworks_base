@@ -44,8 +44,7 @@ void MessageBase::handleMessage(const Message&) {
 // ---------------------------------------------------------------------------
 
 MessageQueue::MessageQueue()
-    : mLooper(new Looper(true)),
-      mInvalidatePending(0)
+    : mLooper(new Looper(true))
 {
 }
 
@@ -54,17 +53,13 @@ MessageQueue::~MessageQueue() {
 
 void MessageQueue::waitMessage() {
     do {
-        // handle invalidate events first
-        if (android_atomic_and(0, &mInvalidatePending) != 0)
-            break;
-
         IPCThreadState::self()->flushCommands();
 
         int32_t ret = mLooper->pollOnce(-1);
         switch (ret) {
             case ALOOPER_POLL_WAKE:
                 // we got woken-up there is work to do in the main loop
-                continue;
+                return;
 
             case ALOOPER_POLL_CALLBACK:
                 // callback was handled, loop again
@@ -99,7 +94,6 @@ status_t MessageQueue::postMessage(
 }
 
 status_t MessageQueue::invalidate() {
-    android_atomic_or(1, &mInvalidatePending);
     mLooper->wake();
     return NO_ERROR;
 }
