@@ -88,8 +88,8 @@ public class SurfaceView extends View {
     final int[] mLocation = new int[2];
     
     final ReentrantLock mSurfaceLock = new ReentrantLock();
-    Surface mSurface = new Surface();       // Current surface in use
-    Surface mNewSurface = new Surface();    // New surface we are switching to
+    final Surface mSurface = new Surface();       // Current surface in use
+    final Surface mNewSurface = new Surface();    // New surface we are switching to
     boolean mDrawingStopped = true;
 
     final WindowManager.LayoutParams mLayout
@@ -519,10 +519,7 @@ public class SurfaceView extends View {
                         }
                     }
 
-                    Surface tmpSurface = mSurface;
-                    mSurface = mNewSurface;
-                    mNewSurface = tmpSurface;
-                    mNewSurface.release();
+                    mSurface.transferFrom(mNewSurface);
 
                     if (visible) {
                         if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
