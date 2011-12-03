@@ -23,6 +23,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <cutils/properties.h>
 #include <utils/ResourceTypes.h>
 
 #include <gui/SurfaceTexture.h>
@@ -736,7 +737,15 @@ static jboolean android_view_GLES20Canvas_copyLayer(JNIEnv* env, jobject clazz,
 
 static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz) {
 #ifdef USE_OPENGL_RENDERER
-    return JNI_TRUE;
+    char prop[PROPERTY_VALUE_MAX];
+    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
+        // not in the emulator
+        return JNI_TRUE;
+    }
+    // In the emulator this property will be set to 1 when hardware GLES is
+    // enabled, 0 otherwise. On old emulator versions it will be undefined.
+    property_get("ro.kernel.qemu.gles", prop, "0");
+    return atoi(prop) == 1 ? JNI_TRUE : JNI_FALSE;
 #else
     return JNI_FALSE;
 #endif
