@@ -63,16 +63,16 @@ public interface ViewParent {
     /**
      * All or part of a child is dirty and needs to be redrawn.
      *
-     * The location array is an array of two int values which respectively
-     * define the left and the top position of the dirty child.
+     * <p>The location array is an array of two int values which respectively
+     * define the left and the top position of the dirty child.</p>
      *
-     * This method must return the parent of this ViewParent if the specified
+     * <p>This method must return the parent of this ViewParent if the specified
      * rectangle must be invalidated in the parent. If the specified rectangle
      * does not require invalidation in the parent or if the parent does not
-     * exist, this method must return null.
+     * exist, this method must return null.</p>
      *
-     * When this method returns a non-null value, the location array must
-     * have been updated with the left and top coordinates of this ViewParent.
+     * <p>When this method returns a non-null value, the location array must
+     * have been updated with the left and top coordinates of this ViewParent.</p>
      *
      * @param location An array of 2 ints containing the left and top
      *        coordinates of the child to invalidate
@@ -115,6 +115,26 @@ public interface ViewParent {
      */
     public void clearChildFocus(View child);
 
+    /**
+     * Compute the visible part of a rectangular region defined in terms of a child view's
+     * coordinates.
+     *
+     * <p>Returns the clipped visible part of the rectangle <code>r</code>, defined in the
+     * <code>child</code>'s local coordinate system. <code>r</code> is modified by this method to
+     * contain the result, expressed in the global (root) coordinate system.</p>
+     *
+     * <p>The resulting rectangle is always axis aligned. If a rotation is applied to a node in the
+     * View hierarchy, the result is the axis-aligned bounding box of the visible rectangle.</p>
+     *
+     * @param child A child View, whose rectangular visible region we want to compute
+     * @param r The input rectangle, defined in the child coordinate system. Will be overwritten to
+     * contain the resulting visible rectangle, expressed in global (root) coordinates
+     * @param offset The input coordinates of a point, defined in the child coordinate system.
+     * As with the <code>r</code> parameter, this will be overwritten to contain the global (root)
+     * coordinates of that point.
+     * A <code>null</code> value is valid (in case you are not interested in this result)
+     * @return true if the resulting rectangle is not empty, false otherwise
+     */
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset);
 
     /**
@@ -143,11 +163,11 @@ public interface ViewParent {
 
     /**
      * Bring up a context menu for the specified view or its ancestors.
-     * <p>
-     * In most cases, a subclass does not need to override this.  However, if
+     *
+     * <p>In most cases, a subclass does not need to override this.  However, if
      * the subclass is added directly to the window manager (for example,
      * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
-     * then it should override this and show the context menu.
+     * then it should override this and show the context menu.</p>
      * 
      * @param originalView The source view where the context menu was first invoked
      * @return true if a context menu was displayed
@@ -164,11 +184,11 @@ public interface ViewParent {
 
     /**
      * Start an action mode for the specified view.
-     * <p>
-     * In most cases, a subclass does not need to override this. However, if the
+     *
+     * <p>In most cases, a subclass does not need to override this. However, if the
      * subclass is added directly to the window manager (for example,
      * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
-     * then it should override this and start the action mode.
+     * then it should override this and start the action mode.</p>
      *
      * @param originalView The source view where the action mode was first invoked
      * @param callback The callback that will handle lifecycle events for the action mode
@@ -188,10 +208,10 @@ public interface ViewParent {
      * Called when a child does not want this parent and its ancestors to
      * intercept touch events with
      * {@link ViewGroup#onInterceptTouchEvent(MotionEvent)}.
-     * <p>
-     * This parent should pass this call onto its parents. This parent must obey
+     *
+     * <p>This parent should pass this call onto its parents. This parent must obey
      * this request for the duration of the touch (that is, only clear the flag
-     * after this parent has received an up or a cancel.
+     * after this parent has received an up or a cancel.</p>
      * 
      * @param disallowIntercept True if the child does not want the parent to
      *            intercept touch events.
@@ -234,7 +254,7 @@ public interface ViewParent {
      *       the sending. The parent can optionally add a record for itself before
      *       dispatching the request to its parent. A parent can also choose not to
      *       respect the request for sending the event. The accessibility event is sent
-     *       by the topmost view in the view tree.
+     *       by the topmost view in the view tree.</p>
      *
      * @param child The child which requests sending the event.
      * @param event The event to be sent.
