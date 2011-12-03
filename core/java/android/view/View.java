@@ -8115,9 +8115,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * If some part of this view is not clipped by any of its parents, then
      * return that area in r in global (root) coordinates. To convert r to local
-     * coordinates, offset it by -globalOffset (e.g. r.offset(-globalOffset.x,
-     * -globalOffset.y)) If the view is completely clipped or translated out,
-     * return false.
+     * coordinates (without taking possible View rotations into account), offset
+     * it by -globalOffset (e.g. r.offset(-globalOffset.x, -globalOffset.y)).
+     * If the view is completely clipped or translated out, return false.
      *
      * @param r If true is returned, r holds the global coordinates of the
      *        visible portion of this view.
@@ -12208,35 +12208,48 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param location an array of two integers in which to hold the coordinates
      */
     public void getLocationInWindow(int[] location) {
+        // When the view is not attached to a window, this method does not make sense
+        if (mAttachInfo == null) return;
+
         if (location == null || location.length < 2) {
-            throw new IllegalArgumentException("location must be an array of "
-                    + "two integers");
+            throw new IllegalArgumentException("location must be an array of two integers");
         }
 
-        location[0] = mLeft;
-        location[1] = mTop;
-        if (mTransformationInfo != null) {
-            location[0] += (int) (mTransformationInfo.mTranslationX + 0.5f);
-            location[1] += (int) (mTransformationInfo.mTranslationY + 0.5f);
+        float[] position = mAttachInfo.mTmpTransformLocation;
+        position[0] = position[1] = 0.0f;
+
+        if (!hasIdentityMatrix()) {
+            getMatrix().mapPoints(position);
         }
+
+        position[0] += mLeft;
+        position[1] += mTop;
 
         ViewParent viewParent = mParent;
         while (viewParent instanceof View) {
-            final View view = (View)viewParent;
-            location[0] += view.mLeft - view.mScrollX;
-            location[1] += view.mTop - view.mScrollY;
-            if (view.mTransformationInfo != null) {
-                location[0] += (int) (view.mTransformationInfo.mTranslationX + 0.5f);
-                location[1] += (int) (view.mTransformationInfo.mTranslationY + 0.5f);
+            final View view = (View) viewParent;
+
+            position[0] -= view.mScrollX;
+            position[1] -= view.mScrollY;
+
+            if (!view.hasIdentityMatrix()) {
+                view.getMatrix().mapPoints(position);
             }
+
+            position[0] += view.mLeft;
+            position[1] += view.mTop;
+
             viewParent = view.mParent;
         }
 
         if (viewParent instanceof ViewRootImpl) {
             // *cough*
-            final ViewRootImpl vr = (ViewRootImpl)viewParent;
-            location[1] -= vr.mCurScrollY;
+            final ViewRootImpl vr = (ViewRootImpl) viewParent;
+            position[1] -= vr.mCurScrollY;
         }
+
+        location[0] = (int) (position[0] + 0.5f);
+        location[1] = (int) (position[1] + 0.5f);
     }
 
     /**

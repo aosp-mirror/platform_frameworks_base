@@ -79,7 +79,7 @@ import java.util.HashSet;
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
 
     private static final boolean DBG = false;
-    
+
     /**
      * Views which have been hidden or removed which need to be animated on
      * their way out.
@@ -4184,15 +4184,42 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
+        // The View is not attached to a window, 'visible' does not make sense, return false
+        if (mAttachInfo == null) return false;
+
+        final RectF rect = mAttachInfo.mTmpTransformRect;
+        rect.set(r);
+
+        if (!child.hasIdentityMatrix()) {
+           child.getMatrix().mapRect(rect);
+        }
+
         int dx = child.mLeft - mScrollX;
         int dy = child.mTop - mScrollY;
+
+        rect.offset(dx, dy);
+
         if (offset != null) {
+            if (!child.hasIdentityMatrix()) {
+                float[] position = mAttachInfo.mTmpTransformLocation;
+                position[0] = offset.x;
+                position[1] = offset.y;
+                child.getMatrix().mapPoints(position);
+                offset.x = (int) (position[0] + 0.5f);
+                offset.y = (int) (position[1] + 0.5f);
+            }
             offset.x += dx;
             offset.y += dy;
         }
-        r.offset(dx, dy);
-        return r.intersect(0, 0, mRight - mLeft, mBottom - mTop) &&
-               (mParent == null || mParent.getChildVisibleRect(this, r, offset));
+
+        if (rect.intersect(0, 0, mRight - mLeft, mBottom - mTop)) {
+            if (mParent == null) return true;
+            r.set((int) (rect.left + 0.5f), (int) (rect.top + 0.5f),
+                    (int) (rect.right + 0.5f), (int) (rect.bottom + 0.5f));
+            return mParent.getChildVisibleRect(this, r, offset);
+        }
+
+        return false;
     }
 
     /**
