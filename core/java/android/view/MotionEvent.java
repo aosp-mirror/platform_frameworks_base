@@ -1642,6 +1642,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Recycle the MotionEvent, to be re-used by a later caller.  After calling
      * this function you must not ever touch the event again.
      */
+    @Override
     public final void recycle() {
         super.recycle();
 

@@ -124,7 +124,7 @@ public abstract class InputEventReceiver {
                 nativeFinishInputEvent(mReceiverPtr, handled);
             }
         }
-        recycleInputEvent(event);
+        event.recycleIfNeededAfterDispatch();
     }
 
     // Called from native code.
@@ -132,16 +132,6 @@ public abstract class InputEventReceiver {
     private void dispatchInputEvent(InputEvent event) {
         mEventSequenceNumberInProgress = event.getSequenceNumber();
         onInputEvent(event);
-    }
-
-    private static void recycleInputEvent(InputEvent event) {
-        if (event instanceof MotionEvent) {
-            // Event though key events are also recyclable, we only recycle motion events.
-            // Historically, key events were not recyclable and applications expect
-            // them to be immutable.  We only ever recycle key events behind the
-            // scenes where an application never sees them (so, not here).
-            event.recycle();
-        }
     }
 
     public static interface Factory {

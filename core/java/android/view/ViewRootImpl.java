@@ -3848,12 +3848,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (q.mReceiver != null) {
             q.mReceiver.finishInputEvent(q.mEvent, handled);
-        } else if (q.mEvent instanceof MotionEvent) {
-            // Event though key events are also recyclable, we only recycle motion events.
-            // Historically, key events were not recyclable and applications expect
-            // them to be immutable.  We only ever recycle key events behind the
-            // scenes where an application never sees them (so, not here).
-            q.mEvent.recycle();
+        } else {
+            q.mEvent.recycleIfNeededAfterDispatch();
         }
 
         recycleQueuedInputEvent(q);

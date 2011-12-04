@@ -112,6 +112,21 @@ public abstract class InputEvent implements Parcelable {
     }
 
     /**
+     * Conditionally recycled the event if it is appropriate to do so after
+     * dispatching the event to an application.
+     *
+     * If the event is a {@link MotionEvent} then it is recycled.
+     *
+     * If the event is a {@link KeyEvent} then it is NOT recycled, because applications
+     * expect key events to be immutable so once the event has been dispatched to
+     * the application we can no longer recycle it.
+     * @hide
+     */
+    public void recycleIfNeededAfterDispatch() {
+        recycle();
+    }
+
+    /**
      * Reinitializes the event on reuse (after recycling).
      * @hide
      */
