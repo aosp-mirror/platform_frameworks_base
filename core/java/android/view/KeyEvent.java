@@ -1596,6 +1596,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @hide
      */
+    @Override
     public final void recycle() {
         super.recycle();
         mCharacters = null;
@@ -1607,6 +1608,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
                 gRecyclerTop = this;
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    public final void recycleIfNeededAfterDispatch() {
+        // Do nothing.
     }
 
     /**
