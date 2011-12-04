@@ -44,7 +44,7 @@ void MessageBase::handleMessage(const Message&) {
 // ---------------------------------------------------------------------------
 
 MessageQueue::MessageQueue()
-    : mLooper(new Looper(true))
+    : mLooper(new Looper(true)), mWorkPending(0)
 {
 }
 
@@ -58,11 +58,11 @@ void MessageQueue::waitMessage() {
         int32_t ret = mLooper->pollOnce(-1);
         switch (ret) {
             case ALOOPER_POLL_WAKE:
-                // we got woken-up there is work to do in the main loop
-                return;
-
             case ALOOPER_POLL_CALLBACK:
-                // callback was handled, loop again
+                // callback and/or wake
+                if (android_atomic_and(0, &mWorkPending)) {
+                    return;
+                }
                 continue;
 
             case ALOOPER_POLL_TIMEOUT:
@@ -94,7 +94,9 @@ status_t MessageQueue::postMessage(
 }
 
 status_t MessageQueue::invalidate() {
-    mLooper->wake();
+    if (android_atomic_or(1, &mWorkPending) == 0) {
+        mLooper->wake();
+    }
     return NO_ERROR;
 }
 
