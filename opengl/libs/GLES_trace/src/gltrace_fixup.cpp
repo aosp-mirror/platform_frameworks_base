@@ -95,20 +95,16 @@ void fixup_glGetString(GLMessage *glmsg) {
     }
 }
 
-/* Add the contents of the framebuffer as an argument */
+/* Add the contents of the framebuffer to the protobuf message */
 void fixup_addFBContents(GLMessage *glmsg) {
-    GLMessage_DataType *arg_fb = glmsg->add_args();    /* Add the FB as the last argument */
-    GLTraceContext *glContext = getGLTraceContext();
-
-    void *fb;
+    void *fbcontents;
     unsigned fbsize, fbwidth, fbheight;
-    glContext->getCompressedFB(&fb, &fbsize, &fbwidth, &fbheight);
+    getGLTraceContext()->getCompressedFB(&fbcontents, &fbsize, &fbwidth, &fbheight);
 
-    arg_fb->set_isarray(true);
-    arg_fb->set_type(GLMessage::DataType::BYTE);
-    arg_fb->add_rawbytes(fb, fbsize);
-    arg_fb->add_intvalue(fbwidth);
-    arg_fb->add_intvalue(fbheight);
+    GLMessage_FrameBuffer *fb = glmsg->mutable_fb();
+    fb->set_width(fbwidth);
+    fb->set_height(fbheight);
+    fb->add_contents(fbcontents, fbsize);
 }
 
 void fixup_glTexImage2D(GLMessage *glmsg) {

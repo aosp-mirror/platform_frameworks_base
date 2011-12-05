@@ -34,6 +34,7 @@ void protobuf_ShutdownFile_gltrace_2eproto();
 
 class GLMessage;
 class GLMessage_DataType;
+class GLMessage_FrameBuffer;
 
 enum GLMessage_DataType_Type {
   GLMessage_DataType_Type_VOID = 1,
@@ -658,6 +659,108 @@ class GLMessage_DataType : public ::google::protobuf::MessageLite {
 };
 // -------------------------------------------------------------------
 
+class GLMessage_FrameBuffer : public ::google::protobuf::MessageLite {
+ public:
+  GLMessage_FrameBuffer();
+  virtual ~GLMessage_FrameBuffer();
+  
+  GLMessage_FrameBuffer(const GLMessage_FrameBuffer& from);
+  
+  inline GLMessage_FrameBuffer& operator=(const GLMessage_FrameBuffer& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  
+  static const GLMessage_FrameBuffer& default_instance();
+  
+  void Swap(GLMessage_FrameBuffer* other);
+  
+  // implements Message ----------------------------------------------
+  
+  GLMessage_FrameBuffer* New() const;
+  void CheckTypeAndMergeFrom(const ::google::protobuf::MessageLite& from);
+  void CopyFrom(const GLMessage_FrameBuffer& from);
+  void MergeFrom(const GLMessage_FrameBuffer& from);
+  void Clear();
+  bool IsInitialized() const;
+  
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  
+  ::std::string GetTypeName() const;
+  
+  // nested types ----------------------------------------------------
+  
+  // accessors -------------------------------------------------------
+  
+  // required int32 width = 1;
+  inline bool has_width() const;
+  inline void clear_width();
+  static const int kWidthFieldNumber = 1;
+  inline ::google::protobuf::int32 width() const;
+  inline void set_width(::google::protobuf::int32 value);
+  
+  // required int32 height = 2;
+  inline bool has_height() const;
+  inline void clear_height();
+  static const int kHeightFieldNumber = 2;
+  inline ::google::protobuf::int32 height() const;
+  inline void set_height(::google::protobuf::int32 value);
+  
+  // repeated bytes contents = 3;
+  inline int contents_size() const;
+  inline void clear_contents();
+  static const int kContentsFieldNumber = 3;
+  inline const ::std::string& contents(int index) const;
+  inline ::std::string* mutable_contents(int index);
+  inline void set_contents(int index, const ::std::string& value);
+  inline void set_contents(int index, const char* value);
+  inline void set_contents(int index, const void* value, size_t size);
+  inline ::std::string* add_contents();
+  inline void add_contents(const ::std::string& value);
+  inline void add_contents(const char* value);
+  inline void add_contents(const void* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& contents() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_contents();
+  
+  // @@protoc_insertion_point(class_scope:android.gltrace.GLMessage.FrameBuffer)
+ private:
+  mutable int _cached_size_;
+  
+  ::google::protobuf::int32 width_;
+  ::google::protobuf::int32 height_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> contents_;
+  friend void  protobuf_AddDesc_gltrace_2eproto();
+  friend void protobuf_AssignDesc_gltrace_2eproto();
+  friend void protobuf_ShutdownFile_gltrace_2eproto();
+  
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  
+  // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
+  inline bool _has_bit(int index) const {
+    return (_has_bits_[index / 32] & (1u << (index % 32))) != 0;
+  }
+  inline void _set_bit(int index) {
+    _has_bits_[index / 32] |= (1u << (index % 32));
+  }
+  inline void _clear_bit(int index) {
+    _has_bits_[index / 32] &= ~(1u << (index % 32));
+  }
+  
+  void InitAsDefaultInstance();
+  static GLMessage_FrameBuffer* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class GLMessage : public ::google::protobuf::MessageLite {
  public:
   GLMessage();
@@ -700,6 +803,7 @@ class GLMessage : public ::google::protobuf::MessageLite {
   // nested types ----------------------------------------------------
   
   typedef GLMessage_DataType DataType;
+  typedef GLMessage_FrameBuffer FrameBuffer;
   
   typedef GLMessage_Function Function;
   static const Function glActiveTexture = GLMessage_Function_glActiveTexture;
@@ -1178,6 +1282,13 @@ class GLMessage : public ::google::protobuf::MessageLite {
   inline float duration() const;
   inline void set_duration(float value);
   
+  // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+  inline bool has_fb() const;
+  inline void clear_fb();
+  static const int kFbFieldNumber = 6;
+  inline const ::android::gltrace::GLMessage_FrameBuffer& fb() const;
+  inline ::android::gltrace::GLMessage_FrameBuffer* mutable_fb();
+  
   // @@protoc_insertion_point(class_scope:android.gltrace.GLMessage)
  private:
   mutable int _cached_size_;
@@ -1187,11 +1298,12 @@ class GLMessage : public ::google::protobuf::MessageLite {
   ::google::protobuf::RepeatedPtrField< ::android::gltrace::GLMessage_DataType > args_;
   ::android::gltrace::GLMessage_DataType* returnvalue_;
   float duration_;
+  ::android::gltrace::GLMessage_FrameBuffer* fb_;
   friend void  protobuf_AddDesc_gltrace_2eproto();
   friend void protobuf_AssignDesc_gltrace_2eproto();
   friend void protobuf_ShutdownFile_gltrace_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -1412,6 +1524,86 @@ GLMessage_DataType::mutable_boolvalue() {
 
 // -------------------------------------------------------------------
 
+// GLMessage_FrameBuffer
+
+// required int32 width = 1;
+inline bool GLMessage_FrameBuffer::has_width() const {
+  return _has_bit(0);
+}
+inline void GLMessage_FrameBuffer::clear_width() {
+  width_ = 0;
+  _clear_bit(0);
+}
+inline ::google::protobuf::int32 GLMessage_FrameBuffer::width() const {
+  return width_;
+}
+inline void GLMessage_FrameBuffer::set_width(::google::protobuf::int32 value) {
+  _set_bit(0);
+  width_ = value;
+}
+
+// required int32 height = 2;
+inline bool GLMessage_FrameBuffer::has_height() const {
+  return _has_bit(1);
+}
+inline void GLMessage_FrameBuffer::clear_height() {
+  height_ = 0;
+  _clear_bit(1);
+}
+inline ::google::protobuf::int32 GLMessage_FrameBuffer::height() const {
+  return height_;
+}
+inline void GLMessage_FrameBuffer::set_height(::google::protobuf::int32 value) {
+  _set_bit(1);
+  height_ = value;
+}
+
+// repeated bytes contents = 3;
+inline int GLMessage_FrameBuffer::contents_size() const {
+  return contents_.size();
+}
+inline void GLMessage_FrameBuffer::clear_contents() {
+  contents_.Clear();
+}
+inline const ::std::string& GLMessage_FrameBuffer::contents(int index) const {
+  return contents_.Get(index);
+}
+inline ::std::string* GLMessage_FrameBuffer::mutable_contents(int index) {
+  return contents_.Mutable(index);
+}
+inline void GLMessage_FrameBuffer::set_contents(int index, const ::std::string& value) {
+  contents_.Mutable(index)->assign(value);
+}
+inline void GLMessage_FrameBuffer::set_contents(int index, const char* value) {
+  contents_.Mutable(index)->assign(value);
+}
+inline void GLMessage_FrameBuffer::set_contents(int index, const void* value, size_t size) {
+  contents_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GLMessage_FrameBuffer::add_contents() {
+  return contents_.Add();
+}
+inline void GLMessage_FrameBuffer::add_contents(const ::std::string& value) {
+  contents_.Add()->assign(value);
+}
+inline void GLMessage_FrameBuffer::add_contents(const char* value) {
+  contents_.Add()->assign(value);
+}
+inline void GLMessage_FrameBuffer::add_contents(const void* value, size_t size) {
+  contents_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+GLMessage_FrameBuffer::contents() const {
+  return contents_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+GLMessage_FrameBuffer::mutable_contents() {
+  return &contents_;
+}
+
+// -------------------------------------------------------------------
+
 // GLMessage
 
 // required int32 context_id = 1;
@@ -1503,6 +1695,23 @@ inline float GLMessage::duration() const {
 inline void GLMessage::set_duration(float value) {
   _set_bit(4);
   duration_ = value;
+}
+
+// optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+inline bool GLMessage::has_fb() const {
+  return _has_bit(5);
+}
+inline void GLMessage::clear_fb() {
+  if (fb_ != NULL) fb_->::android::gltrace::GLMessage_FrameBuffer::Clear();
+  _clear_bit(5);
+}
+inline const ::android::gltrace::GLMessage_FrameBuffer& GLMessage::fb() const {
+  return fb_ != NULL ? *fb_ : *default_instance_->fb_;
+}
+inline ::android::gltrace::GLMessage_FrameBuffer* GLMessage::mutable_fb() {
+  _set_bit(5);
+  if (fb_ == NULL) fb_ = new ::android::gltrace::GLMessage_FrameBuffer;
+  return fb_;
 }
 
 
