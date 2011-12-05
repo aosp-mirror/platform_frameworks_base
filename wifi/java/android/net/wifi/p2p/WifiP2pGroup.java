@@ -172,6 +172,12 @@ public class WifiP2pGroup implements Parcelable {
         return mClients.size() == 0;
     }
 
+    /** @hide Returns {@code true} if the device is part of the group */
+    public boolean contains(WifiP2pDevice device) {
+        if (mOwner.equals(device) || mClients.contains(device)) return true;
+        return false;
+    }
+
     /** Get the list of clients currently part of the p2p group */
     public Collection<WifiP2pDevice> getClientList() {
         return Collections.unmodifiableCollection(mClients);
