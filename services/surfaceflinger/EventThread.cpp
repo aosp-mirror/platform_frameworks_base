@@ -60,36 +60,51 @@ status_t EventThread::unregisterDisplayEventConnection(
     return NO_ERROR;
 }
 
+status_t EventThread::removeDisplayEventConnection(
+        const wp<DisplayEventConnection>& connection) {
+    Mutex::Autolock _l(mLock);
+    mDisplayEventConnections.remove(connection);
+    return NO_ERROR;
+}
+
 bool EventThread::threadLoop() {
 
     nsecs_t timestamp;
-    Mutex::Autolock _l(mLock);
-    do {
-        // wait for listeners
-        while (!mDisplayEventConnections.size()) {
-            mCondition.wait(mLock);
-        }
-
-        // wait for vsync
-        mLock.unlock();
-        timestamp = mHw.waitForVSync();
-        mLock.lock();
-
-        // make sure we still have some listeners
-    } while (!mDisplayEventConnections.size());
-
-
-    // dispatch vsync events to listeners...
-    mDeliveredEvents++;
-    const size_t count = mDisplayEventConnections.size();
-
     DisplayEventReceiver::Event vsync;
-    vsync.header.type = DisplayEventReceiver::DISPLAY_EVENT_VSYNC;
-    vsync.header.timestamp = timestamp;
-    vsync.vsync.count = mDeliveredEvents;
+    SortedVector<wp<DisplayEventConnection> > displayEventConnections;
 
+    { // scope for the lock
+        Mutex::Autolock _l(mLock);
+        do {
+            // wait for listeners
+            while (!mDisplayEventConnections.size()) {
+                mCondition.wait(mLock);
+            }
+
+            // wait for vsync
+            mLock.unlock();
+            timestamp = mHw.waitForVSync();
+            mLock.lock();
+
+            // make sure we still have some listeners
+        } while (!mDisplayEventConnections.size());
+
+
+        // dispatch vsync events to listeners...
+        mDeliveredEvents++;
+
+        vsync.header.type = DisplayEventReceiver::DISPLAY_EVENT_VSYNC;
+        vsync.header.timestamp = timestamp;
+        vsync.vsync.count = mDeliveredEvents;
+
+        // make a copy of our connection list, so we can
+        // dispatch events without holding mLock
+        displayEventConnections = mDisplayEventConnections;
+    }
+
+    const size_t count = displayEventConnections.size();
     for (size_t i=0 ; i<count ; i++) {
-        sp<DisplayEventConnection> conn(mDisplayEventConnections.itemAt(i).promote());
+        sp<DisplayEventConnection> conn(displayEventConnections.itemAt(i).promote());
         // make sure the connection didn't die
         if (conn != NULL) {
             status_t err = conn->postEvent(vsync);
@@ -103,10 +118,17 @@ bool EventThread::threadLoop() {
                 // handle any other error on the pipe as fatal. the only
                 // reasonable thing to do is to clean-up this connection.
                 // The most common error we'll get here is -EPIPE.
-                mDisplayEventConnections.remove(conn);
+                removeDisplayEventConnection(displayEventConnections.itemAt(i));
             }
+        } else {
+            // somehow the connection is dead, but we still have it in our list
+            // just clean the list.
+            removeDisplayEventConnection(displayEventConnections.itemAt(i));
         }
     }
+
+    // clear all our references without holding mLock
+    displayEventConnections.clear();
 
     return true;
 }

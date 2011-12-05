@@ -58,6 +58,9 @@ private:
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
 
+    status_t removeDisplayEventConnection(
+            const wp<DisplayEventConnection>& connection);
+
     // constants
     sp<SurfaceFlinger> mFlinger;
     const DisplayHardware& mHw;
