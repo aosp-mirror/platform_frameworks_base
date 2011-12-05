@@ -459,7 +459,7 @@ message GLMessage {
             BYTE = 3;       // GLbyte, GLubyte
             INT = 4;        // GLbitfield, GLshort, GLint, GLsizei, GLushort, GLuint, GLfixed
             FLOAT = 5;      // GLfloat, GLclampf
-            BOOL = 6;    // GLboolean
+            BOOL = 6;       // GLboolean
             ENUM = 7;       // GLenum
         };
 
@@ -473,9 +473,16 @@ message GLMessage {
         repeated bool   boolValue = 7;
     }
 
+    message FrameBuffer {
+        required int32  width = 1;
+        required int32  height = 2;
+        repeated bytes  contents = 3;
+    }
+
     required int32      context_id = 1;                     // GL context ID
     required Function   function = 2 [default = invalid];   // GL function called
     repeated DataType   args = 3;                           // GL function's arguments
     optional DataType   returnValue = 4;                    // GL function's return value
     optional float      duration = 5;                       // duration of GL call
+    optional FrameBuffer fb = 6;                            // contents of the framebuffer
 };

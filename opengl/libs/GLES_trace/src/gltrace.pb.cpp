@@ -13,6 +13,7 @@ namespace gltrace {
 void protobuf_ShutdownFile_gltrace_2eproto() {
   delete GLMessage::default_instance_;
   delete GLMessage_DataType::default_instance_;
+  delete GLMessage_FrameBuffer::default_instance_;
 }
 
 void protobuf_AddDesc_gltrace_2eproto() {
@@ -23,8 +24,10 @@ void protobuf_AddDesc_gltrace_2eproto() {
 
   GLMessage::default_instance_ = new GLMessage();
   GLMessage_DataType::default_instance_ = new GLMessage_DataType();
+  GLMessage_FrameBuffer::default_instance_ = new GLMessage_FrameBuffer();
   GLMessage::default_instance_->InitAsDefaultInstance();
   GLMessage_DataType::default_instance_->InitAsDefaultInstance();
+  GLMessage_FrameBuffer::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_gltrace_2eproto);
 }
 
@@ -1306,11 +1309,238 @@ void GLMessage_DataType::Swap(GLMessage_DataType* other) {
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
+const int GLMessage_FrameBuffer::kWidthFieldNumber;
+const int GLMessage_FrameBuffer::kHeightFieldNumber;
+const int GLMessage_FrameBuffer::kContentsFieldNumber;
+#endif  // !_MSC_VER
+
+GLMessage_FrameBuffer::GLMessage_FrameBuffer()
+  : ::google::protobuf::MessageLite() {
+  SharedCtor();
+}
+
+void GLMessage_FrameBuffer::InitAsDefaultInstance() {
+}
+
+GLMessage_FrameBuffer::GLMessage_FrameBuffer(const GLMessage_FrameBuffer& from)
+  : ::google::protobuf::MessageLite() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void GLMessage_FrameBuffer::SharedCtor() {
+  _cached_size_ = 0;
+  width_ = 0;
+  height_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+GLMessage_FrameBuffer::~GLMessage_FrameBuffer() {
+  SharedDtor();
+}
+
+void GLMessage_FrameBuffer::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void GLMessage_FrameBuffer::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const GLMessage_FrameBuffer& GLMessage_FrameBuffer::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_gltrace_2eproto();  return *default_instance_;
+}
+
+GLMessage_FrameBuffer* GLMessage_FrameBuffer::default_instance_ = NULL;
+
+GLMessage_FrameBuffer* GLMessage_FrameBuffer::New() const {
+  return new GLMessage_FrameBuffer;
+}
+
+void GLMessage_FrameBuffer::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    width_ = 0;
+    height_ = 0;
+  }
+  contents_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+bool GLMessage_FrameBuffer::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required int32 width = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &width_)));
+          _set_bit(0);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_height;
+        break;
+      }
+      
+      // required int32 height = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_height:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &height_)));
+          _set_bit(1);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_contents;
+        break;
+      }
+      
+      // repeated bytes contents = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_contents:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->add_contents()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_contents;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+      
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void GLMessage_FrameBuffer::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required int32 width = 1;
+  if (_has_bit(0)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->width(), output);
+  }
+  
+  // required int32 height = 2;
+  if (_has_bit(1)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->height(), output);
+  }
+  
+  // repeated bytes contents = 3;
+  for (int i = 0; i < this->contents_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      3, this->contents(i), output);
+  }
+  
+}
+
+int GLMessage_FrameBuffer::ByteSize() const {
+  int total_size = 0;
+  
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required int32 width = 1;
+    if (has_width()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->width());
+    }
+    
+    // required int32 height = 2;
+    if (has_height()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->height());
+    }
+    
+  }
+  // repeated bytes contents = 3;
+  total_size += 1 * this->contents_size();
+  for (int i = 0; i < this->contents_size(); i++) {
+    total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
+      this->contents(i));
+  }
+  
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void GLMessage_FrameBuffer::CheckTypeAndMergeFrom(
+    const ::google::protobuf::MessageLite& from) {
+  MergeFrom(*::google::protobuf::down_cast<const GLMessage_FrameBuffer*>(&from));
+}
+
+void GLMessage_FrameBuffer::MergeFrom(const GLMessage_FrameBuffer& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  contents_.MergeFrom(from.contents_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from._has_bit(0)) {
+      set_width(from.width());
+    }
+    if (from._has_bit(1)) {
+      set_height(from.height());
+    }
+  }
+}
+
+void GLMessage_FrameBuffer::CopyFrom(const GLMessage_FrameBuffer& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GLMessage_FrameBuffer::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  
+  return true;
+}
+
+void GLMessage_FrameBuffer::Swap(GLMessage_FrameBuffer* other) {
+  if (other != this) {
+    std::swap(width_, other->width_);
+    std::swap(height_, other->height_);
+    contents_.Swap(&other->contents_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::std::string GLMessage_FrameBuffer::GetTypeName() const {
+  return "android.gltrace.GLMessage.FrameBuffer";
+}
+
+
+// -------------------------------------------------------------------
+
+#ifndef _MSC_VER
 const int GLMessage::kContextIdFieldNumber;
 const int GLMessage::kFunctionFieldNumber;
 const int GLMessage::kArgsFieldNumber;
 const int GLMessage::kReturnValueFieldNumber;
 const int GLMessage::kDurationFieldNumber;
+const int GLMessage::kFbFieldNumber;
 #endif  // !_MSC_VER
 
 GLMessage::GLMessage()
@@ -1320,6 +1550,7 @@ GLMessage::GLMessage()
 
 void GLMessage::InitAsDefaultInstance() {
   returnvalue_ = const_cast< ::android::gltrace::GLMessage_DataType*>(&::android::gltrace::GLMessage_DataType::default_instance());
+  fb_ = const_cast< ::android::gltrace::GLMessage_FrameBuffer*>(&::android::gltrace::GLMessage_FrameBuffer::default_instance());
 }
 
 GLMessage::GLMessage(const GLMessage& from)
@@ -1334,6 +1565,7 @@ void GLMessage::SharedCtor() {
   function_ = 3000;
   returnvalue_ = NULL;
   duration_ = 0;
+  fb_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1344,6 +1576,7 @@ GLMessage::~GLMessage() {
 void GLMessage::SharedDtor() {
   if (this != default_instance_) {
     delete returnvalue_;
+    delete fb_;
   }
 }
 
@@ -1370,6 +1603,9 @@ void GLMessage::Clear() {
       if (returnvalue_ != NULL) returnvalue_->::android::gltrace::GLMessage_DataType::Clear();
     }
     duration_ = 0;
+    if (_has_bit(5)) {
+      if (fb_ != NULL) fb_->::android::gltrace::GLMessage_FrameBuffer::Clear();
+    }
   }
   args_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1456,6 +1692,20 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(50)) goto parse_fb;
+        break;
+      }
+      
+      // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_fb:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_fb()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1505,6 +1755,12 @@ void GLMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(5, this->duration(), output);
   }
   
+  // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+  if (_has_bit(5)) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessage(
+      6, this->fb(), output);
+  }
+  
 }
 
 int GLMessage::ByteSize() const {
@@ -1534,6 +1790,13 @@ int GLMessage::ByteSize() const {
     // optional float duration = 5;
     if (has_duration()) {
       total_size += 1 + 4;
+    }
+    
+    // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+    if (has_fb()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->fb());
     }
     
   }
@@ -1572,6 +1835,9 @@ void GLMessage::MergeFrom(const GLMessage& from) {
     if (from._has_bit(4)) {
       set_duration(from.duration());
     }
+    if (from._has_bit(5)) {
+      mutable_fb()->::android::gltrace::GLMessage_FrameBuffer::MergeFrom(from.fb());
+    }
   }
 }
 
@@ -1590,6 +1856,9 @@ bool GLMessage::IsInitialized() const {
   if (has_returnvalue()) {
     if (!this->returnvalue().IsInitialized()) return false;
   }
+  if (has_fb()) {
+    if (!this->fb().IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -1600,6 +1869,7 @@ void GLMessage::Swap(GLMessage* other) {
     args_.Swap(&other->args_);
     std::swap(returnvalue_, other->returnvalue_);
     std::swap(duration_, other->duration_);
+    std::swap(fb_, other->fb_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }
