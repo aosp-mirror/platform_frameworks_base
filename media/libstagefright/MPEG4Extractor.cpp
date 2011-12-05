@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
@@ -2302,51 +2303,121 @@ static bool isCompatibleBrand(uint32_t fourcc) {
 
 // Attempt to actually parse the 'ftyp' atom and determine if a suitable
 // compatible brand is present.
+// Also try to identify where this file's metadata ends
+// (end of the 'moov' atom) and report it to the caller as part of
+// the metadata.
 static bool BetterSniffMPEG4(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
-    uint8_t header[12];
-    if (source->readAt(0, header, 12) != 12
-            || memcmp("ftyp", &header[4], 4)) {
-        return false;
-    }
+        const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *meta) {
+    // We scan up to 128 bytes to identify this file as an MP4.
+    static const off64_t kMaxScanOffset = 128ll;
 
-    size_t atomSize = U32_AT(&header[0]);
-    if (atomSize < 16 || (atomSize % 4) != 0) {
-        return false;
-    }
+    off64_t offset = 0ll;
+    bool foundGoodFileType = false;
+    off64_t moovAtomEndOffset = -1ll;
+    bool done = false;
 
-    bool success = false;
-    if (isCompatibleBrand(U32_AT(&header[8]))) {
-        success = true;
-    } else {
-        size_t numCompatibleBrands = (atomSize - 16) / 4;
-        for (size_t i = 0; i < numCompatibleBrands; ++i) {
-            uint8_t tmp[4];
-            if (source->readAt(16 + i * 4, tmp, 4) != 4) {
+    while (!done && offset < kMaxScanOffset) {
+        uint32_t hdr[2];
+        if (source->readAt(offset, hdr, 8) < 8) {
+            return false;
+        }
+
+        uint64_t chunkSize = ntohl(hdr[0]);
+        uint32_t chunkType = ntohl(hdr[1]);
+        off64_t chunkDataOffset = offset + 8;
+
+        if (chunkSize == 1) {
+            if (source->readAt(offset + 8, &chunkSize, 8) < 8) {
                 return false;
             }
 
-            if (isCompatibleBrand(U32_AT(&tmp[0]))) {
-                success = true;
+            chunkSize = ntoh64(chunkSize);
+            chunkDataOffset += 8;
+
+            if (chunkSize < 16) {
+                // The smallest valid chunk is 16 bytes long in this case.
+                return false;
+            }
+        } else if (chunkSize < 8) {
+            // The smallest valid chunk is 8 bytes long.
+            return false;
+        }
+
+        off64_t chunkDataSize = offset + chunkSize - chunkDataOffset;
+
+        switch (chunkType) {
+            case FOURCC('f', 't', 'y', 'p'):
+            {
+                if (chunkDataSize < 8) {
+                    return false;
+                }
+
+                uint32_t numCompatibleBrands = (chunkDataSize - 8) / 4;
+                for (size_t i = 0; i < numCompatibleBrands + 2; ++i) {
+                    if (i == 1) {
+                        // Skip this index, it refers to the minorVersion,
+                        // not a brand.
+                        continue;
+                    }
+
+                    uint32_t brand;
+                    if (source->readAt(
+                                chunkDataOffset + 4 * i, &brand, 4) < 4) {
+                        return false;
+                    }
+
+                    brand = ntohl(brand);
+
+                    if (isCompatibleBrand(brand)) {
+                        foundGoodFileType = true;
+                        break;
+                    }
+                }
+
+                if (!foundGoodFileType) {
+                    return false;
+                }
+
                 break;
             }
+
+            case FOURCC('m', 'o', 'o', 'v'):
+            {
+                moovAtomEndOffset = offset + chunkSize;
+
+                done = true;
+                break;
+            }
+
+            default:
+                break;
         }
+
+        offset += chunkSize;
     }
 
-    if (!success) {
+    if (!foundGoodFileType) {
         return false;
     }
 
     *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
     *confidence = 0.4f;
 
+    if (moovAtomEndOffset >= 0) {
+        *meta = new AMessage;
+        (*meta)->setInt64("meta-data-size", moovAtomEndOffset);
+
+        ALOGV("found metadata size: %lld", moovAtomEndOffset);
+    }
+
     return true;
 }
 
 bool SniffMPEG4(
         const sp<DataSource> &source, String8 *mimeType, float *confidence,
-        sp<AMessage> *) {
-    if (BetterSniffMPEG4(source, mimeType, confidence)) {
+        sp<AMessage> *meta) {
+    if (BetterSniffMPEG4(source, mimeType, confidence, meta)) {
         return true;
     }
 
