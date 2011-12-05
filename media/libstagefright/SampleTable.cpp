@@ -631,14 +631,7 @@ status_t SampleTable::findSyncSampleNear(
         --left;
     }
 
-    uint32_t x;
-    if (mDataSource->readAt(
-                mSyncSampleOffset + 8 + left * 4, &x, 4) != 4) {
-        return ERROR_IO;
-    }
-
-    x = ntohl(x);
-    --x;
+    uint32_t x = mSyncSamples[left];
 
     if (left + 1 < mNumSyncSamples) {
         uint32_t y = mSyncSamples[left + 1];
@@ -679,13 +672,7 @@ status_t SampleTable::findSyncSampleNear(
             if (x > start_sample_index) {
                 CHECK(left > 0);
 
-                if (mDataSource->readAt(
-                            mSyncSampleOffset + 8 + (left - 1) * 4, &x, 4) != 4) {
-                    return ERROR_IO;
-                }
-
-                x = ntohl(x);
-                --x;
+                x = mSyncSamples[left - 1];
 
                 CHECK(x <= start_sample_index);
             }
