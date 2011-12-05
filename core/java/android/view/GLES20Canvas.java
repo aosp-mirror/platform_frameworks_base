@@ -247,7 +247,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDisableVsync();
 
     @Override
-    void onPreDraw(Rect dirty) {
+    public void onPreDraw(Rect dirty) {
         if (dirty != null) {
             nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom, mOpaque);
         } else {
@@ -260,7 +260,7 @@ class GLES20Canvas extends HardwareCanvas {
             boolean opaque);
 
     @Override
-    void onPostDraw() {
+    public void onPostDraw() {
         nFinish(mRenderer);
     }
 
