@@ -63,10 +63,12 @@ public class WifiStressTest
     private final static long WIFI_IDLE_MS = 60 * 1000;
 
     /**
-     * The delay for Wi-Fi to get into idle, after screen off + WIFI_IDEL_MS + WIFI_IDLE_DELAY
-     * the Wi-Fi should be in idle mode and device should be in cellular mode.
+     * Delay after issuing wifi shutdown.
+     * The framework keep driver up for at leat 2 minutes to avoid problems
+     * that a quick shutdown could cause on wext driver and protentially
+     * on cfg based driver
      */
-    private final static long WIFI_IDLE_DELAY = 3 * 1000;
+    private final static long WIFI_SHUTDOWN_DELAY = 2 * 60 * 1000;
 
     private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
     private ConnectivityManagerTestActivity mAct;
@@ -265,7 +267,7 @@ public class WifiStressTest
             PowerManager pm =
                 (PowerManager)mRunner.getContext().getSystemService(Context.POWER_SERVICE);
             assertFalse(pm.isScreenOn());
-            sleep(WIFI_IDLE_MS, "Interruped while wait for wifi to be idle");
+            sleep(WIFI_IDLE_MS + WIFI_SHUTDOWN_DELAY, "Interruped while wait for wifi to be idle");
             assertTrue("Wait for Wi-Fi to idle timeout",
                     mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
                     6 * ConnectivityManagerTestActivity.SHORT_TIMEOUT));
@@ -273,9 +275,9 @@ public class WifiStressTest
                 // use long timeout as the pppd startup may take several retries.
                 assertTrue("Wait for cellular connection timeout",
                         mAct.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                        ConnectivityManagerTestActivity.LONG_TIMEOUT));
+                        2 * ConnectivityManagerTestActivity.LONG_TIMEOUT));
             }
-            sleep(mWifiSleepTime + WIFI_IDLE_DELAY, "Interrupted while device is in sleep mode");
+            sleep(mWifiSleepTime, "Interrupted while device is in sleep mode");
             // Verify the wi-fi is still off and data connection is on
             assertEquals("Wi-Fi is reconnected", State.DISCONNECTED,
                     mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
