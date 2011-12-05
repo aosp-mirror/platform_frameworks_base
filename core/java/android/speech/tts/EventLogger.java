@@ -17,6 +17,7 @@ package android.speech.tts;
 
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * Writes data about a given speech synthesis request to the event logs.
@@ -24,7 +25,7 @@ import android.text.TextUtils;
  * speech rate / pitch and the latency and overall time taken.
  *
  * Note that {@link EventLogger#onStopped()} and {@link EventLogger#onError()}
- * might be called from any thread, but on {@link EventLogger#onPlaybackStart()} and
+ * might be called from any thread, but on {@link EventLogger#onAudioDataWritten()} and
  * {@link EventLogger#onComplete()} must be called from a single thread
  * (usually the audio playback thread}
  */
@@ -81,10 +82,10 @@ class EventLogger {
     /**
      * Notifies the logger that audio playback has started for some section
      * of the synthesis. This is normally some amount of time after the engine
-     * has synthesized data and varides depending on utterances and
+     * has synthesized data and varies depending on utterances and
      * other audio currently in the queue.
      */
-    public void onPlaybackStart() {
+    public void onAudioDataWritten() {
         // For now, keep track of only the first chunk of audio
         // that was played.
         if (mPlaybackStartTime == -1) {
@@ -120,7 +121,7 @@ class EventLogger {
         }
 
         long completionTime = SystemClock.elapsedRealtime();
-        // onPlaybackStart() should normally always be called if an
+        // onAudioDataWritten() should normally always be called if an
         // error does not occur.
         if (mError || mPlaybackStartTime == -1 || mEngineCompleteTime == -1) {
             EventLogTags.writeTtsSpeakFailure(mServiceApp, mCallerUid, mCallerPid,
@@ -139,6 +140,7 @@ class EventLogger {
         final long audioLatency = mPlaybackStartTime - mReceivedTime;
         final long engineLatency = mEngineStartTime - mRequestProcessingStartTime;
         final long engineTotal = mEngineCompleteTime - mRequestProcessingStartTime;
+
         EventLogTags.writeTtsSpeakSuccess(mServiceApp, mCallerUid, mCallerPid,
                 getUtteranceLength(), getLocaleString(),
                 mRequest.getSpeechRate(), mRequest.getPitch(),

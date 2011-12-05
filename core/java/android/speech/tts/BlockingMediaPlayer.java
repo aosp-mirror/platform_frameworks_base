@@ -54,7 +54,6 @@ class BlockingMediaPlayer {
         mUri = uri;
         mStreamType = streamType;
         mDone = new ConditionVariable();
-
     }
 
     /**

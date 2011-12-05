@@ -15,30 +15,27 @@
  */
 package android.speech.tts;
 
-import android.os.ConditionVariable;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
+import android.util.Log;
 
-class SilenceMessageParams extends MessageParams {
-    private final ConditionVariable mCondVar = new ConditionVariable();
-    private final long mSilenceDurationMs;
+class AudioPlaybackQueueItem extends PlaybackQueueItem {
+    private final BlockingMediaPlayer mPlayer;
 
-    SilenceMessageParams(UtteranceProgressDispatcher dispatcher,
-            Object callerIdentity, long silenceDurationMs) {
+    AudioPlaybackQueueItem(UtteranceProgressDispatcher dispatcher,
+            Object callerIdentity, BlockingMediaPlayer player) {
         super(dispatcher, callerIdentity);
-        mSilenceDurationMs = silenceDurationMs;
+        mPlayer = player;
     }
-
-    long getSilenceDurationMs() {
-        return mSilenceDurationMs;
+    @Override
+    public void run() {
+        getDispatcher().dispatchOnStart();
+        // TODO: This can be avoided. Will be fixed later in this CL.
+        mPlayer.startAndWait();
+        getDispatcher().dispatchOnDone();
     }
 
     @Override
-    int getType() {
-        return TYPE_SILENCE;
+    void stop(boolean isError) {
+        mPlayer.stop();
     }
-
-    ConditionVariable getConditionVariable() {
-        return mCondVar;
-    }
-
 }
