@@ -145,6 +145,9 @@ public abstract class RemoteViewsService extends Service {
                 Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
             }
         }
+        public synchronized void onDataSetChangedAsync() {
+            onDataSetChanged();
+        }
         public synchronized int getCount() {
             int count = 0;
             try {
