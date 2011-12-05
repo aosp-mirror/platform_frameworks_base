@@ -497,6 +497,13 @@ public final class WebViewCore {
         message.sendToTarget();
     }
 
+    /**
+     * Clear the picture set. To be called only on the WebCore thread.
+     */
+    /* package */ void clearContent() {
+        nativeClearContent();
+    }
+
     //-------------------------------------------------------------------------
     // JNI methods
     //-------------------------------------------------------------------------
@@ -1560,7 +1567,7 @@ public final class WebViewCore {
                             // Clear the view so that onDraw() will draw nothing
                             // but white background
                             // (See public method WebView.clearView)
-                            nativeClearContent();
+                            clearContent();
                             break;
 
                         case MESSAGE_RELAY:
