@@ -1017,48 +1017,17 @@ void
 UserDataType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, int flags)
 {
-    // if (v != null) {
-    //     RpcData _obj = new RpcData();
-    //     v.writeToRpcData(_obj);
-    //     data.putRpcData(k, obj);
-    // }
-    IfStatement* ifpart = new IfStatement;
-    ifpart->expression = new Comparison(v, "!=", NULL_VALUE);
-    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
-    ifpart->statements->Add(new VariableDeclaration(_obj, new NewExpression(RPC_DATA_TYPE)));
-    ifpart->statements->Add(new MethodCall(v, "writeToRpcData", 1, _obj));
-    ifpart->statements->Add(new MethodCall(data, "putRpcData", 2, k, _obj));
-
-    addTo->Add(ifpart);
+    // data.putFlattenable(k, v);
+    addTo->Add(new MethodCall(data, "putFlattenable", 2, k, v));
 }
 
 void
 UserDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl)
 {
-    // RpcData _obj = data.getRpcData(k);
-    // if (_data_XX != null)
-    //     v = CLASS.RPC_CREATOR.createFromParcel(_obj)
-    // } else {
-    //     v = null;
-    // }
-
-    StatementBlock* block = new StatementBlock;
-    addTo->Add(block);
-
-    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
-    block->Add(new VariableDeclaration(_obj, new MethodCall(data, "getRpcData", 1, k)));
-
-    IfStatement* ifpart = new IfStatement();
-    ifpart->expression = new Comparison(_obj, "!=", NULL_VALUE);
-    ifpart->statements->Add(new Assignment(v,
-                new MethodCall(v->type, "RPC_CREATOR.createFromRpcData", 1, _obj)));
-
-    IfStatement* elsepart = new IfStatement();
-    ifpart->elseif = elsepart;
-    elsepart->statements->Add(new Assignment(v, NULL_VALUE));
-
-    block->Add(ifpart);
+    // data.getFlattenable(k, CLASS.RPC_CREATOR);
+    addTo->Add(new Assignment(v, new MethodCall(data, "getFlattenable", 2, k,
+                new FieldVariable(v->type, "RPC_CREATOR"))));
 }
 
 // ================================================================
