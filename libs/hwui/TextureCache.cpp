@@ -125,7 +125,8 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
 
     if (!texture) {
         if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
-            LOGW("Bitmap too large to be uploaded into a texture");
+            LOGW("Bitmap too large to be uploaded into a texture (%dx%d, max=%dx%d)",
+                    bitmap->width(), bitmap->height(), mMaxTextureSize, mMaxTextureSize);
             return NULL;
         }
 

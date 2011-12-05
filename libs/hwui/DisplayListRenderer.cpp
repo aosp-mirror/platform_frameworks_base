@@ -1204,6 +1204,16 @@ void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
     addText(text, bytesCount);
     addInt(count);
     addPoint(x, y);
+    // TODO: We should probably make a copy of the paint instead of modifying
+    //       it; modifying the paint will change its generationID the first
+    //       time, which might impact caches. More investigation needed to
+    //       see if it matters.
+    //       If we make a copy, then drawTextDecorations() should *not* make
+    //       its own copy as it does right now.
+    paint->setAntiAlias(true);
+#if RENDER_TEXT_AS_GLYPHS
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+#endif
     addPaint(paint);
     addFloat(length < 0.0f ? paint->measureText(text, bytesCount) : length);
 }

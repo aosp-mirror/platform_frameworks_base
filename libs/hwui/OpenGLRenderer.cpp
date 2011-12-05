@@ -2069,16 +2069,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
     if (mSnapshot->isIgnored()) return;
 
-    // TODO: We should probably make a copy of the paint instead of modifying
-    //       it; modifying the paint will change its generationID the first
-    //       time, which might impact caches. More investigation needed to
-    //       see if it matters.
-    //       If we make a copy, then drawTextDecorations() should *not* make
-    //       its own copy as it does right now.
-    paint->setAntiAlias(true);
-#if RENDER_TEXT_AS_GLYPHS
-    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-#endif
+    // NOTE: AA and glyph id encoding are set in DisplayListRenderer.cpp
 
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -2095,6 +2086,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     SkPaint::FontMetrics metrics;
     paint->getFontMetrics(&metrics, 0.0f);
+    // If no length was specified, just perform the hit test on the Y axis
     if (quickReject(x, y + metrics.fTop,
             x + (length >= 0.0f ? length : INT_MAX / 2), y + metrics.fBottom)) {
         return;
