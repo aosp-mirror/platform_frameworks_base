@@ -364,7 +364,7 @@ public abstract class TextToSpeechService extends Service {
             }
 
             // Remove any enqueued audio too.
-            mAudioPlaybackHandler.removePlaybackItems(callerIdentity);
+            mAudioPlaybackHandler.stopForApp(callerIdentity);
 
             return TextToSpeech.SUCCESS;
         }
@@ -378,7 +378,7 @@ public abstract class TextToSpeechService extends Service {
             // Remove all other items from the queue.
             removeCallbacksAndMessages(null);
             // Remove all pending playback as well.
-            mAudioPlaybackHandler.removeAllItems();
+            mAudioPlaybackHandler.stop();
 
             return TextToSpeech.SUCCESS;
         }
@@ -694,9 +694,7 @@ public abstract class TextToSpeechService extends Service {
     }
 
     private class AudioSpeechItem extends SpeechItem {
-
         private final BlockingMediaPlayer mPlayer;
-        private AudioMessageParams mToken;
 
         public AudioSpeechItem(Object callerIdentity, int callerUid, int callerPid,
                 Bundle params, Uri uri) {
@@ -711,8 +709,8 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            mToken = new AudioMessageParams(this, getCallerIdentity(), mPlayer);
-            mAudioPlaybackHandler.enqueueAudio(mToken);
+            mAudioPlaybackHandler.enqueue(new AudioPlaybackQueueItem(
+                    this, getCallerIdentity(), mPlayer));
             return TextToSpeech.SUCCESS;
         }
 
@@ -724,7 +722,6 @@ public abstract class TextToSpeechService extends Service {
 
     private class SilenceSpeechItem extends SpeechItem {
         private final long mDuration;
-        private SilenceMessageParams mToken;
 
         public SilenceSpeechItem(Object callerIdentity, int callerUid, int callerPid,
                 Bundle params, long duration) {
@@ -739,14 +736,14 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            mToken = new SilenceMessageParams(this, getCallerIdentity(), mDuration);
-            mAudioPlaybackHandler.enqueueSilence(mToken);
+            mAudioPlaybackHandler.enqueue(new SilencePlaybackQueueItem(
+                    this, getCallerIdentity(), mDuration));
             return TextToSpeech.SUCCESS;
         }
 
         @Override
         protected void stopImpl() {
-            // Do nothing.
+            // Do nothing, handled by AudioPlaybackHandler#stopForApp
         }
     }
 
