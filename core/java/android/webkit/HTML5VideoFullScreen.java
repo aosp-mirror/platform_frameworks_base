@@ -4,15 +4,12 @@ package android.webkit;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.Metadata;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.HTML5VideoView;
-import android.webkit.HTML5VideoViewProxy;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
@@ -150,7 +147,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     private void prepareForFullScreen() {
         // So in full screen, we reset the MediaPlayer
         mPlayer.reset();
-        MediaController mc = new MediaController(mProxy.getContext());
+        MediaController mc = new FullScreenMediaController(mProxy.getContext(), mLayout);
         mc.setSystemUiVisibility(mLayout.getSystemUiVisibility());
         setMediaController(mc);
         mPlayer.setScreenOnWhilePlaying(true);
@@ -261,9 +258,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mLayout.addView(getSurfaceView(), layoutParams);
 
         mLayout.setVisibility(View.VISIBLE);
-        mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
         WebChromeClient client = webView.getWebChromeClient();
         if (client != null) {
             client.onShowCustomView(mLayout, mCallback);
@@ -340,4 +334,33 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         }
         return;
     }
+
+    static class FullScreenMediaController extends MediaController {
+
+        View mVideoView;
+
+        public FullScreenMediaController(Context context, View video) {
+            super(context);
+            mVideoView = video;
+        }
+
+        @Override
+        public void show() {
+            super.show();
+            if (mVideoView != null) {
+                mVideoView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            }
+        }
+
+        @Override
+        public void hide() {
+            if (mVideoView != null) {
+                mVideoView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            }
+            super.hide();
+        }
+
+    }
+
 }
