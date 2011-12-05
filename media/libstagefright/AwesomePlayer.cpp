@@ -1949,6 +1949,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         mUri = newURI;
     }
 
+    AString sniffedMIME;
+
     if (!strncasecmp("http://", mUri.string(), 7)
             || !strncasecmp("https://", mUri.string(), 8)
             || isWidevineStreaming) {
@@ -1998,7 +2000,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
         mConnectingDataSource.clear();
 
-
         String8 contentType = dataSource->getMIMEType();
 
         if (strncasecmp(contentType.string(), "audio/", 6)) {
@@ -2020,14 +2021,49 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
                 mLock.unlock();
 
+                // Initially make sure we have at least 128 bytes for the sniff
+                // to complete without blocking.
+                static const size_t kMinBytesForSniffing = 128;
+
+                off64_t metaDataSize = -1ll;
                 for (;;) {
                     status_t finalStatus;
                     size_t cachedDataRemaining =
                         mCachedSource->approxDataRemaining(&finalStatus);
 
-                    if (finalStatus != OK || cachedDataRemaining >= kHighWaterMarkBytes
+                    if (finalStatus != OK
+                            || (metaDataSize >= 0
+                                && cachedDataRemaining >= metaDataSize)
                             || (mFlags & PREPARE_CANCELLED)) {
                         break;
+                    }
+
+                    LOGV("now cached %d bytes of data", cachedDataRemaining);
+
+                    if (metaDataSize < 0
+                            && cachedDataRemaining >= kMinBytesForSniffing) {
+                        String8 tmp;
+                        float confidence;
+                        sp<AMessage> meta;
+                        if (!dataSource->sniff(&tmp, &confidence, &meta)) {
+                            mLock.lock();
+                            return UNKNOWN_ERROR;
+                        }
+
+                        // We successfully identified the file's extractor to
+                        // be, remember this mime type so we don't have to
+                        // sniff it again when we call MediaExtractor::Create()
+                        // below.
+                        sniffedMIME = tmp.string();
+
+                        if (meta == NULL
+                                || !meta->findInt64(
+                                    "meta-data-size", &metaDataSize)) {
+                            metaDataSize = kHighWaterMarkBytes;
+                        }
+
+                        CHECK_GE(metaDataSize, 0ll);
+                        LOGV("metaDataSize = %lld bytes", metaDataSize);
                     }
 
                     usleep(200000);
@@ -2067,7 +2103,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         mWVMExtractor->setAdaptiveStreamingMode(true);
         extractor = mWVMExtractor;
     } else {
-        extractor = MediaExtractor::Create(dataSource);
+        extractor = MediaExtractor::Create(
+                dataSource, sniffedMIME.empty() ? NULL : sniffedMIME.c_str());
 
         if (extractor == NULL) {
             return UNKNOWN_ERROR;
