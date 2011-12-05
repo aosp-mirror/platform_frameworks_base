@@ -61,7 +61,7 @@ class AudioResampler;
 
 // ----------------------------------------------------------------------------
 
-static const nsecs_t kStandbyTimeInNsecs = seconds(3);
+static const nsecs_t kDefaultStandbyTimeInNsecs = seconds(3);
 
 class AudioFlinger :
     public BinderService<AudioFlinger>,
@@ -223,6 +223,11 @@ private:
     virtual     void        onFirstRef();
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
     void                    purgeStaleEffects_l();
+
+    static Mutex            mStaticInitLock;
+    static bool             mStaticInitDone;
+    static bool             doStaticInit();
+    static nsecs_t          mStandbyTimeInNsecs;
 
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
