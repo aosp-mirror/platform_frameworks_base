@@ -1639,8 +1639,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (down && repeatCount == 0) {
             String category = sApplicationLaunchKeyCategories.get(keyCode);
             if (category != null) {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(category);
+                Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
                     mContext.startActivity(intent);

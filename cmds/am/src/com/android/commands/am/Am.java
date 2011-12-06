@@ -134,6 +134,10 @@ public class Am {
             runScreenCompat();
         } else if (op.equals("display-size")) {
             runDisplaySize();
+        } else if (op.equals("to-uri")) {
+            runToUri(false);
+        } else if (op.equals("to-intent-uri")) {
+            runToUri(true);
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -141,6 +145,7 @@ public class Am {
 
     private Intent makeIntent() throws URISyntaxException {
         Intent intent = new Intent();
+        Intent baseIntent = intent;
         boolean hasIntentInfo = false;
 
         mDebugOption = false;
@@ -155,35 +160,39 @@ public class Am {
         while ((opt=nextOption()) != null) {
             if (opt.equals("-a")) {
                 intent.setAction(nextArgRequired());
-                hasIntentInfo = true;
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-d")) {
                 data = Uri.parse(nextArgRequired());
-                hasIntentInfo = true;
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-t")) {
                 type = nextArgRequired();
-                hasIntentInfo = true;
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-c")) {
                 intent.addCategory(nextArgRequired());
-                hasIntentInfo = true;
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-e") || opt.equals("--es")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, value);
-                hasIntentInfo = true;
             } else if (opt.equals("--esn")) {
                 String key = nextArgRequired();
                 intent.putExtra(key, (String) null);
-                hasIntentInfo = true;
             } else if (opt.equals("--ei")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Integer.valueOf(value));
-                hasIntentInfo = true;
             } else if (opt.equals("--eu")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Uri.parse(value));
-                hasIntentInfo = true;
             } else if (opt.equals("--eia")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -193,12 +202,10 @@ public class Am {
                     list[i] = Integer.valueOf(strings[i]);
                 }
                 intent.putExtra(key, list);
-                hasIntentInfo = true;
             } else if (opt.equals("--el")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Long.valueOf(value));
-                hasIntentInfo = true;
             } else if (opt.equals("--ela")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -208,12 +215,10 @@ public class Am {
                     list[i] = Long.valueOf(strings[i]);
                 }
                 intent.putExtra(key, list);
-                hasIntentInfo = true;
             } else if (opt.equals("--ef")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Float.valueOf(value));
-                hasIntentInfo = true;
             } else if (opt.equals("--efa")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -223,18 +228,18 @@ public class Am {
                     list[i] = Float.valueOf(strings[i]);
                 }
                 intent.putExtra(key, list);
-                hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, Boolean.valueOf(value));
-                hasIntentInfo = true;
             } else if (opt.equals("-n")) {
                 String str = nextArgRequired();
                 ComponentName cn = ComponentName.unflattenFromString(str);
                 if (cn == null) throw new IllegalArgumentException("Bad component name: " + str);
                 intent.setComponent(cn);
-                hasIntentInfo = true;
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-f")) {
                 String str = nextArgRequired();
                 intent.setFlags(Integer.decode(str).intValue());
@@ -282,6 +287,9 @@ public class Am {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             } else if (opt.equals("--receiver-replace-pending")) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            } else if (opt.equals("--selector")) {
+                intent.setDataAndType(data, type);
+                intent = new Intent();
             } else if (opt.equals("-D")) {
                 mDebugOption = true;
             } else if (opt.equals("-W")) {
@@ -304,25 +312,42 @@ public class Am {
         }
         intent.setDataAndType(data, type);
 
+        final boolean hasSelector = intent != baseIntent;
+        if (hasSelector) {
+            // A selector was specified; fix up.
+            baseIntent.setSelector(intent);
+            intent = baseIntent;
+        }
+
         String arg = nextArg();
-        if (arg != null) {
-            Intent baseIntent;
-            if (arg.indexOf(':') >= 0) {
-                // The argument is a URI.  Fully parse it, and use that result
-                // to fill in any data not specified so far.
-                baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
-            } else if (arg.indexOf('/') >= 0) {
-                // The argument is a component name.  Build an Intent to launch
-                // it.
+        baseIntent = null;
+        if (arg == null) {
+            if (hasSelector) {
+                // If a selector has been specified, and no arguments
+                // have been supplied for the main Intent, then we can
+                // assume it is ACTION_MAIN CATEGORY_LAUNCHER; we don't
+                // need to have a component name specified yet, the
+                // selector will take care of that.
                 baseIntent = new Intent(Intent.ACTION_MAIN);
                 baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                baseIntent.setComponent(ComponentName.unflattenFromString(arg));
-            } else {
-                // Assume the argument is a package name.
-                baseIntent = new Intent(Intent.ACTION_MAIN);
-                baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                baseIntent.setPackage(arg);
             }
+        } else if (arg.indexOf(':') >= 0) {
+            // The argument is a URI.  Fully parse it, and use that result
+            // to fill in any data not specified so far.
+            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
+        } else if (arg.indexOf('/') >= 0) {
+            // The argument is a component name.  Build an Intent to launch
+            // it.
+            baseIntent = new Intent(Intent.ACTION_MAIN);
+            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            baseIntent.setComponent(ComponentName.unflattenFromString(arg));
+        } else {
+            // Assume the argument is a package name.
+            baseIntent = new Intent(Intent.ACTION_MAIN);
+            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            baseIntent.setPackage(arg);
+        }
+        if (baseIntent != null) {
             Bundle extras = intent.getExtras();
             intent.replaceExtras((Bundle)null);
             Bundle uriExtras = baseIntent.getExtras();
@@ -333,7 +358,7 @@ public class Am {
                     baseIntent.removeCategory(c);
                 }
             }
-            intent.fillIn(baseIntent, Intent.FILL_IN_COMPONENT);
+            intent.fillIn(baseIntent, Intent.FILL_IN_COMPONENT | Intent.FILL_IN_SELECTOR);
             if (extras == null) {
                 extras = uriExtras;
             } else if (uriExtras != null) {
@@ -1107,6 +1132,11 @@ public class Am {
         }
     }
 
+    private void runToUri(boolean intentScheme) throws Exception {
+        Intent intent = makeIntent();
+        System.out.println(intent.toUri(intentScheme ? Intent.URI_INTENT_SCHEME : 0));
+    }
+
     private class IntentReceiver extends IIntentReceiver.Stub {
         private boolean mFinished = false;
 
@@ -1277,6 +1307,8 @@ public class Am {
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am display-size [reset|MxN]\n" +
+                "       am to-uri [INTENT]\n" +
+                "       am to-intent-uri [INTENT]\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -1330,6 +1362,10 @@ public class Am {
                 "\n" +
                 "am display-size: override display size.\n" +
                 "\n" +
+                "am to-uri: print the given Intent specification as a URI.\n" +
+                "\n" +
+                "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
+                "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
@@ -1356,6 +1392,7 @@ public class Am {
                 "    [--activity-single-top] [--activity-clear-task]\n" +
                 "    [--activity-task-on-home]\n" +
                 "    [--receiver-registered-only] [--receiver-replace-pending]\n" +
+                "    [--selector]\n" +
                 "    [<URI> | <PACKAGE> | <COMPONENT>]\n"
                 );
     }
