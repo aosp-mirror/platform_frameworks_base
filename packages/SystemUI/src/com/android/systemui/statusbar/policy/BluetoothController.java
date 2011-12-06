@@ -36,7 +36,7 @@ public class BluetoothController extends BroadcastReceiver {
 
     private int mIconId = R.drawable.stat_sys_data_bluetooth;
     private int mContentDescriptionId = 0;
-    private boolean mEnabled;
+    private boolean mEnabled = false;
 
     public BluetoothController(Context context) {
         mContext = context;
@@ -47,8 +47,10 @@ public class BluetoothController extends BroadcastReceiver {
         context.registerReceiver(this, filter);
 
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        handleAdapterStateChange(adapter.getState());
-        handleConnectionStateChange(adapter.getConnectionState());
+        if (adapter != null) {
+            handleAdapterStateChange(adapter.getState());
+            handleConnectionStateChange(adapter.getConnectionState());
+        }
         refreshViews();
     }
 
