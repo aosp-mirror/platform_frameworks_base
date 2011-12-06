@@ -384,6 +384,23 @@ bool AAH_RXPlayer::threadLoop() {
         if (!thread_wrapper_->exitPending()) {
             process_more_right_now = processGaps();
         }
+
+        // Step 5: Check for fatal errors.  If any of our substreams has
+        // encountered a fatal, unrecoverable, error, then propagate the error
+        // up to user level and shut down.
+        for (size_t i = 0; i < substreams_.size(); ++i) {
+            status_t status;
+            CHECK(substreams_.valueAt(i) != NULL);
+
+            status = substreams_.valueAt(i)->getStatus();
+            if (OK != status) {
+                LOGE("Substream index %d has encountered an unrecoverable"
+                     " error (%d).  Signalling application level and shutting"
+                     " down.", i, status);
+                sendEvent(MEDIA_ERROR);
+                goto bailout;
+            }
+        }
     }
 
 bailout:

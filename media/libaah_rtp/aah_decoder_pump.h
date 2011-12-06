@@ -43,6 +43,7 @@ class AAH_DecoderPump : public MediaSource {
     void setRenderTSTransform(const LinearTransform& trans);
     void setRenderVolume(uint8_t volume);
     bool isAboutToUnderflow(int64_t threshold);
+    bool getStatus() const { return thread_status_; }
 
     // MediaSource methods
     virtual status_t     start(MetaData *params) { return OK; }

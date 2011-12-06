@@ -189,12 +189,12 @@ class AAH_RXPlayer : public MediaPlayerInterface {
                                  int32_t ts_lower);
         void processPayloadCont (uint8_t* buf,
                                  uint32_t amt);
-        void processCompletedBuffer();
         void processTSTransform(const LinearTransform& trans);
 
         bool     isAboutToUnderflow();
         uint32_t getSSRC()      const { return ssrc_; }
         uint16_t getProgramID() const { return (ssrc_ >> 5) & 0x1F; }
+        status_t getStatus() const { return status_; }
 
       protected:
         virtual ~Substream() {
@@ -203,11 +203,14 @@ class AAH_RXPlayer : public MediaPlayerInterface {
 
       private:
         void                cleanupDecoder();
+        bool                shouldAbort(const char* log_tag);
+        void                processCompletedBuffer();
         bool                setupSubstreamType(uint8_t substream_type,
                                                uint8_t codec_type);
 
         uint32_t            ssrc_;
         bool                waiting_for_rap_;
+        status_t            status_;
 
         bool                substream_details_known_;
         uint8_t             substream_type_;

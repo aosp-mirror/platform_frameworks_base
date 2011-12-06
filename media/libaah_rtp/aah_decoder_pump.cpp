@@ -29,11 +29,16 @@
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 #include <media/stagefright/Utils.h>
+#include <utils/Timers.h>
 #include <utils/threads.h>
 
 #include "aah_decoder_pump.h"
 
 namespace android {
+
+static const long long kLongDecodeErrorThreshold = 1000000ll;
+static const uint32_t kMaxLongErrorsBeforeFatal = 3;
+static const uint32_t kMaxErrorsBeforeFatal = 60;
 
 AAH_DecoderPump::AAH_DecoderPump(OMXClient& omx)
     : omx_(omx)
@@ -290,11 +295,17 @@ void* AAH_DecoderPump::workThread() {
         return NULL;
     }
 
+    DurationTimer decode_timer;
+    uint32_t consecutive_long_errors = 0;
+    uint32_t consecutive_errors = 0;
+
     while (!thread_->exitPending()) {
         status_t res;
         MediaBuffer* bufOut = NULL;
 
+        decode_timer.start();
         res = decoder_->read(&bufOut);
+        decode_timer.stop();
 
         if (res == INFO_FORMAT_CHANGED) {
             // Format has changed.  Destroy our current renderer so that a new
@@ -308,14 +319,58 @@ void* AAH_DecoderPump::workThread() {
             res = OK;
         }
 
-        // Any error aside from INFO_FORMAT_CHANGED is considered to be fatal
-        // and will result in shutdown of the decoder pump thread.
+        // Try to be a little nuanced in our handling of actual decode errors.
+        // Errors could happen because of minor stream corruption or because of
+        // transient resource limitations.  In these cases, we would rather drop
+        // a little bit of output and ride out the unpleasantness then throw up
+        // our hands and abort everything.
+        //
+        // OTOH - When things are really bad (like we have a non-transient
+        // resource or bookkeeping issue, or the stream being fed to us is just
+        // complete and total garbage) we really want to terminate playback and
+        // raise an error condition all the way up to the application level so
+        // they can deal with it.
+        //
+        // Unfortunately, the error codes returned by the decoder can be a
+        // little non-specific.  For example, if an OMXCodec times out
+        // attempting to obtain an output buffer, the error we get back is a
+        // generic -1.  Try to distinguish between this resource timeout error
+        // and ES corruption error by timing how long the decode operation
+        // takes.  Maintain accounting for both errors and "long errors".  If we
+        // get more than a certain number consecutive errors of either type,
+        // consider it fatal and shutdown (which will cause the error to
+        // propagate all of the way up to the application level).  The threshold
+        // for "long errors" is deliberately much lower than that of normal
+        // decode errors, both because of how long they take to happen and
+        // because they generally indicate resource limitation errors which are
+        // unlikely to go away in pathologically bad cases (in contrast to
+        // stream corruption errors which might happen 20 times in a row and
+        // then be suddenly OK again)
         if (res != OK) {
-            LOGE("%s: Failed to decode data (res = %d)",
-                    __PRETTY_FUNCTION__, res);
+            consecutive_errors++;
+            if (decode_timer.durationUsecs() >= kLongDecodeErrorThreshold)
+                consecutive_long_errors++;
+
             CHECK(NULL == bufOut);
-            thread_status_ = res;
-            break;
+
+            LOGW("%s: Failed to decode data (res = %d)",
+                    __PRETTY_FUNCTION__, res);
+
+            if ((consecutive_errors      >= kMaxErrorsBeforeFatal) ||
+                (consecutive_long_errors >= kMaxLongErrorsBeforeFatal)) {
+                LOGE("%s: Maximum decode error threshold has been reached."
+                     " There have been %d consecutive decode errors, and %d"
+                     " consecutive decode operations which resulted in errors"
+                     " and took more than %lld uSec to process.  The last"
+                     " decode operation took %lld uSec.",
+                     __PRETTY_FUNCTION__,
+                     consecutive_errors, consecutive_long_errors,
+                     kLongDecodeErrorThreshold, decode_timer.durationUsecs());
+                thread_status_ = res;
+                break;
+            }
+
+            continue;
         }
 
         if (NULL == bufOut) {
@@ -323,6 +378,11 @@ void* AAH_DecoderPump::workThread() {
                     __PRETTY_FUNCTION__);
             continue;
         }
+
+        // Successful decode (with actual output produced).  Clear the error
+        // counters.
+        consecutive_errors = 0;
+        consecutive_long_errors = 0;
 
         queueToRenderer(bufOut);
         bufOut->release();
@@ -409,6 +469,7 @@ status_t AAH_DecoderPump::shutdown_l() {
     last_queued_pts_valid_   = false;
     last_ts_transform_valid_ = false;
     last_volume_             = 0xFF;
+    thread_status_           = OK;
 
     decoder_ = NULL;
     format_  = NULL;
