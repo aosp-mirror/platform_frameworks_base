@@ -237,7 +237,6 @@ import java.util.ArrayList;
     private void growOrShrink(boolean grow) {
         AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) getLayoutParams();
         if (grow) {
-            Log.i("webtextview", "grow");
             lp.x -= mRingInset;
             lp.y -= mRingInset;
             lp.width += 2 * mRingInset;
@@ -245,7 +244,6 @@ import java.util.ArrayList;
             setPadding(getPaddingLeft() + mRingInset, getPaddingTop() + mRingInset,
                     getPaddingRight() + mRingInset, getPaddingBottom() + mRingInset);
         } else {
-            Log.i("webtextview", "shrink");
             lp.x += mRingInset;
             lp.y += mRingInset;
             lp.width -= 2 * mRingInset;
