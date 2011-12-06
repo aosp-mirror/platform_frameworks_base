@@ -31,6 +31,7 @@ import android.inputmethodservice.Keyboard.Key;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -967,8 +968,13 @@ public class KeyboardView extends View implements View.OnClickListener {
             AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
             onInitializeAccessibilityEvent(event);
             String text = null;
-            // Add text only if headset is used to avoid leaking passwords.
-            if (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isWiredHeadsetOn()) {
+            // This is very efficient since the properties are cached.
+            final boolean speakPassword = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) != 0;
+            // Add text only if password announcement is enabled or if headset is
+            // used to avoid leaking passwords.
+            if (speakPassword || mAudioManager.isBluetoothA2dpOn()
+                    || mAudioManager.isWiredHeadsetOn()) {
                 switch (code) {
                     case Keyboard.KEYCODE_ALT:
                         text = mContext.getString(R.string.keyboardview_keycode_alt);

@@ -80,6 +80,9 @@
     <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
     <bool name="def_accessibility_script_injection">false</bool>
 
+    <!-- Default for Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD -->
+    <bool name="def_accessibility_speak_password">false</bool>
+
     <!-- Default for Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS -->
     <string name="def_accessibility_web_content_key_bindings" translatable="false">
             <!-- DPAD/Trackball UP - traverse previous on current axis and send an event. -->
