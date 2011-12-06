@@ -865,7 +865,7 @@ private:
 
         virtual int             getTrackName_l() = 0;
         virtual void            deleteTrackName_l(int name) = 0;
-        virtual uint32_t        activeSleepTimeUs() = 0;
+        virtual uint32_t        activeSleepTimeUs();
         virtual uint32_t        idleSleepTimeUs() = 0;
         virtual uint32_t        suspendSleepTimeUs() = 0;
 
@@ -922,7 +922,6 @@ private:
                                                 Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
-        virtual     uint32_t    activeSleepTimeUs();
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
 

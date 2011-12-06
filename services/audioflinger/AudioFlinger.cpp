@@ -1893,6 +1893,18 @@ audio_stream_t* AudioFlinger::PlaybackThread::stream()
     return &mOutput->stream->common;
 }
 
+uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
+{
+    // A2DP output latency is not due only to buffering capacity. It also reflects encoding,
+    // decoding and transfer time. So sleeping for half of the latency would likely cause
+    // underruns
+    if (audio_is_a2dp_device((audio_devices_t)mDevice)) {
+        return (uint32_t)((uint32_t)((mFrameCount * 1000) / mSampleRate) * 1000);
+    } else {
+        return (uint32_t)(mOutput->stream->get_latency(mOutput->stream) * 1000) / 2;
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
@@ -2516,11 +2528,6 @@ status_t AudioFlinger::MixerThread::dumpInternals(int fd, const Vector<String16>
     return NO_ERROR;
 }
 
-uint32_t AudioFlinger::MixerThread::activeSleepTimeUs()
-{
-    return (uint32_t)(mOutput->stream->get_latency(mOutput->stream) * 1000) / 2;
-}
-
 uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
 {
     return (uint32_t)(((mFrameCount * 1000) / mSampleRate) * 1000) / 2;
@@ -2988,7 +2995,7 @@ uint32_t AudioFlinger::DirectOutputThread::activeSleepTimeUs()
 {
     uint32_t time;
     if (audio_is_linear_pcm(mFormat)) {
-        time = (uint32_t)(mOutput->stream->get_latency(mOutput->stream) * 1000) / 2;
+        time = PlaybackThread::activeSleepTimeUs();
     } else {
         time = 10000;
     }
