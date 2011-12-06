@@ -69,7 +69,6 @@ namespace android {
 static const char* kDeadlockedString = "AudioFlinger may be deadlocked\n";
 static const char* kHardwareLockedString = "Hardware lock is taken\n";
 
-//static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 static const float MAX_GAIN = 4096.0f;
 static const float MAX_GAIN_INT = 0x1000;
 
@@ -97,6 +96,9 @@ static const uint32_t kMinThreadSleepTimeUs = 5000;
 // maximum divider applied to the active sleep time in the mixer thread loop
 static const uint32_t kMaxThreadSleepTimeShift = 2;
 
+nsecs_t AudioFlinger::mStandbyTimeInNsecs = kDefaultStandbyTimeInNsecs;
+bool    AudioFlinger::mStaticInitDone = false;
+Mutex   AudioFlinger::mStaticInitLock;
 
 // ----------------------------------------------------------------------------
 
@@ -167,6 +169,31 @@ AudioFlinger::AudioFlinger()
 {
 }
 
+bool AudioFlinger::doStaticInit() {
+    if (!mStaticInitDone) {
+        Mutex::Autolock _l(mStaticInitLock);
+
+        if (mStaticInitDone)
+            return true;
+
+        char val_str[PROPERTY_VALUE_MAX] = { 0 };
+        if (property_get("ro.audio.flinger_standbytime_ms", val_str, NULL) >= 0) {
+            uint32_t int_val;
+            if (1 == sscanf(val_str, "%u", &int_val)) {
+                mStandbyTimeInNsecs = milliseconds(int_val);
+                LOGI("Using %u mSec as standby time.", int_val);
+            } else {
+                mStandbyTimeInNsecs = kDefaultStandbyTimeInNsecs;
+                LOGI("Using default %u mSec as standby time.",
+                        (uint32_t)(mStandbyTimeInNsecs / 1000000));
+            }
+        }
+
+        mStaticInitDone = true;
+    }
+
+    return mStaticInitDone;
+}
 void AudioFlinger::onFirstRef()
 {
     int rc = 0;
@@ -175,6 +202,10 @@ void AudioFlinger::onFirstRef()
 
     /* TODO: move all this work into an Init() function */
     mHardwareStatus = AUDIO_HW_IDLE;
+
+    // Make sure all static variables are set up.  Right now, this is limited to
+    // the standby time parameter.
+    doStaticInit();
 
     for (size_t i = 0; i < ARRAY_SIZE(audio_interfaces); i++) {
         const hw_module_t *mod;
@@ -334,7 +365,10 @@ status_t AudioFlinger::dumpInternals(int fd, const Vector<String16>& args)
     String8 result;
     int hardwareStatus = mHardwareStatus;
 
-    snprintf(buffer, SIZE, "Hardware status: %d\n", hardwareStatus);
+    snprintf(buffer, SIZE, "Hardware status: %d\n"
+                           "Standby Time mSec: %u\n",
+                            hardwareStatus,
+                            (uint32_t)(mStandbyTimeInNsecs / 1000000));
     result.append(buffer);
     write(fd, result.string(), result.size());
     return NO_ERROR;
@@ -2035,7 +2069,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                         }
                     }
 
-                    standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    standbyTime = systemTime() + mStandbyTimeInNsecs;
                     sleepTime = idleSleepTime;
                     sleepTimeShift = 0;
                     continue;
@@ -2071,7 +2105,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             if (sleepTimeShift > 0) {
                 sleepTimeShift--;
             }
-            standbyTime = systemTime() + kStandbyTimeInNsecs;
+            standbyTime = systemTime() + mStandbyTimeInNsecs;
             //TODO: delay standby when effects have a tail
         } else {
             // If no tracks are ready, sleep once for the duration of an output
@@ -3112,7 +3146,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                         }
                     }
 
-                    standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    standbyTime = systemTime() + mStandbyTimeInNsecs;
                     sleepTime = idleSleepTime;
                     continue;
                 }
@@ -3166,7 +3200,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             // enable changes in effect chain
             unlockEffectChains(effectChains);
 
-            standbyTime = systemTime() + kStandbyTimeInNsecs;
+            standbyTime = systemTime() + mStandbyTimeInNsecs;
             for (size_t i = 0; i < outputTracks.size(); i++) {
                 outputTracks[i]->write(mMixBuffer, writeFrames);
             }
