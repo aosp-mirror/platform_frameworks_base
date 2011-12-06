@@ -328,8 +328,7 @@ uint32_t TextLayoutCacheValue::getElapsedTime() {
     return mElapsedTime;
 }
 
-TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0),
-        mShaperItemLogClustersArraySize(0) {
+TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0) {
     mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
     mArabicTypeface = NULL;
     mHebrewRegularTypeface = NULL;
@@ -409,7 +408,7 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
 #if DEBUG_GLYPHS
                     LOGD("      -- dirFlags = %d", dirFlags);
                     LOGD("      -- paraDir = %d", paraDir);
-                    LOGD("      -- run-count = %d", rc);
+                    LOGD("      -- run-count = %d", int(rc));
 #endif
                     if (U_SUCCESS(status) && rc == 1) {
                         // Normal case: one run, status is ok
@@ -418,7 +417,7 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
                     } else if (!U_SUCCESS(status) || rc < 1) {
                         LOGW("Need to force to single run -- string = '%s',"
                                 " status = %d, rc = %d",
-                                String8(chars + start, count).string(), status, rc);
+                                String8(chars + start, count).string(), status, int(rc));
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
                     } else {
@@ -720,7 +719,6 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     }
 
     // Shape
-    ensureShaperItemLogClustersArray(mShaperItem.item.length);
     ensureShaperItemGlyphArrays(mShaperItem.item.length * 3 / 2);
     mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
     while (!HB_ShapeItem(&mShaperItem)) {
@@ -744,10 +742,17 @@ void TextLayoutEngine::createShaperItemGlyphArrays(size_t size) {
     LOGD("Creating Glyph Arrays with size = %d", size);
 #endif
     mShaperItemGlyphArraySize = size;
+
+    // These arrays are all indexed by glyph.
     mShaperItem.glyphs = new HB_Glyph[size];
     mShaperItem.attributes = new HB_GlyphAttributes[size];
     mShaperItem.advances = new HB_Fixed[size];
     mShaperItem.offsets = new HB_FixedPoint[size];
+
+    // Although the log_clusters array is indexed by character, Harfbuzz expects that
+    // it is big enough to hold one element per glyph.  So we allocate log_clusters along
+    // with the other glyph arrays above.
+    mShaperItem.log_clusters = new unsigned short[size];
 }
 
 void TextLayoutEngine::deleteShaperItemGlyphArrays() {
@@ -755,24 +760,6 @@ void TextLayoutEngine::deleteShaperItemGlyphArrays() {
     delete[] mShaperItem.attributes;
     delete[] mShaperItem.advances;
     delete[] mShaperItem.offsets;
-}
-
-void TextLayoutEngine::ensureShaperItemLogClustersArray(size_t size) {
-    if (size > mShaperItemLogClustersArraySize) {
-        deleteShaperItemLogClustersArray();
-        createShaperItemLogClustersArray(size);
-    }
-}
-
-void TextLayoutEngine::createShaperItemLogClustersArray(size_t size) {
-#if DEBUG_GLYPHS
-    LOGD("Creating LogClusters Array with size = %d", size);
-#endif
-    mShaperItemLogClustersArraySize = size;
-    mShaperItem.log_clusters = new unsigned short[size];
-}
-
-void TextLayoutEngine::deleteShaperItemLogClustersArray() {
     delete[] mShaperItem.log_clusters;
 }
 
