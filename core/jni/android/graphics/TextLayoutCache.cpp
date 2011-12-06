@@ -346,9 +346,6 @@ void TextLayoutCacheValue::initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec*
     font->x_scale = 1;
     font->y_scale = 1;
 
-    shaperItem.font = font;
-    shaperItem.face = HB_NewFace(shaperItem.font, harfbuzzSkiaGetTable);
-
     // Reset kerning
     shaperItem.kerning_applied = false;
 
@@ -360,7 +357,10 @@ void TextLayoutCacheValue::initShaperItem(HB_ShaperItem& shaperItem, HB_FontRec*
     fontData->flags = paint->getFlags();
     fontData->hinting = paint->getHinting();
 
+    shaperItem.font = font;
     shaperItem.font->userData = fontData;
+
+    shaperItem.face = HB_NewFace(NULL, harfbuzzSkiaGetTable);
 
     // We cannot know, ahead of time, how many glyphs a given script run
     // will produce. We take a guess that script runs will not produce more
