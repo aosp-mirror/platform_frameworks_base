@@ -82,6 +82,9 @@ public class UiTest implements RsBenchBaseTest{
         mTests[index].testName = Allocation.createFromString(mRS,
                                                              mNames[index],
                                                              Allocation.USAGE_SCRIPT);
+        mTests[index].debugName = RsBenchRS.createZeroTerminatedAlloc(mRS,
+                                                                      mNames[index],
+                                                                      Allocation.USAGE_SCRIPT);
 
         ScriptField_UiTestData_s.Item dataItem = new ScriptField_UiTestData_s.Item();
         dataItem.testId = testId;
