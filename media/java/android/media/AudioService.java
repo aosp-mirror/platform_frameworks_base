@@ -275,6 +275,9 @@ public class AudioService extends IAudioService.Stub {
     // Forced device usage for communications
     private int mForcedUseForComm;
 
+    // True if we have master volume support
+    private final boolean mUseMasterVolume;
+
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
     private ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
@@ -399,8 +402,9 @@ public class AudioService extends IAudioService.Stub {
                 context.getSystemService(Context.TELEPHONY_SERVICE);
         tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
-        if (context.getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume)) {
+        mUseMasterVolume = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
+        if (mUseMasterVolume) {
             float volume = Settings.System.getFloat(mContentResolver,
                     Settings.System.VOLUME_MASTER, -1.0f);
             if (volume >= 0.0f) {
@@ -595,6 +599,8 @@ public class AudioService extends IAudioService.Stub {
 
         float volume = AudioSystem.getMasterVolume();
         if (volume >= 0.0) {
+            // get current master volume adjusted to 0 to 100
+            int oldVolume = getMasterVolume();
             if (direction == AudioManager.ADJUST_RAISE) {
                 volume += MASTER_VOLUME_INCREMENT;
                 if (volume > 1.0f) volume = 1.0f;
@@ -606,7 +612,7 @@ public class AudioService extends IAudioService.Stub {
             long origCallerIdentityToken = Binder.clearCallingIdentity();
             Settings.System.putFloat(mContentResolver, Settings.System.VOLUME_MASTER, volume);
             Binder.restoreCallingIdentity(origCallerIdentityToken);
-            mVolumePanel.postMasterVolumeChanged(flags);
+            sendMasterVolumeUpdate(flags, oldVolume, getMasterVolume());
         }
     }
 
@@ -657,6 +663,27 @@ public class AudioService extends IAudioService.Stub {
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
         intent.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
         mContext.sendBroadcast(intent);
+    }
+
+    // UI update and Broadcast Intent
+    private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
+        mVolumePanel.postMasterVolumeChanged(flags);
+
+        Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
+        intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
+        intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_VALUE, newVolume);
+        mContext.sendBroadcast(intent);
+    }
+
+    // UI update and Broadcast Intent
+    private void sendMasterMuteUpdate(boolean muted, int flags) {
+        mVolumePanel.postMasterMuteChanged(flags);
+
+        Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
+        intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, muted);
+        long origCallerIdentityToken = Binder.clearCallingIdentity();
+        mContext.sendStickyBroadcast(intent);
+        Binder.restoreCallingIdentity(origCallerIdentityToken);
     }
 
     /**
@@ -2158,7 +2185,7 @@ public class AudioService extends IAudioService.Stub {
                                 // If the stream is not yet muted by any client, set lvel to 0
                                 if (muteCount() == 0) {
                                     AudioSystem.setMasterMute(true);
-                                    mVolumePanel.postMasterMuteChanged(AudioManager.FLAG_SHOW_UI);
+                                    sendMasterMuteUpdate(true, AudioManager.FLAG_SHOW_UI);
                                 }
                             } catch (RemoteException e) {
                                 // Client has died!
@@ -2184,7 +2211,7 @@ public class AudioService extends IAudioService.Stub {
                                 }
                                 if (muteCount() == 0) {
                                     AudioSystem.setMasterMute(false);
-                                    mVolumePanel.postMasterMuteChanged(AudioManager.FLAG_SHOW_UI);
+                                    sendMasterMuteUpdate(false, AudioManager.FLAG_SHOW_UI);
                                 }
                             }
                         }
@@ -2861,6 +2888,11 @@ public class AudioService extends IAudioService.Stub {
                 if (adapter != null) {
                     adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
                                             BluetoothProfile.A2DP);
+                }
+
+                if (mUseMasterVolume) {
+                    // Send sticky broadcast for initial master mute state
+                    sendMasterMuteUpdate(false, 0);
                 }
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {

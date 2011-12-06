@@ -96,7 +96,8 @@ public class AudioManager {
      * @see #EXTRA_VIBRATE_SETTING
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String VIBRATE_SETTING_CHANGED_ACTION = "android.media.VIBRATE_SETTING_CHANGED";
+    public static final String VIBRATE_SETTING_CHANGED_ACTION =
+        "android.media.VIBRATE_SETTING_CHANGED";
 
     /**
      * @hide Broadcast intent when the volume for a particular stream type changes.
@@ -108,6 +109,27 @@ public class AudioManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
+
+    /**
+     * @hide Broadcast intent when the master volume changes.
+     * Includes the new volume
+     *
+     * @see #EXTRA_MASTER_VOLUME_VALUE
+     * @see #EXTRA_PREV_MASTER_VOLUME_VALUE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String MASTER_VOLUME_CHANGED_ACTION =
+        "android.media.MASTER_VOLUME_CHANGED_ACTION";
+
+    /**
+     * @hide Broadcast intent when the master mute state changes.
+     * Includes the the new volume
+     *
+     * @see #EXTRA_MASTER_VOLUME_MUTED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String MASTER_MUTE_CHANGED_ACTION =
+        "android.media.MASTER_MUTE_CHANGED_ACTION";
 
     /**
      * The new vibrate setting for a particular type.
@@ -145,6 +167,27 @@ public class AudioManager {
      */
     public static final String EXTRA_PREV_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE";
+
+    /**
+     * @hide The new master volume value for the master volume changed intent.
+     * Value is integer between 0 and 100 inclusive.
+     */
+    public static final String EXTRA_MASTER_VOLUME_VALUE =
+        "android.media.EXTRA_MASTER_VOLUME_VALUE";
+
+    /**
+     * @hide The previous master volume value for the master volume changed intent.
+     * Value is integer between 0 and 100 inclusive.
+     */
+    public static final String EXTRA_PREV_MASTER_VOLUME_VALUE =
+        "android.media.EXTRA_PREV_MASTER_VOLUME_VALUE";
+
+    /**
+     * @hide The new master volume mute state for the master mute changed intent.
+     * Value is boolean
+     */
+    public static final String EXTRA_MASTER_VOLUME_MUTED =
+        "android.media.EXTRA_MASTER_VOLUME_MUTED";
 
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
