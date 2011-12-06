@@ -386,7 +386,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     private boolean isWatchdogEnabled() {
-        return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        //return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
+        //TODO: fix this when we do aggressive monitoring
+        return false;
     }
 
     private void updateSettings() {
