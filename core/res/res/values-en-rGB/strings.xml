@@ -40,7 +40,7 @@
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Service was enabled for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Service has been disabled."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Registration was successful."</string>
-    <string name="serviceErased" msgid="1288584695297200972">"Erasure was successful."</string>
+    <string name="serviceErased" msgid="1288584695297200972">"Erase successful."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Incorrect password."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI complete."</string>
     <string name="badPin" msgid="5085454289896032547">"The old PIN that you typed is not correct."</string>
@@ -150,9 +150,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Silent mode"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sound is OFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sound is ON"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Airplane mode is ON"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Airplane mode is OFF"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Aeroplane mode"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Aeroplane mode is ON"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Aeroplane mode is OFF"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>

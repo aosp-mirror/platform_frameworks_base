@@ -138,5 +138,4 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Sökning efter GPS pågår"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Platsen har identifierats av GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ta bort alla meddelanden."</string>
-    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Aktivera skärmsläckare"</string>
 </resources>
