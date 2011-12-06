@@ -1322,7 +1322,7 @@ public class WebView extends AbsoluteLayout
                 final String packageName = ctx.getPackageName();
                 if (packageName != null) {
                     mTextToSpeech = new TextToSpeech(getContext(), null, null,
-                            packageName + ".**webview**");
+                            packageName + ".**webview**", true);
                     addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
                 }
             }
