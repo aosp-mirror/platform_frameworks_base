@@ -17,12 +17,12 @@
 package com.android.tools.layoutlib.create;
 
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
@@ -32,13 +32,13 @@ import org.objectweb.asm.signature.SignatureWriter;
  * This class visitor renames a class from a given old name to a given new name.
  * The class visitor will also rename all inner classes and references in the methods.
  * <p/>
- * 
+ *
  * For inner classes, this handles only the case where the outer class name changes.
- * The inner class name should remain the same. 
+ * The inner class name should remain the same.
  */
-public class RenameClassAdapter extends ClassAdapter {
+public class RenameClassAdapter extends ClassVisitor {
 
-    
+
     private final String mOldName;
     private final String mNewName;
     private String mOldBase;
@@ -50,10 +50,10 @@ public class RenameClassAdapter extends ClassAdapter {
      * The names must be full qualified internal ASM names (e.g. com/blah/MyClass$InnerClass).
      */
     public RenameClassAdapter(ClassWriter cv, String oldName, String newName) {
-        super(cv);
+        super(Opcodes.ASM4, cv);
         mOldBase = mOldName = oldName;
         mNewBase = mNewName = newName;
-        
+
         int pos = mOldName.indexOf('$');
         if (pos > 0) {
             mOldBase = mOldName.substring(0, pos);
@@ -62,7 +62,7 @@ public class RenameClassAdapter extends ClassAdapter {
         if (pos > 0) {
             mNewBase = mNewName.substring(0, pos);
         }
-        
+
         assert (mOldBase == null && mNewBase == null) || (mOldBase != null && mNewBase != null);
     }
 
@@ -78,7 +78,7 @@ public class RenameClassAdapter extends ClassAdapter {
 
         return renameType(Type.getType(desc));
     }
-    
+
     /**
      * Renames an object type, e.g. "Lcom.package.MyClass;" or an array type that has an
      * object element, e.g. "[Lcom.package.MyClass;"
@@ -150,7 +150,7 @@ public class RenameClassAdapter extends ClassAdapter {
         if (mOldBase != mOldName && type.equals(mOldBase)) {
             return mNewBase;
         }
-    
+
         int pos = type.indexOf('$');
         if (pos == mOldBase.length() && type.startsWith(mOldBase)) {
             return mNewBase + type.substring(pos);
@@ -183,7 +183,7 @@ public class RenameClassAdapter extends ClassAdapter {
             sb.append(name);
         }
         sb.append(')');
-        
+
         Type ret = Type.getReturnType(desc);
         String name = renameType(ret);
         sb.append(name);
@@ -191,9 +191,9 @@ public class RenameClassAdapter extends ClassAdapter {
         return sb.toString();
     }
 
-    
+
     /**
-     * Renames the ClassSignature handled by ClassVisitor.visit 
+     * Renames the ClassSignature handled by ClassVisitor.visit
      * or the MethodTypeSignature handled by ClassVisitor.visitMethod.
      */
     String renameTypeSignature(String sig) {
@@ -207,7 +207,7 @@ public class RenameClassAdapter extends ClassAdapter {
         return sig;
     }
 
-    
+
     /**
      * Renames the FieldTypeSignature handled by ClassVisitor.visitField
      * or MethodVisitor.visitLocalVariable.
@@ -223,17 +223,17 @@ public class RenameClassAdapter extends ClassAdapter {
         return sig;
     }
 
-    
+
     //----------------------------------
     // Methods from the ClassAdapter
-    
+
     @Override
     public void visit(int version, int access, String name, String signature,
             String superName, String[] interfaces) {
         name = renameInternalType(name);
         superName = renameInternalType(superName);
         signature = renameTypeSignature(signature);
-        
+
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -259,7 +259,7 @@ public class RenameClassAdapter extends ClassAdapter {
         desc = renameTypeDesc(desc);
         return super.visitAnnotation(desc, visible);
     }
-    
+
     @Override
     public FieldVisitor visitField(int access, String name, String desc,
             String signature, Object value) {
@@ -267,14 +267,14 @@ public class RenameClassAdapter extends ClassAdapter {
         signature = renameFieldSignature(signature);
         return super.visitField(access, name, desc, signature, value);
     }
-    
-    
+
+
     //----------------------------------
 
     /**
      * A method visitor that renames all references from an old class name to a new class name.
      */
-    public class RenameMethodAdapter extends MethodAdapter {
+    public class RenameMethodAdapter extends MethodVisitor {
 
         /**
          * Creates a method visitor that renames all references from a given old name to a given new
@@ -282,13 +282,13 @@ public class RenameClassAdapter extends ClassAdapter {
          * The names must be full qualified internal ASM names (e.g. com/blah/MyClass$InnerClass).
          */
         public RenameMethodAdapter(MethodVisitor mv) {
-            super(mv);
+            super(Opcodes.ASM4, mv);
         }
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
             desc = renameTypeDesc(desc);
-            
+
             return super.visitAnnotation(desc, visible);
         }
 
@@ -302,7 +302,7 @@ public class RenameClassAdapter extends ClassAdapter {
         @Override
         public void visitTypeInsn(int opcode, String type) {
             type = renameInternalType(type);
-            
+
             super.visitTypeInsn(opcode, type);
         }
 
@@ -321,7 +321,7 @@ public class RenameClassAdapter extends ClassAdapter {
 
             super.visitMethodInsn(opcode, owner, name, desc);
         }
-        
+
         @Override
         public void visitLdcInsn(Object cst) {
             // If cst is a Type, this means the code is trying to pull the .class constant
@@ -335,14 +335,14 @@ public class RenameClassAdapter extends ClassAdapter {
         @Override
         public void visitMultiANewArrayInsn(String desc, int dims) {
             desc = renameTypeDesc(desc);
-         
+
             super.visitMultiANewArrayInsn(desc, dims);
         }
 
         @Override
         public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
             type = renameInternalType(type);
-            
+
             super.visitTryCatchBlock(start, end, handler, type);
         }
 
@@ -351,96 +351,113 @@ public class RenameClassAdapter extends ClassAdapter {
                 Label start, Label end, int index) {
             desc = renameTypeDesc(desc);
             signature = renameFieldSignature(signature);
-            
+
             super.visitLocalVariable(name, desc, signature, start, end, index);
         }
 
     }
 
     //----------------------------------
-    
-    public class RenameSignatureAdapter implements SignatureVisitor {
+
+    public class RenameSignatureAdapter extends SignatureVisitor {
 
         private final SignatureVisitor mSv;
 
         public RenameSignatureAdapter(SignatureVisitor sv) {
+            super(Opcodes.ASM4);
             mSv = sv;
         }
 
+        @Override
         public void visitClassType(String name) {
             name = renameInternalType(name);
             mSv.visitClassType(name);
         }
 
+        @Override
         public void visitInnerClassType(String name) {
             name = renameInternalType(name);
             mSv.visitInnerClassType(name);
         }
 
+        @Override
         public SignatureVisitor visitArrayType() {
             SignatureVisitor sv = mSv.visitArrayType();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public void visitBaseType(char descriptor) {
             mSv.visitBaseType(descriptor);
         }
 
+        @Override
         public SignatureVisitor visitClassBound() {
             SignatureVisitor sv = mSv.visitClassBound();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public void visitEnd() {
             mSv.visitEnd();
         }
 
+        @Override
         public SignatureVisitor visitExceptionType() {
             SignatureVisitor sv = mSv.visitExceptionType();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public void visitFormalTypeParameter(String name) {
             mSv.visitFormalTypeParameter(name);
         }
 
+        @Override
         public SignatureVisitor visitInterface() {
             SignatureVisitor sv = mSv.visitInterface();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public SignatureVisitor visitInterfaceBound() {
             SignatureVisitor sv = mSv.visitInterfaceBound();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public SignatureVisitor visitParameterType() {
             SignatureVisitor sv = mSv.visitParameterType();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public SignatureVisitor visitReturnType() {
             SignatureVisitor sv = mSv.visitReturnType();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public SignatureVisitor visitSuperclass() {
             SignatureVisitor sv = mSv.visitSuperclass();
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public void visitTypeArgument() {
             mSv.visitTypeArgument();
         }
 
+        @Override
         public SignatureVisitor visitTypeArgument(char wildcard) {
             SignatureVisitor sv = mSv.visitTypeArgument(wildcard);
             return new RenameSignatureAdapter(sv);
         }
 
+        @Override
         public void visitTypeVariable(String name) {
             mSv.visitTypeVariable(name);
         }
-        
+
     }
 }

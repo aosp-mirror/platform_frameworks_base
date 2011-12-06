@@ -29,7 +29,10 @@ import org.objectweb.asm.Opcodes;
 /**
  * Indicates if a class contains any native methods.
  */
-public class ClassHasNativeVisitor implements ClassVisitor {
+public class ClassHasNativeVisitor extends ClassVisitor {
+    public ClassHasNativeVisitor() {
+        super(Opcodes.ASM4);
+    }
 
     private boolean mHasNativeMethods = false;
 
@@ -42,35 +45,42 @@ public class ClassHasNativeVisitor implements ClassVisitor {
         mHasNativeMethods = hasNativeMethods;
     }
 
+    @Override
     public void visit(int version, int access, String name, String signature,
             String superName, String[] interfaces) {
         // pass
     }
 
+    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         // pass
         return null;
     }
 
+    @Override
     public void visitAttribute(Attribute attr) {
         // pass
     }
 
+    @Override
     public void visitEnd() {
         // pass
     }
 
+    @Override
     public FieldVisitor visitField(int access, String name, String desc,
             String signature, Object value) {
         // pass
         return null;
     }
 
+    @Override
     public void visitInnerClass(String name, String outerName,
             String innerName, int access) {
         // pass
     }
 
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc,
             String signature, String[] exceptions) {
         if ((access & Opcodes.ACC_NATIVE) != 0) {
@@ -79,10 +89,12 @@ public class ClassHasNativeVisitor implements ClassVisitor {
         return null;
     }
 
+    @Override
     public void visitOuterClass(String owner, String name, String desc) {
         // pass
     }
 
+    @Override
     public void visitSource(String source, String debug) {
         // pass
     }
