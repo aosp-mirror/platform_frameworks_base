@@ -2779,10 +2779,10 @@ public final class Settings {
         public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
 
         /**
-         * If injection of accessibility enhancing JavaScript scripts
+         * If injection of accessibility enhancing JavaScript screen-reader
          * is enabled.
          * <p>
-         *   Note: Accessibility injecting scripts are served by the
+         *   Note: The JavaScript based screen-reader is served by the
          *   Google infrastructure and enable users with disabilities to
          *   efficiantly navigate in and explore web content.
          * </p>
@@ -2793,6 +2793,22 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_SCRIPT_INJECTION =
             "accessibility_script_injection";
+
+        /**
+         * The URL for the injected JavaScript based screen-reader used
+         * for providing accessiblity of content in WebView.
+         * <p>
+         *   Note: The JavaScript based screen-reader is served by the
+         *   Google infrastructure and enable users with disabilities to
+         *   efficiently navigate in and explore web content.
+         * </p>
+         * <p>
+         *   This property represents a string value.
+         * </p>
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SCREEN_READER_URL =
+            "accessibility_script_injection_url";
 
         /**
          * Key bindings for navigation in built-in accessibility support for web content.
