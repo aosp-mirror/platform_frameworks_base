@@ -86,8 +86,11 @@ public abstract class AnimationThread extends Thread {
         try {
             Handler_Delegate.setCallback(new IHandlerCallback() {
                 public void sendMessageAtTime(Handler handler, Message msg, long uptimeMillis) {
-                    if (msg.what == ValueAnimator.ANIMATION_START ||
-                            msg.what == ValueAnimator.ANIMATION_FRAME) {
+                    if (msg.what == ValueAnimator.ANIMATION_START /*||
+                            FIXME: The ANIMATION_FRAME message no longer exists.  Instead,
+                            the animation timing loop is based on a Choreographer object
+                            that schedules animation and drawing frames.
+                            msg.what == ValueAnimator.ANIMATION_FRAME*/) {
                         mQueue.add(new MessageBundle(handler, msg, uptimeMillis));
                     } else {
                         // just ignore.
