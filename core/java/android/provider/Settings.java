@@ -2774,6 +2774,11 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
+         * Whether to speak passwords while in accessibility mode.
+         */
+        public static final String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
+
+        /**
          * If injection of accessibility enhancing JavaScript scripts
          * is enabled.
          * <p>
@@ -4121,6 +4126,7 @@ public final class Settings {
             ENABLED_ACCESSIBILITY_SERVICES,
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
+            ACCESSIBILITY_SPEAK_PASSWORD,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,
