@@ -371,6 +371,10 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
+        if (!count) {
+            *outTotalAdvance = 0;
+            return;
+        }
 
         UBiDiLevel bidiReq = 0;
         bool forceLTR = false;
@@ -508,9 +512,11 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
-
-    *outTotalAdvance = 0;
-    jfloat totalAdvance = 0;
+    if (!count) {
+        // We cannot shape an empty run.
+        *outTotalAdvance = 0;
+        return;
+    }
 
     // Set the string properties
     mShaperItem.string = chars;
@@ -527,6 +533,7 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
     // into the shaperItem
     ssize_t indexFontRun = isRTL ? count - 1 : 0;
     unsigned numCodePoints = 0;
+    jfloat totalAdvance = 0;
     while ((isRTL) ?
             hb_utf16_script_run_prev(&numCodePoints, &mShaperItem.item, chars,
                     count, &indexFontRun):
@@ -719,6 +726,7 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     }
 
     // Shape
+    assert(mShaperItem.item.length > 0); // Harfbuzz will overwrite other memory if length is 0.
     ensureShaperItemGlyphArrays(mShaperItem.item.length * 3 / 2);
     mShaperItem.num_glyphs = mShaperItemGlyphArraySize;
     while (!HB_ShapeItem(&mShaperItem)) {
