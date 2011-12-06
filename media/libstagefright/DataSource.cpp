@@ -15,7 +15,6 @@
  */
 
 #include "include/AMRExtractor.h"
-#include "include/AVIExtractor.h"
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
@@ -113,7 +112,6 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMPEG2TS);
     RegisterSniffer(SniffMP3);
     RegisterSniffer(SniffAAC);
-    RegisterSniffer(SniffAVI);
     RegisterSniffer(SniffMPEG2PS);
 
     char value[PROPERTY_VALUE_MAX];
