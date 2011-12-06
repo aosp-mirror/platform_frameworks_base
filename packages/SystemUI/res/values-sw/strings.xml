@@ -136,5 +136,4 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Inatafuta GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Mahali pamewekwa na GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Futa arifa zote."</string>
-    <string name="dreams_dock_launcher" msgid="3541196417659166245">"Amilisha hifadhi ya skrini"</string>
 </resources>
