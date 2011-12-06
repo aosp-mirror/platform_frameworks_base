@@ -54,8 +54,17 @@ class TaskRecord extends ThumbnailHolder {
     
     void setIntent(Intent _intent, ActivityInfo info) {
         stringName = null;
-        
+
         if (info.targetActivity == null) {
+            if (_intent != null) {
+                // If this Intent has a selector, we want to clear it for the
+                // recent task since it is not relevant if the user later wants
+                // to re-launch the app.
+                if (_intent.getSelector() != null) {
+                    _intent = new Intent(_intent);
+                    _intent.setSelector(null);
+                }
+            }
             intent = _intent;
             realActivity = _intent != null ? _intent.getComponent() : null;
             origActivity = null;
@@ -65,6 +74,7 @@ class TaskRecord extends ThumbnailHolder {
             if (_intent != null) {
                 Intent targetIntent = new Intent(_intent);
                 targetIntent.setComponent(targetComponent);
+                targetIntent.setSelector(null);
                 intent = targetIntent;
                 realActivity = targetComponent;
                 origActivity = _intent.getComponent();
