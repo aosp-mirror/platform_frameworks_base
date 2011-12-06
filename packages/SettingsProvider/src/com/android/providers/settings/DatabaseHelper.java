@@ -1151,8 +1151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     intent.setComponent(cn);
                     title = info.loadLabel(packageManager).toString();
                 } else if (category != null) {
-                    intent = new Intent(Intent.ACTION_MAIN, null);
-                    intent.addCategory(category);
+                    intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
                     title = "";
                 } else {
                     Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutStr

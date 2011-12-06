@@ -5334,6 +5334,7 @@ package android.content {
     method public java.util.ArrayList<T> getParcelableArrayListExtra(java.lang.String);
     method public T getParcelableExtra(java.lang.String);
     method public java.lang.String getScheme();
+    method public android.content.Intent getSelector();
     method public java.io.Serializable getSerializableExtra(java.lang.String);
     method public short[] getShortArrayExtra(java.lang.String);
     method public short getShortExtra(java.lang.String, short);
@@ -5346,6 +5347,7 @@ package android.content {
     method public boolean hasExtra(java.lang.String);
     method public boolean hasFileDescriptors();
     method public static android.content.Intent makeMainActivity(android.content.ComponentName);
+    method public static android.content.Intent makeMainSelectorActivity(java.lang.String, java.lang.String);
     method public static android.content.Intent makeRestartActivityTask(android.content.ComponentName);
     method public static android.content.Intent parseIntent(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.content.Intent parseUri(java.lang.String, int) throws java.net.URISyntaxException;
@@ -5399,6 +5401,7 @@ package android.content {
     method public void setExtrasClassLoader(java.lang.ClassLoader);
     method public android.content.Intent setFlags(int);
     method public android.content.Intent setPackage(java.lang.String);
+    method public void setSelector(android.content.Intent);
     method public void setSourceBounds(android.graphics.Rect);
     method public android.content.Intent setType(java.lang.String);
     method public deprecated java.lang.String toURI();
@@ -5577,6 +5580,7 @@ package android.content {
     field public static final int FILL_IN_COMPONENT = 8; // 0x8
     field public static final int FILL_IN_DATA = 2; // 0x2
     field public static final int FILL_IN_PACKAGE = 16; // 0x10
+    field public static final int FILL_IN_SELECTOR = 64; // 0x40
     field public static final int FILL_IN_SOURCE_BOUNDS = 32; // 0x20
     field public static final int FLAG_ACTIVITY_BROUGHT_TO_FRONT = 4194304; // 0x400000
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
