@@ -252,7 +252,6 @@ private:
     KeyedVector<SkFontID, HB_Face> mCachedHBFaces;
 
     size_t mShaperItemGlyphArraySize;
-    size_t mShaperItemLogClustersArraySize;
 
     size_t shapeFontRun(SkPaint* paint, bool isRTL);
 
@@ -272,10 +271,6 @@ private:
     void ensureShaperItemGlyphArrays(size_t size);
     void createShaperItemGlyphArrays(size_t size);
     void deleteShaperItemGlyphArrays();
-
-    void ensureShaperItemLogClustersArray(size_t size);
-    void createShaperItemLogClustersArray(size_t size);
-    void deleteShaperItemLogClustersArray();
 
 }; // TextLayoutEngine
 
