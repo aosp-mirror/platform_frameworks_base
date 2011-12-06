@@ -27,7 +27,6 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
-#include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <ui/InputTransport.h>
 #include "android_os_MessageQueue.h"
