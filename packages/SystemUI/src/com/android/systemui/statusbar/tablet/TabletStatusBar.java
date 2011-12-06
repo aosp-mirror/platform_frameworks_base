@@ -168,7 +168,6 @@ public class TabletStatusBar extends StatusBar implements
     NetworkController mNetworkController;
 
     ViewGroup mBarContents;
-    LayoutTransition mBarContentsLayoutTransition;
 
     // hide system chrome ("lights out") support
     View mShadow;
@@ -460,19 +459,6 @@ public class TabletStatusBar extends StatusBar implements
         }
 
         mBarContents = (ViewGroup) sb.findViewById(R.id.bar_contents);
-        // layout transitions for the status bar's contents
-        mBarContentsLayoutTransition = new LayoutTransition();
-        // add/removal will fade as normal
-        mBarContentsLayoutTransition.setAnimator(LayoutTransition.APPEARING,
-                ObjectAnimator.ofFloat(null, "alpha", 0f, 1f));
-        mBarContentsLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING,
-                ObjectAnimator.ofFloat(null, "alpha", 1f, 0f));
-        // no animations for siblings on change: just jump into place please
-        mBarContentsLayoutTransition.setAnimator(LayoutTransition.CHANGE_APPEARING, null);
-        mBarContentsLayoutTransition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, null);
-        // quick like bunny
-        mBarContentsLayoutTransition.setDuration(250 * (DEBUG?10:1));
-        mBarContents.setLayoutTransition(mBarContentsLayoutTransition);
 
         // the whole right-hand side of the bar
         mNotificationArea = sb.findViewById(R.id.notificationArea);
@@ -521,7 +507,13 @@ public class TabletStatusBar extends StatusBar implements
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
-        mNavigationArea.setLayoutTransition(mBarContentsLayoutTransition);
+
+        LayoutTransition lt = new LayoutTransition();
+        lt.setDuration(250);
+        // don't wait for these transitions; we just want icons to fade in/out, not move around
+        lt.setDuration(LayoutTransition.CHANGE_APPEARING, 0);
+        lt.setDuration(LayoutTransition.CHANGE_DISAPPEARING, 0);
+        mNavigationArea.setLayoutTransition(lt);
         // no multi-touch on the nav buttons
         mNavigationArea.setMotionEventSplittingEnabled(false);
 
