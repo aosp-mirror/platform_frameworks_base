@@ -366,13 +366,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
             public void takeEmergencyCallAction() {
                 mHasOverlay = true;
-                // FaceLock must be stopped if it is running when emergency call is pressed
-                stopAndUnbindFromFaceLock();
 
                 // Continue showing FaceLock area until dialer comes up or call is resumed
                 if (usingFaceLock() && mFaceLockServiceRunning) {
                     showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_EMERGENCY_DIALER_TIMEOUT);
                 }
+
+                // FaceLock must be stopped if it is running when emergency call is pressed
+                stopAndUnbindFromFaceLock();
 
                 pokeWakelock(EMERGENCY_CALL_TIMEOUT);
                 if (TelephonyManager.getDefault().getCallState()
