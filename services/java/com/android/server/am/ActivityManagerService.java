@@ -14462,10 +14462,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.thread.scheduleTrimMemory(curLevel);
                         } catch (RemoteException e) {
                         }
-                        if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-                            // For these apps we will also finish their activities
-                            // to help them free memory.
-                            mMainStack.destroyActivitiesLocked(app, false, "trim");
+                        if (false) {
+                            // For now we won't do this; our memory trimming seems
+                            // to be good enough at this point that destroying
+                            // activities causes more harm than good.
+                            if (curLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+                                    && app != mHomeProcess && app != mPreviousProcess) {
+                                // For these apps we will also finish their activities
+                                // to help them free memory.
+                                mMainStack.destroyActivitiesLocked(app, false, "trim");
+                            }
                         }
                     }
                     app.trimMemoryLevel = curLevel;
