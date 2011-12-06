@@ -2162,6 +2162,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             int flags, List<ResolveInfo> query, int priority) {
         // writer
         synchronized (mPackages) {
+            if (intent.getSelector() != null) {
+                intent = intent.getSelector(); 
+            }
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             List<PreferredActivity> prefs =
                     mSettings.mPreferredActivities.queryIntent(intent, resolvedType,
@@ -2242,7 +2245,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags) {
-        final ComponentName comp = intent.getComponent();
+        ComponentName comp = intent.getComponent();
+        if (comp == null) {
+            if (intent.getSelector() != null) {
+                intent = intent.getSelector(); 
+                comp = intent.getComponent();
+            }
+        }
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags);
@@ -2440,6 +2449,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public List<ResolveInfo> queryIntentReceivers(Intent intent, String resolvedType, int flags) {
         ComponentName comp = intent.getComponent();
+        if (comp == null) {
+            if (intent.getSelector() != null) {
+                intent = intent.getSelector(); 
+                comp = intent.getComponent();
+            }
+        }
         if (comp != null) {
             List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             ActivityInfo ai = getReceiverInfo(comp, flags);
@@ -2478,7 +2493,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public List<ResolveInfo> queryIntentServices(Intent intent, String resolvedType, int flags) {
-        final ComponentName comp = intent.getComponent();
+        ComponentName comp = intent.getComponent();
+        if (comp == null) {
+            if (intent.getSelector() != null) {
+                intent = intent.getSelector(); 
+                comp = intent.getComponent();
+            }
+        }
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             final ServiceInfo si = getServiceInfo(comp, flags);
