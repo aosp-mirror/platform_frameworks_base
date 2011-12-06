@@ -4250,6 +4250,9 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (inFullScreenMode()) {
+            return; // no need to draw anything if we aren't visible.
+        }
         // if mNativeClass is 0, the WebView is either destroyed or not
         // initialized. In either case, just draw the background color and return
         if (mNativeClass == 0) {
@@ -5833,7 +5836,8 @@ public class WebView extends AbsoluteLayout
         }
         calcOurContentVisibleRectF(mVisibleContentRect);
         nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
-                mGLViewportEmpty ? null : mViewRectViewport, mVisibleContentRect);
+                mGLViewportEmpty ? null : mViewRectViewport,
+                mVisibleContentRect);
     }
 
     /**
@@ -5980,6 +5984,7 @@ public class WebView extends AbsoluteLayout
         if (inFullScreenMode()) {
             mFullScreenHolder.hide();
             mFullScreenHolder = null;
+            invalidate();
         }
     }
 
@@ -8655,6 +8660,7 @@ public class WebView extends AbsoluteLayout
                     mFullScreenHolder = new PluginFullScreenHolder(WebView.this, orientation, npp);
                     mFullScreenHolder.setContentView(view);
                     mFullScreenHolder.show();
+                    invalidate();
 
                     break;
                 }
