@@ -12220,11 +12220,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @param location an array of two integers in which to hold the coordinates
      */
     public void getLocationInWindow(int[] location) {
-        // When the view is not attached to a window, this method does not make sense
-        if (mAttachInfo == null) return;
-
         if (location == null || location.length < 2) {
             throw new IllegalArgumentException("location must be an array of two integers");
+        }
+
+        if (mAttachInfo == null) {
+            // When the view is not attached to a window, this method does not make sense
+            location[0] = location[1] = 0;
+            return;
         }
 
         float[] position = mAttachInfo.mTmpTransformLocation;
