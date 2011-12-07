@@ -66,9 +66,11 @@ public final class Choreographer extends Handler {
 
     // System property to enable/disable the use of the vsync / animation timer
     // for drawing rather than drawing immediately.
-    // Enabled by default.
+    // Temporarily disabled by default because postponing performTraversals() violates
+    // assumptions about traversals happening in-order relative to other posted messages.
+    // Bug: 5721047
     private static final boolean USE_ANIMATION_TIMER_FOR_DRAW = SystemProperties.getBoolean(
-            "debug.choreographer.animdraw", true);
+            "debug.choreographer.animdraw", false);
 
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
