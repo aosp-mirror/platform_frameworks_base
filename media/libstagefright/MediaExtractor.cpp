@@ -19,7 +19,6 @@
 #include <utils/Log.h>
 
 #include "include/AMRExtractor.h"
-#include "include/AVIExtractor.h"
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
@@ -110,8 +109,6 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new MatroskaExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         ret = new MPEG2TSExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI)) {
-        ret = new AVIExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
         ret = new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
