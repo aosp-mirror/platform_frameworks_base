@@ -370,7 +370,7 @@ typedef struct {
 typedef float4 rs_quaternion;
 
 #define RS_PACKED __attribute__((packed, aligned(4)))
-#define NULL ((const void *)0)
+#define NULL ((void *)0)
 
 #if (defined(RS_VERSION) && (RS_VERSION >= 14))
 
