@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -31,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.io.FileDescriptor;
@@ -61,6 +64,7 @@ public class NavigationBarView extends LinearLayout {
 
     boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
+    int mNavigationIconHints = 0;
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -111,6 +115,34 @@ public class NavigationBarView extends LinearLayout {
             return false;
         }
     };
+
+    public void setNavigationIconHints(int hints) {
+        setNavigationIconHints(hints, false);
+    }
+
+    public void setNavigationIconHints(int hints, boolean force) {
+        if (!force && hints == mNavigationIconHints) return;
+
+        if (DEBUG) {
+            android.widget.Toast.makeText(mContext,
+                "Navigation icon hints = " + hints,
+                500).show();
+        }
+
+        mNavigationIconHints = hints;
+
+        getBackButton().setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_NOP)) ? 0.5f : 1.0f);
+        getHomeButton().setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_HOME_NOP)) ? 0.5f : 1.0f);
+        getRecentsButton().setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_RECENT_NOP)) ? 0.5f : 1.0f);
+
+        ((ImageView)getBackButton()).setImageResource(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
+                ? R.drawable.ic_sysbar_back_ime
+                : R.drawable.ic_sysbar_back);
+    }
 
     public void setDisabledFlags(int disabledFlags) {
         setDisabledFlags(disabledFlags, false);

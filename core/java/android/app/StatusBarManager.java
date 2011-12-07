@@ -56,6 +56,11 @@ public class StatusBarManager {
             | DISABLE_NOTIFICATION_ALERTS | DISABLE_NOTIFICATION_TICKER
             | DISABLE_SYSTEM_INFO | DISABLE_RECENT | DISABLE_HOME | DISABLE_BACK | DISABLE_CLOCK;
 
+    public static final int NAVIGATION_HINT_BACK_NOP      = 1 << 0;
+    public static final int NAVIGATION_HINT_HOME_NOP      = 1 << 1;
+    public static final int NAVIGATION_HINT_RECENT_NOP    = 1 << 2;
+    public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 3;
+
     private Context mContext;
     private IStatusBarService mService;
     private IBinder mToken = new Binder();
