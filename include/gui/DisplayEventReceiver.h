@@ -94,6 +94,20 @@ public:
      */
     ssize_t getEvents(Event* events, size_t count);
 
+    /*
+     * setVsyncRate() sets the Event::VSync delivery rate. A value of
+     * 1 returns every Event::VSync. A value of 2 returns every other event,
+     * etc... a value of 0 returns no event unless  requestNextVsync() has
+     * been called.
+     */
+    status_t setVsyncRate(uint32_t count);
+
+    /*
+     * requestNextVsync() schedules the next Event::VSync. It has no effect
+     * if the vsync rate is > 0.
+     */
+    status_t requestNextVsync();
+
 private:
     sp<IDisplayEventConnection> mEventConnection;
     sp<BitTube> mDataChannel;

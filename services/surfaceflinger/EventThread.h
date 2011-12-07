@@ -24,7 +24,7 @@
 
 #include <utils/Errors.h>
 #include <utils/threads.h>
-#include <utils/SortedVector.h>
+#include <utils/KeyedVector.h>
 
 #include "DisplayEventConnection.h"
 
@@ -51,6 +51,11 @@ public:
     status_t unregisterDisplayEventConnection(
             const wp<DisplayEventConnection>& connection);
 
+    void setVsyncRate(uint32_t count,
+            const wp<DisplayEventConnection>& connection);
+
+    void requestNextVsync(const wp<DisplayEventConnection>& connection);
+
     void dump(String8& result, char* buffer, size_t SIZE) const;
 
 private:
@@ -58,7 +63,20 @@ private:
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
 
-    status_t removeDisplayEventConnection(
+    struct ConnectionInfo {
+        ConnectionInfo() : count(-1) { }
+
+        // count >= 1 : continuous event. count is the vsync rate
+        // count == 0 : one-shot event that has not fired
+        // count ==-1 : one-shot event that fired this round / disabled
+        // count ==-2 : one-shot event that fired the round before
+        int32_t count;
+    };
+
+    void removeDisplayEventConnection(
+            const wp<DisplayEventConnection>& connection);
+
+    ConnectionInfo* getConnectionInfoLocked(
             const wp<DisplayEventConnection>& connection);
 
     // constants
@@ -69,7 +87,9 @@ private:
     mutable Condition mCondition;
 
     // protected by mLock
-    SortedVector<wp<DisplayEventConnection> > mDisplayEventConnections;
+    KeyedVector< wp<DisplayEventConnection>, ConnectionInfo > mDisplayEventConnections;
+
+    // main thread only
     size_t mDeliveredEvents;
 };
 

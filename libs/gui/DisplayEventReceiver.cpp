@@ -58,6 +58,26 @@ int DisplayEventReceiver::getFd() const {
     return mDataChannel->getFd();
 }
 
+status_t DisplayEventReceiver::setVsyncRate(uint32_t count) {
+    if (int32_t(count) < 0)
+        return BAD_VALUE;
+
+    if (mEventConnection != NULL) {
+        mEventConnection->setVsyncRate(count);
+        return NO_ERROR;
+    }
+    return NO_INIT;
+}
+
+status_t DisplayEventReceiver::requestNextVsync() {
+    if (mEventConnection != NULL) {
+        mEventConnection->requestNextVsync();
+        return NO_ERROR;
+    }
+    return NO_INIT;
+}
+
+
 ssize_t DisplayEventReceiver::getEvents(DisplayEventReceiver::Event* events,
         size_t count) {
     ssize_t size = mDataChannel->read(events, sizeof(events[0])*count);

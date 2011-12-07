@@ -33,9 +33,27 @@ class BitTube;
 class IDisplayEventConnection : public IInterface
 {
 public:
+
     DECLARE_META_INTERFACE(DisplayEventConnection);
 
+    /*
+     * getDataChannel() returns a BitTube where to receive the events from
+     */
     virtual sp<BitTube> getDataChannel() const = 0;
+
+    /*
+     * setVsyncRate() sets the vsync event delivery rate. A value of
+     * 1 returns every vsync events. A value of 2 returns every other events,
+     * etc... a value of 0 returns no event unless  requestNextVsync() has
+     * been called.
+     */
+    virtual void setVsyncRate(uint32_t count) = 0;
+
+    /*
+     * requestNextVsync() schedules the next vsync event. It has no effect
+     * if the vsync rate is > 0.
+     */
+    virtual void requestNextVsync() = 0;    // asynchronous
 };
 
 // ----------------------------------------------------------------------------

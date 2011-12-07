@@ -389,14 +389,8 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 // ----------------------------------------------------------------------------
 
 sp<IDisplayEventConnection> SurfaceFlinger::createDisplayEventConnection() {
-    sp<DisplayEventConnection> result(new DisplayEventConnection(this));
-    mEventThread->registerDisplayEventConnection(result);
+    sp<DisplayEventConnection> result(new DisplayEventConnection(mEventThread));
     return result;
-}
-
-void SurfaceFlinger::cleanupDisplayEventConnection(
-        const wp<DisplayEventConnection>& connection) {
-    mEventThread->unregisterDisplayEventConnection(connection);
 }
 
 // ----------------------------------------------------------------------------

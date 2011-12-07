@@ -32,6 +32,8 @@ namespace android {
 
 enum {
     GET_DATA_CHANNEL = IBinder::FIRST_CALL_TRANSACTION,
+    SET_VSYNC_RATE,
+    REQUEST_NEXT_VSYNC
 };
 
 class BpDisplayEventConnection : public BpInterface<IDisplayEventConnection>
@@ -49,6 +51,19 @@ public:
         remote()->transact(GET_DATA_CHANNEL, data, &reply);
         return new BitTube(reply);
     }
+
+    virtual void setVsyncRate(uint32_t count) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IDisplayEventConnection::getInterfaceDescriptor());
+        data.writeInt32(count);
+        remote()->transact(SET_VSYNC_RATE, data, &reply);
+    }
+
+    virtual void requestNextVsync() {
+        Parcel data, reply;
+        data.writeInterfaceToken(IDisplayEventConnection::getInterfaceDescriptor());
+        remote()->transact(REQUEST_NEXT_VSYNC, data, &reply, IBinder::FLAG_ONEWAY);
+    }
 };
 
 IMPLEMENT_META_INTERFACE(DisplayEventConnection, "android.gui.DisplayEventConnection");
@@ -63,6 +78,16 @@ status_t BnDisplayEventConnection::onTransact(
             CHECK_INTERFACE(IDisplayEventConnection, data, reply);
             sp<BitTube> channel(getDataChannel());
             channel->writeToParcel(reply);
+            return NO_ERROR;
+        } break;
+        case SET_VSYNC_RATE: {
+            CHECK_INTERFACE(IDisplayEventConnection, data, reply);
+            setVsyncRate(data.readInt32());
+            return NO_ERROR;
+        } break;
+        case REQUEST_NEXT_VSYNC: {
+            CHECK_INTERFACE(IDisplayEventConnection, data, reply);
+            requestNextVsync();
             return NO_ERROR;
         } break;
     }
