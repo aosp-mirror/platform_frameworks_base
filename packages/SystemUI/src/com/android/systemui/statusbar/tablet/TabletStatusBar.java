@@ -514,6 +514,16 @@ public class TabletStatusBar extends StatusBar implements
         // don't wait for these transitions; we just want icons to fade in/out, not move around
         lt.setDuration(LayoutTransition.CHANGE_APPEARING, 0);
         lt.setDuration(LayoutTransition.CHANGE_DISAPPEARING, 0);
+        lt.addTransitionListener(new LayoutTransition.TransitionListener() {
+            public void endTransition(LayoutTransition transition, ViewGroup container,
+                    View view, int transitionType) {
+                // ensure the menu button doesn't stick around on the status bar after it's been
+                // removed
+                mBarContents.invalidate();
+            }
+            public void startTransition(LayoutTransition transition, ViewGroup container,
+                    View view, int transitionType) {}
+        });
         mNavigationArea.setLayoutTransition(lt);
         // no multi-touch on the nav buttons
         mNavigationArea.setMotionEventSplittingEnabled(false);
