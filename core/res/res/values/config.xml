@@ -65,6 +65,10 @@
          master volume stream and nothing else . -->
     <bool name="config_useMasterVolume">false</bool>
 
+    <!-- Flag indicating whether the AUDIO_BECOMING_NOISY notification should
+         be sent during an change to the audio output device. -->
+    <bool name="config_sendAudioBecomingNoisy">true</bool>
+
     <!-- The duration (in milliseconds) of a short animation. -->
     <integer name="config_shortAnimTime">200</integer>
 
