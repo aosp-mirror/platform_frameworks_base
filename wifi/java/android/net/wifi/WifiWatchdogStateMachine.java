@@ -150,6 +150,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private ConnectedState mConnectedState = new ConnectedState();
     private DnsCheckingState mDnsCheckingState = new DnsCheckingState();
     private OnlineWatchState mOnlineWatchState = new OnlineWatchState();
+    private OnlineState mOnlineState = new OnlineState();
     private DnsCheckFailureState mDnsCheckFailureState = new DnsCheckFailureState();
     private DelayWalledGardenState mDelayWalledGardenState = new DelayWalledGardenState();
     private WalledGardenState mWalledGardenState = new WalledGardenState();
@@ -163,6 +164,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private int mMinDnsResponses;
     private int mDnsPingTimeoutMs;
     private long mBlacklistFollowupIntervalMs;
+    private boolean mPoorNetworkDetectionEnabled;
     private boolean mWalledGardenTestEnabled;
     private String mWalledGardenUrl;
 
@@ -226,6 +228,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     addState(mWalledGardenState, mConnectedState);
                     addState(mBlacklistedApState, mConnectedState);
                     addState(mOnlineWatchState, mConnectedState);
+                    addState(mOnlineState, mConnectedState);
 
         setInitialState(mWatchdogDisabledState);
         updateSettings();
@@ -386,9 +389,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     private boolean isWatchdogEnabled() {
-        //return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
-        //TODO: fix this when we do aggressive monitoring
-        return false;
+        return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
     }
 
     private void updateSettings() {
@@ -413,6 +414,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mBlacklistFollowupIntervalMs = Secure.getLong(mContentResolver,
                 Settings.Secure.WIFI_WATCHDOG_BLACKLIST_FOLLOWUP_INTERVAL_MS,
                 DEFAULT_BLACKLIST_FOLLOWUP_INTERVAL_MS);
+        //TODO: enable this by default after changing watchdog behavior
+        //Also, update settings description
+        mPoorNetworkDetectionEnabled = getSettingsBoolean(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED, false);
         mWalledGardenTestEnabled = getSettingsBoolean(mContentResolver,
                 Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED, true);
         mWalledGardenUrl = getSettingsStr(mContentResolver,
@@ -625,9 +630,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
                             initConnection(wifiInfo);
                             mConnectionInfo = wifiInfo;
-                            updateBssids();
-                            transitionTo(mDnsCheckingState);
                             mNetEventCounter++;
+                            if (mPoorNetworkDetectionEnabled) {
+                                updateBssids();
+                                transitionTo(mDnsCheckingState);
+                            } else {
+                                transitionTo(mDelayWalledGardenState);
+                            }
                             break;
                         default:
                             mNetEventCounter++;
@@ -679,12 +688,18 @@ public class WifiWatchdogStateMachine extends StateMachine {
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_SCAN_RESULTS_AVAILABLE:
-                    updateBssids();
+                    if (mPoorNetworkDetectionEnabled) {
+                        updateBssids();
+                    }
                     return HANDLED;
                 case EVENT_WATCHDOG_SETTINGS_CHANGE:
-                    // Stop current checks, but let state update
-                    transitionTo(mOnlineWatchState);
-                    return NOT_HANDLED;
+                    updateSettings();
+                    if (mPoorNetworkDetectionEnabled) {
+                        transitionTo(mOnlineWatchState);
+                    } else {
+                        transitionTo(mOnlineState);
+                    }
+                    return HANDLED;
             }
             return NOT_HANDLED;
         }
@@ -831,7 +846,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
                         transitionTo(mWalledGardenState);
                     } else {
                         if (DBG) log("Walled garden test complete - online");
-                        transitionTo(mOnlineWatchState);
+                        if (mPoorNetworkDetectionEnabled) {
+                            transitionTo(mOnlineWatchState);
+                        } else {
+                            transitionTo(mOnlineState);
+                        }
                     }
                     return HANDLED;
                 default:
@@ -963,6 +982,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
     }
 
+
+    /* Child state of ConnectedState indicating that we are online
+     * and there is nothing to do
+     */
+    class OnlineState extends State {
+    }
+
     class DnsCheckFailureState extends State {
 
         @Override
@@ -1039,7 +1065,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return HANDLED;
             }
             setWalledGardenNotificationVisible(true);
-            transitionTo(mOnlineWatchState);
+            if (mPoorNetworkDetectionEnabled) {
+                transitionTo(mOnlineWatchState);
+            } else {
+                transitionTo(mOnlineState);
+            }
             return HANDLED;
         }
     }

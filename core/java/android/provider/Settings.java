@@ -3132,6 +3132,14 @@ public final class Settings {
                 "wifi_watchdog_blacklist_followup_interval_ms";
 
         /**
+         * Setting to turn off poor network avoidance on Wi-Fi. Feature is disabled by default and
+         * the setting needs to be set to 1 to enable it.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
+                "wifi_watchdog_poor_network_test_enabled";
+
+        /**
          * Setting to turn off walled garden test on Wi-Fi. Feature is enabled by default and
          * the setting needs to be set to 0 to disable it.
          * @hide
