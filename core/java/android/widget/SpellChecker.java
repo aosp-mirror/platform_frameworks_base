@@ -272,9 +272,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
                             ((attributes & SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO) > 0);
 
                     SpellCheckSpan spellCheckSpan = mSpellCheckSpans[j];
+
                     if (!isInDictionary && looksLikeTypo) {
                         createMisspelledSuggestionSpan(editable, suggestionsInfo, spellCheckSpan);
                     }
+
                     editable.removeSpan(spellCheckSpan);
                     break;
                 }
@@ -295,20 +297,21 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }, SPELL_PAUSE_DURATION);
     }
 
-    private void createMisspelledSuggestionSpan(Editable editable,
-            SuggestionsInfo suggestionsInfo, SpellCheckSpan spellCheckSpan) {
+    private void createMisspelledSuggestionSpan(Editable editable, SuggestionsInfo suggestionsInfo,
+            SpellCheckSpan spellCheckSpan) {
         final int start = editable.getSpanStart(spellCheckSpan);
         final int end = editable.getSpanEnd(spellCheckSpan);
-        if (start < 0 || end < 0) return; // span was removed in the meantime
+        if (start < 0 || end <= start) return; // span was removed in the meantime
 
         // Other suggestion spans may exist on that region, with identical suggestions, filter
-        // them out to avoid duplicates. First, filter suggestion spans on that exact region.
+        // them out to avoid duplicates.
         SuggestionSpan[] suggestionSpans = editable.getSpans(start, end, SuggestionSpan.class);
         final int length = suggestionSpans.length;
         for (int i = 0; i < length; i++) {
             final int spanStart = editable.getSpanStart(suggestionSpans[i]);
             final int spanEnd = editable.getSpanEnd(suggestionSpans[i]);
             if (spanStart != start || spanEnd != end) {
+                // Nulled (to avoid new array allocation) if not on that exact same region
                 suggestionSpans[i] = null;
             }
         }
@@ -355,6 +358,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
         SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
                 SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
         editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        mTextView.invalidateRegion(start, end);
     }
 
     private class SpellParser {
