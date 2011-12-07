@@ -2389,8 +2389,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     public final static int RESIZED_REPORT = 1003;
     public final static int WINDOW_FOCUS_CHANGED = 1004;
     public final static int DISPATCH_KEY = 1005;
-    public final static int DISPATCH_POINTER = 1006;
-    public final static int DISPATCH_TRACKBALL = 1007;
     public final static int DISPATCH_APP_VISIBILITY = 1008;
     public final static int DISPATCH_GET_NEW_SURFACE = 1009;
     public final static int IME_FINISHED_EVENT = 1010;
@@ -2422,10 +2420,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 return "WINDOW_FOCUS_CHANGED";
             case DISPATCH_KEY:
                 return "DISPATCH_KEY";
-            case DISPATCH_POINTER:
-                return "DISPATCH_POINTER";
-            case DISPATCH_TRACKBALL:
-                return "DISPATCH_TRACKBALL";
             case DISPATCH_APP_VISIBILITY:
                 return "DISPATCH_APP_VISIBILITY";
             case DISPATCH_GET_NEW_SURFACE:
@@ -2591,6 +2585,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         case DIE:
             doDie();
             break;
+        case DISPATCH_KEY: {
+            KeyEvent event = (KeyEvent)msg.obj;
+            enqueueInputEvent(event, null, 0);
+        } break;
         case DISPATCH_KEY_FROM_IME: {
             if (LOCAL_LOGV) Log.v(
                 TAG, "Dispatching key "
