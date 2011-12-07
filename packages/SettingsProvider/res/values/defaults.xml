@@ -115,6 +115,11 @@
             0x200000038=0x03000701:0x03010701:0x03020701;
     </string>
 
+    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION_URL -->
+    <string name="def_accessibility_screen_reader_url" translatable="false">
+        https://ssl.gstatic.com/accessibility/javascript/android/AndroidScriptChooser.user.js
+    </string>
+
     <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
     <bool name="def_touch_exploration_enabled">false</bool>
 

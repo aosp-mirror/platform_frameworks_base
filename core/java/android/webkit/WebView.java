@@ -59,6 +59,7 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -849,13 +850,12 @@ public class WebView extends AbsoluteLayout
     // the alias via which accessibility JavaScript interface is exposed
     private static final String ALIAS_ACCESSIBILITY_JS_INTERFACE = "accessibility";
 
-    // JavaScript to inject the script chooser which will
-    // pick the right script for the current URL
-    private static final String ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT =
+    // Template for JavaScript that injects a screen-reader.
+    private static final String ACCESSIBILITY_SCREEN_READER_JAVASCRIPT_TEMPLATE =
         "javascript:(function() {" +
         "    var chooser = document.createElement('script');" +
         "    chooser.type = 'text/javascript';" +
-        "    chooser.src = 'https://ssl.gstatic.com/accessibility/javascript/android/AndroidScriptChooser.user.js';" +
+        "    chooser.src = '%1s';" +
         "    document.getElementsByTagName('head')[0].appendChild(chooser);" +
         "  })();";
 
@@ -3818,7 +3818,7 @@ public class WebView extends AbsoluteLayout
             if (onDeviceScriptInjectionEnabled) {
                 ensureAccessibilityScriptInjectorInstance(false);
                 // neither script injected nor script injection opted out => we inject
-                loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+                loadUrl(getScreenReaderInjectingJs());
                 // TODO: Set this flag after successfull script injection. Maybe upon injection
                 // the chooser should update the meta tag and we check it to declare success
                 mAccessibilityScriptInjected = true;
@@ -3832,7 +3832,7 @@ public class WebView extends AbsoluteLayout
         } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED) {
             ensureAccessibilityScriptInjectorInstance(false);
             // the URL provides accessibility but we still need to add our generic script
-            loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+            loadUrl(getScreenReaderInjectingJs());
         } else {
             Log.e(LOGTAG, "Unknown URL value for the \"axs\" URL parameter: " + axsParameterValue);
         }
@@ -3851,6 +3851,17 @@ public class WebView extends AbsoluteLayout
         } else {
             mAccessibilityInjector = null;
         }
+    }
+
+    /**
+     * Gets JavaScript that injects a screen-reader.
+     *
+     * @return The JavaScript snippet.
+     */
+    private String getScreenReaderInjectingJs() {
+        String screenReaderUrl = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL);
+        return String.format(ACCESSIBILITY_SCREEN_READER_JAVASCRIPT_TEMPLATE, screenReaderUrl);
     }
 
     /**
