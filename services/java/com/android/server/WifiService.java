@@ -1078,7 +1078,6 @@ public class WifiService extends IWifiManager.Stub {
                 mWifiStateMachine.setHighPerfModeEnabled(strongestLockMode
                         == WifiManager.WIFI_MODE_FULL_HIGH_PERF);
             } else {
-                mWifiStateMachine.requestCmWakeLock();
                 mWifiStateMachine.setDriverStart(false);
             }
         } else {
