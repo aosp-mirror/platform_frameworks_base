@@ -953,24 +953,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 71) {
+             // New setting to specify whether to speak passwords in accessibility mode.
             db.beginTransaction();
             SQLiteStatement stmt = null;
-            Cursor c = null;
             try {
-                c = db.query("secure", new String[] {"_id", "value"},
-                        "name='lockscreen.disabled'",
-                        null, null, null, null);
-                // only set default if it has not yet been set
-                if (c == null || c.getCount() == 0) {
-                    stmt = db.compileStatement("INSERT INTO system(name,value)"
-                            + " VALUES(?,?);");
-                    loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
-                            R.bool.def_lockscreen_disabled);
-                }
-                db.setTransactionSuccessful();
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
+                        R.bool.def_accessibility_speak_password);
             } finally {
                 db.endTransaction();
-                if (c != null) c.close();
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 72;
@@ -1515,6 +1507,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.TOUCH_EXPLORATION_ENABLED,
                     R.bool.def_touch_exploration_enabled);
+
+            loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
+                    R.bool.def_accessibility_speak_password);
+
             loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
                     R.bool.def_lockscreen_disabled);
 
