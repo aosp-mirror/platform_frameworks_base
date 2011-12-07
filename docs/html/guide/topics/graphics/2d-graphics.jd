@@ -130,9 +130,8 @@ use your Canvas to draw a Bitmap handled by the system.</p>
 <p class="note"><strong>Note: </strong> In order to request an invalidate from a thread other than your main
 Activity's thread, you must call <code>{@link android.view.View#postInvalidate()}</code>.</p>
 
-<p>Also read <a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>
-for a guide to extending a View class, and <a href="2d-graphics.html">2D Graphics: Drawables</a> for
-information on using Drawable objects like images from your resources and other primitive shapes.</p>
+<p>For information about extending the {@link android.view.View} class, read
+<a href="{@docRoot}guide/topics/ui/custom-components.html">Building Custom Components</a>.</p>
 
 <p>For a sample application, see the Snake game, in the SDK samples folder:
 <code>&lt;your-sdk-directory>/samples/Snake/</code>.</p>
@@ -188,7 +187,7 @@ browse the source in the <a href="{@docRoot}guide/samples/index.html">Sample Cod
 
 <p>This document discusses the basics of using Drawable objects to draw graphics and how to use a
 couple subclasses of the Drawable class. For information on using Drawables to do frame-by-frame
-animation, see <a href="{@docRoot}guide/topics/animation/drawable-animation.html">Drawable
+animation, see <a href="{@docRoot}guide/topics/graphics/drawable-animation.html">Drawable
 Animation</a>.</p>
 
 <p>A {@link android.graphics.drawable.Drawable} is a general abstraction for "something that can be
