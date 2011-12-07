@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 73;
+    private static final int DATABASE_VERSION = 74;
 
     private Context mContext;
 
@@ -986,6 +986,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 73;
         }
 
+        if (upgradeVersion == 73) {
+            // URL from which WebView loads a JavaScript based screen-reader.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value) VALUES(?,?);");
+                loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
+                        R.string.def_accessibility_screen_reader_url);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 74;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1526,6 +1542,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
                     R.bool.def_accessibility_speak_password);
+
+            loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
+                    R.string.def_accessibility_screen_reader_url);
         } finally {
             if (stmt != null) stmt.close();
         }
