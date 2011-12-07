@@ -25,6 +25,7 @@
 
 #include "SurfaceFlinger.h"
 #include "DisplayEventConnection.h"
+#include "EventThread.h"
 
 // ---------------------------------------------------------------------------
 
@@ -33,21 +34,30 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 DisplayEventConnection::DisplayEventConnection(
-        const sp<SurfaceFlinger>& flinger)
-    : mFlinger(flinger), mChannel(new BitTube())
+        const sp<EventThread>& eventThread)
+    : mEventThread(eventThread), mChannel(new BitTube())
 {
 }
 
 DisplayEventConnection::~DisplayEventConnection() {
-    mFlinger->cleanupDisplayEventConnection(this);
+    mEventThread->unregisterDisplayEventConnection(this);
 }
 
 void DisplayEventConnection::onFirstRef() {
-    // nothing to do here for now.
+    // NOTE: mEventThread doesn't hold a strong reference on us
+    mEventThread->registerDisplayEventConnection(this);
 }
 
 sp<BitTube> DisplayEventConnection::getDataChannel() const {
     return mChannel;
+}
+
+void DisplayEventConnection::setVsyncRate(uint32_t count) {
+    mEventThread->setVsyncRate(count, this);
+}
+
+void DisplayEventConnection::requestNextVsync() {
+    mEventThread->requestNextVsync(this);
 }
 
 status_t DisplayEventConnection::postEvent(const DisplayEventReceiver::Event& event)
@@ -55,7 +65,6 @@ status_t DisplayEventConnection::postEvent(const DisplayEventReceiver::Event& ev
     ssize_t size = mChannel->write(&event, sizeof(DisplayEventReceiver::Event));
     return size < 0 ? status_t(size) : status_t(NO_ERROR);
 }
-
 
 // ---------------------------------------------------------------------------
 
