@@ -267,7 +267,7 @@ public class NetworkUtils {
         String result = null;
         for (int i = 0; i < 4; i++) {
             try {
-                if (octets[i].length > 3) return addr;
+                if (octets[i].length() > 3) return addr;
                 builder.append(Integer.parseInt(octets[i]));
             } catch (NumberFormatException e) {
                 return addr;
