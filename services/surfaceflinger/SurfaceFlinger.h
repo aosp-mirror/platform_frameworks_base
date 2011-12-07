@@ -335,9 +335,6 @@ private:
             status_t electronBeamOffAnimationImplLocked();
             status_t electronBeamOnAnimationImplLocked();
 
-            void cleanupDisplayEventConnection(
-                    const wp<DisplayEventConnection>& connection);
-
             void        debugFlashRegions();
             void        debugShowFPS() const;
             void        drawWormhole() const;

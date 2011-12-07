@@ -32,13 +32,13 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class BitTube;
-class SurfaceFlinger;
+class EventThread;
 
 // ---------------------------------------------------------------------------
 
 class DisplayEventConnection : public BnDisplayEventConnection {
 public:
-    DisplayEventConnection(const sp<SurfaceFlinger>& flinger);
+    DisplayEventConnection(const sp<EventThread>& flinger);
 
     status_t postEvent(const DisplayEventReceiver::Event& event);
 
@@ -46,8 +46,10 @@ private:
     virtual ~DisplayEventConnection();
     virtual void onFirstRef();
     virtual sp<BitTube> getDataChannel() const;
+    virtual void setVsyncRate(uint32_t count);
+    virtual void requestNextVsync();    // asynchronous
 
-    sp<SurfaceFlinger> const mFlinger;
+    sp<EventThread> const mEventThread;
     sp<BitTube> const mChannel;
 };
 

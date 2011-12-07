@@ -107,6 +107,12 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
             return status_t(n);
         }
 
+        status_t status = mReceiver.requestNextVsync();
+        if (status) {
+            LOGW("Failed to request next vsync, status=%d", status);
+            return status;
+        }
+
         if (!mFdCallbackRegistered) {
             int rc = mLooper->addFd(mReceiver.getFd(), 0, ALOOPER_EVENT_INPUT,
                     handleReceiveCallback, this);
