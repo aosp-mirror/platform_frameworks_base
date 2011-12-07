@@ -48,6 +48,14 @@ static float gZoom;
 static float gLastX;
 static float gLastY;
 
+static float3 toFloat3(float x, float y, float z) {
+    float3 f;
+    f.x = x;
+    f.y = y;
+    f.z = z;
+    return f;
+}
+
 void onActionDown(float x, float y) {
     gLastX = x;
     gLastY = y;
@@ -104,8 +112,8 @@ void updateMeshInfo() {
         rsgMeshComputeBoundingBox(info->mMesh,
                                   &minX, &minY, &minZ,
                                   &maxX, &maxY, &maxZ);
-        info->bBoxMin = (minX, minY, minZ);
-        info->bBoxMax = (maxX, maxY, maxZ);
+        info->bBoxMin = toFloat3(minX, minY, minZ);
+        info->bBoxMax = toFloat3(maxX, maxY, maxZ);
         gLookAt += (info->bBoxMin + info->bBoxMax)*0.5f;
     }
     gLookAt = gLookAt / (float)size;
