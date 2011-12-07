@@ -48,6 +48,9 @@ public class TextTest implements RsBenchBaseTest{
         mTests[index].testName = Allocation.createFromString(mRS,
                                                              mNames[index],
                                                              Allocation.USAGE_SCRIPT);
+        mTests[index].debugName = RsBenchRS.createZeroTerminatedAlloc(mRS,
+                                                                     mNames[index],
+                                                                     Allocation.USAGE_SCRIPT);
 
         ScriptField_TextTestData_s.Item dataItem = new ScriptField_TextTestData_s.Item();
         dataItem.fillNum = fillNum;

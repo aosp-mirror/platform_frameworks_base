@@ -45,6 +45,7 @@ VertexShaderInputs *gVSInputs;
 typedef struct TestScripts_s {
     rs_allocation testData;
     rs_allocation testName;
+    rs_allocation debugName;
     rs_script testScript;
 } TestScripts;
 TestScripts *gTestScripts;
@@ -195,7 +196,8 @@ static void benchmark() {
 
     int64_t end = rsUptimeMillis();
     float fps = (float)(frameCount) / ((float)(end - start)*0.001f);
-    rsDebug("Finishes test ", fps);
+    const char *testName = rsGetElementAt(gTestScripts[benchMode].debugName, 0);
+    rsDebug(testName, fps);
 
     gResultBuffer[benchMode] = fps;
     int bufferW = rsAllocationGetDimX(gRenderBufferColor);
