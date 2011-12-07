@@ -914,10 +914,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NUMERIC)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NAME)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.APN)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY)),
+                        NetworkUtils.trimV4AddrZeros(
+                                cursor.getString(
+                                cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY))),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PORT)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSC)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPROXY)),
+                        NetworkUtils.trimV4AddrZeros(
+                                cursor.getString(
+                                cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSC))),
+                        NetworkUtils.trimV4AddrZeros(
+                                cursor.getString(
+                                cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPROXY))),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPORT)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.USER)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PASSWORD)),
