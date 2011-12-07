@@ -16,6 +16,11 @@
 
 #include "include/AMRExtractor.h"
 #include "include/AVIExtractor.h"
+
+#if CHROMIUM_AVAILABLE
+#include "include/DataUriSource.h"
+#endif
+
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
@@ -136,6 +141,10 @@ sp<DataSource> DataSource::CreateFromURI(
             return NULL;
         }
         source = new NuCachedSource2(httpSource);
+# if CHROMIUM_AVAILABLE
+    } else if (!strncasecmp("data:", uri, 5)) {
+        source = new DataUriSource(uri);
+#endif
     } else {
         // Assume it's a filename.
         source = new FileSource(uri);
