@@ -754,4 +754,8 @@
     <string name="config_wimaxServiceClassname"></string>
     <!-- Name of the wimax state tracker clas -->
     <string name="config_wimaxStateTrackerClassname"></string>
+
+    <!-- Base "touch slop" value used by ViewConfiguration as a
+         movement threshold where scrolling should begin. -->
+    <dimen name="config_viewConfigurationTouchSlop">4dp</dimen>
 </resources>
