@@ -1932,8 +1932,9 @@ final class ActivityStack {
                     // should be left as-is.
                     replyChainEnd = -1;
                 }
-                
-            } else if (target.resultTo != null) {
+
+            } else if (target.resultTo != null && (below == null
+                    || below.task == target.task)) {
                 // If this activity is sending a reply to a previous
                 // activity, we can't do anything with it now until
                 // we reach the start of the reply chain.
@@ -1963,6 +1964,8 @@ final class ActivityStack {
                         replyChainEnd = targetI;
                     }
                     ActivityRecord p = null;
+                    if (DEBUG_TASKS) Slog.v(TAG, "Finishing task at index "
+                            + targetI + " to " + replyChainEnd);
                     for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                         p = mHistory.get(srcPos);
                         if (p.finishing) {
@@ -1981,6 +1984,8 @@ final class ActivityStack {
                     if (replyChainEnd < 0) {
                         replyChainEnd = targetI;
                     }
+                    if (DEBUG_TASKS) Slog.v(TAG, "Reparenting task at index "
+                            + targetI + " to " + replyChainEnd);
                     for (int srcPos=replyChainEnd; srcPos>=targetI; srcPos--) {
                         ActivityRecord p = mHistory.get(srcPos);
                         if (p.finishing) {
@@ -2002,6 +2007,7 @@ final class ActivityStack {
                         p.setTask(task, null, false);
                         mHistory.add(lastReparentPos, p);
                         if (DEBUG_TASKS) Slog.v(TAG, "Pulling activity " + p
+                                + " from " + srcPos + " to " + lastReparentPos
                                 + " in to resetting task " + task);
                         mService.mWindowManager.moveAppToken(lastReparentPos, p.appToken);
                         mService.mWindowManager.setAppGroupId(p.appToken, p.task.taskId);
@@ -2031,6 +2037,11 @@ final class ActivityStack {
                         }
                     }
                 }
+
+            } else if (below != null && below.task != target.task) {
+                // We hit the botton of a task; the reply chain can't
+                // pass through it.
+                replyChainEnd = -1;
             }
             
             target = below;
