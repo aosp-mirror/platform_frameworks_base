@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 72;
+    private static final int DATABASE_VERSION = 73;
 
     private Context mContext;
 
@@ -961,11 +961,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         + " VALUES(?,?);");
                 loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
                         R.bool.def_accessibility_speak_password);
+                db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 72;
+        }
+
+        if (upgradeVersion == 72) {
+            // update vibration settings
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
+                        R.bool.def_vibrate_in_silent);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 73;
         }
 
         // *** Remember to update DATABASE_VERSION above!
