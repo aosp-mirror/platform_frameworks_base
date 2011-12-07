@@ -306,8 +306,6 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_SET_HIGH_PERF_MODE               = BASE + 77;
     /* Set the country code */
     static final int CMD_SET_COUNTRY_CODE                 = BASE + 80;
-    /* Request connectivity manager wake lock before driver stop */
-    static final int CMD_REQUEST_CM_WAKELOCK              = BASE + 81;
     /* Enables RSSI poll */
     static final int CMD_ENABLE_RSSI_POLL                 = BASE + 82;
     /* RSSI poll */
@@ -1059,15 +1057,6 @@ public class WifiStateMachine extends StateMachine {
         boolean result = (resultMsg.arg1 != FAILURE);
         resultMsg.recycle();
         return result;
-    }
-
-    /**
-     * Request a wakelock with connectivity service to
-     * keep the device awake until we hand-off from wifi
-     * to an alternate network
-     */
-    public void requestCmWakeLock() {
-        sendMessage(CMD_REQUEST_CM_WAKELOCK);
     }
 
     public void updateBatteryWorkSource(WorkSource newSource) {
@@ -1867,7 +1856,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
                 case CMD_SET_FREQUENCY_BAND:
-                case CMD_REQUEST_CM_WAKELOCK:
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
@@ -3024,10 +3012,6 @@ public class WifiStateMachine extends StateMachine {
                     WifiNative.disconnectCommand();
                     transitionTo(mDisconnectingState);
                     break;
-                case CMD_REQUEST_CM_WAKELOCK:
-                    checkAndSetConnectivityInstance();
-                    mCm.requestNetworkTransitionWakelock(TAG);
-                    break;
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
                         sendMessage(CMD_DISCONNECT);
@@ -3100,6 +3084,11 @@ public class WifiStateMachine extends StateMachine {
         }
         @Override
         public void exit() {
+
+            /* Request a CS wakelock during transition to mobile */
+            checkAndSetConnectivityInstance();
+            mCm.requestNetworkTransitionWakelock(TAG);
+
             /* If a scan result is pending in connected state, the supplicant
              * is in SCAN_ONLY_MODE. Restore CONNECT_MODE on exit
              */
