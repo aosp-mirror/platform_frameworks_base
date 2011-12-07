@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 /**
  * Command that sends key events to the device, either by their keycode, or by
@@ -30,6 +31,9 @@ import android.view.KeyEvent;
  */
 
 public class Input {
+    private static final String TAG = "Input";
+
+    private IWindowManager mWindowManager;
 
     /**
      * Command-line entry point.
@@ -40,6 +44,13 @@ public class Input {
         (new Input()).run(args);
     }
 
+    private IWindowManager getWindowManager() {
+        if (mWindowManager == null) {
+            mWindowManager = (IWindowManager.Stub.asInterface(ServiceManager.getService("window")));
+        }
+        return mWindowManager;
+    }
+
     private void run(String[] args) {
         if (args.length < 1) {
             showUsage();
@@ -48,19 +59,37 @@ public class Input {
 
         String command = args[0];
 
-        if (command.equals("text")) {
-            sendText(args[1]);
-        } else if (command.equals("keyevent")) {
-            sendKeyEvent(args[1]);
-        } else if (command.equals("motionevent")) {
-            System.err.println("Error: motionevent not yet supported.");
-            return;
+        try {
+            if (command.equals("text")) {
+                if (args.length == 2) {
+                    sendText(args[1]);
+                    return;
+                }
+            } else if (command.equals("keyevent")) {
+                if (args.length == 2) {
+                    sendKeyEvent(Integer.parseInt(args[1]));
+                    return;
+                }
+            } else if (command.equals("tap")) {
+                if (args.length == 3) {
+                    sendTap(Float.parseFloat(args[1]), Float.parseFloat(args[2]));
+                    return;
+                }
+            } else if (command.equals("swipe")) {
+                if (args.length == 5) {
+                    sendSwipe(Float.parseFloat(args[1]), Float.parseFloat(args[2]),
+                            Float.parseFloat(args[3]), Float.parseFloat(args[4]));
+                    return;
+                }
+            } else {
+                System.err.println("Error: Unknown command: " + command);
+                showUsage();
+                return;
+            }
+        } catch (NumberFormatException ex) {
         }
-        else {
-            System.err.println("Error: Unknown command: " + command);
-            showUsage();
-            return;
-        }
+        System.err.println("Error: Invalid arguments for command: " + command);
+        showUsage();
     }
 
     /**
@@ -69,7 +98,6 @@ public class Input {
      *
      * @param text is a string of characters you want to input to the device.
      */
-
     private void sendText(String text) {
 
         StringBuffer buff = new StringBuffer(text);
@@ -90,55 +118,66 @@ public class Input {
 
         char[] chars = buff.toString().toCharArray();
 
-        KeyCharacterMap mKeyCharacterMap = KeyCharacterMap.
-            load(KeyCharacterMap.VIRTUAL_KEYBOARD);
-
-        KeyEvent[] events = mKeyCharacterMap.getEvents(chars);
-
+        KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+        KeyEvent[] events = kcm.getEvents(chars);
         for(int i = 0; i < events.length; i++) {
-            KeyEvent event = events[i];
-            Log.i("SendKeyEvent", Integer.toString(event.getKeyCode()));
-            try {
-                (IWindowManager.Stub
-                    .asInterface(ServiceManager.getService("window")))
-                    .injectKeyEvent(event, true);
-            } catch (RemoteException e) {
-                Log.i("Input", "DeadOjbectException");
-            }
+            injectKeyEvent(events[i]);
         }
     }
 
-    /**
-     * Send a single key event.
-     *
-     * @param event is a string representing the keycode of the key event you
-     * want to execute.
-     */
-    private void sendKeyEvent(String event) {
-        int eventCode = Integer.parseInt(event);
+    private void sendKeyEvent(int keyCode) {
         long now = SystemClock.uptimeMillis();
-        Log.i("SendKeyEvent", event);
+        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0));
+        injectKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0));
+    }
+
+    private void sendTap(float x, float y) {
+        long now = SystemClock.uptimeMillis();
+        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0));
+        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x, y, 0));
+    }
+
+    private void sendSwipe(float x1, float y1, float x2, float y2) {
+        final int NUM_STEPS = 11;
+        long now = SystemClock.uptimeMillis();
+        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x1, y1, 0));
+        for (int i = 1; i < NUM_STEPS; i++) {
+            float alpha = (float)i / NUM_STEPS;
+            injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_MOVE,
+                    lerp(x1, x2, alpha), lerp(y1, y2, alpha), 0));
+        }
+        injectPointerEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x2, y2, 0));
+    }
+
+    private void injectKeyEvent(KeyEvent event) {
         try {
-            KeyEvent down = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, eventCode, 0);
-            KeyEvent up = new KeyEvent(now, now, KeyEvent.ACTION_UP, eventCode, 0);
-            (IWindowManager.Stub
-                .asInterface(ServiceManager.getService("window")))
-                .injectKeyEvent(down, true);
-            (IWindowManager.Stub
-                .asInterface(ServiceManager.getService("window")))
-                .injectKeyEvent(up, true);
-        } catch (RemoteException e) {
-            Log.i("Input", "DeadOjbectException");
+            Log.i(TAG, "InjectKeyEvent: " + event);
+            getWindowManager().injectKeyEvent(event, true);
+        } catch (RemoteException ex) {
+            Log.i(TAG, "RemoteException", ex);
         }
     }
 
-    private void sendMotionEvent(long downTime, int action, float x, float y, 
-            float pressure, float size) {
+    private void injectPointerEvent(MotionEvent event) {
+        try {
+            Log.i("Input", "InjectPointerEvent: " + event);
+            getWindowManager().injectPointerEvent(event, true);
+        } catch (RemoteException ex) {
+            Log.i(TAG, "RemoteException", ex);
+        } finally {
+            event.recycle();
+        }
+    }
+
+    private static final float lerp(float a, float b, float alpha) {
+        return (b - a) * alpha + a;
     }
 
     private void showUsage() {
         System.err.println("usage: input [text|keyevent]");
         System.err.println("       input text <string>");
-        System.err.println("       input keyevent <event_code>");
+        System.err.println("       input keyevent <key code>");
+        System.err.println("       input tap <x> <y>");
+        System.err.println("       input swipe <x1> <y1> <x2> <y2>");
     }
 }
