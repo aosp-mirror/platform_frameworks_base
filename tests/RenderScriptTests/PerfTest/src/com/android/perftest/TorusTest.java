@@ -98,6 +98,9 @@ public class TorusTest implements RsBenchBaseTest{
         mTests[index].testName = Allocation.createFromString(mRS,
                                                              mNames[index],
                                                              Allocation.USAGE_SCRIPT);
+        mTests[index].debugName = RsBenchRS.createZeroTerminatedAlloc(mRS,
+                                                                      mNames[index],
+                                                                      Allocation.USAGE_SCRIPT);
 
         ScriptField_TorusTestData_s.Item dataItem = new ScriptField_TorusTestData_s.Item();
         dataItem.testId = testId;

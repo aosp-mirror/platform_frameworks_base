@@ -60,7 +60,6 @@ public class RsBenchRS {
         mWidth = width;
         mHeight = height;
         mMode = 0;
-        mMaxModes = 0;
         mLoops = loops;
         mCurrentLoop = 0;
         mBenchmarkDimX = 1280;
@@ -88,10 +87,29 @@ public class RsBenchRS {
     ScriptField_TestScripts_s.Item[] mIndividualTests;
 
     int mMode;
-    int mMaxModes;
 
     String[] mTestNames;
     float[] mLocalTestResults;
+
+    static Allocation createZeroTerminatedAlloc(RenderScript rs,
+                                                String str,
+                                                int usage) {
+        byte[] allocArray = null;
+        try {
+            allocArray = str.getBytes("UTF-8");
+            byte[] allocArrayZero = new byte[allocArray.length + 1];
+            System.arraycopy(allocArray, 0, allocArrayZero, 0, allocArray.length);
+            allocArrayZero[allocArrayZero.length - 1] = '\0';
+            Allocation alloc = Allocation.createSized(rs, Element.U8(rs),
+                                                      allocArrayZero.length, usage);
+            alloc.copyFrom(allocArrayZero);
+            return alloc;
+        }
+        catch (Exception e) {
+            throw new RSRuntimeException("Could not convert string to utf-8.");
+        }
+
+    }
 
     void appendTests(RsBenchBaseTest testSet) {
         ScriptField_TestScripts_s.Item[] newTests = testSet.getTests();
@@ -119,6 +137,7 @@ public class RsBenchRS {
 
     void createTestAllocation() {
         int numTests = mIndividualTests.length;
+        mLocalTestResults = new float[numTests];
         ScriptField_TestScripts_s allTests;
         allTests = new ScriptField_TestScripts_s(mRS, numTests);
         for (int i = 0; i < numTests; i ++) {
@@ -239,11 +258,6 @@ public class RsBenchRS {
         return count;
     }
 
-    private void prepareTestData() {
-        mTestNames = new String[mMaxModes];
-        mLocalTestResults = new float[mMaxModes];
-    }
-
     public void setDebugMode(int num) {
         mScript.invoke_setDebugMode(num);
     }
@@ -260,8 +274,6 @@ public class RsBenchRS {
         mRS.setMessageHandler(mRsMessage);
 
         mScript.set_gMaxLoops(mLoops);
-
-        prepareTestData();
 
         initProgramVertex();
         initProgramFragment();
