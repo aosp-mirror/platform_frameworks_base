@@ -37,6 +37,7 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
     ssrc_ = ssrc;
     substream_details_known_ = false;
     buffer_in_progress_ = NULL;
+    status_ = OK;
 
     decoder_ = new AAH_DecoderPump(omx);
     if (decoder_ == NULL) {
@@ -54,6 +55,7 @@ AAH_RXPlayer::Substream::Substream(uint32_t ssrc, OMXClient& omx) {
 
 void AAH_RXPlayer::Substream::shutdown() {
     substream_meta_ = NULL;
+    status_ = OK;
     cleanupBufferInProgress();
     cleanupDecoder();
 }
@@ -75,10 +77,27 @@ void AAH_RXPlayer::Substream::cleanupDecoder() {
     }
 }
 
+bool AAH_RXPlayer::Substream::shouldAbort(const char* log_tag) {
+    // If we have already encountered a fatal error, do nothing.  We are just
+    // waiting for our owner to shut us down now.
+    if (OK != status_) {
+        LOGV("Skipping %s, substream has encountered fatal error (%d).",
+                log_tag, status_);
+        return true;
+    }
+
+    return false;
+}
+
 void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
                                                   uint32_t amt,
                                                   int32_t ts_lower) {
     uint32_t min_length = 6;
+
+    if (shouldAbort(__PRETTY_FUNCTION__)) {
+        return;
+    }
+
     // Do we have a buffer in progress already?  If so, abort the buffer.  In
     // theory, this should never happen.  If there were a discontinutity in the
     // stream, the discon in the seq_nos at the RTP level should have already
@@ -289,6 +308,10 @@ void AAH_RXPlayer::Substream::processPayloadStart(uint8_t* buf,
 
 void AAH_RXPlayer::Substream::processPayloadCont(uint8_t* buf,
                                                  uint32_t amt) {
+    if (shouldAbort(__PRETTY_FUNCTION__)) {
+        return;
+    }
+
     if (NULL == buffer_in_progress_) {
         LOGV("TRTP Receiver skipping payload continuation; no buffer currently"
              " in progress.");
@@ -396,6 +419,7 @@ void AAH_RXPlayer::Substream::processCompletedBuffer() {
     if (res != OK) {
         LOGD("Failed to queue payload for decode, resetting decoder pump!"
              " (res = %d)", res);
+        status_ = res;
         cleanupDecoder();
         cleanupBufferInProgress();
     }
