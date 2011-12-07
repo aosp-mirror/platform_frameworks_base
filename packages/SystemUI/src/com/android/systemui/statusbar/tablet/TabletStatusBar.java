@@ -88,7 +88,8 @@ import com.android.systemui.statusbar.policy.Prefs;
 
 public class TabletStatusBar extends StatusBar implements
         HeightReceiver.OnBarHeightChangedListener,
-        InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
+        InputMethodsPanel.OnHardKeyboardEnabledChangeListener,
+        RecentsPanelView.OnRecentsPanelVisibilityChangedListener {
     public static final boolean DEBUG = false;
     public static final boolean DEBUG_COMPAT_HELP = false;
     public static final String TAG = "TabletStatusBar";
@@ -143,6 +144,7 @@ public class TabletStatusBar extends StatusBar implements
     View mHomeButton;
     View mMenuButton;
     View mRecentButton;
+    private boolean mAltBackButtonEnabledForIme;
 
     ViewGroup mFeedbackIconArea; // notification icons, IME icon, compat icon
     InputMethodButton mInputMethodSwitchButton;
@@ -192,6 +194,8 @@ public class TabletStatusBar extends StatusBar implements
     private int mSystemUiVisibility = 0;
     // used to notify status bar for suppressing notification LED
     private boolean mPanelSlightlyVisible;
+
+    private int mNavigationIconHints = 0;
 
     public Context getContext() { return mContext; }
 
@@ -310,12 +314,11 @@ public class TabletStatusBar extends StatusBar implements
         mRecentsPanel = (RecentsPanelView) View.inflate(context,
                 R.layout.status_bar_recent_panel, null);
         mRecentsPanel.setVisibility(View.GONE);
-        mRecentsPanel.setSystemUiVisibility(View.STATUS_BAR_DISABLE_BACK);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
+        mRecentsPanel.setOnVisibilityChangedListener(this);
         mRecentsPanel.setRecentTasksLoader(mRecentTasksLoader);
         mRecentTasksLoader.setRecentsPanel(mRecentsPanel);
-        mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
 
         lp = new WindowManager.LayoutParams(
                 (int) res.getDimension(R.dimen.status_bar_recents_width),
@@ -334,6 +337,7 @@ public class TabletStatusBar extends StatusBar implements
 
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
+        mRecentsPanel.setStatusBarView(mStatusBarView);
 
         // Input methods Panel
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
@@ -342,7 +346,7 @@ public class TabletStatusBar extends StatusBar implements
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
         mInputMethodsPanel.setImeSwitchButton(mInputMethodSwitchButton);
-        mStatusBarView.setIgnoreChildren(3, mInputMethodSwitchButton, mInputMethodsPanel);
+        mStatusBarView.setIgnoreChildren(2, mInputMethodSwitchButton, mInputMethodsPanel);
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -365,7 +369,7 @@ public class TabletStatusBar extends StatusBar implements
                 MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
         mCompatModePanel.setTrigger(mCompatModeButton);
         mCompatModePanel.setVisibility(View.GONE);
-        mStatusBarView.setIgnoreChildren(4, mCompatModeButton, mCompatModePanel);
+        mStatusBarView.setIgnoreChildren(3, mCompatModeButton, mCompatModePanel);
         lp = new WindowManager.LayoutParams(
                 250,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -429,6 +433,10 @@ public class TabletStatusBar extends StatusBar implements
             if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
             reloadAllNotificationIcons();
         }
+    }
+
+    public View getStatusBarView() {
+        return mStatusBarView;
     }
 
     protected View makeStatusBarView() {
@@ -1082,6 +1090,31 @@ public class TabletStatusBar extends StatusBar implements
         }
     }
 
+    @Override // CommandQueue
+    public void setNavigationIconHints(int hints) {
+        if (hints == mNavigationIconHints) return;
+
+        if (DEBUG) {
+            android.widget.Toast.makeText(mContext,
+                "Navigation icon hints = " + hints,
+                500).show();
+        }
+
+        mNavigationIconHints = hints;
+
+        mBackButton.setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_NOP)) ? 0.5f : 1.0f);
+        mHomeButton.setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_HOME_NOP)) ? 0.5f : 1.0f);
+        mRecentButton.setAlpha(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_RECENT_NOP)) ? 0.5f : 1.0f);
+
+        mBackButton.setImageResource(
+            (0 != (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT))
+                ? R.drawable.ic_sysbar_back_ime
+                : R.drawable.ic_sysbar_back);
+    }
+
     private void notifyUiVisibilityChanged() {
         try {
             mWindowManager.statusBarVisibilityChanged(mSystemUiVisibility);
@@ -1185,28 +1218,27 @@ public class TabletStatusBar extends StatusBar implements
                 (vis & InputMethodService.IME_ACTIVE) != 0);
         updateNotificationIcons();
         mInputMethodsPanel.setImeToken(token);
-        int res;
-        switch (backDisposition) {
-            case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
-                res = R.drawable.ic_sysbar_back;
-                break;
-            case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
-                res = R.drawable.ic_sysbar_back_ime;
-                break;
-            case InputMethodService.BACK_DISPOSITION_DEFAULT:
-            default:
-                if ((vis & InputMethodService.IME_VISIBLE) != 0) {
-                    res = R.drawable.ic_sysbar_back_ime;
-                } else {
-                    res = R.drawable.ic_sysbar_back;
-                }
-                break;
-        }
-        mBackButton.setImageResource(res);
+
+        boolean altBack = (backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS)
+            || ((vis & InputMethodService.IME_VISIBLE) != 0);
+        mAltBackButtonEnabledForIme = altBack;
+
+        mCommandQueue.setNavigationIconHints(
+                altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
+                        : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
+
         if (FAKE_SPACE_BAR) {
             mFakeSpaceBar.setVisibility(((vis & InputMethodService.IME_VISIBLE) != 0)
                     ? View.VISIBLE : View.GONE);
         }
+    }
+
+    @Override
+    public void onRecentsPanelVisibilityChanged(boolean visible) {
+        boolean altBack = visible || mAltBackButtonEnabledForIme;
+        mCommandQueue.setNavigationIconHints(
+                altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
+                        : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
     }
 
     @Override
