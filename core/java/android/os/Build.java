@@ -311,7 +311,7 @@ public class Build {
         public static final int ICE_CREAM_SANDWICH = 14;
 
         /**
-         * Android 4.1.
+         * Android 4.0.3.
          */
         public static final int ICE_CREAM_SANDWICH_MR1 = 15;
     }
