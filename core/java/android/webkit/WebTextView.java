@@ -19,10 +19,13 @@ package android.webkit;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,7 +54,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsoluteLayout;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -74,7 +76,6 @@ import java.util.ArrayList;
 
     static final String LOGTAG = "webtextview";
 
-    private Paint mRingPaint;
     private int mRingInset;
 
     private WebView         mWebView;
@@ -207,13 +208,51 @@ import java.util.ArrayList;
                 }
             }
         };
-        float ringWidth = 4f * context.getResources().getDisplayMetrics().density;
         mReceiver = new MyResultReceiver(mHandler);
-        mRingPaint = new Paint();
-        mRingPaint.setColor(0x6633b5e5);
-        mRingPaint.setStrokeWidth(ringWidth);
-        mRingPaint.setStyle(Style.FILL);
+        float ringWidth = 2f * context.getResources().getDisplayMetrics().density;
         mRingInset = (int) ringWidth;
+        setBackgroundDrawable(new BackgroundDrawable(mRingInset));
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                getPaddingBottom());
+    }
+
+    private static class BackgroundDrawable extends Drawable {
+
+        private Paint mPaint = new Paint();
+        private int mBorderWidth;
+        private Rect mInsetRect = new Rect();
+
+        public BackgroundDrawable(int width) {
+            mPaint = new Paint();
+            mPaint.setStrokeWidth(width);
+            mBorderWidth = width;
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            mPaint.setColor(0x6633b5e5);
+            canvas.drawRect(getBounds(), mPaint);
+            mInsetRect.left = getBounds().left + mBorderWidth;
+            mInsetRect.top = getBounds().top + mBorderWidth;
+            mInsetRect.right = getBounds().right - mBorderWidth;
+            mInsetRect.bottom = getBounds().bottom - mBorderWidth;
+            mPaint.setColor(Color.WHITE);
+            canvas.drawRect(mInsetRect, mPaint);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
     }
 
     public void setAutoFillable(int queryId) {
@@ -223,35 +262,9 @@ import java.util.ArrayList;
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        if (isFocused()) {
-            final int ib = getHeight() - mRingInset;
-            canvas.drawRect(0, 0, getWidth(), mRingInset, mRingPaint);
-            canvas.drawRect(0, ib, getWidth(), getHeight(), mRingPaint);
-            canvas.drawRect(0, mRingInset, mRingInset, ib, mRingPaint);
-            canvas.drawRect(getWidth() - mRingInset, mRingInset, getWidth(), ib, mRingPaint);
-        }
-    }
-
-    private void growOrShrink(boolean grow) {
-        AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) getLayoutParams();
-        if (grow) {
-            lp.x -= mRingInset;
-            lp.y -= mRingInset;
-            lp.width += 2 * mRingInset;
-            lp.height += 2 * mRingInset;
-            setPadding(getPaddingLeft() + mRingInset, getPaddingTop() + mRingInset,
-                    getPaddingRight() + mRingInset, getPaddingBottom() + mRingInset);
-        } else {
-            lp.x += mRingInset;
-            lp.y += mRingInset;
-            lp.width -= 2 * mRingInset;
-            lp.height -= 2 * mRingInset;
-            setPadding(getPaddingLeft() - mRingInset, getPaddingTop() - mRingInset,
-                    getPaddingRight() - mRingInset, getPaddingBottom() - mRingInset);
-        }
-        setLayoutParams(lp);
+    public void setPadding(int left, int top, int right, int bottom) {
+        super.setPadding(left + mRingInset, top + mRingInset,
+                right + mRingInset, bottom + mRingInset);
     }
 
     @Override
@@ -555,7 +568,6 @@ import java.util.ArrayList;
         } else if (!mInsideRemove) {
             mWebView.setActive(false);
         }
-        growOrShrink(focused);
         mFromFocusChange = false;
     }
 
@@ -966,6 +978,10 @@ import java.util.ArrayList;
      */
     /* package */ void setRect(int x, int y, int width, int height) {
         LayoutParams lp = (LayoutParams) getLayoutParams();
+        x -= mRingInset;
+        y -= mRingInset;
+        width += 2 * mRingInset;
+        height += 2 * mRingInset;
         boolean needsUpdate = false;
         if (null == lp) {
             lp = new LayoutParams(width, height, x, y);
