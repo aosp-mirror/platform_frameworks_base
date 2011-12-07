@@ -191,8 +191,12 @@ class WiredAccessoryObserver extends UEventObserver {
         mHeadsetState = headsetState;
 
         if (headsetState == 0) {
-            Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-            mContext.sendBroadcast(intent);
+            if (mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sendAudioBecomingNoisy)) {
+                Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+                mContext.sendBroadcast(intent);
+            }
+
             // It can take hundreds of ms flush the audio pipeline after
             // apps pause audio playback, but audio route changes are
             // immediate, so delay the route change by 1000ms.
