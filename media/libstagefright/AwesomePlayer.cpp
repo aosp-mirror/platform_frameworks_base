@@ -2021,9 +2021,9 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
                 mLock.unlock();
 
-                // Initially make sure we have at least 128 bytes for the sniff
+                // Initially make sure we have at least 192 KB for the sniff
                 // to complete without blocking.
-                static const size_t kMinBytesForSniffing = 128;
+                static const size_t kMinBytesForSniffing = 192 * 1024;
 
                 off64_t metaDataSize = -1ll;
                 for (;;) {
