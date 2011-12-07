@@ -22,7 +22,7 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
 
-    android:paddingLeft="11dip"
+    android:paddingLeft="16dip"
     android:paddingTop="6dip"
     android:paddingBottom="6dip"
     >
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginRight="9dip"
+        android:layout_marginRight="16dip"
         />
 
     <LinearLayout
