@@ -709,7 +709,7 @@ public class VideoEditorPreviewTest extends
 
 
         blockTillPreviewCompletes.acquire();
-                    final String fileName = mVideoEditor.getPath() + "\test.3gp";
+                    final String fileName = mVideoEditor.getPath() + "/test.3gp";
                     final int height = MediaProperties.HEIGHT_480;
                     final int bitrate = MediaProperties.BITRATE_512K;
 
