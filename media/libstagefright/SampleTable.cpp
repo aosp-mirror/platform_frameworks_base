@@ -627,6 +627,14 @@ status_t SampleTable::findSyncSampleNear(
 
         ++left;
     }
+
+    if (left == mNumSyncSamples) {
+        if (flags == kFlagAfter) {
+            LOGE("tried to find a sync frame after the last one: %d", left);
+            return ERROR_OUT_OF_RANGE;
+        }
+    }
+
     if (left > 0) {
         --left;
     }
