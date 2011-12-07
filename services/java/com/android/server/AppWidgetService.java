@@ -24,9 +24,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Intent.FilterComparison;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.Intent.FilterComparison;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -39,6 +39,8 @@ import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -74,6 +76,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 class AppWidgetService extends IAppWidgetService.Stub
 {
@@ -803,6 +806,45 @@ class AppWidgetService extends IAppWidgetService.Stub
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
                     id.host.callbacks = null;
+                }
+            }
+
+            // If the host is unavailable, then we call the associated
+            // RemoteViewsFactory.onDataSetChanged() directly
+            if (id.host.callbacks == null) {
+                Set<FilterComparison> keys = mRemoteViewsServicesAppWidgets.keySet();
+                for (FilterComparison key : keys) {
+                    if (mRemoteViewsServicesAppWidgets.get(key).contains(id.appWidgetId)) {
+                        Intent intent = key.getIntent();
+
+                        final ServiceConnection conn = new ServiceConnection() {
+                            @Override
+                            public void onServiceConnected(ComponentName name, IBinder service) {
+                                IRemoteViewsFactory cb =
+                                    IRemoteViewsFactory.Stub.asInterface(service);
+                                try {
+                                    cb.onDataSetChangedAsync();
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                } catch (RuntimeException e) {
+                                    e.printStackTrace();
+                                }
+                                mContext.unbindService(this);
+                            }
+                            @Override
+                            public void onServiceDisconnected(android.content.ComponentName name) {
+                                // Do nothing
+                            }
+                        };
+
+                        // Bind to the service and call onDataSetChanged()
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
                 }
             }
         }
