@@ -73,6 +73,8 @@ public class TabletTicker
     private StatusBarNotification[] mQueue = new StatusBarNotification[QUEUE_LENGTH];
     private int mQueuePos;
 
+    private final int mLargeIconHeight;
+
     private TabletStatusBar mBar;
 
     private LayoutTransition mLayoutTransition;
@@ -81,6 +83,9 @@ public class TabletTicker
     public TabletTicker(TabletStatusBar bar) {
         mBar = bar;
         mContext = bar.getContext();
+        final Resources res = mContext.getResources();
+        mLargeIconHeight = res.getDimensionPixelSize(
+                android.R.dimen.notification_large_icon_height);
     }
 
     public void add(IBinder key, StatusBarNotification notification) {
@@ -209,8 +214,6 @@ public class TabletTicker
         final Resources res = mContext.getResources();
         final FrameLayout view = new FrameLayout(mContext);
         final int width = res.getDimensionPixelSize(R.dimen.notification_ticker_width);
-        final int height = res.getDimensionPixelSize(
-                android.R.dimen.notification_large_icon_height);
         int windowFlags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -219,7 +222,7 @@ public class TabletTicker
         } else {
             windowFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         }
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, mLargeIconHeight,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
@@ -297,6 +300,16 @@ public class TabletTicker
         if (n.largeIcon != null) {
             largeIcon.setImageBitmap(n.largeIcon);
             largeIcon.setVisibility(View.VISIBLE);
+            final ViewGroup.LayoutParams lp = largeIcon.getLayoutParams();
+            final int statusBarHeight = mBar.getStatusBarHeight();
+            if (n.largeIcon.getHeight() <= statusBarHeight) {
+                // for smallish largeIcons, it looks a little odd to have them floating halfway up
+                // the ticker, so we vertically center them in the status bar area instead
+                lp.height = statusBarHeight;
+            } else {
+                lp.height = mLargeIconHeight;
+            }
+            largeIcon.setLayoutParams(lp);
         }
 
         if (CLICKABLE_TICKER) {
