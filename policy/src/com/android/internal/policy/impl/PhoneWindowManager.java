@@ -3213,10 +3213,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             final int preferredRotation;
-            if (mHdmiPlugged) {
-                // Ignore sensor when plugged into HDMI.
-                preferredRotation = mHdmiRotation;
-            } else if (mLidOpen == LID_OPEN && mLidOpenRotation >= 0) {
+            if (mLidOpen == LID_OPEN && mLidOpenRotation >= 0) {
                 // Ignore sensor when lid switch is open and rotation is forced.
                 preferredRotation = mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR
@@ -3235,6 +3232,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // enable 180 degree rotation while docked.
                 preferredRotation = mDeskDockEnablesAccelerometer
                         ? sensorRotation : mDeskDockRotation;
+            } else if (mHdmiPlugged) {
+                // Ignore sensor when plugged into HDMI.
+                // Note that the dock orientation overrides the HDMI orientation.
+                preferredRotation = mHdmiRotation;
             } else if ((mAccelerometerDefault != 0 /* implies not rotation locked */
                             && (orientation == ActivityInfo.SCREEN_ORIENTATION_USER
                                     || orientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED))
