@@ -1311,6 +1311,12 @@ public interface CommandsInterface {
     void queryAvailableBandMode (Message response);
 
     /**
+     * Set the current preferred network type. This will be the last
+     * networkType that was passed to setPreferredNetworkType.
+     */
+    void setCurrentPreferredNetworkType();
+
+    /**
      *  Requests to set the preferred network type for searching and registering
      * (CS/PS domain, RAT, and operation mode)
      * @param networkType one of  NT_*_TYPE
