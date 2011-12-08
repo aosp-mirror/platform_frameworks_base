@@ -316,7 +316,12 @@ class ZoomManager {
      * Returns the zoom scale used for reading text on a double-tap.
      */
     public final float getReadingLevelScale() {
-        return mDisplayDensity * mDoubleTapZoomFactor;
+        return computeScaleWithLimits(computeReadingLevelScale(getZoomOverviewScale()));
+    }
+
+    /* package */ final float computeReadingLevelScale(float scale) {
+        return Math.max(mDisplayDensity * mDoubleTapZoomFactor,
+                scale + MIN_DOUBLE_TAP_SCALE_INCREMENT);
     }
 
     public final float getInvDefaultScale() {
@@ -678,7 +683,7 @@ class ZoomManager {
             }
             zoomToOverview();
         } else {
-            zoomToReadingLevelOrMore();
+            zoomToReadingLevel();
         }
     }
 
@@ -709,9 +714,8 @@ class ZoomManager {
             !mWebView.getSettings().getUseFixedViewport());
     }
 
-    private void zoomToReadingLevelOrMore() {
-        final float zoomScale = Math.max(getReadingLevelScale(),
-                mActualScale + MIN_DOUBLE_TAP_SCALE_INCREMENT);
+    private void zoomToReadingLevel() {
+        final float readingScale = getReadingLevelScale();
 
         int left = mWebView.nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
         if (left != WebView.NO_LEFTEDGE) {
@@ -721,13 +725,13 @@ class ZoomManager {
             // Re-calculate the zoom center so that the new scroll x will be
             // on the left edge.
             if (viewLeft > 0) {
-                mZoomCenterX = viewLeft * zoomScale / (zoomScale - mActualScale);
+                mZoomCenterX = viewLeft * readingScale / (readingScale - mActualScale);
             } else {
                 mWebView.scrollBy(viewLeft, 0);
                 mZoomCenterX = 0;
             }
         }
-        startZoomAnimation(zoomScale,
+        startZoomAnimation(readingScale,
             !mWebView.getSettings().getUseFixedViewport());
     }
 
