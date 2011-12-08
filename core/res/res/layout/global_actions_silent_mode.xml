@@ -26,6 +26,8 @@
         android:layout_width="64dp"
         android:layout_height="match_parent"
         android:background="?android:attr/actionBarItemBackground"
+        android:contentDescription="@string/silent_mode_silent"
+        android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
@@ -52,6 +54,8 @@
         android:layout_width="64dp"
         android:layout_height="match_parent"
         android:background="?android:attr/actionBarItemBackground"
+        android:contentDescription="@string/silent_mode_vibrate"
+        android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
@@ -79,6 +83,8 @@
         android:layout_width="64dp"
         android:layout_height="match_parent"
         android:background="?android:attr/actionBarItemBackground"
+        android:contentDescription="@string/silent_mode_ring"
+        android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
