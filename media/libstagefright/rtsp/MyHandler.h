@@ -1100,6 +1100,8 @@ struct MyHandler : public AHandler {
         float npt1, npt2;
         if (!ASessionDescription::parseNTPRange(val.c_str(), &npt1, &npt2)) {
             // This is a live stream and therefore not seekable.
+
+            LOGI("This is a live stream");
             return;
         }
 
@@ -1386,12 +1388,14 @@ private:
             msg->setInt32("what", kWhatConnected);
             msg->post();
 
-            for (size_t i = 0; i < mTracks.size(); ++i) {
-                TrackInfo *info = &mTracks.editItemAt(i);
+            if (mSeekable) {
+                for (size_t i = 0; i < mTracks.size(); ++i) {
+                    TrackInfo *info = &mTracks.editItemAt(i);
 
-                postNormalPlayTimeMapping(
-                        i,
-                        info->mNormalPlayTimeRTP, info->mNormalPlayTimeUs);
+                    postNormalPlayTimeMapping(
+                            i,
+                            info->mNormalPlayTimeRTP, info->mNormalPlayTimeUs);
+                }
             }
 
             mFirstAccessUnit = false;
