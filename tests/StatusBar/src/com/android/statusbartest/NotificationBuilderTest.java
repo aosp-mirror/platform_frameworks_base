@@ -287,6 +287,9 @@ public class NotificationBuilderTest extends Activity
             case R.id.large_icon_pineapple2:
                 b.setLargeIcon(loadBitmap(R.drawable.pineapple2));
                 break;
+            case R.id.large_icon_small:
+                b.setLargeIcon(loadBitmap(R.drawable.icon2));
+                break;
         }
 
         // sound TODO
