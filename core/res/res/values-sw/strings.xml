@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"Fungua mtandao wa Wi-Fi unaopatikana"</item>
     <item quantity="other" msgid="7915895323644292768">"Fungua mitandao ya Wi-Fi inayopatikana"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ingia kwa mtandao wa Wi-Fi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Haikuweza kuunganisha kwa Mtandao-Hewa"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inao muunganisho duni wa wavuti."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Mtandao hewa Moja kwa moja"</string>
@@ -1130,7 +1133,7 @@
     <string name="sync_do_nothing" msgid="8717589462945226869">"Usifanye chochote kwa sasa."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Chagua akaunti"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Ongeza akaunti"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"Akaunti gani ungependa kutumia?"</string>
+    <string name="choose_account_text" msgid="6891230675141555481">"Ungependa kutumia akaunti gani?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Ongeza akaunti"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Ongezeko"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Punguza"</string>
