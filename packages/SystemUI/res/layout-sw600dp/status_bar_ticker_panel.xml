@@ -15,13 +15,20 @@
  * limitations under the License.
 -->
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:gravity="bottom"
     >
+
+    <View
+        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_width="match_parent"
+        android:background="@drawable/status_bar_ticker_background"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:clickable="false"
+        />
 
     <ImageView
         android:id="@+id/large_icon"
@@ -29,6 +36,8 @@
         android:layout_height="@android:dimen/notification_large_icon_width"
         android:scaleType="center"
         android:visibility="gone"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
         />
 
     <FrameLayout
@@ -36,6 +45,8 @@
         android:layout_weight="1"
         android:layout_height="@*android:dimen/status_bar_height"
         android:layout_width="match_parent"
-        android:background="@drawable/status_bar_ticker_background"
+        android:layout_toRightOf="@id/large_icon"
+        android:layout_alignParentBottom="true"
+        android:layout_alignWithParentIfMissing="true"
         />
-</LinearLayout>
+</RelativeLayout>
