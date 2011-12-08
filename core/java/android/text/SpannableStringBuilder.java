@@ -863,6 +863,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return new String(buf);
     }
 
+    /**
+     * Return a String containing a copy of the chars in this buffer, limited to the
+     * [start, end[ range.
+     * @hide
+     */
+    public String substring(int start, int end) {
+        char[] buf = new char[end - start];
+        getChars(start, end, buf, 0);
+        return new String(buf);
+    }
+
     private TextWatcher[] sendTextWillChange(int start, int before, int after) {
         TextWatcher[] recip = getSpans(start, start + before, TextWatcher.class);
         int n = recip.length;
