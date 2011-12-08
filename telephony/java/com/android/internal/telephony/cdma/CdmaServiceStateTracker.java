@@ -257,6 +257,9 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             break;
 
         case EVENT_RUIM_READY:
+            // TODO: Consider calling setCurrentPreferredNetworkType as we do in GsmSST.
+            // cm.setCurrentPreferredNetworkType();
+
             // The RUIM is now ready i.e if it was locked it has been
             // unlocked. At this stage, the radio is already powered on.
             isSubscriptionFromRuim = true;
@@ -277,6 +280,9 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             break;
 
         case EVENT_NV_READY:
+            // TODO: Consider calling setCurrentPreferredNetworkType as we do in GsmSST.
+            // cm.setCurrentPreferredNetworkType();
+
             isSubscriptionFromRuim = false;
             // For Non-RUIM phones, the subscription information is stored in
             // Non Volatile. Here when Non-Volatile is ready, we can poll the CDMA
