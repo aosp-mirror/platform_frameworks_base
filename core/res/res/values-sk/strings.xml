@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"K dispozícii je verejná sieť Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"K dispozícii sú verejné siete Wi-Fi"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prihlásiť sa do siete Wi-Fi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepodarilo sa pripojiť k sieti Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" má nekvalitné internetové pripojenie."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Priame pripojenie Wi-Fi"</string>

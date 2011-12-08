@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"개방형 Wi-Fi 네트워크 사용 가능"</item>
     <item quantity="other" msgid="7915895323644292768">"개방형 Wi-Fi 네트워크 사용 가능"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi 네트워크에 로그인"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi에 연결할 수 없습니다"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" 인터넷 연결 상태가 좋지 않습니다."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
