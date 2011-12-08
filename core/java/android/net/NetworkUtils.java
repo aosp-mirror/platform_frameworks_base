@@ -261,6 +261,7 @@ public class NetworkUtils {
      * @return a string propertly trimmed
      */
     public static String trimV4AddrZeros(String addr) {
+        if (addr == null) return null;
         String[] octets = addr.split("\\.");
         if (octets.length != 4) return addr;
         StringBuilder builder = new StringBuilder(16);
