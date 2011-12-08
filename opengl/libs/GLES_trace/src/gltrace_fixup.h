@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#include "gltrace.pb.h"
-
 #ifndef __GLTRACE_FIXUP_H_
 #define __GLTRACE_FIXUP_H_
+
+#include "gltrace.pb.h"
+#include "gltrace_context.h"
 
 namespace android {
 namespace gltrace {
 
 void fixupGLMessage(GLMessage *message);
-void fixup_addFBContents(GLMessage *message);
+void fixup_addFBContents(GLMessage *message, FBBinding fbToRead);
 
 };
 };
