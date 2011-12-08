@@ -1367,10 +1367,12 @@ public class StateMachine {
     /**
      * Get a message and set Message.target = this.
      *
-     * @return message
+     * @return message or null if SM has quit
      */
     public final Message obtainMessage()
     {
+        if (mSmHandler == null) return null;
+
         return Message.obtain(mSmHandler);
     }
 
@@ -1378,9 +1380,11 @@ public class StateMachine {
      * Get a message and set Message.target = this and what
      *
      * @param what is the assigned to Message.what.
-     * @return message
+     * @return message or null if SM has quit
      */
     public final Message obtainMessage(int what) {
+        if (mSmHandler == null) return null;
+
         return Message.obtain(mSmHandler, what);
     }
 
@@ -1390,10 +1394,12 @@ public class StateMachine {
      *
      * @param what is the assigned to Message.what.
      * @param obj is assigned to Message.obj.
-     * @return message
+     * @return message or null if SM has quit
      */
     public final Message obtainMessage(int what, Object obj)
     {
+        if (mSmHandler == null) return null;
+
         return Message.obtain(mSmHandler, what, obj);
     }
 
@@ -1404,10 +1410,13 @@ public class StateMachine {
      * @param what  is assigned to Message.what
      * @param arg1  is assigned to Message.arg1
      * @param arg2  is assigned to Message.arg2
-     * @return  A Message object from the global pool.
+     * @return  A Message object from the global pool or null if
+     *          SM has quit
      */
     public final Message obtainMessage(int what, int arg1, int arg2)
     {
+        if (mSmHandler == null) return null;
+
         return Message.obtain(mSmHandler, what, arg1, arg2);
     }
 
@@ -1419,10 +1428,13 @@ public class StateMachine {
      * @param arg1  is assigned to Message.arg1
      * @param arg2  is assigned to Message.arg2
      * @param obj is assigned to Message.obj
-     * @return  A Message object from the global pool.
+     * @return  A Message object from the global pool or null if
+     *          SM has quit
      */
     public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
     {
+        if (mSmHandler == null) return null;
+
         return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
 
@@ -1430,6 +1442,9 @@ public class StateMachine {
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(int what) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessage(obtainMessage(what));
     }
 
@@ -1437,6 +1452,9 @@ public class StateMachine {
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(int what, Object obj) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessage(obtainMessage(what,obj));
     }
 
@@ -1444,6 +1462,9 @@ public class StateMachine {
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(Message msg) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessage(msg);
     }
 
@@ -1451,6 +1472,9 @@ public class StateMachine {
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(int what, long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessageDelayed(obtainMessage(what), delayMillis);
     }
 
@@ -1458,6 +1482,9 @@ public class StateMachine {
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
     }
 
@@ -1465,6 +1492,9 @@ public class StateMachine {
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(Message msg, long delayMillis) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.sendMessageDelayed(msg, delayMillis);
     }
 
@@ -1509,6 +1539,9 @@ public class StateMachine {
      * will be processed.
      */
     public final void quit() {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.quit();
     }
 
@@ -1523,6 +1556,9 @@ public class StateMachine {
      * @return if debugging is enabled
      */
     public boolean isDbg() {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return false;
+
         return mSmHandler.isDbg();
     }
 
@@ -1532,6 +1568,9 @@ public class StateMachine {
      * @param dbg is true to enable debugging.
      */
     public void setDbg(boolean dbg) {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         mSmHandler.setDbg(dbg);
     }
 
@@ -1539,6 +1578,9 @@ public class StateMachine {
      * Start the state machine.
      */
     public void start() {
+        // mSmHandler can be null if the state machine has quit.
+        if (mSmHandler == null) return;
+
         /** Send the complete construction message */
         mSmHandler.completeConstruction();
     }
