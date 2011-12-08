@@ -38,7 +38,8 @@ NuPlayer::RTSPSource::RTSPSource(
       mFlags(0),
       mState(DISCONNECTED),
       mFinalResult(OK),
-      mDisconnectReplyID(0) {
+      mDisconnectReplyID(0),
+      mSeekGeneration(0) {
     if (headers) {
         mExtraHeaders = *headers;
 
@@ -146,14 +147,21 @@ status_t NuPlayer::RTSPSource::getDuration(int64_t *durationUs) {
 }
 
 status_t NuPlayer::RTSPSource::seekTo(int64_t seekTimeUs) {
+    sp<AMessage> msg = new AMessage(kWhatPerformSeek, mReflector->id());
+    msg->setInt32("generation", ++mSeekGeneration);
+    msg->setInt64("timeUs", seekTimeUs);
+    msg->post(200000ll);
+
+    return OK;
+}
+
+void NuPlayer::RTSPSource::performSeek(int64_t seekTimeUs) {
     if (mState != CONNECTED) {
-        return UNKNOWN_ERROR;
+        return;
     }
 
     mState = SEEKING;
     mHandler->seek(seekTimeUs);
-
-    return OK;
 }
 
 bool NuPlayer::RTSPSource::isSeekable() {
@@ -167,6 +175,20 @@ void NuPlayer::RTSPSource::onMessageReceived(const sp<AMessage> &msg) {
 
         mDisconnectReplyID = replyID;
         finishDisconnectIfPossible();
+        return;
+    } else if (msg->what() == kWhatPerformSeek) {
+        int32_t generation;
+        CHECK(msg->findInt32("generation", &generation));
+
+        if (generation != mSeekGeneration) {
+            // obsolete.
+            return;
+        }
+
+        int64_t seekTimeUs;
+        CHECK(msg->findInt64("timeUs", &seekTimeUs));
+
+        performSeek(seekTimeUs);
         return;
     }
 
