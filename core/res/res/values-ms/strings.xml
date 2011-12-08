@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"Rangkaian Wi-Fi terbuka tersedia"</item>
     <item quantity="other" msgid="7915895323644292768">"Rangkaian Wi-Fi terbuka tersedia"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Log masuk ke rangkaian Wi-Fi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak boleh menyambung kepada Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" mempunyai sambungan internet yang kurang baik."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>

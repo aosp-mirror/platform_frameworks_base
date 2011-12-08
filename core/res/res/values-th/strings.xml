@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
     <item quantity="other" msgid="7915895323644292768">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ลงชื่อเข้าใช้เครือข่าย WiFi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ไม่สามารถเชื่อมต่อ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" มีสัญญาณอินเทอร์เน็ตไม่ดี"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
