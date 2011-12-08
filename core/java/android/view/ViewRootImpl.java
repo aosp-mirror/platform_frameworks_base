@@ -3330,8 +3330,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         // If the Control modifier is held, try to interpret the key as a shortcut.
-        if (event.getAction() == KeyEvent.ACTION_UP
+        if (event.getAction() == KeyEvent.ACTION_DOWN
                 && event.isCtrlPressed()
+                && event.getRepeatCount() == 0
                 && !KeyEvent.isModifierKey(event.getKeyCode())) {
             if (mView.dispatchKeyShortcutEvent(event)) {
                 finishKeyEvent(event, sendDone, true);

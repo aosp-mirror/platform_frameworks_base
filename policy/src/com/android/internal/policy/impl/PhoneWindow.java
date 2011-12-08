@@ -1816,22 +1816,42 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public boolean dispatchKeyShortcutEvent(KeyEvent ev) {
-            // Perform the shortcut (mPreparedPanel can be null since
-            // global shortcuts (such as search) don't rely on a
-            // prepared panel or menu).
-            boolean handled = performPanelShortcut(mPreparedPanel, ev.getKeyCode(), ev,
-                    Menu.FLAG_PERFORM_NO_CLOSE);
-            if (handled) {
-                if (mPreparedPanel != null) {
-                    mPreparedPanel.isHandled = true;
+            // If the panel is already prepared, then perform the shortcut using it.
+            boolean handled;
+            if (mPreparedPanel != null) {
+                handled = performPanelShortcut(mPreparedPanel, ev.getKeyCode(), ev,
+                        Menu.FLAG_PERFORM_NO_CLOSE);
+                if (handled) {
+                    if (mPreparedPanel != null) {
+                        mPreparedPanel.isHandled = true;
+                    }
+                    return true;
                 }
-                return true;
             }
 
             // Shortcut not handled by the panel.  Dispatch to the view hierarchy.
             final Callback cb = getCallback();
-            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchKeyShortcutEvent(ev)
-                    : super.dispatchKeyShortcutEvent(ev);
+            handled = cb != null && !isDestroyed() && mFeatureId < 0
+                    ? cb.dispatchKeyShortcutEvent(ev) : super.dispatchKeyShortcutEvent(ev);
+            if (handled) {
+                return true;
+            }
+
+            // If the panel is not prepared, then we may be trying to handle a shortcut key
+            // combination such as Control+C.  Temporarily prepare the panel then mark it
+            // unprepared again when finished to ensure that the panel will again be prepared
+            // the next time it is shown for real.
+            if (mPreparedPanel == null) {
+                PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                preparePanel(st, ev);
+                handled = performPanelShortcut(st, ev.getKeyCode(), ev,
+                        Menu.FLAG_PERFORM_NO_CLOSE);
+                st.isPrepared = false;
+                if (handled) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
