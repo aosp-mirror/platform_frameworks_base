@@ -2719,13 +2719,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return more;
         }
 
-        float alpha = child.getAlpha();
-        // Bail out early if the view does not need to be drawn
-        if (alpha <= ViewConfiguration.ALPHA_THRESHOLD && (child.mPrivateFlags & ALPHA_SET) == 0 &&
-                !(child instanceof SurfaceView)) {
-            return more;
-        }
-
         if (hardwareAccelerated) {
             // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
             // retain the flag's value temporarily in the mRecreateDisplayList flag
@@ -2779,6 +2772,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
+        float alpha = child.getAlpha();
         if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
