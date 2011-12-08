@@ -605,6 +605,11 @@
                         style="@style/FieldContents"
                         android:text="pineapple2"
                         />
+                <RadioButton
+                        android:id="@+id/large_icon_small"
+                        style="@style/FieldContents"
+                        android:text="small"
+                        />
             </RadioGroup>
             
 
