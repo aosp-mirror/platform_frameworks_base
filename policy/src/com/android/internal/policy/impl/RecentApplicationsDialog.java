@@ -71,8 +71,6 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     };
 
-    private int mHeldModifiers;
-
     public RecentApplicationsDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_Dialog_RecentApplications);
 
@@ -124,17 +122,6 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     }
 
-    /**
-     * Sets the modifier keys that are being held to keep the dialog open, or 0 if none.
-     * Used to make the recent apps dialog automatically dismiss itself when the modifiers
-     * all go up.
-     * @param heldModifiers The held key modifiers, such as {@link KeyEvent#META_ALT_ON}.
-     * Should exclude shift.
-     */
-    public void setHeldModifiers(int heldModifiers) {
-        mHeldModifiers = heldModifiers;
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_TAB) {
@@ -174,30 +161,27 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mHeldModifiers != 0 && (event.getModifiers() & mHeldModifiers) == 0) {
-            final int numIcons = mIcons.length;
-            RecentTag tag = null;
-            for (int i = 0; i < numIcons; i++) {
-                if (mIcons[i].getVisibility() != View.VISIBLE) {
+    /**
+     * Dismiss the dialog and switch to the selected application.
+     */
+    public void dismissAndSwitch() {
+        final int numIcons = mIcons.length;
+        RecentTag tag = null;
+        for (int i = 0; i < numIcons; i++) {
+            if (mIcons[i].getVisibility() != View.VISIBLE) {
+                break;
+            }
+            if (i == 0 || mIcons[i].hasFocus()) {
+                tag = (RecentTag) mIcons[i].getTag();
+                if (mIcons[i].hasFocus()) {
                     break;
                 }
-                if (i == 0 || mIcons[i].hasFocus()) {
-                    tag = (RecentTag) mIcons[i].getTag();
-                    if (mIcons[i].hasFocus()) {
-                        break;
-                    }
-                }
             }
-            if (tag != null) {
-                switchTo(tag);
-            }
-            dismiss();
-            return true;
         }
-
-        return super.onKeyUp(keyCode, event);
+        if (tag != null) {
+            switchTo(tag);
+        }
+        dismiss();
     }
 
     /**
