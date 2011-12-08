@@ -368,6 +368,10 @@ public class WifiStateMachine extends StateMachine {
     private static final int SUCCESS = 1;
     private static final int FAILURE = -1;
 
+    /* Phone in emergency call back mode */
+    private static final int IN_ECM_STATE = 1;
+    private static final int NOT_IN_ECM_STATE = 0;
+
     /**
      * The maximum number of times we will retry a connection to an access point
      * for which we have failed in acquiring an IP address from DHCP. A value of
@@ -778,11 +782,11 @@ public class WifiStateMachine extends StateMachine {
     /**
      * TODO: doc
      */
-    public void setDriverStart(boolean enable) {
+    public void setDriverStart(boolean enable, boolean ecm) {
         if (enable) {
             sendMessage(CMD_START_DRIVER);
         } else {
-            sendMessage(CMD_STOP_DRIVER);
+            sendMessage(obtainMessage(CMD_STOP_DRIVER, ecm ? IN_ECM_STATE : NOT_IN_ECM_STATE, 0));
         }
     }
 
@@ -2576,16 +2580,25 @@ public class WifiStateMachine extends StateMachine {
                     WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
                     break;
                 case CMD_STOP_DRIVER:
-                    /* Already doing a delayed stop */
-                    if (mInDelayedStop) {
+                    int mode = message.arg1;
+
+                    /* Already doing a delayed stop && not in ecm state */
+                    if (mInDelayedStop && mode != IN_ECM_STATE) {
                         if (DBG) log("Already in delayed stop");
                         break;
                     }
                     mInDelayedStop = true;
                     mDelayedStopCounter++;
                     if (DBG) log("Delayed stop message " + mDelayedStopCounter);
-                    sendMessageDelayed(obtainMessage(CMD_DELAYED_STOP_DRIVER, mDelayedStopCounter,
-                            0), DELAYED_DRIVER_STOP_MS);
+
+                    if (mode == IN_ECM_STATE) {
+                        /* send a shut down immediately */
+                        sendMessage(obtainMessage(CMD_DELAYED_STOP_DRIVER, mDelayedStopCounter, 0));
+                    } else {
+                        /* send regular delayed shut down */
+                        sendMessageDelayed(obtainMessage(CMD_DELAYED_STOP_DRIVER,
+                                mDelayedStopCounter, 0), DELAYED_DRIVER_STOP_MS);
+                    }
                     break;
                 case CMD_START_DRIVER:
                     if (mInDelayedStop) {
