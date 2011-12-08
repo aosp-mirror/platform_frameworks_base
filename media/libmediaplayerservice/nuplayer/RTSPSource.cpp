@@ -208,21 +208,32 @@ void NuPlayer::RTSPSource::onMessageReceived(const sp<AMessage> &msg) {
                 break;
             }
 
-            const TrackInfo &info = mTracks.editItemAt(trackIndex);
-            sp<AnotherPacketSource> source = info.mSource;
+            TrackInfo *info = &mTracks.editItemAt(trackIndex);
+
+            sp<AnotherPacketSource> source = info->mSource;
             if (source != NULL) {
-#if 1
                 uint32_t rtpTime;
                 CHECK(accessUnit->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
 
+                if (!info->mNPTMappingValid) {
+                    // This is a live stream, we didn't receive any normal
+                    // playtime mapping. Assume the first packets correspond
+                    // to time 0.
+
+                    LOGV("This is a live stream, assuming time = 0");
+
+                    info->mRTPTime = rtpTime;
+                    info->mNormalPlaytimeUs = 0ll;
+                    info->mNPTMappingValid = true;
+                }
+
                 int64_t nptUs =
-                    ((double)rtpTime - (double)info.mRTPTime)
-                        / info.mTimeScale
+                    ((double)rtpTime - (double)info->mRTPTime)
+                        / info->mTimeScale
                         * 1000000ll
-                        + info.mNormalPlaytimeUs;
+                        + info->mNormalPlaytimeUs;
 
                 accessUnit->meta()->setInt64("timeUs", nptUs);
-#endif
 
                 source->queueAccessUnit(accessUnit);
             }
@@ -278,6 +289,7 @@ void NuPlayer::RTSPSource::onMessageReceived(const sp<AMessage> &msg) {
             TrackInfo *info = &mTracks.editItemAt(trackIndex);
             info->mRTPTime = rtpTime;
             info->mNormalPlaytimeUs = nptUs;
+            info->mNPTMappingValid = true;
             break;
         }
 
@@ -305,6 +317,7 @@ void NuPlayer::RTSPSource::onConnected() {
         info.mTimeScale = timeScale;
         info.mRTPTime = 0;
         info.mNormalPlaytimeUs = 0ll;
+        info.mNPTMappingValid = false;
 
         if ((isAudio && mAudioTrack == NULL)
                 || (isVideo && mVideoTrack == NULL)) {

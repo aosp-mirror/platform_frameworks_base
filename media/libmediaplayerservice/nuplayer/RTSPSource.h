@@ -76,6 +76,7 @@ private:
         int32_t mTimeScale;
         uint32_t mRTPTime;
         int64_t mNormalPlaytimeUs;
+        bool mNPTMappingValid;
     };
 
     AString mURL;
