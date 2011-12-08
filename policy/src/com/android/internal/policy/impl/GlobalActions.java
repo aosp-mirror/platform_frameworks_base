@@ -195,6 +195,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 .setInverseBackgroundForced(true);
 
         final AlertDialog dialog = ab.create();
+        dialog.getListView().setItemsCanFocus(true);
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         dialog.setOnDismissListener(this);
@@ -518,8 +519,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
             View v = inflater.inflate(R.layout.global_actions_silent_mode, parent, false);
-            // Handle clicks outside the icons and ignore
-            v.setOnClickListener(this);
 
             int selectedIndex = ringerModeToIndex(mAudioManager.getRingerMode());
             for (int i = 0; i < 3; i++) {

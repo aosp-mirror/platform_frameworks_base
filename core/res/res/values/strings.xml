@@ -286,6 +286,12 @@
     <string name="screen_lock">Screen lock</string>
     <!-- Button to turn off the phone, within the Phone Options dialog -->
     <string name="power_off">Power off</string>
+    <!-- Spoken description for ringer silent option. [CHAR LIMIT=NONE] -->
+    <string name="silent_mode_silent">Ringer off</string>
+    <!-- Spoken description for ringer vibrate option. [CHAR LIMIT=NONE] -->
+    <string name="silent_mode_vibrate">Ringer vibrate</string>
+    <!-- Spoken description for ringer normal option. [CHAR LIMIT=NONE] -->
+    <string name="silent_mode_ring">Ringer on</string>
 
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. -->
     <string name="shutdown_progress">Shutting down\u2026</string>
