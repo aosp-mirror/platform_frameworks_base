@@ -34,9 +34,10 @@ namespace android {
 #if USE_TEXT_LAYOUT_CACHE
 
     ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutCache);
-    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
 #endif
+
+    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -549,8 +550,8 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
         LOGD("Shaping Script Run with");
         LOGD("         -- isRTL = %d", isRTL);
         LOGD("         -- HB script = %d", mShaperItem.item.script);
-        LOGD("         -- startFontRun = %d", startScriptRun);
-        LOGD("         -- endFontRun = %d", endScriptRun);
+        LOGD("         -- startFontRun = %d", int(startScriptRun));
+        LOGD("         -- endFontRun = %d", int(endScriptRun));
         LOGD("         -- countFontRun = %d", countScriptRun);
         LOGD("         -- run = '%s'", String8(chars + startScriptRun, countScriptRun).string());
         LOGD("         -- string = '%s'", String8(chars, count).string());
@@ -572,12 +573,12 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
         if (isRTL) {
             endScriptRun = startScriptRun;
 #if DEBUG_GLYPHS
-            LOGD("Updated endScriptRun = %d", endScriptRun);
+            LOGD("Updated endScriptRun = %d", int(endScriptRun));
 #endif
         } else {
             startScriptRun = endScriptRun;
 #if DEBUG_GLYPHS
-            LOGD("Updated startScriptRun = %d", startScriptRun);
+            LOGD("Updated startScriptRun = %d", int(startScriptRun));
 #endif
         }
 

@@ -44,7 +44,7 @@
 #include <SkiaColorFilter.h>
 #include <Rect.h>
 
-#include <TextLayout.h>
+#include <TextLayoutCache.h>
 
 namespace android {
 
@@ -487,66 +487,45 @@ static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
 
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
-#if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, flags);
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value");
-        return ;
+        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+                String8(text, count).string());
+        return;
     }
 #else
-    value = new TextLayoutCacheValue();
-    value->computeValues(paint, text, 0, count, count, flags);
+    value = new TextLayoutCacheValue(count);
+    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
+            text, 0, count, count, flags);
 #endif
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     int bytesCount = glyphsCount * sizeof(jchar);
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
-#else
-    const jchar *workText;
-    jchar* buffer = NULL;
-    int32_t workBytes;
-    if (TextLayout::prepareText(paint, text, count, flags, &workText, &workBytes, &buffer)) {
-        renderer->drawText((const char*) workText, workBytes, count, x, y, paint);
-        free(buffer);
-    }
-#endif
 }
 
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
-#if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     value = TextLayoutCache::getInstance().getValue(paint, text, start, count, contextCount, flags);
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value");
-        return ;
+        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+                String8(text + start, count).string());
+        return;
     }
 #else
-    value = new TextLayoutCacheValue();
-    value->computeValues(paint, text, start, count, contextCount, flags);
+    value = new TextLayoutCacheValue(count);
+    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
+            text, start, count, contextCount, flags);
 #endif
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     int bytesCount = glyphsCount * sizeof(jchar);
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount, x, y, paint);
-#else
-    uint8_t rtl = flags & 0x1;
-    if (rtl) {
-        SkAutoSTMalloc<80, jchar> buffer(contextCount);
-        jchar* shaped = buffer.get();
-        if (TextLayout::prepareRtlTextRun(text, start, count, contextCount, shaped)) {
-            renderer->drawText((const char*) shaped, count << 1, count, x, y, paint);
-        } else {
-            LOGW("drawTextRun error");
-        }
-    } else {
-        renderer->drawText((const char*) (text + start), count << 1, count, x, y, paint);
-    }
-#endif
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,

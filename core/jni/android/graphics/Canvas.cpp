@@ -732,11 +732,7 @@ public:
                                       jcharArray text, int index, int count,
                                       jfloat x, jfloat y, int flags, SkPaint* paint) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-#if RTL_USE_HARFBUZZ
         drawTextWithGlyphs(canvas, textArray + index, 0, count, x, y, flags, paint);
-#else
-        TextLayout::drawText(paint, textArray + index, count, flags, x, y, canvas);
-#endif
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
 
@@ -745,11 +741,7 @@ public:
                                           int start, int end,
                                           jfloat x, jfloat y, int flags, SkPaint* paint) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-#if RTL_USE_HARFBUZZ
         drawTextWithGlyphs(canvas, textArray, start, end, x, y, flags, paint);
-#else
-        TextLayout::drawText(paint, textArray + start, end - start, flags, x, y, canvas);
-#endif
         env->ReleaseStringChars(text, textArray);
     }
 
@@ -770,12 +762,14 @@ public:
         value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
                 contextCount, flags);
         if (value == NULL) {
-            LOGE("Cannot get TextLayoutCache value");
+            LOGE("Cannot get TextLayoutCache value for text = '%s'",
+                    String8(textArray + start, count).string());
             return ;
         }
 #else
-        value = new TextLayoutCacheValue();
-        value->computeValues(paint, textArray, start, count, contextCount, flags);
+        value = new TextLayoutCacheValue(contextCount);
+        TextLayoutEngine::getInstance().computeValues(value.get(), paint,
+                reinterpret_cast<const UChar*>(textArray), start, count, contextCount, flags);
 #endif
         doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(), x, y, flags, paint);
     }
@@ -802,13 +796,8 @@ public:
         jfloat x, jfloat y, int dirFlags, SkPaint* paint) {
 
         jchar* chars = env->GetCharArrayElements(text, NULL);
-#if RTL_USE_HARFBUZZ
         drawTextWithGlyphs(canvas, chars + contextIndex, index - contextIndex,
                 count, contextCount, x, y, dirFlags, paint);
-#else
-        TextLayout::drawTextRun(paint, chars + contextIndex, index - contextIndex,
-                count, contextCount, dirFlags, x, y, canvas);
-#endif
         env->ReleaseCharArrayElements(text, chars, JNI_ABORT);
     }
 
@@ -820,13 +809,8 @@ public:
         jint count = end - start;
         jint contextCount = contextEnd - contextStart;
         const jchar* chars = env->GetStringChars(text, NULL);
-#if RTL_USE_HARFBUZZ
         drawTextWithGlyphs(canvas, chars + contextStart, start - contextStart,
                 count, contextCount, x, y, dirFlags, paint);
-#else
-        TextLayout::drawTextRun(paint, chars + contextStart, start - contextStart,
-                count, contextCount, dirFlags, x, y, canvas);
-#endif
         env->ReleaseStringChars(text, chars);
     }
 

@@ -350,14 +350,10 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = 0;
-#if RTL_USE_HARFBUZZ
+
         TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
                 paint->getFlags(), NULL /* dont need all advances */, &result);
-#else
-        // we double count, since measureText wants a byteLength
-        SkScalar width = paint->measureText(textArray + index, count << 1);
-        result = SkScalarToFloat(width);
-#endif
+
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
     }
@@ -380,13 +376,9 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
-#if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, start, count, textLength,
                 paint->getFlags(), NULL /* dont need all advances */, &width);
-#else
 
-        width = SkScalarToFloat(paint->measureText(textArray + start, count << 1));
-#endif
         env->ReleaseStringChars(text, textArray);
         return width;
     }
@@ -404,12 +396,9 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
-#if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
                 paint->getFlags(), NULL /* dont need all advances */, &width);
-#else
-        width = SkScalarToFloat(paint->measureText(textArray, textLength << 1));
-#endif
+
         env->ReleaseStringChars(text, textArray);
         return width;
     }
@@ -434,17 +423,9 @@ public:
         AutoJavaFloatArray autoWidths(env, widths, count);
         jfloat* widthsArray = autoWidths.ptr();
 
-#if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, text, 0, count, count,
                 paint->getFlags(), widthsArray, NULL /* dont need totalAdvance */);
-#else
-        SkScalar* scalarArray = (SkScalar*)widthsArray;
 
-        count = paint->getTextWidths(text, count << 1, scalarArray);
-        for (int i = 0; i < count; i++) {
-            widthsArray[i] = SkScalarToFloat(scalarArray[i]);
-        }
-#endif
         return count;
     }
 
@@ -597,54 +578,11 @@ public:
 
     static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
             jint count, jint flags, jint offset, jint opt) {
-#if RTL_USE_HARFBUZZ
         jfloat scalarArray[count];
 
         TextLayout::getTextRunAdvances(paint, text, start, count, count, flags,
                 scalarArray, NULL /* dont need totalAdvance */);
-#else
-        SkScalar scalarArray[count];
-        jchar buffer[count];
 
-        // this is where we'd call harfbuzz
-        // for now we just use ushape.c and widths returned from skia
-
-        int widths;
-        if (flags & 0x1) { // rtl, call arabic shaping in case
-            UErrorCode status = U_ZERO_ERROR;
-            // Use fixed length since we need to keep start and count valid
-            u_shapeArabic(text + start, count, buffer, count,
-                    U_SHAPE_LENGTH_FIXED_SPACES_NEAR | U_SHAPE_TEXT_DIRECTION_LOGICAL |
-                    U_SHAPE_LETTERS_SHAPE | U_SHAPE_X_LAMALEF_SUB_ALTERNATE, &status);
-            // we shouldn't fail unless there's an out of memory condition,
-            // in which case we're hosed anyway
-            for (int i = 0; i < count; ++i) {
-              if (buffer[i] == 0xffff) {
-                buffer[i] = 0x200b; // zero-width-space for skia
-              }
-            }
-            widths = paint->getTextWidths(buffer, count << 1, scalarArray);
-        } else {
-            widths = paint->getTextWidths(text + start, count << 1, scalarArray);
-        }
-
-        if (widths < count) {
-            // Skia operates on code points, not code units, so surrogate pairs return only one
-            // value. Expand the result so we have one value per UTF-16 code unit.
-
-            // Note, skia's getTextWidth gets confused if it encounters a surrogate pair,
-            // leaving the remaining widths zero.  Not nice.
-            const jchar *chars = text + start;
-            for (int i = count, p = widths - 1; --i > p;) {
-                if (chars[i] >= 0xdc00 && chars[i] < 0xe000 &&
-                        chars[i-1] >= 0xd800 && chars[i-1] < 0xdc00) {
-                    scalarArray[i] = 0;
-                } else {
-                  scalarArray[i] = scalarArray[--p];
-                }
-            }
-        }
-#endif
         jint pos = offset - start;
         switch (opt) {
         case AFTER:
