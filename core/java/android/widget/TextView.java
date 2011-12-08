@@ -9931,6 +9931,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (suggestionInfo.suggestionIndex == ADD_TO_DICTIONARY) {
                 Intent intent = new Intent(Settings.ACTION_USER_DICTIONARY_INSERT);
                 intent.putExtra("word", originalText);
+                intent.putExtra("locale", getTextServicesLocale().toString());
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(intent);
                 // There is no way to know if the word was indeed added. Re-check.
