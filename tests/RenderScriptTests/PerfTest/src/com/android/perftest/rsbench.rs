@@ -51,6 +51,7 @@ typedef struct TestScripts_s {
 TestScripts *gTestScripts;
 
 bool gLoadComplete = false;
+bool gPauseRendering = false;
 
 static float gDt = 0;
 
@@ -257,6 +258,10 @@ int root(void) {
         return 1;
     }
 
+    if (gPauseRendering) {
+        rsgDrawText("Paused", 50, 50);
+        return 30;
+    }
     if (gIsDebugMode) {
         debug();
     } else {
