@@ -1735,6 +1735,9 @@ public class MediaPlayer
         /**
          * Called to indicate the video size
          *
+         * The video size (width and height) could be 0 if there was no video,
+         * no display surface was set, or the value was not determined yet.
+         *
          * @param mp        the MediaPlayer associated with this callback
          * @param width     the width of the video
          * @param height    the height of the video
