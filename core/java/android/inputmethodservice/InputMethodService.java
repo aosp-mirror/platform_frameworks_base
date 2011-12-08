@@ -2006,6 +2006,22 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * @hide
+     */
+    public void onExtractedSetSpan(Object span, int start, int end, int flags) {
+        InputConnection conn = getCurrentInputConnection();
+        if (conn != null) {
+            if (!conn.setSelection(start, end)) return;
+            CharSequence text = conn.getSelectedText(InputConnection.GET_TEXT_WITH_STYLES);
+            if (text instanceof Spannable) {
+                ((Spannable) text).setSpan(span, 0, text.length(), flags);
+                conn.setComposingRegion(start, end);
+                conn.commitText(text, 1);
+            }
+        }
+    }
+
+    /**
      * This is called when the user has clicked on the extracted text view,
      * when running in fullscreen mode.  The default implementation hides
      * the candidates view when this happens, but only if the extracted text
