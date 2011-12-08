@@ -1180,11 +1180,19 @@ class BrowserFrame extends Handler {
             @Override
             public void proceed() {
                 SslCertLookupTable.getInstance().setIsAllowed(sslError);
-                nativeSslCertErrorProceed(handle);
+                post(new Runnable() {
+                        public void run() {
+                            nativeSslCertErrorProceed(handle);
+                        }
+                    });
             }
             @Override
             public void cancel() {
-                nativeSslCertErrorCancel(handle, certError);
+                post(new Runnable() {
+                        public void run() {
+                            nativeSslCertErrorCancel(handle, certError);
+                        }
+                    });
             }
         };
         mCallbackProxy.onReceivedSslError(handler, sslError);
