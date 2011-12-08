@@ -625,6 +625,11 @@ int doDump(Bundle* bundle)
             bool actImeService = false;
             bool actWallpaperService = false;
 
+            // These two implement the implicit permissions that are granted
+            // to pre-1.6 applications.
+            bool hasWriteExternalStoragePermission = false;
+            bool hasReadPhoneStatePermission = false;
+
             // This next group of variables is used to implement a group of
             // backward-compatibility heuristics necessitated by the addition of
             // some new uses-feature constants in 2.1 and 2.2. In most cases, the
@@ -986,6 +991,10 @@ int doDump(Bundle* bundle)
                                        name == "android.permission.WRITE_APN_SETTINGS" ||
                                        name == "android.permission.WRITE_SMS") {
                                 hasTelephonyPermission = true;
+                            } else if (name == "android.permission.WRITE_EXTERNAL_STORAGE") {
+                                hasWriteExternalStoragePermission = true;
+                            } else if (name == "android.permission.READ_PHONE_STATE") {
+                                hasReadPhoneStatePermission = true;
                             }
                             printf("uses-permission:'%s'\n", name.string());
                         } else {
@@ -1141,6 +1150,16 @@ int doDump(Bundle* bundle)
                             }
                         }
                     }
+                }
+            }
+
+            // Pre-1.6 implicitly granted permission compatibility logic
+            if (targetSdk < 4) {
+                if (!hasWriteExternalStoragePermission) {
+                    printf("uses-permission:'android.permission.WRITE_EXTERNAL_STORAGE'\n");
+                }
+                if (!hasReadPhoneStatePermission) {
+                    printf("uses-permission:'android.permission.READ_PHONE_STATE'\n");
                 }
             }
 
