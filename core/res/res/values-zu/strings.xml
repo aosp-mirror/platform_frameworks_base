@@ -504,7 +504,7 @@
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Ivumela uhlelo lokusebenza ukusebenzisa insizakalo ye-SIP ukwenza/ukuthola amakholi e-Inthanethi."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"funda ukusetshenziswa komlando wohleloxhumano"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Ivumela uhlelo lokusebenza ukufunda umlando wokusebenza kohleloxhumano kwezinhleloxhumano eziqondile nezinhlelo zokusebenza."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"phatha uhleloxhumano lwenqubomgomo"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"phatha inqubomgomo yenethiwekhi"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Ivumela uhlelo lokusebenza ukuthi liphathe amapholisi wohleloxhumano kanye nokuchaza imithetho eqondile yohlelo lokusebenza."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"lungisa ukubala kokusebenza kohleloxhumano"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Ivumela ukulungisa kokuthi ukusebenza kohleloxhumano aluvumelwe kuhlelo lokusebenza. Ayisetshenziswa izinhlelo zokusebenza ezivamile."</string>
@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"Vula inethiwekhi ye-Wi-Fi etholakalayo"</item>
     <item quantity="other" msgid="7915895323644292768">"Vula amanethiwekhi we-Wi-Fi atholakalayo"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ngena ngemvume kunethiwekhi ye-Wi-Fi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ayikwazanga ukuxhuma kwi-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inoxhumano oluphansi lwe-inthanethi."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"I-WiFi Eqondile"</string>
@@ -976,7 +979,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"KULUNGILE"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Khansela"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Ikhadi le-SIM likhishiwe"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Uhleloxhumano lweselula aluzutholakala kuwena kuze kube uqala kabusha ufake i-SIM card efanele."</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"Inethiwekhi yeselula ngeke itholakale kuwena kuze kube uqala kabusha ufake ikhadi le-SIM elifanele."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Kwenziwe"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Ikhadi le-SIM lengeziwe"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Kufanele uqalise kabusha idivaysi yakho ukuze ungene kuhleloxhumano yeselula."</string>
@@ -1078,8 +1081,8 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Shintsha iphephadonga"</string>
     <string name="vpn_title" msgid="8219003246858087489">"i-VPN ivuselelwe"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"i-VPN ivuswe ngu <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"Thepha ukuphatha uhleloxhumano."</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"Ixhume ku-<xliff:g id="SESSION">%s</xliff:g>. Thepha ukuphatha uhleloxhumano."</string>
+    <string name="vpn_text" msgid="1610714069627824309">"Thepha ukuphatha inethiwekhi."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Ixhume ku-<xliff:g id="SESSION">%s</xliff:g>. Thepha ukuphatha inethiwekhi."</string>
     <string name="upload_file" msgid="2897957172366730416">"Khetha ifayela"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ayikho ifayela ekhethiwe"</string>
     <string name="reset" msgid="2448168080964209908">"Setha kabusha"</string>

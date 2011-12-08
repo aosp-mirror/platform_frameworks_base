@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"Red Wi-Fi abierta disponible"</item>
     <item quantity="other" msgid="7915895323644292768">"Redes Wi-Fi abiertas disponibles"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Iniciar sesión en red Wi-Fi"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se ha podido establecer conexión con la red Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" tiene una mala conexión a Internet."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>

@@ -959,6 +959,9 @@
     <item quantity="one" msgid="1634101450343277345">"አውታረ መረብ ሲኖር Wi-Fi ክፈት"</item>
     <item quantity="other" msgid="7915895323644292768">"አውታረ መረቦች ሲኖሩ Wi-Fi ክፈት"</item>
   </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ወደ Wi-Fi አውታረ መረብ በመለያ ግባ"</string>
+    <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ወደ Wi-Fi ለማያያዝ አልተቻለም"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ደካማ የበይነመረብ ግንኙነት ኣለው፡፡"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ቀጥታ"</string>
