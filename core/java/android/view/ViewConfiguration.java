@@ -149,7 +149,7 @@ public class ViewConfiguration {
      * It may be appropriate to tweak this on a device-specific basis in an overlay based on
      * the characteristics of the touch panel and firmware.
      */
-    private static final int TOUCH_SLOP = 4;
+    private static final int TOUCH_SLOP = 8;
     
     /**
      * Distance a touch can wander before we think the user is attempting a paged scroll
