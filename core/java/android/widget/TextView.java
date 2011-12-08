@@ -5514,7 +5514,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                      * call performClick(), but that won't do anything in
                      * this case.)
                      */
-                    if (hasOnClickListeners()) {
+                    if (!hasOnClickListeners()) {
                         if (mMovement != null && mText instanceof Editable
                                 && mLayout != null && onCheckIsTextEditor()) {
                             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -5551,7 +5551,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                          * call performClick(), but that won't do anything in
                          * this case.)
                          */
-                        if (hasOnClickListeners()) {
+                        if (!hasOnClickListeners()) {
                             View v = focusSearch(FOCUS_DOWN);
 
                             if (v != null) {
