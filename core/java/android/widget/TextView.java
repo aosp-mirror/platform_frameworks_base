@@ -1209,6 +1209,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) imm.restartInput(this);
         }
+
+        // start or stop the cursor blinking as appropriate
+        makeBlink();
     }
 
     /**
