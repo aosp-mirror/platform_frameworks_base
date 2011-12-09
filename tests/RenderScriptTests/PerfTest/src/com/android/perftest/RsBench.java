@@ -95,8 +95,10 @@ public class RsBench extends Activity {
         switch (item.getItemId()) {
             case R.id.benchmark_all:
                 mView.setBenchmarkMode(-1);
+                mView.suspendRendering(false);
                 return true;
             case R.id.benchmark_one:
+                mView.suspendRendering(true);
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Pick a Test");
                 builder.setItems(mView.getTestNames(),
@@ -106,11 +108,13 @@ public class RsBench extends Activity {
                                        "Starting to benchmark: " + mView.getTestNames()[item],
                                        Toast.LENGTH_SHORT).show();
                         mView.setBenchmarkMode(item);
+                        mView.suspendRendering(false);
                     }
                 });
                 builder.show();
                 return true;
             case R.id.debug_mode:
+                mView.suspendRendering(true);
                 AlertDialog.Builder debugBuilder = new AlertDialog.Builder(this);
                 debugBuilder.setTitle("Pick a Test");
                 debugBuilder.setItems(mView.getTestNames(),
@@ -120,6 +124,7 @@ public class RsBench extends Activity {
                                        "Switching to: " + mView.getTestNames()[item],
                                        Toast.LENGTH_SHORT).show();
                         mView.setDebugMode(item);
+                        mView.suspendRendering(false);
                     }
                 });
                 debugBuilder.show();
