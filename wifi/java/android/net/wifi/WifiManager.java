@@ -413,6 +413,13 @@ public class WifiManager {
     private static final int MAX_RSSI = -55;
 
     /**
+     * Number of RSSI levels used in the framework to initiate
+     * {@link #RSSI_CHANGED_ACTION} broadcast
+     * @hide
+     */
+    public static final int RSSI_LEVELS = 5;
+
+    /**
      * Auto settings in the driver. The driver could choose to operate on both
      * 2.4 GHz and 5 GHz or make a dynamic decision on selecting the band.
      * @hide
