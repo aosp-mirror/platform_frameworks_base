@@ -70,7 +70,6 @@ public class WifiInfo implements Parcelable {
     private InetAddress mIpAddress;
 
     private String mMacAddress;
-    private boolean mExplicitConnect;
 
     WifiInfo() {
         mSSID = null;
@@ -80,7 +79,6 @@ public class WifiInfo implements Parcelable {
         mRssi = -9999;
         mLinkSpeed = -1;
         mHiddenSSID = false;
-        mExplicitConnect = false;
     }
 
     /**
@@ -98,7 +96,6 @@ public class WifiInfo implements Parcelable {
             mLinkSpeed = source.mLinkSpeed;
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
-            mExplicitConnect = source.mExplicitConnect;
         }
     }
 
@@ -174,22 +171,6 @@ public class WifiInfo implements Parcelable {
     void setNetworkId(int id) {
         mNetworkId = id;
     }
-
-
-    /**
-     * @hide
-     */
-    public boolean isExplicitConnect() {
-        return mExplicitConnect;
-    }
-
-    /**
-     * @hide
-     */
-    public void setExplicitConnect(boolean explicitConnect) {
-        this.mExplicitConnect = explicitConnect;
-    }
-
 
     /**
      * Each configured network has a unique small integer ID, used to identify
@@ -279,8 +260,7 @@ public class WifiInfo implements Parcelable {
             append(mSupplicantState == null ? none : mSupplicantState).
             append(", RSSI: ").append(mRssi).
             append(", Link speed: ").append(mLinkSpeed).
-            append(", Net ID: ").append(mNetworkId).
-            append(", Explicit connect: ").append(mExplicitConnect);
+            append(", Net ID: ").append(mNetworkId);
 
         return sb.toString();
     }
@@ -304,7 +284,6 @@ public class WifiInfo implements Parcelable {
         dest.writeString(getSSID());
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
-        dest.writeByte(mExplicitConnect ? (byte)1 : (byte)0);
         mSupplicantState.writeToParcel(dest, flags);
     }
 
@@ -324,7 +303,6 @@ public class WifiInfo implements Parcelable {
                 info.setSSID(in.readString());
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();
-                info.mExplicitConnect = in.readByte() == 1 ? true : false;
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 return info;
             }
