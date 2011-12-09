@@ -45,17 +45,12 @@ namespace android {
 static Mutex gWVMutex;
 
 WVMExtractor::WVMExtractor(const sp<DataSource> &source)
-    : mDataSource(source) {
-    {
-        Mutex::Autolock autoLock(gWVMutex);
-        if (gVendorLibHandle == NULL) {
-            gVendorLibHandle = dlopen("libwvm.so", RTLD_NOW);
-        }
+    : mDataSource(source)
+{
+    Mutex::Autolock autoLock(gWVMutex);
 
-        if (gVendorLibHandle == NULL) {
-            LOGE("Failed to open libwvm.so");
-            return;
-        }
+    if (!getVendorLibHandle()) {
+        return;
     }
 
     typedef WVMLoadableExtractor *(*GetInstanceFunc)(sp<DataSource>);
@@ -69,6 +64,19 @@ WVMExtractor::WVMExtractor(const sp<DataSource> &source)
     } else {
         LOGE("Failed to locate GetInstance in libwvm.so");
     }
+}
+
+bool WVMExtractor::getVendorLibHandle()
+{
+    if (gVendorLibHandle == NULL) {
+        gVendorLibHandle = dlopen("libwvm.so", RTLD_NOW);
+    }
+
+    if (gVendorLibHandle == NULL) {
+        LOGE("Failed to open libwvm.so");
+    }
+
+    return gVendorLibHandle != NULL;
 }
 
 WVMExtractor::~WVMExtractor() {
@@ -111,6 +119,34 @@ void WVMExtractor::setAdaptiveStreamingMode(bool adaptive) {
     if (mImpl != NULL) {
         mImpl->setAdaptiveStreamingMode(adaptive);
     }
+}
+
+bool SniffWVM(
+    const sp<DataSource> &source, String8 *mimeType, float *confidence,
+        sp<AMessage> *) {
+
+    Mutex::Autolock autoLock(gWVMutex);
+
+    if (!WVMExtractor::getVendorLibHandle()) {
+        return false;
+    }
+
+    typedef WVMLoadableExtractor *(*SnifferFunc)(sp<DataSource>);
+    SnifferFunc snifferFunc =
+        (SnifferFunc) dlsym(gVendorLibHandle,
+                            "_ZN7android15IsWidevineMediaENS_2spINS_10DataSourceEEE");
+
+    if (snifferFunc) {
+        if ((*snifferFunc)(source)) {
+            *mimeType = MEDIA_MIMETYPE_CONTAINER_WVM;
+            *confidence = 10.0f;
+            return true;
+        }
+    } else {
+        LOGE("IsWidevineMedia not found in libwvm.so");
+    }
+
+    return false;
 }
 
 } //namespace android
