@@ -4244,6 +4244,7 @@ package android.bluetooth {
     method public int getProfileConnectionState(int);
     method public boolean getProfileProxy(android.content.Context, android.bluetooth.BluetoothProfile.ServiceListener, int);
     method public android.bluetooth.BluetoothDevice getRemoteDevice(java.lang.String);
+    method public android.bluetooth.BluetoothDevice getRemoteDevice(byte[]);
     method public int getScanMode();
     method public int getState();
     method public boolean isDiscovering();
