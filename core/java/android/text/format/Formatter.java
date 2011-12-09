@@ -21,7 +21,7 @@ import android.net.NetworkUtils;
 
 /**
  * Utility class to aid in formatting common values that are not covered
- * by {@link java.util.Formatter}
+ * by the {@link java.util.Formatter} class in {@link java.util}
  */
 public final class Formatter {
 
