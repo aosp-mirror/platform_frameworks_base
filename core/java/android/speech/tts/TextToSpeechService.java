@@ -694,12 +694,12 @@ public abstract class TextToSpeechService extends Service {
     }
 
     private class AudioSpeechItem extends SpeechItem {
-        private final BlockingMediaPlayer mPlayer;
-
+        private final AudioPlaybackQueueItem mItem;
         public AudioSpeechItem(Object callerIdentity, int callerUid, int callerPid,
                 Bundle params, Uri uri) {
             super(callerIdentity, callerUid, callerPid, params);
-            mPlayer = new BlockingMediaPlayer(TextToSpeechService.this, uri, getStreamType());
+            mItem = new AudioPlaybackQueueItem(this, getCallerIdentity(),
+                    TextToSpeechService.this, uri, getStreamType());
         }
 
         @Override
@@ -709,8 +709,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            mAudioPlaybackHandler.enqueue(new AudioPlaybackQueueItem(
-                    this, getCallerIdentity(), mPlayer));
+            mAudioPlaybackHandler.enqueue(mItem);
             return TextToSpeech.SUCCESS;
         }
 
