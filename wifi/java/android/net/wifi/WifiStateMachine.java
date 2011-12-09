@@ -1423,14 +1423,11 @@ public class WifiStateMachine extends StateMachine {
              * be displayed in the status bar, and only send the
              * broadcast if that much more coarse-grained number
              * changes. This cuts down greatly on the number of
-             * broadcasts, at the cost of not mWifiInforming others
+             * broadcasts, at the cost of not informing others
              * interested in RSSI of all the changes in signal
              * level.
              */
-            // TODO: The second arg to the call below needs to be a symbol somewhere, but
-            // it's actually the size of an array of icons that's private
-            // to StatusBar Policy.
-            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, 4);
+            int newSignalLevel = WifiManager.calculateSignalLevel(newRssi, WifiManager.RSSI_LEVELS);
             if (newSignalLevel != mLastSignalLevel) {
                 sendRssiChangeBroadcast(newRssi);
             }
