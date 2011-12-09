@@ -28,13 +28,13 @@ import android.provider.Telephony;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.SMSDispatcher;
 import com.android.internal.telephony.gsm.GsmSMSDispatcher;
-import com.android.internal.telephony.gsm.SimCard;
 import com.android.internal.telephony.ims.IsimRecords;
 
 public class CDMALTEPhone extends CDMAPhone {
@@ -79,7 +79,7 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     protected void initSstIcc() {
-        mIccCard = new SimCard(this, LOG_TAG, DBG);
+        mIccCard = new IccCard(this, LOG_TAG, IccCard.CARD_IS_3GPP, DBG);
         mIccRecords = new CdmaLteUiccRecords(this);
         mIccFileHandler = new CdmaLteUiccFileHandler(this);
         // CdmaLteServiceStateTracker registers with IccCard to know

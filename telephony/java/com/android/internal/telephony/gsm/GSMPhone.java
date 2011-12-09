@@ -56,6 +56,7 @@ import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccPhoneBookInterfaceManager;
 import com.android.internal.telephony.IccSmsInterfaceManager;
@@ -135,7 +136,7 @@ public class GSMPhone extends PhoneBase {
         }
 
         mCM.setPhoneType(Phone.PHONE_TYPE_GSM);
-        mIccCard = new SimCard(this, LOG_TAG, true);
+        mIccCard = new IccCard(this, LOG_TAG, IccCard.CARD_IS_3GPP, true);
         mCT = new GsmCallTracker(this);
         mSST = new GsmServiceStateTracker (this);
         mSMS = new GsmSMSDispatcher(this, mSmsStorageMonitor, mSmsUsageMonitor);
