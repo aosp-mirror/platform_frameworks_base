@@ -92,11 +92,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private float mAutoCorrectionUnderlineThickness;
     private int mAutoCorrectionUnderlineColor;
 
-    /*
-     * TODO: If switching IME is required, needs to add parameters for ids of InputMethodInfo
-     * and InputMethodSubtype.
-     */
-
     /**
      * @param context Context for the application
      * @param suggestions Suggestions for the string under the span
@@ -146,6 +141,16 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     }
 
     private void initStyle(Context context) {
+        if (context == null) {
+            mMisspelledUnderlineThickness = 0;
+            mEasyCorrectUnderlineThickness = 0;
+            mAutoCorrectionUnderlineThickness = 0;
+            mMisspelledUnderlineColor = Color.BLACK;
+            mEasyCorrectUnderlineColor = Color.BLACK;
+            mAutoCorrectionUnderlineColor = Color.BLACK;
+            return;
+        }
+
         int defStyle = com.android.internal.R.attr.textAppearanceMisspelledSuggestion;
         TypedArray typedArray = context.obtainStyledAttributes(
                 null, com.android.internal.R.styleable.SuggestionSpan, defStyle, 0);
@@ -169,7 +174,6 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineThickness, 0);
         mAutoCorrectionUnderlineColor = typedArray.getColor(
                 com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
-
     }
 
     public SuggestionSpan(Parcel src) {
