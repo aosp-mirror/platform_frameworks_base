@@ -118,7 +118,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         "192.168.48.2", "192.168.48.254",
     };
 
-    private String[] mDnsServers;
+    private String[] mDefaultDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
     private static final String DNS_DEFAULT_SERVER2 = "8.8.4.4";
 
@@ -171,9 +171,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         updateConfiguration();
 
         // TODO - remove and rely on real notifications of the current iface
-        mDnsServers = new String[2];
-        mDnsServers[0] = DNS_DEFAULT_SERVER1;
-        mDnsServers[1] = DNS_DEFAULT_SERVER2;
+        mDefaultDnsServers = new String[2];
+        mDefaultDnsServers[0] = DNS_DEFAULT_SERVER1;
+        mDefaultDnsServers[1] = DNS_DEFAULT_SERVER2;
     }
 
     void updateConfiguration() {
@@ -1244,7 +1244,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     }
                 }
                 try {
-                    mNMService.setDnsForwarders(mDnsServers);
+                    mNMService.setDnsForwarders(mDefaultDnsServers);
                 } catch (Exception e) {
                     transitionTo(mSetDnsForwardersErrorState);
                     return false;
@@ -1320,7 +1320,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     try {
                         linkProperties = mConnService.getLinkProperties(upType);
                     } catch (RemoteException e) { }
-                    if (linkProperties != null) iface = linkProperties.getInterfaceName();
+                    if (linkProperties != null) {
+                        iface = linkProperties.getInterfaceName();
+                        String[] dnsServers = mDefaultDnsServers;
+                        Collection<InetAddress> dnses = linkProperties.getDnses();
+                        if (dnses != null) {
+                            dnsServers = NetworkUtils.makeStrings(dnses);
+                        }
+                        try {
+                            mNMService.setDnsForwarders(dnsServers);
+                        } catch (Exception e) {
+                            transitionTo(mSetDnsForwardersErrorState);
+                        }
+                    }
                 }
                 notifyTetheredOfNewUpstreamIface(iface);
             }
