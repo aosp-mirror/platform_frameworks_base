@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.nfc_extras;
+package com.android.nfc_extras.tests;
 
 import android.content.Context;
 import android.nfc.NfcAdapter;
@@ -48,7 +48,7 @@ public class BasicNfcEeTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mContext = getInstrumentation().getContext();
+        mContext = getInstrumentation().getTargetContext();
         mAdapterExtras = NfcAdapterExtras.get(NfcAdapter.getDefaultAdapter(mContext));
         mEe = mAdapterExtras.getEmbeddedExecutionEnvironment();
     }
