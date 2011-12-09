@@ -92,6 +92,10 @@ public class RsBenchView extends RSSurfaceView {
         mRender.setBenchmarkMode(benchNum);
     }
 
+    void suspendRendering(boolean pause) {
+        mRender.pause(pause);
+    }
+
     void setDebugMode(int num) {
         mRender.setDebugMode(num);
     }

@@ -266,6 +266,10 @@ public class RsBenchRS {
         mScript.invoke_setBenchmarkMode(benchNum);
     }
 
+    public void pause(boolean pause) {
+        mScript.set_gPauseRendering(pause);
+    }
+
     private void initRS() {
 
         mScript = new ScriptC_rsbench(mRS, mRes, R.raw.rsbench);
