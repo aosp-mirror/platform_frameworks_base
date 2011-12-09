@@ -88,11 +88,13 @@ private:
 
     void attachToCache(const sp<Entry<K, V> >& entry);
     void detachFromCache(const sp<Entry<K, V> >& entry);
+
+    const V mNullValue;
 }; // class GenerationCache
 
 template<typename K, typename V>
 GenerationCache<K, V>::GenerationCache(uint32_t maxCapacity): mMaxCapacity(maxCapacity),
-    mListener(NULL) {
+    mListener(NULL), mNullValue(NULL) {
 };
 
 template<typename K, typename V>
@@ -154,7 +156,7 @@ const V& GenerationCache<K, V>::get(const K& key) {
         return entry->value;
     }
 
-    return NULL;
+    return mNullValue;
 }
 
 template<typename K, typename V>
