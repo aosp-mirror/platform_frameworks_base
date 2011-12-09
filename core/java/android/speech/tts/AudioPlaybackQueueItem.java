@@ -15,27 +15,91 @@
  */
 package android.speech.tts;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.ConditionVariable;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
 
 class AudioPlaybackQueueItem extends PlaybackQueueItem {
-    private final BlockingMediaPlayer mPlayer;
+    private static final String TAG = "TTS.AudioQueueItem";
+
+    private final Context mContext;
+    private final Uri mUri;
+    private final int mStreamType;
+
+    private final ConditionVariable mDone;
+    private MediaPlayer mPlayer;
+    private volatile boolean mFinished;
 
     AudioPlaybackQueueItem(UtteranceProgressDispatcher dispatcher,
-            Object callerIdentity, BlockingMediaPlayer player) {
+            Object callerIdentity,
+            Context context, Uri uri, int streamType) {
         super(dispatcher, callerIdentity);
-        mPlayer = player;
+
+        mContext = context;
+        mUri = uri;
+        mStreamType = streamType;
+
+        mDone = new ConditionVariable();
+        mPlayer = null;
+        mFinished = false;
     }
     @Override
     public void run() {
-        getDispatcher().dispatchOnStart();
-        // TODO: This can be avoided. Will be fixed later in this CL.
-        mPlayer.startAndWait();
-        getDispatcher().dispatchOnDone();
+        final UtteranceProgressDispatcher dispatcher = getDispatcher();
+
+        dispatcher.dispatchOnStart();
+        mPlayer = MediaPlayer.create(mContext, mUri);
+        if (mPlayer == null) {
+            dispatcher.dispatchOnError();
+            return;
+        }
+
+        try {
+            mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Log.w(TAG, "Audio playback error: " + what + ", " + extra);
+                    mDone.open();
+                    return true;
+                }
+            });
+            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mFinished = true;
+                    mDone.open();
+                }
+            });
+            mPlayer.setAudioStreamType(mStreamType);
+            mPlayer.start();
+            mDone.block();
+            finish();
+        } catch (IllegalArgumentException ex) {
+            Log.w(TAG, "MediaPlayer failed", ex);
+            mDone.open();
+        }
+
+        if (mFinished) {
+            dispatcher.dispatchOnDone();
+        } else {
+            dispatcher.dispatchOnError();
+        }
+    }
+
+    private void finish() {
+        try {
+            mPlayer.stop();
+        } catch (IllegalStateException ex) {
+            // Do nothing, the player is already stopped
+        }
+        mPlayer.release();
     }
 
     @Override
     void stop(boolean isError) {
-        mPlayer.stop();
+        mDone.open();
     }
 }
