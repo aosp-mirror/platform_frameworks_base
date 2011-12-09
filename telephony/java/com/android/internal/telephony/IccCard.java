@@ -37,6 +37,7 @@ import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
+import com.android.internal.telephony.cat.CatService;
 import com.android.internal.telephony.cdma.CDMALTEPhone;
 import com.android.internal.telephony.cdma.CdmaLteUiccFileHandler;
 import com.android.internal.telephony.cdma.CdmaLteUiccRecords;
@@ -65,6 +66,8 @@ public class IccCard {
     protected PhoneBase mPhone;
     private IccRecords mIccRecords;
     private IccFileHandler mIccFileHandler;
+    private CatService mCatService;
+
     private RegistrantList mAbsentRegistrants = new RegistrantList();
     private RegistrantList mPinLockedRegistrants = new RegistrantList();
     private RegistrantList mNetworkLockedRegistrants = new RegistrantList();
@@ -194,6 +197,8 @@ public class IccCard {
             mIccRecords = is3gpp ? new SIMRecords(this, mPhone.mContext, mPhone.mCM) :
                                    new RuimRecords(this, mPhone.mContext, mPhone.mCM);
         }
+        mCatService = CatService.getInstance(mPhone.mCM, mIccRecords,
+                mPhone.mContext, mIccFileHandler, this);
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForOn(mHandler, EVENT_RADIO_ON, null);
         mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_STATUS_CHANGED, null);
@@ -204,6 +209,7 @@ public class IccCard {
         mPhone.mCM.unregisterForIccStatusChanged(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
         mPhone.mCM.unregisterForOn(mHandler);
+        mCatService.dispose();
         mCdmaSSM.dispose(mHandler);
         mIccRecords.dispose();
         mIccFileHandler.dispose();
