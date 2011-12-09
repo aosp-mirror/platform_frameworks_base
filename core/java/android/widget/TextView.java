@@ -9835,7 +9835,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
             }
 
-            // Add to dictionary item is there a span with the misspelled flag
+            // Add to dictionary item if there is a span with the misspelled flag
             if (misspelledSpan != null) {
                 final int misspelledStart = spannable.getSpanStart(misspelledSpan);
                 final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
@@ -9921,7 +9921,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
             final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
-            if (spanStart < 0 || spanEnd < 0) {
+            if (spanStart < 0 || spanEnd <= spanStart) {
                 // Span has been removed
                 hide();
                 return;
@@ -9989,14 +9989,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // way to assign them a valid range after replacement
                     if (suggestionSpansStarts[i] <= spanStart &&
                             suggestionSpansEnds[i] >= spanEnd) {
-                        // TODO The ExtractEditText should restore these spans in the original text
-                        editable.setSpan(suggestionSpans[i], suggestionSpansStarts[i],
+                        setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
                                 suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
                     }
                 }
 
                 // Move cursor at the end of the replaced word
-                Selection.setSelection(editable, spanEnd + lengthDifference);
+                final int newCursorPosition = spanEnd + lengthDifference;
+                setCursorPosition_internal(newCursorPosition, newCursorPosition);
             }
 
             hide();
@@ -11467,6 +11467,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void replaceText_internal(int start, int end, CharSequence text) {
         ((Editable) mText).replace(start, end, text);
+    }
+
+    /**
+     * Sets a span on the specified range of text
+     * @hide
+     */
+    protected void setSpan_internal(Object span, int start, int end, int flags) {
+        ((Editable) mText).setSpan(span, start, end, flags);
+    }
+
+    /**
+     * Moves the cursor to the specified offset position in text
+     * @hide
+     */
+    protected void setCursorPosition_internal(int start, int end) {
+        Selection.setSelection(((Editable) mText), start, end);
     }
 
     @ViewDebug.ExportedProperty(category = "text")
