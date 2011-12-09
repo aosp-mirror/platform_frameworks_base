@@ -3207,7 +3207,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         boolean needEditableForNotification = false;
-        boolean startSpellCheck = false;
 
         if (mListeners != null && mListeners.size() != 0) {
             needEditableForNotification = true;
@@ -3219,7 +3218,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setFilters(t, mFilters);
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) imm.restartInput(this);
-            startSpellCheck = true;
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
         } else if (!(text instanceof CharWrapper)) {
@@ -3307,11 +3305,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
-
-        if (startSpellCheck && mSpellChecker != null) {
-            // This view has to have been previously attached for mSpellChecker to exist  
-            updateSpellCheckSpans(0, textLength);
-        }
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
@@ -4479,8 +4472,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Resolve drawables as the layout direction has been resolved
         resolveDrawables();
-        
-        updateSpellCheckSpans(0, mText.length());
+
+        updateSpellCheckSpans(0, mText.length(), true /* create the spell checker if needed */);
     }
 
     @Override
@@ -7631,7 +7624,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        updateSpellCheckSpans(start, start + after);
+        updateSpellCheckSpans(start, start + after, false);
 
         // Hide the controllers as soon as text is modified (typing, procedural...)
         // We do not hide the span controllers, since they can be added when a new text is
@@ -7789,17 +7782,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (newStart < 0 && what instanceof SpellCheckSpan) {
-            getSpellChecker().removeSpellCheckSpan((SpellCheckSpan) what);
+        if (mSpellChecker != null && newStart < 0 && what instanceof SpellCheckSpan) {
+            mSpellChecker.removeSpellCheckSpan((SpellCheckSpan) what);
         }
     }
 
     /**
      * Create new SpellCheckSpans on the modified region.
      */
-    private void updateSpellCheckSpans(int start, int end) {
+    private void updateSpellCheckSpans(int start, int end, boolean createSpellChecker) {
         if (isTextEditable() && isSuggestionsEnabled()) {
-            getSpellChecker().spellCheck(start, end);
+            if (mSpellChecker == null && createSpellChecker) {
+                mSpellChecker = new SpellChecker(this);
+            }
+            if (mSpellChecker != null) {
+                mSpellChecker.spellCheck(start, end);
+            }
         }
     }
 
@@ -8970,13 +8968,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return packRangeInLong(offset,  offset);
     }
 
-    private SpellChecker getSpellChecker() {
-        if (mSpellChecker == null) {
-            mSpellChecker = new SpellChecker(this);
-        }
-        return mSpellChecker;
-    }
-
     private long getLastTouchOffsets() {
         SelectionModifierCursorController selectionController = getSelectionController();
         final int minOffset = selectionController.getMinTouchOffset();
@@ -9931,7 +9922,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // There is no way to know if the word was indeed added. Re-check.
                 // TODO The ExtractEditText should remove the span in the original text instead
                 editable.removeSpan(suggestionInfo.suggestionSpan);
-                updateSpellCheckSpans(spanStart, spanEnd);
+                updateSpellCheckSpans(spanStart, spanEnd, false);
             } else {
                 // SuggestionSpans are removed by replace: save them before
                 SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
