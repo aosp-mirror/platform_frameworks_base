@@ -4,7 +4,7 @@
     <uses-permission
         android:name="android.permission.INTERNET" />
     <application android:label="SceneGraphTest">
-        <activity android:name="SceneGraph"
+        <activity android:name="TestApp"
                   android:label="SceneGraphTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -41,10 +41,10 @@ import android.util.Log;
 
 import com.android.scenegraph.SceneManager.SceneLoadedCallback;
 
-public class SceneGraphRS {
+public class TestAppRS {
 
     private static String modelName = "orientation_test";
-    private static String TAG = "SceneGraphRS";
+    private static String TAG = "TestAppRS";
     private final int STATE_LAST_FOCUS = 1;
     private final boolean mLoadFromSD = true;
     private static String mSDCardPath = "sdcard/scenegraph/";
@@ -65,7 +65,7 @@ public class SceneGraphRS {
 
     TouchHandler mTouchHandler;
 
-    public SceneGraphRS() {
+    public TestAppRS() {
         mUseBlur = false;
     }
 

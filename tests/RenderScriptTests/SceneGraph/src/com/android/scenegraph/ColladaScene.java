@@ -49,10 +49,10 @@ public class ColladaScene {
     private final boolean mLoadFromSD = true;
     private static String mSDCardPath = "sdcard/scenegraph/";
 
-    SceneGraphRS mRenderer;
+    TestAppRS mRenderer;
     SceneLoadedCallback mCallback;
 
-    public ColladaScene(String name, SceneGraphRS renderer) {
+    public ColladaScene(String name, TestAppRS renderer) {
         modelName = name;
         mRenderer = renderer;
     }

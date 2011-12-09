@@ -40,15 +40,15 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-public class SceneGraphView extends RSSurfaceView {
+public class TestAppView extends RSSurfaceView {
 
-    public SceneGraphView(Context context) {
+    public TestAppView(Context context) {
         super(context);
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
     }
 
     private RenderScriptGL mRS;
-    SceneGraphRS mRender;
+    TestAppRS mRender;
 
     private ScaleGestureDetector mScaleDetector;
     private static final int INVALID_POINTER_ID = -1;
@@ -61,7 +61,7 @@ public class SceneGraphView extends RSSurfaceView {
             sc.setDepth(16, 24);
             mRS = createRenderScriptGL(sc);
             mRS.setSurface(holder, w, h);
-            mRender = new SceneGraphRS();
+            mRender = new TestAppRS();
             mRender.init(mRS, getResources(), w, h);
         }
     }
