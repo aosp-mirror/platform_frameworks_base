@@ -1030,7 +1030,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     mHasConnectedWifiManager = true;
                 }
                 mWifiManager.disableNetwork(networkId, WifiConfiguration.DISABLED_DNS_FAILURE);
-                if (mShowDisabledNotification && mConnectionInfo.isExplicitConnect()) {
+                if (mShowDisabledNotification) {
                     setDisabledNetworkNotificationVisible(true);
                 }
                 transitionTo(mNotConnectedState);
