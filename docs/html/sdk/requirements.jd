@@ -24,8 +24,8 @@ Android applications using the Android SDK. </p>
 
 <h4 style="margin-top:.25em"><em>Eclipse IDE</em></h4>
     <ul>
-      <li>Eclipse 3.5 (Galileo) or greater 
-<p class="note"><strong>Note:</strong> Eclipse 3.4 (Ganymede) is no longer
+      <li>Eclipse 3.6 (Helios) or greater
+<p class="note"><strong>Note:</strong> Eclipse 3.5 (Galileo) is no longer
 supported with the latest version of ADT.</p></li>
       <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
 in most Eclipse IDE packages) </li>
@@ -37,7 +37,7 @@ developing Android applications, we recommend that you install one of these
 packages: </p>
          <ul>
            <li>Eclipse IDE for Java Developers</li>
-           <li>Eclipse Classic (versions 3.5.1 and higher)</li>
+           <li>Eclipse Classic</li>
            <li>Eclipse IDE for Java EE Developers</li>
          </ul>
       </li>
