@@ -9,7 +9,7 @@ href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
 latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory.</p>
 
 <p>If you are already using the SDK and you want to update to the latest version
-of the SDK Tools, use the <em>Android SDK and AVD Manager</em> to get the
+of the SDK Tools, use the <em>Android SDK Manager</em> to get the
 update, rather than downloading a new SDK starter package. For more information
 about how to update, see <a
 href="{@docRoot}sdk/adding-components.html#UpdatingComponents">Updating SDK
@@ -20,8 +20,7 @@ Components</a>.</p>
 
 <p>The sections below provide notes about successive releases of
 the SDK Tools, as denoted by revision number. To determine what revision of the SDK
-Tools you are using, refer to the "Installed Packages" listing in the Android SDK
-and AVD Manager. </p>
+Tools you are using, refer to the "Installed Packages" listing in the Android SDK Manager. </p>
 
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
@@ -69,7 +68,57 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
-    width="9px" />SDK Tools, Revision 15</a> <em>(October 2011)</em>
+    width="9px" />
+    SDK Tools, Revision 16</a> <em>(December 2011)</em>
+
+  <div class="toggleme">
+    <p class="caution"><strong>Important:</strong> To download the new Android
+    4.0 system components from the Android SDK Manager, you must first update the
+    SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+    the Android 4.0 system components will not be available for download.</p>
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+  <ul>
+    <li>Android SDK Platform-tools revision 9 or later.</li>
+    <li>If you are developing in Eclipse with ADT, note that the SDK Tools r16 is designed for use
+    with ADT 16.0.0 and later. If you haven't already, we highly recommend updating your
+    <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin</a> to 16.0.0.</li>
+    <li>If you are developing outside Eclipse, you must have <a href="http://ant.apache.org/">Apache
+    Ant</a> 1.8 or later.</li>
+</ul>
+</dd>
+<dt>General notes:</dt>
+<dd>
+  <ul>
+    <li>Added Lint tools to detect common errors in Android projects. (<a
+href="http://tools.android.com/recent/lint">more info</a>)</li>
+    <li>Added sensor emulation support, which allows the emulator to read sensor data from a
+physical Android device.</li>
+    <li>Added support for using a webcam to emulate a camera on Mac OS X.</li>
+  </ul>
+</dd>
+<dt>Bug fixes:</dt>
+<dd>
+  <ul>
+    <li>Snapshots now work for Android 4.0 system images.</li>
+    <li>Fixed several small issues for the build file.
+    (<a href="http://code.google.com/p/android/issues/detail?id=21023">Issue 21023</a>,
+    <a href="http://code.google.com/p/android/issues/detail?id=21267">Issue 21267</a>,
+    <a href="http://code.google.com/p/android/issues/detail?id=21465">Issue 21465</a>,
+    <a href="http://code.google.com/p/android/issues/detail?id=21525">Issue 21525</a>).</li>
+  </ul>
+</dd>
+</dl>
+</div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+    width="9px" />
+    SDK Tools, Revision 15</a> <em>(October 2011)</em>
 
   <div class="toggleme">
     <p class="caution"><strong>Important:</strong> To download the new Android
@@ -116,7 +165,8 @@ padding: .25em 1em;
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
-    width="9px" />SDK Tools, Revision 14</a> <em>(October 2011)</em>
+    width="9px" />
+    SDK Tools, Revision 14</a> <em>(October 2011)</em>
 
   <div class="toggleme">
     <p class="note"><strong>Important:</strong> To download the new Android
@@ -137,10 +187,11 @@ padding: .25em 1em;
 <dt>General notes:</dt>
 <dd>
   <ul>
-    <li>Added webcam support to Android 4.0 or later platforms to emulate rear-facing cameras when one webcam is present,
-    and to emulate both rear-facing and front-facing cameras when two webcams are present. Webcam suport is for Windows and Linux only.
+    <li>Added webcam support to Android 4.0 or later platforms to emulate rear-facing cameras when
+    one webcam is present, and to emulate both rear-facing and front-facing cameras when two
+    webcams are present. Webcam support is for Windows and Linux only.
     Mac support will come in a later release.</li>
-     <li>Changed <code>default.properties</code> to <code>project.properties</code> and
+    <li>Changed <code>default.properties</code> to <code>project.properties</code> and
     <code>build.properties</code> to <code>ant.properties</code>. Any existing
     projects that you build with Ant must be updated with the <code>android update project</code>
     command.</li>
@@ -428,7 +479,7 @@ normal tasks: <code>-pre-build</code>, <code>-pre-compile</code>, and
 for more information.</li>
 <li>Fixes location control in DDMS to work in any locale not using '.' as a
 decimal point.</li>
-</li>
+</ul>
 </ul>
 </dd>
 </dl>

@@ -65,26 +65,42 @@ experience possible on the latest Android-powered devices.</p>
 <p>To determine what revision of the Android {@sdkPlatformVersion} platform you
 have installed, refer to the "Installed Packages" listing in the Android SDK Manager.</p>
 
+<p class="caution"><strong>Important:</strong> To download the new Android
+4.0 system components from the Android SDK Manager, you must first update the
+SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+the Android 4.0 system components will not be available for download.</p>
 
 <div class="toggle-content opened" style="padding-left:1em;">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
 class="toggle-content-img" alt="" />
+    Android {@sdkPlatformVersion}, Revision 2</a> <em>(December 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <p>Maintenance update. The system version is 4.0.2.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
     Android {@sdkPlatformVersion}, Revision 1</a> <em>(October 2011)</em>
   </a></p>
 
   <div class="toggle-content-toggleme" style="padding-left:2em;">
-
-<dl>
-<dt>Initial release. SDK Tools r14 or higher is required.
-  <p class="caution"><strong>Important:</strong> To download the new Android
-  4.0 system components from the Android SDK Manager, you must first update the
-  SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
-  the Android 4.0 system components will not be available for download.</p>
-</dt>
-</dl>
-
+    <p>Initial release. The system version is 4.0.1.</p>
+    <dl>
+      <dt>Dependencies:</dt>
+      <dd>SDK Tools r14 or higher is required.</dd>
+    </dl>
   </div>
 </div>
 
