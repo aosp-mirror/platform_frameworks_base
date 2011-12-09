@@ -659,6 +659,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
     }
 
     AString line;
+    ssize_t lastDictIndex = -1;
     for (;;) {
         if (!receiveLine(&line)) {
             break;
@@ -668,7 +669,21 @@ bool ARTSPConnection::receiveRTSPReponse() {
             break;
         }
 
-        LOGV("line: %s", line.c_str());
+        LOGV("line: '%s'", line.c_str());
+
+        if (line.c_str()[0] == ' ' || line.c_str()[0] == '\t') {
+            // Support for folded header values.
+
+            if (lastDictIndex < 0) {
+                // First line cannot be a continuation of the previous one.
+                return false;
+            }
+
+            AString &value = response->mHeaders.editValueAt(lastDictIndex);
+            value.append(line);
+
+            continue;
+        }
 
         ssize_t colonPos = line.find(":");
         if (colonPos < 0) {
@@ -681,9 +696,12 @@ bool ARTSPConnection::receiveRTSPReponse() {
         key.tolower();
 
         line.erase(0, colonPos + 1);
-        line.trim();
 
-        response->mHeaders.add(key, line);
+        lastDictIndex = response->mHeaders.add(key, line);
+    }
+
+    for (size_t i = 0; i < response->mHeaders.size(); ++i) {
+        response->mHeaders.editValueAt(i).trim();
     }
 
     unsigned long contentLength = 0;
