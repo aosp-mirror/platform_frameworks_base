@@ -349,7 +349,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 ss.setOperatorAlphaLong(eriText);
             }
 
-            if (phone.mIccCard.getState() == IccCard.State.READY) {
+            if (phone.getIccCard().getState() == IccCard.State.READY) {
                 // SIM is found on the device. If ERI roaming is OFF, and SID/NID matches
                 // one configfured in SIM, use operator name  from CSIM record.
                 boolean showSpn =

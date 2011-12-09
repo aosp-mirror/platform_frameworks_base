@@ -209,8 +209,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         // Unregister for all events.
         cm.unregisterForRadioStateChanged(this);
         cm.unregisterForVoiceNetworkStateChanged(this);
-        phone.mIccCard.unregisterForReady(this);
-
+        phone.getIccCard().unregisterForReady(this);
         cm.unregisterForCdmaOtaProvision(this);
         phone.unregisterForEriFileLoaded(this);
         phone.mIccRecords.unregisterForRecordsLoaded(this);
@@ -498,7 +497,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             // NV is ready when subscription source is NV
             sendMessage(obtainMessage(EVENT_NV_READY));
         } else {
-            phone.mIccCard.registerForReady(this, EVENT_RUIM_READY, null);
+            phone.getIccCard().registerForReady(this, EVENT_RUIM_READY, null);
         }
     }
 
