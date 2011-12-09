@@ -40,9 +40,9 @@ import android.net.Uri;
 
 import java.lang.Runtime;
 
-public class SceneGraph extends Activity {
+public class TestApp extends Activity {
 
-    private SceneGraphView mView;
+    private TestAppView mView;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -50,7 +50,7 @@ public class SceneGraph extends Activity {
 
         // Create our Preview view and set it as the content of our
         // Activity
-        mView = new SceneGraphView(this);
+        mView = new TestAppView(this);
         setContentView(mView);
     }
 
