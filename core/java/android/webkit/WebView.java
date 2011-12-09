@@ -2496,11 +2496,12 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Return the reading level scale of the WebView
+     * Compute the reading level scale of the WebView
+     * @param scale The current scale.
      * @return The reading level scale.
      */
-    /*package*/ float getReadingLevelScale() {
-        return mZoomManager.getReadingLevelScale();
+    /*package*/ float computeReadingLevelScale(float scale) {
+        return mZoomManager.computeReadingLevelScale(scale);
     }
 
     /**
