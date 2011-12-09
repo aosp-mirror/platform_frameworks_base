@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony;
 
+import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
@@ -32,9 +33,16 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     protected static final boolean DBG = true;
     // ***** Instance Variables
+    protected boolean mDestroyed = false; // set to true once this object needs to be disposed of
+    protected Context mContext;
+    protected CommandsInterface mCi;
+    protected IccFileHandler mFh;
+    protected IccCard mParentCard;
 
-    protected PhoneBase phone;
     protected RegistrantList recordsLoadedRegistrants = new RegistrantList();
+    protected RegistrantList mRecordsEventsRegistrants = new RegistrantList();
+    protected RegistrantList mNewSmsRegistrants = new RegistrantList();
+    protected RegistrantList mNetworkSelectionModeAutomaticRegistrants = new RegistrantList();
 
     protected int recordsToLoad;  // number of pending load requests
 
@@ -71,6 +79,9 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     // ***** Event Constants
     protected static final int EVENT_SET_MSISDN_DONE = 30;
+    public static final int EVENT_MWI = 0;
+    public static final int EVENT_CFI = 1;
+    public static final int EVENT_SPN = 2;
 
     public static final int EVENT_GET_ICC_RECORD_DONE = 100;
 
@@ -91,15 +102,23 @@ public abstract class IccRecords extends Handler implements IccConstants {
     }
 
     // ***** Constructor
-
-    public IccRecords(PhoneBase p) {
-        this.phone = p;
+    public IccRecords(IccCard card, Context c, CommandsInterface ci) {
+        mContext = c;
+        mCi = ci;
+        mFh = card.getIccFileHandler();
+        mParentCard = card;
     }
 
     /**
      * Call when the IccRecords object is no longer going to be used.
      */
-    public abstract void dispose();
+    public void dispose() {
+        mDestroyed = true;
+        mParentCard = null;
+        mFh = null;
+        mCi = null;
+        mContext = null;
+    }
 
     protected abstract void onRadioOffOrNotAvailable();
     public abstract void onReady();
@@ -109,7 +128,15 @@ public abstract class IccRecords extends Handler implements IccConstants {
         return adnCache;
     }
 
+    public IccCard getIccCard() {
+        return mParentCard;
+    }
+
     public void registerForRecordsLoaded(Handler h, int what, Object obj) {
+        if (mDestroyed) {
+            return;
+        }
+
         Registrant r = new Registrant(h, what, obj);
         recordsLoadedRegistrants.add(r);
 
@@ -117,9 +144,33 @@ public abstract class IccRecords extends Handler implements IccConstants {
             r.notifyRegistrant(new AsyncResult(null, null, null));
         }
     }
-
     public void unregisterForRecordsLoaded(Handler h) {
         recordsLoadedRegistrants.remove(h);
+    }
+
+    public void registerForRecordsEvents(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mRecordsEventsRegistrants.add(r);
+    }
+    public void unregisterForRecordsEvents(Handler h) {
+        mRecordsEventsRegistrants.remove(h);
+    }
+
+    public void registerForNewSms(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mNewSmsRegistrants.add(r);
+    }
+    public void unregisterForNewSms(Handler h) {
+        mNewSmsRegistrants.remove(h);
+    }
+
+    public void registerForNetworkSelectionModeAutomatic(
+            Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mNetworkSelectionModeAutomaticRegistrants.add(r);
+    }
+    public void unregisterForNetworkSelectionModeAutomatic(Handler h) {
+        mNetworkSelectionModeAutomaticRegistrants.remove(h);
     }
 
     /**
@@ -163,7 +214,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
         AdnRecord adn = new AdnRecord(msisdnTag, msisdn);
 
-        new AdnRecordLoader(phone).updateEF(adn, EF_MSISDN, EF_EXT1, 1, null,
+        new AdnRecordLoader(mFh).updateEF(adn, EF_MSISDN, EF_EXT1, 1, null,
                 obtainMessage(EVENT_SET_MSISDN_DONE, onComplete));
     }
 

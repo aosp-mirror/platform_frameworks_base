@@ -33,7 +33,7 @@ import java.util.Iterator;
 public final class AdnRecordCache extends Handler implements IccConstants {
     //***** Instance Variables
 
-    PhoneBase phone;
+    private IccFileHandler mFh;
     private UsimPhoneBookManager mUsimPhoneBookManager;
 
     // Indexed by EF ID
@@ -56,9 +56,9 @@ public final class AdnRecordCache extends Handler implements IccConstants {
 
 
 
-    public AdnRecordCache(PhoneBase phone) {
-        this.phone = phone;
-        mUsimPhoneBookManager = new UsimPhoneBookManager(phone, this);
+    public AdnRecordCache(IccFileHandler fh) {
+        mFh = fh;
+        mUsimPhoneBookManager = new UsimPhoneBookManager(mFh, this);
     }
 
     //***** Called from SIMRecords
@@ -155,7 +155,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
 
         userWriteResponse.put(efid, response);
 
-        new AdnRecordLoader(phone).updateEF(adn, efid, extensionEF,
+        new AdnRecordLoader(mFh).updateEF(adn, efid, extensionEF,
                 recordIndex, pin2,
                 obtainMessage(EVENT_UPDATE_ADN_DONE, efid, recordIndex, adn));
     }
@@ -233,7 +233,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
 
         userWriteResponse.put(efid, response);
 
-        new AdnRecordLoader(phone).updateEF(newAdn, efid, extensionEF,
+        new AdnRecordLoader(mFh).updateEF(newAdn, efid, extensionEF,
                 index, pin2,
                 obtainMessage(EVENT_UPDATE_ADN_DONE, efid, index, newAdn));
     }
@@ -296,7 +296,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
             return;
         }
 
-        new AdnRecordLoader(phone).loadAllFromEF(efid, extensionEf,
+        new AdnRecordLoader(mFh).loadAllFromEF(efid, extensionEf,
             obtainMessage(EVENT_LOAD_ALL_ADN_LIKE_DONE, efid, 0));
     }
 
