@@ -1996,7 +1996,7 @@
 
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8] -->
     <string name="autofill_this_form">Autofill</string>
-    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=16] -->
+    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=19] -->
     <string name="setup_autofill">Set up Autofill</string>
 
     <!-- String used to separate FirstName and LastName when writing out a local name
