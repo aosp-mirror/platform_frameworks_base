@@ -810,7 +810,7 @@ please see themes_device_defaults.xml.
     
     <!-- Special theme for the recent apps dialog, to allow customization
          with overlays. -->
-    <style name="Theme.Dialog.RecentApplications">
+    <style name="Theme.Dialog.RecentApplications" parent="Theme.DeviceDefault.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.RecentApplications</item>
