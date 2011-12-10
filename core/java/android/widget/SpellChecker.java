@@ -19,6 +19,7 @@ package android.widget;
 import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
@@ -220,7 +221,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
         TextInfo[] textInfos = new TextInfo[mLength];
         int textInfosCount = 0;
 
-        final String text = editable.toString();
         for (int i = 0; i < mLength; i++) {
             final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[i];
             if (spellCheckSpan.isSpellCheckInProgress()) continue;
@@ -230,7 +230,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
             // Do not check this word if the user is currently editing it
             if (start >= 0 && end > start && (selectionEnd < start || selectionStart > end)) {
-                final String word = text.substring(start, end);
+                final String word = (editable instanceof SpannableStringBuilder) ?
+                        ((SpannableStringBuilder) editable).substring(start, end) :
+                        editable.subSequence(start, end).toString();
                 spellCheckSpan.setSpellCheckInProgress(true);
                 textInfos[textInfosCount++] = new TextInfo(word, mCookie, mIds[i]);
             }
