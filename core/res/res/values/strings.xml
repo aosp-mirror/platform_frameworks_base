@@ -1992,7 +1992,7 @@
     <string name="save_password_label">Confirm</string>
 
     <!-- Toast for double-tap -->
-    <string name="double_tap_toast">Tip: Double-touch to zoom in and out.</string>
+    <string name="double_tap_toast">Tip: Double-tap to zoom in and out.</string>
 
     <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8] -->
     <string name="autofill_this_form">Autofill</string>
