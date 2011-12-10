@@ -66,26 +66,12 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     protected CountryDetectorBase mLocationBasedCountryDetector;
     protected Timer mLocationRefreshTimer;
 
-    private final int mPhoneType;
     private Country mCountry;
-    private TelephonyManager mTelephonyManager;
+    private final TelephonyManager mTelephonyManager;
     private Country mCountryFromLocation;
     private boolean mStopped = false;
-    private ServiceState mLastState;
 
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onServiceStateChanged(ServiceState serviceState) {
-            // TODO: Find out how often we will be notified, if this method is called too
-            // many times, let's consider querying the network.
-            Slog.d(TAG, "onServiceStateChanged");
-            // We only care the state change
-            if (mLastState == null || mLastState.getState() != serviceState.getState()) {
-                detectCountry(true, true);
-                mLastState = new ServiceState(serviceState);
-            }
-        }
-    };
+    private PhoneStateListener mPhoneStateListener;
 
     /**
      * The listener for receiving the notification from LocationBasedCountryDetector.
@@ -104,7 +90,6 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     public ComprehensiveCountryDetector(Context context) {
         super(context);
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        mPhoneType = mTelephonyManager.getPhoneType();
     }
 
     @Override
@@ -115,6 +100,7 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
 
     @Override
     public void stop() {
+        // Note: this method in this subclass called only by tests.
         Slog.i(TAG, "Stop the detector.");
         cancelLocationRefresh();
         removePhoneStateListener();
@@ -141,14 +127,20 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
         return result;
     }
 
+    private boolean isNetworkCountryCodeAvailable() {
+        // On CDMA TelephonyManager.getNetworkCountryIso() just returns SIM country.  We don't want
+        // to prioritize it over location based country, so ignore it.
+        final int phoneType = mTelephonyManager.getPhoneType();
+        if (DEBUG) Slog.v(TAG, "    phonetype=" + phoneType);
+        return phoneType == TelephonyManager.PHONE_TYPE_GSM;
+    }
+
     /**
      * @return the country from the mobile network.
      */
     protected Country getNetworkBasedCountry() {
         String countryIso = null;
-        // TODO: The document says the result may be unreliable on CDMA networks. Shall we use
-        // it on CDMA phone? We may test the Android primarily used countries.
-        if (mPhoneType == TelephonyManager.PHONE_TYPE_GSM) {
+        if (isNetworkCountryCodeAvailable()) {
             countryIso = mTelephonyManager.getNetworkCountryIso();
             if (!TextUtils.isEmpty(countryIso)) {
                 return new Country(countryIso, Country.COUNTRY_SOURCE_NETWORK);
@@ -356,20 +348,16 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     }
 
     protected synchronized void addPhoneStateListener() {
-        if (mPhoneStateListener == null && mPhoneType == TelephonyManager.PHONE_TYPE_GSM) {
-            mLastState = null;
+        if (mPhoneStateListener == null) {
             mPhoneStateListener = new PhoneStateListener() {
                 @Override
                 public void onServiceStateChanged(ServiceState serviceState) {
-                    // TODO: Find out how often we will be notified, if this
-                    // method is called too
-                    // many times, let's consider querying the network.
-                    Slog.d(TAG, "onServiceStateChanged");
-                    // We only care the state change
-                    if (mLastState == null || mLastState.getState() != serviceState.getState()) {
-                        detectCountry(true, true);
-                        mLastState = new ServiceState(serviceState);
+                    if (!isNetworkCountryCodeAvailable()) {
+                        return;
                     }
+                    if (DEBUG) Slog.d(TAG, "onServiceStateChanged: " + serviceState.getState());
+
+                    detectCountry(true, true);
                 }
             };
             mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
