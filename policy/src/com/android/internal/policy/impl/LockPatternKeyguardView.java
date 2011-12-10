@@ -52,6 +52,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -101,8 +102,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     private View mLockScreen;
     private View mUnlockScreen;
 
-    private volatile boolean mScreenOn = false;
-    private volatile boolean mWindowFocused = false;
+    private boolean mScreenOn;
+    private boolean mWindowFocused = false;
     private boolean mEnableFallback = false; // assume no fallback UI until we know better
 
     private boolean mShowLockBeforeUnlock = false;
@@ -311,6 +312,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         mWindowController = controller;
         mHasOverlay = false;
         mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
+        mScreenOn = ((PowerManager)context.getSystemService(Context.POWER_SERVICE)).isScreenOn();
 
         mUpdateMonitor.registerInfoCallback(this);
 
