@@ -840,7 +840,7 @@ public class WifiService extends IWifiManager.Stub {
          * of WifiLock & device idle status unless wifi enabled status is toggled
          */
 
-        mWifiStateMachine.setDriverStart(true);
+        mWifiStateMachine.setDriverStart(true, mEmergencyCallbackMode);
         mWifiStateMachine.reconnectCommand();
     }
 
@@ -854,7 +854,7 @@ public class WifiService extends IWifiManager.Stub {
          * TODO: if a stop is issued, wifi is brought up only by startWifi
          * unless wifi enabled status is toggled
          */
-        mWifiStateMachine.setDriverStart(false);
+        mWifiStateMachine.setDriverStart(false, mEmergencyCallbackMode);
     }
 
 
@@ -1074,11 +1074,11 @@ public class WifiService extends IWifiManager.Stub {
                 mWifiStateMachine.setWifiEnabled(true);
                 mWifiStateMachine.setScanOnlyMode(
                         strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
-                mWifiStateMachine.setDriverStart(true);
+                mWifiStateMachine.setDriverStart(true, mEmergencyCallbackMode);
                 mWifiStateMachine.setHighPerfModeEnabled(strongestLockMode
                         == WifiManager.WIFI_MODE_FULL_HIGH_PERF);
             } else {
-                mWifiStateMachine.setDriverStart(false);
+                mWifiStateMachine.setDriverStart(false, mEmergencyCallbackMode);
             }
         } else {
             mWifiStateMachine.setWifiEnabled(false);
