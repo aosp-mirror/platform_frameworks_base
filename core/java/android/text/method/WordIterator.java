@@ -18,6 +18,7 @@
 package android.text.method;
 
 import android.text.Selection;
+import android.text.SpannableStringBuilder;
 
 import java.text.BreakIterator;
 import java.util.Locale;
@@ -58,7 +59,11 @@ public class WordIterator implements Selection.PositionIterator {
         mOffsetShift = Math.max(0, start - WINDOW_WIDTH);
         final int windowEnd = Math.min(charSequence.length(), end + WINDOW_WIDTH);
 
-        mString = charSequence.toString().substring(mOffsetShift, windowEnd);
+        if (charSequence instanceof SpannableStringBuilder) {
+            mString = ((SpannableStringBuilder) charSequence).substring(mOffsetShift, windowEnd);
+        } else {
+            mString = charSequence.subSequence(mOffsetShift, windowEnd).toString();
+        }
         mIterator.setText(mString);
     }
 
