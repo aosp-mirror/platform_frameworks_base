@@ -774,6 +774,7 @@ public class NumberPicker extends LinearLayout {
                 mBeginEditOnUpEvent = false;
                 mAdjustScrollerOnUpEvent = true;
                 if (mSelectorWheelState == SELECTOR_WHEEL_STATE_LARGE) {
+                    mSelectorWheelPaint.setAlpha(SELECTOR_WHEEL_BRIGHT_ALPHA);
                     boolean scrollersFinished = mFlingScroller.isFinished()
                             && mAdjustScroller.isFinished();
                     if (!scrollersFinished) {
@@ -1608,23 +1609,11 @@ public class NumberPicker extends LinearLayout {
      */
     private void fling(int velocityY) {
         mPreviousScrollerY = 0;
-        Scroller flingScroller = mFlingScroller;
 
-        if (mWrapSelectorWheel) {
-            if (velocityY > 0) {
-                flingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
-            } else {
-                flingScroller.fling(0, Integer.MAX_VALUE, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
-            }
+        if (velocityY > 0) {
+            mFlingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
         } else {
-            if (velocityY > 0) {
-                int maxY = mTextSize * (mValue - mMinValue);
-                flingScroller.fling(0, 0, 0, velocityY, 0, 0, 0, maxY);
-            } else {
-                int startY = mTextSize * (mMaxValue - mValue);
-                int maxY = startY;
-                flingScroller.fling(0, startY, 0, velocityY, 0, 0, 0, maxY);
-            }
+            mFlingScroller.fling(0, Integer.MAX_VALUE, 0, velocityY, 0, 0, 0, Integer.MAX_VALUE);
         }
 
         invalidate();
