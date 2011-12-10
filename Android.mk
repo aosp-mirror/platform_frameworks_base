@@ -432,6 +432,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/MultiResolution "Multiple Resolutions" \
 		-samplecode $(sample_dir)/NFCDemo \
 		            resources/samples/NFCDemo "NFC Demo" \
+		-samplecode $(sample_dir)/training/multiscreen/newsreader \
+		            resources/samples/newsreader "News Reader" \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SpellChecker/SampleSpellCheckerService \

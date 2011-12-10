@@ -1,0 +1,127 @@
+page.title=Supporting Different Densities
+parent.title=Designing for Multiple Screens
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Supporting Different Screen Sizes
+previous.link=screensizes.html
+next.title=Implementing Adaptative UI Flows
+next.link=adaptui.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#TaskUseDP">Use Density-independent Pixels</a></li>
+  <li><a href="#TaskProvideAltBmp">Provide Alternative Bitmaps</a></li>
+</ol>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+  <li><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon Design
+Guidelines</a></li>
+</ul>
+
+<h2>Try it out</h2>
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
+  the sample app</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+ 
+</div> 
+</div> 
+
+<p>This lesson shows you how to support different screen densities
+by providing different resources and using resolution-independent units of
+measurements.</p>
+
+<h2 id="TaskUseDP">Use Density-independent Pixels</h2>
+
+<p>One common pitfall you must avoid when designing your layouts is using
+absolute pixels to define distances or sizes. Defining layout dimensions with
+pixels is a problem because different screens have different pixel densities,
+so the same number of pixels may correspond to different physical sizes on
+different devices. Therefore, when specifying dimensions, always use either 
+<code>dp</code> or <code>sp</code> units. A <code>dp</code> is a density-independent pixel
+that corresponds to the physical size of a pixel at 160 dpi. An <code>sp</code> is the same
+base unit, but is scaled by the user's preferred text size (it’s a
+scale-independent pixel), so you should use this measurement unit when defining
+text size (but never for layout sizes).</p>
+
+<p>For example, when you specify spacing between two views, use <code>dp</code> 
+rather than <code>px</code>:</p>
+
+<pre>
+&lt;Button android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:text="&#64;string/clickme"
+    android:layout_marginTop="20dp" /&gt;
+</pre>
+
+<p>When specifying text size, always use <code>sp</code>:</p>
+
+<pre>
+&lt;TextView android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:textSize="20sp" /&gt;
+</pre>
+
+
+<h2 id="TaskProvideAltBmp">Provide Alternative Bitmaps</h2>
+
+<p>Since Android runs in devices with a wide variety of screen densities,
+you should always provide your bitmap resources tailored to each of
+the generalized density buckets: low, medium, high and extra-high density.
+This will help you achieve good graphical quality and performance on all
+screen densities.</p>
+
+<p>To generate these images, you should start with your raw resource in
+vector format and generate the images for each density using the following
+size scale:</p>
+
+<p><ul>
+  <li><code>xhdpi</code>: 2.0
+  <li><code>hdpi</code>: 1.5
+  <li><code>mdpi</code>: 1.0 (baseline)
+  <li><code>ldpi</code>: 0.75
+</ul></p>
+
+<p>This means that if you generate a 200x200 image for <code>xhdpi</code>
+devices, you should generate the same resource in 150x150 for <code>hdpi</code>,
+100x100 for <code>mdpi</code> and finally a 75x75 image for <code>ldpi</code>
+devices.</p>
+
+<p>Then, place the generated image files in the appropriate subdirectory
+under <code>res/</code> and the system will pick the correct one automatically
+based on the screen density of the device your application is running on:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+  res/
+    drawable-xhdpi/
+        awesomeimage.png
+    drawable-hdpi/
+        awesomeimage.png
+    drawable-mdpi/
+        awesomeimage.png
+    drawable-ldpi/
+        awesomeimage.png
+</pre>
+
+<p>Then, any time you reference <code>&#64;drawable/awesomeimage</code>, the system selects the
+appropriate bitmap based on the screen's dpi.</p>
+
+<p>For more tips and guidelines for creating icon assets for your application, see the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon Design
+Guidelines</a>.</p>
+
