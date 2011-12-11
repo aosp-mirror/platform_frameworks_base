@@ -663,7 +663,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public List<WifiConfiguration> getConfiguredNetworks() {
         enforceAccessPermission();
-        return mWifiStateMachine.syncGetConfiguredNetworks();
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncGetConfiguredNetworks(mWifiStateMachineChannel);
+        } else {
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            return null;
+        }
     }
 
     /**
