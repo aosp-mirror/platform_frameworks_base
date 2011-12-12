@@ -400,7 +400,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         if (LOGD) Log.d(TAG, "onVolumeChanged(streamType: " + streamType + ", flags: " + flags + ")");
 
         if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
-            if (mActiveStreamType == -1) {
+            if (mActiveStreamType != streamType) {
                 reorderSliders(streamType);
             }
             onShowVolumeChanged(streamType, flags);
