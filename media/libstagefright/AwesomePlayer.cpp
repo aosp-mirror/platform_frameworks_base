@@ -2105,6 +2105,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
         mWVMExtractor = new WVMExtractor(dataSource);
         mWVMExtractor->setAdaptiveStreamingMode(true);
+        mWVMExtractor->setDrmFlag(true);
         extractor = mWVMExtractor;
     } else {
         extractor = MediaExtractor::Create(
