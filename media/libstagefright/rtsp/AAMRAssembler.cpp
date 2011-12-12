@@ -79,12 +79,16 @@ ARTPAssembler::AssemblyStatus AAMRAssembler::assembleMore(
 }
 
 static size_t getFrameSize(bool isWide, unsigned FT) {
-    static const size_t kFrameSizeNB[8] = {
-        95, 103, 118, 134, 148, 159, 204, 244
+    static const size_t kFrameSizeNB[9] = {
+        95, 103, 118, 134, 148, 159, 204, 244, 39
     };
-    static const size_t kFrameSizeWB[9] = {
-        132, 177, 253, 285, 317, 365, 397, 461, 477
+    static const size_t kFrameSizeWB[10] = {
+        132, 177, 253, 285, 317, 365, 397, 461, 477, 40
     };
+
+    if (FT == 15) {
+        return 1;
+    }
 
     size_t frameSize = isWide ? kFrameSizeWB[FT] : kFrameSizeNB[FT];
 
@@ -161,8 +165,8 @@ ARTPAssembler::AssemblyStatus AAMRAssembler::addPacket(
 
         unsigned FT = (toc >> 3) & 0x0f;
         if ((toc & 3) != 0
-                || (mIsWide && FT > 8)
-                || (!mIsWide && FT > 7)) {
+                || (mIsWide && FT > 9 && FT != 15)
+                || (!mIsWide && FT > 8 && FT != 15)) {
             queue->erase(queue->begin());
             ++mNextExpectedSeqNo;
 
