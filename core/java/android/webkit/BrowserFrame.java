@@ -410,6 +410,7 @@ class BrowserFrame extends Handler {
                 mCommitted = false;
                 // remove pending draw to block update until mFirstLayoutDone is
                 // set to true in didFirstLayout()
+                mWebViewCore.clearContent();
                 mWebViewCore.removeMessages(WebViewCore.EventHub.WEBKIT_DRAW);
             }
         }
