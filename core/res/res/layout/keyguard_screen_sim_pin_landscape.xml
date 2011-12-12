@@ -91,17 +91,6 @@
         android:layout_marginLeft="8dip"
         android:layout_marginRight="8dip">
 
-        <Button android:id="@+id/ok"
-            android:text="@android:string/ok"
-            android:layout_alignParentBottom="true"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.0"
-            android:layout_marginBottom="8dip"
-            android:layout_marginRight="8dip"
-            android:textSize="18sp"
-            />
-
         <Button android:id="@+id/emergencyCallButton"
             android:text="@android:string/lockscreen_emergency_call"
             android:layout_alignParentBottom="true"
@@ -110,10 +99,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:layout_marginBottom="8dip"
-            android:layout_marginLeft="8dip"
+            android:layout_marginRight="8dip"
             android:textSize="18sp"
             android:drawableLeft="@drawable/ic_emergency"
             android:drawablePadding="4dip"
+        />
+
+        <Button android:id="@+id/ok"
+            android:text="@android:string/ok"
+            android:layout_alignParentBottom="true"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:layout_marginBottom="8dip"
+            android:layout_marginLeft="8dip"
+            android:textSize="18sp"
         />
     </LinearLayout>
 
