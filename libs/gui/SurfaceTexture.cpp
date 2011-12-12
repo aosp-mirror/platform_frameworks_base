@@ -498,8 +498,8 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         eglDestroySyncKHR(dpy, fence);
     }
 
-    ST_LOGV("dequeueBuffer: returning slot=%d buf=%p flags=%#x", buf,
-            mSlots[buf].mGraphicBuffer->handle, returnFlags);
+    ST_LOGV("dequeueBuffer: returning slot=%d buf=%p flags=%#x", *outBuf,
+            mSlots[*outBuf].mGraphicBuffer->handle, returnFlags);
 
     return returnFlags;
 }
