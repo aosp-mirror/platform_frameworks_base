@@ -41,6 +41,7 @@ import android.util.Log;
 
 import com.android.scenegraph.SceneManager.SceneLoadedCallback;
 
+// This is where the scenegraph and the rendered objects are initialized and used
 public class TestAppRS {
 
     private static String modelName = "orientation_test";
@@ -55,26 +56,34 @@ public class TestAppRS {
 
     boolean mUseBlur;
 
+    // Used to asynchronously load scene elements like meshes and transform hierarchies
     SceneLoadedCallback mLoadedCallback = new SceneLoadedCallback() {
         public void run() {
             prepareToRender(mLoadedScene);
         }
     };
 
+    // Top level class that initializes all the elements needed to use the scene graph
     SceneManager mSceneManager;
 
+    // Used to move the camera around in the 3D world
     TouchHandler mTouchHandler;
 
     public TestAppRS() {
         mUseBlur = false;
     }
 
+    // This is a part of the test app, it's used to tests multiple render passes and is toggled
+    // on and off in the menu, off by default
     void toggleBlur() {
         mUseBlur = !mUseBlur;
 
         mActiveScene.clearRenderPasses();
         initRenderPasses();
         mActiveScene.initRenderPassRS(mRS, mSceneManager);
+
+        // This is just a hardcoded object in the scene that gets turned on and off for the demo
+        // to make things look a bit better. This could be deleted in the cleanup
         Drawable plane = (Drawable)mActiveScene.getDrawableByName("pPlaneShape1");
         if (plane != null) {
             plane.setVisible(mRS, !mUseBlur);
@@ -91,17 +100,22 @@ public class TestAppRS {
         mTouchHandler = new TouchHandler();
 
         mSceneManager = new SceneManager();
+        // Initializes all the RS specific scenegraph elements 
         mSceneManager.initRS(mRS, mRes, mWidth, mHeight);
 
+        // Shows the loading screen with some text
         renderLoading();
-
+        // Adds a little 3D bugdroid model to the laoding screen asynchronously.
         new LoadingScreenLoaderTask().execute();
 
+        // Initi renderscript stuff specific to the app. This will need to be abstracted out later.
         initRS();
 
+        // Load a scene to render
         mSceneManager.loadModel(modelName, mLoadedCallback);
     }
 
+    // When a new model file is selected from the UI, this function gets called to init everything
     void loadModel(String path) {
         String shortName = path.substring(path.lastIndexOf('/') + 1);
         shortName = shortName.substring(0, shortName.lastIndexOf('.'));
@@ -122,33 +136,21 @@ public class TestAppRS {
     private ProgramFragment mPF_Aluminum;
     private ProgramFragment mPF_Plastic;
     private ProgramFragment mPF_Diffuse;
-    private ProgramFragment mPF_BlurH;
-    private ProgramFragment mPF_BlurV;
-    private ProgramFragment mPF_SelectColor;
     private ProgramFragment mPF_Texture;
     ScriptField_FShaderParams_s mFsConst;
-    ScriptField_FBlurOffsets_s mFsBlurHConst;
-    ScriptField_FBlurOffsets_s mFsBlurVConst;
     private ProgramVertex mPV_Paint;
     ScriptField_VShaderParams_s mVsConst;
-    private ProgramVertex mPV_Blur;
-
+    
     private Allocation mDefaultCube;
     private Allocation mAllocPV;
     private Allocation mEnvCube;
     private Allocation mDiffCube;
 
-    private Allocation mRenderTargetBlur0Color;
-    private Allocation mRenderTargetBlur0Depth;
-    private Allocation mRenderTargetBlur1Color;
-    private Allocation mRenderTargetBlur1Depth;
-    private Allocation mRenderTargetBlur2Color;
-    private Allocation mRenderTargetBlur2Depth;
-
     Scene mActiveScene;
 
     private ScriptC_scenegraph mScript;
 
+    // The loading screen has some elements that shouldn't be loaded on the UI thread
     private class LoadingScreenLoaderTask extends AsyncTask<String, Void, Boolean> {
         Allocation robotTex;
         Mesh robotMesh;
@@ -179,7 +181,7 @@ public class TestAppRS {
         }
     }
 
-
+    // We use this to laod environment maps off the UI thread
     private class ImageLoaderTask extends AsyncTask<String, Void, Boolean> {
         Allocation tempEnv;
         Allocation tempDiff;
@@ -250,6 +252,8 @@ public class TestAppRS {
         mTouchHandler.onActionMove(x, y);
     }
 
+    // All the custom shaders used to render the scene are initialized here
+    // This includes stuff like plastic, car paint, etc.
     private void initPaintShaders() {
         ProgramVertex.Builder vb = new ProgramVertex.Builder(mRS);
         mVsConst = new ScriptField_VShaderParams_s(mRS, 1);
@@ -258,13 +262,6 @@ public class TestAppRS {
         vb.setShader(mRes, R.raw.shader2v);
         mPV_Paint = vb.create();
         mPV_Paint.bindConstants(mVsConst.getAllocation(), 0);
-
-        vb = new ProgramVertex.Builder(mRS);
-        vb.addConstant(mVsConst.getAllocation().getType());
-        vb.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
-        vb.setShader(mRes, R.raw.blur_vertex);
-        mPV_Blur = vb.create();
-        mPV_Blur.bindConstants(mVsConst.getAllocation(), 0);
 
         ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
         mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
@@ -313,51 +310,10 @@ public class TestAppRS {
         mPF_Texture.bindConstants(mFsConst.getAllocation(), 0);
         mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
 
-        mFsBlurHConst = new ScriptField_FBlurOffsets_s(mRS, 1);
-        float xAdvance = 1.0f / (float)mRenderTargetBlur0Color.getType().getX();
-        ScriptField_FBlurOffsets_s.Item item = new ScriptField_FBlurOffsets_s.Item();
-        item.blurOffset0 = - xAdvance * 2.5f;
-        item.blurOffset1 = - xAdvance * 0.5f;
-        item.blurOffset2 =   xAdvance * 1.5f;
-        item.blurOffset3 =   xAdvance * 3.5f;
-        mFsBlurHConst.set(item, 0, true);
-
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsBlurHConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.blur_h);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_BlurH = fb.create();
-        mPF_BlurH.bindConstants(mFsBlurHConst.getAllocation(), 0);
-        mPF_BlurH.bindTexture(mRenderTargetBlur0Color, 0);
-        mPF_BlurH.bindSampler(Sampler.CLAMP_LINEAR(mRS), 0);
-
-        mFsBlurVConst = new ScriptField_FBlurOffsets_s(mRS, 1);
-        float yAdvance = 1.0f / (float)mRenderTargetBlur0Color.getType().getY();
-        item.blurOffset0 = - yAdvance * 2.5f;
-        item.blurOffset1 = - yAdvance * 0.5f;
-        item.blurOffset2 =   yAdvance * 1.5f;
-        item.blurOffset3 =   yAdvance * 3.5f;
-        mFsBlurVConst.set(item, 0, true);
-
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsBlurVConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.blur_v);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_BlurV = fb.create();
-        mPF_BlurV.bindConstants(mFsBlurVConst.getAllocation(), 0);
-        mPF_BlurV.bindTexture(mRenderTargetBlur1Color, 0);
-        mPF_BlurV.bindSampler(Sampler.CLAMP_LINEAR(mRS), 0);
-
-        fb = new ProgramFragment.Builder(mRS);
-        //fb.addConstant(mFsBlurVConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.select_color);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_SelectColor = fb.create();
-        //mPF_SelectColor.bindConstants(mFsBlurVConst.getAllocation(), 0);
-        //mPF_SelectColor.bindTexture(mRenderTargetBlur1Color, 0);
-        mPF_SelectColor.bindSampler(Sampler.CLAMP_LINEAR(mRS), 0);
+        GaussianBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
     }
 
+    // This needs to be cleaned up a bit, it's one of the default render state objects
     private void initPFS() {
         ProgramStore.Builder b = new ProgramStore.Builder(mRS);
 
@@ -369,6 +325,7 @@ public class TestAppRS {
         mScript.set_gPFSBackground(mPSBackground);
     }
 
+    // This needs to be cleaned up a bit, it's one of the default render state objects
     private void initPF() {
         Sampler.Builder bs = new Sampler.Builder(mRS);
         bs.setMinification(Sampler.Value.LINEAR);
@@ -396,133 +353,12 @@ public class TestAppRS {
         mScript.set_gPVBackground(mPVBackground);
     }
 
+    // Creates a simple script to show a loding screen until everything is initialized
+    // Could also be used to do some custom renderscript work before handing things over
+    // to the scenegraph
     void renderLoading() {
         mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph);
         mRS.bindRootScript(mScript);
-    }
-
-    void initSceneRS() {
-
-    }
-
-    void createRenderTargets() {
-        Type.Builder b = new Type.Builder(mRS, Element.RGBA_8888(mRS));
-        b.setX(mWidth/8).setY(mHeight/8);
-        Type renderType = b.create();
-        mRenderTargetBlur0Color = Allocation.createTyped(mRS, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        mRenderTargetBlur1Color = Allocation.createTyped(mRS, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        mRenderTargetBlur2Color = Allocation.createTyped(mRS, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-
-        b = new Type.Builder(mRS,
-                             Element.createPixel(mRS, Element.DataType.UNSIGNED_16,
-                                                 Element.DataKind.PIXEL_DEPTH));
-        b.setX(mWidth/8).setY(mHeight/8);
-        mRenderTargetBlur0Depth = Allocation.createTyped(mRS,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-
-        mRenderTargetBlur1Depth = Allocation.createTyped(mRS,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        mRenderTargetBlur2Depth = Allocation.createTyped(mRS,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-    }
-
-    ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
-        ProgramStore.Builder builder = new ProgramStore.Builder(rs);
-        builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
-        builder.setBlendFunc(ProgramStore.BlendSrcFunc.ONE, ProgramStore.BlendDstFunc.ONE);
-        builder.setDitherEnabled(false);
-        builder.setDepthMaskEnabled(false);
-        return builder.create();
-    }
-
-    Drawable getDrawableQuad(String name, RenderState state) {
-        Drawable quad = new Drawable();
-        quad.setTransform(new MatrixTransform());
-        quad.setMesh(mSceneManager.getScreenAlignedQuad());
-        quad.setName(name);
-        quad.setRenderState(state);
-        quad.setCullType(1);
-        return quad;
-    }
-
-    void addBlurPasses() {
-        ArrayList<DrawableBase> allDraw = mActiveScene.getDrawables();
-        int numDraw = allDraw.size();
-
-        RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture,
-                                            BLEND_ADD_DEPTH_NONE(mRS),
-                                            ProgramRaster.CULL_NONE(mRS));
-
-        RenderState selectCol = new RenderState(mPV_Blur, mPF_SelectColor,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(mRS),
-                                            ProgramRaster.CULL_NONE(mRS));
-
-        RenderState hBlur = new RenderState(mPV_Blur, mPF_BlurH,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(mRS),
-                                            ProgramRaster.CULL_NONE(mRS));
-
-        RenderState vBlur = new RenderState(mPV_Blur, mPF_BlurV,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(mRS),
-                                            ProgramRaster.CULL_NONE(mRS));
-
-        RenderPass blurSourcePass = new RenderPass();
-        blurSourcePass.setColorTarget(mRenderTargetBlur0Color);
-        blurSourcePass.setDepthTarget(mRenderTargetBlur0Depth);
-        blurSourcePass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 1.0f));
-        blurSourcePass.setShouldClearColor(true);
-        blurSourcePass.setClearDepth(1.0f);
-        blurSourcePass.setShouldClearDepth(true);
-        blurSourcePass.setCamera(mActiveScene.getCameras().get(1));
-        for (int i = 0; i < numDraw; i ++) {
-            blurSourcePass.appendDrawable((Drawable)allDraw.get(i));
-        }
-        mActiveScene.appendRenderPass(blurSourcePass);
-
-        RenderPass selectColorPass = new RenderPass();
-        selectColorPass.setColorTarget(mRenderTargetBlur2Color);
-        selectColorPass.setDepthTarget(mRenderTargetBlur2Depth);
-        selectColorPass.setShouldClearColor(false);
-        selectColorPass.setShouldClearDepth(false);
-        selectColorPass.setCamera(mActiveScene.getCameras().get(1));
-        // Make blur shape
-        Drawable quad = getDrawableQuad("ScreenAlignedQuadS", selectCol);
-        quad.updateTextures(mRS, mRenderTargetBlur0Color, 0);
-        selectColorPass.appendDrawable(quad);
-        mActiveScene.appendRenderPass(selectColorPass);
-
-        RenderPass horizontalBlurPass = new RenderPass();
-        horizontalBlurPass.setColorTarget(mRenderTargetBlur1Color);
-        horizontalBlurPass.setDepthTarget(mRenderTargetBlur1Depth);
-        horizontalBlurPass.setShouldClearColor(false);
-        horizontalBlurPass.setShouldClearDepth(false);
-        horizontalBlurPass.setCamera(mActiveScene.getCameras().get(1));
-        // Make blur shape
-        quad = getDrawableQuad("ScreenAlignedQuadH", hBlur);
-        quad.updateTextures(mRS, mRenderTargetBlur2Color, 0);
-        horizontalBlurPass.appendDrawable(quad);
-        mActiveScene.appendRenderPass(horizontalBlurPass);
-
-        RenderPass verticalBlurPass = new RenderPass();
-        verticalBlurPass.setColorTarget(mRenderTargetBlur2Color);
-        verticalBlurPass.setDepthTarget(mRenderTargetBlur2Depth);
-        verticalBlurPass.setShouldClearColor(false);
-        verticalBlurPass.setShouldClearDepth(false);
-        verticalBlurPass.setCamera(mActiveScene.getCameras().get(1));
-        // Make blur shape
-        quad = getDrawableQuad("ScreenAlignedQuadV", vBlur);
-        quad.updateTextures(mRS, mRenderTargetBlur1Color, 0);
-        verticalBlurPass.appendDrawable(quad);
-        mActiveScene.appendRenderPass(verticalBlurPass);
-
     }
 
     void initRenderPasses() {
@@ -530,7 +366,7 @@ public class TestAppRS {
         int numDraw = allDraw.size();
 
         if (mUseBlur) {
-            addBlurPasses();
+            GaussianBlur.addBlurPasses(mActiveScene, mRS, mSceneManager);
         }
 
         RenderPass mainPass = new RenderPass();
@@ -545,21 +381,7 @@ public class TestAppRS {
         mActiveScene.appendRenderPass(mainPass);
 
         if (mUseBlur) {
-            RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture,
-                                            BLEND_ADD_DEPTH_NONE(mRS),
-                                            ProgramRaster.CULL_NONE(mRS));
-
-            RenderPass compositePass = new RenderPass();
-            compositePass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 0.0f));
-            compositePass.setShouldClearColor(false);
-            compositePass.setClearDepth(1.0f);
-            compositePass.setShouldClearDepth(false);
-            compositePass.setCamera(mActiveScene.getCameras().get(1));
-            Drawable quad = getDrawableQuad("ScreenAlignedQuad", drawTex);
-            quad.updateTextures(mRS, mRenderTargetBlur2Color, 0);
-            compositePass.appendDrawable(quad);
-
-            mActiveScene.appendRenderPass(compositePass);
+            GaussianBlur.addCompositePass(mActiveScene, mRS, mSceneManager);
         }
     }
 
@@ -609,7 +431,7 @@ public class TestAppRS {
 
     private void initRS() {
 
-        createRenderTargets();
+        GaussianBlur.createRenderTargets(mRS, mWidth, mHeight);
         initPaintShaders();
         new ImageLoaderTask().execute();
 
