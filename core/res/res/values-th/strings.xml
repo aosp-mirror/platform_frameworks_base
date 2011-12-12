@@ -137,6 +137,12 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"ปิดระบบไร้สาย"</string>
     <string name="screen_lock" msgid="799094655496098153">"ล็อกหน้าจอ"</string>
     <string name="power_off" msgid="4266614107412865048">"ปิดเครื่อง"</string>
+    <!-- no translation found for silent_mode_silent (319298163018473078) -->
+    <skip />
+    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
+    <skip />
+    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิดระบบ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
