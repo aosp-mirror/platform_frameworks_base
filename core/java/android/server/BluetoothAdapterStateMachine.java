@@ -360,13 +360,13 @@ final class BluetoothAdapterStateMachine extends StateMachine {
             boolean retValue = HANDLED;
             switch(message.what) {
                 case USER_TURN_ON:
+                    broadcastState(BluetoothAdapter.STATE_TURNING_ON);
                     if ((Boolean) message.obj) {
                         persistSwitchSetting(true);
                     }
                     // let it fall to TURN_ON_CONTINUE:
                     //$FALL-THROUGH$
                 case TURN_ON_CONTINUE:
-                    broadcastState(BluetoothAdapter.STATE_TURNING_ON);
                     mBluetoothService.switchConnectable(true);
                     transitionTo(mSwitching);
                     break;
