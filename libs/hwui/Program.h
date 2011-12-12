@@ -122,18 +122,17 @@ private:
     GLuint buildShader(const char* source, GLenum type);
 
     // Name of the OpenGL program
-    GLuint id;
-
-    // Name of the shaders
-    GLuint vertexShader;
-    GLuint fragmentShader;
+    GLuint mProgramId;
 
     // Keeps track of attributes and uniforms slots
-    KeyedVector<const char*, int> attributes;
-    KeyedVector<const char*, int> uniforms;
+    KeyedVector<const char*, int> mAttributes;
+    KeyedVector<const char*, int> mUniforms;
 
     bool mUse;
     bool mInitialized;
+
+    bool mHasColorUniform;
+    int mColorUniform;
 }; // class Program
 
 }; // namespace uirenderer

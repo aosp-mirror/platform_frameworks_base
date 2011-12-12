@@ -74,7 +74,7 @@ enum DebugLevel {
 #define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "ro.text_gamma.white_threshold"
 
 // Converts a number of mega-bytes into bytes
-#define MB(s) s * 1024 * 1024
+#define MB(s) (s * 1024 * 1024)
 
 #define DEFAULT_TEXTURE_CACHE_SIZE 24.0f
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
