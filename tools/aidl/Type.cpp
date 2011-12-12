@@ -123,7 +123,7 @@ register_base_types()
     RPC_DATA_TYPE = new RpcDataType();
     NAMES.Add(RPC_DATA_TYPE);
 
-    RPC_ERROR_TYPE = new UserDataType("com.android.athome.rpc", "RpcError",
+    RPC_ERROR_TYPE = new UserDataType("android.support.place.rpc", "RpcError",
                                     true, __FILE__, __LINE__);
     NAMES.Add(RPC_ERROR_TYPE);
 
@@ -1235,7 +1235,7 @@ GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variabl
 // ================================================================
 
 RpcDataType::RpcDataType()
-    :UserDataType("com.android.athome.rpc", "RpcData", true, true, true)
+    :UserDataType("android.support.place.rpc", "RpcData", true, true, true)
 {
 }
 
