@@ -78,19 +78,19 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     }
 }
 
- AudioMixer::~AudioMixer()
- {
-     track_t* t = mState.tracks;
-     for (int i=0 ; i<32 ; i++) {
-         delete t->resampler;
-         t++;
-     }
-     delete [] mState.outputTemp;
-     delete [] mState.resampleTemp;
- }
+AudioMixer::~AudioMixer()
+{
+    track_t* t = mState.tracks;
+    for (int i=0 ; i<32 ; i++) {
+        delete t->resampler;
+        t++;
+    }
+    delete [] mState.outputTemp;
+    delete [] mState.resampleTemp;
+}
 
- int AudioMixer::getTrackName()
- {
+int AudioMixer::getTrackName()
+{
     uint32_t names = mTrackNames;
     uint32_t mask = 1;
     int n = 0;
@@ -104,18 +104,18 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         return TRACK0 + n;
     }
     return -1;
- }
+}
 
- void AudioMixer::invalidateState(uint32_t mask)
- {
+void AudioMixer::invalidateState(uint32_t mask)
+{
     if (mask) {
         mState.needsChanged |= mask;
         mState.hook = process__validate;
     }
  }
 
- void AudioMixer::deleteTrackName(int name)
- {
+void AudioMixer::deleteTrackName(int name)
+{
     name -= TRACK0;
     if (uint32_t(name) < MAX_NUM_TRACKS) {
         ALOGV("deleteTrackName(%d)", name);
@@ -135,7 +135,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         track.volumeInc[1] = 0;
         mTrackNames &= ~(1<<name);
     }
- }
+}
 
 status_t AudioMixer::enable(int name)
 {
@@ -450,33 +450,33 @@ void AudioMixer::process__validate(state_t* state)
         countActiveTracks, state->enabledTracks,
         all16BitsStereoNoResample, resampling, volumeRamp);
 
-   state->hook(state);
+    state->hook(state);
 
-   // Now that the volume ramp has been done, set optimal state and
-   // track hooks for subsequent mixer process
-   if (countActiveTracks) {
-       int allMuted = 1;
-       uint32_t en = state->enabledTracks;
-       while (en) {
-           const int i = 31 - __builtin_clz(en);
-           en &= ~(1<<i);
-           track_t& t = state->tracks[i];
-           if (!t.doesResample() && t.volumeRL == 0)
-           {
-               t.needs |= NEEDS_MUTE_ENABLED;
-               t.hook = track__nop;
-           } else {
-               allMuted = 0;
-           }
-       }
-       if (allMuted) {
-           state->hook = process__nop;
-       } else if (all16BitsStereoNoResample) {
-           if (countActiveTracks == 1) {
-              state->hook = process__OneTrack16BitsStereoNoResampling;
-           }
-       }
-   }
+    // Now that the volume ramp has been done, set optimal state and
+    // track hooks for subsequent mixer process
+    if (countActiveTracks) {
+        int allMuted = 1;
+        uint32_t en = state->enabledTracks;
+        while (en) {
+            const int i = 31 - __builtin_clz(en);
+            en &= ~(1<<i);
+            track_t& t = state->tracks[i];
+            if (!t.doesResample() && t.volumeRL == 0)
+            {
+                t.needs |= NEEDS_MUTE_ENABLED;
+                t.hook = track__nop;
+            } else {
+                allMuted = 0;
+            }
+        }
+        if (allMuted) {
+            state->hook = process__nop;
+        } else if (all16BitsStereoNoResample) {
+            if (countActiveTracks == 1) {
+                state->hook = process__OneTrack16BitsStereoNoResampling;
+            }
+        }
+    }
 }
 
 static inline
@@ -993,7 +993,7 @@ void AudioMixer::process__genericNoResampling(state_t* state)
 }
 
 
-  // generic code with resampling
+// generic code with resampling
 void AudioMixer::process__genericResampling(state_t* state)
 {
     int32_t* const outTemp = state->outputTemp;
@@ -1173,7 +1173,7 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
                 }
                 in1 = buff;
                 b1.frameCount = numFrames;
-               } else {
+            } else {
                 in1 = b1.i16;
             }
             frameCount1 = b1.frameCount;
@@ -1215,4 +1215,3 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-

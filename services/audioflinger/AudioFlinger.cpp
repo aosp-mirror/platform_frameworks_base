@@ -1967,7 +1967,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             // during mixing and effect process as the audio buffers could be deleted
             // or modified if an effect is created or deleted
             lockEffectChains_l(effectChains);
-       }
+        }
 
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
@@ -2012,11 +2012,11 @@ bool AudioFlinger::MixerThread::threadLoop()
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
-             for (size_t i = 0; i < effectChains.size(); i ++) {
-                 effectChains[i]->process_l();
-             }
-             // enable changes in effect chain
-             unlockEffectChains(effectChains);
+            for (size_t i = 0; i < effectChains.size(); i ++) {
+                effectChains[i]->process_l();
+            }
+            // enable changes in effect chain
+            unlockEffectChains(effectChains);
             mLastWriteTime = systemTime();
             mInWrite = true;
             mBytesWritten += mixBufferSize;
