@@ -137,6 +137,12 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Poista langaton yhteys käytöstä"</string>
     <string name="screen_lock" msgid="799094655496098153">"Näytön lukitus"</string>
     <string name="power_off" msgid="4266614107412865048">"Virta pois"</string>
+    <!-- no translation found for silent_mode_silent (319298163018473078) -->
+    <skip />
+    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
+    <skip />
+    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
+    <skip />
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
@@ -892,8 +898,8 @@
     <string name="no" msgid="5141531044935541497">"Peruuta"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Huomio"</string>
     <string name="loading" msgid="1760724998928255250">"Ladataan..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"OTA KÄYTTÖÖN"</string>
-    <string name="capital_off" msgid="6815870386972805832">"POISTA KÄYTÖSTÄ"</string>
+    <string name="capital_on" msgid="1544682755514494298">"PÄÄLLÄ"</string>
+    <string name="capital_off" msgid="6815870386972805832">"POIS PÄÄLTÄ"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Tee toiminto käyttäen sovellusta"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Käytä oletuksena tälle toiminnolle."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Tyhjennä oletusasetus kohdassa Etusivun asetukset &gt; Sovellukset &gt; Hallinnoi sovelluksia."</string>
