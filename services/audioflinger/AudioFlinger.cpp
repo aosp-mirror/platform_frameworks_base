@@ -63,8 +63,8 @@
 
 namespace android {
 
-static const char* kDeadlockedString = "AudioFlinger may be deadlocked\n";
-static const char* kHardwareLockedString = "Hardware lock is taken\n";
+static const char kDeadlockedString[] = "AudioFlinger may be deadlocked\n";
+static const char kHardwareLockedString[] = "Hardware lock is taken\n";
 
 //static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 static const float MAX_GAIN = 4096.0f;
@@ -147,7 +147,7 @@ out:
     return rc;
 }
 
-static const char *audio_interfaces[] = {
+static const char * const audio_interfaces[] = {
     "primary",
     "a2dp",
     "usb",
