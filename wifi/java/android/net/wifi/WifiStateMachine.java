@@ -1642,8 +1642,10 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo.setRssi(MIN_RSSI);
         mWifiInfo.setLinkSpeed(-1);
 
-        /* send event to CM & network change broadcast */
         setNetworkDetailedState(DetailedState.DISCONNECTED);
+        WifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
+
+        /* send event to CM & network change broadcast */
         sendNetworkStateChangeBroadcast(mLastBssid);
 
         /* Clear network properties */
@@ -1726,6 +1728,7 @@ public class WifiStateMachine extends StateMachine {
         } else {
             configureLinkProperties();
             setNetworkDetailedState(DetailedState.CONNECTED);
+            WifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
             sendNetworkStateChangeBroadcast(mLastBssid);
         }
     }
