@@ -31,6 +31,9 @@ import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
+import android.os.Message;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -50,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class provides the API to manage configured
@@ -136,6 +140,13 @@ class WifiConfigStore {
     private static final String EXCLUSION_LIST_KEY = "exclusionList";
     private static final String EOS = "eos";
 
+    private static HandlerThread sDiskWriteHandlerThread;
+    private static DiskWriteHandler sDiskWriteHandler;
+    private static Object sDiskWriteHandlerSync = new Object();
+    /* Tracks multiple writes on the same thread */
+    private static int sWriteSequence = 0;
+    private static final int WRITE = 1;
+
     /**
      * Initialize context, fetch the list of configured networks
      * and enable all stored networks in supplicant.
@@ -153,10 +164,8 @@ class WifiConfigStore {
      */
     static List<WifiConfiguration> getConfiguredNetworks() {
         List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
-        synchronized (sConfiguredNetworks) {
-            for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                networks.add(new WifiConfiguration(config));
-            }
+        for(WifiConfiguration config : sConfiguredNetworks.values()) {
+            networks.add(new WifiConfiguration(config));
         }
         return networks;
     }
@@ -167,15 +176,13 @@ class WifiConfigStore {
      */
     static void enableAllNetworks() {
         boolean networkEnabledStateChanged = false;
-        synchronized (sConfiguredNetworks) {
-            for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                if(config != null && config.status == Status.DISABLED) {
-                    if(WifiNative.enableNetworkCommand(config.networkId, false)) {
-                        networkEnabledStateChanged = true;
-                        config.status = Status.ENABLED;
-                    } else {
-                        loge("Enable network failed on " + config.networkId);
-                    }
+        for(WifiConfiguration config : sConfiguredNetworks.values()) {
+            if(config != null && config.status == Status.DISABLED) {
+                if(WifiNative.enableNetworkCommand(config.networkId, false)) {
+                    networkEnabledStateChanged = true;
+                    config.status = Status.ENABLED;
+                } else {
+                    loge("Enable network failed on " + config.networkId);
                 }
             }
         }
@@ -226,12 +233,10 @@ class WifiConfigStore {
     static void selectNetwork(int netId) {
         // Reset the priority of each network at start or if it goes too high.
         if (sLastPriority == -1 || sLastPriority > 1000000) {
-            synchronized (sConfiguredNetworks) {
-                for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                    if (config.networkId != INVALID_NETWORK_ID) {
-                        config.priority = 0;
-                        addOrUpdateNetworkNative(config);
-                    }
+            for(WifiConfiguration config : sConfiguredNetworks.values()) {
+                if (config.networkId != INVALID_NETWORK_ID) {
+                    config.priority = 0;
+                    addOrUpdateNetworkNative(config);
                 }
             }
             sLastPriority = 0;
@@ -264,9 +269,7 @@ class WifiConfigStore {
         /* enable a new network */
         if (newNetwork && netId != INVALID_NETWORK_ID) {
             WifiNative.enableNetworkCommand(netId, false);
-            synchronized (sConfiguredNetworks) {
-                sConfiguredNetworks.get(netId).status = Status.ENABLED;
-            }
+            sConfiguredNetworks.get(netId).status = Status.ENABLED;
         }
         WifiNative.saveConfigCommand();
         sendConfiguredNetworksChangedBroadcast();
@@ -281,12 +284,10 @@ class WifiConfigStore {
     static void forgetNetwork(int netId) {
         if (WifiNative.removeNetworkCommand(netId)) {
             WifiNative.saveConfigCommand();
-            synchronized (sConfiguredNetworks) {
-                WifiConfiguration config = sConfiguredNetworks.get(netId);
-                if (config != null) {
-                    sConfiguredNetworks.remove(netId);
-                    sNetworkIds.remove(configKey(config));
-                }
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null) {
+                sConfiguredNetworks.remove(netId);
+                sNetworkIds.remove(configKey(config));
             }
             writeIpAndProxyConfigurations();
             sendConfiguredNetworksChangedBroadcast();
@@ -319,13 +320,11 @@ class WifiConfigStore {
      */
     static boolean removeNetwork(int netId) {
         boolean ret = WifiNative.removeNetworkCommand(netId);
-        synchronized (sConfiguredNetworks) {
-            if (ret) {
-                WifiConfiguration config = sConfiguredNetworks.get(netId);
-                if (config != null) {
-                    sConfiguredNetworks.remove(netId);
-                    sNetworkIds.remove(configKey(config));
-                }
+        if (ret) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null) {
+                sConfiguredNetworks.remove(netId);
+                sNetworkIds.remove(configKey(config));
             }
         }
         sendConfiguredNetworksChangedBroadcast();
@@ -349,10 +348,8 @@ class WifiConfigStore {
     static boolean enableNetworkWithoutBroadcast(int netId, boolean disableOthers) {
         boolean ret = WifiNative.enableNetworkCommand(netId, disableOthers);
 
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) config.status = Status.ENABLED;
-        }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null) config.status = Status.ENABLED;
 
         if (disableOthers) {
             markAllNetworksDisabledExcept(netId);
@@ -375,13 +372,11 @@ class WifiConfigStore {
      */
     static boolean disableNetwork(int netId, int reason) {
         boolean ret = WifiNative.disableNetworkCommand(netId);
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            /* Only change the reason if the network was not previously disabled */
-            if (config != null && config.status != Status.DISABLED) {
-                config.status = Status.DISABLED;
-                config.disableReason = reason;
-            }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        /* Only change the reason if the network was not previously disabled */
+        if (config != null && config.status != Status.DISABLED) {
+            config.status = Status.DISABLED;
+            config.disableReason = reason;
         }
         sendConfiguredNetworksChangedBroadcast();
         return ret;
@@ -450,10 +445,8 @@ class WifiConfigStore {
      * Fetch the link properties for a given network id
      */
     static LinkProperties getLinkProperties(int netId) {
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) return new LinkProperties(config.linkProperties);
-        }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null) return new LinkProperties(config.linkProperties);
         return null;
     }
 
@@ -493,15 +486,13 @@ class WifiConfigStore {
     static void setIpConfiguration(int netId, DhcpInfoInternal dhcpInfo) {
         LinkProperties linkProperties = dhcpInfo.makeLinkProperties();
 
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) {
-                // add old proxy details
-                if(config.linkProperties != null) {
-                    linkProperties.setHttpProxy(config.linkProperties.getHttpProxy());
-                }
-                config.linkProperties = linkProperties;
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null) {
+            // add old proxy details
+            if(config.linkProperties != null) {
+                linkProperties.setHttpProxy(config.linkProperties.getHttpProxy());
             }
+            config.linkProperties = linkProperties;
         }
     }
 
@@ -509,14 +500,12 @@ class WifiConfigStore {
      * clear IP configuration for a given network id
      */
     static void clearIpConfiguration(int netId) {
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null && config.linkProperties != null) {
-                // Clear everything except proxy
-                ProxyProperties proxy = config.linkProperties.getHttpProxy();
-                config.linkProperties.clear();
-                config.linkProperties.setHttpProxy(proxy);
-            }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null && config.linkProperties != null) {
+            // Clear everything except proxy
+            ProxyProperties proxy = config.linkProperties.getHttpProxy();
+            config.linkProperties.clear();
+            config.linkProperties.setHttpProxy(proxy);
         }
     }
 
@@ -536,11 +525,9 @@ class WifiConfigStore {
      * Return if the specified network is using static IP
      */
     static boolean isUsingStaticIp(int netId) {
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null && config.ipAssignment == IpAssignment.STATIC) {
-                return true;
-            }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null && config.ipAssignment == IpAssignment.STATIC) {
+            return true;
         }
         return false;
     }
@@ -555,67 +542,62 @@ class WifiConfigStore {
         String listStr = WifiNative.listNetworksCommand();
         sLastPriority = 0;
 
-        synchronized (sConfiguredNetworks) {
-            sConfiguredNetworks.clear();
-            sNetworkIds.clear();
+        sConfiguredNetworks.clear();
+        sNetworkIds.clear();
 
-            if (listStr == null)
-                return;
+        if (listStr == null)
+            return;
 
-            String[] lines = listStr.split("\n");
-            // Skip the first line, which is a header
-            for (int i = 1; i < lines.length; i++) {
-                String[] result = lines[i].split("\t");
-                // network-id | ssid | bssid | flags
-                WifiConfiguration config = new WifiConfiguration();
-                try {
-                    config.networkId = Integer.parseInt(result[0]);
-                } catch(NumberFormatException e) {
-                    continue;
-                }
-                if (result.length > 3) {
-                    if (result[3].indexOf("[CURRENT]") != -1)
-                        config.status = WifiConfiguration.Status.CURRENT;
-                    else if (result[3].indexOf("[DISABLED]") != -1)
-                        config.status = WifiConfiguration.Status.DISABLED;
-                    else
-                        config.status = WifiConfiguration.Status.ENABLED;
-                } else {
-                    config.status = WifiConfiguration.Status.ENABLED;
-                }
-                readNetworkVariables(config);
-                if (config.priority > sLastPriority) {
-                    sLastPriority = config.priority;
-                }
-                sConfiguredNetworks.put(config.networkId, config);
-                sNetworkIds.put(configKey(config), config.networkId);
+        String[] lines = listStr.split("\n");
+        // Skip the first line, which is a header
+        for (int i = 1; i < lines.length; i++) {
+            String[] result = lines[i].split("\t");
+            // network-id | ssid | bssid | flags
+            WifiConfiguration config = new WifiConfiguration();
+            try {
+                config.networkId = Integer.parseInt(result[0]);
+            } catch(NumberFormatException e) {
+                continue;
             }
+            if (result.length > 3) {
+                if (result[3].indexOf("[CURRENT]") != -1)
+                    config.status = WifiConfiguration.Status.CURRENT;
+                else if (result[3].indexOf("[DISABLED]") != -1)
+                    config.status = WifiConfiguration.Status.DISABLED;
+                else
+                    config.status = WifiConfiguration.Status.ENABLED;
+            } else {
+                config.status = WifiConfiguration.Status.ENABLED;
+            }
+            readNetworkVariables(config);
+            if (config.priority > sLastPriority) {
+                sLastPriority = config.priority;
+            }
+            sConfiguredNetworks.put(config.networkId, config);
+            sNetworkIds.put(configKey(config), config.networkId);
         }
+
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
     }
 
     static void updateIpAndProxyFromWpsConfig(int netId, WpsInfo wpsConfig) {
-        synchronized (sConfiguredNetworks) {
-            WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) {
-                config.ipAssignment = wpsConfig.ipAssignment;
-                config.proxySettings = wpsConfig.proxySettings;
-                config.linkProperties = wpsConfig.linkProperties;
-                writeIpAndProxyConfigurations();
-            }
+        WifiConfiguration config = sConfiguredNetworks.get(netId);
+        if (config != null) {
+            config.ipAssignment = wpsConfig.ipAssignment;
+            config.proxySettings = wpsConfig.proxySettings;
+            config.linkProperties = wpsConfig.linkProperties;
+            writeIpAndProxyConfigurations();
         }
     }
 
     /* Mark all networks except specified netId as disabled */
     private static void markAllNetworksDisabledExcept(int netId) {
-        synchronized (sConfiguredNetworks) {
-            for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                if(config != null && config.networkId != netId) {
-                    if (config.status != Status.DISABLED) {
-                        config.status = Status.DISABLED;
-                        config.disableReason = WifiConfiguration.DISABLED_UNKNOWN_REASON;
-                    }
+        for(WifiConfiguration config : sConfiguredNetworks.values()) {
+            if(config != null && config.networkId != netId) {
+                if (config.status != Status.DISABLED) {
+                    config.status = Status.DISABLED;
+                    config.disableReason = WifiConfiguration.DISABLED_UNKNOWN_REASON;
                 }
             }
         }
@@ -627,15 +609,46 @@ class WifiConfigStore {
 
     private static void writeIpAndProxyConfigurations() {
 
-        DataOutputStream out = null;
-        try {
-            out = new DataOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(ipConfigFile)));
+        /* Make a copy */
+        List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
+        for(WifiConfiguration config : sConfiguredNetworks.values()) {
+            networks.add(new WifiConfiguration(config));
+        }
 
-            out.writeInt(IPCONFIG_FILE_VERSION);
+        /* Do a delayed write to disk on a seperate handler thread */
+        synchronized (sDiskWriteHandlerSync) {
+            if (++sWriteSequence == 1) {
+                sDiskWriteHandlerThread = new HandlerThread("WifiConfigThread");
+                sDiskWriteHandlerThread.start();
+                sDiskWriteHandler = new DiskWriteHandler(sDiskWriteHandlerThread.getLooper());
+            }
+        }
 
-            synchronized (sConfiguredNetworks) {
-                for(WifiConfiguration config : sConfiguredNetworks.values()) {
+        sDiskWriteHandler.sendMessage(Message.obtain(sDiskWriteHandler, WRITE, networks));
+    }
+
+    private static class DiskWriteHandler extends Handler {
+
+        DiskWriteHandler(android.os.Looper l) {
+            super(l);
+        }
+
+        public void handleMessage(Message msg) {
+
+            if (msg.what != WRITE) {
+                throw new RuntimeException("Unsupported message in WifiConfigStore: " + msg);
+            }
+
+            List<WifiConfiguration> networks = (List<WifiConfiguration>) msg.obj;
+
+            DataOutputStream out = null;
+            try {
+                out = new DataOutputStream(new BufferedOutputStream(
+                            new FileOutputStream(ipConfigFile)));
+
+                out.writeInt(IPCONFIG_FILE_VERSION);
+
+                for(WifiConfiguration config : networks) {
                     boolean writeToFile = false;
 
                     try {
@@ -720,17 +733,26 @@ class WifiConfigStore {
                     }
                     out.writeUTF(EOS);
                 }
-            }
 
-        } catch (IOException e) {
-            loge("Error writing data file");
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (Exception e) {}
+            } catch (IOException e) {
+                loge("Error writing data file");
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (Exception e) {}
+                }
+
+                //Quit if no more writes sent
+                synchronized (sDiskWriteHandlerSync) {
+                    if (--sWriteSequence == 0) {
+                        getLooper().quit();
+                        sDiskWriteHandlerThread = null;
+                        sDiskWriteHandler= null;
+                    }
+                }
             }
-        }
+       }
     }
 
     private static void readIpAndProxyConfigurations() {
@@ -806,44 +828,42 @@ class WifiConfigStore {
                 } while (true);
 
                 if (id != -1) {
-                    synchronized (sConfiguredNetworks) {
-                        WifiConfiguration config = sConfiguredNetworks.get(
-                                sNetworkIds.get(id));
+                    WifiConfiguration config = sConfiguredNetworks.get(
+                            sNetworkIds.get(id));
 
-                        if (config == null) {
-                            loge("configuration found for missing network, ignored");
-                        } else {
-                            config.linkProperties = linkProperties;
-                            switch (ipAssignment) {
-                                case STATIC:
-                                case DHCP:
-                                    config.ipAssignment = ipAssignment;
-                                    break;
-                                case UNASSIGNED:
-                                    //Ignore
-                                    break;
-                                default:
-                                    loge("Ignore invalid ip assignment while reading");
-                                    break;
-                            }
+                    if (config == null) {
+                        loge("configuration found for missing network, ignored");
+                    } else {
+                        config.linkProperties = linkProperties;
+                        switch (ipAssignment) {
+                            case STATIC:
+                            case DHCP:
+                                config.ipAssignment = ipAssignment;
+                                break;
+                            case UNASSIGNED:
+                                //Ignore
+                                break;
+                            default:
+                                loge("Ignore invalid ip assignment while reading");
+                                break;
+                        }
 
-                            switch (proxySettings) {
-                                case STATIC:
-                                    config.proxySettings = proxySettings;
-                                    ProxyProperties proxyProperties =
-                                        new ProxyProperties(proxyHost, proxyPort, exclusionList);
-                                    linkProperties.setHttpProxy(proxyProperties);
-                                    break;
-                                case NONE:
-                                    config.proxySettings = proxySettings;
-                                    break;
-                                case UNASSIGNED:
-                                    //Ignore
-                                    break;
-                                default:
-                                    loge("Ignore invalid proxy settings while reading");
-                                    break;
-                            }
+                        switch (proxySettings) {
+                            case STATIC:
+                                config.proxySettings = proxySettings;
+                                ProxyProperties proxyProperties =
+                                    new ProxyProperties(proxyHost, proxyPort, exclusionList);
+                                linkProperties.setHttpProxy(proxyProperties);
+                                break;
+                            case NONE:
+                                config.proxySettings = proxySettings;
+                                break;
+                            case UNASSIGNED:
+                                //Ignore
+                                break;
+                            default:
+                                loge("Ignore invalid proxy settings while reading");
+                                break;
                         }
                     }
                 } else {
@@ -1061,10 +1081,7 @@ class WifiConfigStore {
          * when written. For example, wep key is stored as * irrespective
          * of the value sent to the supplicant
          */
-        WifiConfiguration sConfig;
-        synchronized (sConfiguredNetworks) {
-            sConfig = sConfiguredNetworks.get(netId);
-        }
+        WifiConfiguration sConfig = sConfiguredNetworks.get(netId);
         if (sConfig == null) {
             sConfig = new WifiConfiguration();
             sConfig.networkId = netId;
@@ -1072,10 +1089,8 @@ class WifiConfigStore {
 
         readNetworkVariables(sConfig);
 
-        synchronized (sConfiguredNetworks) {
-            sConfiguredNetworks.put(netId, sConfig);
-            sNetworkIds.put(configKey(sConfig), netId);
-        }
+        sConfiguredNetworks.put(netId, sConfig);
+        sNetworkIds.put(configKey(sConfig), netId);
 
         NetworkUpdateResult result = writeIpAndProxyConfigurationsOnChange(sConfig, config);
         result.setNetworkId(netId);

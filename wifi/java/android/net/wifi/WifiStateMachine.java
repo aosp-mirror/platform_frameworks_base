@@ -276,6 +276,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_CLEAR_BLACKLIST                  = BASE + 58;
     /* Save configuration */
     static final int CMD_SAVE_CONFIG                      = BASE + 59;
+    /* Get configured networks*/
+    static final int CMD_GET_CONFIGURED_NETWORKS          = BASE + 60;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
@@ -847,8 +849,11 @@ public class WifiStateMachine extends StateMachine {
         return result;
     }
 
-    public List<WifiConfiguration> syncGetConfiguredNetworks() {
-        return WifiConfigStore.getConfiguredNetworks();
+    public List<WifiConfiguration> syncGetConfiguredNetworks(AsyncChannel channel) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_GET_CONFIGURED_NETWORKS);
+        List<WifiConfiguration> result = (List<WifiConfiguration>) resultMsg.obj;
+        resultMsg.recycle();
+        return result;
     }
 
     /**
@@ -1810,6 +1815,10 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_REMOVE_NETWORK:
                 case CMD_SAVE_CONFIG:
                     mReplyChannel.replyToMessage(message, message.what, FAILURE);
+                    break;
+                case CMD_GET_CONFIGURED_NETWORKS:
+                    mReplyChannel.replyToMessage(message, message.what,
+                            WifiConfigStore.getConfiguredNetworks());
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
