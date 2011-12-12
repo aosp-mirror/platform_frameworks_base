@@ -45,14 +45,15 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
     // No more than this number of words will be parsed on each iteration to ensure a minimum
     // lock of the UI thread
-    public static final int MAX_NUMBER_OF_WORDS = 10;
+    public static final int MAX_NUMBER_OF_WORDS = 50;
 
-    // Safe estimate, will ensure that the interval below usually does not have to be updated
-    public static final int AVERAGE_WORD_LENGTH = 10;
+    // Rough estimate, such that the word iterator interval usually does not need to be shifted
+    public static final int AVERAGE_WORD_LENGTH = 7;
 
     // When parsing, use a character window of that size. Will be shifted if needed
     public static final int WORD_ITERATOR_INTERVAL = AVERAGE_WORD_LENGTH * MAX_NUMBER_OF_WORDS;
 
+    // Pause between each spell check to keep the UI smooth
     private final static int SPELL_PAUSE_DURATION = 400; // milliseconds
 
     private final TextView mTextView;
@@ -74,6 +75,14 @@ public class SpellChecker implements SpellCheckerSessionListener {
     private int mSpanSequenceCounter = 0;
 
     private Locale mCurrentLocale;
+
+    // Shared by all SpellParsers. Cannot be shared with TextView since it may be used
+    // concurrently due to the asynchronous nature of onGetSuggestions.
+    private WordIterator mWordIterator;
+
+    private TextServicesManager mTextServicesManager;
+
+    private Runnable mSpellRunnable;
 
     public SpellChecker(TextView textView) {
         mTextView = textView;
@@ -135,6 +144,10 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             mSpellParsers[i].stop();
+        }
+
+        if (mSpellRunnable != null) {
+            mTextView.removeCallbacks(mSpellRunnable);
         }
     }
 
@@ -285,18 +298,29 @@ public class SpellChecker implements SpellCheckerSessionListener {
             }
         }
 
-        mTextView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                final int length = mSpellParsers.length;
-                for (int i = 0; i < length; i++) {
-                    final SpellParser spellParser = mSpellParsers[i];
-                    if (spellParser.isParsing()) {
-                        spellParser.parse();
+        scheduleNewSpellCheck();
+    }
+
+    private void scheduleNewSpellCheck() {
+        if (mSpellRunnable == null) {
+            mSpellRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    final int length = mSpellParsers.length;
+                    for (int i = 0; i < length; i++) {
+                        final SpellParser spellParser = mSpellParsers[i];
+                        if (!spellParser.isFinished()) {
+                            spellParser.parse();
+                            break; // run one spell parser at a time to bound running time
+                        }
                     }
                 }
-            }
-        }, SPELL_PAUSE_DURATION);
+            };
+        } else {
+            mTextView.removeCallbacks(mSpellRunnable);
+        }
+
+        mTextView.postDelayed(mSpellRunnable, SPELL_PAUSE_DURATION);
     }
 
     private void createMisspelledSuggestionSpan(Editable editable, SuggestionsInfo suggestionsInfo,
@@ -393,20 +417,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
             final int start = editable.getSpanStart(mRange);
             final int end = editable.getSpanEnd(mRange);
 
-            final WordIterator wordIterator = mTextView.getWordIterator();
             int wordIteratorWindowEnd = Math.min(end, start + WORD_ITERATOR_INTERVAL);
-            wordIterator.setCharSequence(editable, start, wordIteratorWindowEnd);
+            mWordIterator.setCharSequence(editable, start, wordIteratorWindowEnd);
 
             // Move back to the beginning of the current word, if any
-            int wordStart = wordIterator.preceding(start);
+            int wordStart = mWordIterator.preceding(start);
             int wordEnd;
             if (wordStart == BreakIterator.DONE) {
-                wordEnd = wordIterator.following(start);
+                wordEnd = mWordIterator.following(start);
                 if (wordEnd != BreakIterator.DONE) {
-                    wordStart = wordIterator.getBeginning(wordEnd);
+                    wordStart = mWordIterator.getBeginning(wordEnd);
                 }
             } else {
-                wordEnd = wordIterator.getEnd(wordStart);
+                wordEnd = mWordIterator.getEnd(wordStart);
             }
             if (wordEnd == BreakIterator.DONE) {
                 removeRangeSpan(editable);
@@ -472,15 +495,15 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
                 // iterate word by word
                 int originalWordEnd = wordEnd;
-                wordEnd = wordIterator.following(wordEnd);
+                wordEnd = mWordIterator.following(wordEnd);
                 if ((wordIteratorWindowEnd < end) &&
                         (wordEnd == BreakIterator.DONE || wordEnd >= wordIteratorWindowEnd)) {
                     wordIteratorWindowEnd = Math.min(end, originalWordEnd + WORD_ITERATOR_INTERVAL);
-                    wordIterator.setCharSequence(editable, originalWordEnd, wordIteratorWindowEnd);
-                    wordEnd = wordIterator.following(originalWordEnd);
+                    mWordIterator.setCharSequence(editable, originalWordEnd, wordIteratorWindowEnd);
+                    wordEnd = mWordIterator.following(originalWordEnd);
                 }
                 if (wordEnd == BreakIterator.DONE) break;
-                wordStart = wordIterator.getBeginning(wordEnd);
+                wordStart = mWordIterator.getBeginning(wordEnd);
                 if (wordStart == BreakIterator.DONE) {
                     break;
                 }
