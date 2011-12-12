@@ -4176,10 +4176,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
-        // The View is not attached to a window, 'visible' does not make sense, return false
-        if (mAttachInfo == null) return false;
-
-        final RectF rect = mAttachInfo.mTmpTransformRect;
+        // It doesn't make a whole lot of sense to call this on a view that isn't attached,
+        // but for some simple tests it can be useful. If we don't have attach info this
+        // will allocate memory.
+        final RectF rect = mAttachInfo != null ? mAttachInfo.mTmpTransformRect : new RectF();
         rect.set(r);
 
         if (!child.hasIdentityMatrix()) {
@@ -4193,7 +4193,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (offset != null) {
             if (!child.hasIdentityMatrix()) {
-                float[] position = mAttachInfo.mTmpTransformLocation;
+                float[] position = mAttachInfo != null ? mAttachInfo.mTmpTransformLocation
+                        : new float[2];
                 position[0] = offset.x;
                 position[1] = offset.y;
                 child.getMatrix().mapPoints(position);
