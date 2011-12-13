@@ -886,7 +886,7 @@ class TextLine {
                 spanFlags = new int[length];
             }
 
-            int count = 0;
+            numberOfSpans = 0;
             for (int i = 0; i < length; i++) {
                 final E span = allSpans[i];
 
@@ -896,14 +896,13 @@ class TextLine {
 
                 final int spanFlag = spanned.getSpanFlags(span);
 
-                spans[i] = span;
-                spanStarts[i] = spanStart;
-                spanEnds[i] = spanEnd;
-                spanFlags[i] = spanFlag;
+                spans[numberOfSpans] = span;
+                spanStarts[numberOfSpans] = spanStart;
+                spanEnds[numberOfSpans] = spanEnd;
+                spanFlags[numberOfSpans] = spanFlag;
 
-                count++;
+                numberOfSpans++;
             }
-            numberOfSpans = count;
         }
 
         public boolean hasSpansIntersecting(int start, int end) {
@@ -926,6 +925,7 @@ class TextLine {
         }
 
         public void recycle() {
+            // The spans array is guaranteed to be not null when numberOfSpans is > 0
             for (int i = 0; i < numberOfSpans; i++) {
                 spans[i] = null; // prevent a leak: no reference kept when TextLine is recycled
             }
