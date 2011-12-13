@@ -92,6 +92,9 @@ static void dumpstate() {
         LOGI("wrote screenshot: %s\n", screenshot_path);
     }
 
+    run_command("SYSTEM SETTINGS", 20, "su", "root", "sqlite3",
+            "/data/data/com.android.providers.settings/databases/settings.db",
+            "pragma user_version; select * from system; select * from secure;", NULL);
     run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
 
     /* show the traces we collected in main(), if that was done */
