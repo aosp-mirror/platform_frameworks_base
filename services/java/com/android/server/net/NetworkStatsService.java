@@ -268,6 +268,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     public void systemReady() {
+        if (!isBandwidthControlEnabled()) {
+            Slog.w(TAG, "bandwidth controls disabled, unable to track stats");
+            return;
+        }
+
         synchronized (mStatsLock) {
             // read historical network stats from disk, since policy service
             // might need them right away. we delay loading detailed UID stats
@@ -1642,6 +1647,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE);
         return telephony.getSubscriberId();
+    }
+
+    private boolean isBandwidthControlEnabled() {
+        try {
+            return mNetworkManager.isBandwidthControlEnabled();
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+            return false;
+        }
     }
 
     /**
