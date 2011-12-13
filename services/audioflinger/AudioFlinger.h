@@ -703,7 +703,7 @@ private:
         virtual     status_t    readyToRun();
         virtual     void        onFirstRef();
 
-        virtual     status_t    initCheck() const { return (mOutput == 0) ? NO_INIT : NO_ERROR; }
+        virtual     status_t    initCheck() const { return (mOutput == NULL) ? NO_INIT : NO_ERROR; }
 
         virtual     uint32_t    latency() const;
 
@@ -980,7 +980,7 @@ private:
         virtual status_t    readyToRun();
         virtual void        onFirstRef();
 
-        virtual status_t    initCheck() const { return (mInput == 0) ? NO_INIT : NO_ERROR; }
+        virtual status_t    initCheck() const { return (mInput == NULL) ? NO_INIT : NO_ERROR; }
                 sp<AudioFlinger::RecordThread::RecordTrack>  createRecordTrack_l(
                         const sp<AudioFlinger::Client>& client,
                         uint32_t sampleRate,

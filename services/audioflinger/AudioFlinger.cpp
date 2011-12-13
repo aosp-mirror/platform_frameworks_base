@@ -158,7 +158,7 @@ static const char *audio_interfaces[] = {
 
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
-        mPrimaryHardwareDev(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
+        mPrimaryHardwareDev(NULL), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
         mBtNrecIsOff(false)
 {
 }
@@ -1367,7 +1367,7 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
                                              int id,
                                              uint32_t device)
     :   ThreadBase(audioFlinger, id, device),
-        mMixBuffer(0), mSuspended(0), mBytesWritten(0), mOutput(output),
+        mMixBuffer(NULL), mSuspended(0), mBytesWritten(0), mOutput(output),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
     snprintf(mName, kNameLength, "AudioOut_%d", id);
@@ -1832,7 +1832,7 @@ uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
     :   PlaybackThread(audioFlinger, output, id, device),
-        mAudioMixer(0)
+        mAudioMixer(NULL)
 {
     mType = ThreadBase::MIXER;
     mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
@@ -2766,7 +2766,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             while (frameCount) {
                 buffer.frameCount = frameCount;
                 activeTrack->getNextBuffer(&buffer);
-                if (UNLIKELY(buffer.raw == 0)) {
+                if (UNLIKELY(buffer.raw == NULL)) {
                     memset(curBuf, 0, frameCount * mFrameSize);
                     break;
                 }
@@ -3264,7 +3264,7 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
 
 void AudioFlinger::ThreadBase::TrackBase::releaseBuffer(AudioBufferProvider::Buffer* buffer)
 {
-    buffer->raw = 0;
+    buffer->raw = NULL;
     mFrameCount = buffer->frameCount;
     step();
     buffer->frameCount = 0;
@@ -3457,14 +3457,14 @@ status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(AudioBufferProvider:
         }
 
          buffer->raw = getBuffer(s, framesReq);
-         if (buffer->raw == 0) goto getNextBuffer_exit;
+         if (buffer->raw == NULL) goto getNextBuffer_exit;
 
          buffer->frameCount = framesReq;
         return NO_ERROR;
      }
 
 getNextBuffer_exit:
-     buffer->raw = 0;
+     buffer->raw = NULL;
      buffer->frameCount = 0;
      ALOGV("getNextBuffer() no more data for track %d on thread %p", mName, mThread.unsafe_get());
      return NOT_ENOUGH_DATA;
@@ -3705,14 +3705,14 @@ status_t AudioFlinger::RecordThread::RecordTrack::getNextBuffer(AudioBufferProvi
         }
 
         buffer->raw = getBuffer(s, framesReq);
-        if (buffer->raw == 0) goto getNextBuffer_exit;
+        if (buffer->raw == NULL) goto getNextBuffer_exit;
 
         buffer->frameCount = framesReq;
         return NO_ERROR;
     }
 
 getNextBuffer_exit:
-    buffer->raw = 0;
+    buffer->raw = NULL;
     buffer->frameCount = 0;
     return NOT_ENOUGH_DATA;
 }
@@ -4217,7 +4217,7 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
                                          int id,
                                          uint32_t device) :
     ThreadBase(audioFlinger, id, device),
-    mInput(input), mTrack(NULL), mResampler(0), mRsmpOutBuffer(0), mRsmpInBuffer(0)
+    mInput(input), mTrack(NULL), mResampler(NULL), mRsmpOutBuffer(NULL), mRsmpInBuffer(NULL)
 {
     mType = ThreadBase::RECORD;
 
@@ -4232,7 +4232,7 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
 AudioFlinger::RecordThread::~RecordThread()
 {
     delete[] mRsmpInBuffer;
-    if (mResampler != 0) {
+    if (mResampler != NULL) {
         delete mResampler;
         delete[] mRsmpOutBuffer;
     }
@@ -4326,7 +4326,7 @@ bool AudioFlinger::RecordThread::threadLoop()
             buffer.frameCount = mFrameCount;
             if (LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 size_t framesOut = buffer.frameCount;
-                if (mResampler == 0) {
+                if (mResampler == NULL) {
                     // no resampling
                     while (framesOut) {
                         size_t framesIn = mFrameCount - mRsmpInIndex;
@@ -4584,7 +4584,7 @@ status_t AudioFlinger::RecordThread::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
         snprintf(buffer, SIZE, "In size: %d\n", mInputBytes);
         result.append(buffer);
-        snprintf(buffer, SIZE, "Resampling: %d\n", (mResampler != 0));
+        snprintf(buffer, SIZE, "Resampling: %d\n", (mResampler != NULL));
         result.append(buffer);
         snprintf(buffer, SIZE, "Out channel count: %d\n", mReqChannelCount);
         result.append(buffer);
@@ -4619,7 +4619,7 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
                 mInput->stream->common.standby(&mInput->stream->common);
                 usleep(kRecordThreadSleepUs);
             }
-            buffer->raw = 0;
+            buffer->raw = NULL;
             buffer->frameCount = 0;
             return NOT_ENOUGH_DATA;
         }
@@ -4782,7 +4782,7 @@ void AudioFlinger::RecordThread::readInputParameters()
     if (mRsmpInBuffer) delete mRsmpInBuffer;
     if (mRsmpOutBuffer) delete mRsmpOutBuffer;
     if (mResampler) delete mResampler;
-    mResampler = 0;
+    mResampler = NULL;
 
     mSampleRate = mInput->stream->common.get_sample_rate(&mInput->stream->common);
     mChannelMask = mInput->stream->common.get_channels(&mInput->stream->common);
