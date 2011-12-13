@@ -49,7 +49,7 @@ struct Texture {
             GLenum renderTarget = GL_TEXTURE_2D) {
 
         if (firstWrap || force || wrapS != this->wrapS || wrapT != this->wrapT) {
-            firstWrap = true;
+            firstWrap = false;
 
             this->wrapS = wrapS;
             this->wrapT = wrapT;

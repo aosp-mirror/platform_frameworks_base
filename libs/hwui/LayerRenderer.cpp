@@ -458,6 +458,8 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         }
 
 error:
+        glEnable(GL_SCISSOR_TEST);
+
 #if DEBUG_OPENGL
         if (error != GL_NO_ERROR) {
             LOGD("GL error while copying layer into bitmap = 0x%x", error);

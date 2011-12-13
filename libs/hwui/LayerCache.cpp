@@ -108,8 +108,8 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
 
         layer->generateTexture();
         layer->bindTexture();
-        layer->setFilter(GL_NEAREST, GL_NEAREST);
-        layer->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, false);
+        layer->setFilter(GL_NEAREST);
+        layer->setWrap(GL_CLAMP_TO_EDGE, false);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 #if DEBUG_LAYERS
