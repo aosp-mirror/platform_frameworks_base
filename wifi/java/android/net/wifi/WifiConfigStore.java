@@ -22,6 +22,7 @@ import android.net.DhcpInfoInternal;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
+import android.net.NetworkInfo.DetailedState;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration.IpAssignment;
@@ -274,6 +275,24 @@ class WifiConfigStore {
         WifiNative.saveConfigCommand();
         sendConfiguredNetworksChangedBroadcast();
         return result;
+    }
+
+    static void updateStatus(int netId, DetailedState state) {
+        if (netId != INVALID_NETWORK_ID) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config == null) return;
+            switch (state) {
+                case CONNECTED:
+                    config.status = Status.CURRENT;
+                    break;
+                case DISCONNECTED:
+                    config.status = Status.ENABLED;
+                    break;
+                default:
+                    //do nothing, retain the existing state
+                    break;
+            }
+        }
     }
 
     /**
