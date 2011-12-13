@@ -2872,6 +2872,6 @@ public final class WebViewCore {
     private native ArrayList<Rect> nativeGetTouchHighlightRects(int x, int y,
             int slop);
 
-   private native void nativeAutoFillForm(int queryId);
-   private native void nativeScrollLayer(int layer, Rect rect);
+    private native void nativeAutoFillForm(int queryId);
+    private native void nativeScrollLayer(int layer, Rect rect);
 }
