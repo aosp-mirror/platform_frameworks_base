@@ -1,0 +1,299 @@
+page.title=Creating Multiple APKs for Different GL Textures
+parent.title=Creating and Maintaining Multiple APKs
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Creating Multiple APKs for Different Screen Sizes
+previous.link=screensize.html
+next.title=Creating Multiple APKs with 2+ Dimensions
+next.link=multiple.html
+
+@jd:body
+
+<style type="text/css">
+.blueCell { background-color: #9fc5e8;}
+.greenCell { background-color: #b6d7a8;}
+.redCell { background-color: #ea9999;}
+</style>
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Confirm">Confirm You Need Multiple APKs</a></li>
+  <li><a href="#ChartReqs">Chart Your Requirements</a></li>
+  <li><a href="#CreateLibrary">Put All Common Code and Resources in a Library Project</a></li>
+  <li><a href="#CreateAPKs">Create New APK Projects</a></li>
+  <li><a href="#AdjustManifests">Adjust the Manifests</a></li>
+  <li><a href="#PreLaunch">Go Over Pre-launch Checklist</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://developer.android.com/guide/market/publishing/multiple-apks.html">Multiple APK
+Support</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>When developing your Android application to take advantage of multiple APKs on Android Market, it’s important to adopt some good practices from the get-go, and prevent unnecessary headaches further into the development process.  This lesson shows you how to create multiple APKs of your app, each supporting a different subset of OpenGL texture formats.  You will also gain some tools necessary to make maintaining a multiple APK codebase as painless as possible.</p>
+
+
+<h2 id="Confirm">Confirm You Need Multiple APKs</h2>
+
+<p>When trying to create an application that works across all available Android-powered
+devices, naturally you want your application look its best on each individual device, regardless of
+the fact they don’t all support the same set of GL textures.  It may seem at the outset as though
+multiple APK support is the best solution, but this often isn’t the case.  The <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
+Instead</a> section of the multiple APK developer guide includes some useful information on how to
+accomplish this with a single APK, including how to <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html#TextureOptions">detect supported texture
+formats at runtime</a>.  Depending on your situation, it might be easier to bundle all formats with
+your application, and simply pick which one to use at runtime.</p>
+
+<p>If you can manage it, confining your application to a single APK has several advantages,
+including:</p>
+<ul>
+<li>Publishing and Testing are easier</li>
+<li>There’s only one codebase to maintain</li>
+<li>Your application can adapt to device configuration changes</li>
+<li>App restore across devices just works</li>
+<li>You don’t have to worry about market preference, behavior from "upgrades" from one APK to the
+next, or which APK goes with which class of devices</li>
+</ul>
+
+<p>The rest of this lesson assumes that you’ve researched the topic, studiously absorbed the
+material in the resources linked, and determined that multiple APKs are the right path for your
+application.</p>
+
+
+<h2 id="ChartReqs">Chart Your Requirements</h2>
+ 
+<p>The Android Developer Guide provides a handy reference of some of common supported textures on
+the <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">supports-gl-texture
+page</a>.  This page also contains some hints as to which phones (or families of phones) support
+particular texture formats.  Note that it’s generally a good idea for one of your APKs to support
+ETC1, as that texture format is supported by all Android-powered devices that support the OpenGL ES
+2.0 spec.</p>
+
+<p>Since most Android-powered devices support more than one texture format, you need to establish an
+order of preference.  Create a chart including all the formats that your application is going to
+support.  The left-most cell is going to be the lowest priority (It will probably be ETC1, a really
+solid default in terms of performance and compatibility).  Then color in the chart such that each
+cell represents an APK.</p>
+<table cellpadding="10" cellspacing="0" border="1">
+  <tbody>
+    <tr>
+      <td class="blueCell">ETC1</td>
+      <td class="greenCell">ATI</td>
+      <td class="redCell">PowerVR</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+Coloring in the chart does more than just make this guide less monochromatic - It also has a way of
+making intra-team communication easier-  You can now simply refer to each APK as "blue", "green", or
+"red", instead of "The one that supports ETC1 texture formats", etc.</p>
+
+<h2 id="CreateLibrary">Put All Common Code and Resources in a Library Project</h2>
+<p>Whether you’re modifying an existing Android application or starting one from scratch, this is
+the first thing that you should do to the codebase, and by the far the most important.  Everything
+that goes into the library project only needs to be updated once (think language-localized strings,
+color themes, bugs fixed in shared code), which improves your development time and reduces the
+likelihood of mistakes that could have been easily avoided.</p>
+
+<p class="note"><strong>Note:</strong>  While the implementation details of how to create and
+include library projects are beyond the scope of this lesson, you can get up to speed quickly on
+their creation at the following links:</p>
+<ul>
+<li><a
+href="{@docRoot}guide/developing/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
+a library project (Eclipse)</a></li>
+<li><a
+href="{@docRoot}guide/developing/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
+a library project (Command line)</a></li>
+</ul>
+
+<p>If you’re converting an existing application to use multiple APK support,
+scour your codebase for every localized string file, list of values, theme
+colors, menu icons and layout that isn’t going to change across APKs, and put
+it all in the library project.  Code that isn’t going to change much should
+also go in the library project.  You’ll likely find yourself extending these
+classes to add a method or two from APK to APK.</p>
+
+<p>If, on the other hand, you’re creating the application from scratch, try as
+much as possible to write code in the library project <em>first</em>, then only move it down to an
+individual APK if necessary.  This is much easier to manage in the long run than adding it to one,
+then another, then another, then months later trying to figure out whether this blob can be moved up
+to the library section without screwing anything up.</p>
+
+<h2 id="CreateAPKs">Create New APK Projects</h2>
+<p>There should be a separate Android project for each APK you’re going to release.  For easy
+organization, place the library project and all related APK projects under the same parent folder. 
+Also remember that each APK needs to have the same package name, although they don’t necessarily
+need to share the package name with the library.  If you were to have 3 APKs following the scheme
+described earlier, your root directory might look like this:</p>
+
+<pre class="no-pretty-print classic">
+alexlucas:~/code/multi-apks-root$ ls
+foo-blue
+foo-green
+foo-lib
+foo-red
+</pre>
+
+
+<p>Once the projects are created, add the library project as a reference to each APK project.  If
+possible, define your starting Activity in the library project, and extend that Activity in your APK
+project.  Having a starting activity defined in the library project gives you a chance to put all
+your application initialization in one place, so that each individual APK doesn’t have to
+re-implement "universal" tasks like initializing Analytics, running licensing checks, and any other
+initialization procedures that don’t change much from APK to APK.</p>
+
+
+<h2 id="AdjustManifests">Adjust the Manifests</h2>
+<p>When a user downloads an application which uses multiple APKs through Android Market, the correct
+APK to use is chosen using some simple rules:</p>
+
+<ul>
+<li>The manifest has to show that particular APK is eligible</li>
+<li>Of the eligible APKs, highest version number wins</li>
+<li>If <em>any</em> of the texture formats listed in your APK are supported by the device on market,
+that device is considered eligible</li>
+</ul>
+
+<p>With regards to GL Textures, that last rule is important.  It means that you should, for
+instance, be <em>very</em> careful about using different GL formats in the same application.  If you
+were to use PowerVR 99% of the time, but use ETC1 for, say, your splash screen... Then your manifest
+would necessarily indicate support for both formats.  A device that <em>only</em> supported ETC1
+would be deemed compatible, your app would download, and the user would see some thrilling crash
+messages.  The common case is going to be that if you’re using multiple APKs specifically to target
+different devices based on GL texture support, it’s going to be one texture format per APK.</p>
+
+<p>This actually makes texture support a little bit different than the other two multiple APK
+dimensions, API level and screen size.  Any given device only has one API level, and one screen
+size, and it’s up to the APK to support a range of them.  With textures, the APK will generally
+support one texture, and the device will support many.  There will often be overlap in terms of one
+device supporting many APKs, but the solution is the same:  Version codes.</p>
+
+<p>By way of example, take a few devices, and see how many of the APKs defined earlier fit each
+device.</p>
+<table cellpadding="10" cellspacing="0" border="1">
+  <tbody>
+    <tr>
+      <td>FooPhone</td>
+      <td>Nexus S</td>
+      <td>Evo</td>
+    </tr>
+    <tr>
+      <td class="blueCell">ETC1</td>
+      <td class="blueCell">ETC1</td>
+      <td class="blueCell">ETC1</td>      
+    </tr>
+    <tr>
+      <td></td>
+      <td class="greenCell">PowerVR</td>
+      <td class="redCell">ATI TC</td>
+    </tr>
+  </tbody>
+</table>
+<p> Assuming that PowerVR and ATI formats are both preferred over ETC1 when available, than
+according to the "highest version number wins" rule, if we set the versionCode attribute in each APK
+such that red &#8805; green &#8805; blue, then both Red and Green will always be chosen over Blue on
+devices which support them, and should a device ever come along which supports both Red and Green,
+red will be chosen.
+</p>
+
+<p>  In order to keep all your APKs on separate "tracks," it’s important to have a good version code
+scheme.  The recommended one can be found on the Version Codes area of our developer guide.  Since
+the example set of APKs is only dealing with one of 3 possible dimensions, it would be sufficient to
+separate each APK by 1000 and increment from there.  This might look like:</p>
+
+<p>Blue: 1001, 1002, 1003, 1004...<br />
+Green: 2001, 2002, 2003, 2004...<br />
+Red:3001, 3002, 3003, 3004...</p>
+
+<p>  Putting this all together, your Android Manifests would likely look something like the
+following:</p>
+<p>Blue:</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="1001" android:versionName="1.0" package="com.example.foo"&gt;
+    &lt;supports-gl-texture android:name="GL_OES_compressed_ETC1_RGB8_texture" /&gt;
+    ...
+</pre>
+
+<p>Green:</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="2001" android:versionName="1.0" package="com.example.foo"&gt;
+    &lt;supports-gl-texture android:name="GL_AMD_compressed_ATC_texture" /&gt;
+    ...
+</pre>
+
+<p>Red:</p>
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="3001" android:versionName="1.0" package="com.example.foo"&gt;
+    &lt;supports-gl-texture android:name="GL_IMG_texture_compression_pvrtc" /&gt;
+    ...
+</pre>
+
+<h2 id="PreLaunch">Go Over Pre-launch Checklist</h2>
+<p>Before uploading to Android Market, double-check the following items.  Remember that these are
+specifically relevant to multiple APKs, and in no way represent a complete checklist for all
+applications being uploaded to Android Market.</p>
+
+<ul>
+<li>All APKs must have the same package name</li>
+<li>All APKs must be signed with the same certificate</li>
+<li>Double check your manifest filters for conflicting information (an APK that only supports
+cupcake on XLARGE screens isn’t going to be seen by anybody)</li>
+<li>Each APK's manifest must be unique across at least one of supported screen, OpenGL texture, or
+platform version</li>
+<li>Try to test each APK on at least one device.  Barring that, you have one of the most
+customizable device emulators in the business sitting on your development machine.  Go nuts!</li>
+</ul>
+
+<p>It’s also worth inspecting the compiled APK before pushing to market, to make sure there aren’t
+any surprises that could hide your application in Market.  This is actually quite simple using the
+"aapt" tool.  Aapt (the Android Asset Packaging Tool) is part of the build process for creating and
+packaging your Android applications, and is also a very handy tool for inspecting them. </p>
+
+<pre class="no-pretty-print classic">
+&gt;aapt dump badging
+package: name='com.example.hello' versionCode='1' versionName='1.0'
+sdkVersion:'11'
+uses-permission:'android.permission.SEND_SMS'
+application-label:'Hello'
+application-icon-120:'res/drawable-ldpi/icon.png'
+application-icon-160:'res/drawable-mdpi/icon.png'
+application-icon-240:'res/drawable-hdpi/icon.png'
+application: label='Hello' icon='res/drawable-mdpi/icon.png'
+launchable-activity: name='com.example.hello.HelloActivity'  label='Hello' icon=''
+uses-feature:'android.hardware.telephony'
+uses-feature:'android.hardware.touchscreen'
+main
+supports-screens: 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '120' '160' '240'
+</pre>
+
+<p>When you examine aapt output, be sure to check that you don’t have conflicting values for
+supports-screens and compatible-screens, and that you don’t have unintended "uses-feature" values
+that were added as a result of permissions you set in the manifest. In the example above, the APK
+will be invisible to most, if not all devices.</p>
+<p>Why?  By adding the required permission SEND_SMS, the feature requirement of android.hardware.telephony was implicitly added.  Since most (if not all) xlarge devices are tablets without telephony hardware in them, Market will filter out this APK in these cases, until future devices come along which are both large enough to report as xlarge screen size, and possess telephony hardware.  
+</p>
+<p>Fortunately this is easily fixed by adding the following to your manifest:</p>
+<pre>
+&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;
+</pre>
+<p>Once you’ve completed the pre-launch checklist, upload your APKs to Android Market.  It may take a bit for the application to show up when browsing Android Market, but when it does, perform one last check.  Download the application onto any test devices you may have to make sure that the APKs are targeting the intended devices. Congratulations, you’re done!</p>
