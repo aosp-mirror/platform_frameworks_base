@@ -178,9 +178,13 @@ public:
         mGammaTable = gammaTable;
     }
 
-    void setAttributeBindingSlots(int positionSlot, int texCoordSlot) {
-        mPositionAttrSlot = positionSlot;
-        mTexcoordAttrSlot = texCoordSlot;
+    inline float* getMeshBuffer() {
+        checkInit();
+        return mTextMeshPtr;
+    }
+
+    inline int getMeshTexCoordsOffset() const {
+        return 2;
     }
 
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
@@ -308,9 +312,6 @@ protected:
     uint32_t mMaxNumberOfQuads;
 
     uint32_t mIndexBufferID;
-
-    int32_t mPositionAttrSlot;
-    int32_t mTexcoordAttrSlot;
 
     const Rect* mClip;
     Rect* mBounds;
