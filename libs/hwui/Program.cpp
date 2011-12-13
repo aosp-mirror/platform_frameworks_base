@@ -25,21 +25,24 @@ namespace uirenderer {
 // Base program
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO: Program instance should be created from a factory method
 Program::Program(const char* vertex, const char* fragment) {
     mInitialized = false;
     mHasColorUniform = false;
+    mUse = false;
 
     // No need to cache compiled shaders, rely instead on Android's
     // persistent shaders cache
-    GLuint vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
-    if (vertexShader) {
-
-        GLuint fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
-        if (fragmentShader) {
-
+    mVertexShader = buildShader(vertex, GL_VERTEX_SHADER);
+    if (mVertexShader) {
+        mFragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
+        if (mFragmentShader) {
             mProgramId = glCreateProgram();
-            glAttachShader(mProgramId, vertexShader);
-            glAttachShader(mProgramId, fragmentShader);
+
+            glAttachShader(mProgramId, mVertexShader);
+            glAttachShader(mProgramId, mFragmentShader);
+
+            position = bindAttrib("position", kBindingPosition);
             glLinkProgram(mProgramId);
 
             GLint status;
@@ -53,34 +56,35 @@ Program::Program(const char* vertex, const char* fragment) {
                     glGetProgramInfoLog(mProgramId, infoLen, 0, &log[0]);
                     LOGE("%s", log);
                 }
+
+                glDetachShader(mProgramId, mVertexShader);
+                glDetachShader(mProgramId, mFragmentShader);
+
+                glDeleteShader(mVertexShader);
+                glDeleteShader(mFragmentShader);
+
+                glDeleteProgram(mProgramId);
             } else {
                 mInitialized = true;
             }
-
-            glDetachShader(mProgramId, vertexShader);
-            glDetachShader(mProgramId, fragmentShader);
-
-            glDeleteShader(vertexShader);
-            glDeleteShader(fragmentShader);
-
-            if (!mInitialized) {
-                glDeleteProgram(mProgramId);
-            }
         } else {
-            glDeleteShader(vertexShader);
+            glDeleteShader(mVertexShader);
         }
     }
 
-    mUse = false;
-
     if (mInitialized) {
-        position = addAttrib("position");
         transform = addUniform("transform");
     }
 }
 
 Program::~Program() {
     if (mInitialized) {
+        glDetachShader(mProgramId, mVertexShader);
+        glDetachShader(mProgramId, mFragmentShader);
+
+        glDeleteShader(mVertexShader);
+        glDeleteShader(mFragmentShader);
+
         glDeleteProgram(mProgramId);
     }
 }
@@ -89,6 +93,17 @@ int Program::addAttrib(const char* name) {
     int slot = glGetAttribLocation(mProgramId, name);
     mAttributes.add(name, slot);
     return slot;
+}
+
+int Program::bindAttrib(const char* name, ShaderBindings bindingSlot) {
+    glBindAttribLocation(mProgramId, bindingSlot, name);
+    GLenum status = GL_NO_ERROR;
+    while ((status = glGetError()) != GL_NO_ERROR) {
+        LOGD("Program::GL error from OpenGLRenderer: 0x%x", status);
+    }
+
+    mAttributes.add(name, bindingSlot);
+    return bindingSlot;
 }
 
 int Program::getAttrib(const char* name) {
@@ -161,14 +176,10 @@ void Program::setColor(const float r, const float g, const float b, const float 
 void Program::use() {
     glUseProgram(mProgramId);
     mUse = true;
-    glEnableVertexAttribArray(position);
 }
 
 void Program::remove() {
     mUse = false;
-    // TODO: Is this necessary? It should not be since all of our shaders
-    //       use slot 0 for the position attrib
-    // glDisableVertexAttribArray(position);
 }
 
 }; // namespace uirenderer
