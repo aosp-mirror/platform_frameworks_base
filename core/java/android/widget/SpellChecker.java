@@ -385,7 +385,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 SuggestionSpan.FLAG_EASY_CORRECT | SuggestionSpan.FLAG_MISSPELLED);
         editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        mTextView.invalidateRegion(start, end);
+        mTextView.invalidateRegion(start, end, false /* No cursor involved */);
     }
 
     private class SpellParser {
