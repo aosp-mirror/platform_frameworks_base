@@ -22,6 +22,7 @@
 
 #include <utils/Log.h>
 
+#include "Caches.h"
 #include "Debug.h"
 #include "FontRenderer.h"
 
@@ -536,9 +537,8 @@ void FontRenderer::initVertexArrayBuffers() {
     }
 
     glGenBuffers(1, &mIndexBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
+    Caches::getInstance().bindIndicesBuffer(mIndexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSizeBytes, indexBufferData, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     free(indexBufferData);
 
@@ -597,7 +597,18 @@ void FontRenderer::checkTextureUpdate() {
 void FontRenderer::issueDrawCommand() {
     checkTextureUpdate();
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
+    Caches& caches = Caches::getInstance();
+    if (!mDrawn) {
+        float* buffer = mTextMeshPtr;
+        int offset = 2;
+
+        bool force = caches.unbindMeshBuffer();
+        caches.bindPositionVertexPointer(force, caches.currentProgram->position, buffer);
+        caches.bindTexCoordsVertexPointer(force, caches.currentProgram->texCoords,
+                buffer + offset);
+    }
+
+    caches.bindIndicesBuffer(mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
 
     mDrawn = true;

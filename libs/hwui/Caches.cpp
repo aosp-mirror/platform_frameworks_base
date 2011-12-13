@@ -73,8 +73,11 @@ void Caches::init() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
 
     mCurrentBuffer = meshBuffer;
+    mCurrentIndicesBuffer = 0;
     mCurrentPositionPointer = this;
     mCurrentTexCoordsPointer = this;
+
+    mTexCoordsArrayEnabled = false;
 
     mRegionMesh = NULL;
 
@@ -243,6 +246,24 @@ bool Caches::unbindMeshBuffer() {
     return false;
 }
 
+bool Caches::bindIndicesBuffer(const GLuint buffer) {
+    if (mCurrentIndicesBuffer != buffer) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+        mCurrentIndicesBuffer = buffer;
+        return true;
+    }
+    return false;
+}
+
+bool Caches::unbindIndicesBuffer() {
+    if (mCurrentIndicesBuffer) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        mCurrentIndicesBuffer = 0;
+        return true;
+    }
+    return false;
+}
+
 void Caches::bindPositionVertexPointer(bool force, GLuint slot, GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentPositionPointer) {
         glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
@@ -266,6 +287,20 @@ void Caches::resetTexCoordsVertexPointer() {
     mCurrentTexCoordsPointer = this;
 }
 
+void Caches::enableTexCoordsVertexArray() {
+    if (!mTexCoordsArrayEnabled) {
+        glEnableVertexAttribArray(Program::kBindingTexCoords);
+        mTexCoordsArrayEnabled = true;
+    }
+}
+
+void Caches::disbaleTexCoordsVertexArray() {
+    if (mTexCoordsArrayEnabled) {
+        glDisableVertexAttribArray(Program::kBindingTexCoords);
+        mTexCoordsArrayEnabled = false;
+    }
+}
+
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
@@ -284,13 +319,13 @@ TextureVertex* Caches::getRegionMesh() {
         }
 
         glGenBuffers(1, &mRegionMeshIndices);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRegionMeshIndices);
+        bindIndicesBuffer(mRegionMeshIndices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
                 regionIndices, GL_STATIC_DRAW);
 
         delete[] regionIndices;
     } else {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRegionMeshIndices);
+        bindIndicesBuffer(mRegionMeshIndices);
     }
 
     return mRegionMesh;
