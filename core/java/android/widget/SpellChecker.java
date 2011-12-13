@@ -309,7 +309,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     final int length = mSpellParsers.length;
                     for (int i = 0; i < length; i++) {
                         final SpellParser spellParser = mSpellParsers[i];
-                        if (!spellParser.isFinished()) {
+                        if (!spellParser.isParsing()) {
                             spellParser.parse();
                             break; // run one spell parser at a time to bound running time
                         }
