@@ -558,6 +558,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'bestpractices'],
+    path: 'samples/newsreader/index.html',
+    title: {
+      en: 'News Reader'
+    },
+    description: {
+      en: 'A sample app demonstrating best practices to support multiple screen sizes and densities.'
+    }
+  },
+  {
     tags: ['sample', 'data'],
     path: 'samples/NFCDemo/index.html',
     title: {

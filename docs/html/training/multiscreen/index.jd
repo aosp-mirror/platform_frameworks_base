@@ -1,0 +1,87 @@
+page.title=Designing for Multiple Screens
+
+trainingnavtop=true
+startpage=true
+next.title=Supporting Different Screen Sizes
+next.link=screensizes.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>Dependencies and prerequisites</h2> 
+
+<ul>
+  <li>Android 1.6 or higher (2.1+ for the sample app)</li>
+  <li>Basic knowledge of <a
+href="http://developer.android.com/guide/topics/fundamentals/activities.html">Activities</a> and
+<a href="http://developer.android.com/guide/topics/fundamentals/fragments.html">Fragments</a></li>
+  <li>Experience building an Android <a
+href="http://developer.android.com/guide/topics/ui/index.html"> User Interface</a></li>
+  <li>Several features require the use of the <a
+href="{@docRoot}sdk/compatibility-library.html">support library</a></li>
+</ul>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+</ul>
+ 
+<h2>Try it out</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
+  the sample app</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+ 
+<p>Android powers hundreds of device types with several different screen sizes,
+ranging from small phones to large TV sets. Therefore, it’s important
+that you design your application to be compatible with all screen sizes so it’s available to as many
+users as possible.</p>
+
+<p>But being compatible with different device types is not enough. Each screen
+size offers different possibilities and challenges for user interaction, so in
+order to truly satisfy and impress your users, your application must go beyond merely
+<em>supporting</em> multiple screens: it must <em>optimize</em> the user
+experience for each screen configuration.</p>
+
+<p>This class shows you how to implement a user interface that's
+optimized for several screen configurations.</p>
+
+<p>The code in each lesson comes from a sample application that demonstrates best practices in
+optimizing for multiple screens. You can download the sample (to the right) and use it as a source
+of reusable code for your own application.</p>
+
+<p class="note"><strong>Note:</strong> This class and the associated sample use the <a
+href="{@docRoot}sdk/compatibility-library.html">support library</a> in order to use the {@link
+android.app.Fragment} APIs on versions lower than Android 3.0. You must download and add the
+library to your application in order to use all APIs in this class.</p>
+ 
+
+<h2>Lessons</h2> 
+ 
+<dl> 
+  <dt><b><a href="screensizes.html">Supporting Different Screen Sizes</a></b></dt> 
+    <dd>This lesson walks you through how to design layouts that adapts
+        several different screen sizes (using flexible dimensions for
+        views, {@link android.widget.RelativeLayout}, screen size and orientation qualifiers,
+        alias filters, and nine-patch bitmaps).</dd> 
+ 
+  <dt><b><a href="screendensities.html">Supporting Different Screen
+        Densities</a></b></dt> 
+    <dd>This lesson shows you how to support screens that have different
+        pixel densities (using density-independent pixels and providing
+        bitmaps appropriate for each density).</dd> 
+ 
+  <dt><b><a href="adaptui.html">Implementing Adaptative UI Flows</a></b></dt> 
+    <dd>This lesson shows you how to implement your UI flow in a way
+        that adapts to several screen size/density combinations
+        (run-time detection of active layout, reacting according to
+        current layout, handling screen configuration changes).</dd> 
+</dl> 
