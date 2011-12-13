@@ -178,15 +178,6 @@ public:
         mGammaTable = gammaTable;
     }
 
-    inline float* getMeshBuffer() {
-        checkInit();
-        return mTextMeshPtr;
-    }
-
-    inline int getMeshTexCoordsOffset() const {
-        return 2;
-    }
-
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
     bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, Rect* bounds);

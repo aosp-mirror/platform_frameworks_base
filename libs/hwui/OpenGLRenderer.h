@@ -498,6 +498,7 @@ private:
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
     void setupDrawWithExternalTexture();
+    void setupDrawNoTexture();
     void setupDrawAALine();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
@@ -530,6 +531,7 @@ private:
     void setupDrawTextureTransform();
     void setupDrawTextureTransformUniforms(mat4& transform);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
+    void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords);
     void setupDrawVertices(GLvoid* vertices);
     void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, GLvoid* lengthCoords,
             float strokeWidth);
@@ -601,8 +603,6 @@ private:
     GLuint mTextureUnit;
     // Track dirty regions, true by default
     bool mTrackDirtyRegions;
-    // Texture coordinates slot
-    int mTexCoordsSlot;
 
     friend class DisplayListRenderer;
 
