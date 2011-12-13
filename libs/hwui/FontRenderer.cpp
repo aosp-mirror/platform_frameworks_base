@@ -325,8 +325,6 @@ FontRenderer::FontRenderer() {
     mTextTexture = NULL;
 
     mIndexBufferID = 0;
-    mPositionAttrSlot = -1;
-    mTexcoordAttrSlot = -1;
 
     mCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
     mCacheHeight = DEFAULT_TEXT_CACHE_HEIGHT;
@@ -599,12 +597,6 @@ void FontRenderer::checkTextureUpdate() {
 void FontRenderer::issueDrawCommand() {
     checkTextureUpdate();
 
-    float* vtx = mTextMeshPtr;
-    float* tex = vtx + 2;
-
-    glVertexAttribPointer(mPositionAttrSlot, 2, GL_FLOAT, GL_FALSE, 16, vtx);
-    glVertexAttribPointer(mTexcoordAttrSlot, 2, GL_FLOAT, GL_FALSE, 16, tex);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
 
@@ -757,11 +749,6 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
 
     if (!mCurrentFont) {
         LOGE("No font set");
-        return false;
-    }
-
-    if (mPositionAttrSlot < 0 || mTexcoordAttrSlot < 0) {
-        LOGE("Font renderer unable to draw, attribute slots undefined");
         return false;
     }
 

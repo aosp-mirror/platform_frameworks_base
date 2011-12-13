@@ -26,7 +26,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // TODO: Program instance should be created from a factory method
-Program::Program(const char* vertex, const char* fragment) {
+Program::Program(const ProgramDescription& description, const char* vertex, const char* fragment) {
     mInitialized = false;
     mHasColorUniform = false;
     mUse = false;
@@ -43,6 +43,12 @@ Program::Program(const char* vertex, const char* fragment) {
             glAttachShader(mProgramId, mFragmentShader);
 
             position = bindAttrib("position", kBindingPosition);
+            if (description.hasTexture || description.hasExternalTexture) {
+                texCoords = bindAttrib("texCoords", kBindingTexCoords);
+            } else {
+                texCoords = -1;
+            }
+
             glLinkProgram(mProgramId);
 
             GLint status;

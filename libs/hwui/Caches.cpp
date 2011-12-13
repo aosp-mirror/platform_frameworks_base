@@ -73,6 +73,9 @@ void Caches::init() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
 
     mCurrentBuffer = meshBuffer;
+    mCurrentPositionPointer = this;
+    mCurrentTexCoordsPointer = this;
+
     mRegionMesh = NULL;
 
     blend = false;
@@ -218,22 +221,49 @@ void Caches::flush(FlushMode mode) {
 // VBO
 ///////////////////////////////////////////////////////////////////////////////
 
-void Caches::bindMeshBuffer() {
-    bindMeshBuffer(meshBuffer);
+bool Caches::bindMeshBuffer() {
+    return bindMeshBuffer(meshBuffer);
 }
 
-void Caches::bindMeshBuffer(const GLuint buffer) {
+bool Caches::bindMeshBuffer(const GLuint buffer) {
     if (mCurrentBuffer != buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         mCurrentBuffer = buffer;
+        return true;
     }
+    return false;
 }
 
-void Caches::unbindMeshBuffer() {
+bool Caches::unbindMeshBuffer() {
     if (mCurrentBuffer) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         mCurrentBuffer = 0;
+        return true;
     }
+    return false;
+}
+
+void Caches::bindPositionVertexPointer(bool force, GLuint slot, GLvoid* vertices, GLsizei stride) {
+    if (force || vertices != mCurrentPositionPointer) {
+        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
+        mCurrentPositionPointer = vertices;
+    }
+}
+
+void Caches::bindTexCoordsVertexPointer(bool force, GLuint slot, GLvoid* vertices) {
+    if (force || vertices != mCurrentTexCoordsPointer) {
+        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, gMeshStride, vertices);
+        mCurrentTexCoordsPointer = vertices;
+    }
+}
+
+void Caches::resetVertexPointers() {
+    mCurrentPositionPointer = this;
+    mCurrentTexCoordsPointer = this;
+}
+
+void Caches::resetTexCoordsVertexPointer() {
+    mCurrentTexCoordsPointer = this;
 }
 
 TextureVertex* Caches::getRegionMesh() {
