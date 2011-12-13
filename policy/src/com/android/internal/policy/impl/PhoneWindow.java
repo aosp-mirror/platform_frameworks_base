@@ -2582,6 +2582,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (targetPreHoneycomb || (targetPreIcs && targetHcNeedsOptions && noActionBar)) {
             addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
+        } else {
+            clearFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
         }
         
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
