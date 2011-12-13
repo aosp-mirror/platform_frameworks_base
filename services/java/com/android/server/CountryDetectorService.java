@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import com.android.server.location.ComprehensiveCountryDetector;
@@ -30,6 +32,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
 import android.util.Slog;
 
 /**
@@ -75,7 +79,7 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         }
     }
 
-    private final static String TAG = "CountryDetectorService";
+    private final static String TAG = "CountryDetector";
 
     private final HashMap<IBinder, Receiver> mReceivers;
     private final Context mContext;
@@ -200,5 +204,21 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     // For testing
     boolean isSystemReady() {
         return mSystemReady;
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        try {
+            final Printer p = new PrintWriterPrinter(fout);
+            p.println("CountryDetectorService state:");
+            p.println("  Number of listeners=" + mReceivers.keySet().size());
+            if (mCountryDetector == null) {
+                p.println("  ComprehensiveCountryDetector not initialized");
+            } else {
+                p.println("  " + mCountryDetector.toString());
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to dump CountryDetectorService: ", e);
+        }
     }
 }
