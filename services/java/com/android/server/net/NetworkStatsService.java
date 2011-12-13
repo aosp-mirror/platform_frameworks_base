@@ -1060,8 +1060,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // clear UID from current stats snapshot
-        mLastPollUidSnapshot = mLastPollUidSnapshot.withoutUid(uid);
-        mLastPollNetworkXtSnapshot = computeNetworkXtSnapshotFromUid(mLastPollUidSnapshot);
+        if (mLastPollUidSnapshot != null) {
+            mLastPollUidSnapshot = mLastPollUidSnapshot.withoutUid(uid);
+            mLastPollNetworkXtSnapshot = computeNetworkXtSnapshotFromUid(mLastPollUidSnapshot);
+        }
 
         // clear kernel stats associated with UID
         resetKernelUidStats(uid);
