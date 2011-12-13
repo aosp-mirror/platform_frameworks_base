@@ -3729,8 +3729,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;
         int diff = visibility ^ mLastSystemUiFlags;
-        final boolean needsMenu = (mFocusedWindow.getAttrs().flags
-                & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+        final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
         if (diff == 0 && mLastFocusNeedsMenu == needsMenu
                 && mFocusedApp == mFocusedWindow.getAppToken()) {
             return 0;
