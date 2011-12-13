@@ -68,6 +68,8 @@ public abstract class DataConnection extends StateMachine {
     private List<ApnContext> mApnList = null;
     PendingIntent mReconnectIntent = null;
 
+    private DataConnectionTracker mDataConnectionTracker = null;
+
     /**
      * Used internally for saving connecting parameters.
      */
@@ -201,6 +203,7 @@ public abstract class DataConnection extends StateMachine {
     protected static final int EVENT_DEACTIVATE_DONE = BASE + 3;
     protected static final int EVENT_DISCONNECT = BASE + 4;
     protected static final int EVENT_RIL_CONNECTED = BASE + 5;
+    protected static final int EVENT_DISCONNECT_ALL = BASE + 6;
 
     //***** Tag IDs for EventLog
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
@@ -233,10 +236,12 @@ public abstract class DataConnection extends StateMachine {
 
 
    //***** Constructor
-    protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm) {
+    protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm,
+            DataConnectionTracker dct) {
         super(name);
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
+        this.mDataConnectionTracker = dct;
         mId = id;
         mRetryMgr = rm;
         this.cid = -1;
@@ -315,11 +320,16 @@ public abstract class DataConnection extends StateMachine {
      *
      * @param dp is the DisconnectParams.
      */
-    private void notifyDisconnectCompleted(DisconnectParams dp) {
+    private void notifyDisconnectCompleted(DisconnectParams dp, boolean sendAll) {
         if (VDBG) log("NotifyDisconnectCompleted");
+
+        ApnContext alreadySent = null;
+        String reason = null;
 
         if (dp.onCompletedMsg != null) {
             Message msg = dp.onCompletedMsg;
+            alreadySent = (ApnContext)msg.obj;
+            reason = dp.reason;
             if (VDBG) {
                 log(String.format("msg=%s msg.obj=%s", msg.toString(),
                     ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
@@ -327,6 +337,17 @@ public abstract class DataConnection extends StateMachine {
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
         }
+        if (sendAll) {
+            for (ApnContext a : mApnList) {
+                if (a == alreadySent) continue;
+                if (reason != null) a.setReason(reason);
+                Message msg = mDataConnectionTracker.obtainMessage(
+                        DataConnectionTracker.EVENT_DISCONNECT_DONE, a);
+                AsyncResult.forMessage(msg);
+                msg.sendToTarget();
+            }
+        }
+
         if (DBG) log("NotifyDisconnectCompleted DisconnectParams=" + dp);
     }
 
@@ -705,6 +726,13 @@ public abstract class DataConnection extends StateMachine {
                     deferMessage(msg);
                     break;
 
+                case EVENT_DISCONNECT_ALL:
+                    if (DBG) {
+                        log("DcDefaultState deferring msg.what=EVENT_DISCONNECT_ALL" + mRefCount);
+                    }
+                    deferMessage(msg);
+                    break;
+
                 case EVENT_RIL_CONNECTED:
                     ar = (AsyncResult)msg.obj;
                     if (ar.exception == null) {
@@ -770,7 +798,7 @@ public abstract class DataConnection extends StateMachine {
             }
             if (mDisconnectParams != null) {
                 if (VDBG) log("DcInactiveState: enter notifyDisconnectCompleted");
-                notifyDisconnectCompleted(mDisconnectParams);
+                notifyDisconnectCompleted(mDisconnectParams, true);
             }
             clearSettings();
         }
@@ -811,7 +839,13 @@ public abstract class DataConnection extends StateMachine {
 
                 case EVENT_DISCONNECT:
                     if (DBG) log("DcInactiveState: msg.what=EVENT_DISCONNECT");
-                    notifyDisconnectCompleted((DisconnectParams)msg.obj);
+                    notifyDisconnectCompleted((DisconnectParams)msg.obj, false);
+                    retVal = HANDLED;
+                    break;
+
+                case EVENT_DISCONNECT_ALL:
+                    if (DBG) log("DcInactiveState: msg.what=EVENT_DISCONNECT_ALL");
+                    notifyDisconnectCompleted((DisconnectParams)msg.obj, false);
                     retVal = HANDLED;
                     break;
 
@@ -988,9 +1022,21 @@ public abstract class DataConnection extends StateMachine {
                         transitionTo(mDisconnectingState);
                     } else {
                         if (msg.obj != null) {
-                            notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                            notifyDisconnectCompleted((DisconnectParams) msg.obj, false);
                         }
                     }
+                    retVal = HANDLED;
+                    break;
+
+                case EVENT_DISCONNECT_ALL:
+                    if (DBG) {
+                        log("DcActiveState msg.what=EVENT_DISCONNECT_ALL RefCount=" + mRefCount);
+                    }
+                    mRefCount = 0;
+                    DisconnectParams dp = (DisconnectParams) msg.obj;
+                    dp.tag = mTag;
+                    tearDownData(dp);
+                    transitionTo(mDisconnectingState);
                     retVal = HANDLED;
                     break;
 
@@ -1122,5 +1168,17 @@ public abstract class DataConnection extends StateMachine {
      */
     public void tearDown(String reason, Message onCompletedMsg) {
         sendMessage(obtainMessage(EVENT_DISCONNECT, new DisconnectParams(reason, onCompletedMsg)));
+    }
+
+    /**
+     * Tear down the connection through the apn on the network.  Ignores refcount and
+     * and always tears down.
+     *
+     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
+     *        With AsyncResult.userObj set to the original msg.obj.
+     */
+    public void tearDownAll(String reason, Message onCompletedMsg) {
+        sendMessage(obtainMessage(EVENT_DISCONNECT_ALL,
+                new DisconnectParams(reason, onCompletedMsg)));
     }
 }

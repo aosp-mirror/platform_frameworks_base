@@ -20,6 +20,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
@@ -32,8 +33,9 @@ public class CdmaDataConnection extends DataConnection {
     private static final String LOG_TAG = "CDMA";
 
     // ***** Constructor
-    private CdmaDataConnection(CDMAPhone phone, String name, int id, RetryManager rm) {
-        super(phone, name, id, rm);
+    private CdmaDataConnection(CDMAPhone phone, String name, int id, RetryManager rm,
+            DataConnectionTracker dct) {
+        super(phone, name, id, rm, dct);
     }
 
     /**
@@ -44,12 +46,13 @@ public class CdmaDataConnection extends DataConnection {
      * @param rm the RetryManager
      * @return CdmaDataConnection that was created.
      */
-    static CdmaDataConnection makeDataConnection(CDMAPhone phone, int id, RetryManager rm) {
+    static CdmaDataConnection makeDataConnection(CDMAPhone phone, int id, RetryManager rm,
+            DataConnectionTracker dct) {
         synchronized (mCountLock) {
             mCount += 1;
         }
         CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDC-" + mCount,
-                id, rm);
+                id, rm, dct);
         cdmaDc.start();
         if (DBG) cdmaDc.log("Made " + cdmaDc.getName());
         return cdmaDc;

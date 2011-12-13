@@ -1031,9 +1031,14 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 if ((ni.isConnectedOrConnecting() == true) &&
                         !network.isTeardownRequested()) {
                     if (ni.isConnected() == true) {
-                        // add the pid-specific dns
-                        handleDnsConfigurationChange(usedNetworkType);
-                        if (VDBG) log("special network already active");
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            // add the pid-specific dns
+                            handleDnsConfigurationChange(usedNetworkType);
+                            if (VDBG) log("special network already active");
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
                         return Phone.APN_ALREADY_ACTIVE;
                     }
                     if (VDBG) log("special network already connecting");
@@ -1221,6 +1226,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
         }
 
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
+            if (DBG) log("requestRouteToHostAddress on invalid network: " + networkType);
             return false;
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
@@ -1233,11 +1239,16 @@ private NetworkStateTracker makeWimaxStateTracker() {
             }
             return false;
         }
+        final long token = Binder.clearCallingIdentity();
         try {
             InetAddress addr = InetAddress.getByAddress(hostAddress);
             LinkProperties lp = tracker.getLinkProperties();
             return addRouteToAddress(lp, addr);
-        } catch (UnknownHostException e) {}
+        } catch (UnknownHostException e) {
+            if (DBG) log("requestRouteToHostAddress got " + e.toString());
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return false;
     }
 
@@ -1277,7 +1288,10 @@ private NetworkStateTracker makeWimaxStateTracker() {
 
     private boolean modifyRoute(String ifaceName, LinkProperties lp, RouteInfo r, int cycleCount,
             boolean doAdd, boolean toDefaultTable) {
-        if ((ifaceName == null) || (lp == null) || (r == null)) return false;
+        if ((ifaceName == null) || (lp == null) || (r == null)) {
+            if (DBG) log("modifyRoute got unexpected null: " + ifaceName + ", " + lp + ", " + r);
+            return false;
+        }
 
         if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
             loge("Error modifying route - too much recursion");
@@ -1309,7 +1323,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 }
             } catch (Exception e) {
                 // never crash - catch them all
-                if (VDBG) loge("Exception trying to add a route: " + e);
+                if (DBG) loge("Exception trying to add a route: " + e);
                 return false;
             }
         } else {
@@ -1323,7 +1337,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                         mNetd.removeRoute(ifaceName, r);
                     } catch (Exception e) {
                         // never crash - catch them all
-                        if (VDBG) loge("Exception trying to remove a route: " + e);
+                        if (DBG) loge("Exception trying to remove a route: " + e);
                         return false;
                     }
                 } else {
@@ -1335,7 +1349,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                     mNetd.removeSecondaryRoute(ifaceName, r);
                 } catch (Exception e) {
                     // never crash - catch them all
-                    if (VDBG) loge("Exception trying to remove a route: " + e);
+                    if (DBG) loge("Exception trying to remove a route: " + e);
                     return false;
                 }
             }
@@ -1998,7 +2012,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                         mNetd.removeRoute(ifaceName, r);
                     } catch (Exception e) {
                         // never crash - catch them all
-                        if (VDBG) loge("Exception trying to remove a route: " + e);
+                        if (DBG) loge("Exception trying to remove a route: " + e);
                     }
                 }
             }
@@ -2212,7 +2226,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
                 mNetd.setDefaultInterfaceForDns(iface);
             } catch (Exception e) {
-                if (VDBG) loge("exception setting default dns interface: " + e);
+                if (DBG) loge("exception setting default dns interface: " + e);
             }
         }
         if (!domains.equals(SystemProperties.get("net.dns.search"))) {
@@ -2242,7 +2256,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
                     mNetd.setDnsServersForInterface(p.getInterfaceName(),
                             NetworkUtils.makeStrings(dnses));
                 } catch (Exception e) {
-                    if (VDBG) loge("exception setting dns servers: " + e);
+                    if (DBG) loge("exception setting dns servers: " + e);
                 }
                 // set per-pid dns for attached secondary nets
                 List pids = mNetRequestersPids[netType];
