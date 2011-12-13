@@ -102,6 +102,11 @@ class TextLine {
         tl.mText = null;
         tl.mPaint = null;
         tl.mDirections = null;
+
+        tl.mMetricAffectingSpanSpanSet.recycle();
+        tl.mCharacterStyleSpanSet.recycle();
+        tl.mReplacementSpanSpanSet.recycle();
+
         synchronized(sCached) {
             for (int i = 0; i < sCached.length; ++i) {
                 if (sCached[i] == null) {
@@ -918,6 +923,12 @@ class TextLine {
                 if (spanEnd > start && spanEnd < limit) limit = spanEnd;
             }
             return limit;
+        }
+
+        public void recycle() {
+            for (int i = 0; i < numberOfSpans; i++) {
+                spans[i] = null; // prevent a leak: no reference kept when TextLine is recycled
+            }
         }
     }
 
