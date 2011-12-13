@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 73;
+    private static final int DATABASE_VERSION = 74;
 
     private Context mContext;
 
@@ -986,6 +986,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 73;
         }
 
+        if (upgradeVersion == 73) {
+            // update vibration settings
+            upgradeVibrateSettingFromNone(db);
+            upgradeVersion = 74;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1088,6 +1094,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         } else {
             c.close();
+        }
+    }
+
+    private void upgradeVibrateSettingFromNone(SQLiteDatabase db) {
+        int vibrateSetting = getIntValueFromSystem(db, Settings.System.VIBRATE_ON, 0);
+        // If the ringer vibrate value is invalid, set it to the default
+        if ((vibrateSetting & 3) == AudioManager.VIBRATE_SETTING_OFF) {
+            vibrateSetting = AudioService.getValueForVibrateSetting(0,
+                    AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
+        }
+        // Apply the same setting to the notification vibrate value
+        vibrateSetting = AudioService.getValueForVibrateSetting(vibrateSetting,
+                AudioManager.VIBRATE_TYPE_NOTIFICATION, vibrateSetting);
+
+        SQLiteStatement stmt = null;
+        try {
+            stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                    + " VALUES(?,?);");
+            loadSetting(stmt, Settings.System.VIBRATE_ON, vibrateSetting);
+        } finally {
+            if (stmt != null)
+                stmt.close();
         }
     }
 
