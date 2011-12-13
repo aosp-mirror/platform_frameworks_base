@@ -1306,8 +1306,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             }
 
             if (mFaceLockAreaView != null) {
+                int[] faceLockPosition;
+                faceLockPosition = new int[2];
+                mFaceLockAreaView.getLocationInWindow(faceLockPosition);
                 startFaceLock(mFaceLockAreaView.getWindowToken(),
-                        mFaceLockAreaView.getLeft(), mFaceLockAreaView.getTop(),
+                        faceLockPosition[0], faceLockPosition[1],
                         mFaceLockAreaView.getWidth(), mFaceLockAreaView.getHeight());
             }
         }
@@ -1325,14 +1328,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
     };
 
     // Tells the FaceLock service to start displaying its UI and perform recognition
-    public void startFaceLock(IBinder windowToken, int x, int y, int h, int w)
+    public void startFaceLock(IBinder windowToken, int x, int y, int w, int h)
     {
         if (usingFaceLock()) {
             synchronized (mFaceLockServiceRunningLock) {
                 if (!mFaceLockServiceRunning) {
                     if (DEBUG) Log.d(TAG, "Starting FaceLock");
                     try {
-                        mFaceLockService.startUi(windowToken, x, y, h, w);
+                        mFaceLockService.startUi(windowToken, x, y, w, h);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Caught exception starting FaceLock: " + e.toString());
                         return;
