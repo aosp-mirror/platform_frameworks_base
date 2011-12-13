@@ -97,19 +97,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mCookie = hashCode();
     }
 
-    private void setLocale(Locale locale) {
+    private void resetSession() {
         closeSession();
-        final TextServicesManager textServicesManager = (TextServicesManager)
-                mTextView.getContext().getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        if (!textServicesManager.isSpellCheckerEnabled()) {
+
+        mTextServicesManager = (TextServicesManager) mTextView.getContext().
+                getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
+        if (!mTextServicesManager.isSpellCheckerEnabled()) {
             mSpellCheckerSession = null;
         } else {
-            mSpellCheckerSession = textServicesManager.newSpellCheckerSession(
+            mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
                     null /* Bundle not currently used by the textServicesManager */,
-                    locale, this,
+                    mCurrentLocale, this,
                     false /* means any available languages from current spell checker */);
         }
-        mCurrentLocale = locale;
 
         // Restore SpellCheckSpans in pool
         for (int i = 0; i < mLength; i++) {
@@ -118,9 +118,19 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
         mLength = 0;
 
-        mSpellParsers = new SpellParser[0];
+        // Remove existing misspelled SuggestionSpans
+        mTextView.removeMisspelledSpans((Editable) mTextView.getText());
+    }
 
-        // This class is the global listener for locale change: warn other locale-aware objects
+    private void setLocale(Locale locale) {
+        mCurrentLocale = locale;
+
+        resetSession();
+
+        // Change SpellParsers' wordIterator locale
+        mWordIterator = new WordIterator(locale);
+
+        // This class is the listener for locale change: warn other locale-aware objects
         mTextView.onLocaleChanged();
     }
 
@@ -137,10 +147,6 @@ public class SpellChecker implements SpellCheckerSessionListener {
             mSpellCheckerSession.close();
         }
 
-        stopAllSpellParsers();
-    }
-
-    private void stopAllSpellParsers() {
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             mSpellParsers[i].stop();
@@ -198,6 +204,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
             // Re-check the entire text
             start = 0;
             end = mTextView.getText().length();
+        } else {
+            final boolean spellCheckerActivated = mTextServicesManager.isSpellCheckerEnabled();
+            if (isSessionActive() != spellCheckerActivated) {
+                // Spell checker has been turned of or off since last spellCheck
+                resetSession();
+            }
         }
 
         if (!isSessionActive()) return;
@@ -206,7 +218,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int length = mSpellParsers.length;
         for (int i = 0; i < length; i++) {
             final SpellParser spellParser = mSpellParsers[i];
-            if (!spellParser.isParsing()) {
+            if (spellParser.isFinished()) {
                 spellParser.init(start, end);
                 spellParser.parse();
                 return;
@@ -309,7 +321,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     final int length = mSpellParsers.length;
                     for (int i = 0; i < length; i++) {
                         final SpellParser spellParser = mSpellParsers[i];
-                        if (!spellParser.isParsing()) {
+                        if (!spellParser.isFinished()) {
                             spellParser.parse();
                             break; // run one spell parser at a time to bound running time
                         }
@@ -395,12 +407,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
             setRangeSpan((Editable) mTextView.getText(), start, end);
         }
 
-        public void stop() {
-            removeRangeSpan((Editable) mTextView.getText());
+        public boolean isFinished() {
+            return ((Editable) mTextView.getText()).getSpanStart(mRange) < 0;
         }
 
-        public boolean isParsing() {
-            return ((Editable) mTextView.getText()).getSpanStart(mRange) >= 0;
+        public void stop() {
+            removeRangeSpan((Editable) mTextView.getText());
         }
 
         private void setRangeSpan(Editable editable, int start, int end) {
