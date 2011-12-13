@@ -1,0 +1,72 @@
+page.title=Creating and Maintaining Multiple APKs
+
+trainingnavtop=true
+startpage=true
+next.title=Creating Multiple APKs for Different API Levels
+next.link=api.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+
+<ul>
+  <li>Android 1.0 and higher</li>
+  <li>You must have an <a href="http://market.android.com/publish">Android Market</a> publisher
+account</li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://developer.android.com/guide/market/publishing/multiple-apks.html">Multiple APK
+Support</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>Multiple APK support is a feature in Android Market that allows you to publish multiple APKs
+under the same application listing.  Each APK is a complete instance of your application, optimized
+to target specific device configurations.  Each APK can target a specific set of GL
+textures, API levels, screen sizes, or some combination thereof.</p>
+
+<p>This class shows you how to write your multiple APK application using any one of these
+configuration variables.  Each lesson covers basics about how to organize your codebase and target
+the right devices, as well as the smart way to avoid pitfalls such as unnecessary redundancy across
+your codebase, and making mistakes in your manifest that could render an APK invisible to all
+devices in Android Market.  By going through any of these lessons, you'll know how to develop
+multiple APKs the smart way, make sure they're targeting the devices you want them to,
+and know how to catch mistakes <em>before</em> your app goes live.</p>
+
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><b><a href="api.html">Creating Multiple APKs for Different API Levels</a></b></dt>
+    <dd>Learn how to target different versions of the Android platform using multiple APKs.  Also
+learn how to organize your codebase, what to do with your manifest, and how to investigate your APK
+configuration using the <code>aapt</code> tool before pushing live.</dd>
+
+  <dt><b><a href="screensize.html">Creating Multiple APKs for Different Screen Sizes</a></b></dt>
+    <dd>Learn how to target Android devices by screen size using multiple APKs.  Also learn how to
+organize your codebase, what to do with your manifest, and how to investigate your APK configuration
+using the <code>aapt</code> tool before pushing live.</dd>
+
+  <dt><b><a href="texture.html">Creating Multiple APKs for Different GL Textures</a></b></dt>
+        <dd>Learn how to target Android devices based on their support for GL texture.  Also learn
+how to organize your codebase, what to do with your manifest, and how to investigate your APK
+configuration using the <code>aapt</code> tool before pushing live.</dd>
+
+  <dt><b><a href="multiple.html">Creating Multiple APKs with 2+ Dimensions</a></b></dt>
+        <dd>Learn how to target different Android devices based on more than one configuration
+variable (screen size, API version, GL texture).  Examples in the lesson target using a combination
+of API level and screen size.  Also learn how to organize your codebase, what to do with your
+manifest, and how to investigate your APK configuration using the <code>aapt</code> tool before
+pushing live.</dd>
+</dl>
