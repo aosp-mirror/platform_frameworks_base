@@ -57,7 +57,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     mState.resampleTemp = NULL;
     mState.hook         = process__nop;
     track_t* t = mState.tracks;
-    for (int i=0 ; i<32 ; i++) {
+    for (unsigned i=0 ; i < MAX_NUM_TRACKS ; i++) {
         t->needs = 0;
         t->volume[0] = UNITY_GAIN;
         t->volume[1] = UNITY_GAIN;
@@ -90,7 +90,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
 AudioMixer::~AudioMixer()
 {
     track_t* t = mState.tracks;
-    for (int i=0 ; i<32 ; i++) {
+    for (unsigned i=0 ; i < MAX_NUM_TRACKS ; i++) {
         delete t->resampler;
         t++;
     }
@@ -319,7 +319,7 @@ void AudioMixer::track_t::resetResampler()
 inline
 void AudioMixer::track_t::adjustVolumeRamp(bool aux)
 {
-    for (int i=0 ; i<2 ; i++) {
+    for (int i=0 ; i<MAX_NUM_CHANNELS ; i++) {
         if (((volumeInc[i]>0) && (((prevVolume[i]+volumeInc[i])>>16) >= volume[i])) ||
             ((volumeInc[i]<0) && (((prevVolume[i]+volumeInc[i])>>16) <= volume[i]))) {
             volumeInc[i] = 0;

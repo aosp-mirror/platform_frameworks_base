@@ -47,7 +47,7 @@ public:
 
     enum { // names
 
-        // track units (32 units)
+        // track units (MAX_NUM_TRACKS units)
         TRACK0          = 0x1000,
 
         // 0x2000 is unused
@@ -132,13 +132,13 @@ private:
         uint32_t    needs;
 
         union {
-        int16_t     volume[2];      // [0]3.12 fixed point
+        int16_t     volume[MAX_NUM_CHANNELS]; // [0]3.12 fixed point
         int32_t     volumeRL;
         };
 
-        int32_t     prevVolume[2];
+        int32_t     prevVolume[MAX_NUM_CHANNELS];
 
-        int32_t     volumeInc[2];
+        int32_t     volumeInc[MAX_NUM_CHANNELS];
         int32_t     auxLevel;
         int32_t     auxInc;
         int32_t     prevAuxLevel;
@@ -177,7 +177,7 @@ private:
         int32_t         *outputTemp;
         int32_t         *resampleTemp;
         int32_t         reserved[2];
-        track_t         tracks[32]; __attribute__((aligned(32)));
+        track_t         tracks[MAX_NUM_TRACKS]; __attribute__((aligned(32)));
     };
 
     int             mActiveTrack;
