@@ -391,6 +391,16 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         return mArguments;
     }
 
+    /**
+     * Add a {@link TestListener}
+     * @hide
+     */
+    protected void addTestListener(TestListener listener){
+        if(mTestRunner!=null && listener!=null){
+            mTestRunner.addTestListener(listener);
+        }
+    }
+
     List<Predicate<TestMethod>> getBuilderRequirements() {
         return new ArrayList<Predicate<TestMethod>>();
     }
