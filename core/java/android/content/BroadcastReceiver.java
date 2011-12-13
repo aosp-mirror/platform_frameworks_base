@@ -28,11 +28,21 @@ import android.util.Slog;
 
 /**
  * Base class for code that will receive intents sent by sendBroadcast().
- * You can either dynamically register an instance of this class with
+ *
+ * <p>If you don't need to send broadcasts across applications, consider using
+ * this class with {@link android.support.v4.content.LocalBroadcastManager} instead
+ * of the more general facilities described below.  This will give you a much
+ * more efficient implementation (no cross-process communication needed) and allow
+ * you to avoid thinking about any security issues related to other applications
+ * being able to receive or send your broadcasts.
+ *
+ * <p>You can either dynamically register an instance of this class with
  * {@link Context#registerReceiver Context.registerReceiver()}
  * or statically publish an implementation through the
  * {@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}
- * tag in your <code>AndroidManifest.xml</code>. <em><strong>Note:</strong></em>
+ * tag in your <code>AndroidManifest.xml</code>.
+ * 
+ * <p><em><strong>Note:</strong></em>
  * &nbsp;&nbsp;&nbsp;If registering a receiver in your
  * {@link android.app.Activity#onResume() Activity.onResume()}
  * implementation, you should unregister it in 
@@ -86,8 +96,8 @@ import android.util.Slog;
  * 
  * <p>Topics covered here:
  * <ol>
+ * <li><a href="#Security">Security</a>
  * <li><a href="#ReceiverLifecycle">Receiver Lifecycle</a>
- * <li><a href="#Permissions">Permissions</a>
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * </ol>
  *
@@ -97,6 +107,63 @@ import android.util.Slog;
  * <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
  * developer guide.</p>
  * </div>
+ *
+ * <a name="Security"></a>
+ * <h3>Security</h3>
+ *
+ * <p>Receivers used with the {@link Context} APIs are by their nature a
+ * cross-application facility, so you must consider how other applications
+ * may be able to abuse your use of them.  Some things to consider are:
+ *
+ * <ul>
+ * <li><p>The Intent namespace is global.  Make sure that Intent action names and
+ * other strings are written in a namespace you own, or else you may inadvertantly
+ * conflict with other applications.
+ * <li><p>When you use {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)},
+ * <em>any</em> application may send broadcasts to that registered receiver.  You can
+ * control who can send broadcasts to it through permissions described below.
+ * <li><p>When you publish a receiver in your application's manifest and specify
+ * intent-filters for it, any other application can send broadcasts to it regardless
+ * of the filters you specify.  To prevent others from sending to it, make it
+ * unavailable to them with <code>android:exported="false"</code>.
+ * <li><p>When you use {@link Context#sendBroadcast(Intent)} or related methods,
+ * normally any other application can receive these broadcasts.  You can control who
+ * can receive such broadcasts through permissions described below.  Alternatively,
+ * starting with {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, you
+ * can also safely restrict the broadcast to a single application with
+ * {@link Intent#setPackage(String) Intent.setPackage}
+ * </ul>
+ *
+ * <p>None of these issues exist when using
+ * {@link android.support.v4.content.LocalBroadcastManager}, since intents
+ * broadcast it never go outside of the current process.
+ *
+ * <p>Access permissions can be enforced by either the sender or receiver
+ * of a broadcast.
+ *
+ * <p>To enforce a permission when sending, you supply a non-null
+ * <var>permission</var> argument to
+ * {@link Context#sendBroadcast(Intent, String)} or
+ * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, Bundle)}.
+ * Only receivers who have been granted this permission
+ * (by requesting it with the
+ * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
+ * tag in their <code>AndroidManifest.xml</code>) will be able to receive
+ * the broadcast.
+ *
+ * <p>To enforce a permission when receiving, you supply a non-null
+ * <var>permission</var> when registering your receiver -- either when calling
+ * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter, String, android.os.Handler)}
+ * or in the static
+ * {@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}
+ * tag in your <code>AndroidManifest.xml</code>.  Only broadcasters who have
+ * been granted this permission (by requesting it with the
+ * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
+ * tag in their <code>AndroidManifest.xml</code>) will be able to send an
+ * Intent to the receiver.
+ *
+ * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
+ * document for more information on permissions and security in general.
  *
  * <a name="ReceiverLifecycle"></a>
  * <h3>Receiver Lifecycle</h3>
@@ -117,37 +184,7 @@ import android.util.Slog;
  * {@link android.app.NotificationManager} API.  For the latter, you can
  * use {@link android.content.Context#startService Context.startService()} to
  * send a command to the service.
- * 
- * <a name="Permissions"></a>
- * <h3>Permissions</h3>
- * 
- * <p>Access permissions can be enforced by either the sender or receiver
- * of an Intent.
- * 
- * <p>To enforce a permission when sending, you supply a non-null
- * <var>permission</var> argument to
- * {@link Context#sendBroadcast(Intent, String)} or
- * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, Bundle)}.
- * Only receivers who have been granted this permission
- * (by requesting it with the
- * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
- * tag in their <code>AndroidManifest.xml</code>) will be able to receive
- * the broadcast.
- * 
- * <p>To enforce a permission when receiving, you supply a non-null
- * <var>permission</var> when registering your receiver -- either when calling
- * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter, String, android.os.Handler)}
- * or in the static
- * {@link android.R.styleable#AndroidManifestReceiver &lt;receiver&gt;}
- * tag in your <code>AndroidManifest.xml</code>.  Only broadcasters who have
- * been granted this permission (by requesting it with the
- * {@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
- * tag in their <code>AndroidManifest.xml</code>) will be able to send an
- * Intent to the receiver.
- * 
- * <p>See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
- * document for more information on permissions and security in general.
- * 
+ *
  * <a name="ProcessLifecycle"></a>
  * <h3>Process Lifecycle</h3>
  * 
