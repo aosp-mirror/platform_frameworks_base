@@ -540,6 +540,8 @@ public class AudioManager {
     public void adjustStreamVolume(int streamType, int direction, int flags) {
         IAudioService service = getService();
         try {
+            Log.d(TAG, "adjustStreamVolume mUseMasterVolume=" + mUseMasterVolume
+                    + " direction=" + direction + " flags=0x" + Integer.toHexString(flags));
             if (mUseMasterVolume) {
                 service.adjustMasterVolume(direction, flags);
             } else {
