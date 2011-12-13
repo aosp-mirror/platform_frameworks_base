@@ -150,7 +150,12 @@ static void sortToBucket(SgDrawable *obj) {
     }
     const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     if (rsIsObject(renderState->ps)) {
-        gBackToFront[gBackToFrontCount++] = (uint32_t)obj;
+        if ((rsgProgramStoreGetBlendSrcFunc(renderState->ps) == RS_BLEND_SRC_ONE) &&
+            (rsgProgramStoreGetBlendDstFunc(renderState->ps) == RS_BLEND_DST_ZERO)) {
+            gFrontToBack[gFrontToBackCount++] = (uint32_t)obj;
+        } else {
+            gBackToFront[gBackToFrontCount++] = (uint32_t)obj;
+        }
     } else {
         gFrontToBack[gFrontToBackCount++] = (uint32_t)obj;
     }

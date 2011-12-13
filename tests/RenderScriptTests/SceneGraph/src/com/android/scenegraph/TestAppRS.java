@@ -310,7 +310,7 @@ public class TestAppRS {
         mPF_Texture.bindConstants(mFsConst.getAllocation(), 0);
         mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
 
-        GaussianBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
+        FullscreenBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
     }
 
     // This needs to be cleaned up a bit, it's one of the default render state objects
@@ -366,7 +366,7 @@ public class TestAppRS {
         int numDraw = allDraw.size();
 
         if (mUseBlur) {
-            GaussianBlur.addBlurPasses(mActiveScene, mRS, mSceneManager);
+            FullscreenBlur.addBlurPasses(mActiveScene, mRS, mSceneManager);
         }
 
         RenderPass mainPass = new RenderPass();
@@ -381,7 +381,7 @@ public class TestAppRS {
         mActiveScene.appendRenderPass(mainPass);
 
         if (mUseBlur) {
-            GaussianBlur.addCompositePass(mActiveScene, mRS, mSceneManager);
+            FullscreenBlur.addCompositePass(mActiveScene, mRS, mSceneManager);
         }
     }
 
@@ -431,7 +431,7 @@ public class TestAppRS {
 
     private void initRS() {
 
-        GaussianBlur.createRenderTargets(mRS, mWidth, mHeight);
+        FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
         initPaintShaders();
         new ImageLoaderTask().execute();
 
