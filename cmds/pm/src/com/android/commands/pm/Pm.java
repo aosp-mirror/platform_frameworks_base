@@ -212,6 +212,7 @@ public final class Pm {
         int getFlags = 0;
         boolean listDisabled = false, listEnabled = false;
         boolean listSystem = false, listThirdParty = false;
+        boolean listInstaller = false;
         try {
             String opt;
             while ((opt=nextOption()) != null) {
@@ -229,6 +230,8 @@ public final class Pm {
                     listSystem = true;
                 } else if (opt.equals("-3")) {
                     listThirdParty = true;
+                } else if (opt.equals("-i")) {
+                    listInstaller = true;
                 } else if (opt.equals("-u")) {
                     getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
                 } else {
@@ -265,7 +268,12 @@ public final class Pm {
                         System.out.print(info.applicationInfo.sourceDir);
                         System.out.print("=");
                     }
-                    System.out.println(info.packageName);
+                    System.out.print(info.packageName);
+                    if (listInstaller) {
+                        System.out.print("  installer=");
+                        System.out.print(mPm.getInstallerPackageName(info.packageName));
+                    }
+                    System.out.println();
                 }
             }
         } catch (RemoteException e) {
@@ -1109,7 +1117,7 @@ public final class Pm {
     }
 
     private static void showUsage() {
-        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-e] [-u] [FILTER]");
+        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-3] [-i] [-u] [FILTER]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
@@ -1134,6 +1142,7 @@ public final class Pm {
         System.err.println("    -e: filter to only show enabled packages.");
         System.err.println("    -s: filter to only show system packages.");
         System.err.println("    -3: filter to only show third party packages.");
+        System.err.println("    -i: see the installer for the packages.");
         System.err.println("    -u: also include uninstalled packages.");
         System.err.println("");
         System.err.println("pm list permission-groups: prints all known permission groups.");
