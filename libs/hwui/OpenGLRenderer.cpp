@@ -133,8 +133,6 @@ OpenGLRenderer::~OpenGLRenderer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setViewport(int width, int height) {
-    glDisable(GL_DITHER);
-    glViewport(0, 0, width, height);
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
     mWidth = width;
@@ -144,6 +142,13 @@ void OpenGLRenderer::setViewport(int width, int height) {
     mFirstSnapshot->viewport.set(0, 0, width, height);
 
     mDirtyClip = false;
+
+    glDisable(GL_DITHER);
+    glViewport(0, 0, width, height);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    glEnableVertexAttribArray(Program::kBindingPosition);
 }
 
 void OpenGLRenderer::prepare(bool opaque) {
@@ -159,14 +164,11 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
 
     mSaveCount = 1;
 
-    glViewport(0, 0, mWidth, mHeight);
-
     glEnable(GL_SCISSOR_TEST);
     glScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
     mSnapshot->setClip(left, top, right, bottom);
 
     if (!opaque) {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
 }
@@ -207,6 +209,8 @@ void OpenGLRenderer::resume() {
 
     glViewport(0, 0, snapshot->viewport.getWidth(), snapshot->viewport.getHeight());
 
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
     glEnable(GL_SCISSOR_TEST);
     dirtyClip();
 
@@ -214,6 +218,8 @@ void OpenGLRenderer::resume() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glEnableVertexAttribArray(Program::kBindingPosition);
 
     mCaches.blend = true;
     glEnable(GL_BLEND);
@@ -556,7 +562,6 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
     glScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
             clip.getWidth() + 2.0f, clip.getHeight() + 2.0f);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     dirtyClip();

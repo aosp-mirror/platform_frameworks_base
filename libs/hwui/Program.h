@@ -33,6 +33,11 @@ namespace uirenderer {
  */
 class Program {
 public:
+    enum ShaderBindings {
+        kBindingPosition,
+        kBindingTexCoords
+    };
+
     /**
      * Creates a new program with the specified vertex and fragment
      * shaders sources.
@@ -107,6 +112,11 @@ protected:
     int addAttrib(const char* name);
 
     /**
+     * Binds the specified attribute name to the specified slot.
+     */
+    int bindAttrib(const char* name, ShaderBindings bindingSlot);
+
+    /**
      * Adds a uniform with the specified name.
      *
      * @return The OpenGL name of the uniform.
@@ -121,8 +131,10 @@ private:
      */
     GLuint buildShader(const char* source, GLenum type);
 
-    // Name of the OpenGL program
+    // Name of the OpenGL program and shaders
     GLuint mProgramId;
+    GLuint mVertexShader;
+    GLuint mFragmentShader;
 
     // Keeps track of attributes and uniforms slots
     KeyedVector<const char*, int> mAttributes;
