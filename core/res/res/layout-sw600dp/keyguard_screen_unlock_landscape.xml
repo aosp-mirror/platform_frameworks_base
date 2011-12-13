@@ -72,48 +72,65 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical|center_horizontal">
 
-        <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
-            android:layout_width="354dip"
-            android:layout_height="354dip"
-            android:layout_gravity="center_vertical"
-        />
-
-        <!-- Emergency and forgot pattern buttons. -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lockPattern"
-            android:layout_alignLeft="@id/lockPattern"
-            android:layout_alignRight="@id/lockPattern"
-            android:layout_marginTop="28dip"
-            android:gravity="center"
-            style="?android:attr/buttonBarStyle"
-            android:weightSum="2">
+            android:layout_centerInParent="true"
+            android:gravity="center_vertical|center_horizontal">
 
-            <Button android:id="@+id/forgotPatternButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                style="?android:attr/buttonBarButtonStyle"
-                android:drawableLeft="@drawable/lockscreen_forgot_password_button"
-                android:drawablePadding="8dip"
-                android:text="@string/lockscreen_forgot_pattern_button_text"
-                android:visibility="gone"
+            <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
+                android:layout_width="354dip"
+                android:layout_height="354dip"
+                android:layout_gravity="center_vertical"
             />
 
-            <Button android:id="@+id/emergencyCallButton"
-                android:layout_width="wrap_content"
+            <!-- Emergency and forgot pattern buttons. -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                style="?android:attr/buttonBarButtonStyle"
-                android:drawableLeft="@drawable/ic_emergency"
-                android:drawablePadding="8dip"
-                android:text="@string/lockscreen_emergency_call"
-                android:visibility="gone"
-            />
+                android:orientation="horizontal"
+                android:layout_below="@id/lockPattern"
+                android:layout_alignLeft="@id/lockPattern"
+                android:layout_alignRight="@id/lockPattern"
+                android:layout_marginTop="28dip"
+                style="?android:attr/buttonBarStyle"
+                android:gravity="center"
+                android:weightSum="2">
 
-        </LinearLayout>
+                <Button android:id="@+id/forgotPatternButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:drawableLeft="@drawable/lockscreen_forgot_password_button"
+                    android:drawablePadding="8dip"
+                    android:text="@string/lockscreen_forgot_pattern_button_text"
+                    android:visibility="gone"
+                />
+
+                <Button android:id="@+id/emergencyCallButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:drawableLeft="@drawable/ic_emergency"
+                    android:drawablePadding="8dip"
+                    android:text="@string/lockscreen_emergency_call"
+                    android:visibility="gone"
+                />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <!-- Area to overlay FaceLock -->
+        <View android:id="@+id/faceLockAreaView"
+            android:visibility="invisible"
+            android:layout_width="512dip"
+            android:layout_height="512dip"
+            android:layout_centerInParent="true"
+            android:background="@color/facelock_color_background"
+        />
 
     </RelativeLayout>
 
