@@ -129,8 +129,6 @@ extern int register_android_database_SQLiteQuery(JNIEnv* env);
 extern int register_android_database_SQLiteStatement(JNIEnv* env);
 extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
-extern int register_android_nfc_NdefMessage(JNIEnv *env);
-extern int register_android_nfc_NdefRecord(JNIEnv *env);
 extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
@@ -1161,8 +1159,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
     REG_JNI(register_android_net_wifi_WifiManager),
-    REG_JNI(register_android_nfc_NdefMessage),
-    REG_JNI(register_android_nfc_NdefRecord),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_hardware_Camera),
