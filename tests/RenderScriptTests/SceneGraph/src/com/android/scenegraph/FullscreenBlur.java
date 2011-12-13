@@ -31,7 +31,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-class GaussianBlur {
+class FullscreenBlur {
 
     static Allocation sRenderTargetBlur0Color;
     static Allocation sRenderTargetBlur0Depth;
