@@ -1,0 +1,376 @@
+page.title=Supporting Different Screen Sizes
+parent.title=Designing for Multiple Screens
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Supporting Different Screen Densities
+next.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#TaskUseWrapMatchPar">Use "wrap_content" and "match_parent"</a></li>
+  <li><a href="#TaskUseRelativeLayout">Use RelativeLayout</a></li>
+  <li><a href="#TaskUseSizeQuali">Use Size Qualifiers</a></li>
+  <li><a href="#TaskUseSWQuali">Use the Smallest-width Qualifier</a></li>
+  <li><a href="#TaskUseAliasFilters">Use Layout Aliases</a></li>
+  <li><a href="#TaskUseOriQuali">Use Orientation Qualifiers</a></li>
+  <li><a href="#TaskUse9Patch">Use Nine-patch Bitmaps</a></li>
+</ol>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+</ul>
+
+<h2>Try it out</h2> 
+ 
+<div class="download-box"> 
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
+  the sample app</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+</div> 
+</div> 
+
+<p>This lesson shows you how to support different screen sizes by:</p>
+<ul> 
+  <li>Ensuring your layout can be adequately resized to fit the screen</li> 
+  <li>Providing appropriate UI layout according to screen configuration</li> 
+  <li>Ensuring the correct layout is applied to the correct screen</li>
+  <li>Providing bitmaps that scale correctly</li> 
+</ul> 
+
+
+<h2 id="TaskUseWrapMatchPar">Use "wrap_content" and "match_parent"</h2> 
+
+<p>To ensure that your layout is flexible and adapts to different screen sizes,
+you should use <code>"wrap_content"</code> and <code>"match_parent"</code> for the width
+and height of some view components. If you use <code>"wrap_content"</code>, the width
+or height of the view is set to the minimum size necessary to fit the content
+within that view, while <code>"match_parent"</code> (also known as
+<code>"fill_parent"</code> before API level 8) makes the component expand to match the size of its
+parent view.</p>
+
+<p>By using the <code>"wrap_content"</code> and <code>"match_parent"</code> size values instead of
+hard-coded sizes, your views either use only the space required for that
+view or expand to fill the available space, respectively. For example:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p>Notice how the sample uses <code>"wrap_content"</code> and <code>"match_parent"</code>
+for component sizes rather than specific dimensions. This allows the layout
+to adapt correctly to different screen sizes and orientations.</p>
+
+<p>For example, this is what this layout looks like in portrait and landscape
+mode. Notice that the sizes of the components adapt automatically to the
+width and height:</p>
+
+<img src="{@docRoot}images/training/layout-hvga.png" />
+<p class="img-caption"><strong>Figure 1.</strong> The News Reader sample app in portrait (left)
+and landscape (right).</p>
+
+
+<h2 id="TaskUseRelativeLayout">Use RelativeLayout</h2> 
+
+<p>You can construct fairly complex layouts using nested instances of {@link
+android.widget.LinearLayout} and
+combinations of <code>"wrap_content"</code> and <code>"match_parent"</code> sizes. 
+However, {@link android.widget.LinearLayout} does not allow you to precisely control the
+spacial relationships of child views; views in a {@link android.widget.LinearLayout} simply line up
+side-by-side. If you need child views to be oriented in variations other than a straight line, a
+better solution is often to use a {@link android.widget.RelativeLayout}, which allows
+you to specify your layout in terms of the spacial relationships between
+components. For instance, you can align one child view on the left side and another view on
+the right side of the screen.</p>
+
+<p>For example:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;TextView
+        android:id="&#64;+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/&gt;
+    &lt;EditText
+        android:id="&#64;+id/entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/label"/&gt;
+    &lt;Button
+        android:id="&#64;+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="&#64;id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:text="OK" /&gt;
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="&#64;id/ok"
+        android:layout_alignTop="&#64;id/ok"
+        android:text="Cancel" /&gt;
+&lt;/RelativeLayout&gt;
+</pre>
+
+<p>Figure 2 shows how this layout appears on a QVGA screen.</p>
+
+<img src="{@docRoot}images/training/relativelayout1.png" />
+<p class="img-caption"><strong>Figure 2.</strong> Screenshot on a QVGA screen (small screen).</p>
+
+<p>Figure 3 shows how it appears on a larger screen.</p>
+
+<img src="{@docRoot}images/training/relativelayout2.png" />
+<p class="img-caption"><strong>Figure 3.</strong> Screenshot on a WSVGA screen (large screen).</p>
+
+<p>Notice that although the size of the components changed, their
+spatial relationships are preserved as specified by the {@link
+android.widget.RelativeLayout.LayoutParams}.</p>
+
+ 
+<h2 id="TaskUseSizeQuali">Use Size Qualifiers</h2> 
+
+<p>There's only so much mileage you can get from a flexible layout or relative layout
+like the one in the previous sections. While those layouts adapt to
+different screens by stretching the space within and around components, they
+may not provide the best user experience for each screen size. Therefore, your
+application should not only implement flexible layouts, but should also provide
+several alternative layouts to target different screen configurations. You do
+so by using <a href="http://developer.android.com/guide/practices/screens_support.html#qualifiers">configuration qualifiers</a>, which allows the runtime 
+to automatically select the appropriate resource based on the current device’s
+configuration (such as a different layout design for different screen sizes).</p>
+
+<p>For example, many applications implement the "two pane" pattern for large
+screens (the app might show a list of items on one pane and the content on
+another pane). Tablets and TVs are large enough for both panes to fit
+simultaneously on screen, but phone screens have to show them separately. So,
+to implement these layouts, you could have the following files:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, single-pane (default) layout:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-xlarge/main.xml</code>, two-pane layout:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>Notice the <code>xlarge</code> qualifier in the directory name of the second layout. This layout
+will be selected on devices with screens classified as extra-large (for example, 10" tablets). The
+other layout (without qualifiers) will be selected for smaller devices.</p>
+
+
+<h2 id="TaskUseSWQuali">Use the Smallest-width Qualifier</h2>
+
+<p>One of the difficulties developers had in pre-3.2 Android devices was the
+"large" screen size bin, which encompasses the Dell Streak, the original Galaxy
+Tab, and 7" tablets in general. However, many applications may want to show
+different layouts for different devices in this category (such as for 5" and 7" devices), even
+though they are all considered to be "large" screens. That's why Android introduced the
+"Smallest-width" qualifier (amongst others) in Android 3.2.</p>
+
+<p>The Smallest-width qualifier allows you to target screens that have a certain minimum
+width given in dp. For example, the typical 7" tablet has a minimum width of
+600 dp, so if you want your UI to have two panes on those screens (but a single
+list on smaller screens), you can use the same two layouts from the previous section for single
+and two-pane layouts, but instead of the <code>xlarge</code> size qualifier, use
+<code>sw600dp</code> to indicate the two-pane layout is for screens on which the smallest-width
+is 600 dp:</p>
+
+<ul>
+  <li><code>res/layout/main.xml</code>, single-pane (default) layout:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+</li>
+  <li><code>res/layout-sw600dp/main.xml</code>, two-pane layout:
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+</li>
+</ul>
+
+<p>This means that devices whose smallest width is greater than or equal to
+600dp will select the <code>layout-sw600dp/main.xml</code> (two-pane) layout,
+while smaller screens will select the <code>layout/main.xml</code> (single-pane)
+layout.</p>
+
+<p>However, this won't work well on pre-3.2 devices, because they don't
+recognize <code>sw600dp</code> as a size qualifier, so you still have to use the <code>xlarge</code>
+qualifier as well. So, you should have a file named 
+<code>res/layout-xlarge/main.xml</code>
+which is identical to <code>res/layout-sw600dp/main.xml</code>. In the next section
+you'll see a technique that allows you to avoid duplicating the layout files this way.</p>
+
+
+<h2 id="TaskUseAliasFilters">Use Layout Aliases</h2> 
+
+<p>The smallest-width qualifier is available only on Android 3.2 and above.
+Therefore, you should also still use the abstract size bins (small, normal,
+large and xlarge) to be compatible with earlier versions. For example, if you
+want to design your UI so that it shows a single-pane UI on phones but a
+multi-pane UI on 7" tablets and larger devices, you'd have to supply these
+files:</p>
+
+<p><ul>
+<li><code>res/layout/main.xml:</code> single-pane layout</li>
+<li><code>res/layout-xlarge:</code> multi-pane layout</li>
+<li><code>res/layout-sw600dp:</code> multi-pane layout</li>
+</ul></p>
+
+<p>The last two files are identical, because one of them will be matched by
+Android 3.2 devices, and the other one is for the benefit of tablets with
+earlier versions of Android.</p>
+
+<p>To avoid this duplication of the same file for tablets (and the maintenance
+headache resulting from it), you can use alias files. For example, you can define the following
+layouts:</p>
+
+<ul>
+<li><code>res/layout/main.xml</code>, single-pane layout</li>
+<li><code>res/layout/main_twopanes.xml</code>, two-pane layout</li>
+</ul>
+
+<p>And add these two files:</p>
+
+<p><ul>
+<li><code>res/values-xlarge/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+</li>
+
+<li><code>res/values-sw600dp/layout.xml</code>:
+<pre>
+&lt;resources>
+    &lt;item name="main" type="layout">&#64;layout/main_twopanes&lt;/item>
+&lt;/resources>
+</pre>
+
+</li>
+</ul></p>
+
+<p>These latter two files have identical content, but they don’t actually define
+the layout. They merely set up {@code main} to be an alias to {@code main_twopanes}. Since
+these files have <code>xlarge</code> and <code>sw600dp</code> selectors, they are
+applied to tablets regardless of Android version (pre-3.2 tablets match
+{@code xlarge}, and post-3.2 will match <code>sw600dp</code>).</p>
+
+
+<h2 id="TaskUseOriQuali">Use Orientation Qualifiers</h2> 
+
+<p>Some layouts work well in both landscape and portrait orientations, but most of them can
+benefit from adjustments. In the News Reader sample app, here is how the layout
+behaves in each screen size and orientation:</p>
+
+<p><ul>
+<li><b>small screen, portrait:</b> single pane, with logo</li>
+<li><b>small screen, landscape:</b> single pane, with logo</li>
+<li><b>7" tablet, portrait:</b> single pane, with action bar</li>
+<li><b>7" tablet, landscape:</b> dual pane, wide, with action bar</li>
+<li><b>10" tablet, portrait:</b> dual pane, narrow, with action bar</li>
+<li><b>10" tablet, landscape:</b> dual pane, wide, with action bar</li>
+</ul></p>
+
+<p>So each of these layouts is defined in an XML file in the 
+<code>res/layout/</code> directory. To then assign each layout to the various screen
+configurations, the app uses layout aliases to match them to
+each configuration:</p>
+
+<p><code>res/layout/onepane.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane.xml all}
+
+<p><code>res/layout/onepane_with_bar.xml:</code></p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/onepane_with_bar.xml all}
+
+<p><code>res/layout/twopanes.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p><code>res/layout/twopanes_narrow.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes_narrow.xml all}
+
+<p>Now that all possible layouts are defined, it's just a matter of mapping the correct layout to
+each configuration using the configuration qualifiers. You can now do it using the layout alias
+technique:</p>
+
+<p><code>res/values/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values/layouts.xml all}
+
+<p><code>res/values-sw600dp-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-land/layouts.xml
+all}
+
+<p><code>res/values-sw600dp-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-sw600dp-port/layouts.xml
+all}
+
+<p><code>res/values-xlarge-land/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-xlarge-land/layouts.xml all}
+
+<p><code>res/values-xlarge-port/layouts.xml</code>:</p>
+{@sample development/samples/training/multiscreen/newsreader/res/values-xlarge-port/layouts.xml all}
+
+
+
+<h2 id="TaskUse9Patch">Use Nine-patch Bitmaps</h2>
+
+<p>Supporting different screen sizes usually means that your image resources
+must also be capable of adapting to different sizes. For example, a button
+background must fit whichever button shape it is applied to.</p>
+
+<p>If you use simple images on components that can change size, you will
+quickly notice that the results are somewhat less than impressive, since the
+runtime will stretch or shrink your images uniformly. The solution is using nine-patch bitmaps,
+which are specially
+formatted PNG files that indicate which areas can and cannot be stretched.</p>
+
+<p>Therefore, when designing bitmaps that will be used on components with
+variable size, always use nine-patches. To convert a bitmap into a nine-patch,
+you can start with a regular image (figure 4, shown with in 4x zoom for clarity).</p>
+
+<img src="{@docRoot}images/training/button.png" />
+<p class="img-caption"><strong>Figure 4.</strong> <code>button.png</code></p>
+
+<p>And then run it through the <ode
+href="{@docRoot}guide/developing/tools/draw9patch.html"><code>draw9patch</code></a> utility of the
+SDK (which is located in the <code>tools/</code> directory), in which you can mark the areas that
+should be stretched by drawing pixels along the left and top borders. You can also mark the area
+that should hold the content by drawing pixels along the right and bottom borders, resulting in
+figure 5.</p>
+
+<img src="{@docRoot}images/training/button_with_marks.png" />
+<p class="img-caption"><strong>Figure 5.</strong> <code>button.9.png</code></p>
+
+<p>Notice the black pixels along the borders. The ones on the top and left
+borders indicate the places where the image can be stretched, and the ones on
+the right and bottom borders indicate where the content should be
+placed.</p>
+
+<p>Also, notice the <code>.9.png</code> extension. You must use this 
+extension, since this is how the framework detects that this is a nine-patch
+image, as opposed to a regular PNG image.</p>
+
+<p>When you apply this background to a component (by setting
+<code>android:background="&#64;drawable/button"</code>), the framework stretches
+the image correctly to accommodate the size of the button, as shown in various sizes in figure
+6.</p>
+
+<img src="{@docRoot}images/training/buttons_stretched.png" />
+<p class="img-caption"><strong>Figure 6.</strong> A button using the <code>button.9.png</code>
+nine-patch in various sizes.</p>
+
