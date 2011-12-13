@@ -339,7 +339,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
-    private int mCursorCount; // Actual current number of used mCursorDrawable: 0, 1 or 2
+    private int mCursorCount; // Actual current number of used mCursorDrawable: 0, 1 or 2 (split)
 
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
@@ -4322,7 +4322,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (a >= 0 || b >= 0 || c >= 0) {
             int start = Math.min(Math.min(a, b), c);
             int end = Math.max(Math.max(a, b), c);
-            invalidateRegion(start, end);
+            invalidateRegion(start, end, true /* Also invalidates blinking cursor */);
         }
     }
 
@@ -4331,7 +4331,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @hide
      */
-    void invalidateRegion(int start, int end) {
+    void invalidateRegion(int start, int end, boolean invalidateCursor) {
         if (mLayout == null) {
             invalidate();
         } else {
@@ -4357,11 +4357,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 int bottom = mLayout.getLineBottom(lineEnd);
 
+                if (invalidateCursor) {
+                    for (int i = 0; i < mCursorCount; i++) {
+                        Rect bounds = mCursorDrawable[i].getBounds();
+                        top = Math.min(top, bounds.top);
+                        bottom = Math.max(bottom, bounds.bottom);
+                    }
+                }
+
                 final int compoundPaddingLeft = getCompoundPaddingLeft();
                 final int verticalPadding = getExtendedPaddingTop() + getVerticalOffset(true);
 
                 int left, right;
-                if (lineStart == lineEnd) {
+                if (lineStart == lineEnd && !invalidateCursor) {
                     left = (int) mLayout.getPrimaryHorizontal(start);
                     right = (int) (mLayout.getPrimaryHorizontal(end) + 1.0);
                     left += compoundPaddingLeft;
