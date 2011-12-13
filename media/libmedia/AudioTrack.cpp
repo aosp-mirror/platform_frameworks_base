@@ -1322,7 +1322,7 @@ audio_track_cblk_t::audio_track_cblk_t()
 
 uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 {
-    uint32_t u = this->user;
+    uint32_t u = user;
 
     u += frameCount;
     // Ensure that user is never ahead of server for AudioRecord
@@ -1331,16 +1331,16 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
         if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS-1) {
             bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
         }
-    } else if (u > this->server) {
-        LOGW("stepServer occured after track reset");
-        u = this->server;
+    } else if (u > server) {
+        LOGW("stepServer occurred after track reset");
+        u = server;
     }
 
     if (u >= userBase + this->frameCount) {
         userBase += this->frameCount;
     }
 
-    this->user = u;
+    user = u;
 
     // Clear flow control error condition as new data has been written/read to/from buffer.
     if (flags & CBLK_UNDERRUN_MSK) {
@@ -1357,7 +1357,7 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
         return false;
     }
 
-    uint32_t s = this->server;
+    uint32_t s = server;
 
     s += frameCount;
     if (flags & CBLK_DIRECTION_MSK) {
@@ -1370,9 +1370,9 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
         // while the mixer is processing a block: in this case,
         // stepServer() is called After the flush() has reset u & s and
         // we have s > u
-        if (s > this->user) {
-            LOGW("stepServer occured after track reset");
-            s = this->user;
+        if (s > user) {
+            LOGW("stepServer occurred after track reset");
+            s = user;
         }
     }
 
@@ -1388,7 +1388,7 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
         serverBase += this->frameCount;
     }
 
-    this->server = s;
+    server = s;
 
     if (!(flags & CBLK_INVALID_MSK)) {
         cv.signal();
@@ -1399,7 +1399,7 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
 
 void* audio_track_cblk_t::buffer(uint32_t offset) const
 {
-    return (int8_t *)this->buffers + (offset - userBase) * this->frameSize;
+    return (int8_t *)buffers + (offset - userBase) * frameSize;
 }
 
 uint32_t audio_track_cblk_t::framesAvailable()
@@ -1410,8 +1410,8 @@ uint32_t audio_track_cblk_t::framesAvailable()
 
 uint32_t audio_track_cblk_t::framesAvailable_l()
 {
-    uint32_t u = this->user;
-    uint32_t s = this->server;
+    uint32_t u = user;
+    uint32_t s = server;
 
     if (flags & CBLK_DIRECTION_MSK) {
         uint32_t limit = (s < loopStart) ? s : loopStart;
@@ -1423,8 +1423,8 @@ uint32_t audio_track_cblk_t::framesAvailable_l()
 
 uint32_t audio_track_cblk_t::framesReady()
 {
-    uint32_t u = this->user;
-    uint32_t s = this->server;
+    uint32_t u = user;
+    uint32_t s = server;
 
     if (flags & CBLK_DIRECTION_MSK) {
         if (u < loopEnd) {
