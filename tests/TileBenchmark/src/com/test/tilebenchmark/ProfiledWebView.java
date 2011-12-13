@@ -33,8 +33,7 @@ public class ProfiledWebView extends WebView {
     private ProfileCallback mCallback;
     private long mContentInvalMillis;
     private boolean mHadToBeForced = false;
-    private int mTestCount = 0;
-    private static final int LOAD_STALL_MILLIS = 5000; // nr of millis after load,
+    private static final int LOAD_STALL_MILLIS = 2000; // nr of millis after load,
                                                        // before test is forced
 
     public ProfiledWebView(Context context) {
@@ -76,13 +75,6 @@ public class ProfiledWebView extends WebView {
         mIsScrolling = autoScrolling;
         mCallback = callback;
         mIsTesting = false;
-        mContentInvalMillis = System.currentTimeMillis();
-        registerPageSwapCallback();
-        contentInvalidateAll();
-        invalidate();
-
-        mTestCount++;
-        final int testCount = mTestCount;
 
         if (autoScrolling) {
             // after a while, force it to start even if the pages haven't swapped
@@ -93,13 +85,12 @@ public class ProfiledWebView extends WebView {
 
                 @Override
                 public void onFinish() {
-                    if (testCount == mTestCount && !mIsTesting) {
-                        mHadToBeForced = true;
-                        Log.d("ProfiledWebView", "num " + testCount
-                                + " forcing a page swap with a scroll...");
-                        scrollBy(0, 1);
-                        invalidate(); // ensure a redraw so that auto-scrolling can occur
-                    }
+                    // invalidate all content, and kick off redraw
+                    registerPageSwapCallback();
+                    discardAllTextures();
+                    invalidate();
+
+                    mContentInvalMillis = System.currentTimeMillis();
                 }
             }.start();
         }

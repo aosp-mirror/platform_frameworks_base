@@ -4538,7 +4538,7 @@ public class WebView extends AbsoluteLayout
             boolean isPictureAfterFirstLayout, boolean registerPageSwapCallback) {
         if (mNativeClass == 0)
             return;
-        nativeSetBaseLayer(layer, invalRegion, showVisualIndicator,
+        nativeSetBaseLayer(mNativeClass, layer, invalRegion, showVisualIndicator,
                 isPictureAfterFirstLayout, registerPageSwapCallback);
         if (mHTML5VideoViewProxy != null) {
             mHTML5VideoViewProxy.setBaseLayer(layer);
@@ -9493,7 +9493,12 @@ public class WebView extends AbsoluteLayout
 
     /** @hide call pageSwapCallback upon next page swap */
     protected void registerPageSwapCallback() {
-        nativeRegisterPageSwapCallback();
+        nativeRegisterPageSwapCallback(mNativeClass);
+    }
+
+    /** @hide discard all textures from tiles */
+    protected void discardAllTextures() {
+        nativeDiscardAllTextures();
     }
 
     /**
@@ -9643,7 +9648,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetBaseLayer(int layer, Region invalRegion,
+    private native void     nativeSetBaseLayer(int nativeInstance,
+            int layer, Region invalRegion,
             boolean showVisualIndicator, boolean isPictureAfterFirstLayout,
             boolean registerPageSwapCallback);
     private native int      nativeGetBaseLayer();
@@ -9657,7 +9663,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
-    private native void     nativeRegisterPageSwapCallback();
+    private native void     nativeRegisterPageSwapCallback(int nativeInstance);
+    private native void     nativeDiscardAllTextures();
     private native void     nativeTileProfilingStart();
     private native float    nativeTileProfilingStop();
     private native void     nativeTileProfilingClear();

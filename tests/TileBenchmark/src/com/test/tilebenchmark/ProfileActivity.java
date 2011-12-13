@@ -276,6 +276,7 @@ public class ProfileActivity extends Activity {
         settings.setEnableSmoothTransition(true);
         settings.setBuiltInZoomControls(true);
         settings.setLoadWithOverviewMode(true);
+        settings.setProperty("use_minimal_memory", "false"); // prefetch tiles, as browser does
         mWeb.setWebViewClient(new LoggingWebViewClient());
 
         // URL text entry
