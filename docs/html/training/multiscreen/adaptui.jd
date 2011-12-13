@@ -1,0 +1,258 @@
+page.title=Implementing Adaptative UI Flows
+parent.title=Designing for Multiple Screens
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Supporting Different Screen Densities
+previous.link=screendensities.html
+
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper"> 
+<div id="tb"> 
+ 
+<h2>This lesson teaches you to</h2>
+
+<ol>
+  <li><a href="#TaskDetermineCurLayout">Determine the Current Layout</a></li>
+  <li><a href="#TaskReactToLayout">React According to Current Layout</a></li>
+  <li><a href="#TaskReuseFrag">Reuse Fragments in Other Activities</a></li>
+  <li><a href="#TaskHandleConfigChanges">Handle Screen Configuration Changes</a></li>
+</ol>
+
+<h2>You should also read</h2>
+
+<ul>
+  <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and
+Handsets</a></li>
+</ul>
+ 
+<h2>Try it out</h2>
+ 
+<div class="download-box">
+<a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
+  the sample app</a>
+<p class="filename">NewsReader.zip</p> 
+</div> 
+ 
+ 
+</div> 
+</div> 
+
+<p>Depending on the layout that your application is currently showing, the UI
+flow may be different. For example, if your application is in the dual-pane
+mode, clicking on an item on the left pane will simply display the content on
+the right pane; if it is in single-pane mode, the content should be displayed
+on its own (in a different activity).</p>
+
+
+<h2 id="TaskDetermineCurLayout">Determine the Current Layout</h2>
+
+<p>Since your implementation of each layout will be a little different, one of
+the first things you will probably have to do is determine what layout the user is currently
+viewing. For example, you might want to know whether the user is in "single
+pane" mode or "dual pane" mode. You can do that by querying if a given view
+exists and is visible:</p>
+
+<pre class="prettyprint">
+public class NewsReaderActivity extends FragmentActivity {
+    boolean mIsDualPane;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_layout);
+
+        View articleView = findViewById(R.id.article);
+        mIsDualPane = articleView != null &amp;&amp; 
+                        articleView.getVisibility() == View.VISIBLE;
+    }
+}
+</pre>
+
+<p>Notice that this code queries whether the "article" pane is available or not,
+which is much more flexible than hard-coding a query for a specific layout.</p>
+
+<p>Another example of how you can adapt to the existence of different
+components is to check whether they are available before performing an operation on
+them. For example, in the News Reader sample app, there is a button that opens a
+menu, but that button only exists when running on versions older than Android 3.0 (because it's
+function is taken over by the {@link android.app.ActionBar} on API level 11+). So, to add the event
+listener for this button, you can do:</p>
+
+<pre class="prettyprint">
+Button catButton = (Button) findViewById(R.id.categorybutton);
+OnClickListener listener = /* create your listener here */;
+if (catButton != null) {
+    catButton.setOnClickListener(listener);
+}
+</pre>
+
+
+<h2 id="TaskReactToLayout">React According to Current Layout</h2>
+
+<p>Some actions may have a different result depending on the current layout.
+For example, in the News Reader sample, clicking on a headline from the
+headlines list opens the article in the right hand-side pane if the UI
+is in dual pane mode, but will launch a separate activity if the UI is in
+single-pane mode:</p>
+
+<pre>
+&#64;Override
+public void onHeadlineSelected(int index) {
+    mArtIndex = index;
+    if (mIsDualPane) {
+        /* display article on the right pane */
+        mArticleFragment.displayArticle(mCurrentCat.getArticle(index));
+    } else {
+        /* start a separate activity */
+        Intent intent = new Intent(this, ArticleActivity.class);
+        intent.putExtra("catIndex", mCatIndex);
+        intent.putExtra("artIndex", index);
+        startActivity(intent);
+    }
+}
+</pre>
+
+<p>Likewise, if the app is in dual-pane mode, it should set up the action bar
+with tabs for navigation, whereas if the app is in single-pane mode, it should set
+up navigation with a spinner widget. So your code should also check which case is
+appropriate:</p>
+
+<pre>
+final String CATEGORIES[] = { "Top Stories", "Politics", "Economy", "Technology" };
+
+public void onCreate(Bundle savedInstanceState) {
+    ....
+    if (mIsDualPane) {
+        /* use tabs for navigation */
+        actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_TABS);
+        int i;
+        for (i = 0; i &lt; CATEGORIES.length; i++) {
+            actionBar.addTab(actionBar.newTab().setText(
+                CATEGORIES[i]).setTabListener(handler));
+        }
+        actionBar.setSelectedNavigationItem(selTab);
+    }
+    else {
+        /* use list navigation (spinner) */
+        actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
+        SpinnerAdapter adap = new ArrayAdapter<String>(this, 
+                R.layout.headline_item, CATEGORIES);
+        actionBar.setListNavigationCallbacks(adap, handler);
+    }
+}
+</pre>
+
+
+<h2 id="TaskReuseFrag">Reuse Fragments in Other Activities</h2>
+
+<p>A recurring pattern in designing for multiple screens is having a portion of
+your interface that's implemented as a pane on some screen configurations and
+as a separate activity on other configurations. For example, in the News Reader
+sample, the news article text is presented in the right side pane on
+large screens, but is a separate activity on smaller screens.</p>
+
+<p>In cases like this, you can usually avoid code duplication by reusing the
+same {@link android.app.Fragment} subclass in several activities.  For example,
+<code>ArticleFragment</code> 
+is used in the dual-pane layout:</p>
+
+{@sample development/samples/training/multiscreen/newsreader/res/layout/twopanes.xml all}
+
+<p>And reused (without a layout) in the activity layout for smaller screens
+(<code>ArticleActivity</code>):</p>
+
+<pre>
+ArticleFragment frag = new ArticleFragment();
+getSupportFragmentManager().beginTransaction().add(android.R.id.content, frag).commit();
+</pre>
+
+<p>Naturally, this has the same effect as declaring the fragment in an XML
+layout, but in this case an XML layout is unnecessary work because the article fragment
+is the only component of this activity.</p>
+
+<p>One very important point to keep in mind when designing your fragments is
+to not create a strong coupling to a specific activity. You can usually do that
+by defining an interface that abstracts all the ways in which the fragment
+needs to interact with its host activity, and then the host activity
+implements that interface:</p>
+
+<p>For example, the News Reader app's <code>HeadlinesFragment</code> does precisely that:</p>
+
+<pre>
+public class HeadlinesFragment extends ListFragment {
+    ...
+    OnHeadlineSelectedListener mHeadlineSelectedListener = null;
+
+    /* Must be implemented by host activity */
+    public interface OnHeadlineSelectedListener {
+        public void onHeadlineSelected(int index);
+    }
+    ...
+
+    public void setOnHeadlineSelectedListener(OnHeadlineSelectedListener listener) {
+        mHeadlineSelectedListener = listener;
+    }
+}
+</pre>
+
+<p>Then, when the user selects a headline, the fragment notifies the listener specified by the host
+activity (as opposed to notifying a specific hard-coded activity):</p>
+
+<pre>
+public class HeadlinesFragment extends ListFragment {
+    ...
+    &#64;Override
+    public void onItemClick(AdapterView&lt;?&gt; parent, 
+                            View view, int position, long id) {
+        if (null != mHeadlineSelectedListener) {
+            mHeadlineSelectedListener.onHeadlineSelected(position);
+        }
+    }
+    ...
+}
+</pre>
+
+<p>This technique is discussed further in the guide to <a
+href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a>.</p>
+
+
+<h2 id="TaskHandleConfigChanges">Handle Screen Configuration Changes</h2>
+
+<p>If you are using separate activities to implement separate parts of your interface,
+you have to keep in mind that it may be necessary to react to certain
+configuration changes (such as a rotation change) in order to keep your
+interface consistent.</p>
+
+<p>For example, on a typical 7" tablet running Android 3.0 or higher, the News Reader sample uses a
+separate activity to display the news article when running in portrait mode,
+but uses a two-pane layout when in landscape mode.</p>
+
+<p>This means that when the user is in portrait mode and the activity for viewing an article is
+onscreen, you need to detect that the orientation changed to landscape and
+react appropriately by ending the activity and return to the main activity so the content can
+display in the two-pane layout:</p>
+
+<pre>
+public class ArticleActivity extends FragmentActivity {
+    int mCatIndex, mArtIndex;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mCatIndex = getIntent().getExtras().getInt("catIndex", 0);
+        mArtIndex = getIntent().getExtras().getInt("artIndex", 0);
+
+        // If should be in two-pane mode, finish to return to main activity
+        if (getResources().getBoolean(R.bool.has_two_panes)) {
+            finish();
+            return;
+        }
+        ...
+}
+</pre>
+
+
