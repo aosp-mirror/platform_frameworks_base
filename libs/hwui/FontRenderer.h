@@ -55,6 +55,77 @@ namespace uirenderer {
 
 class FontRenderer;
 
+class CacheTexture {
+public:
+    CacheTexture(){}
+    CacheTexture(uint8_t* texture, GLuint textureId, uint16_t width, uint16_t height) :
+        mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height) {}
+    ~CacheTexture() {
+        if (mTexture != NULL) {
+            delete[] mTexture;
+        }
+        if (mTextureId != 0) {
+            glDeleteTextures(1, &mTextureId);
+        }
+    }
+
+    uint8_t* mTexture;
+    GLuint mTextureId;
+    uint16_t mWidth;
+    uint16_t mHeight;
+};
+
+class CacheTextureLine {
+public:
+    CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
+            uint32_t currentCol, CacheTexture* cacheTexture):
+                mMaxHeight(maxHeight),
+                mMaxWidth(maxWidth),
+                mCurrentRow(currentRow),
+                mCurrentCol(currentCol),
+                mDirty(false),
+                mCacheTexture(cacheTexture){
+    }
+
+    bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
+
+    uint16_t mMaxHeight;
+    uint16_t mMaxWidth;
+    uint32_t mCurrentRow;
+    uint32_t mCurrentCol;
+    bool mDirty;
+    CacheTexture *mCacheTexture;
+};
+
+struct CachedGlyphInfo {
+    // Has the cache been invalidated?
+    bool mIsValid;
+    // Location of the cached glyph in the bitmap
+    // in case we need to resize the texture or
+    // render to bitmap
+    uint32_t mStartX;
+    uint32_t mStartY;
+    uint32_t mBitmapWidth;
+    uint32_t mBitmapHeight;
+    // Also cache texture coords for the quad
+    float mBitmapMinU;
+    float mBitmapMinV;
+    float mBitmapMaxU;
+    float mBitmapMaxV;
+    // Minimize how much we call freetype
+    uint32_t mGlyphIndex;
+    uint32_t mAdvanceX;
+    uint32_t mAdvanceY;
+    // Values below contain a glyph's origin in the bitmap
+    int32_t mBitmapLeft;
+    int32_t mBitmapTop;
+    // Auto-kerning
+    SkFixed mLsbDelta;
+    SkFixed mRsbDelta;
+    CacheTextureLine* mCachedTextureLine;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Font
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,33 +171,6 @@ protected:
 
     void measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
             int numGlyphs, Rect *bounds);
-
-    struct CachedGlyphInfo {
-        // Has the cache been invalidated?
-        bool mIsValid;
-        // Location of the cached glyph in the bitmap
-        // in case we need to resize the texture or
-        // render to bitmap
-        uint32_t mStartX;
-        uint32_t mStartY;
-        uint32_t mBitmapWidth;
-        uint32_t mBitmapHeight;
-        // Also cache texture coords for the quad
-        float mBitmapMinU;
-        float mBitmapMinV;
-        float mBitmapMaxU;
-        float mBitmapMaxV;
-        // Minimize how much we call freetype
-        uint32_t mGlyphIndex;
-        uint32_t mAdvanceX;
-        uint32_t mAdvanceY;
-        // Values below contain a glyph's origin in the bitmap
-        int32_t mBitmapLeft;
-        int32_t mBitmapTop;
-        // Auto-kerning
-        SkFixed mLsbDelta;
-        SkFixed mRsbDelta;
-    };
 
     Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle,
             uint32_t scaleX, SkPaint::Style style, uint32_t strokeWidth);
@@ -209,19 +253,28 @@ public:
             mLinearFiltering = linearFiltering;
             const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
 
-            glBindTexture(GL_TEXTURE_2D, mTextureId);
+            glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->mTextureId);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
         }
-        return mTextureId;
+        return mCurrentCacheTexture->mTextureId;
     }
 
-    uint32_t getCacheWidth() const {
-        return mCacheWidth;
-    }
-
-    uint32_t getCacheHeight() const {
-        return mCacheHeight;
+    uint32_t getCacheSize() const {
+        uint32_t size = 0;
+        if (mCacheTextureSmall != NULL && mCacheTextureSmall->mTexture != NULL) {
+            size += mCacheTextureSmall->mWidth * mCacheTextureSmall->mHeight;
+        }
+        if (mCacheTexture128 != NULL && mCacheTexture128->mTexture != NULL) {
+            size += mCacheTexture128->mWidth * mCacheTexture128->mHeight;
+        }
+        if (mCacheTexture256 != NULL && mCacheTexture256->mTexture != NULL) {
+            size += mCacheTexture256->mWidth * mCacheTexture256->mHeight;
+        }
+        if (mCacheTexture512 != NULL && mCacheTexture512->mTexture != NULL) {
+            size += mCacheTexture512->mWidth * mCacheTexture512->mHeight;
+        }
+        return size;
     }
 
 protected:
@@ -229,41 +282,11 @@ protected:
 
     const uint8_t* mGammaTable;
 
-    struct CacheTextureLine {
-        uint16_t mMaxHeight;
-        uint16_t mMaxWidth;
-        uint32_t mCurrentRow;
-        uint32_t mCurrentCol;
-        bool mDirty;
-
-        CacheTextureLine(uint16_t maxWidth, uint16_t maxHeight, uint32_t currentRow,
-                uint32_t currentCol):
-                    mMaxHeight(maxHeight),
-                    mMaxWidth(maxWidth),
-                    mCurrentRow(currentRow),
-                    mCurrentCol(currentCol),
-                    mDirty(false) {
-        }
-
-        bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY) {
-            if (glyph.fHeight + 2 > mMaxHeight) {
-                return false;
-            }
-
-            if (mCurrentCol + glyph.fWidth + 2 < mMaxWidth) {
-                *retOriginX = mCurrentCol + 1;
-                *retOriginY = mCurrentRow + 1;
-                mCurrentCol += glyph.fWidth + 2;
-                mDirty = true;
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-    void initTextTexture(bool largeFonts = false);
-    bool cacheBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
+    uint8_t* allocateTextureMemory(int width, int height);
+    void initTextTexture();
+    CacheTexture *createCacheTexture(int width, int height, bool allocate);
+    void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
+            uint32_t *retOriginX, uint32_t *retOriginY);
 
     void flushAllAndInvalidate();
     void initVertexArrayBuffers();
@@ -277,10 +300,10 @@ protected:
     void appendMeshQuad(float x1, float y1, float u1, float v1,
             float x2, float y2, float u2, float v2,
             float x3, float y3, float u3, float v3,
-            float x4, float y4, float u4, float v4);
+            float x4, float y4, float u4, float v4, CacheTexture* texture);
 
-    uint32_t mCacheWidth;
-    uint32_t mCacheHeight;
+    uint32_t mSmallCacheWidth;
+    uint32_t mSmallCacheHeight;
 
     Vector<CacheTextureLine*> mCacheLines;
     uint32_t getRemainingCacheCapacity();
@@ -288,12 +311,14 @@ protected:
     Font* mCurrentFont;
     Vector<Font*> mActiveFonts;
 
-    // Texture to cache glyph bitmaps
-    uint8_t* mTextTexture;
-    const uint8_t* getTextTextureData() const {
-        return mTextTexture;
-    }
-    GLuint mTextureId;
+    CacheTexture* mCurrentCacheTexture;
+    CacheTexture* mLastCacheTexture;
+    CacheTexture* mCacheTextureSmall;
+    CacheTexture* mCacheTexture128;
+    CacheTexture* mCacheTexture256;
+    CacheTexture* mCacheTexture512;
+
+
     void checkTextureUpdate();
     bool mUploadTexture;
 
