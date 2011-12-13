@@ -824,6 +824,16 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
 
         /**
+         * This is set for a window that has explicitly specified its
+         * FLAG_NEEDS_MENU_KEY, so we know the value on this window is the
+         * appropriate one to use.  If this is not set, we should look at
+         * windows behind it to determine the appropriate value.
+         *
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_SET_NEEDS_MENU_KEY = 0x00000008;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
