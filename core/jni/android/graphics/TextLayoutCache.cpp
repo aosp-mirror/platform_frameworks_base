@@ -19,6 +19,8 @@
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
 #include "SkFontHost.h"
+#include <unicode/unistr.h>
+#include <unicode/normlzr.h>
 
 extern "C" {
   #include "harfbuzz-unicode.h"
@@ -503,7 +505,8 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
 static void logGlyphs(HB_ShaperItem shaperItem) {
     LOGD("         -- glyphs count=%d", shaperItem.num_glyphs);
     for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
-        LOGD("         -- glyph[%d] = %d, offset.x = %f, offset.y = %f", i, shaperItem.glyphs[i],
+        LOGD("         -- glyph[%d] = %d, offset.x = %0.2f, offset.y = %0.2f", i,
+                shaperItem.glyphs[i],
                 HBFixedToFloat(shaperItem.offsets[i].x),
                 HBFixedToFloat(shaperItem.offsets[i].y));
     }
@@ -519,8 +522,73 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
         return;
     }
 
+    UErrorCode error = U_ZERO_ERROR;
+    bool useNormalizedString = false;
+    for (ssize_t i = count - 1; i >= 0; --i) {
+        UChar ch1 = chars[i];
+        if (::ublock_getCode(ch1) == UBLOCK_COMBINING_DIACRITICAL_MARKS) {
+            // So we have found a diacritic, let's get now the main code point which is paired
+            // with it. As we can have several diacritics in a row, we need to iterate back again
+#if DEBUG_GLYPHS
+            LOGD("The BiDi run '%s' is containing a Diacritic at position %d",
+                    String8(chars, count).string(), int(i));
+#endif
+            ssize_t j = i - 1;
+            for (; j >= 0;  --j) {
+                UChar ch2 = chars[j];
+                if (::ublock_getCode(ch2) != UBLOCK_COMBINING_DIACRITICAL_MARKS) {
+                    break;
+                }
+            }
+
+            // We could not found the main code point, so we will just use the initial chars
+            if (j < 0) {
+                break;
+            }
+
+#if DEBUG_GLYPHS
+            LOGD("Found main code point at index %d", int(j));
+#endif
+            // We found the main code point, so we can normalize the "chunck" and fill
+            // the remaining with ZWSP so that the Paint.getTextWidth() APIs will still be able
+            // to get one advance per char
+            mBuffer.remove();
+            Normalizer::normalize(UnicodeString(chars + j, i - j + 1),
+                    UNORM_NFC, 0 /* no options */, mBuffer, error);
+            if (U_SUCCESS(error)) {
+                if (!useNormalizedString) {
+                    useNormalizedString = true;
+                    mNormalizedString.setTo(false /* not terminated*/, chars, count);
+                }
+                // Set the normalized chars
+                for (ssize_t k = j; k < j + mBuffer.length(); ++k) {
+                    mNormalizedString.setCharAt(k, mBuffer.charAt(k - j));
+                }
+                // Fill the remain part with ZWSP (ZWNJ and ZWJ would lead to weird results
+                // because some fonts are missing those glyphs)
+                for (ssize_t k = j + mBuffer.length(); k <= i; ++k) {
+                    mNormalizedString.setCharAt(k, UNICODE_ZWSP);
+                }
+            }
+            i = j - 1;
+        }
+    }
+
+#if DEBUG_GLYPHS
+    if (useNormalizedString) {
+        LOGD("Will use normalized string '%s', length = %d",
+                    String8(mNormalizedString.getTerminatedBuffer(),
+                            mNormalizedString.length()).string(),
+                    mNormalizedString.length());
+    } else {
+        LOGD("Normalization cannot be done, using initial string");
+    }
+#endif
+
+    assert(mNormalizedString.length() == count);
+
     // Set the string properties
-    mShaperItem.string = chars;
+    mShaperItem.string = useNormalizedString ? mNormalizedString.getTerminatedBuffer() : chars;
     mShaperItem.stringLength = count;
 
     // Define shaping paint properties
@@ -532,14 +600,14 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
 
     // Split the BiDi run into Script runs. Harfbuzz will populate the pos, length and script
     // into the shaperItem
-    ssize_t indexFontRun = isRTL ? count - 1 : 0;
+    ssize_t indexFontRun = isRTL ? mShaperItem.stringLength - 1 : 0;
     unsigned numCodePoints = 0;
     jfloat totalAdvance = 0;
     while ((isRTL) ?
-            hb_utf16_script_run_prev(&numCodePoints, &mShaperItem.item, chars,
-                    count, &indexFontRun):
-            hb_utf16_script_run_next(&numCodePoints, &mShaperItem.item, chars,
-                    count, &indexFontRun)) {
+            hb_utf16_script_run_prev(&numCodePoints, &mShaperItem.item, mShaperItem.string,
+                    mShaperItem.stringLength, &indexFontRun):
+            hb_utf16_script_run_next(&numCodePoints, &mShaperItem.item, mShaperItem.string,
+                    mShaperItem.stringLength, &indexFontRun)) {
 
         ssize_t startScriptRun = mShaperItem.item.pos;
         size_t countScriptRun = mShaperItem.item.length;
@@ -611,7 +679,7 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
 #if DEBUG_ADVANCES
         LOGD("Returned advances");
         for (size_t i = 0; i < countScriptRun; i++) {
-            LOGD("         -- hb-adv[%d] = %f, log_clusters = %d, total = %f", i,
+            LOGD("         -- hb-adv[%d] = %0.2f, log_clusters = %d, total = %0.2f", i,
                     (*outAdvances)[i], mShaperItem.log_clusters[i], totalFontRunAdvance);
         }
 #endif

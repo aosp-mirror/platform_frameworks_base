@@ -35,6 +35,8 @@
 
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>
+#include <unicode/unistr.h>
+
 #include "HarfbuzzSkia.h"
 #include "harfbuzz-shaper.h"
 
@@ -249,9 +251,25 @@ private:
     SkTypeface* mHebrewRegularTypeface;
     SkTypeface* mHebrewBoldTypeface;
 
+    /**
+     * Cache of Harfbuzz faces
+     */
     KeyedVector<SkFontID, HB_Face> mCachedHBFaces;
 
+    /**
+     * Cache of glyph array size
+     */
     size_t mShaperItemGlyphArraySize;
+
+    /**
+     * Buffer for containing the ICU normalized form of a run
+     */
+    UnicodeString mNormalizedString;
+
+    /**
+     * Buffer for normalizing a piece of a run with ICU
+     */
+    UnicodeString mBuffer;
 
     size_t shapeFontRun(SkPaint* paint, bool isRTL);
 
