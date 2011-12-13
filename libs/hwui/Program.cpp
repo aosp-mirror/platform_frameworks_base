@@ -97,11 +97,6 @@ int Program::addAttrib(const char* name) {
 
 int Program::bindAttrib(const char* name, ShaderBindings bindingSlot) {
     glBindAttribLocation(mProgramId, bindingSlot, name);
-    GLenum status = GL_NO_ERROR;
-    while ((status = glGetError()) != GL_NO_ERROR) {
-        LOGD("Program::GL error from OpenGLRenderer: 0x%x", status);
-    }
-
     mAttributes.add(name, bindingSlot);
     return bindingSlot;
 }
