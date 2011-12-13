@@ -562,6 +562,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAttrs;
     }
 
+    public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
+        int index = -1;
+        WindowState ws = this;
+        while (true) {
+            if ((ws.mAttrs.privateFlags
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
+                return (ws.mAttrs.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+            }
+            // If we reached the bottom of the range of windows we are considering,
+            // assume no menu is needed.
+            if (ws == bottom) {
+                return false;
+            }
+            // The current window hasn't specified whether menu key is needed;
+            // look behind it.
+            // First, we may need to determine the starting position.
+            if (index < 0) {
+                index = mService.mWindows.indexOf(ws);
+            }
+            index--;
+            if (index < 0) {
+                return false;
+            }
+            ws = mService.mWindows.get(index);
+        }
+    }
+
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
