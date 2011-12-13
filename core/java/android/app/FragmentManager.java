@@ -51,6 +51,13 @@ import java.util.Arrays;
  * <p>For more information about using fragments, read the
  * <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
  * </div>
+ *
+ * While the FragmentManager API was introduced in
+ * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
+ * at is also available for use on older platforms through
+ * {@link android.support.v4.app.FragmentActivity}.  See the blog post
+ * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+ * Fragments For All</a> for more details.
  */
 public abstract class FragmentManager {
     /**

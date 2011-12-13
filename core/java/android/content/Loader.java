@@ -58,6 +58,13 @@ public class Loader<D> {
     boolean mReset = true;
     boolean mContentChanged = false;
 
+    /**
+     * An implementation of a ContentObserver that takes care of connecting
+     * it to the Loader to have the loader re-load its data when the observer
+     * is told it has changed.  You do not normally need to use this yourself;
+     * it is used for you by {@link CursorLoader} to take care of executing
+     * an update when the cursor's backing data changes.
+     */
     public final class ForceLoadContentObserver extends ContentObserver {
         public ForceLoadContentObserver() {
             super(new Handler());
@@ -74,6 +81,14 @@ public class Loader<D> {
         }
     }
 
+    /**
+     * Interface that is implemented to discover when a Loader has finished
+     * loading its data.  You do not normally need to implement this yourself;
+     * it is used in the implementation of {@link android.app.LoaderManager}
+     * to find out when a Loader it is managing has completed so that this can
+     * be reported to its client.  This interface should only be used if a
+     * Loader is not being used in conjunction with LoaderManager.
+     */
     public interface OnLoadCompleteListener<D> {
         /**
          * Called on the thread that created the Loader when the load is complete.
