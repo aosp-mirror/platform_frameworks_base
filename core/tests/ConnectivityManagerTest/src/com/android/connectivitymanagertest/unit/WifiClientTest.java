@@ -271,4 +271,46 @@ public class WifiClientTest extends AndroidTestCase {
 
     }
 
+    // Test case 6: test configured network status
+    @LargeTest
+    public void testWifiConfiguredNetworkStatus() {
+
+        /* Initialize */
+        mWifiManager.setWifiEnabled(false);
+        sleepAfterWifiEnable();
+
+        /* Ensure no network is CURRENT */
+        List<WifiConfiguration> configList = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration c : configList) {
+            assertTrue(c.status != WifiConfiguration.Status.CURRENT);
+        }
+
+        /* Enable wifi */
+        mWifiManager.setWifiEnabled(true);
+        sleepAfterWifiEnable();
+
+        /* Ensure connected network is CURRENT */
+        String connectedSSID = mWifiManager.getConnectionInfo().getSSID();
+        configList = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration c : configList) {
+            if (c.SSID.contains(connectedSSID)) {
+                assertTrue(c.status == WifiConfiguration.Status.CURRENT);
+            } else {
+                assertTrue(c.status != WifiConfiguration.Status.CURRENT);
+            }
+        }
+
+        /* Disable wifi */
+        mWifiManager.setWifiEnabled(false);
+        sleepAfterWifiEnable();
+
+        /* Ensure no network is CURRENT */
+        configList = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration c : configList) {
+            assertTrue(c.status != WifiConfiguration.Status.CURRENT);
+        }
+    }
+
+
+
 }
