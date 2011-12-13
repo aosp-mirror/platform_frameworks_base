@@ -104,10 +104,10 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
     int width = (int) glyph->mBitmapWidth;
     int height = (int) glyph->mBitmapHeight;
 
-    mState->appendMeshQuad(nPenX, nPenY, 0, u1, v2,
-            nPenX + width, nPenY, 0, u2, v2,
-            nPenX + width, nPenY - height, 0, u2, v1,
-            nPenX, nPenY - height, 0, u1, v1);
+    mState->appendMeshQuad(nPenX, nPenY, u1, v2,
+            nPenX + width, nPenY, u2, v2,
+            nPenX + width, nPenY - height, u2, v1,
+            nPenX, nPenY - height, u1, v1);
 }
 
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
@@ -519,8 +519,8 @@ void FontRenderer::initTextTexture(bool largeFonts) {
 
 // Avoid having to reallocate memory and render quad by quad
 void FontRenderer::initVertexArrayBuffers() {
-    uint32_t numIndicies = mMaxNumberOfQuads * 6;
-    uint32_t indexBufferSizeBytes = numIndicies * sizeof(uint16_t);
+    uint32_t numIndices = mMaxNumberOfQuads * 6;
+    uint32_t indexBufferSizeBytes = numIndices * sizeof(uint16_t);
     uint16_t* indexBufferData = (uint16_t*) malloc(indexBufferSizeBytes);
 
     // Four verts, two triangles , six indices per quad
@@ -544,7 +544,7 @@ void FontRenderer::initVertexArrayBuffers() {
 
     free(indexBufferData);
 
-    uint32_t coordSize = 3;
+    uint32_t coordSize = 2;
     uint32_t uvSize = 2;
     uint32_t vertsPerQuad = 4;
     uint32_t vertexBufferSize = mMaxNumberOfQuads * vertsPerQuad * coordSize * uvSize;
@@ -579,12 +579,12 @@ void FontRenderer::checkTextureUpdate() {
     // Iterate over all the cache lines and see which ones need to be updated
     for (uint32_t i = 0; i < mCacheLines.size(); i++) {
         CacheTextureLine* cl = mCacheLines[i];
-        if(cl->mDirty) {
+        if (cl->mDirty) {
             uint32_t xOffset = 0;
             uint32_t yOffset = cl->mCurrentRow;
             uint32_t width   = mCacheWidth;
             uint32_t height  = cl->mMaxHeight;
-            void* textureData = mTextTexture + yOffset*width;
+            void* textureData = mTextTexture + yOffset * width;
 
             glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
@@ -600,10 +600,10 @@ void FontRenderer::issueDrawCommand() {
     checkTextureUpdate();
 
     float* vtx = mTextMeshPtr;
-    float* tex = vtx + 3;
+    float* tex = vtx + 2;
 
-    glVertexAttribPointer(mPositionAttrSlot, 3, GL_FLOAT, false, 20, vtx);
-    glVertexAttribPointer(mTexcoordAttrSlot, 2, GL_FLOAT, false, 20, tex);
+    glVertexAttribPointer(mPositionAttrSlot, 2, GL_FLOAT, GL_FALSE, 16, vtx);
+    glVertexAttribPointer(mTexcoordAttrSlot, 2, GL_FLOAT, GL_FALSE, 16, tex);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
@@ -611,39 +611,37 @@ void FontRenderer::issueDrawCommand() {
     mDrawn = true;
 }
 
-void FontRenderer::appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2,
-        float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3,
-        float x4, float y4, float z4, float u4, float v4) {
+void FontRenderer::appendMeshQuad(float x1, float y1, float u1, float v1,
+        float x2, float y2, float u2, float v2,
+        float x3, float y3, float u3, float v3,
+        float x4, float y4, float u4, float v4) {
+
     if (mClip &&
             (x1 > mClip->right || y1 < mClip->top || x2 < mClip->left || y4 > mClip->bottom)) {
         return;
     }
 
     const uint32_t vertsPerQuad = 4;
-    const uint32_t floatsPerVert = 5;
+    const uint32_t floatsPerVert = 4;
     float* currentPos = mTextMeshPtr + mCurrentQuadIndex * vertsPerQuad * floatsPerVert;
 
     (*currentPos++) = x1;
     (*currentPos++) = y1;
-    (*currentPos++) = z1;
     (*currentPos++) = u1;
     (*currentPos++) = v1;
 
     (*currentPos++) = x2;
     (*currentPos++) = y2;
-    (*currentPos++) = z2;
     (*currentPos++) = u2;
     (*currentPos++) = v2;
 
     (*currentPos++) = x3;
     (*currentPos++) = y3;
-    (*currentPos++) = z3;
     (*currentPos++) = u3;
     (*currentPos++) = v3;
 
     (*currentPos++) = x4;
     (*currentPos++) = y4;
-    (*currentPos++) = z4;
     (*currentPos++) = u4;
     (*currentPos++) = v4;
 
@@ -914,9 +912,12 @@ void FontRenderer::verticalBlur(float* weights, int32_t radius,
 void FontRenderer::blurImage(uint8_t *image, int32_t width, int32_t height, int32_t radius) {
     float *gaussian = new float[2 * radius + 1];
     computeGaussianWeights(gaussian, radius);
+
     uint8_t* scratch = new uint8_t[width * height];
+
     horizontalBlur(gaussian, radius, image, scratch, width, height);
     verticalBlur(gaussian, radius, scratch, image, width, height);
+
     delete[] gaussian;
     delete[] scratch;
 }
