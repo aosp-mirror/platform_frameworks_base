@@ -79,6 +79,9 @@ void Caches::init() {
 
     mTexCoordsArrayEnabled = false;
 
+    glActiveTexture(gTextureUnits[0]);
+    mTextureUnit = 0;
+
     mRegionMesh = NULL;
 
     blend = false;
@@ -298,6 +301,13 @@ void Caches::disbaleTexCoordsVertexArray() {
     if (mTexCoordsArrayEnabled) {
         glDisableVertexAttribArray(Program::kBindingTexCoords);
         mTexCoordsArrayEnabled = false;
+    }
+}
+
+void Caches::activeTexture(GLuint textureUnit) {
+    if (mTextureUnit != textureUnit) {
+        glActiveTexture(gTextureUnits[textureUnit]);
+        mTextureUnit = textureUnit;
     }
 }
 

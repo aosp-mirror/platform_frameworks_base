@@ -29,17 +29,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Rect {
-    static inline float min(float a, float b) { return (a<b) ? a : b; }
-    static inline float max(float a, float b) { return (a>b) ? a : b; }
-    Rect intersectWith(float l, float t, float r, float b) const {
-        Rect tmp;
-        tmp.left    = max(left, l);
-        tmp.top     = max(top, t);
-        tmp.right   = min(right, r);
-        tmp.bottom  = min(bottom, b);
-        return tmp;
-    }
-
 public:
     float left;
     float top;
@@ -115,7 +104,7 @@ public:
     }
 
     bool intersects(float l, float t, float r, float b) const {
-        return !intersectWith(l,t,r,b).isEmpty();
+        return !intersectWith(l, t, r, b).isEmpty();
     }
 
     bool intersects(const Rect& r) const {
@@ -123,7 +112,7 @@ public:
     }
 
     bool intersect(float l, float t, float r, float b) {
-        Rect tmp(intersectWith(l,t,r,b));
+        Rect tmp(intersectWith(l, t, r, b));
         if (!tmp.isEmpty()) {
             set(tmp);
             return true;
@@ -170,6 +159,19 @@ public:
 
     void dump() const {
         LOGD("Rect[l=%f t=%f r=%f b=%f]", left, top, right, bottom);
+    }
+
+private:
+    static inline float min(float a, float b) { return (a < b) ? a : b; }
+    static inline float max(float a, float b) { return (a > b) ? a : b; }
+
+    Rect intersectWith(float l, float t, float r, float b) const {
+        Rect tmp;
+        tmp.left = max(left, l);
+        tmp.top = max(top, t);
+        tmp.right = min(right, r);
+        tmp.bottom = min(bottom, b);
+        return tmp;
     }
 
 }; // class Rect
