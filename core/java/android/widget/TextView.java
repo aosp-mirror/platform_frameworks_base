@@ -7802,7 +7802,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Create new SpellCheckSpans on the modified region.
      */
     private void updateSpellCheckSpans(int start, int end, boolean createSpellChecker) {
-        if (isTextEditable() && isSuggestionsEnabled()) {
+        if (isTextEditable() && isSuggestionsEnabled() && !(this instanceof ExtractEditText)) {
             if (mSpellChecker == null && createSpellChecker) {
                 mSpellChecker = new SpellChecker(this);
             }
