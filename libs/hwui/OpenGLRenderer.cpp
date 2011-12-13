@@ -141,13 +141,9 @@ void OpenGLRenderer::setViewport(int width, int height) {
     mFirstSnapshot->height = height;
     mFirstSnapshot->viewport.set(0, 0, width, height);
 
-    mDirtyClip = false;
-
     glDisable(GL_DITHER);
-    glViewport(0, 0, width, height);
-
+    glEnable(GL_SCISSOR_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
     glEnableVertexAttribArray(Program::kBindingPosition);
 }
 
@@ -161,12 +157,13 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->fbo = getTargetFbo();
-
     mSaveCount = 1;
 
-    glEnable(GL_SCISSOR_TEST);
+    glViewport(0, 0, mWidth, mHeight);
     glScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
+
     mSnapshot->setClip(left, top, right, bottom);
+    mDirtyClip = false;
 
     if (!opaque) {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -214,12 +211,8 @@ void OpenGLRenderer::resume() {
     glEnable(GL_SCISSOR_TEST);
     dirtyClip();
 
-    glDisable(GL_DITHER);
-
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glEnableVertexAttribArray(Program::kBindingPosition);
 
     mCaches.blend = true;
     glEnable(GL_BLEND);
@@ -916,10 +909,8 @@ void OpenGLRenderer::clearLayerRegions() {
         setupDrawProgram();
         setupDrawPureColorUniforms();
         setupDrawModelViewTranslate(0.0f, 0.0f, 0.0f, 0.0f, true);
+        setupDrawVertices(&mesh[0].position[0]);
 
-        mCaches.unbindMeshBuffer();
-        glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-                gVertexStride, &mesh[0].position[0]);
         glDrawArrays(GL_TRIANGLES, 0, count * 6);
 
         glEnable(GL_SCISSOR_TEST);
