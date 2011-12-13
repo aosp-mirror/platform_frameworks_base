@@ -765,7 +765,9 @@ private:
         int16_t*                        mMixBuffer;
         int                             mSuspended;
         int                             mBytesWritten;
+    private:
         bool                            mMasterMute;
+    protected:
         SortedVector< wp<Track> >       mActiveTracks;
 
         virtual int             getTrackName_l() = 0;
@@ -1388,6 +1390,8 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
                 DefaultKeyedVector< int, sp<PlaybackThread> >  mPlaybackThreads;
                 PlaybackThread::stream_type_t       mStreamTypes[AUDIO_STREAM_CNT];
+
+                // both are protected by mLock
                 float                               mMasterVolume;
                 bool                                mMasterMute;
 
@@ -1399,6 +1403,9 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 bool                                mBtNrecIsOff;
 
                 Vector<AudioSessionRef*> mAudioSessionRefs;
+
+                float       masterVolume_l() const  { return mMasterVolume; }
+                bool        masterMute_l() const    { return mMasterMute; }
 };
 
 
