@@ -21,8 +21,11 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
 
+import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.textservice.SpellCheckerInfo;
@@ -205,6 +208,8 @@ public class SpellCheckerSession {
 
         private boolean mOpened;
         private ISpellCheckerSession mISpellCheckerSession;
+        private HandlerThread mThread;
+        private Handler mAsyncHandler;
 
         public SpellCheckerSessionListenerImpl(Handler handler) {
             mOpened = false;
@@ -216,6 +221,7 @@ public class SpellCheckerSession {
             public final TextInfo[] mTextInfos;
             public final int mSuggestionsLimit;
             public final boolean mSequentialWords;
+            public ISpellCheckerSession mSession;
             public SpellCheckerParams(int what, TextInfo[] textInfos, int suggestionsLimit,
                     boolean sequentialWords) {
                 mWhat = what;
@@ -225,27 +231,86 @@ public class SpellCheckerSession {
             }
         }
 
-        private void processTask(SpellCheckerParams scp) {
-            switch (scp.mWhat) {
-                case TASK_CANCEL:
-                    processCancel();
-                    break;
-                case TASK_GET_SUGGESTIONS_MULTIPLE:
-                    processGetSuggestionsMultiple(scp);
-                    break;
-                case TASK_CLOSE:
-                    processClose();
-                    break;
+        private void processTask(ISpellCheckerSession session, SpellCheckerParams scp,
+                boolean async) {
+            if (async || mAsyncHandler == null) {
+                switch (scp.mWhat) {
+                    case TASK_CANCEL:
+                        if (DBG) {
+                            Log.w(TAG, "Cancel spell checker tasks.");
+                        }
+                        try {
+                            session.onCancel();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Failed to cancel " + e);
+                        }
+                        break;
+                    case TASK_GET_SUGGESTIONS_MULTIPLE:
+                        if (DBG) {
+                            Log.w(TAG, "Get suggestions from the spell checker.");
+                        }
+                        try {
+                            session.onGetSuggestionsMultiple(scp.mTextInfos,
+                                    scp.mSuggestionsLimit, scp.mSequentialWords);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Failed to get suggestions " + e);
+                        }
+                        break;
+                    case TASK_CLOSE:
+                        if (DBG) {
+                            Log.w(TAG, "Close spell checker tasks.");
+                        }
+                        try {
+                            session.onClose();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Failed to close " + e);
+                        }
+                        break;
+                }
+            } else {
+                // The interface is to a local object, so need to execute it
+                // asynchronously.
+                scp.mSession = session;
+                mAsyncHandler.sendMessage(Message.obtain(mAsyncHandler, 1, scp));
+            }
+
+            if (scp.mWhat == TASK_CLOSE) {
+                // If we are closing, we want to clean up our state now even
+                // if it is pending as an async operation.
+                synchronized (this) {
+                    mISpellCheckerSession = null;
+                    mHandler = null;
+                    if (mThread != null) {
+                        mThread.quit();
+                    }
+                    mThread = null;
+                    mAsyncHandler = null;
+                }
             }
         }
 
         public synchronized void onServiceConnected(ISpellCheckerSession session) {
-            mISpellCheckerSession = session;
-            mOpened = true;
+            synchronized (this) {
+                mISpellCheckerSession = session;
+                if (session.asBinder() instanceof Binder && mThread == null) {
+                    // If this is a local object, we need to do our own threading
+                    // to make sure we handle it asynchronously.
+                    mThread = new HandlerThread("SpellCheckerSession",
+                            Process.THREAD_PRIORITY_BACKGROUND);
+                    mThread.start();
+                    mAsyncHandler = new Handler(mThread.getLooper()) {
+                        @Override public void handleMessage(Message msg) {
+                            SpellCheckerParams scp = (SpellCheckerParams)msg.obj;
+                            processTask(scp.mSession, scp, true);
+                        }
+                    };
+                }
+                mOpened = true;
+            }
             if (DBG)
                 Log.d(TAG, "onServiceConnected - Success");
             while (!mPendingTasks.isEmpty()) {
-                processTask(mPendingTasks.poll());
+                processTask(session, mPendingTasks.poll(), false);
             }
         }
 
@@ -277,87 +342,43 @@ public class SpellCheckerSession {
             return mOpened && mISpellCheckerSession == null;
         }
 
-        public boolean checkOpenConnection() {
-            if (mISpellCheckerSession != null) {
-                return true;
-            }
-            Log.e(TAG, "not connected to the spellchecker service.");
-            return false;
-        }
-
         private void processOrEnqueueTask(SpellCheckerParams scp) {
             if (DBG) {
                 Log.d(TAG, "process or enqueue task: " + mISpellCheckerSession);
             }
-            SpellCheckerParams closeTask = null;
-            if (mISpellCheckerSession == null) {
-                if (scp.mWhat == TASK_CANCEL) {
-                    while (!mPendingTasks.isEmpty()) {
-                        final SpellCheckerParams tmp = mPendingTasks.poll();
-                        if (tmp.mWhat == TASK_CLOSE) {
-                            // Only one close task should be processed, while we need to remove all
-                            // close tasks from the queue
-                            closeTask = tmp;
+            ISpellCheckerSession session;
+            synchronized (this) {
+                session = mISpellCheckerSession;
+                if (session == null) {
+                    SpellCheckerParams closeTask = null;
+                    if (scp.mWhat == TASK_CANCEL) {
+                        while (!mPendingTasks.isEmpty()) {
+                            final SpellCheckerParams tmp = mPendingTasks.poll();
+                            if (tmp.mWhat == TASK_CLOSE) {
+                                // Only one close task should be processed, while we need to remove all
+                                // close tasks from the queue
+                                closeTask = tmp;
+                            }
                         }
                     }
+                    mPendingTasks.offer(scp);
+                    if (closeTask != null) {
+                        mPendingTasks.offer(closeTask);
+                    }
+                    return;
                 }
-                mPendingTasks.offer(scp);
-                if (closeTask != null) {
-                    mPendingTasks.offer(closeTask);
-                }
-            } else {
-                processTask(scp);
             }
-        }
-
-        private void processCancel() {
-            if (!checkOpenConnection()) {
-                return;
-            }
-            if (DBG) {
-                Log.w(TAG, "Cancel spell checker tasks.");
-            }
-            try {
-                mISpellCheckerSession.onCancel();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to cancel " + e);
-            }
-        }
-
-        private void processClose() {
-            if (!checkOpenConnection()) {
-                return;
-            }
-            if (DBG) {
-                Log.w(TAG, "Close spell checker tasks.");
-            }
-            try {
-                mISpellCheckerSession.onClose();
-                mISpellCheckerSession = null;
-                mHandler = null;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to close " + e);
-            }
-        }
-
-        private void processGetSuggestionsMultiple(SpellCheckerParams scp) {
-            if (!checkOpenConnection()) {
-                return;
-            }
-            if (DBG) {
-                Log.w(TAG, "Get suggestions from the spell checker.");
-            }
-            try {
-                mISpellCheckerSession.onGetSuggestionsMultiple(
-                        scp.mTextInfos, scp.mSuggestionsLimit, scp.mSequentialWords);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to get suggestions " + e);
-            }
+            processTask(session, scp, false);
         }
 
         @Override
         public void onGetSuggestions(SuggestionsInfo[] results) {
-            mHandler.sendMessage(Message.obtain(mHandler, MSG_ON_GET_SUGGESTION_MULTIPLE, results));
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.sendMessage(Message.obtain(mHandler,
+                            MSG_ON_GET_SUGGESTION_MULTIPLE, results));
+                }
+            }
         }
     }
 
