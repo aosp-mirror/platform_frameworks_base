@@ -46,8 +46,7 @@ public class ColladaScene {
     private String modelName;
     private static String TAG = "ColladaScene";
     private final int STATE_LAST_FOCUS = 1;
-    private final boolean mLoadFromSD = true;
-    private static String mSDCardPath = "sdcard/scenegraph/";
+    boolean mLoadFromSD = false;
 
     TestAppRS mRenderer;
     SceneLoadedCallback mCallback;
@@ -66,7 +65,11 @@ public class ColladaScene {
         mRS = rs;
         mRes = res;
 
-        new ColladaLoaderTask().execute(modelName + ".dae");
+        if (modelName.indexOf("sdcard/") != -1) {
+            mLoadFromSD = true;
+        }
+
+        new ColladaLoaderTask().execute(modelName);
     }
 
     private Resources mRes;
@@ -76,6 +79,7 @@ public class ColladaScene {
     private class ColladaLoaderTask extends AsyncTask<String, Void, Boolean> {
         ColladaParser sceneSource;
         protected Boolean doInBackground(String... names) {
+            String rootDir = names[0].substring(0, names[0].lastIndexOf('/') + 1);
             long start = System.currentTimeMillis();
             sceneSource = new ColladaParser();
             InputStream is = null;
@@ -83,7 +87,7 @@ public class ColladaScene {
                 if (!mLoadFromSD) {
                     is = mRes.getAssets().open(names[0]);
                 } else {
-                    File f = new File(mSDCardPath + names[0]);
+                    File f = new File(names[0]);
                     is = new BufferedInputStream(new FileInputStream(f));
                 }
             } catch (IOException e) {
@@ -94,7 +98,7 @@ public class ColladaScene {
             Log.v("TIMER", "Stream load time: " + (end - start));
 
             start = System.currentTimeMillis();
-            sceneSource.init(is);
+            sceneSource.init(is, rootDir);
             end = System.currentTimeMillis();
             Log.v("TIMER", "Collada parse time: " + (end - start));
             return new Boolean(true);
@@ -110,7 +114,8 @@ public class ColladaScene {
                 mCallback.run();
             }
 
-            new A3DLoaderTask().execute(modelName + ".a3d");
+            String shortName = modelName.substring(0, modelName.lastIndexOf('.'));
+            new A3DLoaderTask().execute(shortName + ".a3d");
         }
     }
 
@@ -121,7 +126,7 @@ public class ColladaScene {
             if (!mLoadFromSD) {
                 model = FileA3D.createFromAsset(mRS, mRes.getAssets(), names[0]);
             } else {
-                model = FileA3D.createFromFile(mRS, mSDCardPath + names[0]);
+                model = FileA3D.createFromFile(mRS, names[0]);
             }
             int numModels = model.getIndexEntryCount();
             for (int i = 0; i < numModels; i ++) {

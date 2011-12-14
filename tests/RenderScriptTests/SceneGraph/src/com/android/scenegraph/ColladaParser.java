@@ -50,6 +50,8 @@ public class ColladaParser {
     HashMap<String, Texture2D> mSamplerImageMap;
     Scene mScene;
 
+    String mRootDir;
+
     String toString(Float3 v) {
         String valueStr = v.x + " " + v.y + " " + v.z;
         return valueStr;
@@ -67,10 +69,12 @@ public class ColladaParser {
         mImages = new HashMap<String, Texture2D>();
     }
 
-    public void init(InputStream is) {
+    public void init(InputStream is, String rootDir) {
         mLights.clear();
         mCameras.clear();
         mEffectsParams.clear();
+
+        mRootDir = rootDir;
 
         long start = System.currentTimeMillis();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -444,6 +448,7 @@ public class ColladaParser {
 
         Texture2D tex = new Texture2D();
         tex.setFileName(file);
+        tex.setFileDir(mRootDir);
         mScene.appendTextures(tex);
         mImages.put(id, tex);
     }
