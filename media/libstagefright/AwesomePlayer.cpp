@@ -335,13 +335,11 @@ status_t AwesomePlayer::setDataSource_l(
         return UNKNOWN_ERROR;
     }
 
-    if (extractor->getDrmFlag()) {
-        dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
-        if (mDecryptHandle != NULL) {
-            CHECK(mDrmManagerClient);
-            if (RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
-                notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_DRM_NO_LICENSE);
-            }
+    dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
+    if (mDecryptHandle != NULL) {
+        CHECK(mDrmManagerClient);
+        if (RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
+            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_DRM_NO_LICENSE);
         }
     }
 
@@ -2093,7 +2091,7 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         String8 mimeType;
         float confidence;
         sp<AMessage> dummy;
-        bool success = SniffWVM(dataSource, &mimeType, &confidence, &dummy);
+        bool success = SniffDRM(dataSource, &mimeType, &confidence, &dummy);
 
         if (!success
                 || strcasecmp(
@@ -2101,11 +2099,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             return ERROR_UNSUPPORTED;
         }
 
-        dataSource->DrmInitialization();
-
         mWVMExtractor = new WVMExtractor(dataSource);
         mWVMExtractor->setAdaptiveStreamingMode(true);
-        mWVMExtractor->setDrmFlag(true);
         extractor = mWVMExtractor;
     } else {
         extractor = MediaExtractor::Create(
@@ -2116,14 +2111,12 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         }
     }
 
-    if (extractor->getDrmFlag()) {
-        dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
+    dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
 
-        if (mDecryptHandle != NULL) {
-            CHECK(mDrmManagerClient);
-            if (RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
-                notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_DRM_NO_LICENSE);
-            }
+    if (mDecryptHandle != NULL) {
+        CHECK(mDrmManagerClient);
+        if (RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
+            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_DRM_NO_LICENSE);
         }
     }
 

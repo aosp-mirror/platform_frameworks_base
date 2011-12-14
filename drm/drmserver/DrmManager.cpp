@@ -99,12 +99,11 @@ void DrmManager::removeUniqueId(int uniqueId) {
 
 status_t DrmManager::loadPlugIns() {
 
-    String8 pluginDirPath("/system/lib/drm");
-    loadPlugIns(pluginDirPath);
-
     String8 vendorPluginDirPath("/vendor/lib/drm");
     loadPlugIns(vendorPluginDirPath);
 
+    String8 pluginDirPath("/system/lib/drm");
+    loadPlugIns(pluginDirPath);
     return DRM_NO_ERROR;
 
 }
