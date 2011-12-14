@@ -59,7 +59,8 @@ class CacheTexture {
 public:
     CacheTexture(){}
     CacheTexture(uint8_t* texture, GLuint textureId, uint16_t width, uint16_t height) :
-        mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height) {}
+        mTexture(texture), mTextureId(textureId), mWidth(width), mHeight(height),
+        mLinearFiltering(false) {}
     ~CacheTexture() {
         if (mTexture != NULL) {
             delete[] mTexture;
@@ -73,6 +74,7 @@ public:
     GLuint mTextureId;
     uint16_t mWidth;
     uint16_t mHeight;
+    bool mLinearFiltering;
 };
 
 class CacheTextureLine {
@@ -249,7 +251,8 @@ public:
 
     GLuint getTexture(bool linearFiltering = false) {
         checkInit();
-        if (linearFiltering != mLinearFiltering) {
+        if (linearFiltering != mCurrentCacheTexture->mLinearFiltering) {
+            mCurrentCacheTexture->mLinearFiltering = linearFiltering;
             mLinearFiltering = linearFiltering;
             const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
 
@@ -282,7 +285,7 @@ protected:
 
     const uint8_t* mGammaTable;
 
-    uint8_t* allocateTextureMemory(int width, int height);
+    void allocateTextureMemory(CacheTexture* cacheTexture);
     void initTextTexture();
     CacheTexture *createCacheTexture(int width, int height, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
@@ -317,7 +320,6 @@ protected:
     CacheTexture* mCacheTexture128;
     CacheTexture* mCacheTexture256;
     CacheTexture* mCacheTexture512;
-
 
     void checkTextureUpdate();
     bool mUploadTexture;
