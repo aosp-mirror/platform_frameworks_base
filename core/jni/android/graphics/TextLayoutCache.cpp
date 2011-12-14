@@ -33,6 +33,7 @@ namespace android {
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
+#define TYPEFACE_THAI "/system/fonts/DroidSansThai.ttf"
 
 #if USE_TEXT_LAYOUT_CACHE
 
@@ -763,6 +764,13 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
 #endif
         break;
 
+    case HB_Script_Thai:
+        typeface = getCachedTypeface(&mThaiTypeface, TYPEFACE_THAI);
+#if DEBUG_GLYPHS
+        LOGD("Using Thai Typeface");
+#endif
+        break;
+
     default:
         if (!typeface) {
             typeface = mDefaultTypeface;
@@ -793,7 +801,8 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     switch (mShaperItem.item.script) {
     case HB_Script_Arabic:
     case HB_Script_Hebrew:
-    case HB_Script_Bengali:{
+    case HB_Script_Bengali:
+    case HB_Script_Thai:{
         const uint16_t* text16 = (const uint16_t*)mShaperItem.string;
         SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
         baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
