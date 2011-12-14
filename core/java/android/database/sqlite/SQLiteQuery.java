@@ -28,7 +28,7 @@ import android.util.Log;
  * SQLiteQuery is not internally synchronized so code using a SQLiteQuery from multiple
  * threads should perform its own synchronization when using the SQLiteQuery.
  */
-public class SQLiteQuery extends SQLiteProgram {
+public final class SQLiteQuery extends SQLiteProgram {
     private static final String TAG = "SQLiteQuery";
 
     private static native long nativeFillWindow(int databasePtr, int statementPtr, int windowPtr,

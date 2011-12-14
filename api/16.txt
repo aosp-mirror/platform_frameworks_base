@@ -83,7 +83,6 @@ package android {
     field public static final java.lang.String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
     field public static final java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
-    field public static final java.lang.String READ_SOCIAL_STREAM = "android.permission.READ_SOCIAL_STREAM";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
@@ -128,7 +127,6 @@ package android {
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final java.lang.String WRITE_SMS = "android.permission.WRITE_SMS";
-    field public static final java.lang.String WRITE_SOCIAL_STREAM = "android.permission.WRITE_SOCIAL_STREAM";
     field public static final java.lang.String WRITE_SYNC_SETTINGS = "android.permission.WRITE_SYNC_SETTINGS";
   }
 
@@ -3237,7 +3235,6 @@ package android.app {
     method public final android.app.Fragment getTargetFragment();
     method public final int getTargetRequestCode();
     method public final java.lang.CharSequence getText(int);
-    method public boolean getUserVisibleHint();
     method public android.view.View getView();
     method public final int hashCode();
     method public static android.app.Fragment instantiate(android.content.Context, java.lang.String);
@@ -3284,7 +3281,6 @@ package android.app {
     method public void setMenuVisibility(boolean);
     method public void setRetainInstance(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
-    method public void setUserVisibleHint(boolean);
     method public void startActivity(android.content.Intent);
     method public void startActivityForResult(android.content.Intent, int);
     method public void unregisterForContextMenu(android.view.View);
@@ -4147,7 +4143,6 @@ package android.appwidget {
     ctor public AppWidgetHostView(android.content.Context, int, int);
     method public int getAppWidgetId();
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo();
-    method public static android.graphics.Rect getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect);
     method protected android.view.View getDefaultView();
     method protected android.view.View getErrorView();
     method protected void prepareView(android.view.View);
@@ -4244,7 +4239,6 @@ package android.bluetooth {
     method public int getProfileConnectionState(int);
     method public boolean getProfileProxy(android.content.Context, android.bluetooth.BluetoothProfile.ServiceListener, int);
     method public android.bluetooth.BluetoothDevice getRemoteDevice(java.lang.String);
-    method public android.bluetooth.BluetoothDevice getRemoteDevice(byte[]);
     method public int getScanMode();
     method public int getState();
     method public boolean isDiscovering();
@@ -4478,12 +4472,10 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothSocket createInsecureRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket createRfcommSocketToServiceRecord(java.util.UUID) throws java.io.IOException;
     method public int describeContents();
-    method public boolean fetchUuidsWithSdp();
     method public java.lang.String getAddress();
     method public android.bluetooth.BluetoothClass getBluetoothClass();
     method public int getBondState();
     method public java.lang.String getName();
-    method public android.os.ParcelUuid[] getUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED";
     field public static final java.lang.String ACTION_ACL_DISCONNECTED = "android.bluetooth.device.action.ACL_DISCONNECTED";
@@ -4492,7 +4484,6 @@ package android.bluetooth {
     field public static final java.lang.String ACTION_CLASS_CHANGED = "android.bluetooth.device.action.CLASS_CHANGED";
     field public static final java.lang.String ACTION_FOUND = "android.bluetooth.device.action.FOUND";
     field public static final java.lang.String ACTION_NAME_CHANGED = "android.bluetooth.device.action.NAME_CHANGED";
-    field public static final java.lang.String ACTION_UUID = "android.bluetooth.device.action.UUID";
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
@@ -4504,7 +4495,6 @@ package android.bluetooth {
     field public static final java.lang.String EXTRA_NAME = "android.bluetooth.device.extra.NAME";
     field public static final java.lang.String EXTRA_PREVIOUS_BOND_STATE = "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     field public static final java.lang.String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
-    field public static final java.lang.String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -5335,7 +5325,6 @@ package android.content {
     method public java.util.ArrayList<T> getParcelableArrayListExtra(java.lang.String);
     method public T getParcelableExtra(java.lang.String);
     method public java.lang.String getScheme();
-    method public android.content.Intent getSelector();
     method public java.io.Serializable getSerializableExtra(java.lang.String);
     method public short[] getShortArrayExtra(java.lang.String);
     method public short getShortExtra(java.lang.String, short);
@@ -5348,7 +5337,6 @@ package android.content {
     method public boolean hasExtra(java.lang.String);
     method public boolean hasFileDescriptors();
     method public static android.content.Intent makeMainActivity(android.content.ComponentName);
-    method public static android.content.Intent makeMainSelectorActivity(java.lang.String, java.lang.String);
     method public static android.content.Intent makeRestartActivityTask(android.content.ComponentName);
     method public static android.content.Intent parseIntent(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.content.Intent parseUri(java.lang.String, int) throws java.net.URISyntaxException;
@@ -5402,7 +5390,6 @@ package android.content {
     method public void setExtrasClassLoader(java.lang.ClassLoader);
     method public android.content.Intent setFlags(int);
     method public android.content.Intent setPackage(java.lang.String);
-    method public void setSelector(android.content.Intent);
     method public void setSourceBounds(android.graphics.Rect);
     method public android.content.Intent setType(java.lang.String);
     method public deprecated java.lang.String toURI();
@@ -5506,16 +5493,7 @@ package android.content {
     field public static final java.lang.String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final java.lang.String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
     field public static final java.lang.String CATEGORY_ALTERNATIVE = "android.intent.category.ALTERNATIVE";
-    field public static final java.lang.String CATEGORY_APP_BROWSER = "android.intent.category.APP_BROWSER";
-    field public static final java.lang.String CATEGORY_APP_CALCULATOR = "android.intent.category.APP_CALCULATOR";
-    field public static final java.lang.String CATEGORY_APP_CALENDAR = "android.intent.category.APP_CALENDAR";
-    field public static final java.lang.String CATEGORY_APP_CONTACTS = "android.intent.category.APP_CONTACTS";
-    field public static final java.lang.String CATEGORY_APP_EMAIL = "android.intent.category.APP_EMAIL";
-    field public static final java.lang.String CATEGORY_APP_GALLERY = "android.intent.category.APP_GALLERY";
-    field public static final java.lang.String CATEGORY_APP_MAPS = "android.intent.category.APP_MAPS";
     field public static final java.lang.String CATEGORY_APP_MARKET = "android.intent.category.APP_MARKET";
-    field public static final java.lang.String CATEGORY_APP_MESSAGING = "android.intent.category.APP_MESSAGING";
-    field public static final java.lang.String CATEGORY_APP_MUSIC = "android.intent.category.APP_MUSIC";
     field public static final java.lang.String CATEGORY_BROWSABLE = "android.intent.category.BROWSABLE";
     field public static final java.lang.String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     field public static final java.lang.String CATEGORY_CAR_MODE = "android.intent.category.CAR_MODE";
@@ -5581,7 +5559,6 @@ package android.content {
     field public static final int FILL_IN_COMPONENT = 8; // 0x8
     field public static final int FILL_IN_DATA = 2; // 0x2
     field public static final int FILL_IN_PACKAGE = 16; // 0x10
-    field public static final int FILL_IN_SELECTOR = 64; // 0x40
     field public static final int FILL_IN_SOURCE_BOUNDS = 32; // 0x20
     field public static final int FLAG_ACTIVITY_BROUGHT_TO_FRONT = 4194304; // 0x400000
     field public static final int FLAG_ACTIVITY_CLEAR_TASK = 32768; // 0x8000
@@ -6805,13 +6782,6 @@ package android.database {
     method public abstract boolean onMove(int, int);
   }
 
-  public class CrossProcessCursorWrapper extends android.database.CursorWrapper implements android.database.CrossProcessCursor {
-    ctor public CrossProcessCursorWrapper(android.database.Cursor);
-    method public void fillWindow(int, android.database.CursorWindow);
-    method public android.database.CursorWindow getWindow();
-    method public boolean onMove(int, int);
-  }
-
   public abstract interface Cursor {
     method public abstract void close();
     method public abstract void copyStringToBuffer(int, android.database.CharArrayBuffer);
@@ -6881,8 +6851,7 @@ package android.database {
   }
 
   public class CursorWindow extends android.database.sqlite.SQLiteClosable implements android.os.Parcelable {
-    ctor public CursorWindow(java.lang.String);
-    ctor public deprecated CursorWindow(boolean);
+    ctor public CursorWindow(boolean);
     method public boolean allocRow();
     method public void clear();
     method public void close();
@@ -8802,7 +8771,6 @@ package android.graphics {
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public void release();
-    method public void setDefaultBufferSize(int, int);
     method public void setOnFrameAvailableListener(android.graphics.SurfaceTexture.OnFrameAvailableListener);
     method public void updateTexImage();
   }
@@ -9377,7 +9345,6 @@ package android.hardware {
     method public java.util.List<android.hardware.Camera.Size> getSupportedVideoSizes();
     method public java.util.List<java.lang.String> getSupportedWhiteBalance();
     method public float getVerticalViewAngle();
-    method public boolean getVideoStabilization();
     method public java.lang.String getWhiteBalance();
     method public int getZoom();
     method public java.util.List<java.lang.Integer> getZoomRatios();
@@ -9385,7 +9352,6 @@ package android.hardware {
     method public boolean isAutoWhiteBalanceLockSupported();
     method public boolean isSmoothZoomSupported();
     method public boolean isVideoSnapshotSupported();
-    method public boolean isVideoStabilizationSupported();
     method public boolean isZoomSupported();
     method public void remove(java.lang.String);
     method public void removeGpsData();
@@ -9417,7 +9383,6 @@ package android.hardware {
     method public void setRecordingHint(boolean);
     method public void setRotation(int);
     method public void setSceneMode(java.lang.String);
-    method public void setVideoStabilization(boolean);
     method public void setWhiteBalance(java.lang.String);
     method public void setZoom(int);
     method public void unflatten(java.lang.String);
@@ -10553,7 +10518,6 @@ package android.media {
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_LOW = 0; // 0x0
     field public static final int QUALITY_QCIF = 2; // 0x2
-    field public static final int QUALITY_QVGA = 7; // 0x7
     field public static final int QUALITY_TIME_LAPSE_1080P = 1006; // 0x3ee
     field public static final int QUALITY_TIME_LAPSE_480P = 1004; // 0x3ec
     field public static final int QUALITY_TIME_LAPSE_720P = 1005; // 0x3ed
@@ -10561,7 +10525,6 @@ package android.media {
     field public static final int QUALITY_TIME_LAPSE_HIGH = 1001; // 0x3e9
     field public static final int QUALITY_TIME_LAPSE_LOW = 1000; // 0x3e8
     field public static final int QUALITY_TIME_LAPSE_QCIF = 1002; // 0x3ea
-    field public static final int QUALITY_TIME_LAPSE_QVGA = 1007; // 0x3ef
     field public int audioBitRate;
     field public int audioChannels;
     field public int audioCodec;
@@ -10701,7 +10664,6 @@ package android.media {
     field public static final int METADATA_KEY_GENRE = 6; // 0x6
     field public static final int METADATA_KEY_HAS_AUDIO = 16; // 0x10
     field public static final int METADATA_KEY_HAS_VIDEO = 17; // 0x11
-    field public static final int METADATA_KEY_LOCATION = 23; // 0x17
     field public static final int METADATA_KEY_MIMETYPE = 12; // 0xc
     field public static final int METADATA_KEY_NUM_TRACKS = 10; // 0xa
     field public static final int METADATA_KEY_TITLE = 7; // 0x7
@@ -12651,7 +12613,6 @@ package android.nfc {
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
-    method public boolean isNdefPushEnabled();
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
     method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
     method public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
@@ -13637,19 +13598,16 @@ package android.opengl {
     field public static final int GL_RENDERBUFFER_RED_SIZE_OES = 36176; // 0x8d50
     field public static final int GL_RENDERBUFFER_STENCIL_SIZE_OES = 36181; // 0x8d55
     field public static final int GL_RENDERBUFFER_WIDTH_OES = 36162; // 0x8d42
-    field public static final int GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES = 36200; // 0x8d68
     field public static final int GL_RGB565_OES = 36194; // 0x8d62
     field public static final int GL_RGB5_A1_OES = 32855; // 0x8057
     field public static final int GL_RGB8_OES = 32849; // 0x8051
     field public static final int GL_RGBA4_OES = 32854; // 0x8056
     field public static final int GL_RGBA8_OES = 32856; // 0x8058
-    field public static final int GL_SAMPLER_EXTERNAL_OES = 36198; // 0x8d66
     field public static final int GL_STENCIL_ATTACHMENT_OES = 36128; // 0x8d20
     field public static final int GL_STENCIL_INDEX1_OES = 36166; // 0x8d46
     field public static final int GL_STENCIL_INDEX4_OES = 36167; // 0x8d47
     field public static final int GL_STENCIL_INDEX8_OES = 36168; // 0x8d48
     field public static final int GL_TEXTURE_BINDING_CUBE_MAP_OES = 34068; // 0x8514
-    field public static final int GL_TEXTURE_BINDING_EXTERNAL_OES = 36199; // 0x8d67
     field public static final int GL_TEXTURE_CROP_RECT_OES = 35741; // 0x8b9d
     field public static final int GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES = 34070; // 0x8516
     field public static final int GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES = 34072; // 0x8518
@@ -13658,7 +13616,6 @@ package android.opengl {
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES = 34069; // 0x8515
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES = 34071; // 0x8517
     field public static final int GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES = 34073; // 0x8519
-    field public static final int GL_TEXTURE_EXTERNAL_OES = 36197; // 0x8d65
     field public static final int GL_TEXTURE_GEN_MODE_OES = 9472; // 0x2500
     field public static final int GL_TEXTURE_GEN_STR_OES = 36192; // 0x8d60
     field public static final int GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES = 35215; // 0x898f
@@ -14416,7 +14373,6 @@ package android.os {
     field public static final int HONEYCOMB_MR1 = 12; // 0xc
     field public static final int HONEYCOMB_MR2 = 13; // 0xd
     field public static final int ICE_CREAM_SANDWICH = 14; // 0xe
-    field public static final int ICE_CREAM_SANDWICH_MR1 = 15; // 0xf
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
@@ -14782,7 +14738,6 @@ package android.os {
     field public static final int FLAG_ONEWAY = 1; // 0x1
     field public static final int INTERFACE_TRANSACTION = 1598968902; // 0x5f4e5446
     field public static final int LAST_CALL_TRANSACTION = 16777215; // 0xffffff
-    field public static final int LIKE_TRANSACTION = 1598835019; // 0x5f4c494b
     field public static final int PING_TRANSACTION = 1599098439; // 0x5f504e47
     field public static final int TWEET_TRANSACTION = 1599362900; // 0x5f545754
   }
@@ -15144,7 +15099,6 @@ package android.os {
 
   public class RemoteException extends android.util.AndroidException {
     ctor public RemoteException();
-    ctor public RemoteException(java.lang.String);
   }
 
   public class ResultReceiver implements android.os.Parcelable {
@@ -15237,10 +15191,6 @@ package android.os {
     method public boolean isAcquired();
     method public void release(android.os.IBinder);
     method public abstract void released();
-  }
-
-  public class TransactionTooLargeException extends android.os.RemoteException {
-    ctor public TransactionTooLargeException();
   }
 
   public class Vibrator {
@@ -15759,7 +15709,6 @@ package android.provider {
     field public static final int TYPE_NONE = 0; // 0x0
     field public static final int TYPE_OPTIONAL = 2; // 0x2
     field public static final int TYPE_REQUIRED = 1; // 0x1
-    field public static final int TYPE_RESOURCE = 3; // 0x3
   }
 
   public static final class CalendarContract.CalendarAlerts implements android.provider.BaseColumns android.provider.CalendarContract.CalendarAlertsColumns android.provider.CalendarContract.CalendarColumns android.provider.CalendarContract.EventsColumns {
@@ -15798,12 +15747,9 @@ package android.provider {
   }
 
   protected static abstract interface CalendarContract.CalendarColumns {
-    field public static final java.lang.String ALLOWED_ATTENDEE_TYPES = "allowedAttendeeTypes";
-    field public static final java.lang.String ALLOWED_AVAILABILITY = "allowedAvailability";
     field public static final java.lang.String ALLOWED_REMINDERS = "allowedReminders";
     field public static final java.lang.String CALENDAR_ACCESS_LEVEL = "calendar_access_level";
     field public static final java.lang.String CALENDAR_COLOR = "calendar_color";
-    field public static final java.lang.String CALENDAR_COLOR_KEY = "calendar_color_index";
     field public static final java.lang.String CALENDAR_DISPLAY_NAME = "calendar_displayName";
     field public static final java.lang.String CALENDAR_TIME_ZONE = "calendar_timezone";
     field public static final int CAL_ACCESS_CONTRIBUTOR = 500; // 0x1f4
@@ -15848,18 +15794,6 @@ package android.provider {
     field public static final java.lang.String NAME = "name";
   }
 
-  public static final class CalendarContract.Colors implements android.provider.CalendarContract.ColorsColumns {
-    field public static final android.net.Uri CONTENT_URI;
-  }
-
-  protected static abstract interface CalendarContract.ColorsColumns implements android.provider.SyncStateContract.Columns {
-    field public static final java.lang.String COLOR = "color";
-    field public static final java.lang.String COLOR_KEY = "color_index";
-    field public static final java.lang.String COLOR_TYPE = "color_type";
-    field public static final int TYPE_CALENDAR = 0; // 0x0
-    field public static final int TYPE_EVENT = 1; // 0x1
-  }
-
   public static final class CalendarContract.EventDays implements android.provider.CalendarContract.EventDaysColumns {
     method public static final android.database.Cursor query(android.content.ContentResolver, int, int, java.lang.String[]);
     field public static final android.net.Uri CONTENT_URI;
@@ -15885,7 +15819,6 @@ package android.provider {
     field public static final java.lang.String AVAILABILITY = "availability";
     field public static final int AVAILABILITY_BUSY = 0; // 0x0
     field public static final int AVAILABILITY_FREE = 1; // 0x1
-    field public static final int AVAILABILITY_TENTATIVE = 2; // 0x2
     field public static final java.lang.String CALENDAR_ID = "calendar_id";
     field public static final java.lang.String CAN_INVITE_OTHERS = "canInviteOthers";
     field public static final java.lang.String DESCRIPTION = "description";
@@ -15893,7 +15826,6 @@ package android.provider {
     field public static final java.lang.String DTSTART = "dtstart";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String EVENT_COLOR = "eventColor";
-    field public static final java.lang.String EVENT_COLOR_KEY = "eventColor_index";
     field public static final java.lang.String EVENT_END_TIMEZONE = "eventEndTimezone";
     field public static final java.lang.String EVENT_LOCATION = "eventLocation";
     field public static final java.lang.String EVENT_TIMEZONE = "eventTimezone";
@@ -16629,10 +16561,6 @@ package android.provider {
     field public static final java.lang.String PHOTO_FILE_ID = "data14";
   }
 
-  public static final class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "stream_items";
-  }
-
   protected static abstract interface ContactsContract.ContactsColumns {
     field public static final java.lang.String DISPLAY_NAME = "display_name";
     field public static final java.lang.String HAS_PHONE_NUMBER = "has_phone_number";
@@ -16890,10 +16818,6 @@ package android.provider {
     field public static final java.lang.String DATA_ID = "data_id";
   }
 
-  public static final class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "stream_items";
-  }
-
   protected static abstract interface ContactsContract.RawContactsColumns {
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
     field public static final java.lang.String CONTACT_ID = "contact_id";
@@ -16957,56 +16881,6 @@ package android.provider {
     field public static final android.net.Uri PROFILE_CONTENT_URI;
   }
 
-  public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String PHOTO = "photo";
-  }
-
-  protected static abstract interface ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
-    field public static final java.lang.String PHOTO_URI = "photo_uri";
-    field public static final java.lang.String SORT_INDEX = "sort_index";
-    field public static final java.lang.String STREAM_ITEM_ID = "stream_item_id";
-    field public static final java.lang.String SYNC1 = "stream_item_photo_sync1";
-    field public static final java.lang.String SYNC2 = "stream_item_photo_sync2";
-    field public static final java.lang.String SYNC3 = "stream_item_photo_sync3";
-    field public static final java.lang.String SYNC4 = "stream_item_photo_sync4";
-  }
-
-  public static final class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
-    field public static final android.net.Uri CONTENT_LIMIT_URI;
-    field public static final android.net.Uri CONTENT_PHOTO_URI;
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
-    field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String MAX_ITEMS = "max_items";
-  }
-
-  public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String CONTENT_DIRECTORY = "photo";
-    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
-  }
-
-  protected static abstract interface ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String ACCOUNT_NAME = "account_name";
-    field public static final java.lang.String ACCOUNT_TYPE = "account_type";
-    field public static final java.lang.String COMMENTS = "comments";
-    field public static final java.lang.String CONTACT_ID = "contact_id";
-    field public static final java.lang.String CONTACT_LOOKUP_KEY = "contact_lookup";
-    field public static final java.lang.String DATA_SET = "data_set";
-    field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
-    field public static final java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
-    field public static final java.lang.String RES_ICON = "icon";
-    field public static final java.lang.String RES_LABEL = "label";
-    field public static final java.lang.String RES_PACKAGE = "res_package";
-    field public static final java.lang.String SYNC1 = "stream_item_sync1";
-    field public static final java.lang.String SYNC2 = "stream_item_sync2";
-    field public static final java.lang.String SYNC3 = "stream_item_sync3";
-    field public static final java.lang.String SYNC4 = "stream_item_sync4";
-    field public static final java.lang.String TEXT = "text";
-    field public static final java.lang.String TIMESTAMP = "timestamp";
-  }
-
   protected static abstract interface ContactsContract.SyncColumns implements android.provider.ContactsContract.BaseSyncColumns {
     field public static final java.lang.String ACCOUNT_NAME = "account_name";
     field public static final java.lang.String ACCOUNT_TYPE = "account_type";
@@ -17061,7 +16935,7 @@ package android.provider {
     field public static final java.lang.String EXTRA_VIDEO_QUALITY = "android.intent.extra.videoQuality";
     field public static final java.lang.String INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH = "android.media.action.MEDIA_PLAY_FROM_SEARCH";
     field public static final java.lang.String INTENT_ACTION_MEDIA_SEARCH = "android.intent.action.MEDIA_SEARCH";
-    field public static final deprecated java.lang.String INTENT_ACTION_MUSIC_PLAYER = "android.intent.action.MUSIC_PLAYER";
+    field public static final java.lang.String INTENT_ACTION_MUSIC_PLAYER = "android.intent.action.MUSIC_PLAYER";
     field public static final java.lang.String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
     field public static final java.lang.String INTENT_ACTION_VIDEO_CAMERA = "android.media.action.VIDEO_CAMERA";
     field public static final java.lang.String MEDIA_IGNORE_FILENAME = ".nomedia";
@@ -17383,7 +17257,6 @@ package android.provider {
     field public static final java.lang.String ACTION_MEMORY_CARD_SETTINGS = "android.settings.MEMORY_CARD_SETTINGS";
     field public static final java.lang.String ACTION_NETWORK_OPERATOR_SETTINGS = "android.settings.NETWORK_OPERATOR_SETTINGS";
     field public static final java.lang.String ACTION_NFCSHARING_SETTINGS = "android.settings.NFCSHARING_SETTINGS";
-    field public static final java.lang.String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
     field public static final java.lang.String ACTION_PRIVACY_SETTINGS = "android.settings.PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
     field public static final java.lang.String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
@@ -17425,7 +17298,6 @@ package android.provider {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
     method public static final void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
     field public static final java.lang.String ACCESSIBILITY_ENABLED = "accessibility_enabled";
-    field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
     field public static final java.lang.String ADB_ENABLED = "adb_enabled";
     field public static final java.lang.String ALLOWED_GEOLOCATION_ORIGINS = "allowed_geolocation_origins";
     field public static final java.lang.String ALLOW_MOCK_LOCATION = "mock_location";
@@ -18720,7 +18592,6 @@ package android.service.textservice {
     method public android.os.Bundle getBundle();
     method public java.lang.String getLocale();
     method public void onCancel();
-    method public void onClose();
     method public abstract void onCreate();
     method public abstract android.view.textservice.SuggestionsInfo onGetSuggestions(android.view.textservice.TextInfo, int);
     method public android.view.textservice.SuggestionsInfo[] onGetSuggestionsMultiple(android.view.textservice.TextInfo[], int, boolean);
@@ -18757,7 +18628,6 @@ package android.service.wallpaper {
     method public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
     method public void onTouchEvent(android.view.MotionEvent);
     method public void onVisibilityChanged(boolean);
-    method public void setOffsetNotificationsEnabled(boolean);
     method public void setTouchEventsEnabled(boolean);
   }
 
@@ -18896,7 +18766,6 @@ package android.speech.tts {
     method public boolean areDefaultsEnforced();
     method public java.lang.String getDefaultEngine();
     method public java.util.List<android.speech.tts.TextToSpeech.EngineInfo> getEngines();
-    method public java.util.Set<java.lang.String> getFeatures(java.util.Locale);
     method public java.util.Locale getLanguage();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
@@ -18904,8 +18773,7 @@ package android.speech.tts {
     method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public deprecated int setEngineByPackageName(java.lang.String);
     method public int setLanguage(java.util.Locale);
-    method public deprecated int setOnUtteranceCompletedListener(android.speech.tts.TextToSpeech.OnUtteranceCompletedListener);
-    method public int setOnUtteranceProgressListener(android.speech.tts.UtteranceProgressListener);
+    method public int setOnUtteranceCompletedListener(android.speech.tts.TextToSpeech.OnUtteranceCompletedListener);
     method public int setPitch(float);
     method public int setSpeechRate(float);
     method public void shutdown();
@@ -18943,8 +18811,6 @@ package android.speech.tts {
     field public static final java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
     field public static final java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
     field public static final java.lang.String INTENT_ACTION_TTS_SERVICE = "android.intent.action.TTS_SERVICE";
-    field public static final java.lang.String KEY_FEATURE_EMBEDDED_SYNTHESIS = "embeddedTts";
-    field public static final java.lang.String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
     field public static final java.lang.String KEY_PARAM_PAN = "pan";
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
     field public static final java.lang.String KEY_PARAM_UTTERANCE_ID = "utteranceId";
@@ -18970,19 +18836,11 @@ package android.speech.tts {
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
     method public android.os.IBinder onBind(android.content.Intent);
-    method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
     method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract void onStop();
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
-  }
-
-  public abstract class UtteranceProgressListener {
-    ctor public UtteranceProgressListener();
-    method public abstract void onDone(java.lang.String);
-    method public abstract void onError(java.lang.String);
-    method public abstract void onStart(java.lang.String);
   }
 
 }
@@ -21149,7 +21007,6 @@ package android.text.style {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_AUTO_CORRECTION = 4; // 0x4
     field public static final int FLAG_EASY_CORRECT = 1; // 0x1
     field public static final int FLAG_MISSPELLED = 2; // 0x2
     field public static final int SUGGESTIONS_MAX_SIZE = 5; // 0x5
@@ -22222,8 +22079,6 @@ package android.view {
     field public static final int KEYCODE_BUTTON_Y = 100; // 0x64
     field public static final int KEYCODE_BUTTON_Z = 101; // 0x65
     field public static final int KEYCODE_C = 31; // 0x1f
-    field public static final int KEYCODE_CALCULATOR = 210; // 0xd2
-    field public static final int KEYCODE_CALENDAR = 208; // 0xd0
     field public static final int KEYCODE_CALL = 5; // 0x5
     field public static final int KEYCODE_CAMERA = 27; // 0x1b
     field public static final int KEYCODE_CAPS_LOCK = 115; // 0x73
@@ -22232,7 +22087,6 @@ package android.view {
     field public static final int KEYCODE_CHANNEL_UP = 166; // 0xa6
     field public static final int KEYCODE_CLEAR = 28; // 0x1c
     field public static final int KEYCODE_COMMA = 55; // 0x37
-    field public static final int KEYCODE_CONTACTS = 207; // 0xcf
     field public static final int KEYCODE_CTRL_LEFT = 113; // 0x71
     field public static final int KEYCODE_CTRL_RIGHT = 114; // 0x72
     field public static final int KEYCODE_D = 32; // 0x20
@@ -22300,7 +22154,6 @@ package android.view {
     field public static final int KEYCODE_MINUS = 69; // 0x45
     field public static final int KEYCODE_MOVE_END = 123; // 0x7b
     field public static final int KEYCODE_MOVE_HOME = 122; // 0x7a
-    field public static final int KEYCODE_MUSIC = 209; // 0xd1
     field public static final int KEYCODE_MUTE = 91; // 0x5b
     field public static final int KEYCODE_N = 42; // 0x2a
     field public static final int KEYCODE_NOTIFICATION = 83; // 0x53
@@ -22950,7 +22803,6 @@ package android.view {
     method public void buildDrawingCache();
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
-    method public boolean callOnClick();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -23002,7 +22854,6 @@ package android.view {
     method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
-    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public float getAlpha();
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
@@ -23103,7 +22954,6 @@ package android.view {
     method public float getY();
     method public boolean hasFocus();
     method public boolean hasFocusable();
-    method public boolean hasOnClickListeners();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);
     method protected void initializeFadingEdge(android.content.res.TypedArray);
@@ -23404,7 +23254,6 @@ package android.view {
   public static class View.AccessibilityDelegate {
     ctor public View.AccessibilityDelegate();
     method public boolean dispatchPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(android.view.View);
     method public void onInitializeAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
     method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
@@ -24160,7 +24009,6 @@ package android.view.accessibility {
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public void addAction(int);
     method public void addChild(android.view.View);
-    method public void addChild(android.view.View, int);
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
     method public int getActions();
@@ -24185,7 +24033,6 @@ package android.view.accessibility {
     method public boolean isScrollable();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
-    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
@@ -24203,12 +24050,10 @@ package android.view.accessibility {
     method public void setLongClickable(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
-    method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
-    method public void setSource(android.view.View, int);
     method public void setText(java.lang.CharSequence);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
@@ -24216,13 +24061,6 @@ package android.view.accessibility {
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public abstract class AccessibilityNodeProvider {
-    ctor public AccessibilityNodeProvider();
-    method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
-    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String, int);
-    method public boolean performAccessibilityAction(int, int);
   }
 
   public class AccessibilityRecord {
@@ -24233,8 +24071,6 @@ package android.view.accessibility {
     method public int getCurrentItemIndex();
     method public int getFromIndex();
     method public int getItemCount();
-    method public int getMaxScrollX();
-    method public int getMaxScrollY();
     method public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
     method public int getScrollX();
@@ -24261,8 +24097,6 @@ package android.view.accessibility {
     method public void setFromIndex(int);
     method public void setFullScreen(boolean);
     method public void setItemCount(int);
-    method public void setMaxScrollX(int);
-    method public void setMaxScrollY(int);
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
@@ -24270,7 +24104,6 @@ package android.view.accessibility {
     method public void setScrollY(int);
     method public void setScrollable(boolean);
     method public void setSource(android.view.View);
-    method public void setSource(android.view.View, int);
     method public void setToIndex(int);
   }
 
@@ -24869,7 +24702,6 @@ package android.view.textservice {
   }
 
   public class SpellCheckerSession {
-    method public void cancel();
     method public void close();
     method public android.view.textservice.SpellCheckerInfo getSpellChecker();
     method public void getSuggestions(android.view.textservice.TextInfo, int);
@@ -24906,7 +24738,6 @@ package android.view.textservice {
     method public void setCookieAndSequence(int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 4; // 0x4
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
     field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
   }
@@ -25176,7 +25007,7 @@ package android.webkit {
     method public synchronized java.lang.String getFixedFontFamily();
     method public synchronized boolean getJavaScriptCanOpenWindowsAutomatically();
     method public synchronized boolean getJavaScriptEnabled();
-    method public synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
+    method public deprecated synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
     method public boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
@@ -25223,7 +25054,7 @@ package android.webkit {
     method public synchronized void setGeolocationEnabled(boolean);
     method public synchronized void setJavaScriptCanOpenWindowsAutomatically(boolean);
     method public synchronized void setJavaScriptEnabled(boolean);
-    method public synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
+    method public deprecated synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
     method public void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
@@ -25258,12 +25089,12 @@ package android.webkit {
     field public static final int LOAD_NO_CACHE = 2; // 0x2
   }
 
-  public static final class WebSettings.LayoutAlgorithm extends java.lang.Enum {
+  public static final deprecated class WebSettings.LayoutAlgorithm extends java.lang.Enum {
     method public static android.webkit.WebSettings.LayoutAlgorithm valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.LayoutAlgorithm[] values();
     enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NARROW_COLUMNS;
     enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NORMAL;
-    enum_constant public static final deprecated android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
+    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
   }
 
   public static final class WebSettings.PluginState extends java.lang.Enum {
@@ -26928,7 +26759,6 @@ package android.widget {
     method public void setChar(int, java.lang.String, char);
     method public void setCharSequence(int, java.lang.String, java.lang.CharSequence);
     method public void setChronometer(int, long, java.lang.String, boolean);
-    method public void setContentDescription(int, java.lang.CharSequence);
     method public void setDisplayedChild(int, int);
     method public void setDouble(int, java.lang.String, double);
     method public void setEmptyView(int, int);

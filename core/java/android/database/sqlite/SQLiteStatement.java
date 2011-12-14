@@ -35,7 +35,7 @@ import dalvik.system.BlockGuard;
  * threads should perform its own synchronization when using the SQLiteStatement.
  */
 @SuppressWarnings("deprecation")
-public class SQLiteStatement extends SQLiteProgram
+public final class SQLiteStatement extends SQLiteProgram
 {
     private static final String TAG = "SQLiteStatement";
 
