@@ -1,0 +1,194 @@
+page.title=Sending Content to Other Apps
+parent.title=Sharing Content
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Receiving Content from Other Apps
+next.link=receive.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#send-text-content">Send Text Content</a></li>
+  <li><a href="#send-binary-content">Send Binary Content</a></li>
+  <li><a href="#send-multiple-content">Send Multiple Pieces of Content</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+Intent Filters</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>When you construct an intent, you must specify the action you want the intent to "trigger." 
+Android defines several actions, including {@link android.content.Intent#ACTION_SEND} which, as 
+you can probably guess, indicates that the intent is sending data from one activity to another, 
+even across process boundaries. To send data to another activity, all you need to do is speicify 
+the data and its type, the system will identify compatible receiving activities and display them 
+to the user (if there are multiple options) or immediately start the activity (if there is only 
+one option). Similarly, you can advertise the data types that your activities support receiving 
+from other applications by specifying them in your manifest.</p>
+
+<p>Sending and receiving data between applications with intents is most commonly used for social 
+sharing of content. Intents allow users to share information quickly and easily, using their 
+favorite social applications.</p>
+
+<p><strong>Note:</strong> The best way to add a share action item to an 
+{@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became 
+available in API level 14. {@link android.widget.ShareActionProvider} is discussed in the lesson 
+about <a href="shareaction.html">Adding an Easy Share Action</a>.</p>
+
+
+<h2 id="send-text-content">Send Text Content</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/training/sharing/share-text-screenshot.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Screenshot of {@link android.content.Intent#ACTION_SEND} intent chooser
+on a handset.
+</p>
+</div>
+
+<p>The most straightforward and common use of the {@link android.content.Intent#ACTION_SEND} 
+action is sending text content from one activity to another. For example, the built-in Browser 
+app can share the URL of the currently-displayed page as text with any application. This is useful 
+for sharing an article or website with friends via email or social networking. Here is the code to 
+implement this type of sharing:</p>
+
+<pre>
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, &quot;This is my text to send.&quot;);
+sendIntent.setType(&quot;text/plain&quot;);
+startActivity(sendIntent);
+</pre>
+
+<p>If there's an installed application with a filter that matches 
+{@link android.content.Intent#ACTION_SEND} and MIME type text/plain, the Android system will run 
+it; if more than one application matches, the system displays a disambiguation dialog (a "chooser") 
+that allows the user to choose an app. If you call 
+{@link android.content.Intent#createChooser(android.content.Intent, CharSequence)
+Intent.createChooser()} 
+for the intent, Android will <strong>always</strong> display the chooser. This has some
+advantages:</p>
+
+<ul>
+  <li>Even if the user has previously selected a default action for this intent, the chooser will
+still be displayed.</li>
+  <li>If no applications match, Android displays a system message.</li>
+  <li>You can specify a title for the chooser dialog.</li>
+</ul>
+
+<p>Here's the updated code:</p>
+
+<pre>
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, &quot;This is my text to send.&quot;);
+sendIntent.setType(&quot;text/plain&quot;);
+startActivity(<strong>Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)</strong>);
+</pre>
+
+<p>The resulting dialog is shown in figure 1.</p>
+
+<p>Optionally, you can set some standard extras for the intent: 
+{@link android.content.Intent#EXTRA_EMAIL}, {@link android.content.Intent#EXTRA_CC}, 
+{@link android.content.Intent#EXTRA_BCC}, {@link android.content.Intent#EXTRA_SUBJECT}. However, 
+if the receiving application is not designed to use them, nothing will happen. You can use 
+custom extras as well, but there's no effect unless the receiving application understands them. 
+Typically, you'd use custom extras defined by the receiving application itself.</p>
+
+<p class="note"><strong>Note:</strong> Some e-mail applications, such as Gmail, expect a 
+{@link java.lang.String String[]} for extras like {@link android.content.Intent#EXTRA_EMAIL} and 
+{@link android.content.Intent#EXTRA_CC}, use 
+{@link android.content.Intent#putExtra(String,String[]) putExtra(String, String[])} to add these 
+to your intent.</p>
+
+
+<h2 id="send-binary-content">Send Binary Content</h2>
+
+<p>Binary data is shared using the {@link android.content.Intent#ACTION_SEND} action combined with
+setting the appropriate MIME type and placing the URI to the data in an extra named {@link
+android.content.Intent#EXTRA_STREAM}. This is commonly used to share an image but can be used to
+share any type of binary content:</p>
+
+<pre>
+Intent shareIntent = new Intent();
+shareIntent.setAction(Intent.ACTION_SEND);
+shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
+shareIntent.setType(&quot;image/jpeg&quot;);
+startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
+</pre>
+
+<p>Note the following:</p>
+<ul>
+  <li>You can use a MIME type of {@code "*/*"}, but this will only match activities that are able to
+handle generic data streams.</li>
+  <li>The receiving application needs permission to access the data the {@link android.net.Uri}
+points to. There are a number of ways to handle this:
+  <ul>
+    <li>Write the data to a file on external/shared storage (such as the SD card), which all apps
+can read. Use {@link android.net.Uri#fromFile(java.io.File) Uri.fromFile()} to create the
+{@link android.net.Uri} that can be passed to the share intent. However, keep in mind that not
+all applications process a {@code file://} style {@link android.net.Uri}.</li>
+    <li>Write the data to a file in your own application directory using {@link
+android.content.Context#openFileOutput(java.lang.String, int) openFileOutput()} with mode {@link
+android.content.Context#MODE_WORLD_READABLE} after which {@link
+android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()} can be used to
+return a {@link java.io.File}. As with the previous option, {@link
+android.net.Uri#fromFile(java.io.File) Uri.fromFile()} will create a {@code file://} style {@link
+android.net.Uri} for your share intent.</li>
+    <li>Media files like images, videos and audio can be scanned and added to the system {@link
+android.provider.MediaStore} using {@link
+android.media.MediaScannerConnection#scanFile(android.content.Context, java.lang.String[],
+java.lang.String[], android.media.MediaScannerConnection.OnScanCompletedListener) scanFile()}. The
+{@link
+android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String,
+android.net.Uri) onScanCompleted()} callback returns a {@code content://} style {@link
+android.net.Uri} suitable for including in your share intent.</li>
+    <li>Images can be inserted into the system {@link android.provider.MediaStore} using {@link
+android.provider.MediaStore.Images.Media#insertImage(android.content.ContentResolver,
+android.graphics.Bitmap, java.lang.String, java.lang.String) insertImage()} which will return a
+{@code content://} style {@link android.net.Uri} suitable for including in a share intent.</li>
+    <li>Store the data in your own {@link android.content.ContentProvider}, make sure that other
+apps have the correct permission to access your provider (or use <a
+href="{@docRoot}guide/topics/security/security.html#uri">per-URI permissions</a>).</li>
+  </ul>
+  </li>
+</ul>
+
+
+<h2 id="send-multiple-content">Send Multiple Pieces of Content</h2>
+
+<p>To share multiple pieces of content, use the {@link android.content.Intent#ACTION_SEND_MULTIPLE}
+action together with a list of URIs pointing to the content. The MIME type varies according to the
+mix of content you're sharing. For example, if you share 3 JPEG images, the type is still {@code
+"image/jpeg"}. For a mixture of image types, it should be {@code "image/*"} to match an activity
+that handles any type of image. You should only use {@code "*/*"} if you're sharing out a wide
+variety of types. As previously stated, it's up to the receiving application to parse and process
+your data. Here's an example:</p>
+
+<pre>
+ArrayList&lt;Uri&gt; imageUris = new ArrayList&lt;Uri&gt;();
+imageUris.add(imageUri1); // Add your image URIs here
+imageUris.add(imageUri2);
+
+Intent shareIntent = new Intent();
+shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
+shareIntent.setType(&quot;image/*&quot;);
+startActivity(Intent.createChooser(shareIntent, &quot;Share images to..&quot;));
+</pre>
+
+<p>As before, make sure the provided {@link android.net.Uri URIs} point to data that a receiving
+application can access.</p>
+
