@@ -28,85 +28,119 @@
 namespace android {
 namespace gltrace {
 
-int gServerSocket, gClientSocket;
-
-void startServer(int port) {
-    if (gServerSocket > 0) {
-        ALOGD("startServer: server socket already open!");
-        return;
-    }
-
-    gServerSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (gServerSocket < 0) {
+int acceptClientConnection(int serverPort) {
+    int serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (serverSocket < 0) {
         LOGE("Error (%d) while creating socket. Check if app has network permissions.",
-                                                                            gServerSocket);
-        exit(-1);
+                                                                            serverSocket);
+        return -1;
     }
 
     struct sockaddr_in server, client;
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = htonl(INADDR_ANY);
-    server.sin_port = htons(port);
+    server.sin_port = htons(serverPort);
 
     socklen_t sockaddr_len = sizeof(sockaddr_in);
-    if (bind(gServerSocket, (struct sockaddr *) &server, sizeof(server)) < 0) {
-        close(gServerSocket);
+    if (bind(serverSocket, (struct sockaddr *) &server, sizeof(server)) < 0) {
+        close(serverSocket);
         LOGE("Failed to bind the server socket");
-        exit(-1);
+        return -1;
     }
 
-    if (listen(gServerSocket, 1) < 0) {
-        close(gServerSocket);
+    if (listen(serverSocket, 1) < 0) {
+        close(serverSocket);
         LOGE("Failed to listen on server socket");
-        exit(-1);
+        return -1;
     }
 
-    ALOGD("startServer: server started on %d", port);
+    ALOGD("gltrace::waitForClientConnection: server listening @ port %d", serverPort);
 
-    /* Wait for client connection */
-    if ((gClientSocket = accept(gServerSocket, (struct sockaddr *)&client, &sockaddr_len)) < 0) {
-        close(gServerSocket);
+    int clientSocket = accept(serverSocket, (struct sockaddr *)&client, &sockaddr_len);
+    if (clientSocket < 0) {
+        close(serverSocket);
         LOGE("Failed to accept client connection");
-        exit(-1);
+        return -1;
     }
 
-    ALOGD("startServer: client connected: %s", inet_ntoa(client.sin_addr));
+    ALOGD("gltrace::waitForClientConnection: client connected: %s", inet_ntoa(client.sin_addr));
+
+    // do not accept any more incoming connections
+    close(serverSocket);
+
+    return clientSocket;
 }
 
-void stopServer() {
-    if (gServerSocket > 0) {
-        close(gServerSocket);
-        close(gClientSocket);
-        gServerSocket = gClientSocket = 0;
+TCPStream::TCPStream(int socket) {
+    mSocket = socket;
+    pthread_mutex_init(&mSocketWriteMutex, NULL);
+}
+
+TCPStream::~TCPStream() {
+    pthread_mutex_destroy(&mSocketWriteMutex);
+}
+
+void TCPStream::closeStream() {
+    if (mSocket > 0) {
+        close(mSocket);
+        mSocket = 0;
     }
 }
 
-/** Send GLMessage to the receiver on the host. */
-void traceGLMessage(GLMessage *call) {
-    if (gClientSocket <= 0) {
-        LOGE("traceGLMessage: Attempt to send while client connection is not established");
-        return;
+int TCPStream::send(void *buf, size_t len) {
+    if (mSocket <= 0) {
+        return -1;
     }
 
-    std::string str;
-    call->SerializeToString(&str);
-    const uint32_t len = str.length();
+    pthread_mutex_lock(&mSocketWriteMutex);
+    int n = write(mSocket, buf, len);
+    pthread_mutex_unlock(&mSocketWriteMutex);
 
-    int n = write(gClientSocket, &len, sizeof len);
-    if (n != sizeof len) {
-        LOGE("traceGLMessage: Error (%d) while writing message length\n", n);
-        stopServer();
-        exit(-1);
+    return n;
+}
+
+int TCPStream::receive(void *data, size_t len) {
+    if (mSocket <= 0) {
+        return -1;
     }
 
-    n = write(gClientSocket, str.data(), str.length());
-    if (n != (int) str.length()) {
-        LOGE("traceGLMessage: Error while writing out message, result = %d, length = %d\n",
-            n, str.length());
-        stopServer();
-        exit(-1);
+    return read(mSocket, data, len);
+}
+
+BufferedOutputStream::BufferedOutputStream(TCPStream *stream, size_t bufferSize) {
+    mStream = stream;
+
+    mBufferSize = bufferSize;
+    mStringBuffer = "";
+    mStringBuffer.reserve(bufferSize);
+}
+
+int BufferedOutputStream::flush() {
+    if (mStringBuffer.size() == 0) {
+        return 0;
     }
+
+    int n = mStream->send((void *)mStringBuffer.data(), mStringBuffer.size());
+    mStringBuffer.clear();
+    return n;
+}
+
+void BufferedOutputStream::enqueueMessage(GLMessage *msg) {
+    const uint32_t len = msg->ByteSize();
+
+    mStringBuffer.append((const char *)&len, sizeof(len));    // append header
+    msg->AppendToString(&mStringBuffer);                      // append message
+}
+
+int BufferedOutputStream::send(GLMessage *msg) {
+    enqueueMessage(msg);
+
+    if (mStringBuffer.size() > mBufferSize) {
+        return flush();
+    }
+
+    return 0;
 }
 
 };  // namespace gltrace

@@ -662,7 +662,7 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             egl_tls_t::setContext(ctx);
 #if EGL_TRACE
             if (gEGLDebugLevel > 0)
-                GLTrace_eglMakeCurrent(c->version, c->cnx->hooks[c->version]);
+                GLTrace_eglMakeCurrent(c->version, c->cnx->hooks[c->version], ctx);
 #endif
             _c.acquire();
             _r.acquire();

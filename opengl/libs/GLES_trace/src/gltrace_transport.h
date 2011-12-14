@@ -17,15 +17,69 @@
 #ifndef __GLTRACE_TRANSPORT_H_
 #define __GLTRACE_TRANSPORT_H_
 
+#include <pthread.h>
+
 #include "gltrace.pb.h"
 
 namespace android {
 namespace gltrace {
 
-void startServer(int port);
-void stopServer();
+/**
+ * TCPStream provides a TCP based communication channel from the device to
+ * the host for transferring GLMessages.
+ */
+class TCPStream {
+    int mSocket;
+    pthread_mutex_t mSocketWriteMutex;
+public:
+    /** Create a TCP based communication channel over @socket */
+    TCPStream(int socket);
+    ~TCPStream();
 
-void traceGLMessage(GLMessage *msg);
+    /** Close the channel. */
+    void closeStream();
+
+    /** Send @data of size @len to host. . Returns -1 on error, 0 on success. */
+    int send(void *data, size_t len);
+
+    /** Receive data into @buf from the remote end. This is a blocking call. */
+    int receive(void *buf, size_t size);
+};
+
+/**
+ * BufferedOutputStream provides buffering of data sent to the underlying
+ * unbuffered channel.
+ */
+class BufferedOutputStream {
+    TCPStream *mStream;
+
+    size_t mBufferSize;
+    std::string mStringBuffer;
+
+    /** Enqueue message into internal buffer. */
+    void enqueueMessage(GLMessage *msg);
+public:
+    /**
+     * Construct a Buffered stream of size @bufferSize, using @stream as
+     * its underlying channel for transport.
+     */
+    BufferedOutputStream(TCPStream *stream, size_t bufferSize);
+
+    /**
+     * Send @msg. The message could be buffered and sent later with a
+     * subsequent message. Returns -1 on error, 0 on success.
+     */
+    int send(GLMessage *msg);
+
+    /** Send any buffered messages, returns -1 on error, 0 on success. */
+    int flush();
+};
+
+/**
+ * Utility method: start a server at @serverPort, and wait for a client
+ * connection. Returns the connected client socket on success, or -1 on failure.
+ */
+int acceptClientConnection(int serverPort);
 
 };
 };

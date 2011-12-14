@@ -23,8 +23,8 @@
 namespace android {
 namespace gltrace {
 
-void fixupGLMessage(GLMessage *message);
-void fixup_addFBContents(GLMessage *message, FBBinding fbToRead);
+void fixupGLMessage(GLTraceContext *curContext, GLMessage *message);
+void fixup_addFBContents(GLTraceContext *curContext, GLMessage *message, FBBinding fbToRead);
 
 };
 };

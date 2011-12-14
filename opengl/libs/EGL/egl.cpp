@@ -84,6 +84,9 @@ void initEglTraceLevel() {
     sEGLTraceLevel = propertyLevel > applicationLevel ? propertyLevel : applicationLevel;
 
     property_get("debug.egl.debug_proc", value, "");
+    if (strlen(value) == 0)
+        return;
+
     long pid = getpid();
     char procPath[128] = {};
     sprintf(procPath, "/proc/%ld/cmdline", pid);
@@ -91,8 +94,11 @@ void initEglTraceLevel() {
     if (file) {
         char cmdline[256] = {};
         if (fgets(cmdline, sizeof(cmdline) - 1, file)) {
-            if (!strcmp(value, cmdline))
+            if (!strncmp(value, cmdline, strlen(value))) {
+                // set EGL debug if the "debug.egl.debug_proc" property
+                // matches the prefix of this application's command line
                 gEGLDebugLevel = 1;
+            }
         }
         fclose(file);
     }
