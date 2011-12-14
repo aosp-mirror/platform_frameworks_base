@@ -250,6 +250,7 @@ private:
     SkTypeface* mArabicTypeface;
     SkTypeface* mHebrewRegularTypeface;
     SkTypeface* mHebrewBoldTypeface;
+    SkTypeface* mBengaliTypeface;
 
     /**
      * Cache of Harfbuzz faces
