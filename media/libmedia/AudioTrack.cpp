@@ -809,9 +809,7 @@ status_t AudioTrack::createTrack_l(
         LOGE("Could not get control block");
         return NO_INIT;
     }
-    mAudioTrack.clear();
     mAudioTrack = track;
-    mCblkMemory.clear();
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
     android_atomic_or(CBLK_DIRECTION_OUT, &mCblk->flags);
