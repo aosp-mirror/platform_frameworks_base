@@ -1,0 +1,149 @@
+page.title=Receiving Content from Other Apps
+parent.title=Sharing Content
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Sending Content to Other Apps
+previous.link=send.html
+next.title=Adding an Easy Share Action
+next.link=shareaction.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#update-manifest">Update Your Manifest</a></li>
+  <li><a href="#handling-content">Handle the Incoming Content</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
+Intent Filters</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>Just as your application can send data to other applications, so too can it easily receive data 
+from applications. Think about how users interact with your application, and what data types you 
+want to receive from other applications. For example, a social networking application would likely 
+be interested in receiving text content, like an interesting web URL, from another app. The 
+<a href="https://market.android.com/details?id=com.google.android.apps.plus">Google+ Android
+application</a> 
+accepts both text <em>and</em> single or multiple images. With this app, a user can easily start a 
+new Google+ post with photos from the Android Gallery app.</p>
+
+
+<h2 id="update-manifest">Update Your Manifest</h2>
+
+<p>Intent filters inform the system what intents an application component is willing to accept. 
+Just as you constructed an intent with action {@link android.content.Intent#ACTION_SEND} in the 
+<a href="{@docRoot}training/sharing/send.html">Send Content to Other Apps Using Intents</a> 
+lesson, you create intent filters in order to be able to receive intents with this action. You 
+define an intent filter in your manifest, using the 
+<code><a
+href="{@docRoot}guide/topics/intents/intents-filters.html#ifs">&lt;intent-filter&gt;</a></code> 
+element. For example, if your application handles receiving text content, a single image of any 
+type, or multiple images of any type, your manifest would look like:</p>
+
+<pre>
+&lt;activity android:name=&quot;.ui.MyActivity&quot; &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.SEND&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.SEND&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;text/plain&quot; /&gt;
+    &lt;/intent-filter&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.SEND_MULTIPLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> For more information on intent filters and intent resolution 
+please read <a href="{@docRoot}guide/topics/intents/intents-filters.html#ifs">Intents and Intent
+Filters</a></p>
+
+<p>When another application tries to share any of these things by constructing an intent and passing
+it to {@link android.content.Context#startActivity(android.content.Intent) startActivity()}, your
+application will be listed as an option in the intent chooser (see figure 1). If the user selects
+your application, the corresponding activity (<code>.ui.MyActivity</code> in the example above) will
+be started. It is then up to you to handle the content appropriately within your code and UI.</p>
+
+
+<h2 id="handling-content">Handle the Incoming Content</h2>
+
+<p>To handle the content delivered by an {@link android.content.Intent}, start by calling {@link
+android.content.Intent#getIntent(String) getIntent()} 
+to get {@link android.content.Intent} object. Once you have the object, you can examine its 
+contents to determine what to do next. Keep in mind that if this activity can be started from other 
+parts of the system, such as the launcher, then you will need to take this into consideration when 
+examining the intent.</p>
+
+<pre>
+void onCreate (Bundle savedInstanceState) {
+    ...
+    // Get intent, action and MIME type
+    Intent intent = getIntent();
+    String action = intent.getAction();
+    String type = intent.getType();
+
+    if (Intent.ACTION_SEND.equals(action) &amp;&amp; type != null) {
+        if (&quot;text/plain&quot;.equals(type)) {
+            handleSendText(intent); // Handle text being sent
+        } else if (type.startsWith(&quot;image/&quot;)) {
+            handleSendImage(intent); // Handle single image being sent
+        }
+    } else if (Intent.ACTION_SEND_MULTIPLE.equals(action) &amp;&amp; type != null) {
+        if (type.startsWith(&quot;image/&quot;)) {
+            handleSendMultipleImages(intent); // Handle multiple images being sent
+        }
+    } else {
+        // Handle other intents, such as being started from the home screen
+    }
+    ...
+}
+
+void handleSendText(Intent intent) {
+    String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+    if (sharedText != null) {
+        // Update UI to reflect text being shared
+    }
+}
+
+void handleSendImage(Intent intent) {
+    Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+    if (imageUri != null) {
+        // Update UI to reflect image being shared
+    }
+}
+
+void handleSendMultipleImages(Intent intent) {
+    ArrayList&lt;Uri&gt; imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+    if (imageUris != null) {
+        // Update UI to reflect multiple images being shared
+    }
+}
+</pre>
+
+<p class="caution"><strong>Caution:</strong> Take extra care to check the incoming data, you never
+know what some other application may send you. For example, the wrong MIME type might be set, or the
+image being sent might be extremely large. Also, remember to process binary data in a separate
+thread rather than the main ("UI") thread.</p>
+
+<p>Updating the UI can be as simple as populating an {@link android.widget.EditText}, or it can 
+be more complicated like applying an interesting photo filter to an image. It's really specific 
+to your application what happens next.</p>
+

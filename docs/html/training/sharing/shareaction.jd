@@ -1,0 +1,115 @@
+page.title=Adding an Easy Share Action
+parent.title=Sharing Content
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Receiving Content from Other Apps
+previous.link=receive.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#update-menus">Update Menu Declarations</a></li>
+  <li><a href="#set-share-intent">Set the Share Intent</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Implementing an effective and user friendly share action in your {@link android.app.ActionBar} 
+is made even easier with the introduction of {@link  android.view.ActionProvider} in Android 4.0
+(API Level 14). An {@link android.view.ActionProvider}, once attached to a menu item in the action
+bar, handles both the appearance and behavior of that item. In the case of {@link
+android.widget.ShareActionProvider}, you provide a share intent and it does the rest.</p>
+
+<p class="note"><strong>Note:&nbsp;</strong> {@link android.widget.ShareActionProvider} is available
+starting with API Level 14 and higher.</p>
+
+
+<div class="figure" style="width:200px">
+<img src="{@docRoot}images/ui/actionbar-shareaction.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> The {@link android.widget.ShareActionProvider} in the Gallery app.
+</p>
+</div>
+
+<h2 id="update-menus">Update Menu Declarations</h2>
+
+<p>To get started with {@link android.widget.ShareActionProvider ShareActionProviders}, define the <code>android:actionProviderClass</code> attribute for the corresponding <code>&lt;item&gt;</code> in your <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> file:</p>
+
+<pre>
+&lt;menu xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;item android:id=&quot;@+id/menu_item_share&quot;
+        android:showAsAction=&quot;ifRoom&quot;
+        android:title=&quot;Share&quot;
+        <strong>android:actionProviderClass=&quot;android.widget.ShareActionProvider&quot;</strong> /&gt;
+    ...
+&lt;/menu&gt;
+</pre>
+
+<p>This delegates responsibility for the item's appearance and function to 
+{@link android.widget.ShareActionProvider}. However, you will need to tell the provider what you 
+would like to share.</p>
+
+
+<h2 id="set-share-intent">Set the Share Intent</h2>
+
+<p>In order for {@link android.widget.ShareActionProvider} to function, you must provide it a share
+intent. This share intent should be the same as described in the <a
+href="{@docRoot}training/sharing/send.html">Sending Content to Other Apps</a>
+lesson, with action {@link android.content.Intent#ACTION_SEND} and additional data set via extras
+like {@link android.content.Intent#EXTRA_TEXT} and {@link android.content.Intent#EXTRA_STREAM}. To
+assign a share intent, first find the corresponding {@link android.view.MenuItem} while inflating
+your menu resource in your {@link android.app.Activity} or {@link android.app.Fragment}. Next, call
+{@link android.view.MenuItem#getActionProvider() MenuItem.getActionProvider()} to retreive an
+instance of {@link android.widget.ShareActionProvider}. Use {@link
+android.widget.ShareActionProvider#setShareIntent(android.content.Intent) setShareIntent()} to
+update the share intent associated with that action item. Here's an example:</p>
+
+<pre>
+private ShareActionProvider mShareActionProvider;
+...
+
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate menu resource file.
+    getMenuInflater().inflate(R.menu.share_menu, menu);
+
+    // Locate MenuItem with ShareActionProvider
+    MenuItem item = menu.findItem(R.id.menu_item_share);
+
+    // Fetch and store ShareActionProvider
+    mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+
+    // Return true to display menu
+    return true;
+}
+
+// Call to update the share intent
+private void setShareIntent(Intent shareIntent) {
+    if (mShareActionProvider != null) {
+        mShareActionProvider.setShareIntent(shareIntent);
+    }
+}
+</pre>
+
+<p>You may only need to set the share intent once during the creation of your menus, or you may 
+want to set it and then update it as the UI changes. For example, when you view photos full screen 
+in the Gallery app, the sharing intent changes as you flip between photos.</p>
+
+<p>For further discussion about the {@link android.widget.ShareActionProvider}, see the <a
+href="{@docRoot}guide/topics/ui/actionbar.html#ActionProvider">Action Bar</a> guide.</p>
+
+
