@@ -38,13 +38,21 @@ import android.util.Log;
  * @hide
  */
 public class Texture2D extends SceneGraphBase {
-    private static String mSDCardPath = "sdcard/scenegraph/";
-    private final boolean mLoadFromSD = true;
+    private boolean mLoadFromSD;
 
     String mFileName;
+    String mFileDir;
     Allocation mRsTexture;
 
     public Texture2D() {
+        mLoadFromSD = false;
+    }
+
+    public void setFileDir(String dir) {
+        if (dir.indexOf("sdcard/") != -1) {
+            mLoadFromSD = true;
+        }
+        mFileDir = dir;
     }
 
     public void setFileName(String file) {
@@ -64,9 +72,9 @@ public class Texture2D extends SceneGraphBase {
         InputStream is = null;
         try {
             if (!mLoadFromSD) {
-                is = res.getAssets().open(shortName);
+                is = res.getAssets().open(mFileDir + shortName);
             } else {
-                File f = new File(mSDCardPath + shortName);
+                File f = new File(mFileDir + shortName);
                 is = new BufferedInputStream(new FileInputStream(f));
             }
         } catch (IOException e) {

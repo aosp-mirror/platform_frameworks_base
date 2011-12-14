@@ -44,7 +44,7 @@ import com.android.scenegraph.SceneManager.SceneLoadedCallback;
 // This is where the scenegraph and the rendered objects are initialized and used
 public class TestAppRS {
 
-    private static String modelName = "orientation_test";
+    private static String modelName = "orientation_test.dae";
     private static String TAG = "TestAppRS";
     private final int STATE_LAST_FOCUS = 1;
     private final boolean mLoadFromSD = true;
@@ -112,16 +112,16 @@ public class TestAppRS {
         initRS();
 
         // Load a scene to render
-        mSceneManager.loadModel(modelName, mLoadedCallback);
+        mSceneManager.loadModel(mSDCardPath + modelName, mLoadedCallback);
     }
 
     // When a new model file is selected from the UI, this function gets called to init everything
     void loadModel(String path) {
-        String shortName = path.substring(path.lastIndexOf('/') + 1);
-        shortName = shortName.substring(0, shortName.lastIndexOf('.'));
+        //String shortName = path.substring(path.lastIndexOf('/') + 1);
+        //shortName = shortName.substring(0, shortName.lastIndexOf('.'));
         mScript.set_gInitialized(false);
         mActiveScene.destroyRS(mSceneManager);
-        mSceneManager.loadModel(shortName, mLoadedCallback);
+        mSceneManager.loadModel(path, mLoadedCallback);
     }
 
     private Resources mRes;
