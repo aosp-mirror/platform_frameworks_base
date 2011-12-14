@@ -16,11 +16,8 @@
 
 package com.android.server;
 
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
-import static android.Manifest.permission.CHANGE_NETWORK_STATE;
-import static android.Manifest.permission.CHANGE_WIFI_STATE;
+import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
-import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
@@ -48,7 +45,6 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -207,12 +203,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void registerObserver(INetworkManagementEventObserver obs) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Slog.d(TAG, "Registering observer");
         mObservers.add(obs);
     }
 
     @Override
     public void unregisterObserver(INetworkManagementEventObserver obs) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         Slog.d(TAG, "Unregistering observer");
         mObservers.remove(mObservers.indexOf(obs));
     }
@@ -366,7 +364,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public String[] listInterfaces() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             return NativeDaemonEvent.filterMessageList(
                     mConnector.executeForList("interface", "list"), InterfaceListResult);
@@ -377,7 +375,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public InterfaceConfiguration getInterfaceConfig(String iface) {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NativeDaemonEvent event;
         try {
@@ -421,7 +419,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceConfig(String iface, InterfaceConfiguration cfg) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         LinkAddress linkAddr = cfg.getLinkAddress();
         if (linkAddr == null || linkAddr.getAddress() == null) {
             throw new IllegalStateException("Null LinkAddress given");
@@ -443,7 +441,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceDown(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
         ifcg.setInterfaceDown();
         setInterfaceConfig(iface, ifcg);
@@ -451,7 +449,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceUp(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
         ifcg.setInterfaceUp();
         setInterfaceConfig(iface, ifcg);
@@ -459,7 +457,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute(
                     "interface", "ipv6privacyextensions", iface, enable ? "enable" : "disable");
@@ -472,7 +470,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
        IPv6 addresses on interface down, but we need to do full clean up here */
     @Override
     public void clearInterfaceAddresses(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "clearaddrs", iface);
         } catch (NativeDaemonConnectorException e) {
@@ -482,7 +480,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void enableIpv6(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "ipv6", iface, "enable");
         } catch (NativeDaemonConnectorException e) {
@@ -492,7 +490,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void disableIpv6(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "ipv6", iface, "disable");
         } catch (NativeDaemonConnectorException e) {
@@ -502,25 +500,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         modifyRoute(interfaceName, ADD, route, DEFAULT);
     }
 
     @Override
     public void removeRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         modifyRoute(interfaceName, REMOVE, route, DEFAULT);
     }
 
     @Override
     public void addSecondaryRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         modifyRoute(interfaceName, ADD, route, SECONDARY);
     }
 
     @Override
     public void removeSecondaryRoute(String interfaceName, RouteInfo route) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         modifyRoute(interfaceName, REMOVE, route, SECONDARY);
     }
 
@@ -579,7 +577,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public RouteInfo[] getRoutes(String interfaceName) {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
 
         // v4 routes listed as:
@@ -662,7 +660,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public boolean getIpForwardingEnabled() throws IllegalStateException{
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NativeDaemonEvent event;
         try {
@@ -678,7 +676,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setIpForwardingEnabled(boolean enable) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("ipfwd", enable ? "enable" : "disable");
         } catch (NativeDaemonConnectorException e) {
@@ -688,7 +686,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void startTethering(String[] dhcpRange) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // cmd is "tether start first_start first_stop second_start second_stop ..."
         // an odd number of addrs will fail
 
@@ -706,7 +704,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void stopTethering() {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("tether", "stop");
         } catch (NativeDaemonConnectorException e) {
@@ -716,7 +714,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public boolean isTetheringStarted() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NativeDaemonEvent event;
         try {
@@ -732,7 +730,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void tetherInterface(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("tether", "interface", "add", iface);
         } catch (NativeDaemonConnectorException e) {
@@ -742,7 +740,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void untetherInterface(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("tether", "interface", "remove", iface);
         } catch (NativeDaemonConnectorException e) {
@@ -752,7 +750,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public String[] listTetheredInterfaces() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             return NativeDaemonEvent.filterMessageList(
                     mConnector.executeForList("tether", "interface", "list"),
@@ -764,7 +762,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setDnsForwarders(String[] dns) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final Command cmd = new Command("tether", "dns", "set");
         for (String s : dns) {
@@ -780,7 +778,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public String[] getDnsForwarders() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             return NativeDaemonEvent.filterMessageList(
                     mConnector.executeForList("tether", "dns", "list"), TetherDnsFwdTgtListResult);
@@ -817,7 +815,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void enableNat(String internalInterface, String externalInterface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             modifyNat("enable", internalInterface, externalInterface);
         } catch (SocketException e) {
@@ -827,7 +825,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void disableNat(String internalInterface, String externalInterface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             modifyNat("disable", internalInterface, externalInterface);
         } catch (SocketException e) {
@@ -837,7 +835,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public String[] listTtys() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             return NativeDaemonEvent.filterMessageList(
                     mConnector.executeForList("list_ttys"), TtyListResult);
@@ -849,7 +847,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void attachPppd(
             String tty, String localAddr, String remoteAddr, String dns1Addr, String dns2Addr) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("pppd", "attach", tty,
                     NetworkUtils.numericToInetAddress(localAddr).getHostAddress(),
@@ -863,7 +861,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void detachPppd(String tty) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("pppd", "detach", tty);
         } catch (NativeDaemonConnectorException e) {
@@ -874,8 +872,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void startAccessPoint(
             WifiConfiguration wifiConfig, String wlanIface, String softapIface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             wifiFirmwareReload(wlanIface, "AP");
             mConnector.execute("softap", "start", wlanIface);
@@ -905,8 +902,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     /* @param mode can be "AP", "STA" or "P2P" */
     @Override
     public void wifiFirmwareReload(String wlanIface, String mode) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("softap", "fwreload", wlanIface, mode);
         } catch (NativeDaemonConnectorException e) {
@@ -916,8 +912,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void stopAccessPoint(String wlanIface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("softap", "stopap");
             mConnector.execute("softap", "stop", wlanIface);
@@ -929,8 +924,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
-        mContext.enforceCallingOrSelfPermission(CHANGE_WIFI_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             if (wifiConfig == null) {
                 mConnector.execute("softap", "set", wlanIface, softapIface);
@@ -945,19 +939,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public NetworkStats getNetworkStatsSummary() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return mStatsFactory.readNetworkStatsSummary();
     }
 
     @Override
     public NetworkStats getNetworkStatsDetail() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return mStatsFactory.readNetworkStatsDetail(UID_ALL);
     }
 
     @Override
     public void setInterfaceQuota(String iface, long quotaBytes) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -980,7 +974,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void removeInterfaceQuota(String iface) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -1006,7 +1000,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceAlert(String iface, long alertBytes) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -1034,7 +1028,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void removeInterfaceAlert(String iface) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -1058,7 +1052,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setGlobalAlert(long alertBytes) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -1073,7 +1067,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
@@ -1102,21 +1096,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public boolean isBandwidthControlEnabled() {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return mBandwidthControlEnabled;
     }
 
     @Override
     public NetworkStats getNetworkStatsUidDetail(int uid) {
-        if (Binder.getCallingUid() != uid) {
-            mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
-        }
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return mStatsFactory.readNetworkStatsDetail(uid);
     }
 
     @Override
     public NetworkStats getNetworkStatsTethering(String[] ifacePairs) {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         if (ifacePairs.length % 2 != 0) {
             throw new IllegalArgumentException(
@@ -1168,7 +1160,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "setthrottle", iface, rxKbps, txKbps);
         } catch (NativeDaemonConnectorException e) {
@@ -1177,8 +1169,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private int getInterfaceThrottle(String iface, boolean rx) {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
-
         final NativeDaemonEvent event;
         try {
             event = mConnector.execute("interface", "getthrottle", iface, rx ? "rx" : "tx");
@@ -1201,17 +1191,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public int getInterfaceRxThrottle(String iface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return getInterfaceThrottle(iface, true);
     }
 
     @Override
     public int getInterfaceTxThrottle(String iface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return getInterfaceThrottle(iface, false);
     }
 
     @Override
     public void setDefaultInterfaceForDns(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("resolver", "setdefaultif", iface);
         } catch (NativeDaemonConnectorException e) {
@@ -1221,7 +1213,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setDnsServersForInterface(String iface, String[] servers) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final Command cmd = new Command("resolver", "setifdns", iface);
         for (String s : servers) {
@@ -1240,7 +1232,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void flushDefaultDnsCache() {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("resolver", "flushdefaultif");
         } catch (NativeDaemonConnectorException e) {
@@ -1250,7 +1242,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void flushInterfaceDnsCache(String iface) {
-        mContext.enforceCallingOrSelfPermission(CHANGE_NETWORK_STATE, TAG);
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("resolver", "flushif", iface);
         } catch (NativeDaemonConnectorException e) {
