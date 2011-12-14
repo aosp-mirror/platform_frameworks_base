@@ -1,0 +1,88 @@
+page.title=Dealing with Audio Output Hardware
+parent.title=Managing Audio Playback and Focus
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Managing Audio Focus
+previous.link=audio-focus.html
+
+@jd:body
+
+ 
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#CheckHardware">Check What Hardware is Being Used</a></li>
+  <li><a href="#HandleChanges">Handle Changes in the Audio Output Hardware</a></li>
+</ol>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></li>
+</ul>
+
+
+</div> 
+</div>
+
+<p>Users have a number of alternatives when it comes to enjoying the audio from their Android
+devices. Most devices have a built-in speaker, headphone jacks for wired headsets, and many also
+feature Bluetooth connectivity and support for A2DP audio. </p>
+
+ 
+<h2 id="CheckHardware">Check What Hardware is Being Used</h2> 
+ 
+<p>How your app behaves might be affected by which hardware its output is being routed to.</p>
+
+<p>You can query the {@link android.media.AudioManager} to determine if the audio is currently
+being routed to the device speaker, wired headset, or attached Bluetooth device as shown in the
+following snippet:</p>
+
+<pre>
+if (isBluetoothA2dpOn()) {
+    // Adjust output for Bluetooth.
+} else if (isSpeakerphoneOn()) {
+    // Adjust output for Speakerphone.
+} else if (isWiredHeadsetOn()) {
+    // Adjust output for headsets
+} else { 
+    // If audio plays and noone can hear it, is it still playing?
+}
+</pre>
+
+
+<h2 id="HandleChanges">Handle Changes in the Audio Output Hardware</h2> 
+
+<p>When a headset is unplugged, or a Bluetooth device disconnected, the audio stream
+automatically reroutes to the built in speaker. If you listen to your music at as high a volume as I
+do, that can be a noisy surprise.</p>
+
+<p>Luckily the system broadcasts an {@link android.media.AudioManager#ACTION_AUDIO_BECOMING_NOISY}
+intent when this happens. It’s good practice to register a {@link android.content.BroadcastReceiver}
+that listens for this intent whenever you’re playing audio. In the case of music players, users
+typically expect the playback to be paused&mdash;while for games you may choose to significantly
+lower the volume.</p>
+ 
+<pre>
+private class NoisyAudioStreamReceiver extends BroadcastReceiver {
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+            // Pause the playback
+        }
+    }
+}
+
+private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+
+private void startPlayback() {
+    registerReceiver(myNoisyAudioStreamReceiver(), intentFilter);
+}
+
+private void stopPlayback() {
+    unregisterReceiver(myNoisyAudioStreamReceiver);
+}
+</pre>

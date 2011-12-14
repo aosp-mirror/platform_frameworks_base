@@ -1,0 +1,90 @@
+page.title=Determining and Monitoring the Connectivity Status
+parent.title=Monitoring Device State to Optimize Battery Life
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Determining and Monitoring the Docking State and Type
+previous.link=docking-monitoring.html
+next.title=Manipulating Broadcast Receivers On Demand
+next.link=manifest-receivers.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DetermineConnection">Determine if you Have an Internet Connection</a></li>
+  <li><a href="#DetermineType">Determine the Type of your Internet Connection</a></li>
+  <li><a href="#MonitorChanges">Monitor for Changes in Connectivity</a></li>
+</ol>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+</ul>
+
+</div> 
+</div>
+
+<p>Some of the most common uses for repeating alarms and background services is to schedule regular
+updates of application data from Internet resources, cache data, or execute long running downloads.
+But if you aren't connected to the Internet, or the connection is too slow to complete your
+download, why both waking the device to schedule the update at all?</p>
+
+<p>You can use the {@link android.net.ConnectivityManager} to check that you're actually
+connected to the Internet, and if so, what type of connection is in place.</p>
+
+
+<h2 id="DetermineConnection">Determine if You Have an Internet Connection</h2> 
+ 
+<p>There's no need to schedule an update based on an Internet resource if you aren't connected to
+the Internet. The following snippet shows how to use the {@link android.net.ConnectivityManager} 
+to query the active network and determine if it has Internet connectivity.</p>
+
+<pre>ConnectivityManager cm =
+        (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+ 
+NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
+
+
+<h2 id="DetermineType">Determine the Type of your Internet Connection</h2> 
+
+<p>It's also possible to determine the type of Internet connection currently available.</p>
+
+<p>Device connectivity can be provided by mobile data, WiMAX, Wi-Fi, and ethernet connections. By
+querying the type of the active network, as shown below, you can alter your refresh rate based on
+the bandwidth available.</p>
+
+<pre>boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;</pre>
+
+<p>Mobile data costs tend to be significantly higher than Wi-Fi, so in most cases, your app's update
+rate should be lower when on mobile connections. Similarly, downloads of significant size should be
+suspended until you have a Wi-Fi connection.</p>
+
+<p>Having disabled your updates, it's important that you listen for changes in connectivity in order
+to resume them once an Internet connection has been established.</p>
+
+
+<h2 id="MonitorChanges">Monitor for Changes in Connectivity</h2> 
+
+<p>The {@link android.net.ConnectivityManager} broadcasts the {@link
+android.net.ConnectivityManager#CONNECTIVITY_ACTION} ({@code
+"android.net.conn.CONNECTIVITY_CHANGE"}) action whenever the connectivity details have changed. You
+can register a broadcast receiver in your manifest to listen for these changes and resume (or
+suspend) your background updates accordingly.</p>
+
+<pre>&lt;action android:name="android.net.conn.CONNECTIVITY_CHANGE"/></pre>
+
+<p>Changes to a device's connectivity can be very frequent&mdash;this broadcast is triggered
+every time you move between mobile data and Wi-Fi. As a result, it's good practice to monitor
+this broadcast only when you've previously suspended updates or downloads in order to resume them.
+It's generally sufficient to simply check for Internet connectivity before beginning an update and,
+should there be none, suspend further updates until connectivity is restored.</p>
+
+<p>This technique requires toggling broadcast receivers you've declard in the manifest, which is
+described in the next lesson.</p>

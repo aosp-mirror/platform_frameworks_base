@@ -1,0 +1,90 @@
+page.title=Determining and Monitoring the Docking State and Type
+parent.title=Monitoring Device State to Optimize Battery Life
+parent.link=index.html
+
+trainingnavtop=true
+previous.title= Monitoring the Battery Level and Charging State
+previous.link=battery-monitoring.html
+next.title= Determining and Monitoring the Connectivity Status
+next.link=connectivity-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#CurrentDockState">Request the Audio Focus</a></li>
+  <li><a href="#DockType">Determine the Current Dock Type</a></li>
+  <li><a href="#MonitorDockState">Monitor for Changes in the Dock State or Type</a></li>
+</ol>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+</ul>
+
+</div> 
+</div>
+
+<p>Android devices can be docked into several different kinds of docks. These include car or home
+docks and digital versus analog docks. The dock-state is typically closely linked to the charging
+state as many docks provide power to docked devices.</p>
+
+<p>How the dock-state of the phone affects your update rate depends on your app. You may choose
+to increase the update frequency of a sports center app when it's in the desktop dock, or disable
+your updates completely if the device is car docked. Conversely, you may choose to maximize your
+updates while car docked if your background service is updating traffic conditions.</p>
+
+<p>The dock state is also broadcast as a sticky {@link android.content.Intent}, allowing you to
+query if the device is docked or not, and if so, in which kind of dock.</p>
+
+
+<h2 id="CurrentDockState">Determine the Current Docking State</h2> 
+ 
+<p>The dock-state details are included as an extra in a sticky broadcast of the {@link
+android.content.Intent#ACTION_DOCK_EVENT} action. Because it's sticky, you don't need to register a
+{@link android.content.BroadcastReceiver}. You can simply call {@link
+android.content.Context#registerReceiver registerReceiver()} passing in {@code null} as the
+broadcast receiver as shown in the next snippet.</p>
+
+<pre>IntentFilter ifilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);
+Intent dockStatus = context.registerReceiver(null, ifilter);</pre>
+
+<p>You can extract the current docking status from the {@code EXTRA_DOCK_STATE} extra:<p>
+
+<pre>int dockState = battery.getIntExtra(EXTRA_DOCK_STATE, -1);
+boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;</pre>
+
+
+<h2 id="DockType">Determine the Current Dock Type</h2> 
+
+<p>If a device is docked, it can be docked in any one of four different type of dock: 
+<ul><li>Car</li>
+<li>Desk</li>
+<li>Low-End (Analog) Desk</li>
+<li>High-End (Digital) Desk</li></ul></p>
+
+<p>Note that the latter two options were only introduced to Android in API level 11, so it's good
+practice to check for all three where you are only interested in the type of dock rather than it
+being digital or analog specifically:</p>
+
+<pre>boolean isCar = dockState == EXTRA_DOCK_STATE_CAR;
+boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK || 
+                 dockState == EXTRA_DOCK_STATE_LE_DESK ||
+                 dockState == EXTRA_DOCK_STATE_HE_DESK;</pre>
+
+
+<h2 id="MonitorDockState">Monitor for Changes in the Dock State or Type</h2> 
+
+<p>Whenever the the device is docked or undocked, the {@link
+android.content.Intent#ACTION_DOCK_EVENT} action is broadcast. To monitor changes in the
+device's dock-state, simply register a broadcast receiver in your application manifest as shown in
+the snippet below:</p>
+
+<pre>&lt;action android:name="android.intent.action.ACTION_DOCK_EVENT"/></pre>
+
+<p>You can extract the dock type and state within the receiver implementation using the same
+techniques described in the previous step.</p>
