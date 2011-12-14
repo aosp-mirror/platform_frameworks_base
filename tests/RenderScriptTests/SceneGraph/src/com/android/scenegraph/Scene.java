@@ -38,8 +38,8 @@ public class Scene extends SceneGraphBase {
     private class ImageLoaderTask extends AsyncTask<String, Void, Boolean> {
         protected Boolean doInBackground(String... names) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < mDrawables.size(); i ++) {
-                Drawable dI = (Drawable)mDrawables.get(i);
+            for (int i = 0; i < mRenderables.size(); i ++) {
+                Renderable dI = (Renderable)mRenderables.get(i);
                 dI.updateTextures(mRS, mRes);
             }
             long end = System.currentTimeMillis();
@@ -56,11 +56,11 @@ public class Scene extends SceneGraphBase {
     ArrayList<RenderPass> mRenderPasses;
     ArrayList<LightBase> mLights;
     ArrayList<Camera> mCameras;
-    ArrayList<DrawableBase> mDrawables;
-    HashMap<String, DrawableBase> mDrawableMap;
+    ArrayList<RenderableBase> mRenderables;
+    HashMap<String, RenderableBase> mRenderableMap;
     ArrayList<Texture2D> mTextures;
 
-    HashMap<String, ArrayList<Drawable> > mDrawableMeshMap;
+    HashMap<String, ArrayList<Renderable> > mRenderableMeshMap;
 
     // RS Specific stuff
     ScriptField_SgTransform mTransformRSData;
@@ -74,9 +74,9 @@ public class Scene extends SceneGraphBase {
         mRenderPasses = new ArrayList<RenderPass>();
         mLights = new ArrayList<LightBase>();
         mCameras = new ArrayList<Camera>();
-        mDrawables = new ArrayList<DrawableBase>();
-        mDrawableMap = new HashMap<String, DrawableBase>();
-        mDrawableMeshMap = new HashMap<String, ArrayList<Drawable> >();
+        mRenderables = new ArrayList<RenderableBase>();
+        mRenderableMap = new HashMap<String, RenderableBase>();
+        mRenderableMeshMap = new HashMap<String, ArrayList<Renderable> >();
         mTextures = new ArrayList<Texture2D>();
         mRootTransforms = new CompoundTransform();
         mRootTransforms.setName("_scene_root_");
@@ -116,17 +116,17 @@ public class Scene extends SceneGraphBase {
         return mCameras;
     }
 
-    public void appendDrawable(DrawableBase d) {
-        mDrawables.add(d);
-        mDrawableMap.put(d.getName(), d);
+    public void appendRenderable(RenderableBase d) {
+        mRenderables.add(d);
+        mRenderableMap.put(d.getName(), d);
     }
 
-    public ArrayList<DrawableBase> getDrawables() {
-        return mDrawables;
+    public ArrayList<RenderableBase> getRenderables() {
+        return mRenderables;
     }
 
-    public DrawableBase getDrawableByName(String name) {
-        return mDrawableMap.get(name);
+    public RenderableBase getRenderableByName(String name) {
+        return mRenderableMap.get(name);
     }
 
     public void appendTextures(Texture2D tex) {
@@ -135,9 +135,9 @@ public class Scene extends SceneGraphBase {
 
     public void assignRenderStateToMaterial(RenderState renderState, String regex) {
         Pattern pattern = Pattern.compile(regex);
-        int numDrawables = mDrawables.size();
-        for (int i = 0; i < numDrawables; i ++) {
-            Drawable shape = (Drawable)mDrawables.get(i);
+        int numRenderables = mRenderables.size();
+        for (int i = 0; i < numRenderables; i ++) {
+            Renderable shape = (Renderable)mRenderables.get(i);
             Matcher m = pattern.matcher(shape.mMaterialName);
             if (m.find()) {
                 shape.setRenderState(renderState);
@@ -146,28 +146,28 @@ public class Scene extends SceneGraphBase {
     }
 
     public void assignRenderState(RenderState renderState) {
-        int numDrawables = mDrawables.size();
-        for (int i = 0; i < numDrawables; i ++) {
-            Drawable shape = (Drawable)mDrawables.get(i);
+        int numRenderables = mRenderables.size();
+        for (int i = 0; i < numRenderables; i ++) {
+            Renderable shape = (Renderable)mRenderables.get(i);
             shape.setRenderState(renderState);
         }
     }
 
     public void meshLoaded(Mesh m) {
-        ArrayList<Drawable> entries = mDrawableMeshMap.get(m.getName());
+        ArrayList<Renderable> entries = mRenderableMeshMap.get(m.getName());
         int numEntries = entries.size();
         for (int i = 0; i < numEntries; i++) {
-            Drawable d = entries.get(i);
+            Renderable d = entries.get(i);
             d.resolveMeshData(m);
-            //mDrawablesField.set(d.getRsField(mRS, mRes), d.sceneIndex, true);
+            //mRenderablesField.set(d.getRsField(mRS, mRes), d.sceneIndex, true);
         }
     }
 
-    void addToMeshMap(Drawable d) {
-        ArrayList<Drawable> entries = mDrawableMeshMap.get(d.mMeshName);
+    void addToMeshMap(Renderable d) {
+        ArrayList<Renderable> entries = mRenderableMeshMap.get(d.mMeshName);
         if (entries == null) {
-            entries = new ArrayList<Drawable>();
-            mDrawableMeshMap.put(d.mMeshName, entries);
+            entries = new ArrayList<Renderable>();
+            mRenderableMeshMap.put(d.mMeshName, entries);
         }
         entries.add(d);
     }
@@ -175,7 +175,7 @@ public class Scene extends SceneGraphBase {
     public void destroyRS(SceneManager sceneManager) {
         mTransformRSData = null;
         sceneManager.mRenderLoop.bind_gRootNode(mTransformRSData);
-        sceneManager.mRenderLoop.set_gDrawableObjects(null);
+        sceneManager.mRenderLoop.set_gRenderableObjects(null);
         mRenderPassAlloc = null;
         sceneManager.mRenderLoop.set_gRenderPasses(null);
         sceneManager.mRenderLoop.bind_gFrontToBack(null);
@@ -186,10 +186,10 @@ public class Scene extends SceneGraphBase {
         mRenderPasses = null;
         mLights = null;
         mCameras = null;
-        mDrawables = null;
-        mDrawableMap = null;
+        mRenderables = null;
+        mRenderableMap = null;
         mTextures = null;
-        mDrawableMeshMap = null;
+        mRenderableMeshMap = null;
         mRootTransforms = null;
     }
 
@@ -220,27 +220,27 @@ public class Scene extends SceneGraphBase {
         start = System.currentTimeMillis();
         Allocation drawableData = Allocation.createSized(rs,
                                                          Element.ALLOCATION(rs),
-                                                         mDrawables.size());
-        Allocation[] drawableAllocs = new Allocation[mDrawables.size()];
-        for (int i = 0; i < mDrawables.size(); i ++) {
-            Drawable dI = (Drawable)mDrawables.get(i);
+                                                         mRenderables.size());
+        Allocation[] drawableAllocs = new Allocation[mRenderables.size()];
+        for (int i = 0; i < mRenderables.size(); i ++) {
+            Renderable dI = (Renderable)mRenderables.get(i);
             dI.sceneIndex = i;
             addToMeshMap(dI);
             drawableAllocs[i] = dI.getRsField(rs, res).getAllocation();
         }
         drawableData.copyFrom(drawableAllocs);
-        sceneManager.mRenderLoop.set_gDrawableObjects(drawableData);
+        sceneManager.mRenderLoop.set_gRenderableObjects(drawableData);
 
         initRenderPassRS(rs, sceneManager);
 
         new ImageLoaderTask().execute();
 
         end = System.currentTimeMillis();
-        Log.v(TIMER_TAG, "Drawable init time: " + (end - start));
+        Log.v(TIMER_TAG, "Renderable init time: " + (end - start));
 
-        Allocation opaqueBuffer = Allocation.createSized(rs, Element.U32(rs), mDrawables.size());
+        Allocation opaqueBuffer = Allocation.createSized(rs, Element.U32(rs), mRenderables.size());
         Allocation transparentBuffer = Allocation.createSized(rs,
-                                                              Element.U32(rs), mDrawables.size());
+                                                              Element.U32(rs), mRenderables.size());
 
         sceneManager.mRenderLoop.bind_gFrontToBack(opaqueBuffer);
         sceneManager.mRenderLoop.bind_gBackToFront(transparentBuffer);

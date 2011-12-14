@@ -33,7 +33,7 @@ import android.content.res.Resources;
 /**
  * @hide
  */
-public class Drawable extends DrawableBase {
+public class Renderable extends RenderableBase {
     Allocation mVertexParams;
     Allocation mFragmentParams;
     ArrayList<Allocation> mFragmentTextures;
@@ -57,10 +57,10 @@ public class Drawable extends DrawableBase {
     // quick hack to prototype
     int sceneIndex;
 
-    ScriptField_Drawable_s mRsField;
-    ScriptField_Drawable_s.Item mRsFieldItem;
+    ScriptField_Renderable_s mRsField;
+    ScriptField_Renderable_s.Item mRsFieldItem;
 
-    public Drawable() {
+    public Renderable() {
         mSourceParams = new ArrayList<ShaderParam>();
     }
 
@@ -140,13 +140,13 @@ public class Drawable extends DrawableBase {
         mRsField.set(mRsFieldItem, 0, true);
     }
 
-    ScriptField_Drawable_s getRsField(RenderScriptGL rs, Resources res) {
+    ScriptField_Renderable_s getRsField(RenderScriptGL rs, Resources res) {
         if (mRsField != null) {
             return mRsField;
         }
         getRsFieldItem(rs, res);
 
-        mRsField = new ScriptField_Drawable_s(rs, 1);
+        mRsField = new ScriptField_Renderable_s(rs, 1);
         mRsField.set(mRsFieldItem, 0, true);
 
         return mRsField;
@@ -157,7 +157,7 @@ public class Drawable extends DrawableBase {
             return;
         }
 
-        mRsFieldItem = new ScriptField_Drawable_s.Item();
+        mRsFieldItem = new ScriptField_Renderable_s.Item();
         mRsFieldItem.mesh = mMesh;
         mRsFieldItem.meshIndex = mMeshIndex;
         mRsFieldItem.pv_const = mVertexParams;

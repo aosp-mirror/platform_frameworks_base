@@ -147,11 +147,11 @@ public class ColladaParser {
         }
     }
 
-    private void getDrawable(Element shape, Transform t) {
+    private void getRenderable(Element shape, Transform t) {
         String geoURL = shape.getAttribute("url");
-        //DrawableGroup group = new DrawableGroup();
+        //RenderableGroup group = new RenderableGroup();
         //group.setName(geoURL.substring(1));
-        //mScene.appendDrawable(group);
+        //mScene.appendRenderable(group);
         NodeList nl = shape.getElementsByTagName("instance_material");
         if (nl != null) {
             for(int i = 0; i < nl.getLength(); i++) {
@@ -159,7 +159,7 @@ public class ColladaParser {
                 String meshIndexName = materialRef.getAttribute("symbol");
                 String materialName = materialRef.getAttribute("target");
 
-                Drawable d = new Drawable();
+                Renderable d = new Renderable();
                 d.setMesh(geoURL.substring(1), meshIndexName);
                 d.setMaterialName(materialName);
                 d.setName(geoURL.substring(1));
@@ -180,7 +180,7 @@ public class ColladaParser {
                     d.appendSourceParams(materialParams.get(pI));
                     //Log.v(TAG, "Set source param i: " + pI + " name " + materialParams.get(pI).getParamName());
                 }
-                mScene.appendDrawable(d);
+                mScene.appendRenderable(d);
                 //group.appendChildren(d);
             }
         }
@@ -244,7 +244,7 @@ public class ColladaParser {
                     //Log.v(TAG, indent + " scale " + description + toString(value));
                     current.addComponent(new ScaleComponent(description, value));
                 } else if (fieldName.equals("instance_geometry")) {
-                    getDrawable(field, current);
+                    getRenderable(field, current);
                 } else if (fieldName.equals("instance_light")) {
                     updateLight(field, current);
                 } else if (fieldName.equals("instance_camera")) {
