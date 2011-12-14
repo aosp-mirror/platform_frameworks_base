@@ -182,14 +182,15 @@ void LayerRenderer::generateMesh() {
 Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
-    GLuint fbo = Caches::getInstance().fboCache.get();
+    Caches& caches = Caches::getInstance();
+    GLuint fbo = caches.fboCache.get();
     if (!fbo) {
         LOGW("Could not obtain an FBO");
         return NULL;
     }
 
-    glActiveTexture(GL_TEXTURE0);
-    Layer* layer = Caches::getInstance().layerCache.get(width, height);
+    caches.activeTexture(0);
+    Layer* layer = caches.layerCache.get(width, height);
     if (!layer) {
         LOGW("Could not obtain a layer");
         return NULL;
@@ -220,7 +221,7 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
                     fbo, width, height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-            Caches::getInstance().fboCache.put(fbo);
+            caches.fboCache.put(fbo);
 
             layer->deleteTexture();
             delete layer;
@@ -274,7 +275,7 @@ Layer* LayerRenderer::createTextureLayer(bool isOpaque) {
     layer->region.clear();
     layer->setRenderTarget(GL_NONE); // see ::updateTextureLayer()
 
-    glActiveTexture(GL_TEXTURE0);
+    Caches::getInstance().activeTexture(0);
     layer->generateTexture();
 
     return layer;
@@ -406,7 +407,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
         glGenTextures(1, &texture);
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
-        glActiveTexture(GL_TEXTURE0);
+        caches.activeTexture(0);
         glBindTexture(GL_TEXTURE_2D, texture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

@@ -103,12 +103,6 @@ static const Blender gBlendsSwap[] = {
     { SkXfermode::kScreen_Mode,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
 };
 
-static const GLenum gTextureUnits[] = {
-    GL_TEXTURE0,
-    GL_TEXTURE1,
-    GL_TEXTURE2
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,6 +208,7 @@ void OpenGLRenderer::resume() {
     glEnable(GL_SCISSOR_TEST);
     dirtyClip();
 
+    mCaches.activeTexture(0);
     glBindFramebuffer(GL_FRAMEBUFFER, snapshot->fbo);
 
     mCaches.blend = true;
@@ -454,7 +449,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return false;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Layer* layer = mCaches.layerCache.get(bounds.getWidth(), bounds.getHeight());
     if (!layer) {
         return false;
@@ -596,7 +591,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 
     mCaches.unbindMeshBuffer();
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
 
     // When the layer is stored in an FBO, we can save a bit of fillrate by
     // drawing only the dirty region
@@ -1377,7 +1372,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1398,7 +1393,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1418,7 +1413,7 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1503,7 +1498,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -1557,7 +1552,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -2008,7 +2003,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
         float rx, float ry, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
             right - left, bottom - top, rx, ry, paint);
     drawShape(left, top, texture, paint);
@@ -2017,7 +2012,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
 void OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, paint);
     drawShape(x - radius, y - radius, texture, paint);
 }
@@ -2025,7 +2020,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) 
 void OpenGLRenderer::drawOval(float left, float top, float right, float bottom, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, paint);
     drawShape(left, top, texture, paint);
 }
@@ -2039,7 +2034,7 @@ void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
             startAngle, sweepAngle, useCenter, paint);
     drawShape(left, top, texture, paint);
@@ -2049,7 +2044,7 @@ void OpenGLRenderer::drawRectAsShape(float left, float top, float right, float b
         SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, paint);
     drawShape(left, top, texture, paint);
 }
@@ -2147,7 +2142,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             shadowColor = 0xffffffff;
         }
 
-        glActiveTexture(gTextureUnits[0]);
+        mCaches.activeTexture(0);
         setupDraw();
         setupDrawWithTexture(true);
         setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
@@ -2177,7 +2172,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
     setupDraw();
     setupDrawDirtyRegionsDisabled();
     setupDrawWithTexture(true);
@@ -2219,7 +2214,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
 
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
@@ -2236,7 +2231,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
         return;
     }
 
-    glActiveTexture(gTextureUnits[0]);
+    mCaches.activeTexture(0);
 
     int alpha;
     SkXfermode::Mode mode;
