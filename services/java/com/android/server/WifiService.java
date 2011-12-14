@@ -61,6 +61,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -111,6 +112,10 @@ public class WifiService extends IWifiManager.Stub {
     private int mFullLocksReleased;
     private int mScanLocksAcquired;
     private int mScanLocksReleased;
+
+    /* A mapping from UID to scan count */
+    private HashMap<Integer, Integer> mScanCount =
+            new HashMap<Integer, Integer>();
 
     private final List<Multicaster> mMulticasters =
             new ArrayList<Multicaster>();
@@ -527,6 +532,15 @@ public class WifiService extends IWifiManager.Stub {
      */
     public void startScan(boolean forceActive) {
         enforceChangePermission();
+
+        int uid = Binder.getCallingUid();
+        int count = 0;
+        synchronized (mScanCount) {
+            if (mScanCount.containsKey(uid)) {
+                count = mScanCount.get(uid);
+            }
+            mScanCount.put(uid, ++count);
+        }
         mWifiStateMachine.startScan(forceActive);
     }
 
@@ -990,6 +1004,13 @@ public class WifiService extends IWifiManager.Stub {
                     }
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                 }
+
+                //Start scan stats tracking when device unplugged
+                if (pluggedType == 0) {
+                    synchronized (mScanCount) {
+                        mScanCount.clear();
+                    }
+                }
                 mPluggedType = pluggedType;
             } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
@@ -1179,6 +1200,13 @@ public class WifiService extends IWifiManager.Stub {
         pw.println();
         pw.println("Locks held:");
         mLocks.dump(pw);
+
+        pw.println("Scan count since last plugged in");
+        synchronized (mScanCount) {
+            for(int sc : mScanCount.keySet()) {
+                pw.println("UID: " + sc + " Scan count: " + mScanCount.get(sc));
+            }
+        }
 
         pw.println();
         pw.println("WifiWatchdogStateMachine dump");
