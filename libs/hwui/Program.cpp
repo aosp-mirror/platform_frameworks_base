@@ -29,6 +29,7 @@ namespace uirenderer {
 Program::Program(const ProgramDescription& description, const char* vertex, const char* fragment) {
     mInitialized = false;
     mHasColorUniform = false;
+    mHasSampler = false;
     mUse = false;
 
     // No need to cache compiled shaders, rely instead on Android's
@@ -176,6 +177,10 @@ void Program::setColor(const float r, const float g, const float b, const float 
 
 void Program::use() {
     glUseProgram(mProgramId);
+    if (texCoords >= 0 && !mHasSampler) {
+        glUniform1i(getUniform("sampler"), 0);
+        mHasSampler = true;
+    }
     mUse = true;
 }
 

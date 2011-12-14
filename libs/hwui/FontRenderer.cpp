@@ -615,6 +615,8 @@ void FontRenderer::checkTextureUpdate() {
         return;
     }
 
+    Caches& caches = Caches::getInstance();
+    GLuint lastTextureId = 0;
     // Iterate over all the cache lines and see which ones need to be updated
     for (uint32_t i = 0; i < mCacheLines.size(); i++) {
         CacheTextureLine* cl = mCacheLines[i];
@@ -626,7 +628,11 @@ void FontRenderer::checkTextureUpdate() {
             uint32_t height  = cl->mMaxHeight;
             void* textureData = cacheTexture->mTexture + (yOffset * width);
 
-            glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
+            if (cacheTexture->mTextureId != lastTextureId) {
+                caches.activeTexture(0);
+                glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
+                lastTextureId = cacheTexture->mTextureId;
+            }
             glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height,
                     GL_ALPHA, GL_UNSIGNED_BYTE, textureData);
 
@@ -644,6 +650,7 @@ void FontRenderer::issueDrawCommand() {
     checkTextureUpdate();
 
     Caches& caches = Caches::getInstance();
+    caches.bindIndicesBuffer(mIndexBufferID);
     if (!mDrawn) {
         float* buffer = mTextMeshPtr;
         int offset = 2;
@@ -654,7 +661,6 @@ void FontRenderer::issueDrawCommand() {
                 buffer + offset);
     }
 
-    caches.bindIndicesBuffer(mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
 
     mDrawn = true;
@@ -779,6 +785,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
         return image;
     }
 
+    mDrawn = false;
     mClip = NULL;
     mBounds = NULL;
 
@@ -806,6 +813,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     image.image = dataBuffer;
     image.penX = penX;
     image.penY = penY;
+
     return image;
 }
 
