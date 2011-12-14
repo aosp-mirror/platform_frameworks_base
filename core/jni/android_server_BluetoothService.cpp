@@ -1645,6 +1645,25 @@ static jobject getChannelFdNative(JNIEnv *env, jobject object, jstring channelPa
         fd = dbus_returns_unixfd(env, reply);
         if (fd == -1) return NULL;
 
+        int flags = fcntl(fd, F_GETFL);
+        if (flags < 0) {
+           LOGE("Can't get flags with fcntl(): %s (%d)",
+                                strerror(errno), errno);
+           releaseChannelFdNative(env, object, channelPath);
+           close(fd);
+           return NULL;
+        }
+
+        flags &= ~O_NONBLOCK;
+        int status = fcntl(fd, F_SETFL, flags);
+        if (status < 0) {
+           LOGE("Can't set flags with fcntl(): %s (%d)",
+               strerror(errno), errno);
+           releaseChannelFdNative(env, object, channelPath);
+           close(fd);
+           return NULL;
+        }
+
         // Create FileDescriptor object
         jobject fileDesc = jniCreateFileDescriptor(env, fd);
         if (fileDesc == NULL) {
