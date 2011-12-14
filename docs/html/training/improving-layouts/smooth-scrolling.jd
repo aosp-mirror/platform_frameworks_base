@@ -1,0 +1,124 @@
+page.title=Making ListView Scrolling Smooth
+parent.title=Optimizing Performance of Layouts
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Loading Views On Demand
+previous.link=loading-ondemand.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#AsyncTask">Use a Background Thread</a></li>
+  <li><a href="#ViewHolder">Hold View Objects in a View Holder</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}resources/articles/listview-backgrounds.html">ListView
+Backgrounds: An Optimization</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>The key to a smoothly scrolling {@link android.widget.ListView} is to keep the application’s main
+thread (the UI thread) free from heavy processing. Ensure you do any disk access, network access, or
+SQL access in a separate thread. To test the status of your app, you can enable {@link
+android.os.StrictMode}.</p>
+
+
+<h2 id="AsyncTask">Use a Background Thread</h2>
+
+<p>Using a background thread ("worker thread") removes strain from the main thread so it can focus
+on drawing the UI. In many cases, using {@link android.os.AsyncTask} provides a simple way to
+perform your work outside the main thread. {@link android.os.AsyncTask} automatically queues up all
+the {@link android.os.AsyncTask#execute execute()} requests and performs them serially. This
+behavior is global to a particular process and means you don’t need to worry about creating your
+own thread pool.</p>
+
+<p>In the sample code below, an {@link android.os.AsyncTask} is used to load
+images in a background thread, then apply them to the UI once finished. It also shows a
+progress spinner in place of the images while they are loading.</p>
+
+<pre>
+// Using an AsyncTask to load the slow images in a background thread
+new AsyncTask&lt;ViewHolder, Void, Bitmap>() {
+    private ViewHolder v;
+
+    &#64;Override
+    protected Bitmap doInBackground(ViewHolder... params) {
+        v = params[0];
+        return mFakeImageLoader.getImage();
+    }
+
+    &#64;Override
+    protected void onPostExecute(Bitmap result) {
+        super.onPostExecute(result);
+        if (v.position == position) {
+            // If this item hasn't been recycled already, hide the
+            // progress and set and show the image
+            v.progress.setVisibility(View.GONE);
+            v.icon.setVisibility(View.VISIBLE);
+            v.icon.setImageBitmap(result);
+        }
+    }
+}.execute(holder);
+</pre>
+
+<p>Beginning with Android 3.0 (API level 11), an extra feature is available in {@link
+android.os.AsyncTask} so you can enable it to run across multiple processor cores. Instead of
+calling {@link android.os.AsyncTask#execute execute()} you can specify {@link
+android.os.AsyncTask#executeOnExecutor executeOnExecutor()} and multiple requests can be executed at
+the same time depending on the number of cores available.</p>
+
+
+<h2 id="ViewHolder">Hold View Objects in a View Holder</h2>
+
+<p>Your code might call {@link android.app.Activity#findViewById findViewById()} frequently
+during the scrolling of {@link android.widget.ListView}, which can slow down performance. Even when
+the {@link
+android.widget.Adapter} returns an inflated view for recycling, you still need to look up the
+elements
+and update them. A way around repeated use of {@link android.app.Activity#findViewById
+findViewById()} is to use the "view holder" design pattern.</p>
+
+<p>A {@code ViewHolder} object stores each of the component views inside the tag field of the
+Layout, so you can immediately access them without the need to look them up repeatedly. First, you
+need to create a class to hold your exact set of views. For example:</p>
+
+<pre>
+static class ViewHolder {
+  TextView text;
+  TextView timestamp;
+  ImageView icon;
+  ProgressBar progress;
+  int position;
+}
+</pre>
+
+<p>Then populate the {@code ViewHolder} and store it inside the layout.</p>
+
+<pre>
+ViewHolder holder = new ViewHolder();
+holder.icon = (ImageView) convertView.findViewById(R.id.listitem_image);
+holder.text = (TextView) convertView.findViewById(R.id.listitem_text);
+holder.timestamp = (TextView) convertView.findViewById(R.id.listitem_timestamp);
+holder.progress = (ProgressBar) convertView.findViewById(R.id.progress_spinner);
+convertView.setTag(holder);
+</pre>
+
+<p>Now you can easily access each view without the need for the look-up, saving valuable processor
+cycles.</p>
+
+
+
+
+
