@@ -80,14 +80,15 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     }
 
     private void tagSocketFd(FileDescriptor fd, int tag, int uid) {
-        int errno;
         if (tag == -1 && uid == -1) return;
 
-        errno = native_tagSocketFd(fd, tag, uid);
-        if (errno < 0) {
-            Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
-                  + tag + ", " +
-                  + uid + ") failed with errno" + errno);
+        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
+            final int errno = native_tagSocketFd(fd, tag, uid);
+            if (errno < 0) {
+                Log.i(TAG, "tagSocketFd(" + fd.getInt$() + ", "
+                      + tag + ", " +
+                      + uid + ") failed with errno" + errno);
+            }
         }
     }
 
@@ -101,12 +102,13 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
 
     private void unTagSocketFd(FileDescriptor fd) {
         final SocketTags options = threadSocketTags.get();
-        int errno;
         if (options.statsTag == -1 && options.statsUid == -1) return;
 
-        errno = native_untagSocketFd(fd);
-        if (errno < 0) {
-            Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
+        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
+            final int errno = native_untagSocketFd(fd);
+            if (errno < 0) {
+                Log.w(TAG, "untagSocket(" + fd.getInt$() + ") failed with errno " + errno);
+            }
         }
     }
 
@@ -116,16 +118,21 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     }
 
     public static void setKernelCounterSet(int uid, int counterSet) {
-        int errno = native_setCounterSet(counterSet, uid);
-        if (errno < 0) {
-            Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno " + errno);
+        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
+            final int errno = native_setCounterSet(counterSet, uid);
+            if (errno < 0) {
+                Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno "
+                        + errno);
+            }
         }
     }
 
     public static void resetKernelUidStats(int uid) {
-        int errno = native_deleteTagData(0, uid);
-        if (errno < 0) {
-            Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
+        if (SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) {
+            int errno = native_deleteTagData(0, uid);
+            if (errno < 0) {
+                Slog.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
+            }
         }
     }
 
