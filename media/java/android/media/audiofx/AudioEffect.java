@@ -386,7 +386,7 @@ public class AudioEffect {
             default:
                 throw (new RuntimeException(
                         "Cannot initialize effect engine for type: " + type
-                                + "Error: " + initResult));
+                                + " Error: " + initResult));
             }
         }
         mId = id[0];
