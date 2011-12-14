@@ -37,21 +37,21 @@ public class RenderPass extends SceneGraphBase {
     float mClearDepth;
     boolean mShouldClearDepth;
 
-    ArrayList<DrawableBase> mObjectsToDraw;
+    ArrayList<RenderableBase> mObjectsToDraw;
 
     Camera mCamera;
 
     ScriptField_RenderPass_s.Item mRsField;
 
     public RenderPass() {
-        mObjectsToDraw = new ArrayList<DrawableBase>();
+        mObjectsToDraw = new ArrayList<RenderableBase>();
         mClearColor = new Float4(0.0f, 0.0f, 0.0f, 0.0f);
         mShouldClearColor = true;
         mClearDepth = 1.0f;
         mShouldClearDepth = true;
     }
 
-    public void appendDrawable(Drawable d) {
+    public void appendRenderable(Renderable d) {
         mObjectsToDraw.add(d);
     }
 
@@ -95,7 +95,7 @@ public class RenderPass extends SceneGraphBase {
                                                               mObjectsToDraw.size());
             Allocation[] drawableAllocs = new Allocation[mObjectsToDraw.size()];
             for (int i = 0; i < mObjectsToDraw.size(); i ++) {
-                Drawable dI = (Drawable)mObjectsToDraw.get(i);
+                Renderable dI = (Renderable)mObjectsToDraw.get(i);
                 drawableAllocs[i] = dI.getRsField(rs, res).getAllocation();
             }
             drawableData.copyFrom(drawableAllocs);

@@ -55,7 +55,7 @@ typedef struct RenderState_s {
     rs_program_raster pr;
 } SgRenderState;
 
-typedef struct Drawable_s {
+typedef struct Renderable_s {
     rs_allocation render_state;
     rs_allocation pv_const;
     rs_allocation pf_const;
@@ -69,7 +69,7 @@ typedef struct Drawable_s {
     float4 worldBoundingSphere;
     int bVolInitialized;
     int cullType; // specifies whether to frustum cull
-} SgDrawable;
+} SgRenderable;
 
 typedef struct RenderPass_s {
     rs_allocation color_target;

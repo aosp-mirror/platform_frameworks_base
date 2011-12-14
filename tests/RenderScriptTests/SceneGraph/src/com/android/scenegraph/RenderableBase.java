@@ -28,16 +28,8 @@ import android.util.Log;
 /**
  * @hide
  */
-public class DrawableGroup extends DrawableBase {
-
-    ArrayList<DrawableBase> mChildren;
-
-    public DrawableGroup() {
-        mChildren = new ArrayList<DrawableBase>();
-    }
-
-    public void appendChildren(DrawableBase d) {
-        mChildren.add(d);
+public class RenderableBase extends SceneGraphBase {
+    public RenderableBase() {
     }
 }
 

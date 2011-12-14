@@ -84,7 +84,7 @@ public class TestAppRS {
 
         // This is just a hardcoded object in the scene that gets turned on and off for the demo
         // to make things look a bit better. This could be deleted in the cleanup
-        Drawable plane = (Drawable)mActiveScene.getDrawableByName("pPlaneShape1");
+        Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
             plane.setVisible(mRS, !mUseBlur);
         }
@@ -362,7 +362,7 @@ public class TestAppRS {
     }
 
     void initRenderPasses() {
-        ArrayList<DrawableBase> allDraw = mActiveScene.getDrawables();
+        ArrayList<RenderableBase> allDraw = mActiveScene.getRenderables();
         int numDraw = allDraw.size();
 
         if (mUseBlur) {
@@ -376,7 +376,7 @@ public class TestAppRS {
         mainPass.setShouldClearDepth(true);
         mainPass.setCamera(mActiveScene.getCameras().get(1));
         for (int i = 0; i < numDraw; i ++) {
-            mainPass.appendDrawable((Drawable)allDraw.get(i));
+            mainPass.appendRenderable((Renderable)allDraw.get(i));
         }
         mActiveScene.appendRenderPass(mainPass);
 
@@ -412,7 +412,7 @@ public class TestAppRS {
 
         mActiveScene.assignRenderStateToMaterial(glassTransp, "^#GlassLight");
 
-        Drawable plane = (Drawable)mActiveScene.getDrawableByName("pPlaneShape1");
+        Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
             RenderState texState = new RenderState(mPV_Paint, mPF_Texture, null, null);
             plane.setRenderState(texState);

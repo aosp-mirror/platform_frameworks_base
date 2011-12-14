@@ -21,7 +21,7 @@
 #include "transform_def.rsh"
 SgTransform *exportPtr;
 SgRenderState *sExport;
-SgDrawable *drExport;
+SgRenderable *drExport;
 SgRenderPass *pExport;
 SgCamera *exportPtrCam;
 FBlurOffsets *blurExport;

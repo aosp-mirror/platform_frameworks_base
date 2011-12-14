@@ -24,7 +24,7 @@ rs_script gCameraScript;
 
 SgTransform *gRootNode;
 rs_allocation gCameras;
-rs_allocation gDrawableObjects;
+rs_allocation gRenderableObjects;
 
 rs_allocation gRenderPasses;
 
@@ -46,7 +46,7 @@ static float4 gFrustumPlanes[6];
 static rs_allocation nullAlloc;
 
 //#define DEBUG_RENDERABLES
-static void draw(SgDrawable *obj) {
+static void draw(SgRenderable *obj) {
 
     const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
@@ -90,7 +90,7 @@ static void draw(SgDrawable *obj) {
     rsgDrawMesh(obj->mesh, obj->meshIndex);
 }
 
-static void getTransformedSphere(SgDrawable *obj) {
+static void getTransformedSphere(SgRenderable *obj) {
     obj->worldBoundingSphere = obj->boundingSphere;
     obj->worldBoundingSphere.w = 1.0f;
     const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
@@ -102,7 +102,7 @@ static void getTransformedSphere(SgDrawable *obj) {
     obj->worldBoundingSphere.w = obj->boundingSphere.w * length(scaledVec);
 }
 
-static bool frustumCulled(SgDrawable *obj) {
+static bool frustumCulled(SgRenderable *obj) {
     if (!obj->bVolInitialized) {
         float minX, minY, minZ, maxX, maxY, maxZ;
         rsgMeshComputeBoundingBox(obj->mesh,
@@ -133,7 +133,7 @@ static bool frustumCulled(SgDrawable *obj) {
                                 &gFrustumPlanes[3], &gFrustumPlanes[4]);
 }
 
-static void sortToBucket(SgDrawable *obj) {
+static void sortToBucket(SgRenderable *obj) {
     // Not loaded yet
     if (!rsIsObject(obj->mesh) || obj->cullType == 2) {
         return;
@@ -178,12 +178,12 @@ static void prepareCameras() {
 
 static void drawSorted() {
     for (int i = 0; i < gFrontToBackCount; i ++) {
-        SgDrawable *current = (SgDrawable*)gFrontToBack[i];
+        SgRenderable *current = (SgRenderable*)gFrontToBack[i];
         draw(current);
     }
 
     for (int i = 0; i < gBackToFrontCount; i ++) {
-        SgDrawable *current = (SgDrawable*)gBackToFront[i];
+        SgRenderable *current = (SgRenderable*)gBackToFront[i];
         draw(current);
     }
 }
@@ -192,10 +192,10 @@ static void drawAllObjects(rs_allocation allObj) {
     if (!rsIsObject(allObj)) {
         return;
     }
-    int numDrawables = rsAllocationGetDimX(allObj);
-    for (int i = 0; i < numDrawables; i ++) {
+    int numRenderables = rsAllocationGetDimX(allObj);
+    for (int i = 0; i < numRenderables; i ++) {
         rs_allocation *drawAlloc = (rs_allocation*)rsGetElementAt(allObj, i);
-        SgDrawable *current = (SgDrawable*)rsGetElementAt(*drawAlloc, 0);
+        SgRenderable *current = (SgRenderable*)rsGetElementAt(*drawAlloc, 0);
         sortToBucket(current);
     }
     drawSorted();
@@ -211,7 +211,7 @@ void root(const void *v_in, void *v_out) {
 
     rsgClearDepth(1.0f);
 
-    int numDrawables = rsAllocationGetDimX(gDrawableObjects);
+    int numRenderables = rsAllocationGetDimX(gRenderableObjects);
     if (rsIsObject(gRenderPasses)) {
         int numPasses = rsAllocationGetDimX(gRenderPasses);
         for (uint i = 0; i < numPasses; i ++) {
@@ -245,11 +245,11 @@ void root(const void *v_in, void *v_out) {
         rsgClearDepth(1.0f);
         rs_allocation *camAlloc = (rs_allocation*)rsGetElementAt(gCameras, 1);
         updateActiveCamera(*camAlloc);
-        drawAllObjects(gDrawableObjects);
+        drawAllObjects(gRenderableObjects);
     }
 }
 
-static bool intersect(const SgDrawable *obj, float3 pnt, float3 vec) {
+static bool intersect(const SgRenderable *obj, float3 pnt, float3 vec) {
     // Solving for t^2 + Bt + C = 0
     float3 originMinusCenter = pnt - obj->worldBoundingSphere.xyz;
     float B = dot(originMinusCenter, vec) * 2.0f;
@@ -284,7 +284,7 @@ void pick(int screenX, int screenY) {
     getCameraRay(gActiveCamera, screenX, screenY, &pnt, &vec);
 
     for (int i = 0; i < gFrontToBackCount; i ++) {
-        SgDrawable *current = (SgDrawable*)gFrontToBack[i];
+        SgRenderable *current = (SgRenderable*)gFrontToBack[i];
         bool isPicked = intersect(current, pnt, vec);
         if (isPicked) {
             current->cullType = 2;
@@ -292,7 +292,7 @@ void pick(int screenX, int screenY) {
     }
 
     for (int i = 0; i < gBackToFrontCount; i ++) {
-        SgDrawable *current = (SgDrawable*)gBackToFront[i];
+        SgRenderable *current = (SgRenderable*)gBackToFront[i];
         bool isPicked = intersect(current, pnt, vec);
         if (isPicked) {
             current->cullType = 2;
