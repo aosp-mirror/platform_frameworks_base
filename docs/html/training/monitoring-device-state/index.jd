@@ -1,0 +1,63 @@
+page.title=Monitoring Device State to Optimize Battery Life
+
+trainingnavtop=true
+startpage=true
+next.title=Monitoring the Battery Level and Charging State
+next.link=battery-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2> 
+<ul>
+  <li>Android 2.0 (API level 5) or higher</li>
+  <li>Experience with <a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>
+</ul>
+
+</div> 
+</div>
+
+<p>For your app to be a good citizen, it should seek to limit its impact on the battery life of its
+host device. After this class you will be able to build apps that monitor modify their functionality
+and behavior based on the state of the host device.</p>
+
+<p>By taking steps such as disabling background service updates when you lose connectivity, or
+reducing the rate of such updates when the battery level is low, you can ensure that the impact of
+your app on battery life is minimized, without compromising the user experience.</p>
+
+<h2>Lessons</h2> 
+ 
+<!-- Create a list of the lessons in this class along with a short description of each lesson.
+These should be short and to the point. It should be clear from reading the summary whether someone
+will want to jump to a lesson or not.--> 
+ 
+<dl>
+  <dt><b><a href="battery-monitoring.html">Monitoring the Battery Level and Charging State</a></b></dt>
+  <dd>Learn how to alter your app's update rate by determining, and monitoring, the current battery
+level and changes in charging state.</dd>
+
+  <dt><b><a href="docking-monitoring.html">Determining and Monitoring the Docking State and
+Type</a></b></dt>
+  <dd>Optimal refresh rates can vary based on how the host device is being used. Learn how to
+determine, and monitor, the docking state and type of dock being used to affect your app's
+behavior.</dd>
+
+  <dt><b><a href="connectivity-monitoring.html">Determining and Monitoring the Connectivity
+Status</a></b></dt>
+  <dd>Without Internet connectivity you can't update your app from an online source. Learn how to  
+check the connectivity status to alter your background update rate. You'll also learn to check for
+Wi-Fi or mobile connectivity before beginning high-bandwidth operations.</dd>
+
+  <dt><b><a href="manifest-receivers.html">Manipulating Broadcast Receivers On Demand</a></b></dt>
+  <dd>Broadcast receivers that you've declared in the manifest can be toggled at runtime to disable
+those that aren't necessary due to the current device state. Learn to improve
+efficiency by toggling and cascading state change receivers and delay actions until the device is in
+a specific state.</dd>
+</dl> 
