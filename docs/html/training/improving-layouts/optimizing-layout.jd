@@ -1,0 +1,156 @@
+page.title=Optimizing Layout Hierarchies
+parent.title=Improving Performance of Layouts
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Re-using Layouts with &lt;include/&gt;
+next.link=reusing-layouts.html
+
+@jd:body
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Inspect">Inspect Your Layout</a></li>
+  <li><a href="#Revise">Revise Your Layout</a></li>
+  <li><a href="#Layoutopt">Use Layoutopt</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
+  <li><a
+href="{@docRoot}guide/topics/resources/layout-resource.html#include- element">Layout
+Resource</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>It is a common misconception that using the basic layout structures leads to the most efficient
+layouts. However, each widget and layout you add to your application requires initialization,
+layout, and drawing. For example, using nested instances of {@link android.widget.LinearLayout} can
+lead to an excessively deep view hierarchy. Furthermore, nesting several instances of {@link
+android.widget.LinearLayout} that use the {@code layout_weight} parameter can be especially
+expensive as each child needs to be measured twice. This is particularly important when the layout
+is inflated repeatedly, such as when used in a {@link android.widget.ListView} or {@link
+android.widget.GridView}.</p>
+
+<p>In this lesson you'll learn to use <a
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Heirachy Viewer</a> and <a
+href="{@docRoot}guide/developing/tools/layoutopt.html">Layoutopt</a> to examine and optimize your
+layout.</p>
+
+
+
+<h2 id="Inspect">Inspect Your Layout</h2>
+
+<p>The Android SDK tools include a tool called <a
+href="{@docRoot}guide/developing/tools/hierarchy-viewer.html">Heirachy Viewer</a> that allows
+you to analyze your layout while your application is running. Using this tool helps you discover
+bottlenecks in the layout performance.</p>
+
+<p>Hierarchy Viewer works by allowing you to select running processes on a connected device or
+emulator, then display the layout tree. The traffic lights on each block represent its Measure,
+Layout and Draw performance, helping you identify potential issues.</p>
+
+<p>For example, figure 1 shows a layout that's used as an item in a {@link
+android.widget.ListView}. This layout shows a small bitmap image on the left and two stacked items
+of text on the right. It is especially important that layouts that will be inflated multiple
+times&mdash;such as this one&mdash;are optimized as the performance
+benefits will be multiplied.</p>
+
+<img src="{@docRoot}images/training/layout-listitem.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> Conceptual layout for an item in a {@link
+android.widget.ListView}.</p>
+
+<p>The {@code hierarchyviewer} tool is available in  {@code &lt;sdk&gt;/tools/}. When opened,
+the Hierarchy Viewer shows a list of available devices and its running components. Click
+<strong>Load View Hierarchy</strong> to view the layout hierarchy of the selected component. For
+example, figure 2 shows the layout for the list item illustrated by figure 1.</p>
+
+<div style="float:left;width:455px">
+<img src="{@docRoot}images/training/hierarchy-linearlayout.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> Layout hierarchy for the layout in figure 1,
+using nested instances of {@link android.widget.LinearLayout}.</p>
+</div>
+
+<div style="float:left;width:155px;margin-left:2em">
+<img src="{@docRoot}images/training/hierarchy-layouttimes.png" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> Clicking a hierarchy node shows its
+performance times.</p>
+</div>
+
+<p style="clear:left">In figure 2, you can see there is a 3-level hierarchy with some problems
+laying out the text items. Clicking on the items shows the time taken for each stage of the process
+(figure 3). It becomes clear which items are taking the longest to measure, layout, and render, and
+where you should spend time optimizing.</p>
+
+<p>The timings for rendering a complete list item using this layout are:</p>
+<ul>
+  <li>Measure: 0.977ms</li>
+  <li>Layout: 0.167ms</li>
+  <li>Draw: 2.717ms</li>
+</ul>
+
+
+<h2 id="Revise">Revise Your Layout</h2>
+
+<p>Because the layout performance above slows down due to a nested {@link
+android.widget.LinearLayout}, the performance might improve by flattening the layout&mdash;make
+the layout shallow and wide, rather than narrow and deep. A {@link android.widget.RelativeLayout} as
+the root node allows for such layouts. So, when this design is converted to use {@link
+android.widget.RelativeLayout}, you can see that the layout becomes a 2-level hierarchy. Inspection
+of the new layout looks like this:</p>
+
+<img src="{@docRoot}images/training/hierarchy-relativelayout.png" alt="" />
+<p class="img-caption"><strong>Figure 4.</strong> Layout hierarchy for the layout in figure 1,
+using {@link android.widget.RelativeLayout}.</p>
+
+<p>Now rendering a list item takes:</p>
+<ul>
+  <li>Measure: 0.598ms</li>
+  <li>Layout: 0.110ms</li>
+  <li>Draw: 2.146ms</li>
+</ul>
+
+<p>Might seem like a small improvement, but this time is multiplied several times because this
+layout is used for every item in a list.</p>
+
+<p>Most of this time difference is due to the use of {@code layout_weight} in the {@link
+android.widget.LinearLayout} design, which can slow down the speed of measurement. It is just one
+example of how each layout has appropriate uses and you should carefully consider whether using 
+layout weight is necessary.</p>
+
+
+<h2 id="Layoutopt">Use Layoutopt</h2>
+
+<p>It is always good practice to also run the <a
+href="{@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a> tool on your final layout files
+to search for places in your view hierarchy that may be optimized. Layoutopt is also in your SDK
+{@code tools/} directory and takes a layout directory name or a space-separated list of layout files
+that you'd like to inspect.</p>
+
+<p>When you run {@code layoutopt} on a layout file, it prints a line number for each issue found, a
+description of the issue, and for some types of issues it also suggests a resolution. For
+example:</p>
+
+<pre class="no-pretty-print classic">
+$ layoutopt samples/
+samples/compound.xml
+   7:23 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+   11:21 This LinearLayout layout or its FrameLayout parent is useless
+samples/simple.xml
+   7:7 The root-level &lt;FrameLayout/&gt; can be replaced with &lt;merge/&gt;
+</pre>
+
+<p>After you apply the suggested layout optimizations, run Hierarchy Viewer again to inspect the
+performance changes.</p>
+
