@@ -1,0 +1,156 @@
+page.title=Controlling Your App’s Volume and Playback
+parent.title=Managing Audio Playback and Focus
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Managing Audio Focus
+next.link=audio-focus.html
+
+@jd:body
+
+ 
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#IdentifyStream">Identify Which Audio Stream to Use</a></li>
+  <li><a href="#HardwareVolumeKeys">Use Hardware Volume Keys to Control Your App’s Audio
+Volume</a></li>
+  <li><a href="#PlaybackControls">Use Hardware Playback Control Keys to Control Your App’s Audio
+Playback</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a></li>
+</ul>
+
+</div> 
+</div>
+
+
+ 
+<p>A good user experience is a predictable one. If your app plays media it’s important that your
+users can control the volume of your app using the hardware or software volume controls of their
+device, bluetooth headset, or headphones.</p>
+
+<p>Similarly, where appropriate and available, the play, stop, pause, skip, and previous media
+playback keys should perform their respective actions on the audio stream used by your app.</p>
+
+ 
+<h2 id="IdentifyStream">Identify Which Audio Stream to Use</h2> 
+ 
+<p>The first step to creating a predictable audio experience is understanding which audio stream
+your app will use.</p>
+
+<p>Android maintains a separate audio stream for playing music, alarms, notifications, the incoming
+call ringer, system sounds, in-call volume, and DTMF tones. This is done primarily to allow users to
+control the volume of each stream independently.</p>
+
+<p>Most of these streams are restricted to system events, so unless your app is a replacement alarm
+clock, you’ll almost certainly be playing your audio using the {@link
+android.media.AudioManager#STREAM_MUSIC} stream.</p>
+
+
+<h2 id="HardwareVolumeKeys">Use Hardware Volume Keys to Control Your App’s Audio Volume</h2> 
+
+<p>By default, pressing the volume controls modify the volume of the active audio stream. If your
+app isn't currently playing anything, hitting the volume keys adjusts the ringer volume.<p>
+    
+<p>If you've got a game or music app, then chances are good that when the user hits the volume keys
+they want to control the volume of the game or music, even if they’re currently between songs or
+there’s no music in the current game location.</p>
+
+<p>You may be tempted to try and listen for volume key presses and modify the volume of your
+audio stream that way. Resist the urge. Android provides the handy {@link
+android.app.Activity#setVolumeControlStream setVolumeControlStream()} method to direct volume key
+presses to the audio stream you specify.<p> 
+  
+<p>Having identified the audio stream your application
+will be using, you should set it as the volume stream target. You should make this call early in
+your app’s lifecycle&mdash;because you only need to call it once during the activity lifecycle, you
+should typically call it within the {@code onCreate()} method (of the {@link
+android.app.Activity} or {@link android.app.Fragment} that controls
+your media). This ensures that whenever your app is visible, the
+volume controls function as the user expects.<p>
+
+<pre>
+setVolumeControlStream(AudioManager.STREAM_MUSIC);
+</pre>
+
+
+<p>From this point onwards, pressing the volume keys on the device affect the audio stream you
+specify (in this case “music”) whenever the target activity or fragment is visible.</p>
+
+
+<h2 id="PlaybackControls">Use Hardware Playback Control Keys to Control Your App’s Audio
+Playback</h2> 
+
+<p>Media playback buttons such as play, pause, stop, skip, and previous are available on some
+handsets and many connected or wireless headsets. Whenever a user presses one of these hardware
+keys, the system broadcasts an intent with the {@link android.content.Intent#ACTION_MEDIA_BUTTON}
+action.</p>
+
+<p>To respond to media button clicks, you need to register a {@link
+android.content.BroadcastReceiver} in your manifest that listens for this action broadcast as shown
+below.</p>
+
+<pre>
+&lt;receiver android:name=".RemoteControlReceiver">
+    &lt;intent-filter>
+        &lt;action android:name="android.intent.action.MEDIA_BUTTON" />
+    &lt;/intent-filter>
+&lt;/receiver>
+</pre>
+
+<p>The receiver implementation itself needs to extract which key was pressed to cause the broadcast.
+The {@link android.content.Intent} includes this under the {@link
+android.content.Intent#EXTRA_KEY_EVENT} key, while the {@link android.view.KeyEvent} class includes
+a list {@code KEYCODE_MEDIA_*} static constants that represents each of the possible media
+buttons, such as {@link android.view.KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE} and {@link
+android.view.KeyEvent#KEYCODE_MEDIA_NEXT}.</p>
+
+<p>The following snippet shows how to extract the media button pressed and affects the media playback accordingly.</p>
+
+<pre>
+public class RemoteControlReceiver extends BroadcastReceiver {
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
+            KeyEvent event = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            if (KeyEvent.KEYCODE_MEDIA_PLAY == event.getKeyCode()) {
+                // Handle key press.
+            }
+        }
+    }
+}
+</pre>
+
+<p>Because multiple applications might want to listen for media button presses, you must
+also programmatically control when your app should receive media button press events.</p>
+
+<p>The following code can be used within your app to register and de-register your media button
+event receiver using the {@link android.media.AudioManager}. When registered, your broadcast
+receiver is the exclusive receiver of all media button broadcasts.<p>
+
+<pre>
+AudioManager am = mContext.getSystemService(Context.AUDIO_SERVICE);
+...
+
+// Start listening for button presses
+am.registerMediaButtonEventReceiver(RemoteControlReceiver);
+...
+
+// Stop listening for button presses
+am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);
+</pre>
+
+<p>Typically, apps should unregister most of their receivers whenever they become inactive or
+invisible (such as during the {@link android.app.Activity#onStop onStop()} callback). However, it’s
+not that simple for media playback apps&mdash;in fact, responding to media playback buttons is most
+important when your application isn’t visible and therefore can’t be controlled by the on-screen
+UI.</p>
+
+<p>A better approach is to register and unregister the media button event receiver when your
+application gains and losses the audio focus. This is covered in detail in the next lesson.</p>

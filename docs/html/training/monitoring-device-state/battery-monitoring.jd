@@ -1,0 +1,156 @@
+page.title=Monitoring the Battery Level and Charging State
+parent.title=Monitoring Device State to Optimize Battery Life
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Determining and Monitoring the Docking State and Type
+next.link=docking-monitoring.html
+
+@jd:body
+ 
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DetermineChargeState">Determine the Current Charging State</a></li>
+  <li><a href="#MonitorChargeState">Monitor Changes in Charging State</a></li>
+  <li><a href="#CurrentLevel">Determine the Current Battery Level</a></li>
+  <li><a href="#MonitorLevel">Monitor Significant Changes in Battery Level</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+</ul>
+
+</div> 
+</div>
+ 
+<p>When you're altering the frequency of your background updates to reduce the effect of those
+updates on battery life, checking the current battery level and charging state is a good place to
+start.</p>
+
+<p>The battery-life impact of performing application updates depends on the battery level and
+charging state of the device. The impact of performing updates while the device is charging over AC
+is negligible, so in most cases you can maximize your refresh rate whenever the device is connected
+to a wall charger. Conversely, if the device is discharging, reducing your update rate helps
+prolong the battery life.</p>
+
+<p>Similarly, you can check the battery charge level, potentially reducing the frequency of&mdash;or
+even stopping&mdash;your updates when the battery charge is nearly exhausted.</p>
+
+
+<h2 id="DetermineChargeState">Determine the Current Charging State</h2> 
+ 
+<p>Start by determining the current charge status. The {@link android.os.BatteryManager}
+broadcasts all battery and charging details in a sticky {@link android.content.Intent} that includes
+the charging status.</p>
+
+<p>Because it's a sticky intent, you don't need to register a {@link
+android.content.BroadcastReceiver}&mdash;by simply calling {@code registerReceiver} passing in
+{@code null} as the receiver as shown in the next snippet, the current battery status intent is
+returned. You could pass in an actual {@link android.content.BroadcastReceiver} object here, but
+we'll be handling updates in a later section so it's not necessary.</p>
+
+<pre>IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+Intent batteryStatus = context.registerReceiver(null, ifilter);</pre>
+
+<p>You can extract both the current charging status and, if the device is being charged, whether
+it's charging via USB or AC charger:<p>
+
+<pre>// Are we charging / charged?
+int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                     status == BatteryManager.BATTERY_STATUS_FULL;
+
+// How are we charging?
+int chargePlug = battery.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
+boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
+
+<p>Typically you should maximize the rate of your background updates in the case where the device is
+connected to an AC charger, reduce the rate if the charge is over USB, and lower it
+further if the battery is discharging.</p>
+
+
+<h2 id="MonitorChargeState">Monitor Changes in Charging State</h2> 
+
+<p>The charging status can change as easily as a device can be plugged in, so it's important to
+monitor the charging state for changes and alter your refresh rate accordingly.</p>
+
+<p>The {@link android.os.BatteryManager} broadcasts an action whenever the device is connected or
+disconnected from power. It's important to to receive these events even while your app isn't
+running&mdash;particularly as these events should impact how often you start your app in order to
+initiate a background update&mdash;so you should register a {@link
+android.content.BroadcastReceiver} in your manifest to listen for both events by defining the
+{@link android.content.Intent#ACTION_POWER_CONNECTED} and {@link
+android.content.Intent#ACTION_POWER_DISCONNECTED} within an intent filter.</p>
+
+<pre>&lt;receiver android:name=".PowerConnectionReceiver">
+  &lt;intent-filter>
+    &lt;action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+    &lt;action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+  &lt;/intent-filter>
+&lt;/receiver></pre>
+
+<p>Within the associated {@link android.content.BroadcastReceiver} implementation, you can extract
+the current charging state and method as described in the previous step.</p>
+
+<pre>public class PowerConnectionReceiver extends BroadcastReceiver {
+    &#64;Override
+    public void onReceive(Context context, Intent intent) { 
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                            status == BatteryManager.BATTERY_STATUS_FULL;
+    
+        int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
+        boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;
+    }
+}</pre>
+
+
+<h2 id="CurrentLevel">Determine the Current Battery Level</h2> 
+
+<p>In some cases it's also useful to determine the current battery level. You may choose to reduce
+the rate of your background updates if the battery charge is below a certain level.</p>
+
+<p>You can find the current battery charge by extracting the current battery level and scale from
+the battery status intent as shown here:</p>
+
+<pre>int level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+float batteryPct = level / (float)scale;</pre>
+
+
+<h2 id="MonitorLevel">Monitor Significant Changes in Battery Level</h2> 
+
+<p>You can't easily continually monitor the battery state, but you don't need to.</p>
+
+<p>Generally speaking, the impact of constantly monitoring the battery level has a greater
+impact on the battery than your app's normal behavior, so it's good practice to only monitor
+significant changes in battery level&mdash;specifically when the device enters or exits a low
+battery state.</p>
+
+<p>The manifest snippet below is extracted from the intent filter element within a broadcast
+receiver. The receiver is triggered whenever the device battery becomes low or exits the low
+condition by listening for {@link android.content.Intent#ACTION_BATTERY_LOW} and {@link
+android.content.Intent#ACTION_BATTERY_OKAY}.</p>
+
+<pre>&lt;receiver android:name=".BatteryLevelReceiver">
+&lt;intent-filter>
+  &lt;action android:name="android.intent.action.ACTION_BATTERY_LOW"/>
+  &lt;action android:name="android.intent.action.ACTION_BATTERY_OKAY"/>
+  &lt;/intent-filter>
+&lt;/receiver></pre>
+
+<p>It is generally good practice to disable all your background updates when the battery is
+critically low. It doesn't matter how fresh your data is if the phone turns itself off before you
+can make use of it.</p>
+
+<p>In many cases, the act of charging a device is coincident with putting it into a dock. The next
+lesson shows you how to determine the current dock state and monitor for changes in device
+docking.</p>
+
