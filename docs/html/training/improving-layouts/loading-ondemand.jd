@@ -1,0 +1,86 @@
+page.title=Loading Views On Demand
+parent.title=Improving Performance of Layouts
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Re-using Layouts with &lt;include/&gt;
+previous.link=reusing-layouts.html
+next.title=Making ListView Scrolling Smooth
+next.link=smooth-scrolling.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ViewStub">Define a ViewStub</a></li>
+  <li><a href="#Load">Load the ViewStub Layout</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}resources/articles/layout-tricks-stubs.html">Using ViewStubs</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>Sometimes your layout might require complex views that are rarely used. Whether
+they are item details, progress indicators, or undo messages, you can reduce memory usage and speed
+up rendering by loading the views only when they are needed.</p>
+
+
+<h2 id="ViewStub">Define a ViewStub</h2>
+
+<p>{@link android.view.ViewStub} is a lightweight view with no dimension and doesn’t draw anything
+or participate in the layout. As such, it's cheap to inflate and cheap to leave in a view hierarchy.
+Each {@link android.view.ViewStub} simply needs to include the {@code android:layout} attribute to
+specify the layout to inflate.</p>
+
+<p>The following {@link android.view.ViewStub} is for a translucent progress bar overlay. It should
+be visible only when new items are being imported into the application.</p>
+
+<pre>
+&lt;ViewStub
+    android:id="@+id/stub_import"
+    android:inflatedId="@+id/panel_import"
+    android:layout="@layout/progress_overlay"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom" /&gt;
+</pre>
+
+
+<h2 id="Load">Load the ViewStub Layout</h2>
+
+<p>When you want to load the layout specified by the {@link android.view.ViewStub}, either set it
+visible by calling {@link android.view.View#setVisibility setVisibility(View.VISIBLE)} or call
+{@link android.view.ViewStub#inflate()}.</p>
+
+<pre>
+((ViewStub) findViewById(R.id.stub_import)).setVisibility(View.VISIBLE);
+// or
+View importPanel = ((ViewStub) findViewById(R.id.stub_import)).inflate();
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@link android.view.ViewStub#inflate()} method returns
+the inflated {@link android.view.View} once complete. so you don't need to call {@link
+android.app.Activity#findViewById findViewById()} if you need to interact with the layout.</p>
+
+<p>Once visible/inflated, the {@link android.view.ViewStub} element is no longer part of the view
+hierarchy. It is replaced by the inflated layout and the ID for the root view of that layout is
+the one specified by the {@code android:inflatedId} attribute of the ViewStub. (The ID {@code
+android:id} specified for the {@link android.view.ViewStub} is valid only until the {@link
+android.view.ViewStub} layout is visible/inflated.)</p>
+
+<p class="note"><strong>Note:</strong> One drawback of {@link android.view.ViewStub} is that it
+doesn’t currently support the {@code &lt;merge/&gt;} tag in the layouts to be inflated.</p>
+
+
+

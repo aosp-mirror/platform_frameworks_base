@@ -1,0 +1,150 @@
+page.title=Re-using Layouts with &lt;include/&gt;
+parent.title=Improving Performance of Layouts
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Optimizing Layout Hierarchies
+previous.link=optimizing-layout.html
+next.title=Loading Views On Demand
+next.link=loading-ondemand.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Create">Create a Re-usable Layout</a></li>
+  <li><a href="#Include">Use the &lt;include&gt; Tag</a></li>
+  <li><a href="#Merge">Use the &lt;merge&gt; Tag</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}resources/articles/layout-tricks-reuse.html">Creating Reusable UI
+Components</a></li>
+  <li><a href="{@docRoot}resources/articles/layout-tricks-merge.html">Merging Layouts</a></li>
+  <li><a
+href="{@docRoot}guide/topics/resources/layout-resource.html#include-element">Layout
+Resource</a></li>
+</ul>
+
+</div>
+</div>
+
+
+
+<p>Although Android offers a variety of widgets to provide small and re-usable interactive elements,
+you might also need to re-use larger components that require a special layout. To efficiently
+re-use complete layouts, you can use the {@code &lt;include/&gt;} and {@code &lt;merge/&gt;} tags
+to embed another layout inside the current layout.</p>
+
+<p>Reusing layouts is particularly powerful as it allows you create reusable complex layouts. For
+example, a yes/no button panel, or custom progress bar with description text.
+It also means that any elements of your application that are common across multiple layouts can be
+extracted, managed separately, then included in each layout. So while 
+you can create individual UI components by writing a custom {@link android.view.View}, you can
+do it even more easily by re-using a layout file.</p>
+
+
+<h2 id="Create">Create a Re-usable Layout</h2>
+
+<p>If you already know the layout that you want to re-use, create a new XML file and define the
+layout. For example, here's a layout from the G-Kenya codelab that defines a title bar to be
+included in each activity (<code>titlebar.xml</code>):</p>
+
+<pre>
+&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width=”match_parent”
+    android:layout_height="wrap_content"
+    android:background="&#64;color/titlebar_bg">
+
+    &lt;ImageView android:layout_width="wrap_content"
+               android:layout_height="wrap_content" 
+               android:src="&#64;drawable/gafricalogo" />
+&lt;/FrameLayout>
+</pre>
+
+<p>The root {@link android.view.View} should be exactly how you'd like it to appear in each
+layout to which you add this layout.</p>
+
+
+<h2 id="Include">Use the &lt;include&gt; Tag</h2>
+
+<p>Inside the layout to which you want to add the re-usable component, add the {@code
+&lt;include/&gt;} tag. For example, here's a layout from the
+G-Kenya codelab that includes the title bar from above:</p>
+
+<p>Here's the layout file:</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" 
+    android:layout_width=”match_parent”
+    android:layout_height=”match_parent”
+    android:background="&#64;color/app_bg"
+    android:gravity="center_horizontal">
+
+    <strong>&lt;include layout="&#64;layout/titlebar"/></strong>
+
+    &lt;TextView android:layout_width=”match_parent”
+              android:layout_height="wrap_content"
+              android:text="&#64;string/hello"
+              android:padding="10dp" />
+
+    ...
+
+&lt;/LinearLayout>
+</pre>
+
+<p>You can also override all the layout parameters (any {@code android:layout_*} attributes) of the
+included layout's root view by specifying them in the {@code &lt;include/&gt;} tag. For
+example:</p>
+
+<pre>
+&lt;include android:id=”&#64;+id/news_title”
+         android:layout_width=”match_parent”
+         android:layout_height=”match_parent”
+         layout=”@layout/title”/>
+</pre>
+
+
+
+<h2 id="Merge">Use the &lt;merge&gt; Tag</h2>
+
+<p>The {@code &lt;merge />} tag helps eliminate redundant view groups in your view hierarchy
+when including one layout within another. For example, if your main layout is a vertical {@link
+android.widget.LinearLayout} in which two consecutive views can be
+re-used in multiple layouts, then the re-usable layout in which you place the two views requires its
+own root view. However, using another {@link android.widget.LinearLayout} as the root for the
+re-usable layout would result in a vertical {@link android.widget.LinearLayout} inside a
+vertical {@link android.widget.LinearLayout}. The nested {@link android.widget.LinearLayout}
+serves no real purpose other than to slow down your UI performance.</p>
+
+<p>To avoid including such a redundant view group, you can instead use the
+{@code &lt;merge&gt;} element as the root view for the re-usable layout. For example:</p>
+
+<pre>
+&lt;merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;Button
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:text="@string/add"/>
+
+    &lt;Button
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:text="@string/delete"/>
+
+&lt;/merge>
+</pre>
+
+<p>Now, when you include this layout in another layout (using the {@code &lt;include/&gt;} tag), the
+system ignores the {@code &lt;merge&gt;} element and places the two buttons directly in the
+layout, in place of the {@code &lt;include/&gt;} tag.</p>
+
