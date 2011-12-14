@@ -19,6 +19,7 @@
 
 #include <cutils/misc.h>
 #include <cutils/config_utils.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/SortedVector.h>
 #include <binder/BinderService.h>
@@ -30,8 +31,6 @@
 #include <media/AudioEffect.h>
 
 namespace android {
-
-class String8;
 
 // ----------------------------------------------------------------------------
 
