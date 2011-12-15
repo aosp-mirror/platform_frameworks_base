@@ -6557,6 +6557,7 @@ package android.content.res {
     field public static final int UI_MODE_NIGHT_NO = 16; // 0x10
     field public static final int UI_MODE_NIGHT_UNDEFINED = 0; // 0x0
     field public static final int UI_MODE_NIGHT_YES = 32; // 0x20
+    field public static final int UI_MODE_TYPE_APPLIANCE = 5; // 0x5
     field public static final int UI_MODE_TYPE_CAR = 3; // 0x3
     field public static final int UI_MODE_TYPE_DESK = 2; // 0x2
     field public static final int UI_MODE_TYPE_MASK = 15; // 0xf
