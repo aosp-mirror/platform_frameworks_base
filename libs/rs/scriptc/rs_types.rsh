@@ -400,6 +400,15 @@ typedef enum {
     RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET = 0x0010
 } rs_allocation_usage_type;
 
+typedef enum {
+    RS_PRIMITIVE_POINT,
+    RS_PRIMITIVE_LINE,
+    RS_PRIMITIVE_LINE_STRIP,
+    RS_PRIMITIVE_TRIANGLE,
+    RS_PRIMITIVE_TRIANGLE_STRIP,
+    RS_PRIMITIVE_TRIANGLE_FAN
+} rs_primitive;
+
 #endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
 #endif

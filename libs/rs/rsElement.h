@@ -28,6 +28,27 @@ namespace renderscript {
 // An element is a group of Components that occupies one cell in a structure.
 class Element : public ObjectBase {
 public:
+    struct Hal {
+        mutable void *drv;
+
+        struct State {
+            RsDataType dataType;
+            RsDataKind dataKind;
+            uint32_t vectorSize;
+            uint32_t elementSizeBytes;
+
+            // Subelements
+            const Element **fields;
+            uint32_t *fieldArraySizes;
+            const char **fieldNames;
+            uint32_t *fieldNameLengths;
+            uint32_t *fieldOffsetBytes;
+            uint32_t fieldsCount;
+        };
+        State state;
+    };
+    Hal mHal;
+
     class Builder {
     public:
         Builder();

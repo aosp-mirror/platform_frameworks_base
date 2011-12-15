@@ -168,5 +168,29 @@ extern const void * __attribute__((overloadable))
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
+extern const rs_element __attribute__((overloadable))
+    rsAllocationGetElement(rs_allocation);
+
+extern const uint32_t __attribute__((overloadable))
+    rsMeshGetVertexAllocationCount(rs_mesh);
+
+extern const uint32_t __attribute__((overloadable))
+    rsMeshGetPrimitiveCount(rs_mesh);
+
+extern const uint32_t __attribute__((overloadable))
+    rsMeshGetVertexAllocationCount(rs_mesh);
+
+extern const rs_allocation __attribute__((overloadable))
+    rsMeshGetVertexAllocation(rs_mesh, uint32_t index);
+
+extern const uint32_t __attribute__((overloadable))
+    rsMeshGetPrimitiveCount(rs_mesh);
+
+extern const rs_allocation __attribute__((overloadable))
+    rsMeshGetIndexAllocation(rs_mesh, uint32_t index);
+
+extern const rs_primitive __attribute__((overloadable))
+    rsMeshGetPrimitive(rs_mesh, uint32_t index);
+
 #endif
 

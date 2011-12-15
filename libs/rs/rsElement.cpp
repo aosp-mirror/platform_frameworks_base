@@ -47,6 +47,12 @@ void Element::clear() {
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
+
+    delete [] mHal.state.fields;
+    delete [] mHal.state.fieldArraySizes;
+    delete [] mHal.state.fieldNames;
+    delete [] mHal.state.fieldNameLengths;
+    delete [] mHal.state.fieldOffsetBytes;
 }
 
 size_t Element::getSizeBits() const {
@@ -157,12 +163,25 @@ Element *Element::createFromStream(Context *rsc, IStream *stream) {
 }
 
 void Element::compute() {
+    mHal.state.dataType = mComponent.getType();
+    mHal.state.dataKind = mComponent.getKind();
+    mHal.state.vectorSize = mComponent.getVectorSize();
+
     if (mFieldCount == 0) {
         mBits = mComponent.getBits();
         mBitsUnpadded = mComponent.getBitsUnpadded();
         mHasReference = mComponent.isReference();
+
+        mHal.state.elementSizeBytes = getSizeBytes();
         return;
     }
+
+    mHal.state.fields = new const Element*[mFieldCount];
+    mHal.state.fieldArraySizes = new uint32_t[mFieldCount];
+    mHal.state.fieldNames = new const char*[mFieldCount];
+    mHal.state.fieldNameLengths = new uint32_t[mFieldCount];
+    mHal.state.fieldOffsetBytes = new uint32_t[mFieldCount];
+    mHal.state.fieldsCount = mFieldCount;
 
     size_t bits = 0;
     size_t bitsUnpadded = 0;
@@ -175,8 +194,15 @@ void Element::compute() {
         if (mFields[ct].e->mHasReference) {
             mHasReference = true;
         }
+
+        mHal.state.fields[ct] = mFields[ct].e.get();
+        mHal.state.fieldArraySizes[ct] = mFields[ct].arraySize;
+        mHal.state.fieldNames[ct] = mFields[ct].name.string();
+        mHal.state.fieldNameLengths[ct] = mFields[ct].name.length();
+        mHal.state.fieldOffsetBytes[ct] = mFields[ct].offsetBits >> 3;
     }
 
+    mHal.state.elementSizeBytes = getSizeBytes();
 }
 
 ObjectBaseRef<const Element> Element::createRef(Context *rsc, RsDataType dt, RsDataKind dk,
