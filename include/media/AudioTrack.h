@@ -75,15 +75,15 @@ public:
         size_t      size;
         union {
             void*       raw;
-            short*      i16;
-            int8_t*     i8;
+            short*      i16;    // signed 16-bit
+            int8_t*     i8;     // unsigned 8-bit, offset by 0x80
         };
     };
 
 
     /* As a convenience, if a callback is supplied, a handler thread
      * is automatically created with the appropriate priority. This thread
-     * invokes the callback when a new buffer becomes availlable or an underrun condition occurs.
+     * invokes the callback when a new buffer becomes available or an underrun condition occurs.
      * Parameters:
      *
      * event:   type of event notified (see enum AudioTrack::event_type).
@@ -94,8 +94,8 @@ public:
      *          written.
      *          - EVENT_UNDERRUN: unused.
      *          - EVENT_LOOP_END: pointer to an int indicating the number of loops remaining.
-     *          - EVENT_MARKER: pointer to an uin32_t containing the marker position in frames.
-     *          - EVENT_NEW_POS: pointer to an uin32_t containing the new position in frames.
+     *          - EVENT_MARKER: pointer to an uint32_t containing the marker position in frames.
+     *          - EVENT_NEW_POS: pointer to an uint32_t containing the new position in frames.
      *          - EVENT_BUFFER_END: unused.
      */
 
@@ -135,9 +135,10 @@ public:
      * flags:              Reserved for future use.
      * cbf:                Callback function. If not null, this function is called periodically
      *                     to request new PCM data.
+     * user:               Context for use by the callback receiver.
      * notificationFrames: The callback function is called each time notificationFrames PCM
-     *                     frames have been comsumed from track input buffer.
-     * user                Context for use by the callback receiver.
+     *                     frames have been consumed from track input buffer.
+     * sessionId:          Specific session ID, or zero to use default.
      */
 
                         AudioTrack( int streamType,
@@ -152,11 +153,11 @@ public:
                                     int sessionId = 0);
 
     /* Creates an audio track and registers it with AudioFlinger. With this constructor,
-     * The PCM data to be rendered by AudioTrack is passed in a shared memory buffer
+     * the PCM data to be rendered by AudioTrack is passed in a shared memory buffer
      * identified by the argument sharedBuffer. This prototype is for static buffer playback.
-     * PCM data must be present into memory before the AudioTrack is started.
-     * The Write() and Flush() methods are not supported in this case.
-     * It is recommented to pass a callback function to be notified of playback end by an
+     * PCM data must be present in memory before the AudioTrack is started.
+     * The write() and flush() methods are not supported in this case.
+     * It is recommended to pass a callback function to be notified of playback end by an
      * EVENT_UNDERRUN event.
      */
 
@@ -172,15 +173,15 @@ public:
                                     int sessionId = 0);
 
     /* Terminates the AudioTrack and unregisters it from AudioFlinger.
-     * Also destroys all resources assotiated with the AudioTrack.
+     * Also destroys all resources associated with the AudioTrack.
      */
                         ~AudioTrack();
 
 
     /* Initialize an uninitialized AudioTrack.
      * Returned status (from utils/Errors.h) can be:
-     *  - NO_ERROR: successful intialization
-     *  - INVALID_OPERATION: AudioTrack is already intitialized
+     *  - NO_ERROR: successful initialization
+     *  - INVALID_OPERATION: AudioTrack is already initialized
      *  - BAD_VALUE: invalid parameter (channels, format, sampleRate...)
      *  - NO_INIT: audio server or audio hardware not initialized
      * */
@@ -199,13 +200,13 @@ public:
 
 
     /* Result of constructing the AudioTrack. This must be checked
-     * before using any AudioTrack API (except for set()), using
+     * before using any AudioTrack API (except for set()), because using
      * an uninitialized AudioTrack produces undefined results.
      * See set() method above for possible return codes.
      */
             status_t    initCheck() const;
 
-    /* Returns this track's latency in milliseconds.
+    /* Returns this track's estimated latency in milliseconds.
      * This includes the latency due to AudioTrack buffer size, AudioMixer (if any)
      * and audio hardware driver.
      */
@@ -233,8 +234,8 @@ public:
             void        stop();
             bool        stopped() const;
 
-    /* flush a stopped track. All pending buffers are discarded.
-     * This function has no effect if the track is not stoped.
+    /* Flush a stopped track. All pending buffers are discarded.
+     * This function has no effect if the track is not stopped.
      */
             void        flush();
 
@@ -244,26 +245,25 @@ public:
      */
             void        pause();
 
-    /* mute or unmutes this track.
-     * While mutted, the callback, if set, is still called.
+    /* Mute or unmute this track.
+     * While muted, the callback, if set, is still called.
      */
             void        mute(bool);
             bool        muted() const;
 
-
-    /* set volume for this track, mostly used for games' sound effects
-     * left and right volumes. Levels must be <= 1.0.
+    /* Set volume for this track, mostly used for games' sound effects
+     * left and right volumes. Levels must be >= 0.0 and <= 1.0.
      */
             status_t    setVolume(float left, float right);
             void        getVolume(float* left, float* right);
 
-    /* set the send level for this track. An auxiliary effect should be attached
-     * to the track with attachEffect(). Level must be <= 1.0.
+    /* Set the send level for this track. An auxiliary effect should be attached
+     * to the track with attachEffect(). Level must be >= 0.0 and <= 1.0.
      */
             status_t    setAuxEffectSendLevel(float level);
             void        getAuxEffectSendLevel(float* level);
 
-    /* set sample rate for this track, mostly used for games' sound effects
+    /* Set sample rate for this track, mostly used for games' sound effects
      */
             status_t    setSampleRate(int sampleRate);
             uint32_t    getSampleRate();
@@ -274,8 +274,8 @@ public:
      *
      * loopStart:   loop start expressed as the number of PCM frames played since AudioTrack start.
      * loopEnd:     loop end expressed as the number of PCM frames played since AudioTrack start.
-     * loopCount:   number of loops to execute. Calling setLoop() with loopCount == 0 cancels any pending or
-     *          active loop. loopCount = -1 means infinite looping.
+     * loopCount:   number of loops to execute. Calling setLoop() with loopCount == 0 cancels any
+     *              pending or active loop. loopCount = -1 means infinite looping.
      *
      * For proper operation the following condition must be respected:
      *          (loopEnd-loopStart) <= framecount()
@@ -283,10 +283,9 @@ public:
             status_t    setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount);
             status_t    getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount);
 
-
-    /* Sets marker position. When playback reaches the number of frames specified, a callback with event 
-     * type EVENT_MARKER is called. Calling setMarkerPosition with marker == 0 cancels marker notification 
-     * callback. 
+    /* Sets marker position. When playback reaches the number of frames specified, a callback with
+     * event type EVENT_MARKER is called. Calling setMarkerPosition with marker == 0 cancels marker
+     * notification callback.
      * If the AudioTrack has been opened with no callback function associated, the operation will fail.
      *
      * Parameters:
@@ -301,10 +300,10 @@ public:
             status_t    getMarkerPosition(uint32_t *marker);
 
 
-    /* Sets position update period. Every time the number of frames specified has been played, 
-     * a callback with event type EVENT_NEW_POS is called. 
-     * Calling setPositionUpdatePeriod with updatePeriod == 0 cancels new position notification 
-     * callback. 
+    /* Sets position update period. Every time the number of frames specified has been played,
+     * a callback with event type EVENT_NEW_POS is called.
+     * Calling setPositionUpdatePeriod with updatePeriod == 0 cancels new position notification
+     * callback.
      * If the AudioTrack has been opened with no callback function associated, the operation will fail.
      *
      * Parameters:
@@ -318,12 +317,11 @@ public:
             status_t    setPositionUpdatePeriod(uint32_t updatePeriod);
             status_t    getPositionUpdatePeriod(uint32_t *updatePeriod);
 
-
     /* Sets playback head position within AudioTrack buffer. The new position is specified
-     * in number of frames. 
+     * in number of frames.
      * This method must be called with the AudioTrack in paused or stopped state.
-     * Note that the actual position set is <position> modulo the AudioTrack buffer size in frames. 
-     * Therefore using this method makes sense only when playing a "static" audio buffer 
+     * Note that the actual position set is <position> modulo the AudioTrack buffer size in frames.
+     * Therefore using this method makes sense only when playing a "static" audio buffer
      * as opposed to streaming.
      * The getPosition() method on the other hand returns the total number of frames played since
      * playback start.
@@ -335,12 +333,12 @@ public:
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful operation
      *  - INVALID_OPERATION: the AudioTrack is not stopped.
-     *  - BAD_VALUE: The specified position is beyond the number of frames present in AudioTrack buffer 
+     *  - BAD_VALUE: The specified position is beyond the number of frames present in AudioTrack buffer
      */
             status_t    setPosition(uint32_t position);
             status_t    getPosition(uint32_t *position);
 
-    /* Forces AudioTrack buffer full condition. When playing a static buffer, this method avoids 
+    /* Forces AudioTrack buffer full condition. When playing a static buffer, this method avoids
      * rewriting the buffer before restarting playback after a stop.
      * This method must be called with the AudioTrack in paused or stopped state.
      *
@@ -350,7 +348,7 @@ public:
      */
             status_t    reload();
 
-    /* returns a handle on the audio output used by this AudioTrack.
+    /* Returns a handle on the audio output used by this AudioTrack.
      *
      * Parameters:
      *  none.
@@ -360,18 +358,17 @@ public:
      */
             audio_io_handle_t    getOutput();
 
-    /* returns the unique ID associated to this track.
+    /* Returns the unique session ID associated with this track.
      *
      * Parameters:
      *  none.
      *
      * Returned value:
-     *  AudioTrack ID.
+     *  AudioTrack session ID.
      */
             int    getSessionId();
 
-
-    /* Attach track auxiliary output to specified effect. Used effectId = 0
+    /* Attach track auxiliary output to specified effect. Use effectId = 0
      * to detach track from effect.
      *
      * Parameters:
@@ -385,9 +382,9 @@ public:
      */
             status_t    attachAuxEffect(int effectId);
 
-    /* obtains a buffer of "frameCount" frames. The buffer must be
+    /* Obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
-     * STOPPED instead of NO_ERROR as long as there are buffers availlable,
+     * STOPPED instead of NO_ERROR as long as there are buffers available,
      * at which point NO_MORE_BUFFERS is returned.
      * Buffers will be returned until the pool (buffercount())
      * is exhausted, at which point obtainBuffer() will either block
@@ -403,10 +400,9 @@ public:
             status_t    obtainBuffer(Buffer* audioBuffer, int32_t waitCount);
             void        releaseBuffer(Buffer* audioBuffer);
 
-
     /* As a convenience we provide a write() interface to the audio buffer.
      * This is implemented on top of lockBuffer/unlockBuffer. For best
-     * performance
+     * performance use callbacks. Return actual number of bytes written.
      *
      */
             ssize_t     write(const void* buffer, size_t size);

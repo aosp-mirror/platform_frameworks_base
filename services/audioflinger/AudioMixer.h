@@ -65,10 +65,10 @@ public:
         FORMAT          = 0x4001,
         MAIN_BUFFER     = 0x4002,
         AUX_BUFFER      = 0x4003,
-        // for TARGET RESAMPLE
+        // for target RESAMPLE
         SAMPLE_RATE     = 0x4100,
         RESET           = 0x4101,
-        // for TARGET VOLUME (8 channels max)
+        // for target RAMP_VOLUME and VOLUME (8 channels max)
         VOLUME0         = 0x4200,
         VOLUME1         = 0x4201,
         AUXLEVEL        = 0x4210,
