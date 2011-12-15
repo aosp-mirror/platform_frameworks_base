@@ -16,10 +16,10 @@
  */
 
 #include <string.h>
-#include "AudioCoefInterpolator.h"
 
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
+#include <cutils/compiler.h>
+
+#include "AudioCoefInterpolator.h"
 
 namespace android {
 
@@ -44,9 +44,9 @@ void AudioCoefInterpolator::getCoef(const int intCoord[], uint32_t fracCoord[],
     size_t index = 0;
     size_t dim = mNumInDims;
     while (dim-- > 0) {
-        if (UNLIKELY(intCoord[dim] < 0)) {
+        if (CC_UNLIKELY(intCoord[dim] < 0)) {
             fracCoord[dim] = 0;
-        } else if (UNLIKELY(intCoord[dim] >= (int)mInDims[dim] - 1)) {
+        } else if (CC_UNLIKELY(intCoord[dim] >= (int)mInDims[dim] - 1)) {
             fracCoord[dim] = 0;
             index += mInDimOffsets[dim] * (mInDims[dim] - 1);
         } else {
@@ -63,7 +63,7 @@ void AudioCoefInterpolator::getCoefRecurse(size_t index,
         memcpy(out, mTable + index, mNumOutDims * sizeof(audio_coef_t));
     } else {
         getCoefRecurse(index, fracCoord, out, dim + 1);
-        if (LIKELY(fracCoord != 0)) {
+        if (CC_LIKELY(fracCoord != 0)) {
            audio_coef_t tempCoef[MAX_OUT_DIMS];
            getCoefRecurse(index + mInDimOffsets[dim], fracCoord, tempCoef,
                            dim + 1);

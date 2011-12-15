@@ -35,6 +35,7 @@
 
 #include <cutils/bitops.h>
 #include <cutils/properties.h>
+#include <cutils/compiler.h>
 
 #include <media/AudioTrack.h>
 #include <media/AudioRecord.h>
@@ -1930,8 +1931,8 @@ bool AudioFlinger::MixerThread::threadLoop()
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
 
             // put audio hardware into standby after short delay
-            if UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
-                        mSuspended) {
+            if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
+                        mSuspended)) {
                 if (!mStandby) {
                     ALOGV("Audio hardware entering standby, mixer %p, mSuspended %d\n", this, mSuspended);
                     mOutput->stream->common.standby(&mOutput->stream->common);
@@ -1976,7 +1977,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             lockEffectChains_l(effectChains);
         }
 
-        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             mAudioMixer->process();
             sleepTime = 0;
@@ -2256,7 +2257,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
     // remove all the tracks that need to be...
     count = tracksToRemove->size();
-    if (UNLIKELY(count)) {
+    if (CC_UNLIKELY(count)) {
         for (size_t i=0 ; i<count ; i++) {
             const sp<Track>& track = tracksToRemove->itemAt(i);
             mActiveTracks.remove(track);
@@ -2591,8 +2592,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
 
             // put audio hardware into standby after short delay
-            if UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
-                        mSuspended) {
+            if (CC_UNLIKELY((!mActiveTracks.size() && systemTime() > standbyTime) ||
+                        mSuspended)) {
                 // wait until we have something to do...
                 if (!mStandby) {
                     ALOGV("Audio hardware entering standby, mixer %p\n", this);
@@ -2742,7 +2743,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
 
             // remove all the tracks that need to be...
-            if (UNLIKELY(trackToRemove != 0)) {
+            if (CC_UNLIKELY(trackToRemove != 0)) {
                 mActiveTracks.remove(trackToRemove);
                 if (!effectChains.isEmpty()) {
                     ALOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
@@ -2757,7 +2758,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             lockEffectChains_l(effectChains);
        }
 
-        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             AudioBufferProvider::Buffer buffer;
             size_t frameCount = mFrameCount;
             curBuf = (int8_t *)mMixBuffer;
@@ -2765,7 +2766,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             while (frameCount) {
                 buffer.frameCount = frameCount;
                 activeTrack->getNextBuffer(&buffer);
-                if (UNLIKELY(buffer.raw == NULL)) {
+                if (CC_UNLIKELY(buffer.raw == NULL)) {
                     memset(curBuf, 0, frameCount * mFrameSize);
                     break;
                 }
@@ -2984,8 +2985,8 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             }
 
             // put audio hardware into standby after short delay
-            if UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
-                         mSuspended) {
+            if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
+                         mSuspended)) {
                 if (!mStandby) {
                     for (size_t i = 0; i < outputTracks.size(); i++) {
                         outputTracks[i]->stop();
@@ -3030,7 +3031,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             lockEffectChains_l(effectChains);
         }
 
-        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
+        if (CC_LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             if (outputsReady(outputTracks)) {
                 mAudioMixer->process();
@@ -3443,7 +3444,7 @@ status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(AudioBufferProvider:
 
      framesReady = cblk->framesReady();
 
-     if (LIKELY(framesReady)) {
+     if (CC_LIKELY(framesReady)) {
         uint32_t s = cblk->server;
         uint32_t bufferEnd = cblk->serverBase + cblk->frameCount;
 
@@ -3692,7 +3693,7 @@ status_t AudioFlinger::RecordThread::RecordTrack::getNextBuffer(AudioBufferProvi
 
     framesAvail = cblk->framesAvailable_l();
 
-    if (LIKELY(framesAvail)) {
+    if (CC_LIKELY(framesAvail)) {
         uint32_t s = cblk->server;
         uint32_t bufferEnd = cblk->serverBase + cblk->frameCount;
 
@@ -3945,7 +3946,7 @@ status_t AudioFlinger::PlaybackThread::OutputTrack::obtainBuffer(AudioBufferProv
         goto start_loop_here;
         while (framesAvail == 0) {
             active = mActive;
-            if (UNLIKELY(!active)) {
+            if (CC_UNLIKELY(!active)) {
                 ALOGV("Not active and NO_MORE_BUFFERS");
                 return AudioTrack::NO_MORE_BUFFERS;
             }
@@ -4323,7 +4324,7 @@ bool AudioFlinger::RecordThread::threadLoop()
             }
 
             buffer.frameCount = mFrameCount;
-            if (LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
+            if (CC_LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 size_t framesOut = buffer.frameCount;
                 if (mResampler == NULL) {
                     // no resampling

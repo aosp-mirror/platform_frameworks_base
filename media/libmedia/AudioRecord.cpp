@@ -39,9 +39,7 @@
 
 #include <system/audio.h>
 #include <cutils/bitops.h>
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
+#include <cutils/compiler.h>
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -513,11 +511,11 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         goto start_loop_here;
         while (framesReady == 0) {
             active = mActive;
-            if (UNLIKELY(!active)) {
+            if (CC_UNLIKELY(!active)) {
                 cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
             }
-            if (UNLIKELY(!waitCount)) {
+            if (CC_UNLIKELY(!waitCount)) {
                 cblk->lock.unlock();
                 return WOULD_BLOCK;
             }
@@ -534,7 +532,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (cblk->flags & CBLK_INVALID_MSK) {
                 goto create_new_record;
             }
-            if (__builtin_expect(result!=NO_ERROR, false)) {
+            if (CC_UNLIKELY(result != NO_ERROR)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     LOGW(   "obtainBuffer timed out (is the CPU pegged?) "

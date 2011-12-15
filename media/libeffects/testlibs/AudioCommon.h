@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <cutils/compiler.h>
 
 namespace android {
 
@@ -76,9 +77,9 @@ inline int16_t audio_sample_t_to_s15(audio_sample_t sample) {
 // Convert a audio_sample_t sample to S15 (with clipping)
 inline int16_t audio_sample_t_to_s15_clip(audio_sample_t sample) {
     // TODO: optimize for targets supporting this as an atomic operation.
-    if (__builtin_expect(sample >= (0x7FFF << 9), 0)) {
+    if (CC_UNLIKELY(sample >= (0x7FFF << 9))) {
         return 0x7FFF;
-    } else if (__builtin_expect(sample <= -(0x8000 << 9), 0)) {
+    } else if (CC_UNLIKELY(sample <= -(0x8000 << 9))) {
         return 0x8000;
     } else {
         return audio_sample_t_to_s15(sample);
