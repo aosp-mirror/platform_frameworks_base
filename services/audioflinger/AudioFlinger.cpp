@@ -54,6 +54,8 @@
 #include <audio_effects/effect_ns.h>
 #include <audio_effects/effect_aec.h>
 
+#include <audio_utils/primitives.h>
+
 #include <cpustats/ThreadCpuUsage.h>
 #include <powermanager/PowerManager.h>
 // #define DEBUG_CPU_USAGE 10  // log statistics every n wall clock seconds
@@ -2455,14 +2457,6 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 {
 }
 
-
-static inline int16_t clamp16(int32_t sample)
-{
-    if ((sample>>15) ^ (sample>>31))
-        sample = 0x7FFF ^ (sample>>31);
-    return sample;
-}
-
 static inline
 int32_t mul(int16_t in, int16_t v)
 {
@@ -4391,7 +4385,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                     // ditherAndClamp() works as long as all buffers returned by mActiveTrack->getNextBuffer()
                     // are 32 bit aligned which should be always true.
                     if (mChannelCount == 2 && mReqChannelCount == 1) {
-                        AudioMixer::ditherAndClamp(mRsmpOutBuffer, mRsmpOutBuffer, framesOut);
+                        ditherAndClamp(mRsmpOutBuffer, mRsmpOutBuffer, framesOut);
                         // the resampler always outputs stereo samples: do post stereo to mono conversion
                         int16_t *src = (int16_t *)mRsmpOutBuffer;
                         int16_t *dst = buffer.i16;
@@ -4400,7 +4394,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                             src += 2;
                         }
                     } else {
-                        AudioMixer::ditherAndClamp((int32_t *)buffer.raw, mRsmpOutBuffer, framesOut);
+                        ditherAndClamp((int32_t *)buffer.raw, mRsmpOutBuffer, framesOut);
                     }
 
                 }
@@ -6271,7 +6265,7 @@ void AudioFlinger::EffectModule::process()
     if (isProcessEnabled()) {
         // do 32 bit to 16 bit conversion for auxiliary effect input buffer
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            AudioMixer::ditherAndClamp(mConfig.inputCfg.buffer.s32,
+            ditherAndClamp(mConfig.inputCfg.buffer.s32,
                                         mConfig.inputCfg.buffer.s32,
                                         mConfig.inputCfg.buffer.frameCount/2);
         }

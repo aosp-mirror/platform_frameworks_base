@@ -89,8 +89,6 @@ public:
 
     uint32_t    trackNames() const { return mTrackNames; }
 
-    static void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c);
-
 private:
 
     enum {
