@@ -259,6 +259,9 @@ public final class Ndef extends BasicTagTechnology {
 
         try {
             INfcTag tagService = mTag.getTagService();
+            if (tagService == null) {
+                throw new IOException("Mock tags don't support this operation.");
+            }
             int serviceHandle = mTag.getServiceHandle();
             if (tagService.isNdef(serviceHandle)) {
                 NdefMessage msg = tagService.ndefRead(serviceHandle);
@@ -303,6 +306,9 @@ public final class Ndef extends BasicTagTechnology {
 
         try {
             INfcTag tagService = mTag.getTagService();
+            if (tagService == null) {
+                throw new IOException("Mock tags don't support this operation.");
+            }
             int serviceHandle = mTag.getServiceHandle();
             if (tagService.isNdef(serviceHandle)) {
                 int errorCode = tagService.ndefWrite(serviceHandle, msg);
@@ -335,6 +341,9 @@ public final class Ndef extends BasicTagTechnology {
      */
     public boolean canMakeReadOnly() {
         INfcTag tagService = mTag.getTagService();
+        if (tagService == null) {
+            return false;
+        }
         try {
             return tagService.canMakeReadOnly(mNdefType);
         } catch (RemoteException e) {
@@ -366,6 +375,9 @@ public final class Ndef extends BasicTagTechnology {
 
         try {
             INfcTag tagService = mTag.getTagService();
+            if (tagService == null) {
+                return false;
+            }
             if (tagService.isNdef(mTag.getServiceHandle())) {
                 int errorCode = tagService.ndefMakeReadOnly(mTag.getServiceHandle());
                 switch (errorCode) {
