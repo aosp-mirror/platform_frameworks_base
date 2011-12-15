@@ -124,24 +124,23 @@ void AudioMixer::invalidateState(uint32_t mask)
 void AudioMixer::deleteTrackName(int name)
 {
     name -= TRACK0;
-    if (uint32_t(name) < MAX_NUM_TRACKS) {
-        ALOGV("deleteTrackName(%d)", name);
-        track_t& track(mState.tracks[ name ]);
-        if (track.enabled != 0) {
-            track.enabled = 0;
-            invalidateState(1<<name);
-        }
-        if (track.resampler) {
-            // delete  the resampler
-            delete track.resampler;
-            track.resampler = NULL;
-            track.sampleRate = mSampleRate;
-            invalidateState(1<<name);
-        }
-        track.volumeInc[0] = 0;
-        track.volumeInc[1] = 0;
-        mTrackNames &= ~(1<<name);
+    assert(uint32_t(name) < MAX_NUM_TRACKS);
+    ALOGV("deleteTrackName(%d)", name);
+    track_t& track(mState.tracks[ name ]);
+    if (track.enabled != 0) {
+        track.enabled = 0;
+        invalidateState(1<<name);
     }
+    if (track.resampler) {
+        // delete  the resampler
+        delete track.resampler;
+        track.resampler = NULL;
+        track.sampleRate = mSampleRate;
+        invalidateState(1<<name);
+    }
+    track.volumeInc[0] = 0;
+    track.volumeInc[1] = 0;
+    mTrackNames &= ~(1<<name);
 }
 
 void AudioMixer::enable()
