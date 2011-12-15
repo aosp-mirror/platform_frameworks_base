@@ -83,8 +83,14 @@ Android platform.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
-  
-    <tr><td><a href="{@docRoot}sdk/android-4.0.html">Android 4.0</a></td>
+ 
+     <tr><td><a href="{@docRoot}sdk/android-4.0.3.html">Android 4.0.3</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/15/changes.html" title="Diff Report">15</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1}</td>
+    <td><a href="{@docRoot}sdk/android-4.0-highlights.html">Platform
+Highlights</a></td></tr>
+
+    <tr><td><a href="{@docRoot}sdk/android-4.0.html">Android 4.0, 4.0.1, 4.0.2</a></td>
     <td><a href="{@docRoot}sdk/api_diff/14/changes.html" title="Diff Report">14</a></td>
     <td>{@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}</td>
     <td><a href="{@docRoot}sdk/android-4.0-highlights.html">Platform

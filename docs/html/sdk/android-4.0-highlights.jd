@@ -298,7 +298,7 @@ profiles</strong></p>
 linked together and integrated for easy accessibility. At the center is a new
 <strong>People app</strong> that offers richer profile information, including a
 large profile picture, phone numbers, addresses and accounts, status updates,
-events, and a new button for connecting on integrated social networks. </p>
+events, stream items, and a new button for connecting on integrated social networks. </p>
 
 <p>The user's own contact information is stored in a new <strong>"Me"
 profile</strong>, allowing easier sharing with apps and people. All of the
@@ -562,7 +562,7 @@ can connect to compatible devices to take advantage of new features such as
 instant sharing of files, photos, or other media; streaming video or audio from
 another device; or connecting to compatible printers or other devices.</p>
 
-<p>Android 4.0 also introduces built-in support for connecting to <strong>Bluetooth Health Device Profile (HDP)</strong> devices. With support from third-party apps, users can connect to wireless medical devices and sensors in hospitals, fitness centers, homes, and elsewhere. In addition, for connecting to higher quality Bluetooth audio devices, Android 4.0 adds support for Bluetooth Hands Free Profile (HFP) 1.6.</p>
+<p>Android 4.0 also introduces built-in support for connecting to <strong>Bluetooth Health Device Profile (HDP)</strong> devices. With support from third-party apps, users can connect to wireless medical devices and sensors in hospitals, fitness centers, homes, and elsewhere.</p>
 
 
 <h2 id="DeveloperApis" style="clear:right">New Developer Features</h2>
@@ -633,21 +633,21 @@ development across the range of Android-powered devices.</p>
 <h3 id="communication-dev">Communication and sharing</h3>
 
 <p>Android 4.0 extends social and sharing features to any application on the
-device. Applications can integrate contacts, profile data, and calendar events
-from any of the user’s activities or social networks.</p>
+device. Applications can integrate contacts, profile data, stream items, 
+and calendar events from any of the user’s activities or social networks.</p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Social API</strong></p>
 
 <p>A shared social provider and API provide a new unified store for contacts,
-profile data, status updates, and photos. Any app or social network with user
+profile data, stream items, and photos. Any app or social network with user
 permission can contribute raw contacts and make them accessible to other apps
 and networks. Applications with user permission can also read profile data from
 the provider and display it in their applications.</p>
 
 <p>The social API lets applications store standard contact data as well as new
-types of content for any given contact, including large profile photos and
-recent activity feedback. Recent activity feedback is a standard way for
+types of content for any given contact, including large profile photos, stream
+items, and recent activity feedback. Recent activity feedback is a standard way for
 applications to “tag” a contact with common activity, such as when the user
 calls the contact or sends an email or SMS message. The social provider uses the
 recent activity feedback as a new signal in ranking, such as for name

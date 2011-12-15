@@ -1,0 +1,513 @@
+page.title=Android 4.0.3 Platform
+sdk.platform.version=4.0.3
+sdk.platform.apiLevel=15
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#Honeycomb">Previous APIs</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/14/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Android {@sdkPlatformVersion} is an incremental release of the Android 4.x
+(Ice Cream Sandwich) platform family. This release includes new features for
+users and developers, API changes, and various bug fixes.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The development platform includes a
+fully compliant Android library and system image as well as a set of emulator
+skins, sample applications, and more. The downloadable platform includes no
+external libraries.</p>
+
+<p>To start developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK. For more
+information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
+
+<p>For a high-level overview of the new user and developer features, see the
+<a href="http://developer.android.com/sdk/android-4.0-highlights.html">Platform
+Highlights</a>.</p>
+
+
+<h2 id="relnotes">Development Platform Revisions</h2>
+
+<p>The sections below provide notes about successive revisions of the Android
+{@sdkPlatformVersion} development platform for the Android SDK, as denoted by
+revision number. To determine what revisions you have installed in your SDK
+environment, refer to the "Installed Packages" listing in the Android SDK
+Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+    Android {@sdkPlatformVersion}, Revision 1</a> <em>(December 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Initial release. SDK Tools r14 or higher is required.
+  <p class="caution"><strong>Important:</strong> To download the new Android
+  4.x system components from the Android SDK Manager, you must first update the
+  SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+  the Android 4.0 system components will not be available for download.</p>
+</dt>
+</dl>
+
+  </div>
+</div>
+
+
+<h2 id="api">API Overview</h2>
+
+<p>The sections below provide a technical overview of new APIs in Android 4.0.3.</p>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+    <strong>Table of Contents</strong>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+    <ol class="toc" style="margin-left:-1em">
+      <li><a href="#contacts">Social stream API in contacts provider</a></li>
+      <li><a href="#calendar">Calendar provider</a></li>
+      <li><a href="#widgets">Home screen widgets</a></li>
+      <li><a href="#textservices">Spell-checking</a></li>
+      <li><a href="#bluetooth">Bluetooth</a></li>
+      <li><a href="#ui">UI toolkit</a></li>
+      <li><a href="#accessibility">Accessibility</a></li>
+      <li><a href="#tts">Text-to-speech</a></li>
+      <li><a href="#database">Database</a></li>
+      <li><a href="#intents">Intents</a></li>
+      <li><a href="#camera">Camera</a></li>
+      <li><a href="#permissions">Permissions</a></li>
+    </ol>
+  </div>
+</div>
+
+
+
+
+
+<h3 id="contacts">Social stream API in Contacts provider</h3>
+
+<p>Applications that use social stream data such as status updates and check-ins
+can now sync that data with each of the user’s contacts, providing items in a
+stream along with photos for each.</p>
+
+<p>The database table that contains an individual contact’s social stream is
+defined by {@link android.provider.ContactsContract.StreamItems}, the Uri for
+which is nested within the {@link android.provider.ContactsContract.RawContacts}
+directory to which the stream items belong. Each social stream table includes
+several columns for metadata about each stream item, such as an icon
+representing the source (an avatar), a label for the item, the primary text
+content, comments about the item (such as responses from other people), and
+more. Photos associated with a stream are stored in another table, defined by
+{@link android.provider.ContactsContract.StreamItemPhotos}, which is available
+as a sub-directory of the {@link android.provider.ContactsContract.StreamItems}
+Uri.</p>
+
+<p>See {@link android.provider.ContactsContract.StreamItems} and
+{@link android.provider.ContactsContract.StreamItemPhotos} for more information.</p>
+
+<p>To read or write social stream items for a contact, an application must
+request permission from the user by declaring <code>&lt;uses-permission
+android:name="android.permission.READ_SOCIAL_STREAM"&gt;</code> and/or <code>&lt;uses-permission
+android:name="android.permission.WRITE_SOCIAL_STREAM"&gt;</code> in their manifest files.</p>
+
+<h3 id="calendar">Calendar provider</h4>
+<ul>
+<li>Adds the class {@link android.provider.CalendarContract.Colors} to represent
+a color table in the Calendar provider. The class provivdes fields for accessing
+colors available for a given account. Colors are referenced by 
+{@link android.provider.CalendarContract.ColorsColumns#COLOR_KEY COLOR_KEY}
+which must be unique for a given account name/type. These values can only be
+updated by the sync adapter.</li>
+<li>Adds {@link android.provider.CalendarContract.CalendarColumns#ALLOWED_AVAILABILITY ALLOWED_AVAILABILITY}
+and 
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_ATTENDEE_TYPES ALLOWED_ATTENDEE_TYPES}
+for exchange/sync support.</li>
+<li>Adds {@link android.provider.CalendarContract.AttendeesColumns#TYPE_RESOURCE}
+(such as conference rooms) for attendees and 
+{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY_TENTATIVE},
+as well as {@link android.provider.CalendarContract.EventsColumns#EVENT_COLOR_KEY}
+for events.</li>
+</ul>
+
+<h3 id="widgets">Home screen widgets</h3>
+
+<p>Starting from Android 4.0, home screen widgets should no longer include their
+own padding. Instead, the system now automatically adds padding for each widget,
+based the characteristics of the current screen. This leads to a more uniform,
+consistent presentation of widgets in a grid. To assist applications that host
+home screen widgets, the platform provides a new method 
+{@link android.appwidget.AppWidgetHostView#getDefaultPaddingForWidget(android.content.Context, android.content.ComponentName, android.graphics.Rect)
+getDefaultPaddingForWidget()}. Applications can call this method to get the
+system-defined padding and account for it when computing the number of cells to
+allocate to the widget.</p>
+
+<h3 id="textservices">Spell-checking</h3>
+
+<ul>
+<li>For apps that accessing spell-checker services, a new {@link
+android.view.textservice.SpellCheckerSession#cancel() cancel()} method cancels
+any pending and running spell-checker tasks in a session.</li>
+
+<li>For spell-checker services, a new suggestions flag, 
+{@link android.view.textservice.SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS},
+lets the services distinguish higher-confidence suggestions from
+lower-confidence ones. For example, a spell-checker could set the flag if an
+input word is not in the user dictionary but has likely suggestions, or not set
+the flag if an input word is not in the dictionary and has suggestions that are
+likely to be less useful.
+
+<p>Apps connected to the spell-checker can use the {@link
+android.view.textservice.SuggestionsInfo#RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS}
+flag in combination with other suggestion attributes, as well as the {@link
+android.view.textservice.SuggestionsInfo#getSuggestionsAttributes()} and {@link
+android.view.textservice.SuggestionsInfo#getSuggestionsCount()} methods, to
+determine whether to mark input words as typos and offer suggestions.</p></li>
+
+<li>A new {@link android.text.style.SuggestionSpan#FLAG_AUTO_CORRECTION} style
+for text spans indicates that auto correction is about to be applied to a
+word/text that the user is typing/composing. This type of suggestion is rendered
+differently, to indicate the auto correction is happening.</li>
+</ul>
+
+<h3 id="bluetooth">Bluetooth</h3>
+<p>New public methods {@link
+android.bluetooth.BluetoothDevice#fetchUuidsWithSdp()} and {@link
+android.bluetooth.BluetoothDevice#getUuids()} let apps determine the features
+(UUIDs) supported by a remote device. In the case of {@link
+android.bluetooth.BluetoothDevice#fetchUuidsWithSdp()}, the system performs a
+service discovery on the remote device to get the UUIDs supported, then
+broadcasts the result in an {@link
+android.bluetooth.BluetoothDevice#ACTION_UUID} intent.</p>
+
+<h3 id="ui">UI toolkit</h3>
+
+<p>New methods {@link android.app.Fragment#setUserVisibleHint(boolean) setUserVisibleHint()} and
+{@link android.app.Fragment#getUserVisibleHint() getUserVisibleHint()} allow a
+fragment to set a hint of whether or not it is currently user-visible. The
+system defers the start of fragments that are not user-visible until the loaders
+for visible fragments have run. The visibility hint is "true" by default.</li>
+</p>
+
+<h3 id="graphics">Graphics</h3>
+
+<ul>
+<li>New method {@link android.graphics.SurfaceTexture#setDefaultBufferSize(int
+width, int height)} in SurfaceTexture sets the default size of the image
+buffers. This method may be used to set the image size when producing images
+with {@link android.graphics.Canvas} (via {@link
+android.view.Surface#lockCanvas}), or OpenGL ES (via an EGLSurface).</li>
+<li>Adds definitions for the enums of the GL_OES_EGL_image_external OpenGL ES extension &mdash;
+{@link android.opengl.GLES11Ext#GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES},
+{@link android.opengl.GLES11Ext#GL_SAMPLER_EXTERNAL_OES},
+{@link android.opengl.GLES11Ext#GL_TEXTURE_BINDING_EXTERNAL_OES}, and
+{@link android.opengl.GLES11Ext#GL_TEXTURE_EXTERNAL_OES}.</li>
+</ul>
+
+<h3 id="accessibility">Accessibility</h3>
+
+<ul>
+<li>Clients of {@link android.widget.RemoteViews} can now use the method {@link
+android.widget.RemoteViews#setContentDescription(int, java.lang.CharSequence)
+setContentDescription()} to set and get the content description of any View in
+the inflated layout.</li>
+
+<li>The methods {@link android.view.accessibility.AccessibilityRecord#getMaxScrollX()},
+{@link android.view.accessibility.AccessibilityRecord#getMaxScrollY()},
+{@link android.view.accessibility.AccessibilityRecord#setMaxScrollX(int) setMaxScrollX()}, and
+{@link android.view.accessibility.AccessibilityRecord#setMaxScrollY(int) setMaxScrollY()}
+allow apps to get and set the maximum scroll offset for an
+{@link android.view.accessibility.AccessibilityRecord} object.</li>
+
+<li>When touch-exploration mode is enabled, a new secure setting 
+{@link android.provider.Settings.Secure#ACCESSIBILITY_SPEAK_PASSWORD} 
+indicates whether the user requests the IME to speak text entered in password fields, even when
+a headset is not in use. By default, no password text is spoken unless a headset
+is in use.</li>
+</ul>
+
+<h3 id="tts">Text-to-speech</h3>
+
+<ul>
+<li>Adds the new method {@link
+android.speech.tts.TextToSpeech.Engine#getFeatures(java.util.Locale)
+getFeatures()}for querying and enabling network TTS support.
+<li>Adds a new listener class, {@link
+android.speech.tts.UtteranceProgressListener}, that engines can register to
+receive notification of speech-sythesis errors.</li>
+</ul>
+
+<h3 id="database">Database</h3>
+
+<ul>
+<li>A new {@link android.database.CrossProcessCursorWrapper} class lets content
+providers return results for a cross-process query more effieciently. The new
+class is a useful building block for wrapping cursors that will be sent to
+processes remotely. It can also transform normal {@link android.database.Cursor}
+objects into {@link android.database.CrossProcessCursor} objects
+transparently.
+
+<p>The {@link android.database.CrossProcessCursorWrapper} class fixes common
+performance issues and bugs that applications have encountered when
+implementing content providers.</p></li>
+
+<li>The {@link android.database.CursorWindow#CursorWindow(java.lang.String)}
+constructor now takes a name string as input. The system no longer distinguishes
+between local and remote cursor windows, so {@link
+android.database.CursorWindow#CursorWindow(boolean)} is now deprecated.</li>
+</ul>
+
+<h3 id="intents">Intents</h3>
+
+<p>Adds  for categories for targeting common types of applications on the
+device, such as {@link android.content.Intent#CATEGORY_APP_BROWSER}, {@link
+android.content.Intent#CATEGORY_APP_CALENDAR}, {@link
+android.content.Intent#CATEGORY_APP_MAPS}, and more.</li>
+
+<h3 id="camera">Camera</h3>
+
+<ul>
+<li>{@link android.media.MediaMetadataRetriever} adds the new constant
+{@link android.media.MediaMetadataRetriever#METADATA_KEY_LOCATION} to let apps
+access retrieve location information for an image or video. </li>
+
+<li>{@link android.media.CamcorderProfile} adds the QVGA (320x240) resolution
+profiles. Quality level is represented by the
+{@link android.media.CamcorderProfile#QUALITY_QVGA}.and
+{@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_QVGA} constants.</li>
+
+<li>New methods {@link android.hardware.Camera.Parameters#setVideoStabilization(boolean) setVideoStabilization()},
+{@link android.hardware.Camera.Parameters#getVideoStabilization() setVideoStabilization()}, and {android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
+let you check and manage video stabilization for a {@link android.hardware.Camera}.</li>
+</ul>
+
+<h3 id="Permissions">Permissions</h3>
+
+<p>The following are new permissions:</p>
+<ul>
+<li>{@link android.Manifest.permission#READ_SOCIAL_STREAM} and 
+{@link android.Manifest.permission#WRITE_SOCIAL_STREAM}: Allow a sync
+adapter to read and write social stream data to a contact in the shared
+contacts provider.</li>
+</ul>
+
+
+<div class="special" style="margin-top:2em">
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
+</div>
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} API is assigned an integer
+identifier&mdash;<strong>{@sdkPlatformApiLevel}</strong>&mdash;that is stored in the system itself.
+This identifier, called the "API level", allows the system to correctly determine whether an
+application is compatible with the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need compile the
+application against an Android platform that supports API level {@sdkPlatformApiLevel} or
+higher. Depending on your needs, you might also need to add an
+<code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+element.</p>
+
+<p>For more information, see the <a href="{@docRoot}guide/appendix/api-levels.html">API Levels</a>
+document. </p>
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>API Demos</li>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Calendar</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+<li>Gallery</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gestures Builder</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>People</li>
+<li>Phone</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Speech Recorder</li>
+<li>Widget Preview</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety of built-in
+locales. In some cases, region-specific strings are available for the locales. In other cases, a
+default version of the language is used. The languages that are available in the Android 3.0 system
+image are listed below (with <em>language</em>_<em>country/region</em> locale descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, Zimbabwe (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian bokmål, Norway (nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes the following emulator skins:</p>
+
+<ul>
+  <li>
+    QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
+  </li>
+  <li>
+    HVGA (320x480, medium density, normal screen)
+  </li>
+  <li>
+    WVGA800 (480x800, high density, normal screen)
+  </li>
+  <li>
+    WVGA854 (480x854 high density, normal screen)
+  </li>
+  <li>
+    WXGA720 (1280x720, extra-high density, normal screen) 
+  </li>
+  <li>
+    WSVGA (1024x600, medium density, large screen) 
+  </li>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>To test your application on an emulator that represents the latest Android device, you can create
+an AVD with the new WXGA720 skin (it's an xhdpi, normal screen device). Note that the emulator
+currently doesn't support the new on-screen navigation bar for devices without hardware navigation
+buttons, so when using this skin, you must use keyboard keys <em>Home</em> for the Home button,
+<em>ESC</em> for the Back button, and <em>F2</em> or <em>Page-up</em> for the Menu button.</p>
+
+<p>However, due to performance issues in the emulator when running high-resolution screens such as
+the one for the WXGA720 skin, we recommend that you primarily use the traditional WVGA800 skin
+(hdpi, normal screen) to test your application.</p>
+
