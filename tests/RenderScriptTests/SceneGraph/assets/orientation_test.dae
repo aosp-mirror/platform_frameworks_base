@@ -1,0 +1,1102 @@
+<?xml version="1.0" ?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+    <asset>
+        <contributor>
+            <author>alexst</author>
+            <authoring_tool>OpenCOLLADA2010</authoring_tool>
+            <comments>ColladaMaya export options: bakeTransforms=0;relativePaths=0;copyTextures=0;exportTriangles=1;exportCgfxFileReferences=0; isSampling=0;curveConstrainSampling=0;removeStaticCurves=1;exportPolygonMeshes=1;exportLights=1; exportCameras=1;exportJointsAndSkin=1;exportAnimations=0;exportInvisibleNodes=0;exportDefaultCameras=0; exportTexCoords=1;exportNormals=1;exportNormalsPerVertex=1;exportVertexColors=0;exportVertexColorsPerVertex=0; exportTexTangents=0;exportTangents=0;exportReferencedMaterials=1;exportMaterialsOnly=0; exportXRefs=1;dereferenceXRefs=1;exportCameraAsLookat=0;cameraXFov=0;cameraYFov=1;doublePrecision=0</comments>
+            <source_data>file:///Volumes/Android/art/orientation_test.mb</source_data>
+        </contributor>
+        <created>2011-09-30T15:31:38</created>
+        <modified>2011-09-30T15:31:38</modified>
+        <unit meter="0.01" name="centimeter" />
+        <up_axis>Y_UP</up_axis>
+    </asset>
+    <library_cameras>
+        <camera id="cameraShape1" name="cameraShape1">
+            <optics>
+                <technique_common>
+                    <perspective>
+                        <yfov>37.8493</yfov>
+                        <aspect_ratio>1.5</aspect_ratio>
+                        <znear>1</znear>
+                        <zfar>400</zfar>
+                    </perspective>
+                </technique_common>
+            </optics>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <film_fit>0</film_fit>
+                    <film_fit_offset>0</film_fit_offset>
+                    <film_offsetX>0</film_offsetX>
+                    <film_offsetY>0</film_offsetY>
+                    <horizontal_aperture>3.599993</horizontal_aperture>
+                    <lens_squeeze>1</lens_squeeze>
+                    <originalMayaNodeId>cameraShape1</originalMayaNodeId>
+                    <vertical_aperture>2.399995</vertical_aperture>
+                </technique>
+            </extra>
+        </camera>
+        <camera id="CameraDistShape" name="CameraDistShape">
+            <optics>
+                <technique_common>
+                    <perspective>
+                        <yfov>37.8493</yfov>
+                        <aspect_ratio>1.5</aspect_ratio>
+                        <znear>1</znear>
+                        <zfar>1000</zfar>
+                    </perspective>
+                </technique_common>
+            </optics>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <film_fit>0</film_fit>
+                    <film_fit_offset>0</film_fit_offset>
+                    <film_offsetX>0</film_offsetX>
+                    <film_offsetY>0</film_offsetY>
+                    <horizontal_aperture>3.599993</horizontal_aperture>
+                    <lens_squeeze>1</lens_squeeze>
+                    <originalMayaNodeId>CameraDistShape</originalMayaNodeId>
+                    <vertical_aperture>2.399995</vertical_aperture>
+                </technique>
+            </extra>
+        </camera>
+    </library_cameras>
+    <library_materials>
+        <material id="Paint1" name="Paint1">
+            <instance_effect url="#Paint1-fx" />
+        </material>
+        <material id="lambert2" name="lambert2">
+            <instance_effect url="#lambert2-fx" />
+        </material>
+        <material id="Plastic" name="Plastic">
+            <instance_effect url="#Plastic-fx" />
+        </material>
+        <material id="Metal" name="Metal">
+            <instance_effect url="#Metal-fx" />
+        </material>
+        <material id="PlasticCenter" name="PlasticCenter">
+            <instance_effect url="#PlasticCenter-fx" />
+        </material>
+        <material id="PlasticRed" name="PlasticRed">
+            <instance_effect url="#PlasticRed-fx" />
+        </material>
+        <material id="lambert10" name="lambert10">
+            <instance_effect url="#lambert10-fx" />
+        </material>
+        <material id="lambert11" name="lambert11">
+            <instance_effect url="#lambert11-fx" />
+        </material>
+    </library_materials>
+    <library_effects>
+        <effect id="Metal-fx">
+            <profile_COMMON>
+                <newparam sid="file23-surface">
+                    <surface type="2D">
+                        <init_from>file23</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file23-sampler">
+                    <sampler2D>
+                        <source>file23-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file23-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="Paint1-fx">
+            <profile_COMMON>
+                <newparam sid="file25-surface">
+                    <surface type="2D">
+                        <init_from>file25</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file25-sampler">
+                    <sampler2D>
+                        <source>file25-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file25-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="Plastic-fx">
+            <profile_COMMON>
+                <newparam sid="file24-surface">
+                    <surface type="2D">
+                        <init_from>file24</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file24-sampler">
+                    <sampler2D>
+                        <source>file24-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file24-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="PlasticCenter-fx">
+            <profile_COMMON>
+                <newparam sid="file24-surface">
+                    <surface type="2D">
+                        <init_from>file24</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file24-sampler">
+                    <sampler2D>
+                        <source>file24-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file24-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="PlasticRed-fx">
+            <profile_COMMON>
+                <newparam sid="file23-surface">
+                    <surface type="2D">
+                        <init_from>file23</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file23-sampler">
+                    <sampler2D>
+                        <source>file23-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file23-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="lambert10-fx">
+            <profile_COMMON>
+                <newparam sid="file28-surface">
+                    <surface type="2D">
+                        <init_from>file28</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file28-sampler">
+                    <sampler2D>
+                        <source>file28-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file28-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="lambert11-fx">
+            <profile_COMMON>
+                <newparam sid="file29-surface">
+                    <surface type="2D">
+                        <init_from>file29</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file29-sampler">
+                    <sampler2D>
+                        <source>file29-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file29-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="lambert2-fx">
+            <profile_COMMON>
+                <newparam sid="file22-surface">
+                    <surface type="2D">
+                        <init_from>file22</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="file22-sampler">
+                    <sampler2D>
+                        <source>file22-surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="common">
+                    <lambert>
+                        <emission>
+                            <color>0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color>0 0 0 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="file22-sampler" texcoord="TEX0">
+                                <extra>
+                                    <technique profile="OpenCOLLADAMaya">
+                                        <blend_mode>NONE</blend_mode>
+                                        <coverageU>1</coverageU>
+                                        <coverageV>1</coverageV>
+                                        <fast>0</fast>
+                                        <mirrorU>0</mirrorU>
+                                        <mirrorV>0</mirrorV>
+                                        <noiseU>0</noiseU>
+                                        <noiseV>0</noiseV>
+                                        <offsetU>0</offsetU>
+                                        <offsetV>0</offsetV>
+                                        <repeatU>1</repeatU>
+                                        <repeatV>1</repeatV>
+                                        <rotateFrame>0</rotateFrame>
+                                        <rotateUV>0</rotateUV>
+                                        <stagger>0</stagger>
+                                        <translateFrameU>0</translateFrameU>
+                                        <translateFrameV>0</translateFrameV>
+                                        <wrapU>1</wrapU>
+                                        <wrapV>1</wrapV>
+                                    </technique>
+                                </extra>
+                            </texture>
+                        </diffuse>
+                        <transparent opaque="RGB_ZERO">
+                            <color>0 0 0 1</color>
+                        </transparent>
+                        <transparency>
+                            <float>1</float>
+                        </transparency>
+                    </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+    </library_effects>
+    <library_images>
+        <image id="file29" name="file29" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/blue.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file29</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+        <image id="file25" name="file25" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/carbonfiber.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file25</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+        <image id="file28" name="file28" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/green.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file28</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+        <image id="file22" name="file22" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/grey.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file22</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+        <image id="file24" name="file24" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/orange.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file24</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+        <image id="file23" name="file23" height="0" width="0">
+            <init_from>file:///Volumes/Android/Sanity/SceneGraph/assets/red.jpg</init_from>
+            <extra>
+                <technique profile="OpenCOLLADAMaya">
+                    <dgnode_type>kFile</dgnode_type>
+                    <image_sequence>0</image_sequence>
+                    <originalMayaNodeId>file23</originalMayaNodeId>
+                </technique>
+            </extra>
+        </image>
+    </library_images>
+    <library_visual_scenes>
+        <visual_scene id="VisualSceneNode" name="orientation_test">
+            <node id="camera1" name="camera1">
+                <translate sid="translate">24.5791 14.1321 31.4654</translate>
+                <rotate sid="rotateZ">0 0 1 0</rotate>
+                <rotate sid="rotateY">0 1 0 42</rotate>
+                <rotate sid="rotateX">1 0 0 -16.2</rotate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_camera url="#cameraShape1" />
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>camera1</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="CameraAim" name="CameraAim">
+                <translate sid="translate">0.0209301 3.68542 2.06912</translate>
+                <rotate sid="rotateY">0 1 0 43.2561</rotate>
+                <rotate sid="rotateX">1 0 0 -20</rotate>
+                <scale sid="scale">1 1 1</scale>
+                <node id="CameraDist" name="CameraDist">
+                    <translate sid="translate">0 0 45</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_camera url="#CameraDistShape" />
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>CameraDist</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>CameraAim</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pSphere4" name="pSphere4">
+                <translate sid="translate">-9.69237 0 7.70498</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pSphereShape4">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert7SG" target="#Paint1">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pSphere4</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pSphere1" name="pSphere1">
+                <translate sid="translate">13.0966 0 5.76254</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pSphereShape1">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert7SG" target="#Paint1">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pSphere1</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pSphere2" name="pSphere2">
+                <translate sid="translate">21.7661 0 -13.6375</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pSphereShape2">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert7SG" target="#Paint1">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pSphere2</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pSphere3" name="pSphere3">
+                <translate sid="translate">-13.862 0 -13.6154</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pSphereShape3">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert7SG" target="#Paint1">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pSphere3</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pSphere5" name="pSphere5">
+                <translate sid="translate">31.0862 0 18.5992</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pSphereShape5">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert7SG" target="#Paint1">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pSphere5</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pCube1" name="pCube1">
+                <translate sid="translate">0 0 0</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pCubeShape1">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert4SG" target="#lambert2">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pCube1</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="group1" name="group1">
+                <translate sid="translate">0 0 0</translate>
+                <rotate sid="rotateZ">0 0 1 -162.693</rotate>
+                <rotate sid="rotateY">0 1 0 21.3345</rotate>
+                <rotate sid="rotateX">1 0 0 -100.567</rotate>
+                <scale sid="scale">1 1 1</scale>
+                <node id="pSphere6" name="pSphere6">
+                    <translate sid="translate">-13.862 0 -13.6154</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape6">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert6SG" target="#Plastic">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere6</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere7" name="pSphere7">
+                    <translate sid="translate">-9.69237 0 7.70498</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape7">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert6SG" target="#Plastic">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere7</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere8" name="pSphere8">
+                    <translate sid="translate">21.7661 0 -13.6375</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape8">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert6SG" target="#Plastic">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere8</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere9" name="pSphere9">
+                    <translate sid="translate">13.0966 0 5.76254</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape9">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert6SG" target="#Plastic">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere9</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>group1</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="group2" name="group2">
+                <translate sid="translate">0 0 0</translate>
+                <rotate sid="rotateZ">0 0 1 45.4017</rotate>
+                <rotate sid="rotateY">0 1 0 79.393</rotate>
+                <rotate sid="rotateX">1 0 0 5.10889</rotate>
+                <scale sid="scale">1 1 1</scale>
+                <node id="pSphere10" name="pSphere10">
+                    <translate sid="translate">31.0862 0 18.5992</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape10">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere10</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere11" name="pSphere11">
+                    <translate sid="translate">13.0966 0 5.76254</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape11">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere11</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere12" name="pSphere12">
+                    <translate sid="translate">7.4784 16.3496 7.36882</translate>
+                    <rotate sid="rotateZ">0 0 1 17.3073</rotate>
+                    <rotate sid="rotateY">0 1 0 158.666</rotate>
+                    <rotate sid="rotateX">1 0 0 79.4335</rotate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape12">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere12</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere13" name="pSphere13">
+                    <translate sid="translate">-9.69237 0 7.70498</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape13">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere13</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere14" name="pSphere14">
+                    <translate sid="translate">11.3635 -4.3926 2.21012</translate>
+                    <rotate sid="rotateZ">0 0 1 17.3073</rotate>
+                    <rotate sid="rotateY">0 1 0 158.666</rotate>
+                    <rotate sid="rotateX">1 0 0 79.4335</rotate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape14">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere14</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere15" name="pSphere15">
+                    <translate sid="translate">21.7661 0 -13.6375</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape15">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere15</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere16" name="pSphere16">
+                    <translate sid="translate">-9.5945 -8.92317 -5.74901</translate>
+                    <rotate sid="rotateZ">0 0 1 17.3073</rotate>
+                    <rotate sid="rotateY">0 1 0 158.666</rotate>
+                    <rotate sid="rotateX">1 0 0 79.4335</rotate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape16">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere16</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere17" name="pSphere17">
+                    <translate sid="translate">-13.862 0 -13.6154</translate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape17">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere17</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <node id="pSphere18" name="pSphere18">
+                    <translate sid="translate">-24.2135 6.497 -5.58935</translate>
+                    <rotate sid="rotateZ">0 0 1 17.3073</rotate>
+                    <rotate sid="rotateY">0 1 0 158.666</rotate>
+                    <rotate sid="rotateX">1 0 0 79.4335</rotate>
+                    <scale sid="scale">1 1 1</scale>
+                    <instance_geometry url="#pSphereShape18">
+                        <bind_material>
+                            <technique_common>
+                                <instance_material symbol="lambert5SG" target="#Metal">
+                                    <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                                </instance_material>
+                            </technique_common>
+                        </bind_material>
+                    </instance_geometry>
+                    <extra>
+                        <technique profile="OpenCOLLADAMaya">
+                            <originalMayaNodeId>pSphere18</originalMayaNodeId>
+                        </technique>
+                    </extra>
+                </node>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>group2</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pCube2" name="pCube2">
+                <translate sid="translate">0 0 0</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pCubeShape2">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert8SG" target="#PlasticCenter">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pCube2</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pCube3" name="pCube3">
+                <translate sid="translate">15 0 0</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pCubeShape3">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert9SG" target="#PlasticRed">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pCube3</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pCube4" name="pCube4">
+                <translate sid="translate">0 15 0</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pCubeShape4">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert10SG" target="#lambert10">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pCube4</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+            <node id="pCube5" name="pCube5">
+                <translate sid="translate">0 0 15</translate>
+                <scale sid="scale">1 1 1</scale>
+                <instance_geometry url="#pCubeShape5">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="lambert11SG" target="#lambert11">
+                                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <extra>
+                    <technique profile="OpenCOLLADAMaya">
+                        <originalMayaNodeId>pCube5</originalMayaNodeId>
+                    </technique>
+                </extra>
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#VisualSceneNode" />
+    </scene>
+</COLLADA>

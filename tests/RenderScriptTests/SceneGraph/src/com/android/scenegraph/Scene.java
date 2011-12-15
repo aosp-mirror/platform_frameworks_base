@@ -206,6 +206,7 @@ public class Scene extends SceneGraphBase {
 
     public void initRS(RenderScriptGL rs, Resources res, SceneManager sceneManager) {
         mRS = rs;
+        mRes = res;
         long start = System.currentTimeMillis();
         mTransformRSData = mRootTransforms.getRSData(rs);
         long end = System.currentTimeMillis();

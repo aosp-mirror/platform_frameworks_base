@@ -48,7 +48,8 @@ public class TestAppRS {
     private static String TAG = "TestAppRS";
     private final int STATE_LAST_FOCUS = 1;
     private final boolean mLoadFromSD = true;
-    private static String mSDCardPath = "sdcard/scenegraph/";
+    private static String mSDFilePath = "sdcard/scenegraph/";
+    private static String mFilePath = "";
 
     int mWidth;
     int mHeight;
@@ -100,7 +101,7 @@ public class TestAppRS {
         mTouchHandler = new TouchHandler();
 
         mSceneManager = new SceneManager();
-        // Initializes all the RS specific scenegraph elements 
+        // Initializes all the RS specific scenegraph elements
         mSceneManager.initRS(mRS, mRes, mWidth, mHeight);
 
         // Shows the loading screen with some text
@@ -112,7 +113,7 @@ public class TestAppRS {
         initRS();
 
         // Load a scene to render
-        mSceneManager.loadModel(mSDCardPath + modelName, mLoadedCallback);
+        mSceneManager.loadModel(mFilePath + modelName, mLoadedCallback);
     }
 
     // When a new model file is selected from the UI, this function gets called to init everything
@@ -140,7 +141,7 @@ public class TestAppRS {
     ScriptField_FShaderParams_s mFsConst;
     private ProgramVertex mPV_Paint;
     ScriptField_VShaderParams_s mVsConst;
-    
+
     private Allocation mDefaultCube;
     private Allocation mAllocPV;
     private Allocation mEnvCube;
@@ -186,55 +187,54 @@ public class TestAppRS {
         Allocation tempEnv;
         Allocation tempDiff;
 
-        InputStream openStream(String name) {
+        Allocation loadCubemap(String name) {
             InputStream is = null;
             try {
                 if (!mLoadFromSD) {
                     is = mRes.getAssets().open(name);
                 } else {
-                    File f = new File(mSDCardPath + name);
+                    File f = new File(mSDFilePath + name);
                     is = new BufferedInputStream(new FileInputStream(f));
                 }
             } catch (IOException e) {
-                Log.e("PAINTSHADERS", " Message: " + e.getMessage());
+                Log.e("ImageLoaderTask", " Message: " + e.getMessage());
+                return null;
             }
-            return is;
+
+            Bitmap b = BitmapFactory.decodeStream(is);
+            try {
+                is.close();
+            } catch (IOException e) {
+                Log.e("ImageLoaderTask", " Message: " + e.getMessage());
+            }
+
+            return Allocation.createCubemapFromBitmap(mRS,
+                                                      b,
+                                                      MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                                      Allocation.USAGE_GRAPHICS_TEXTURE);
         }
 
         protected Boolean doInBackground(String... names) {
             long start = System.currentTimeMillis();
-            InputStream is = openStream("cube_env.png");
-            if (is == null) {
-                return new Boolean(false);
-            }
 
-            Bitmap b = BitmapFactory.decodeStream(is);
-            tempEnv = Allocation.createCubemapFromBitmap(mRS,
-                                                         b,
-                                                         MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE);
+            tempEnv = loadCubemap("cube_env.png");
+            tempDiff = loadCubemap("cube_spec.png");
 
-            is = openStream("cube_spec.png");
-            if (is == null) {
-                return new Boolean(false);
-            }
-
-            b = BitmapFactory.decodeStream(is);
-            tempDiff = Allocation.createCubemapFromBitmap(mRS,
-                                                          b,
-                                                          MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                          Allocation.USAGE_GRAPHICS_TEXTURE);
             long end = System.currentTimeMillis();
             Log.v("TIMER", "Image load time: " + (end - start));
             return new Boolean(true);
         }
 
         protected void onPostExecute(Boolean result) {
-            mEnvCube = tempEnv;
-            mDiffCube = tempDiff;
+            if (tempEnv != null) {
+                mEnvCube = tempEnv;
+                mPF_Paint.bindTexture(mEnvCube, 1);
+            }
 
-            mPF_Paint.bindTexture(mEnvCube, 1);
-            mPF_Aluminum.bindTexture(mDiffCube, 1);
+            if (tempDiff != null) {
+                mDiffCube = tempDiff;
+                mPF_Aluminum.bindTexture(mDiffCube, 1);
+            }
         }
     }
 
@@ -433,12 +433,14 @@ public class TestAppRS {
 
         FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
         initPaintShaders();
-        new ImageLoaderTask().execute();
 
         Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.defaultcube);
         mDefaultCube = Allocation.createCubemapFromBitmap(mRS, b);
         mPF_Paint.bindTexture(mDefaultCube, 1);
         mPF_Aluminum.bindTexture(mDefaultCube, 1);
+
+        // Reflection maps from SD card
+        new ImageLoaderTask().execute();
 
         ScriptC_render renderLoop = mSceneManager.getRenderLoop();
         renderLoop.bind_vConst(mVsConst);
