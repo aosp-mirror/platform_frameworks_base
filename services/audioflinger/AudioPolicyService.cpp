@@ -31,7 +31,6 @@
 #include <utils/threads.h>
 #include "AudioPolicyService.h"
 #include <cutils/properties.h>
-#include <dlfcn.h>
 #include <hardware_legacy/power.h>
 #include <media/AudioEffect.h>
 #include <media/EffectsFactoryApi.h>
