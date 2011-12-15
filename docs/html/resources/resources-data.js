@@ -883,7 +883,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['tutorial', 'gl', 'new'],
+    tags: ['tutorial', 'gl'],
     path: 'tutorials/opengl/opengl-es10.html',
     title: {
       en: 'OpenGL ES 1.0'
@@ -893,7 +893,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['tutorial', 'gl', 'new'],
+    tags: ['tutorial', 'gl'],
     path: 'tutorials/opengl/opengl-es20.html',
     title: {
       en: 'OpenGL ES 2.0'
