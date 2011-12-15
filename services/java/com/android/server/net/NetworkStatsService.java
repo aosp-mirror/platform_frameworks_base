@@ -548,7 +548,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO: switch to data layer stats once kernel exports
         // for now, read network layer stats and flatten across all ifaces
-        final NetworkStats networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid);
+        final long token = Binder.clearCallingIdentity();
+        final NetworkStats networkLayer;
+        try {
+            networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
         final NetworkStats dataLayer = new NetworkStats(
                 networkLayer.getElapsedRealtime(), networkLayer.size());
 
