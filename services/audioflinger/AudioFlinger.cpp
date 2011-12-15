@@ -988,7 +988,6 @@ AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int i
 AudioFlinger::ThreadBase::~ThreadBase()
 {
     mParamCond.broadcast();
-    mNewParameters.clear();
     // do not lock the mutex in destructor
     releaseWakeLock_l();
     if (mPowerManager != 0) {
