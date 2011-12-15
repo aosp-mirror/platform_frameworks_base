@@ -32,6 +32,7 @@ namespace android {
 #define TYPEFACE_ARABIC "/system/fonts/DroidNaskh-Regular.ttf"
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
+#define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
 
 #if USE_TEXT_LAYOUT_CACHE
 
@@ -581,7 +582,7 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
                             mNormalizedString.length()).string(),
                     mNormalizedString.length());
     } else {
-        LOGD("Normalization cannot be done, using initial string");
+        LOGD("Normalization is not needed or cannot be done, using initial string");
     }
 #endif
 
@@ -755,6 +756,13 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
         }
         break;
 
+    case HB_Script_Bengali:
+        typeface = getCachedTypeface(&mBengaliTypeface, TYPEFACE_BENGALI);
+#if DEBUG_GLYPHS
+        LOGD("Using Bengali Typeface");
+#endif
+        break;
+
     default:
         if (!typeface) {
             typeface = mDefaultTypeface;
@@ -784,7 +792,8 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     size_t baseGlyphCount = 0;
     switch (mShaperItem.item.script) {
     case HB_Script_Arabic:
-    case HB_Script_Hebrew: {
+    case HB_Script_Hebrew:
+    case HB_Script_Bengali:{
         const uint16_t* text16 = (const uint16_t*)mShaperItem.string;
         SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
         baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
@@ -843,6 +852,13 @@ void TextLayoutEngine::deleteShaperItemGlyphArrays() {
 SkTypeface* TextLayoutEngine::getCachedTypeface(SkTypeface** typeface, const char path[]) {
     if (!*typeface) {
         *typeface = SkTypeface::CreateFromFile(path);
+        // CreateFromFile(path) can return NULL if the path is non existing
+        if (!*typeface) {
+#if DEBUG_GLYPHS
+        LOGD("Font path '%s' is not valid, will use default font", path);
+#endif
+            return mDefaultTypeface;
+        }
         (*typeface)->ref();
 #if DEBUG_GLYPHS
         LOGD("Created SkTypeface from file '%s' with uniqueID = %d", path, (*typeface)->uniqueID());
