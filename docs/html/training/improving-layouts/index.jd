@@ -1,0 +1,58 @@
+page.title=Improving Performance of Layouts
+
+trainingnavtop=true
+startpage=true
+next.title=Optimizing Layout
+next.link=optimizing-layout.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+ <li>Android 1.5 (API Level 3) or higher</li>
+</ul>
+
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+ <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">XML Layouts</a></li>
+</ul>
+
+</div>
+</div>
+
+
+
+<p>Layouts are a key part of Android applications that directly affect the user experience. If
+implemented poorly, your layout can lead to a memory hungry application with slow UIs. The Android
+SDK includes tools to help you identify problems in your layout performance, which when combined the
+lessons here, you will be able to implement smooth scrolling interfaces with a minimum memory
+footprint.</p>
+
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><b><a href="optimizing-layout.html">Optimizing Layout Hierarchies</a></b></dt>
+    <dd>In the same way a complex web page can slow down load time, your layout hierarchy
+if too complex can also cause performance problems. This lesson shows how you can use SDK tools
+to inspect your layout and discover performance bottlenecks.</dd>
+  <dt><b><a href="reusing-layouts.html">Re-using Layouts with &lt;include/&gt;</a></b></dt>
+    <dd>If your application UI repeats certain layout constructs in multiple places, this lesson
+shows you how to create efficient, re-usable layout constructs, then include them in the appropriate
+UI layouts.</dd>
+  <dt><b><a href="loading-ondemand.html">Loading Views On Demand</a></b></dt>
+    <dd>Beyond simply including one layout component within another layout, you might want to
+make the included layout visible only when it's needed, sometime after the activity is running.
+This lesson shows how you can improve your layout's initialization performance by loading
+portions of your layout on demand.</dd>
+  <dt><b><a href="smooth-scrolling.html">Making ListView Scrolling Smooth</a></b></dt>
+    <dd>If you've built an instance of {@link android.widget.ListView} that contains complex or
+data-heavy content in each list item, the scroll performance of the list might suffer. This
+lesson provides some tips about how you can make your scrolling performance more smooth.</dd>
+</dl>
