@@ -153,6 +153,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
     private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
+    private static final int VERSION_ADDED_METERED = 4;
 
     private static final long KB_IN_BYTES = 1024;
     private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
@@ -175,6 +176,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_WARNING_BYTES = "warningBytes";
     private static final String ATTR_LIMIT_BYTES = "limitBytes";
     private static final String ATTR_LAST_SNOOZE = "lastSnooze";
+    private static final String ATTR_METERED = "metered";
     private static final String ATTR_UID = "uid";
     private static final String ATTR_POLICY = "policy";
 
@@ -819,9 +821,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
-            if (hasLimit) {
+            if (hasLimit || policy.metered) {
                 final long quotaBytes;
-                if (policy.lastSnooze >= start) {
+                if (!hasLimit) {
+                    // metered network, but no policy limit; we still need to
+                    // restrict apps, so push really high quota.
+                    quotaBytes = Long.MAX_VALUE;
+                } else if (policy.lastSnooze >= start) {
                     // snoozing past quota, but we still need to restrict apps,
                     // so push really high quota.
                     quotaBytes = Long.MAX_VALUE;
@@ -891,7 +897,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
             mNetworkPolicy.put(template, new NetworkPolicy(
-                    template, cycleDay, warningBytes, LIMIT_DISABLED, SNOOZE_NEVER));
+                    template, cycleDay, warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, true));
             writePolicyLocked();
         }
     }
@@ -935,11 +941,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         } else {
                             lastSnooze = SNOOZE_NEVER;
                         }
+                        final boolean metered;
+                        if (version >= VERSION_ADDED_METERED) {
+                            metered = readBooleanAttribute(in, ATTR_METERED);
+                        } else {
+                            switch (networkTemplate) {
+                                case MATCH_MOBILE_3G_LOWER:
+                                case MATCH_MOBILE_4G:
+                                case MATCH_MOBILE_ALL:
+                                    metered = true;
+                                    break;
+                                default:
+                                    metered = false;
+                            }
+                        }
 
                         final NetworkTemplate template = new NetworkTemplate(
                                 networkTemplate, subscriberId);
                         mNetworkPolicy.put(template, new NetworkPolicy(
-                                template, cycleDay, warningBytes, limitBytes, lastSnooze));
+                                template, cycleDay, warningBytes, limitBytes, lastSnooze, metered));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -994,7 +1014,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_RESTRICT_BACKGROUND);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_METERED);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1011,6 +1031,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
                 writeLongAttribute(out, ATTR_LIMIT_BYTES, policy.limitBytes);
                 writeLongAttribute(out, ATTR_LAST_SNOOZE, policy.lastSnooze);
+                writeBooleanAttribute(out, ATTR_METERED, policy.metered);
                 out.endTag(null, TAG_NETWORK_POLICY);
             }
 
