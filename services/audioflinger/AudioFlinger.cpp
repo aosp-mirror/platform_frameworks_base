@@ -397,7 +397,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     int lSessionId;
 
     if (streamType >= AUDIO_STREAM_CNT) {
-        LOGE("invalid stream type");
+        LOGE("createTrack() invalid stream type %d", streamType);
         lStatus = BAD_VALUE;
         goto Exit;
     }
@@ -429,6 +429,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
                     // prevent same audio session on different output threads
                     uint32_t sessions = t->hasAudioSession(*sessionId);
                     if (sessions & PlaybackThread::TRACK_SESSION) {
+                        LOGE("createTrack() session ID %d already in use", *sessionId);
                         lStatus = BAD_VALUE;
                         goto Exit;
                     }
@@ -659,6 +660,7 @@ status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
     }
 
     if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT) {
+        LOGE("setStreamVolume() invalid stream %d", stream);
         return BAD_VALUE;
     }
 
@@ -693,6 +695,7 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
 
     if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT ||
         uint32_t(stream) == AUDIO_STREAM_ENFORCED_AUDIBLE) {
+        LOGE("setStreamMute() invalid stream %d", stream);
         return BAD_VALUE;
     }
 
@@ -1527,8 +1530,10 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         for (size_t i = 0; i < mTracks.size(); ++i) {
             sp<Track> t = mTracks[i];
             if (t != 0) {
-                if (sessionId == t->sessionId() &&
-                        strategy != AudioSystem::getStrategyForStream((audio_stream_type_t)t->type())) {
+                uint32_t actual = AudioSystem::getStrategyForStream((audio_stream_type_t)t->type());
+                if (sessionId == t->sessionId() && strategy != actual) {
+                    LOGE("createTrack_l() mismatched strategy; expected %u but found %u",
+                            strategy, actual);
                     lStatus = BAD_VALUE;
                     goto Exit;
                 }
