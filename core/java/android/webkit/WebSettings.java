@@ -201,7 +201,7 @@ public class WebSettings {
     private boolean         mXSSAuditorEnabled = false;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
-    private String          mAppCachePath = "";
+    private String          mAppCachePath = null;
     private String          mDatabasePath = "";
     // The WebCore DatabaseTracker only allows the database path to be set
     // once. Keep track of when the path has been set.
@@ -1370,8 +1370,8 @@ public class WebSettings {
     }
 
     /**
-     * Tell the WebView to enable Application Caches API.
-     * @param flag True if the WebView should enable Application Caches.
+     * Enable or disable the Application Cache API.
+     * @param flag Whether to enable the Application Cache API.
      */
     public synchronized void setAppCacheEnabled(boolean flag) {
         if (mAppCacheEnabled != flag) {
@@ -1381,15 +1381,19 @@ public class WebSettings {
     }
 
     /**
-     * Set a custom path to the Application Caches files. The client
-     * must ensure it exists before this call.
-     * @param appCachePath String path to the directory containing Application
-     * Caches files. The appCache path can be the empty string but should not
-     * be null. Passing null for this parameter will result in a no-op.
+     * Set the path used by the Application Cache API to store files. This
+     * setting is applied to all WebViews in the application. In order for the
+     * Application Cache API to function, this method must be called with a
+     * path which exists and is writable by the application. This method may
+     * only be called once: repeated calls are ignored.
+     * @param path Path to the directory that should be used to store Application
+     * Cache files.
      */
-    public synchronized void setAppCachePath(String appCachePath) {
-        if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
-            mAppCachePath = appCachePath;
+    public synchronized void setAppCachePath(String path) {
+        // We test for a valid path and for repeated setting on the native
+        // side, but we can avoid syncing in some simple cases. 
+        if (mAppCachePath == null && path != null && !path.isEmpty()) {
+            mAppCachePath = path;
             postSync();
         }
     }
