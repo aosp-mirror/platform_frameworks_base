@@ -32,8 +32,10 @@ import android.os.Process;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -1012,5 +1014,20 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     public void shutdown() {
         Log.w(TAG, "implement ContentProvider shutdown() to make sure all database " +
                 "connections are gracefully shutdown");
+    }
+
+    /**
+     * Print the Provider's state into the given stream.  This gets invoked if
+     * you run "adb shell dumpsys activity provider <provider_component_name>".
+     *
+     * @param prefix Desired prefix to prepend at each line of output.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     * @hide
+     */
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        writer.println("nothing to dump");
     }
 }

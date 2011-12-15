@@ -102,6 +102,8 @@ public interface IApplicationThread extends IInterface {
     void processInBackground() throws RemoteException;
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
+    void dumpProvider(FileDescriptor fd, IBinder servicetoken, String[] args)
+            throws RemoteException;
     void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
             int resultCode, String data, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException;
@@ -171,4 +173,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_TRIM_MEMORY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+41;
     int DUMP_MEM_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+42;
     int DUMP_GFX_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+43;
+    int DUMP_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+44;
 }
