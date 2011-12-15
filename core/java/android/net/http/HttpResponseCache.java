@@ -136,6 +136,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
  *         int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
  *         connection.addRequestProperty("Cache-Control", "max-stale=" + maxStale);
  * }</pre>
+ *
+ * <h3>Working With Earlier Releases</h3>
+ * This class was added in Android 4.0 (Ice Cream Sandwich). Use reflection to
+ * enable the response cache without impacting earlier releases: <pre>   {@code
+ *       try {
+ *           File httpCacheDir = new File(context.getCacheDir(), "http");
+ *           long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+ *           Class.forName("android.net.http.HttpResponseCache")
+ *                   .getMethod("install", File.class, long.class)
+ *                   .invoke(null, httpCacheDir, httpCacheSize);
+ *       } catch (Exception httpResponseCacheNotAvailable) {
+ *       }}</pre>
  */
 public final class HttpResponseCache extends ResponseCache implements Closeable {
 
