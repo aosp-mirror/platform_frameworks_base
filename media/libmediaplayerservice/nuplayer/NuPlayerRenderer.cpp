@@ -376,7 +376,7 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
     bool tooLate = (mVideoLateByUs > 40000);
 
     if (tooLate) {
-        ALOGV("video late by %lld us (%.2f secs)", lateByUs, lateByUs / 1E6);
+        ALOGV("video late by %lld us (%.2f secs)", mVideoLateByUs, mVideoLateByUs / 1E6);
     } else {
         ALOGV("rendering video at media time %.2f secs", mediaTimeUs / 1E6);
     }
