@@ -112,6 +112,7 @@ public class AudioService extends IAudioService.Stub {
     // AudioHandler message.whats
     private static final int MSG_SET_DEVICE_VOLUME = 0;
     private static final int MSG_PERSIST_VOLUME = 1;
+    private static final int MSG_PERSIST_MASTER_VOLUME = 2;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
     private static final int MSG_PERSIST_VIBRATE_SETTING = 4;
     private static final int MSG_MEDIA_SERVER_DIED = 5;
@@ -638,9 +639,9 @@ public class AudioService extends IAudioService.Stub {
                 if (volume < 0.0f) volume = 0.0f;
             }
             AudioSystem.setMasterVolume(volume);
-            long origCallerIdentityToken = Binder.clearCallingIdentity();
-            Settings.System.putFloat(mContentResolver, Settings.System.VOLUME_MASTER, volume);
-            Binder.restoreCallingIdentity(origCallerIdentityToken);
+            // Post a persist master volume msg
+            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, 0, SENDMSG_REPLACE,
+                    Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
             sendMasterVolumeUpdate(flags, oldVolume, getMasterVolume());
         }
     }
@@ -813,7 +814,23 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void setMasterVolume(int volume, int flags) {
-        AudioSystem.setMasterVolume((float)volume / MAX_MASTER_VOLUME);
+        doSetMasterVolume((float)volume / MAX_MASTER_VOLUME, flags);
+    }
+
+    private void doSetMasterVolume(float volume, int flags) {
+        // don't allow changing master volume when muted
+        if (!AudioSystem.getMasterMute()) {
+            int oldVolume = getMasterVolume();
+            AudioSystem.setMasterVolume(volume);
+
+            int newVolume = getMasterVolume();
+            if (newVolume != oldVolume) {
+                // Post a persist master volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, SENDMSG_REPLACE,
+                        Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
+                sendMasterVolumeUpdate(flags, oldVolume, newVolume);
+            }
+        }
     }
 
     /** @see AudioManager#getStreamMaxVolume(int) */
@@ -2445,6 +2462,11 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_PERSIST_VOLUME:
                     persistVolume((VolumeStreamState) msg.obj, msg.arg1, msg.arg2);
+                    break;
+
+                case MSG_PERSIST_MASTER_VOLUME:
+                    Settings.System.putFloat(mContentResolver, Settings.System.VOLUME_MASTER,
+                            (float)msg.arg1 / (float)1000.0);
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:
