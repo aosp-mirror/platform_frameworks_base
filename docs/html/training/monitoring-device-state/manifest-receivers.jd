@@ -1,0 +1,64 @@
+page.title=Manipulating Broadcast Receivers On Demand
+parent.title=Monitoring Device State to Optimize Battery Life
+parent.link=index.html
+
+trainingnavtop=true
+
+previous.title=Determining and Monitoring the Connectivity Status
+previous.link=connectivity-monitoring.html
+
+@jd:body
+
+<div id="tb-wrapper"> 
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve
+Efficiency</a></li>
+</ol>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
+</ul>
+
+</div> 
+</div>
+
+<p>The simplest way to monitor device state changes is to create a {@link
+android.content.BroadcastReceiver} for each state you're monitoring and register each of them in
+your application manifest. Then within each of these receivers you simply reschedule your recurring
+alarms based on the current device state.</p>
+
+<p>A side-effect of this approach is that your app will wake the device each time any of these
+receivers is triggered&mdash;potentially much more frequently than required.</p>
+
+<p>A better approach is to disable or enable the broadcast receivers at runtime. That way you can
+use the receivers you declared in the manifest as passive alarms that are triggered by system events
+only when necessary.</p>
+ 
+
+<h2 id="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve Efficiency </h2> 
+ 
+<p>Use can use the {@link android.content.pm.PackageManager} to toggle the enabled state on any
+component defined in the manifest, including whichever broadcast receivers you wish to enable or
+disable as shown in the snippet below:</p>
+
+<pre>ComponentName receiver = new ComponentName(context, myReceiver.class);
+
+PackageManager pm = context.getPackageManager();
+
+pm.setComponentEnabledSetting(receiver,
+        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+        PackageManager.DONT_KILL_APP)</pre>
+
+<p>Using this technique, if you determine that connectivity has been lost, you can disable all of
+your receivers except the connectivity-change receiver. Conversely, once you are connected you can
+stop listening for connectivity changes and simply check to see if you're online immediately before
+performing an update and rescheduling a recurring update alarm.</p>
+
+<p>You can use the same technique to delay a download that requires higher bandwidth to complete.  
+Simply enable a broadcast receiver that listens for connectivity changes and initiates the
+download only after you are connected to Wi-Fi.</p>
