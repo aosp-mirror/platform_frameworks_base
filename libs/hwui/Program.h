@@ -398,6 +398,8 @@ private:
 
     bool mHasColorUniform;
     int mColorUniform;
+
+    bool mHasSampler;
 }; // class Program
 
 }; // namespace uirenderer
