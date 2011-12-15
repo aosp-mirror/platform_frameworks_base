@@ -1115,6 +1115,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
     }
 }
 
+#if 0
 // 2 tracks is also a common case
 // NEVER used in current implementation of process__validate()
 // only use if the 2 tracks have the same output buffer
@@ -1212,7 +1213,7 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
         delete [] buff;
     }
 }
+#endif
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-
