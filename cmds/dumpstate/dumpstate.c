@@ -253,6 +253,13 @@ static void dumpstate() {
     run_command("APP SERVICES", 30, "dumpsys", "activity", "service", "all", NULL);
 
     printf("========================================================\n");
+    printf("== Running Application Providers\n");
+    printf("========================================================\n");
+
+    run_command("APP SERVICES", 30, "dumpsys", "activity", "provider", "all", NULL);
+
+
+    printf("========================================================\n");
     printf("== dumpstate: done\n");
     printf("========================================================\n");
 }

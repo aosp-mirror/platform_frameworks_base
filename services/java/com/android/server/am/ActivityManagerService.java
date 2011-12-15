@@ -7945,6 +7945,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
                 pw.println("    o[om]: out of memory management");
                 pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
+                pw.println("    provider [COMP_SPEC]: provider client-side state");
                 pw.println("    s[ervices] [COMP_SPEC ...]: service state");
                 pw.println("    service [COMP_SPEC]: service client-side state");
                 pw.println("    package [PACKAGE_NAME]: all state related to given package");
@@ -8025,6 +8026,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
                     dumpOomLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("provider".equals(cmd)) {
+                String[] newArgs;
+                String name;
+                if (opti >= args.length) {
+                    name = null;
+                    newArgs = EMPTY_STRING_ARRAY;
+                } else {
+                    name = args[opti];
+                    opti++;
+                    newArgs = new String[args.length - opti];
+                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
+                }
+                if (!dumpProvider(fd, pw, name, newArgs, 0, dumpAll)) {
+                    pw.println("No providers match: " + name);
+                    pw.println("Use -h for help.");
                 }
                 return;
             } else if ("providers".equals(cmd) || "prov".equals(cmd)) {
@@ -8611,6 +8629,110 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * There are three ways to call this:
+     *  - no provider specified: dump all the providers
+     *  - a flattened component name that matched an existing provider was specified as the
+     *    first arg: dump that one provider
+     *  - the first arg isn't the flattened component name of an existing provider:
+     *    dump all providers whose component contains the first arg as a substring
+     */
+    protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+            int opti, boolean dumpAll) {
+        ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
+
+        if ("all".equals(name)) {
+            synchronized (this) {
+                for (ContentProviderRecord r1 : mProvidersByClass.values()) {
+                    providers.add(r1);
+                }
+            }
+        } else {
+            ComponentName componentName = name != null
+                    ? ComponentName.unflattenFromString(name) : null;
+            int objectId = 0;
+            if (componentName == null) {
+                // Not a '/' separated full component name; maybe an object ID?
+                try {
+                    objectId = Integer.parseInt(name, 16);
+                    name = null;
+                    componentName = null;
+                } catch (RuntimeException e) {
+                }
+            }
+
+            synchronized (this) {
+                for (ContentProviderRecord r1 : mProvidersByClass.values()) {
+                    if (componentName != null) {
+                        if (r1.name.equals(componentName)) {
+                            providers.add(r1);
+                        }
+                    } else if (name != null) {
+                        if (r1.name.flattenToString().contains(name)) {
+                            providers.add(r1);
+                        }
+                    } else if (System.identityHashCode(r1) == objectId) {
+                        providers.add(r1);
+                    }
+                }
+            }
+        }
+
+        if (providers.size() <= 0) {
+            return false;
+        }
+
+        boolean needSep = false;
+        for (int i=0; i<providers.size(); i++) {
+            if (needSep) {
+                pw.println();
+            }
+            needSep = true;
+            dumpProvider("", fd, pw, providers.get(i), args, dumpAll);
+        }
+        return true;
+    }
+
+    /**
+     * Invokes IApplicationThread.dumpProvider() on the thread of the specified provider if
+     * there is a thread associated with the provider.
+     */
+    private void dumpProvider(String prefix, FileDescriptor fd, PrintWriter pw,
+            final ContentProviderRecord r, String[] args, boolean dumpAll) {
+        String innerPrefix = prefix + "  ";
+        synchronized (this) {
+            pw.print(prefix); pw.print("PROVIDER ");
+                    pw.print(r);
+                    pw.print(" pid=");
+                    if (r.proc != null) pw.println(r.proc.pid);
+                    else pw.println("(not running)");
+            if (dumpAll) {
+                r.dump(pw, innerPrefix);
+            }
+        }
+        if (r.proc != null && r.proc.thread != null) {
+            pw.println("    Client:");
+            pw.flush();
+            try {
+                TransferPipe tp = new TransferPipe();
+                try {
+                    r.proc.thread.dumpProvider(
+                            tp.getWriteFd().getFileDescriptor(), r.provider.asBinder(), args);
+                    tp.setBufferPrefix("      ");
+                    // Short timeout, since blocking here can
+                    // deadlock with the application.
+                    tp.go(fd, 2000);
+                } finally {
+                    tp.kill();
+                }
+            } catch (IOException ex) {
+                pw.println("      Failure while dumping the provider: " + ex);
+            } catch (RemoteException ex) {
+                pw.println("      Got a RemoteException while dumping the service");
+            }
+        }
+    }
+
     static class ItemMatcher {
         ArrayList<ComponentName> components;
         ArrayList<String> strings;
@@ -8950,6 +9072,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         return needSep;
     }
 
+    /**
+     * Prints a list of ServiceRecords (dumpsys activity services)
+     */
     boolean dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
         boolean needSep = false;

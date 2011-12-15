@@ -813,6 +813,19 @@ public final class ActivityThread {
             }
         }
 
+        public void dumpProvider(FileDescriptor fd, IBinder providertoken,
+                String[] args) {
+            DumpComponentInfo data = new DumpComponentInfo();
+            try {
+                data.fd = ParcelFileDescriptor.dup(fd);
+                data.token = providertoken;
+                data.args = args;
+                queueOrSendMessage(H.DUMP_PROVIDER, data);
+            } catch (IOException e) {
+                Slog.w(TAG, "dumpProvider failed", e);
+            }
+        }
+
         @Override
         public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin,
                 boolean all, String[] args) {
@@ -1044,6 +1057,7 @@ public final class ActivityThread {
         public void scheduleTrimMemory(int level) {
             queueOrSendMessage(H.TRIM_MEMORY, null, level);
         }
+
     }
 
     private class H extends Handler {
@@ -1088,6 +1102,7 @@ public final class ActivityThread {
         public static final int SET_CORE_SETTINGS       = 138;
         public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
         public static final int TRIM_MEMORY             = 140;
+        public static final int DUMP_PROVIDER           = 141;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1132,6 +1147,7 @@ public final class ActivityThread {
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
                     case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case TRIM_MEMORY: return "TRIM_MEMORY";
+                    case DUMP_PROVIDER: return "DUMP_PROVIDER";
                 }
             }
             return "(unknown)";
@@ -1263,6 +1279,9 @@ public final class ActivityThread {
                     break;
                 case DUMP_ACTIVITY:
                     handleDumpActivity((DumpComponentInfo)msg.obj);
+                    break;
+                case DUMP_PROVIDER:
+                    handleDumpProvider((DumpComponentInfo)msg.obj);
                     break;
                 case SLEEPING:
                     handleSleeping((IBinder)msg.obj, msg.arg1 != 0);
@@ -2339,6 +2358,19 @@ public final class ActivityThread {
         if (r != null && r.activity != null) {
             PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
             r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
+            pw.flush();
+            try {
+                info.fd.close();
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    private void handleDumpProvider(DumpComponentInfo info) {
+        ProviderClientRecord r = mLocalProviders.get(info.token);
+        if (r != null && r.mLocalProvider != null) {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+            r.mLocalProvider.dump(info.fd.getFileDescriptor(), pw, info.args);
             pw.flush();
             try {
                 info.fd.close();
