@@ -58,10 +58,16 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         t->needs = 0;
         t->volume[0] = UNITY_GAIN;
         t->volume[1] = UNITY_GAIN;
+        // no initialization needed
+        // t->prevVolume[0]
+        // t->prevVolume[1]
         t->volumeInc[0] = 0;
         t->volumeInc[1] = 0;
         t->auxLevel = 0;
         t->auxInc = 0;
+        // no initialization needed
+        // t->prevAuxLevel
+        // t->frameCount
         t->channelCount = 2;
         t->enabled = 0;
         t->format = 16;
