@@ -1,0 +1,185 @@
+page.title=Creating a Custom Account Type
+parent.title=Identifying and Authenticating Users
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Authenticating to OAuth2 Services
+previous.link=authenticate.html
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#AccountCode">Implement Your Custom Account Code</a></li>
+  <li><a href="#Security">Be Smart About Security!</a></li>
+  <li><a href="#ExtendThatThing">Extend AbstractAccountAuthenticator</a></li>
+  <li><a href="#TaskFour">Create an Authenticator Service</a></li>
+  <li><a href="#DistributeService">Distribute Your Service</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a
+href="http://developer.android.com/resources/samples/SampleSyncAdapter/index.html">
+SampleSyncAdapter app</a></li>
+</ul>
+  </div>
+</div>
+
+<p>In the previous lessons, we've talked about using Google accounts to identify Google users and
+access Google APIs. But what if you've got your own online service? It turns out
+to be relatively straightforward to install new account types on a user's
+device. This lesson explains how to create a custom account type that works the
+same way as the built-in accounts do. </p>
+
+
+<h2 id="AccountCode">Implement Your Custom Account Code</h2>
+
+<p>The first thing you'll need is a way to get credentials from the user. This
+may be as simple as a dialog box that asks for a name and a password. Or it may
+be a more exotic procedure like a one-time password or a biometric scan. Either
+way, it's your responsibility to implement the code that:</p>
+<ol>
+  <li>Collects credentials from the user</li>
+  <li>Authenticates the credentials with the server</li>
+  <li>Stores the credentials on the device</li>
+</ol>
+
+
+<p>Typically all three of these requirements can be handled by one activity. We'll call this the
+authenticator activity.</p>
+
+<p>Because they need to interact with the {@link android.accounts.AccountManager} system,
+authenticator activities have certain requirements that normal activities don't. To make it easy to
+get things right, the Android framework supplies a base class, {@link
+android.accounts.AccountAuthenticatorActivity}, which you can extend to create your own custom
+authenticator.</p>
+
+<p>How you address the first two requirements of an authenticator activity,
+credential collection and authentication, is completely up to you. (If there
+were only one way to do it, there'd be no need for "custom" account types, after
+all.) The third requirement has a canonical, and rather simple,
+implementation:</p>
+
+<pre>
+final Account account = new Account(mUsername, <em>your_account_type</em>);
+mAccountManager.addAccountExplicitly(account, mPassword, null);
+</pre>
+
+
+<h2 id="Security">Be Smart About Security!</h2>
+
+<p>It's important to understand that {@link android.accounts.AccountManager} is not an encryption
+service
+or a keychain. It stores account credentials just as you pass them, in <strong>plain
+text</strong>. On most devices, this isn't
+a particular concern, because it stores them in
+a database that is only accessible to root. But on a rooted device, the
+credentials would be readable by anyone with {@code adb} access to the device.</p>
+
+<p>With this in mind, you shouldn't pass the user's actual
+password to {@link android.accounts.AccountManager#addAccountExplicitly 
+AccountManager.addAccountExplicitly()}. Instead, you should store a
+cryptographically secure token that would be of limited use to an attacker. If your
+user credentials are protecting something valuable, you should carefully
+consider doing something similar.</p>
+
+<p class="caution"><strong>Remember:</strong> When it comes to security code, follow the
+"Mythbusters" rule: don't try this at home! Consult a security professional before implementing any
+custom account code.</p>
+
+<p>Now that the security disclaimers are out of the way, it's time to get back to work.
+You've already implemented the meat of your custom account code; what's left is
+plumbing.</p>
+
+
+<h2 id="ExtendThatThing">Extend AbstractAccountAuthenticator</h2>
+
+<p>In order for the {@link android.accounts.AccountManager} to work with your custom account
+code, you
+need a class that implements the interfaces that {@link android.accounts.AccountManager} expects.
+This class is the <em>authenticator class</em>.</p>
+
+<p>The easiest way to create an authenticator class is to extend
+{@link android.accounts.AbstractAccountAuthenticator} and implement its abstract methods. If you've
+worked through the previous lessons, the abstract methods of
+{@link android.accounts.AbstractAccountAuthenticator} should look familiar: they're the opposite
+side of
+the methods you called in the previous lesson to get account information and
+authorization tokens.</p>
+
+<p>Implementing an authenticator class properly requires a number of separate
+pieces of code. First, {@link android.accounts.AbstractAccountAuthenticator} has seven abstract
+methods that you must override. Second, you need to add an
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">intent filter</a> for
+<code>"android.accounts.AccountAuthenticator"</code> to your application
+manifest (shown in the next section). Finally, you must supply two XML resources that define, among
+other
+things, the name of your custom account type and the icon that the system will
+display next to accounts of this type.</p>
+
+<p> You can find a step-by-step guide to implementing a successful authenticator class and the XML
+files in the {@link android.accounts.AbstractAccountAuthenticator} documentation. There's also a
+sample implementation in the <a
+href="http://developer.android.com/resources/samples/SampleSyncAdapter/index.html">
+SampleSyncAdapter sample app</a>.</p>
+
+<p>As you read through the SampleSyncAdapter code, you'll notice that several of
+the methods return an intent in a bundle. This is the same intent that will be
+used to launch your custom authenticator activity. If your authenticator
+activity needs any special initialization parameters, you can attach them to the
+intent using {@link android.content.Intent#putExtra Intent.putExtra()}.</p>
+
+
+<h2 id="TaskFour">Create an Authenticator Service</h2>
+
+<p>Now that you have an authenticator class, you need a place for it to live.
+Account authenticators need to be available to multiple applications and work in
+the background, so naturally they're required to run inside a {@link android.app.Service}. We'll
+call this the authenticator service.</p>
+
+<p>Your authenticator service can be very simple. All it needs to do is create
+an instance of your authenticator class in {@link android.app.Service#onCreate onCreate()} and call
+{@link android.accounts.AbstractAccountAuthenticator#getIBinder getIBinder()} in {@link
+android.app.Service#onBind onBind()}. The <a
+href="http://developer.android.com/resources/samples/SampleSyncAdapter/index.html">
+SampleSyncAdapter</a> contains a good example of an authenticator service.</p>
+
+<p>Don't forget to add a {@code &lt;service&gt;} tag to your manifest file
+and add an intent filter for the AccountAuthenticator intent and declare the account
+authenticator:</p>
+
+<pre>
+&lt;service ...>
+   &lt;intent-filter>
+      &lt;action android:name="android.accounts.AccountAuthenticator" />
+   &lt;/intent-filter>
+   &lt;meta-data android:name="android.accounts.AccountAuthenticator"
+             android:resource="@xml/authenticator" />
+&lt;/service>
+</pre>
+
+
+<h2 id="DistributeService">Distribute Your Service</h2>
+
+<p>You're done! The system now recognizes your account type, right alongside all
+the big name account types like "Google" and "Corporate." You can use the
+<strong>Accounts &amp; Sync</strong> Settings page to add an account, and apps that ask for
+accounts of your custom type will be able to enumerate and authenticate just as
+they would with any other account type.</p>
+
+<p>Of course, all of this assumes that your account service is actually
+installed on the device. If only one app will ever access the service, then
+this isn't a big deal&mdash;just bundle the service in the app.
+But if you want your account service to be used by more than one app, things get
+trickier. You don't want to bundle the service with all of your apps and have
+multiple copies of it taking up space on your user's device.</p>
+
+<p>One solution is to place the service in one small, special-purpose APK. When
+an app wishes to use your custom account type, it can check the device to see if
+your custom account service is available. If not, it can direct the user to
+Android Market to download the service. This may seem like a great deal of
+trouble at first, but compared with the alternative of re-entering credentials
+for every app that uses your custom account, it's refreshingly easy.</p>
