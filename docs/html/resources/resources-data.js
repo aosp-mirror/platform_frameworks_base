@@ -558,6 +558,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/training/ads-and-ux/index.html',
+    title: {
+      en: 'Mobile Advertisement Integration'
+    },
+    description: {
+      en: 'This sample demonstrates the integration of a mobile ad SDK with your application.'
+    }
+  },
+  {
     tags: ['sample', 'ui', 'bestpractice', 'layout'],
     path: 'samples/MultiResolution/index.html',
     title: {

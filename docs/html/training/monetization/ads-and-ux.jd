@@ -1,0 +1,250 @@
+page.title=Advertising without Compromising User Experience
+parent.title=Monetizing your App
+parent.link=index.html
+@jd:body
+
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ObtainPubAccountAndSDK">Obtain a Publisher Account and Ad SDK</a></li>
+  <li><a href="#DeclarePermissions">Declare Proper Permissions</a></li>
+  <li><a href="#SetupAdPlacement">Set Up Ad Placement</a></li>
+  <li><a href="#InitializeAd">Initialize the Ad</a></li>
+  <li><a href="#EnableTestMode">Enable Test Mode</a></li>
+  <li><a href="#ImplementListeners">Implement Ad Event Listeners</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="http://code.google.com/mobile/ads/">AdMob SDK</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+  <a href="http://developer.android.com/shareables/training/MobileAds.zip" class="button">Download
+the sample app</a>
+  <p class="filename">MobileAds.zip</p>
+</div>
+
+
+</div>
+</div>
+
+<p>Advertising is one of the means to monetize (make money with) mobile applications.  In this
+lesson, you are going to learn how to incorporate banner ads in your Android application.</p>
+
+<p>While this lesson and the sample application use <a
+href="http://code.google.com/mobile/ads/">AdMob</a> to serve ads, the Android platform doesn’t
+impose any restrictions on the choice of mobile advertising network.  To the extent possible, this
+lesson generically highlights concepts that are similar across advertising networks.</p>
+
+<p>For example, each advertising network may have some network-specific configuration settings such
+as geo-targeting and ad-text font size, which may be configurable on some networks but not on
+others.  This lesson does not touch not these topics in depth and you should consult documentation
+provided by the network you choose.</p>
+
+
+<h2 id="ObtainPubAccountAndSDK">Obtain a Publisher Account and Ad SDK</h2>
+
+<p>In order to integrate advertisements in your application, you first must become a publisher by
+registering a publishing account with the mobile advertising network.  Typically, an identifier is
+provisioned for each application serving advertisements.  This is how the advertising network
+correlates advertisements served in applications.  In the case of AdMob, the identifier is known as
+the Publisher ID.  You should consult your advertising networks for details.</p>
+
+<p>Mobile advertising networks typically distribute a specific Android SDK, which consists of code
+that takes care of communication, ad refresh, look-and-feel customization, and so on.</p>
+
+<p>Most advertising networks distribute their SDK as a JAR file.  Setting up ad network JAR file in
+your Android project is no different from integrating any third-party JAR files.  First, copy the
+JAR files to the <code>libs/</code> directory of your project.  If you’re using Eclipse as IDE, be
+sure to add the JAR file to the Build Path.  It can be done through <b>Properties &gt;
+Java Build Path &gt; Libraries &gt; Add JARs</b>.</p>
+
+<img src="/images/training/ads-eclipse-build-path.png" id="figure1" />
+<p class="img-caption">
+    <strong>Figure 1.</strong> Eclipse build path settings.
+</p>
+
+
+<h2 id="DeclarePermissions">Declare Proper Permissions</h2>
+
+<p>Because the mobile ads are fetched over the network, mobile advertising SDKs usually
+require the declaration of related permissions in the Android manifest.  Other kinds of permissions
+may also be required.</p>
+
+<p>For example, here's how you can request the {@link android.Manifest.permission#INTERNET}
+permission:</p>
+
+<pre>
+&lt;/manifest&gt;
+    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+    ...
+    &lt;application&gt;...&lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="SetupAdPlacement">Set Up Ad Placement</h2>
+
+<div class="figure" style="width:262px">
+<img src="/images/training/ads-top-banner.png" id="figure2" />
+<p class="img-caption">
+    <strong>Figure 2.</strong> Screenshot of the ad layout in the Mobile Ads sample.
+</p>
+</div>
+
+<p>Banner ads typically are implemented as a custom {@link android.webkit.WebView} (a view for
+viewing web pages). Ads also come in different dimensions and shapes.  Once you’ve decided to put an
+ad on a particular screen, you can add it in your activity's XML layout.  The XML snippet below
+illustrates a banner ad displayed on top of a screen.</p>
+
+<pre>
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        android:id=&quot;&#064;+id/ad_catalog_layout&quot;
+        android:orientation=&quot;vertical&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot; &gt;
+    &lt;com.google.ads.AdView
+        xmlns:googleads=&quot;http://schemas.android.com/apk/lib/com.google.ads&quot;
+        android:id=&quot;&#064;+id/ad&quot;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        googleads:adSize=&quot;BANNER&quot;
+        googleads:adUnitId=&quot;&#064;string/admob_id&quot; /&gt;
+    &lt;TextView android:id=&quot;&#064;+id/title&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;&#064;string/banner_top&quot; /&gt;
+    &lt;TextView android:id=&quot;&#064;+id/status&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot; /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>You should consider using alternative ad sizes based on various configurations such as screen
+size or screen orientation.  This can easily be addressed by <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">providing
+alternative resources</a>. For instance, the above sample layout might placed under the
+<code>res/layout/</code> directory as the default layout. If larger ad
+sizes are available, you can consider using them for "large" (and above) screens. For example, the
+following snippet comes from a layout file in the <code>res/layout-large/</code> directory, which
+renders a larger ad for "large" screen sizes.</p>
+
+<pre>
+...
+&lt;com.google.ads.AdView
+    xmlns:googleads=&quot;http://schemas.android.com/apk/lib/com.google.ads&quot;
+    android:id=&quot;&#064;+id/ad&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    <strong>googleads:adSize=&quot;IAB_LEADERBOARD&quot;</strong>
+    googleads:adUnitId=&quot;&#064;string/admob_id&quot; /&gt;
+...
+</pre>
+
+<p>Notice that the custom view name and it’s configuration attributes are network-specific.  Ad
+networks might support configurations with XML layout attributes (as shown above), runtime APIs, or
+both. In the sample application, Mobile Ads, the {@code AdView} ad size
+(<code>googleads:adSize</code>) and publisher ID (<code>googleads:adUnitId</code>) are set up in the
+XML layout.</p>
+
+<p>When deciding where to place ads within your application, you should carefully
+consider user-experience.  For example, you don’t want to fill the screen with
+multiple ads that will quite likely annoy your users.  In fact, this practice is banned by some ad
+networks. Also, avoid placing ads too closely to UI controls to avoid inadvertent clicks.</p>
+
+<p>Figures 3 and 4 illustrate what <strong>not</strong> to do.</p>
+
+<div style="float:left;width:275px">
+<img src="/images/training/ads-close-to-button.png" />
+<p class="img-caption">
+    <strong>Figure 3.</strong> Avoid putting UI
+inputs too closely to an ad banner to prevent inadvertent ad clicks.
+</p>
+</div>
+
+<div style="float:left;width:275px;height:530px;margin-left:2em">
+<img src="/images/training/ads-cover-content.png" />
+<p class="img-caption">
+    <strong>Figure 4.</strong> Don't overlay ad banner on useful content.
+</p>
+</div>
+
+
+<h2 id="InitializeAd" style="clear:left">Initialize the Ad</h2>
+
+<p>After setting up the ad in the XML layout, you can further customize the ad in {@link
+android.app.Activity#onCreate Activity.onCreate()} or {@link
+android.app.Fragment#onCreateView Fragment.onCreateView()} based on how your application is
+architected. Depending on the ad network, possible configuration parameters are: ad size, font
+color, keyword, demographics, location targeting, and so on.</p>
+
+<p>It is important to respect user privacy if certain parameters, such as demographics or location,
+are passed to ad networks for targeting purposes.  Let your users know and give them a chance to opt
+out of these features.</p>
+
+<p>In the below code snippet, keyword targeting is used.  After the keywords are set, the
+application calls <code>loadAd()</code> to begin serving ads.</p>
+
+<pre>
+public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        Bundle savedInstanceState) {
+    ...
+    View v = inflater.inflate(R.layout.main, container, false);
+    mAdStatus = (TextView) v.findViewById(R.id.status);
+    mAdView = (AdView) v.findViewById(R.id.ad);
+    mAdView.setAdListener(new MyAdListener());
+
+    AdRequest adRequest = new AdRequest();
+    adRequest.addKeyword("sporting goods");
+    mAdView.loadAd(adRequest);
+    return v;
+}
+</pre>
+
+
+
+<h2 id="EnableTestMode">Enable Test Mode</h2>
+
+<p>Some ad networks provide a test mode.  This is useful during development and testing in which ad
+impressions and clicks are not counted.</p>
+
+<p class="caution"><strong>Important:</strong> Be sure to turn off test mode before publishing your
+application.</p>
+
+
+<h2 id="ImplementListeners">Implement Ad Event Listeners</h2>
+
+<p>Where available, you should consider implementing ad event listeners, which provide callbacks on
+various ad-serving events associated with the ad view.  Depending on the ad network, the listener
+might provide notifications on events such as before the ad is loaded, after the ad is loaded,
+whether the ad fails to load, or other events.  You can choose to react to these events based on
+your specific situation.  For example, if the ad fails to load, you can display a custom banner
+within the application or create a layout such that the rest of content fills up the screen.</p>
+
+<p>For example, here are some event callbacks available from AdMob's {@code AdListener}
+interface:</p>
+
+<pre>
+private class MyAdListener implements AdListener {
+    ...
+
+    &#064;Override
+    public void onFailedToReceiveAd(Ad ad, ErrorCode errorCode) {
+        mAdStatus.setText(R.string.error_receive_ad);
+    }
+
+    &#064;Override
+    public void onReceiveAd(Ad ad) {
+        mAdStatus.setText("");
+    }
+}
+</pre>
+
