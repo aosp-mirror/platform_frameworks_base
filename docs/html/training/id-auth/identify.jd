@@ -1,0 +1,137 @@
+page.title=Identifying Your User
+parent.title=Identifying and Authenticating Users
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Authenticating to OAuth2 Services
+next.link=authenticate.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ForYou">Determine if AccountManager for You</a></li>
+  <li><a href="#TaskTwo">Decide What Type of Account to Use</a></li>
+  <li><a href="#GetPermission">Request GET_ACCOUNT permission</a></li>
+  <li><a href="#TaskFive">Query AccountManager for a List of Accounts</a></li>
+  <li><a href="#IdentifyUser">Use the Account Object to Identify the User</a></li>
+  <li><a href="#IdIsEnough">Decide Whether Identification is Enough</a></li>
+</ol>
+  </div>
+</div>
+
+
+<p>Everyone likes it when you remember their name. One of the simplest, most
+effective things you can do to make your app more lovable is to remember who
+your user is&mdash;especially when the user upgrades to a new device or starts carrying
+a tablet as well as a phone. But how do you know who your user is? And how do
+you recognize them on a new device?</p>
+
+<p>For many applications, the answer is the {@link android.accounts.AccountManager} APIs. With the
+user's permission, you can use Account Manager to uniquely identify a user
+by the online identity that the user has stored on their device.</p>
+
+<p>Integration with the user's accounts allows you to do a variety of things such as:</p>
+<ul>
+<li>Auto-fill forms with the user's email address.</li>
+<li>Retrieve an ID that is tied to a user, not the device.</li>
+</ul>
+
+
+<h2 id="ForYou">Determine if AccountManager for You</h2>
+
+<p>Applications typically identify the user in three different ways:</p>
+<ol type="a">
+<li>Ask the user to type in a username </li>
+<li>Use a unique device identifier rather than a user identifier</li>
+<li>Retrieve a built-in account from {@link android.accounts.AccountManager}</li>
+</ol>
+
+<p>Option (a) is problematic. First, asking the user to type something before
+entering your app will automatically make your app less appealing. Second,
+there's no guarantee that the username chosen will be unique. </p>
+
+<p>Option (b) is less onerous for the user, but it's
+<a href="http://android-developers.blogspot.com/2011/03/identifying-app-installations.html">tricky
+to get right</a>. More
+importantly, it only allows you to remember the user on one device. Imagine the
+frustration of someone who upgrades to a shiny new device, only to find that
+your app no longer remembers them.</p>
+
+<p>Option (c) is the preferred technique. Account Manager allows you to get
+information about the accounts that are stored on the user's device. As we'll
+see in this lesson, using Account Manager lets you identify your user, no matter
+how many devices the user may own, by adding just a couple of extra taps to your
+UI.</p>
+
+
+<h2 id="TaskTwo">Decide What Type of Account to Use</h2>
+
+<p>Android devices can store multiple accounts from many different providers.
+When you query {@link android.accounts.AccountManager} for account names, you can choose to filter
+by
+account type. The account type is a string that uniquely identifies the entity
+that issued the account. For instance, Google accounts have type "com.google,"
+while Twitter uses "com.twitter.android.auth.login."</p>
+
+
+<h2 id="GetPermission">Request GET_ACCOUNT permission</h2>
+
+<p>In order to get a list of accounts on the device, your app needs the {@link
+android.Manifest.permission#GET_ACCOUNTS}
+permission. Add a <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
+&lt;uses-permission&gt;}</a> tag in your manifest file to request
+this permission:</p>
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;
+    ...
+&lt;/manifest>
+</pre>
+
+
+<h2 id="TaskFive">Query AccountManager for a List of Accounts</h2>
+
+<p>Once you decide what account type you're interested in, you need to query for accounts of that
+type. Get an instance of {@link android.accounts.AccountManager} by calling {@link
+android.accounts.AccountManager#get(android.content.Context) AccountManager.get()}. Then use that
+instance to call {@link android.accounts.AccountManager#getAccountsByType(java.lang.String)
+getAccountsByType()}.</p>
+
+<pre>
+AccountManager am = AccountManager.get(this); // "this" references the current Context
+
+Account[] accounts = am.getAccountsByType("com.google");
+</pre>
+
+<p>This returns an array of {@link android.accounts.Account} objects. If there's more than one
+{@link android.accounts.Account} in
+the array, you should present a dialog asking the user to select one.</p>
+
+
+<h2 id="IdentifyUser">Use the Account Object to Identify the User</h2>
+
+<p>The {@link android.accounts.Account} object contains an account name, which for Google accounts
+is an
+email address. You can use this information in several different ways, such as:
+<ul>
+    <li> As suggestions in forms, so the user doesn't need to input account information by
+hand.</li>
+    <li> As a key into your own online database of usage and personalization information.</li>
+</ul>
+</p>
+
+
+<h2 id="IdIsEnough">Decide Whether Identification is Enough</h2>
+
+<p>Account names are a good way to identify the user, but the {@link android.accounts.Account}
+object by
+itself doesn't protect your data or give you access to anything. If you intend
+to access private data, you'll need something stronger: authentication.
+The next lesson explains how to authenticate to existing online services. The lesson after that
+deals with writing a custom authenticator so that you can install your own
+account types.</p>
