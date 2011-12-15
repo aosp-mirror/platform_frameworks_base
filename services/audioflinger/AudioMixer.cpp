@@ -137,36 +137,22 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     }
  }
 
-status_t AudioMixer::enable(int name)
+void AudioMixer::enable()
 {
-    switch (name) {
-        case MIXING: {
-            if (mState.tracks[ mActiveTrack ].enabled != 1) {
-                mState.tracks[ mActiveTrack ].enabled = 1;
-                ALOGV("enable(%d)", mActiveTrack);
-                invalidateState(1<<mActiveTrack);
-            }
-        } break;
-        default:
-            return NAME_NOT_FOUND;
+    if (mState.tracks[ mActiveTrack ].enabled != 1) {
+        mState.tracks[ mActiveTrack ].enabled = 1;
+        ALOGV("enable(%d)", mActiveTrack);
+        invalidateState(1<<mActiveTrack);
     }
-    return NO_ERROR;
 }
 
-status_t AudioMixer::disable(int name)
+void AudioMixer::disable()
 {
-    switch (name) {
-        case MIXING: {
-            if (mState.tracks[ mActiveTrack ].enabled != 0) {
-                mState.tracks[ mActiveTrack ].enabled = 0;
-                ALOGV("disable(%d)", mActiveTrack);
-                invalidateState(1<<mActiveTrack);
-            }
-        } break;
-        default:
-            return NAME_NOT_FOUND;
+    if (mState.tracks[ mActiveTrack ].enabled != 0) {
+        mState.tracks[ mActiveTrack ].enabled = 0;
+        ALOGV("disable(%d)", mActiveTrack);
+        invalidateState(1<<mActiveTrack);
     }
-    return NO_ERROR;
 }
 
 status_t AudioMixer::setActiveTrack(int track)
