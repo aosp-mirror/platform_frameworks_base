@@ -155,7 +155,7 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     mSaveCount = 1;
 
     glViewport(0, 0, mWidth, mHeight);
-    glScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
+    mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
 
     mSnapshot->setClip(left, top, right, bottom);
     mDirtyClip = false;
@@ -550,7 +550,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
 #endif
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
-    glScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
+    mCaches.setScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
             clip.getWidth() + 2.0f, clip.getHeight() + 2.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -965,7 +965,10 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 void OpenGLRenderer::setScissorFromClip() {
     Rect clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
-    glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
+
+    mCaches.setScissor(clip.left, mSnapshot->height - clip.bottom,
+            clip.getWidth(), clip.getHeight());
+
     mDirtyClip = false;
 }
 
