@@ -46,13 +46,13 @@ public:
      */
     virtual void        stop() = 0;
 
-    /* flush a stopped track. All pending buffers are discarded.
-     * This function has no effect if the track is not stoped.
+    /* Flush a stopped track. All pending buffers are discarded.
+     * This function has no effect if the track is not stopped.
      */
     virtual void        flush() = 0;
 
-    /* mute or unmutes this track.
-     * While mutted, the callback, if set, is still called.
+    /* Mute or unmute this track.
+     * While muted, the callback, if set, is still called.
      */
     virtual void        mute(bool) = 0;
     
@@ -67,7 +67,7 @@ public:
      */
     virtual status_t    attachAuxEffect(int effectId) = 0;
 
-    /* get this tracks control block */
+    /* get this track's control block */
     virtual sp<IMemory> getCblk() const = 0;    
 };
 

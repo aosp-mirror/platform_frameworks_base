@@ -59,8 +59,8 @@ struct audio_track_cblk_t
 
     // The data members are grouped so that members accessed frequently and in the same context
     // are in the same line of data cache.
-                Mutex       lock;
-                Condition   cv;
+                Mutex       lock;           // sizeof(int)
+                Condition   cv;             // sizeof(int)
     volatile    uint32_t    user;
     volatile    uint32_t    server;
                 uint32_t    userBase;

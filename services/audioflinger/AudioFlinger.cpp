@@ -1000,7 +1000,7 @@ AudioFlinger::ThreadBase::~ThreadBase()
 
 void AudioFlinger::ThreadBase::exit()
 {
-    // keep a strong ref on ourself so that we wont get
+    // keep a strong ref on ourself so that we won't get
     // destroyed in the middle of requestExitAndWait()
     sp <ThreadBase> strongMe = this;
 
@@ -2345,7 +2345,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
         }
         if (param.getInt(String8(AudioParameter::keyFrameCount), value) == NO_ERROR) {
             // do not accept frame count changes if tracks are open as the track buffer
-            // size depends on frame count and correct behavior would not be garantied
+            // size depends on frame count and correct behavior would not be guaranteed
             // if frame count is changed after track creation
             if (!mTracks.isEmpty()) {
                 status = INVALID_OPERATION;
