@@ -1299,6 +1299,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ServiceManager.addService("activity", m);
             ServiceManager.addService("meminfo", new MemBinder(m));
             ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
+            ServiceManager.addService("dbinfo", new DbBinder(m));
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(m));
             }
@@ -1450,6 +1451,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
+        }
+    }
+
+    static class DbBinder extends Binder {
+        ActivityManagerService mActivityManagerService;
+        DbBinder(ActivityManagerService activityManagerService) {
+            mActivityManagerService = activityManagerService;
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump dbinfo from from pid="
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                        + " without permission " + android.Manifest.permission.DUMP);
+                return;
+            }
+
+            mActivityManagerService.dumpDbInfo(fd, pw, args);
         }
     }
 
@@ -9726,6 +9747,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                     TransferPipe tp = new TransferPipe();
                     try {
                         r.thread.dumpGfxInfo(tp.getWriteFd().getFileDescriptor(), args);
+                        tp.go(fd);
+                    } finally {
+                        tp.kill();
+                    }
+                } catch (IOException e) {
+                    pw.println("Failure while dumping the app: " + r);
+                    pw.flush();
+                } catch (RemoteException e) {
+                    pw.println("Got a RemoteException while dumping the app " + r);
+                    pw.flush();
+                }
+            }
+        }
+    }
+
+    final void dumpDbInfo(FileDescriptor fd, PrintWriter pw, String[] args) {
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
+        if (procs == null) {
+            return;
+        }
+
+        pw.println("Applications Database Info:");
+
+        for (int i = procs.size() - 1 ; i >= 0 ; i--) {
+            ProcessRecord r = procs.get(i);
+            if (r.thread != null) {
+                pw.println("\n** Database info for pid " + r.pid + " [" + r.processName + "] **");
+                pw.flush();
+                try {
+                    TransferPipe tp = new TransferPipe();
+                    try {
+                        r.thread.dumpDbInfo(tp.getWriteFd().getFileDescriptor(), args);
                         tp.go(fd);
                     } finally {
                         tp.kill();
