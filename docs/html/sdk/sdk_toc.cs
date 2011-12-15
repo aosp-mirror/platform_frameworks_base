@@ -76,11 +76,11 @@ class="new">new!</span></li>
     </ul>
     <ul>
       <li class="toggle-list">
-        <div><a href="<?cs var:toroot ?>sdk/android-4.0.html">
-        <span class="en">Android 4.0 Platform</span></a> <span class="new">new!</span></div>
+        <div><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">
+        <span class="en">Android 4.0.x Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-4.0-highlights.html">Platform Highlights</a></li>
-          <li><a href="<?cs var:toroot ?>sdk/api_diff/14/changes.html">API Differences Report &raquo;</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-4.0.3.html">Android 4.0.3 Platform</a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-4.0.html">Android 4.0 Platform</a> </li>
         </ul>
       </li>
       <li class="toggle-list">
