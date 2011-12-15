@@ -79,6 +79,8 @@ void Caches::init() {
 
     mTexCoordsArrayEnabled = false;
 
+    mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
+
     glActiveTexture(gTextureUnits[0]);
     mTextureUnit = 0;
 
@@ -309,6 +311,17 @@ void Caches::activeTexture(GLuint textureUnit) {
     if (mTextureUnit != textureUnit) {
         glActiveTexture(gTextureUnits[textureUnit]);
         mTextureUnit = textureUnit;
+    }
+}
+
+void Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
+    if (x != mScissorX || y != mScissorY || width != mScissorWidth || height != mScissorHeight) {
+        glScissor(x, y, width, height);
+
+        mScissorX = x;
+        mScissorY = y;
+        mScissorWidth = width;
+        mScissorHeight = height;
     }
 }
 

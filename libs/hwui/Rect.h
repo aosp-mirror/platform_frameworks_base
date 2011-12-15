@@ -112,7 +112,8 @@ public:
     }
 
     bool intersect(float l, float t, float r, float b) {
-        Rect tmp(intersectWith(l, t, r, b));
+        Rect tmp(l, t, r, b);
+        intersectWith(tmp);
         if (!tmp.isEmpty()) {
             set(tmp);
             return true;
@@ -172,6 +173,13 @@ public:
 private:
     static inline float min(float a, float b) { return (a < b) ? a : b; }
     static inline float max(float a, float b) { return (a > b) ? a : b; }
+
+    void intersectWith(Rect& tmp) const {
+        tmp.left = max(left, tmp.left);
+        tmp.top = max(top, tmp.top);
+        tmp.right = min(right, tmp.right);
+        tmp.bottom = min(bottom, tmp.bottom);
+    }
 
     Rect intersectWith(float l, float t, float r, float b) const {
         Rect tmp;

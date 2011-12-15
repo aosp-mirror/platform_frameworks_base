@@ -1889,8 +1889,7 @@ public class Resources {
         if (cs != null) {
             dr = cs.newDrawable(this);
         } else {
-            if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
-                    value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            if (isColorDrawable) {
                 dr = new ColorDrawable(value.data);
             }
 

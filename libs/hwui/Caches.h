@@ -188,6 +188,11 @@ public:
     void activeTexture(GLuint textureUnit);
 
     /**
+     * Sets the scissor for the current surface.
+     */
+    void setScissor(GLint x, GLint y, GLint width, GLint height);
+
+    /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
      * indices for the region mesh.
@@ -239,6 +244,11 @@ private:
     bool mTexCoordsArrayEnabled;
 
     GLuint mTextureUnit;
+
+    GLint mScissorX;
+    GLint mScissorY;
+    GLint mScissorWidth;
+    GLint mScissorHeight;
 
     // Used to render layers
     TextureVertex* mRegionMesh;
