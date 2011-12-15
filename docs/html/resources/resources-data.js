@@ -508,6 +508,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/training/device-management-policy/index.html',
+    title: {
+      en: 'Device Policy Management'
+    },
+    description: {
+      en: 'This is a security-aware sample application that demonstrates the enforcement of device administration policies on Android 2.2 or above platforms.'
+    }
+  },
+  {
     tags: ['sample'],
     path: 'samples/Home/index.html',
     title: {
