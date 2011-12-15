@@ -23,8 +23,6 @@
 
 namespace android {
 
-struct AMessage;
-class String8;
 class DataSource;
 
 class WVMLoadableExtractor : public MediaExtractor {
@@ -60,8 +58,6 @@ public:
     // is used.
     void setAdaptiveStreamingMode(bool adaptive);
 
-    static bool getVendorLibHandle();
-
 protected:
     virtual ~WVMExtractor();
 
@@ -72,10 +68,6 @@ private:
     WVMExtractor(const WVMExtractor &);
     WVMExtractor &operator=(const WVMExtractor &);
 };
-
-bool SniffWVM(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence,
-        sp<AMessage> *);
 
 }  // namespace android
 
