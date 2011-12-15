@@ -1743,6 +1743,7 @@ public class BluetoothService extends IBluetooth.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (getBluetoothStateInternal() != BluetoothAdapter.STATE_ON) {
+            pw.println("state: " + getBluetoothStateInternal());
             return;
         }
 

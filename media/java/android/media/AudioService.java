@@ -600,6 +600,7 @@ public class AudioService extends IAudioService.Stub {
         ensureValidDirection(direction);
 
         float volume = AudioSystem.getMasterVolume();
+        Log.d(TAG, "adjustMasterVolume old=" + volume);
         if (volume >= 0.0) {
             // get current master volume adjusted to 0 to 100
             int oldVolume = getMasterVolume();
@@ -616,6 +617,7 @@ public class AudioService extends IAudioService.Stub {
             Binder.restoreCallingIdentity(origCallerIdentityToken);
             sendMasterVolumeUpdate(flags, oldVolume, getMasterVolume());
         }
+        Log.d(TAG, "adjustMasterVolume new=" + volume);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
