@@ -1,0 +1,220 @@
+page.title=Enhancing Security with Device Management Policies
+parent.title=Developing Android Applications for the Enterprise
+parent.link=index.html
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DeclarePolicy">Define and Declare Your Policy</a></li>
+  <li><a href="#CreateDeviceAdminReceiver">Create a Device Administration Receiver</a></li>
+  <li><a href="#ActivateDeviceAdmin">Activate the Device Administrator</a></li>
+  <li><a href="#ImplementDevicePolicyController">Implement the Device Policy Controller</a></li>
+</ol>
+  
+<!-- related docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a></li>
+</ul>
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/DeviceManagement.zip"
+class="button">Download the sample</a>
+ <p class="filename">DeviceManagement.zip</p>
+</div>
+
+</div>
+</div>
+
+
+<p>Since Android 2.2 (API level 8), the Android platform offes system-level device management
+capabilities through the Device Administration APIs.</p>
+
+<p>In this lesson, you will learn how to create a security-aware application that manages access to
+its content by enforcing device management policies. Specifically, the application can be configured
+such that it ensures a screen-lock password of sufficient strength is set up before displaying
+restricted content to the user.</p>
+
+
+<h2 id="DeclarePolicy">Define and Declare Your Policy</h2>
+
+<p>First, you need to define the kinds of policy to support at the functional level.  Policies may
+cover screen-lock password strength, expiration timeout, encryption, etc.</p>
+
+<p>You must declare the selected policy set, which will be enforced by the application, in the
+<code>res/xml/device_admin.xml</code> file.   The Android manifest should also reference the
+declared policy set.</p>
+
+<p>Each declared policy corresponds to some number of related device policy methods in {@link
+android.app.admin.DevicePolicyManager} (defining minimum password length and minimum number of
+uppercase characters are two examples).  If an application attempts to invoke methods whose
+corresponding policy is not declared in the XML, this will result in a {@link
+java.lang.SecurityException} at runtime.  Other permissions,
+such as <code>force-lock</code>, are available if the application intends to manage
+other kinds of policy.  As you'll see later, as part of the device administrator activation process,
+the list of declared policies will be presented to the user on a system screen.</p>
+
+<p>The following snippet declares the limit password policy in <code>res/xml/device_admin.xml</code>:</p>
+
+<pre>
+&lt;device-admin xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;uses-policies&gt;
+        &lt;limit-password /&gt;
+    &lt;/uses-policies&gt;
+&lt;/device-admin&gt;
+</pre>
+
+<p>Policy declaration XML referenced in Android manifest:</p>
+
+<pre>
+&lt;receiver android:name=&quot;.Policy$PolicyAdmin&quot;
+    android:permission=&quot;android.permission.BIND_DEVICE_ADMIN&quot;&gt;
+    <strong>&lt;meta-data android:name=&quot;android.app.device_admin&quot;
+        android:resource=&quot;&#064;xml/device_admin&quot; /&gt;</strong>
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.app.action.DEVICE_ADMIN_ENABLED&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+
+<h2 id="CreateDeviceAdminReceiver">Create a Device Administration Receiver</h2>
+
+<p>Create a Device Administration broadcast receiver, which gets notified of events related to the policies you’ve declared to support.  An application can selectively override callback methods.</p>
+
+<p>In the sample application, Device Admin, when the device administrator is deactivated by the
+user, the configured policy is erased from the shared preference.  You should consider implementing
+business logic that is relevant to your use case.  For example, the application might take some
+actions to mitigate security risk by implementing some combination of deleting sensitive data on the
+device, disabling remote synchronization, alerting an administrator, etc.</p>
+
+<p>For the broadcast receiver to work, be sure to register it in the Android manifest as illustrated in the above snippet.</p>
+
+<pre>
+public static class PolicyAdmin extends DeviceAdminReceiver {
+
+    &#064;Override
+    public void onDisabled(Context context, Intent intent) {
+        // Called when the app is about to be deactivated as a device administrator.
+        // Deletes previously stored password policy.
+        super.onDisabled(context, intent);
+        SharedPreferences prefs = context.getSharedPreferences(APP_PREF, Activity.MODE_PRIVATE);
+        prefs.edit().clear().commit();
+    }
+}
+</pre>
+
+
+<h2 id="ActivateDeviceAdmin">Activate the Device Administrator</h2>
+
+<p>Before enforcing any policies, the user needs to manually activate the application as a device
+administrator.  The snippet below illustrates how to trigger the settings activity in which the
+user can activate your application. It is good practice to include the explanatory text to highlight
+to users why the application is requesting to be a device administrator, by specifying the
+{@link android.app.admin.DevicePolicyManager#EXTRA_ADD_EXPLANATION} extra in the intent.</p>
+
+<div class="figure" style="width:220px">
+<img src="/images/training/device-mgmt-activate-device-admin.png" />
+<p class="img-caption"><strong>Figure 1.</strong> The user activation screen in which you can
+provide a description of your device policies.</p>
+</div>
+
+<pre>
+if (!mPolicy.isAdminActive()) {
+
+    Intent activateDeviceAdminIntent =
+        new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+
+    activateDeviceAdminIntent.putExtra(
+        DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+        mPolicy.getPolicyAdmin());
+
+    // It is good practice to include the optional explanation text to
+    // explain to user why the application is requesting to be a device
+    // administrator. The system will display this message on the activation
+    // screen.
+    activateDeviceAdminIntent.putExtra(
+        DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+        getResources().getString(R.string.device_admin_activation_message));
+
+    startActivityForResult(activateDeviceAdminIntent,
+        REQ_ACTIVATE_DEVICE_ADMIN);
+}
+</pre>
+
+<p>If the user chooses "Activate," the application becomes a device administrator and can begin
+configuring and enforcing the policy.</p>
+
+<p>The application also needs to be prepared to handle set back situations where the user abandons
+the activation process by hitting the Cancel button, the Back key, or the Home key. Therefore,
+{@link android.app.Activity#onResume onResume()} in the Policy Set Up Activity needs to have logic
+to reevaluate the condition and present the Device Administrator Activation option to the user if
+needed.</p>
+
+
+<h2 id="ImplementDevicePolicyController">Implement the Device Policy Controller</h2>
+
+<p>After the device administrator is activated successfully, the application then configures Device
+Policy Manager with the requested policy.  Keep in mind that new policies are being added to
+Android with each release. It is appropriate to perform version checks in your application if using
+new policies while supporting older versions of the platform. For example, the Password Minimum
+Upper Case policy is only available with API level 11 (Honeycomb) and above. The following code
+demonstrates how you can check the version at runtime.</p>
+
+<pre>
+DevicePolicyManager mDPM = (DevicePolicyManager)
+        context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+ComponentName mPolicyAdmin = new ComponentName(context, PolicyAdmin.class);
+...
+mDPM.setPasswordQuality(mPolicyAdmin, PASSWORD_QUALITY_VALUES[mPasswordQuality]);
+mDPM.setPasswordMinimumLength(mPolicyAdmin, mPasswordLength);
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+    mDPM.setPasswordMinimumUpperCase(mPolicyAdmin, mPasswordMinUpperCase);
+}
+</pre>
+
+<p>At this point, the application is able to enforce the policy. While the application has no access
+to the actual screen-lock password used, through the Device Policy Manager API it can determine
+whether the existing password satisfies the required policy.  If it turns out that the existing
+screen-lock password is not sufficient, the device administration API does not automatically take
+corrective action.  It is the application’s responsibility to explicitly launch the system
+password-change screen in the Settings app. For example:</p>
+
+<pre>
+if (!mDPM.isActivePasswordSufficient()) {
+    ...
+    // Triggers password change screen in Settings.
+    Intent intent =
+        new Intent(DevicePolicyManager.ACTION_SET_NEW_PASSWORD);
+    startActivity(intent);
+}
+</pre>
+
+<p>Normally, the user can select from one of the available lock mechanisms, such as None, Pattern,
+PIN (numeric), or Password (alphanumeric).  When a password policy is configured, those password
+types that are weaker than those defined in the policy are disabled.  For example, if the
+“Numeric” password quality is configured, the user can select either PIN (numeric) or Password
+(alphanumeric) password only.</p>
+
+<p>Once the device is properly secured by setting up a proper screen-lock password, the application
+allows access to the secured content.</p>
+
+<pre>
+if (!mDPM.isAdminActive(..)) {
+    // Activates device administrator.
+    ...
+} else if (!mDPM.isActivePasswordSufficient()) {
+    // Launches password set-up screen in Settings.
+    ...
+} else {
+    // Grants access to secure content.
+    ...
+    startActivity(new Intent(context, SecureActivity.class));
+}
+</pre>
