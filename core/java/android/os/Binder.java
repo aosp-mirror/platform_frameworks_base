@@ -337,13 +337,16 @@ public class Binder implements IBinder {
         try {
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException e) {
+            reply.setDataPosition(0);
             reply.writeException(e);
             res = true;
         } catch (RuntimeException e) {
+            reply.setDataPosition(0);
             reply.writeException(e);
             res = true;
         } catch (OutOfMemoryError e) {
             RuntimeException re = new RuntimeException("Out of memory", e);
+            reply.setDataPosition(0);
             reply.writeException(re);
             res = true;
         }
