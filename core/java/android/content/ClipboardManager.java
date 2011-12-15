@@ -70,7 +70,20 @@ public class ClipboardManager extends android.text.ClipboardManager {
         }
     };
 
+    /**
+     * Defines a listener callback that is invoked when the primary clip on the clipboard changes.
+     * Objects that want to register a listener call
+     * {@link android.content.ClipboardManager#addPrimaryClipChangedListener(OnPrimaryClipChangedListener)
+     * addPrimaryClipChangedListener()} with an
+     * object that implements OnPrimaryClipChangedListener.
+     *
+     */
     public interface OnPrimaryClipChangedListener {
+
+        /**
+         * Callback that is invoked by {@link android.content.ClipboardManager} when the primary
+         * clip changes.
+         */
         void onPrimaryClipChanged();
     }
 
