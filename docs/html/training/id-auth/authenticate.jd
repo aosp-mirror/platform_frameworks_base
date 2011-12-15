@@ -1,0 +1,253 @@
+page.title=Authenticating to OAuth2 Services
+parent.title=Identifying and Authenticating Users
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Identifying Your User
+previous.link=identify.html
+next.title=Creating a Custom Account Type
+next.link=custom_auth.html
+
+@jd:body
+
+    <!-- This is the training bar -->
+<div id="tb-wrapper">
+  <div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Gather">Gather Information</a></li>
+  <li><a href="#RequestToken">Request an Auth Token</a></li>
+  <li><a href="#RequestAgain">Request an Auth Token... Again</a></li>
+  <li><a href="#ConnectToService">Connect to the Online Service</a></li>
+</ol>
+  </div>
+</div>
+
+<p>In order to securely access an online service, users need to authenticate to
+the service&mdash;they need to provide proof of their identity. For an
+application that accesses a third-party service, the security problem is even
+more complicated. Not only does the user need to be authenticated to access the
+service, but the application also needs to be authorized to act on the user's
+behalf. </p>
+
+<p>The industry standard way to deal with authentication to third-party services
+is the OAuth2 protocol. OAuth2 provides a single value, called an <strong>auth
+token</strong>, that represents both the user's identity and the application's
+authorization to act on the user's behalf. This lesson demonstrates connecting
+to a Google server that supports OAuth2. Although Google services are used as an
+example, the techniques demonstrated will work on any service that correctly
+supports the OAuth2 protocol.</p>
+
+<p>Using OAuth2 is good for:</p>
+<ul>
+<li>Getting permission from the user to access an online service using his or
+her account.</li>
+<li>Authenticating to an online service on behalf of the user.</li>
+<li>Handling authentication errors.</li>
+</ul>
+
+
+<h2 id="Gather">Gather Information</h2>
+
+<p>To begin using OAuth2, you need to know a few things about the API you're trying
+to access:</p>
+
+<ul>
+<li>The url of the service you want to access.</li>
+<li>The <strong>auth scope</strong>, which is a string that defines the specific
+type of access your app is asking for. For instance, the auth scope for
+read-only access to Google Tasks is <code>View your tasks</code>, while the auth
+scope for read-write access to Google Tasks is <code>Manage Your
+Tasks</code>.</li>
+<li>A <strong>client id</strong> and <strong>client secret</strong>, which are
+strings that identify your app to the service. You need to obtain these strings
+directly from the service owner. Google has a self-service system for obtaining
+client ids and secrets. The article <a
+href="http://code.google.com/apis/tasks/articles/oauth-and-tasks-on-android.
+html">Getting Started with the Tasks API and OAuth 2.0 on Android</a> explains
+how to use this system to obtain these values for use with the Google Tasks
+API.</li>
+</ul>
+
+
+<h2 id="RequestToken">Request an Auth Token</h2>
+
+<p>Now you're ready to request an auth token. Auth tokens usually expire after
+some period of time, so you'll have to renew them.</p>
+
+ <!-- TODO: I think a flowchart would be useful here, or perhaps a link to an as-yet-to-be-created
+flowchart that lives in the docs. -->
+
+<p>To get an auth token you first need to request the
+{@link android.Manifest.permission#ACCOUNT_MANAGER}
+to yourmanifest file. To actually do anything useful with the
+token, you'll also need to add the {@link android.Manifest.permission#INTERNET}
+permission.</p>
+
+<code>
+&lt;manifest ... >
+    &lt;uses-permission android:name="android.permission.ACCOUNT_MANAGER" /&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+    ...
+&lt;/manifest>
+</code>
+
+
+<p>Once your app has these permissions set, you can call {@link
+android.accounts.AccountManager#getAuthToken AccountManager.getAuthToken()} to get the
+token.</p>
+
+<p>Watch out! Calling methods on {@link android.accounts.AccountManager} can be tricky! Since
+account operations may involve network communication, most of the {@link
+android.accounts.AccountManager} methods are asynchronous. This means that instead of doing all of
+your auth work in one function, you need to implement it as a series of callbacks. For example:</p>
+
+<pre>
+AccountManager am = AccountManager.get(this);
+Bundle options = new Bundle();
+
+am.getAuthToken(
+    myAccount_,                     // Account retrieved using getAccountsByType()
+    "Manage your tasks",            // Auth scope
+    options,                        // Authenticator-specific options
+    this,                           // Your activity
+    new OnTokenAcquired(),          // Callback called when a token is successfully acquired
+    new Handler(new OnError()));    // Callback called if an error occurs
+</pre>
+
+<p>In this example, <code>OnTokenAcquired</code> is a class that extends
+{@link android.accounts.AccountManagerCallback}. {@link android.accounts.AccountManager} calls
+{@link android.accounts.AccountManagerCallback#run run()} on <code>OnTokenAcquired</code> with an
+{@link android.accounts.AccountManagerFuture} that contains a {@link android.os.Bundle}. If
+the call succeeded, the token is inside
+the {@link android.os.Bundle}.</p>
+
+<p>Here's how you can get the token from the {@link android.os.Bundle}:</p>
+
+<pre>
+private class OnTokenAcquired implements AccountManagerCallback&lt;Bundle&gt; {
+    &#64;Override
+    public void run(AccountManagerFuture&lt;Bundle&gt; result) {
+        // Get the result of the operation from the AccountManagerFuture.
+        Bundle bundle = result.getResult();
+    
+        // The token is a named value in the bundle. The name of the value
+        // is stored in the constant AccountManager.KEY_AUTHTOKEN.
+        token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+        ...
+    }
+}
+</pre>
+
+<p>If all goes well, the {@link android.os.Bundle} contains a valid token in the {@link
+android.accounts.AccountManager#KEY_AUTHTOKEN} key and you're off to the races. Things don't
+always go that smoothly, though...</p>
+
+
+<h2 id="RequestAgain">Request an Auth Token... Again</h2>
+
+<p>Your first request for an auth token might fail for several reasons:</p>
+
+<ul>
+<li>An error in the device or network caused {@link android.accounts.AccountManager} to fail.</li>
+<li>The user decided not to grant your app access to the account.</li>
+<li>The stored account credentials aren't sufficient to gain access to the account.</li>
+<li>The cached auth token has expired.</li>
+</ul>
+
+<p>Applications can handle the first two cases trivially, usually by simply
+showing an error message to the user. If the network is down or the user decided
+not to grant access, there's not much that your application can do about it. The
+last two cases are a little more complicated, because well-behaved applications
+are expected to handle these failures automatically.</p>
+
+<p>The third failure case, having insufficient credentials, is communicated via the {@link
+android.os.Bundle} you receive in your {@link android.accounts.AccountManagerCallback}
+(<code>OnTokenAcquired</code> from the previous example). If the {@link android.os.Bundle} includes
+an {@link android.content.Intent} in the {@link android.accounts.AccountManager#KEY_INTENT} key,
+then the authenticator is telling you that it needs to interact directly with the user before it can
+give you a valid token.</p>
+
+<p>There may be many reasons for the authenticator to return an {@link android.content.Intent}. It
+may be the first time the user has logged in to this account. Perhaps the user's account has expired
+and they need to log in again, or perhaps their stored credentials are incorrect. Maybe the account
+requires two-factor authentication or it needs to activate the camera to do a retina scan. It
+doesn't really matter what the reason is. If you want a valid token, you're going to have to fire
+off the {@link android.content.Intent} to get it.</p>
+
+<pre>
+private class OnTokenAcquired implements AccountManagerCallback&lt;Bundle&gt; {
+    &#64;Override
+    public void run(AccountManagerFuture&lt;Bundle&gt; result) {
+        ...
+        Intent launch = (Intent) result.get(AccountManager.KEY_INTENT);
+        if (launch != null) {
+            startActivityForResult(launch, 0);
+            return;
+        }
+    }
+}
+</pre>
+
+<p>Note that the example uses {@link android.app.Activity#startActivityForResult
+startActivityForResult()}, so that you can capture
+the result of the {@link android.content.Intent} by implementing {@link
+android.app.Activity#onActivityResult onActivityResult()} in
+your own activity. This is important! If you don't capture the result from the
+authenticator's response {@link android.content.Intent},
+it's impossible to tell whether the user has successfully authenticated or not.
+If the result is {@link android.app.Activity#RESULT_OK}, then the
+authenticator has updated the stored credentials so that they are sufficient for
+the level of access you requested, and you should call {@link
+android.accounts.AccountManager#getAuthToken AccountManager.getAuthToken()} again to request the new
+auth token.</p>
+
+<p>The last case, where the token has expired, it is not actually an {@link
+android.accounts.AccountManager} failure. The only way to discover whether a token is expired or not
+is to contact the server, and it would be wasteful and expensive for {@link
+android.accounts.AccountManager} to continually go online to check the state of all of its tokens.
+So this is a failure that can only be detected when an application like yours tries to use the auth
+token to access an online service.</p>
+
+
+<h2 id="ConnectToService">Connect to the Online Service</h2>
+
+<p>The example below shows how to connect to a Google server. Since Google uses the
+industry standard OAuth2 protocol to
+authenticate requests, the techniques discussed here are broadly
+applicable. Keep in mind, though, that every
+server is different. You may find yourself needing to make minor adjustments to
+these instructions to account for your specific
+situation.</p>
+
+<p>The Google APIs require you to supply four values with each request: the API
+key, the client ID, the client secret,
+and the auth key. The first three come from the Google API Console
+website. The last is the string value you
+obtained by calling {@link android.accounts.AccountManager#getAuthToken(android.accounts.Account,java.lang.String,android.os.Bundle,android.app.Activity,android.accounts.AccountManagerCallback,android.os.Handler) AccountManager.getAuthToken()}. You pass these to the
+Google Server as part of
+an HTTP request.</p>
+
+<pre>
+URL url = new URL("https://www.googleapis.com/tasks/v1/users/&#64;me/lists?key=" + <em>your_api_key</em>);
+URLConnection conn = (HttpURLConnection) url.openConnection();
+conn.addRequestProperty("client_id", <em>your client id</em>);
+conn.addRequestProperty("client_secret", <em>your client secret</em>);
+conn.setRequestProperty("Authorization", "OAuth " + token);
+</pre>
+
+<p>If the request returns
+an HTTP error code of 401, then your token has been denied. As mentioned in the
+last section, the most common reason for
+this is that the token has expired. The fix is
+simple: call
+{@link android.accounts.AccountManager#invalidateAuthToken AccountManager.invalidateAuthToken()} and
+repeat the token acquisition dance one
+more time.</p>
+
+<p>Because expired tokens are such a common occurrence, and fixing them  is so easy, many
+applications just assume the token has expired before even asking for it. If renewing a token is a
+cheap operation for your server, you might prefer to call {@link
+android.accounts.AccountManager#invalidateAuthToken AccountManager.invalidateAuthToken()} before the
+first call to {@link android.accounts.AccountManager#getAuthToken AccountManager.getAuthToken()},
+and spare yourself the need to request an auth token twice.</p>
