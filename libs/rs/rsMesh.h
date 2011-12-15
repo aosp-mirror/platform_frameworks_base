@@ -28,15 +28,6 @@ namespace renderscript {
 // An element is a group of Components that occupies one cell in a structure.
 class Mesh : public ObjectBase {
 public:
-    Mesh(Context *);
-    Mesh(Context *, uint32_t vertexBuffersCount, uint32_t primitivesCount);
-    ~Mesh();
-
-    virtual void serialize(OStream *stream) const;
-    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
-    static Mesh *createFromStream(Context *rsc, IStream *stream);
-    void init();
-
     struct Hal {
         mutable void *drv;
 
@@ -56,6 +47,15 @@ public:
         State state;
     };
     Hal mHal;
+
+    Mesh(Context *);
+    Mesh(Context *, uint32_t vertexBuffersCount, uint32_t primitivesCount);
+    ~Mesh();
+
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
+    static Mesh *createFromStream(Context *rsc, IStream *stream);
+    void init();
 
     void setVertexBuffer(Allocation *vb, uint32_t index) {
         mVertexBuffers[index].set(vb);
