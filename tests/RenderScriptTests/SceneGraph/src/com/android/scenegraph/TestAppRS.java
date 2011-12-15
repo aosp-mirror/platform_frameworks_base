@@ -252,6 +252,23 @@ public class TestAppRS {
         mTouchHandler.onActionMove(x, y);
     }
 
+    ProgramFragment createFromResource(int id, boolean addCubemap) {
+        ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
+        fb.addConstant(mFsConst.getAllocation().getType());
+        fb.setShader(mRes, id);
+        fb.addTexture(TextureType.TEXTURE_2D);
+        if (addCubemap) {
+            fb.addTexture(TextureType.TEXTURE_CUBE);
+        }
+        ProgramFragment pf = fb.create();
+        pf.bindConstants(mFsConst.getAllocation(), 0);
+        pf.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
+        if (addCubemap) {
+            pf.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
+        }
+        return pf;
+    }
+
     // All the custom shaders used to render the scene are initialized here
     // This includes stuff like plastic, car paint, etc.
     private void initPaintShaders() {
@@ -263,52 +280,14 @@ public class TestAppRS {
         mPV_Paint = vb.create();
         mPV_Paint.bindConstants(mVsConst.getAllocation(), 0);
 
-        ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
         mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
-        fb.addConstant(mFsConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.paintf);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        fb.addTexture(TextureType.TEXTURE_CUBE);
-        mPF_Paint = fb.create();
 
-        mPF_Paint.bindConstants(mFsConst.getAllocation(), 0);
-        mPF_Paint.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
-        mPF_Paint.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
+        mPF_Paint = createFromResource(R.raw.paintf, true);
+        mPF_Aluminum = createFromResource(R.raw.metal, true);
 
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.metal);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        fb.addTexture(TextureType.TEXTURE_CUBE);
-        mPF_Aluminum = fb.create();
-
-        mPF_Aluminum.bindConstants(mFsConst.getAllocation(), 0);
-        mPF_Aluminum.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
-        mPF_Aluminum.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
-
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.plastic);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_Plastic = fb.create();
-        mPF_Plastic.bindConstants(mFsConst.getAllocation(), 0);
-        mPF_Plastic.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
-
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.diffuse);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_Diffuse = fb.create();
-        mPF_Diffuse.bindConstants(mFsConst.getAllocation(), 0);
-        mPF_Diffuse.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
-
-        fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst.getAllocation().getType());
-        fb.setShader(mRes, R.raw.texture);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_Texture = fb.create();
-        mPF_Texture.bindConstants(mFsConst.getAllocation(), 0);
-        mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
+        mPF_Plastic = createFromResource(R.raw.plastic, false);
+        mPF_Diffuse = createFromResource(R.raw.diffuse, false);
+        mPF_Texture = createFromResource(R.raw.texture, false);
 
         FullscreenBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
     }
