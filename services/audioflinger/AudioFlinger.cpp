@@ -80,14 +80,16 @@ static const int8_t kMaxTrackStartupRetries = 50;
 static const int8_t kMaxTrackRetriesDirect = 2;
 
 static const int kDumpLockRetries = 50;
-static const int kDumpLockSleep = 20000;
+static const int kDumpLockSleepUs = 20000;
 
-static const nsecs_t kWarningThrottle = seconds(5);
+// don't warn about blocked writes or record buffer overflows more often than this
+static const nsecs_t kWarningThrottleNs = seconds(5);
 
 // RecordThread loop sleep time upon application overrun or audio HAL read error
 static const int kRecordThreadSleepUs = 5000;
 
-static const nsecs_t kSetParametersTimeout = seconds(2);
+// maximum time to wait for setParameters to complete
+static const nsecs_t kSetParametersTimeoutNs = seconds(2);
 
 // minimum sleep time for the mixer thread loop when tracks are active but in underrun
 static const uint32_t kMinThreadSleepTimeUs = 5000;
@@ -320,7 +322,7 @@ static bool tryLock(Mutex& mutex)
             locked = true;
             break;
         }
-        usleep(kDumpLockSleep);
+        usleep(kDumpLockSleepUs);
     }
     return locked;
 }
@@ -1043,7 +1045,7 @@ status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
     mWaitWorkCV.signal();
     // wait condition with timeout in case the thread loop has exited
     // before the request could be processed
-    if (mParamCond.waitRelative(mLock, kSetParametersTimeout) == NO_ERROR) {
+    if (mParamCond.waitRelative(mLock, kSetParametersTimeoutNs) == NO_ERROR) {
         status = mParamStatus;
         mWaitWorkCV.signal();
     } else {
@@ -2028,7 +2030,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             nsecs_t delta = now - mLastWriteTime;
             if (!mStandby && delta > maxPeriod) {
                 mNumDelayedWrites++;
-                if ((now - lastWarning) > kWarningThrottle) {
+                if ((now - lastWarning) > kWarningThrottleNs) {
                     LOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
                             ns2ms(delta), mNumDelayedWrites, this);
                     lastWarning = now;
@@ -2414,7 +2416,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
         mParamCond.signal();
         // wait for condition with time out in case the thread calling ThreadBase::setParameters()
         // already timed out waiting for the status and will never signal the condition.
-        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeoutNs);
     }
     return reconfig;
 }
@@ -2890,7 +2892,7 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
         mParamCond.signal();
         // wait for condition with time out in case the thread calling ThreadBase::setParameters()
         // already timed out waiting for the status and will never signal the condition.
-        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeoutNs);
     }
     return reconfig;
 }
@@ -4410,7 +4412,7 @@ bool AudioFlinger::RecordThread::threadLoop()
             else {
                 if (!mActiveTrack->setOverflow()) {
                     nsecs_t now = systemTime();
-                    if ((now - lastWarning) > kWarningThrottle) {
+                    if ((now - lastWarning) > kWarningThrottleNs) {
                         LOGW("RecordThread: buffer overflow");
                         lastWarning = now;
                     }
@@ -4733,7 +4735,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
         mParamCond.signal();
         // wait for condition with time out in case the thread calling ThreadBase::setParameters()
         // already timed out waiting for the status and will never signal the condition.
-        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeout);
+        mWaitWorkCV.waitRelative(mLock, kSetParametersTimeoutNs);
     }
     return reconfig;
 }
