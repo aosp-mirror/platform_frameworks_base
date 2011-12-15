@@ -2571,7 +2571,8 @@ public class WebView extends AbsoluteLayout
                 if (text != null) {
                     if (text.startsWith(SCHEME_TEL)) {
                         result.setType(HitTestResult.PHONE_TYPE);
-                        result.setExtra(text.substring(SCHEME_TEL.length()));
+                        result.setExtra(URLDecoder.decode(text
+                                .substring(SCHEME_TEL.length())));
                     } else if (text.startsWith(SCHEME_MAILTO)) {
                         result.setType(HitTestResult.EMAIL_TYPE);
                         result.setExtra(text.substring(SCHEME_MAILTO.length()));
