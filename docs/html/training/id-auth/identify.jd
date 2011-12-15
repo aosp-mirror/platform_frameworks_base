@@ -1,5 +1,5 @@
-page.title=Identifying Your User
-parent.title=Identifying and Authenticating Users
+﻿page.title=Remembering Your User
+parent.title=Remembering and Authenticating Users
 parent.link=index.html
 
 trainingnavtop=true
@@ -17,8 +17,8 @@ next.link=authenticate.html
   <li><a href="#TaskTwo">Decide What Type of Account to Use</a></li>
   <li><a href="#GetPermission">Request GET_ACCOUNT permission</a></li>
   <li><a href="#TaskFive">Query AccountManager for a List of Accounts</a></li>
-  <li><a href="#IdentifyUser">Use the Account Object to Identify the User</a></li>
-  <li><a href="#IdIsEnough">Decide Whether Identification is Enough</a></li>
+  <li><a href="#IdentifyUser">Use the Account Object to Personalize Your App</a></li>
+  <li><a href="#IdIsEnough">Decide Whether an Account Name is Enough</a></li>
 </ol>
   </div>
 </div>
@@ -31,8 +31,8 @@ a tablet as well as a phone. But how do you know who your user is? And how do
 you recognize them on a new device?</p>
 
 <p>For many applications, the answer is the {@link android.accounts.AccountManager} APIs. With the
-user's permission, you can use Account Manager to uniquely identify a user
-by the online identity that the user has stored on their device.</p>
+user's permission, you can use Account Manager to fetch the account names
+that the user has stored on their device.</p>
 
 <p>Integration with the user's accounts allows you to do a variety of things such as:</p>
 <ul>
@@ -43,10 +43,10 @@ by the online identity that the user has stored on their device.</p>
 
 <h2 id="ForYou">Determine if AccountManager for You</h2>
 
-<p>Applications typically identify the user in three different ways:</p>
+<p>Applications typically try to remember the user using one of three techniques:</p>
 <ol type="a">
 <li>Ask the user to type in a username </li>
-<li>Use a unique device identifier rather than a user identifier</li>
+<li>Retrieve a unique device ID to remember the device</li>
 <li>Retrieve a built-in account from {@link android.accounts.AccountManager}</li>
 </ol>
 
@@ -63,7 +63,7 @@ your app no longer remembers them.</p>
 
 <p>Option (c) is the preferred technique. Account Manager allows you to get
 information about the accounts that are stored on the user's device. As we'll
-see in this lesson, using Account Manager lets you identify your user, no matter
+see in this lesson, using Account Manager lets you remember your user, no matter
 how many devices the user may own, by adding just a couple of extra taps to your
 UI.</p>
 
@@ -113,7 +113,7 @@ Account[] accounts = am.getAccountsByType("com.google");
 the array, you should present a dialog asking the user to select one.</p>
 
 
-<h2 id="IdentifyUser">Use the Account Object to Identify the User</h2>
+<h2 id="IdentifyUser">Use the Account Object to Personalize Your App</h2>
 
 <p>The {@link android.accounts.Account} object contains an account name, which for Google accounts
 is an
@@ -126,12 +126,12 @@ hand.</li>
 </p>
 
 
-<h2 id="IdIsEnough">Decide Whether Identification is Enough</h2>
+<h2 id="IdIsEnough">Decide Whether an Account Name is Enough</h2>
 
-<p>Account names are a good way to identify the user, but the {@link android.accounts.Account}
+<p>An account name is a good way to remember the user, but the {@link android.accounts.Account}
 object by
-itself doesn't protect your data or give you access to anything. If you intend
-to access private data, you'll need something stronger: authentication.
+itself doesn't protect your data or give you access to anything besides the user's account name. If your app
+needs to allow the user to go online to access private data, you'll need something stronger: authentication.
 The next lesson explains how to authenticate to existing online services. The lesson after that
 deals with writing a custom authenticator so that you can install your own
 account types.</p>
