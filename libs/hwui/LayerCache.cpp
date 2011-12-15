@@ -20,6 +20,7 @@
 
 #include <utils/Log.h>
 
+#include "Caches.h"
 #include "Debug.h"
 #include "LayerCache.h"
 #include "Properties.h"
@@ -140,7 +141,7 @@ bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t heigh
     uint32_t oldWidth = layer->getWidth();
     uint32_t oldHeight = layer->getHeight();
 
-    glActiveTexture(GL_TEXTURE0);
+    Caches::getInstance().activeTexture(0);
     layer->bindTexture();
     layer->setSize(entry.mWidth, entry.mHeight);
     layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);

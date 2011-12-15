@@ -70,6 +70,12 @@ static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
 static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
 static const GLsizei gMeshCount = 4;
 
+static const GLenum gTextureUnits[] = {
+    GL_TEXTURE0,
+    GL_TEXTURE1,
+    GL_TEXTURE2
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,6 +182,12 @@ public:
     void disbaleTexCoordsVertexArray();
 
     /**
+     * Activate the specified texture unit. The texture unit must
+     * be specified using an integer number (0 for GL_TEXTURE0 etc.)
+     */
+    void activeTexture(GLuint textureUnit);
+
+    /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
      * indices for the region mesh.
@@ -225,6 +237,8 @@ private:
     void* mCurrentTexCoordsPointer;
 
     bool mTexCoordsArrayEnabled;
+
+    GLuint mTextureUnit;
 
     // Used to render layers
     TextureVertex* mRegionMesh;

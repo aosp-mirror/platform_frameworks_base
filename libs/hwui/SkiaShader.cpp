@@ -20,6 +20,7 @@
 
 #include <SkMatrix.h>
 
+#include "Caches.h"
 #include "SkiaShader.h"
 #include "Texture.h"
 #include "Matrix.h"
@@ -30,12 +31,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Support
 ///////////////////////////////////////////////////////////////////////////////
-
-static const GLenum gTextureUnitsMap[] = {
-        GL_TEXTURE0,
-        GL_TEXTURE1,
-        GL_TEXTURE2
-};
 
 static const GLint gTileModes[] = {
         GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
@@ -129,7 +124,7 @@ void SkiaBitmapShader::describe(ProgramDescription& description, const Extension
 void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
-    glActiveTexture(gTextureUnitsMap[textureSlot]);
+    Caches::getInstance().activeTexture(textureSlot);
 
     Texture* texture = mTexture;
     mTexture = NULL;
@@ -223,7 +218,7 @@ void SkiaLinearGradientShader::describe(ProgramDescription& description,
 void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
-    glActiveTexture(gTextureUnitsMap[textureSlot]);
+    Caches::getInstance().activeTexture(textureSlot);
 
     Texture* texture = mGradientCache->get(mColors, mPositions, mCount, mTileX);
 
@@ -335,7 +330,7 @@ void SkiaSweepGradientShader::describe(ProgramDescription& description,
 void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
-    glActiveTexture(gTextureUnitsMap[textureSlot]);
+    Caches::getInstance().activeTexture(textureSlot);
 
     Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
 
