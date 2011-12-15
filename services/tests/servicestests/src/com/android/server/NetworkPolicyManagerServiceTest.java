@@ -434,7 +434,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 5, 1024L, 1024L, SNOOZE_NEVER);
+                sTemplateWifi, 5, 1024L, 1024L, SNOOZE_NEVER, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -445,7 +445,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 20, 1024L, 1024L, SNOOZE_NEVER);
+                sTemplateWifi, 20, 1024L, 1024L, SNOOZE_NEVER, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -456,7 +456,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER);
+                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -467,14 +467,14 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-02-28T23:59:59.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER);
+                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
     public void testNextCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER);
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk forwards, ensuring that cycle boundaries don't get stuck
@@ -489,7 +489,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     public void testLastCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER);
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk backwards, ensuring that cycle boundaries look sane
@@ -547,7 +547,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         replay();
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER));
+                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER, false));
         future.get();
         verifyAndReset();
     }
@@ -604,8 +604,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged();
 
             replay();
-            setNetworkPolicies(new NetworkPolicy(
-                    sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER));
+            setNetworkPolicies(
+                    new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES,
+                            SNOOZE_NEVER, false));
             future.get();
             verifyAndReset();
         }
@@ -699,6 +700,45 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             replay();
             mService.snoozePolicy(sTemplateWifi);
             assertNotificationType(TYPE_LIMIT_SNOOZED, tagFuture.get());
+            future.get();
+            verifyAndReset();
+        }
+    }
+
+    public void testMeteredNetworkWithoutLimit() throws Exception {
+        NetworkState[] state = null;
+        NetworkStats stats = null;
+        Future<Void> future;
+        Future<String> tagFuture;
+
+        final long TIME_FEB_15 = 1171497600000L;
+        final long TIME_MAR_10 = 1173484800000L;
+        final int CYCLE_DAY = 15;
+
+        setCurrentTimeMillis(TIME_MAR_10);
+
+        // bring up wifi network with metered policy
+        state = new NetworkState[] { buildWifi() };
+        stats = new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
+
+        {
+            expectCurrentTime();
+            expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
+            expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, currentTimeMillis()))
+                    .andReturn(stats).atLeastOnce();
+            expectPolicyDataEnable(TYPE_WIFI, true);
+
+            expectRemoveInterfaceQuota(TEST_IFACE);
+            expectSetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
+
+            expectClearNotifications();
+            future = expectMeteredIfacesChanged(TEST_IFACE);
+
+            replay();
+            setNetworkPolicies(
+                    new NetworkPolicy(sTemplateWifi, CYCLE_DAY, WARNING_DISABLED, LIMIT_DISABLED,
+                            SNOOZE_NEVER, true));
             future.get();
             verifyAndReset();
         }
