@@ -20,7 +20,7 @@ sdk.platform.apiLevel=15
 <h2>Reference</h2>
 <ol>
 <li><a
-href="{@docRoot}sdk/api_diff/14/changes.html">API
+href="{@docRoot}sdk/api_diff/15/changes.html">API
 Differences Report &raquo;</a> </li>
 </ol>
 
@@ -72,9 +72,9 @@ class="toggle-content-img" alt="" />
 <dl>
 <dt>Initial release. SDK Tools r14 or higher is required.
   <p class="caution"><strong>Important:</strong> To download the new Android
-  4.x system components from the Android SDK Manager, you must first update the
+  4.0.x system components from the Android SDK Manager, you must first update the
   SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
-  the Android 4.0 system components will not be available for download.</p>
+  the Android 4.0.x system components will not be available for download.</p>
 </dt>
 </dl>
 
@@ -224,7 +224,7 @@ for visible fragments have run. The visibility hint is "true" by default.</li>
 
 <ul>
 <li>New method {@link android.graphics.SurfaceTexture#setDefaultBufferSize(int
-width, int height)} in SurfaceTexture sets the default size of the image
+width, int height)} in {@link android.graphics.SurfaceTexture} sets the default size of the image
 buffers. This method may be used to set the image size when producing images
 with {@link android.graphics.Canvas} (via {@link
 android.view.Surface#lockCanvas}), or OpenGL ES (via an EGLSurface).</li>
@@ -308,7 +308,7 @@ profiles. Quality level is represented by the
 {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_QVGA} constants.</li>
 
 <li>New methods {@link android.hardware.Camera.Parameters#setVideoStabilization(boolean) setVideoStabilization()},
-{@link android.hardware.Camera.Parameters#getVideoStabilization() setVideoStabilization()}, and {android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
+{@link android.hardware.Camera.Parameters#getVideoStabilization() setVideoStabilization()}, and {@link android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
 let you check and manage video stabilization for a {@link android.hardware.Camera}.</li>
 </ul>
 
