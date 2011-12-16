@@ -1,5 +1,5 @@
 page.title=Taking Photos Simply
-parent.title=Capturing Photos with the Camera
+parent.title=Capturing Photos
 parent.link=index.html
 
 trainingnavtop=true
@@ -31,7 +31,8 @@ next.link=videobasics.html
 
     <h2>Try it out</h2>
     <div class="download-box">
-      <a href="{@docRoot}shareables/training/PhotoIntentActivity.zip" class="button">Download the
+      <a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip"
+class="button">Download the
 sample</a>
       <p class="filename">PhotoIntentActivity.zip</p>
     </div>
