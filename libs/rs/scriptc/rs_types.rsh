@@ -402,6 +402,10 @@ typedef enum {
 
 #endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
+/**
+ * Describes the way mesh vertex data is interpreted when rendering
+ *
+ **/
 typedef enum {
     RS_PRIMITIVE_POINT,
     RS_PRIMITIVE_LINE,
