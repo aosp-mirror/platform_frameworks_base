@@ -114,7 +114,7 @@ struct EqualizerContext {
 //--- local function prototypes
 
 int Equalizer_init(EqualizerContext *pContext);
-int Equalizer_configure(EqualizerContext *pContext, effect_config_t *pConfig);
+int Equalizer_setConfig(EqualizerContext *pContext, effect_config_t *pConfig);
 int Equalizer_getParameter(AudioEqualizer * pEqualizer, int32_t *pParam, size_t *pValueSize, void *pValue);
 int Equalizer_setParameter(AudioEqualizer * pEqualizer, int32_t *pParam, void *pValue);
 
@@ -224,7 +224,7 @@ extern "C" int EffectGetDescriptor(effect_uuid_t       *uuid,
 }
 
 //----------------------------------------------------------------------------
-// Equalizer_configure()
+// Equalizer_setConfig()
 //----------------------------------------------------------------------------
 // Purpose: Set input and output audio configuration.
 //
@@ -237,9 +237,9 @@ extern "C" int EffectGetDescriptor(effect_uuid_t       *uuid,
 //
 //----------------------------------------------------------------------------
 
-int Equalizer_configure(EqualizerContext *pContext, effect_config_t *pConfig)
+int Equalizer_setConfig(EqualizerContext *pContext, effect_config_t *pConfig)
 {
-    ALOGV("Equalizer_configure start");
+    ALOGV("Equalizer_setConfig start");
 
     CHECK_ARG(pContext != NULL);
     CHECK_ARG(pConfig != NULL);
@@ -272,7 +272,26 @@ int Equalizer_configure(EqualizerContext *pContext, effect_config_t *pConfig)
                         pConfig->outputCfg.accessMode);
 
     return 0;
-}   // end Equalizer_configure
+}   // end Equalizer_setConfig
+
+//----------------------------------------------------------------------------
+// Equalizer_getConfig()
+//----------------------------------------------------------------------------
+// Purpose: Get input and output audio configuration.
+//
+// Inputs:
+//  pContext:   effect engine context
+//  pConfig:    pointer to effect_config_t structure holding input and output
+//      configuration parameters
+//
+// Outputs:
+//
+//----------------------------------------------------------------------------
+
+void Equalizer_getConfig(EqualizerContext *pContext, effect_config_t *pConfig)
+{
+    memcpy(pConfig, &pContext->config, sizeof(effect_config_t));
+}   // end Equalizer_getConfig
 
 
 //----------------------------------------------------------------------------
@@ -332,7 +351,7 @@ int Equalizer_init(EqualizerContext *pContext)
 
     pContext->pEqualizer->enable(true);
 
-    Equalizer_configure(pContext, &pContext->config);
+    Equalizer_setConfig(pContext, &pContext->config);
 
     return 0;
 }   // end Equalizer_init
@@ -643,16 +662,22 @@ extern "C" int Equalizer_command(effect_handle_t self, uint32_t cmdCode, uint32_
         }
         *(int *) pReplyData = Equalizer_init(pContext);
         break;
-    case EFFECT_CMD_CONFIGURE:
+    case EFFECT_CMD_SET_CONFIG:
         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
                 || pReplyData == NULL || *replySize != sizeof(int)) {
             return -EINVAL;
         }
-        *(int *) pReplyData = Equalizer_configure(pContext,
+        *(int *) pReplyData = Equalizer_setConfig(pContext,
                 (effect_config_t *) pCmdData);
         break;
+    case EFFECT_CMD_GET_CONFIG:
+        if (pReplyData == NULL || *replySize != sizeof(effect_config_t)) {
+            return -EINVAL;
+        }
+        Equalizer_getConfig(pContext, (effect_config_t *) pCmdData);
+        break;
     case EFFECT_CMD_RESET:
-        Equalizer_configure(pContext, &pContext->config);
+        Equalizer_setConfig(pContext, &pContext->config);
         break;
     case EFFECT_CMD_GET_PARAM: {
         if (pCmdData == NULL || cmdSize < (int)(sizeof(effect_param_t) + sizeof(int32_t)) ||

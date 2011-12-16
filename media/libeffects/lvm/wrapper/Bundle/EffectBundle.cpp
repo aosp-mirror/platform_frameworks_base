@@ -133,7 +133,8 @@ int  LvmBundle_init            (EffectContext *pContext);
 int  LvmEffect_enable          (EffectContext *pContext);
 int  LvmEffect_disable         (EffectContext *pContext);
 void LvmEffect_free            (EffectContext *pContext);
-int  Effect_configure          (EffectContext *pContext, effect_config_t *pConfig);
+int  Effect_setConfig          (EffectContext *pContext, effect_config_t *pConfig);
+void Effect_getConfig          (EffectContext *pContext, effect_config_t *pConfig);
 int  BassBoost_setParameter    (EffectContext *pContext, void *pParam, void *pValue);
 int  BassBoost_getParameter    (EffectContext *pContext,
                                void           *pParam,
@@ -936,7 +937,7 @@ void LvmEffect_free(EffectContext *pContext){
 }    /* end LvmEffect_free */
 
 //----------------------------------------------------------------------------
-// Effect_configure()
+// Effect_setConfig()
 //----------------------------------------------------------------------------
 // Purpose: Set input and output audio configuration.
 //
@@ -949,9 +950,9 @@ void LvmEffect_free(EffectContext *pContext){
 //
 //----------------------------------------------------------------------------
 
-int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
+int Effect_setConfig(EffectContext *pContext, effect_config_t *pConfig){
     LVM_Fs_en   SampleRate;
-    //ALOGV("\tEffect_configure start");
+    //ALOGV("\tEffect_setConfig start");
 
     CHECK_ARG(pContext != NULL);
     CHECK_ARG(pConfig != NULL);
@@ -992,7 +993,7 @@ int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
         pContext->pBundledContext->SamplesPerSecond = 48000*2; // 2 secs Stereo
         break;
     default:
-        ALOGV("\tEffect_Configure invalid sampling rate %d", pConfig->inputCfg.samplingRate);
+        ALOGV("\tEffect_setConfig invalid sampling rate %d", pConfig->inputCfg.samplingRate);
         return -EINVAL;
     }
 
@@ -1001,28 +1002,47 @@ int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
         LVM_ControlParams_t     ActiveParams;
         LVM_ReturnStatus_en     LvmStatus = LVM_SUCCESS;
 
-        ALOGV("\tEffect_configure change sampling rate to %d", SampleRate);
+        ALOGV("\tEffect_setConfig change sampling rate to %d", SampleRate);
 
         /* Get the current settings */
         LvmStatus = LVM_GetControlParameters(pContext->pBundledContext->hInstance,
                                          &ActiveParams);
 
-        LVM_ERROR_CHECK(LvmStatus, "LVM_GetControlParameters", "Effect_configure")
+        LVM_ERROR_CHECK(LvmStatus, "LVM_GetControlParameters", "Effect_setConfig")
         if(LvmStatus != LVM_SUCCESS) return -EINVAL;
 
         LvmStatus = LVM_SetControlParameters(pContext->pBundledContext->hInstance, &ActiveParams);
 
-        LVM_ERROR_CHECK(LvmStatus, "LVM_SetControlParameters", "Effect_configure")
-        ALOGV("\tEffect_configure Succesfully called LVM_SetControlParameters\n");
+        LVM_ERROR_CHECK(LvmStatus, "LVM_SetControlParameters", "Effect_setConfig")
+        ALOGV("\tEffect_setConfig Succesfully called LVM_SetControlParameters\n");
         pContext->pBundledContext->SampleRate = SampleRate;
 
     }else{
-        //ALOGV("\tEffect_configure keep sampling rate at %d", SampleRate);
+        //ALOGV("\tEffect_setConfig keep sampling rate at %d", SampleRate);
     }
 
-    //ALOGV("\tEffect_configure End....");
+    //ALOGV("\tEffect_setConfig End....");
     return 0;
-}   /* end Effect_configure */
+}   /* end Effect_setConfig */
+
+//----------------------------------------------------------------------------
+// Effect_getConfig()
+//----------------------------------------------------------------------------
+// Purpose: Get input and output audio configuration.
+//
+// Inputs:
+//  pContext:   effect engine context
+//  pConfig:    pointer to effect_config_t structure holding input and output
+//      configuration parameters
+//
+// Outputs:
+//
+//----------------------------------------------------------------------------
+
+void Effect_getConfig(EffectContext *pContext, effect_config_t *pConfig)
+{
+    memcpy(pConfig, &pContext->config, sizeof(effect_config_t));
+}   /* end Effect_getConfig */
 
 //----------------------------------------------------------------------------
 // BassGetStrength()
@@ -2778,23 +2798,34 @@ int Effect_command(effect_handle_t  self,
             }
             break;
 
-        case EFFECT_CMD_CONFIGURE:
-            //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_CONFIGURE start");
+        case EFFECT_CMD_SET_CONFIG:
+            //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_SET_CONFIG start");
             if (pCmdData    == NULL||
                 cmdSize     != sizeof(effect_config_t)||
                 pReplyData  == NULL||
                 *replySize  != sizeof(int)){
                 ALOGV("\tLVM_ERROR : Effect_command cmdCode Case: "
-                        "EFFECT_CMD_CONFIGURE: ERROR");
+                        "EFFECT_CMD_SET_CONFIG: ERROR");
                 return -EINVAL;
             }
-            *(int *) pReplyData = android::Effect_configure(pContext, (effect_config_t *) pCmdData);
-            //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_CONFIGURE end");
+            *(int *) pReplyData = android::Effect_setConfig(pContext, (effect_config_t *) pCmdData);
+            //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_SET_CONFIG end");
+            break;
+
+        case EFFECT_CMD_GET_CONFIG:
+            if (pReplyData == NULL ||
+                *replySize != sizeof(effect_config_t)) {
+                ALOGV("\tLVM_ERROR : Effect_command cmdCode Case: "
+                        "EFFECT_CMD_GET_CONFIG: ERROR");
+                return -EINVAL;
+            }
+
+            android::Effect_getConfig(pContext, (effect_config_t *)pReplyData);
             break;
 
         case EFFECT_CMD_RESET:
             //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_RESET start");
-            android::Effect_configure(pContext, &pContext->config);
+            android::Effect_setConfig(pContext, &pContext->config);
             //ALOGV("\tEffect_command cmdCode Case: EFFECT_CMD_RESET end");
             break;
 

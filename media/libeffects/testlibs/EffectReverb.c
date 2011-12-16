@@ -318,13 +318,19 @@ static int Reverb_Command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSi
             pRvbModule->context.mState = REVERB_STATE_INITIALIZED;
         }
         break;
-    case EFFECT_CMD_CONFIGURE:
+    case EFFECT_CMD_SET_CONFIG:
         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
                 || pReplyData == NULL || *replySize != sizeof(int)) {
             return -EINVAL;
         }
-        *(int *) pReplyData = Reverb_Configure(pRvbModule,
+        *(int *) pReplyData = Reverb_setConfig(pRvbModule,
                 (effect_config_t *)pCmdData, false);
+        break;
+    case EFFECT_CMD_GET_CONFIG:
+        if (pReplyData == NULL || *replySize != sizeof(effect_config_t)) {
+            return -EINVAL;
+        }
+        Reverb_getConfig(pRvbModule, (effect_config_t *) pCmdData);
         break;
     case EFFECT_CMD_RESET:
         Reverb_Reset(pReverb, false);
@@ -492,7 +498,7 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
     pRvbModule->config.outputCfg.accessMode = EFFECT_BUFFER_ACCESS_ACCUMULATE;
     pRvbModule->config.outputCfg.mask = EFFECT_CONFIG_ALL;
 
-    ret = Reverb_Configure(pRvbModule, &pRvbModule->config, true);
+    ret = Reverb_setConfig(pRvbModule, &pRvbModule->config, true);
     if (ret < 0) {
         ALOGV("Reverb_Init error %d on module %p", ret, pRvbModule);
     }
@@ -501,7 +507,7 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
 }
 
 /*----------------------------------------------------------------------------
- * Reverb_Init()
+ * Reverb_setConfig()
  *----------------------------------------------------------------------------
  * Purpose:
  *  Set input and output audio configuration.
@@ -518,7 +524,7 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
  *----------------------------------------------------------------------------
  */
 
-int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
+int Reverb_setConfig(reverb_module_t *pRvbModule, effect_config_t *pConfig,
         bool init) {
     reverb_object_t *pReverb = &pRvbModule->context;
     int bufferSizeInSamples;
@@ -531,12 +537,12 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
         || pConfig->outputCfg.channels != OUTPUT_CHANNELS
         || pConfig->inputCfg.format != AUDIO_FORMAT_PCM_16_BIT
         || pConfig->outputCfg.format != AUDIO_FORMAT_PCM_16_BIT) {
-        ALOGV("Reverb_Configure invalid config");
+        ALOGV("Reverb_setConfig invalid config");
         return -EINVAL;
     }
     if ((pReverb->m_Aux && (pConfig->inputCfg.channels != AUDIO_CHANNEL_OUT_MONO)) ||
         (!pReverb->m_Aux && (pConfig->inputCfg.channels != AUDIO_CHANNEL_OUT_STEREO))) {
-        ALOGV("Reverb_Configure invalid config");
+        ALOGV("Reverb_setConfig invalid config");
         return -EINVAL;
     }
 
@@ -576,7 +582,7 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
         pReverb->m_nCosWT_5KHz = 25997;
         break;
     default:
-        ALOGV("Reverb_Configure invalid sampling rate %d", pReverb->m_nSamplingRate);
+        ALOGV("Reverb_setConfig invalid sampling rate %d", pReverb->m_nSamplingRate);
         return -EINVAL;
     }
 
@@ -617,6 +623,28 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
     Reverb_Reset(pReverb, init);
 
     return 0;
+}
+
+/*----------------------------------------------------------------------------
+ * Reverb_getConfig()
+ *----------------------------------------------------------------------------
+ * Purpose:
+ *  Get input and output audio configuration.
+ *
+ * Inputs:
+ *  pRvbModule    - pointer to reverb effect module
+ *  pConfig       - pointer to effect_config_t structure containing input
+ *              and output audio parameters configuration
+ * Outputs:
+ *
+ * Side Effects:
+ *
+ *----------------------------------------------------------------------------
+ */
+
+void Reverb_getConfig(reverb_module_t *pRvbModule, effect_config_t *pConfig)
+{
+    memcpy(pConfig, &pRvbModule->config, sizeof(effect_config_t));
 }
 
 /*----------------------------------------------------------------------------
@@ -844,7 +872,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
             if (param == REVERB_PARAM_ROOM_HF_LEVEL) {
                 break;
             }
-            pValue32 = &pProperties->decayTime;
+            pValue32 = (int32_t *)&pProperties->decayTime;
             /* FALL THROUGH */
 
         case REVERB_PARAM_DECAY_TIME:
@@ -916,7 +944,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
             if (param == REVERB_PARAM_REFLECTIONS_LEVEL) {
                 break;
             }
-            pValue32 = &pProperties->reflectionsDelay;
+            pValue32 = (int32_t *)&pProperties->reflectionsDelay;
             /* FALL THROUGH */
 
         case REVERB_PARAM_REFLECTIONS_DELAY:
@@ -940,7 +968,7 @@ int Reverb_getParameter(reverb_object_t *pReverb, int32_t param, size_t *pSize,
             if (param == REVERB_PARAM_REVERB_LEVEL) {
                 break;
             }
-            pValue32 = &pProperties->reverbDelay;
+            pValue32 = (int32_t *)&pProperties->reverbDelay;
             /* FALL THROUGH */
 
         case REVERB_PARAM_REVERB_DELAY:
