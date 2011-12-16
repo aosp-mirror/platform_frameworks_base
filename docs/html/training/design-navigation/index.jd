@@ -1,8 +1,8 @@
-page.title=Designing Effective and Intuitive App Navigation
+page.title=Designing Effective Navigation
 
 trainingnavtop=true
 startpage=true
-next.title=Planning Screens and their Relationships
+next.title=Planning Screens and Their Relationships
 next.link=screen-planning.html
 
 @jd:body
@@ -30,7 +30,8 @@ next.link=screen-planning.html
 
 
 <dl>
-  <dt><strong><a href="screen-planning.html">Planning Screens and their Relationships</a></strong></dt>
+  <dt><strong><a href="screen-planning.html">Planning Screens and Their
+Relationships</a></strong></dt>
     <dd>Learn how to choose which screens your application should contain. Also learn how to choose which screens should be directly reachable from others. This lesson introduces a hypothetical news application to serve as an example for later lessons.</dd>
 
   <dt><strong><a href="multiple-sizes.html">Planning for Multiple Touchscreen Sizes</a></strong></dt>
@@ -42,6 +43,6 @@ next.link=screen-planning.html
   <dt><strong><a href="ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></strong></dt>
     <dd>Learn how to allow users to navigate upwards in the content hierarchy. Also learn about best practices for the BACK button and temporal navigation, or navigation to previous screens that may not be hierarchically related.</dd>
 
-  <dt><strong><a href="wireframing.html">Putting it All Together: Wireframing the Example Application</a></strong></dt>
+  <dt><strong><a href="wireframing.html">Putting it All Together: Wireframing the Example App</a></strong></dt>
     <dd>Learn how to create screen wireframes (low-fidelity graphic mockups) representing the screens in a news application based on the desired information model. These wireframes utilize navigational elements discussed in previous lessons to demonstrate intuitive and efficient navigation.</dd>
 </dl>

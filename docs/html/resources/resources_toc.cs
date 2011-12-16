@@ -8,7 +8,7 @@
             <span class="en">Orientation</span>
           </a>
       </li>
-      
+
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/multiscreen/index.html">
             <span class="en">Designing for Multiple Screens</span>
@@ -96,27 +96,8 @@
           </li>
         </ul>
       </li>
-      
-      <li class="toggle-list">
-        <div><a href="<?cs var:toroot ?>training/id-auth/index.html">
-            <span class="en">Identifying Users</span>
-          </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/id-auth/identify.html">
-            <span class="en">Identifying Your User</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/authenticate.html">
-            <span class="en">Authenticating to OAuth2 Services</span>
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/custom_auth.html">
-            <span class="en">Creating a Custom Account Type</span>
-          </a>
-          </li>
-        </ul>
-      </li>
-      
+
+
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/sharing/index.html">
             <span class="en">Sharing Content</span>
@@ -132,6 +113,26 @@
           </li>
           <li><a href="<?cs var:toroot ?>training/sharing/shareaction.html">
             <span class="en">Adding an Easy Share Action</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/camera/index.html">
+            <span class="en">Capturing Photos</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/camera/photobasics.html">
+            <span class="en">Taking Photos Simply</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/camera/videobasics.html">
+            <span class="en">Recording Videos Simply</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/camera/cameradirect.html">
+            <span class="en">Controlling the Camera</span>
           </a>
           </li>
         </ul>
@@ -180,6 +181,34 @@
         <ul>
           <li><a href="<?cs var:toroot ?>training/monetization/ads-and-ux.html">
             <span class="en">Advertising without Compromising User Experience</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+      
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/design-navigation/index.html">
+            <span class="en">Designing Effective Navigation</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/design-navigation/screen-planning.html">
+            <span class="en">Planning Screens and Their Relationships</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/design-navigation/multiple-sizes.html">
+            <span class="en">Planning for Multiple Touchscreen Sizes</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/design-navigation/descendant-lateral.html">
+            <span class="en">Providing Descendant and Lateral Navigation</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/design-navigation/ancestral-temporal.html">
+            <span class="en">Providing Ancestral and Temporal Navigation</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/design-navigation/wireframing.html">
+            <span class="en">Putting it All Together: Wireframing the Example App</span>
           </a>
           </li>
         </ul>
