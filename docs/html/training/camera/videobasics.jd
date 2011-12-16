@@ -1,0 +1,118 @@
+page.title=Recording Videos Simply
+parent.title=Capturing Photos with the Camera
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Recording Photos Simply
+previous.link=photobasics.html
+next.title=Controlling the Camera
+next.link=cameradirect.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#TaskManifest">Request Camera Permission</a></li>
+      <li><a href="#TaskCaptureIntent">Record a Video with a Camera App</a>
+      <li><a href="#TaskVideoView">View the Video</a></li>
+    </ol>
+
+    <h2>You should also read</h2>
+      <ul>
+        <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
+        <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent 
+      Filters</a></li>
+      </ul>
+
+    <h2>Try it out</h2>
+
+    <div class="download-box">
+      <a href="{@docRoot}shareables/training/PhotoIntentActivity.zip" class="button">Download the
+sample</a>
+      <p class="filename">PhotoIntentActivity.zip</p>
+    </div>
+  </div>
+</div>
+
+
+<p>This lesson explains how to capture video using existing camera
+applications.</p>
+
+<p>Your application has a job to do, and integrating videos is only a small
+part of it.  You want to take videos with minimal fuss, and not reinvent the
+camcorder. Happily, most Android-powered devices already have a camera application that
+records video. In this lesson, you make it do this for you.</p>
+
+
+
+<h2 id="TaskManifest">Request Camera Permission</h2>
+
+<p>To advertise that your application depends on having a camera, put a
+{@code &lt;uses-feature&gt;} tag in the manifest file:</p>
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera" /&gt;
+    ...
+&lt;/manifest ... >
+</pre>
+
+<p>If your application uses, but does not require a camera in order to function, add {@code
+android:required="false"} to the tag. In doing so, Android Market will allow devices without a
+camera to download your application. It's then your responsibility to check for the availability
+of the camera at runtime by calling {@link
+android.content.pm.PackageManager#hasSystemFeature hasSystemFeature(PackageManager.FEATURE_CAMERA)}.
+If a camera is not available, you should then disable your camera features.</p>
+
+
+<h2 id="TaskCaptureIntent">Record a Video with a Camera App</h2> 
+
+<p>The Android way of delegating actions to other applications is to invoke
+an {@link android.content.Intent} that describes what you want done.  This
+involves three pieces: the {@link android.content.Intent} itself, a call to start the external
+{@link android.app.Activity}, and some code to handle the video when focus returns
+to your activity.</p>
+
+<p>Here's a function that invokes an intent to capture video.</p>
+
+<pre>
+private void dispatchTakeVideoIntent() {
+    Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+    startActivityForResult(takeVideoIntent, ACTION_TAKE_VIDEO);
+}
+</pre>
+
+
+<p>It's a good idea to make sure an app exists to handle your intent
+before invoking it. Here's a function that checks for apps that can handle your intent:</p>
+
+<pre>
+public static boolean isIntentAvailable(Context context, String action) {
+    final PackageManager packageManager = context.getPackageManager();
+    final Intent intent = new Intent(action);
+    List&lt;ResolveInfo> list =
+        packageManager.queryIntentActivities(intent,
+            PackageManager.MATCH_DEFAULT_ONLY);
+    return list.size() > 0;
+}
+</pre>
+
+
+<h2 id="TaskVideoView">View the Video</h2>
+
+<p>The Android Camera application returns the video in the {@link android.content.Intent} delivered
+to {@link android.app.Activity#onActivityResult onActivityResult()} as a {@link
+android.net.Uri} pointing to the video location in storage. The following code
+retrieves this image and displays it in a {@link android.widget.VideoView}.</p>
+
+<pre>
+private void handleCameraVideo(Intent intent) {
+    mVideoUri = intent.getData();
+    mVideoView.setVideoURI(mVideoUri);
+}
+</pre>
+

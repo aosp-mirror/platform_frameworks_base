@@ -1,0 +1,60 @@
+page.title=Capturing Photos with the Camera
+
+trainingnavtop=true
+startpage=true
+next.title=Taking Photos Simply
+next.link=photobasics.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 1.5 (API level 3) or higher</li>
+  <li>A device with a camera</li>
+</ul>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
+  <li><a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a></li>
+</ul>
+
+
+<h2>Try it out</h2>
+
+<div class="download-box">
+ <a href="{@docRoot}shareables/training/PhotoIntentActivity.zip" class="button">Download the Intent sample</a>
+ <p class="filename">PhotoIntentActivity.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>The world was a dismal and featureless place before rich media became
+prevalent. Remember Gopher? We don't, either. For your app to become
+part of your users' lives, give them a way to put their lives into it.
+Using the on-board cameras, your application can enable users to augment what
+they see around them, make unique avatars, look for zombies around the corner,
+or simply share their experiences.</p> 
+
+<p>This class gets you clicking fast with some super-easy ways of
+leveraging existing camera applications. In later lessons, you dive deeper
+and learn how to control the camera hardware directly.</p>
+
+
+<h2>Lessons</h2>
+ 
+<dl>
+  <dt><b><a href="photobasics.html">Taking Photos Simply</a></b></dt>
+  <dd>Leverage other applications and capture photos with just a few lines of code.</dd>
+  <dt><b><a href="videobasics.html">Recording Videos Simply</a></b></dt>
+  <dd>Leverage other applications and record videos with just a few lines of code.</dd>
+  <dt><b><a href="cameradirect.html">Controlling the Camera</a></b></dt>
+  <dd>Control the camera hardware directly and implement your own camera application.</dd>
+</dl> 
+
