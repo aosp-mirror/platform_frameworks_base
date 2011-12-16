@@ -33,6 +33,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Binder;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -47,7 +48,6 @@ import com.android.internal.net.VpnConfig;
 import com.android.server.ConnectivityService.VpnCallback;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charsets;
@@ -573,11 +573,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 }
 
                 // Now we are connected. Read and parse the new state.
-                byte[] buffer = new byte[(int) state.length()];
-                if (new FileInputStream(state).read(buffer) != buffer.length) {
-                    throw new IllegalStateException("Cannot read the state");
-                }
-                String[] parameters = new String(buffer, Charsets.UTF_8).split("\n", -1);
+                String[] parameters = FileUtils.readTextFile(state, 0, null).split("\n", -1);
                 if (parameters.length != 6) {
                     throw new IllegalStateException("Cannot parse the state");
                 }
