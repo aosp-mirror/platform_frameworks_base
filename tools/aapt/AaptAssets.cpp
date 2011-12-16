@@ -1019,6 +1019,11 @@ bool AaptGroupEntry::getUiModeTypeName(const char* name,
               (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
               | ResTable_config::UI_MODE_TYPE_TELEVISION;
         return true;
+    } else if (strcmp(name, "appliance") == 0) {
+      if (out) out->uiMode =
+              (out->uiMode&~ResTable_config::MASK_UI_MODE_TYPE)
+              | ResTable_config::UI_MODE_TYPE_APPLIANCE;
+        return true;
     }
 
     return false;
