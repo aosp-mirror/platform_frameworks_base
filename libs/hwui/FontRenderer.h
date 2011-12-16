@@ -180,7 +180,7 @@ protected:
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
-    void invalidateTextureCache();
+    void invalidateTextureCache(CacheTextureLine *cacheLine = NULL);
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
@@ -219,6 +219,7 @@ public:
 
     void init();
     void deinit();
+    void flushLargeCaches();
 
     void setGammaTable(const uint8_t* gammaTable) {
         mGammaTable = gammaTable;
@@ -286,6 +287,7 @@ protected:
     const uint8_t* mGammaTable;
 
     void allocateTextureMemory(CacheTexture* cacheTexture);
+    void deallocateTextureMemory(CacheTexture* cacheTexture);
     void initTextTexture();
     CacheTexture *createCacheTexture(int width, int height, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
