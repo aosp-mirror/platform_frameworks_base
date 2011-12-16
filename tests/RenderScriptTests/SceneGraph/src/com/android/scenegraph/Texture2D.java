@@ -49,9 +49,7 @@ public class Texture2D extends SceneGraphBase {
     }
 
     public void setFileDir(String dir) {
-        if (dir.indexOf("sdcard/") != -1) {
-            mLoadFromSD = true;
-        }
+        mLoadFromSD = SceneManager.isSDCardPath(dir);
         mFileDir = dir;
     }
 
