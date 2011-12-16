@@ -348,6 +348,8 @@ FontRenderer::FontRenderer() {
     mCacheTexture256 = NULL;
     mCacheTexture512 = NULL;
 
+    mLinearFiltering = false;
+
     mIndexBufferID = 0;
 
     mSmallCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
@@ -412,11 +414,23 @@ void FontRenderer::flushAllAndInvalidate() {
     }
 }
 
-uint8_t* FontRenderer::allocateTextureMemory(int width, int height) {
-    uint8_t* textureMemory = new uint8_t[width * height];
-    memset(textureMemory, 0, width * height * sizeof(uint8_t));
+void FontRenderer::allocateTextureMemory(CacheTexture *cacheTexture) {
+    int width = cacheTexture->mWidth;
+    int height = cacheTexture->mHeight;
+    cacheTexture->mTexture = new uint8_t[width * height];
+    memset(cacheTexture->mTexture, 0, width * height * sizeof(uint8_t));
+    glBindTexture(GL_TEXTURE_2D, cacheTexture->mTextureId);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // Initialize texture dimensions
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0,
+            GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
-    return textureMemory;
+    const GLenum filtering = cacheTexture->mLinearFiltering ? GL_LINEAR : GL_NEAREST;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
@@ -475,7 +489,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     CacheTexture *cacheTexture = cacheLine->mCacheTexture;
     if (cacheTexture->mTexture == NULL) {
         // Large-glyph texture memory is allocated only as needed
-        cacheTexture->mTexture = allocateTextureMemory(cacheTexture->mWidth, cacheTexture->mHeight);
+        allocateTextureMemory(cacheTexture);
     }
     uint8_t* cacheBuffer = cacheTexture->mTexture;
     uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
@@ -492,23 +506,15 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    uint8_t* textureMemory = allocate ? allocateTextureMemory(width, height) : NULL;
     GLuint textureId;
     glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // Initialize texture dimensions
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0,
-            GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+    uint8_t* textureMemory = NULL;
 
-    mLinearFiltering = false;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    return new CacheTexture(textureMemory, textureId, width, height);
+    CacheTexture* cacheTexture = new CacheTexture(textureMemory, textureId, width, height);
+    if (allocate) {
+        allocateTextureMemory(cacheTexture);
+    }
+    return cacheTexture;
 }
 
 void FontRenderer::initTextTexture() {
@@ -641,6 +647,12 @@ void FontRenderer::checkTextureUpdate() {
     }
 
     glBindTexture(GL_TEXTURE_2D, mCurrentCacheTexture->mTextureId);
+    if (mLinearFiltering != mCurrentCacheTexture->mLinearFiltering) {
+        const GLenum filtering = mLinearFiltering ? GL_LINEAR : GL_NEAREST;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+        mCurrentCacheTexture->mLinearFiltering = mLinearFiltering;
+    }
     mLastCacheTexture = mCurrentCacheTexture;
 
     mUploadTexture = false;
