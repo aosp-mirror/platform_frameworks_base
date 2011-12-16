@@ -17,13 +17,15 @@
 #ifndef __GLTRACE_FIXUP_H_
 #define __GLTRACE_FIXUP_H_
 
+#include <utils/Timers.h>
+
 #include "gltrace.pb.h"
 #include "gltrace_context.h"
 
 namespace android {
 namespace gltrace {
 
-void fixupGLMessage(GLTraceContext *curContext, GLMessage *message);
+void fixupGLMessage(GLTraceContext *curContext, nsecs_t start, nsecs_t end, GLMessage *message);
 void fixup_addFBContents(GLTraceContext *curContext, GLMessage *message, FBBinding fbToRead);
 
 };
