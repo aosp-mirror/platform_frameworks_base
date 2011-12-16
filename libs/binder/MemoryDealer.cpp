@@ -180,7 +180,6 @@ Allocation::~Allocation()
         /* NOTE: it's VERY important to not free allocations of size 0 because
          * they're special as they don't have any record in the allocator
          * and could alias some real allocation (their offset is zero). */
-        mDealer->deallocate(freedOffset);
 
         // keep the size to unmap in excess
         size_t pagesize = getpagesize();
@@ -216,6 +215,11 @@ Allocation::~Allocation()
             }
 #endif
         }
+
+        // This should be done after madvise(MADV_REMOVE), otherwise madvise()
+        // might kick out the memory region that's allocated and/or written
+        // right after the deallocation.
+        mDealer->deallocate(freedOffset);
     }
 }
 
