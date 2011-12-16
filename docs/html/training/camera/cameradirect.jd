@@ -1,0 +1,308 @@
+page.title=Controlling the Camera
+parent.title=Capturing Photos with the Camera
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Recording Videos Simply
+previous.link=videobasics.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#TaskOpenCamera">Open the Camera Object</a></li>
+      <li><a href="#camera-preview">Create the Camera Preview</a></li>
+      <li><a href="#TaskSettings">Modify Camera Settings</a></li>
+      <li><a href="#TaskOrientation">Set the Preview Orientation</a></li>
+      <li><a href="#TaskTakePicture">Take a Picture</a></li>
+      <li><a href="#TaskRestartPreview">Restart the Preview</a></li>
+      <li><a href="#TaskReleaseCamera">Stop the Preview and Release the Camera</a></li>
+    </ol>
+    
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/topics/media/camera.html#custom-camera">Building
+              a Camera App</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>In this lesson, we discuss how to control the camera hardware directly using
+the framework APIs.</p>
+
+<p>Directly controlling a device camera requires a lot more code than requesting pictures or videos
+from existing camera applications. However, if you want to build a specialized camera application or
+or something fully integrated in your app UI, this lesson shows you how.</p>
+
+
+<h2 id="TaskOpenCamera">Open the Camera Object</h2>
+
+<p>Getting an instance of the {@link android.hardware.Camera} object is the first step in the
+process of directly controlling the camera. As Android's own Camera application does, the
+recommended way to access the camera is to open {@link android.hardware.Camera} on a separate thread
+that's launched from {@link android.app.Activity#onCreate onCreate()}. This approach is a good idea
+since it can take a while and might bog down the UI thread. However, in the sample application
+associated with this lesson, opening the camera is deferred to the {@link
+android.app.Activity#onResume onResume()} method to facilitate code reuse and keep the flow of
+control simple.</p>
+
+<pre>
+private void openCameraPerIdAndSetPreview() {
+    if (! safeCameraOpen(mCameraId)) {
+        mCameraId = getFirstRearCameraID();
+        safeCameraOpen(mCameraId);
+    }
+
+    mPreview.setCamera(mCamera);
+}
+</pre>
+
+<p>Since API level 9, the camera framework supports multiple cameras. If you use the
+legacy API and call {@link android.hardware.Camera#open open()} without an
+argument, you get the first rear-facing camera. Dealing with multiple cameras
+is an advanced topic and beyond the scope of this lesson. If you are really
+interested, check out the implementation of {@code getFirstRearCameraID()} in
+the sample app (downloadable at the top).</p>
+
+<p>Calling {@link android.hardware.Camera#open Camera.open()} throws an
+exception if the camera is already in use by another application, so we wrap it
+in a {@code try} block.</p>
+
+<pre>
+private boolean safeCameraOpen(int id) {
+    boolean qOpened = false;
+  
+    try {
+        releaseCameraAndPreview();
+        mCamera = Camera.open(mCameraId);
+        qOpened = (mCamera != null);
+    } catch (Exception e) {
+        Log.e(getString(R.string.app_name), "failed to open Camera");
+        e.printStackTrace();
+    }
+
+    return qOpened;    
+}
+
+private void releaseCameraAndPreview() {
+    mPreview.setCamera(null);
+    if (mCamera != null) {
+        mCamera.release();
+        mCamera = null;
+    }
+}
+</pre>
+
+
+<h2 id="camera-preview">Create the Camera Preview</h2>
+
+<p>Taking a picture usually requires that your users see a preview of their subject before clicking
+the shutter. To do so, you can use a {@link android.view.SurfaceView} to draw previews of what the
+camera sensor is picking up.</p>
+
+<h3 id="TaskSetPreview">Preview Class</h3>
+
+<p>To get started with displaying a preview, you need preview class. The
+preview requires an implementation of the {@code
+android.view.SurfaceHolder.Callback} interface, which is used to pass image
+data from the camera hardware the application.</p>
+
+<pre>
+class Preview extends ViewGroup implements SurfaceHolder.Callback {
+...
+
+    SurfaceView mSurfaceView;
+    SurfaceHolder mHolder;
+
+...
+
+    Preview(Context context) {
+        super(context);
+
+        mSurfaceView = new SurfaceView(context);
+        addView(mSurfaceView);
+
+        // Install a SurfaceHolder.Callback so we get notified when the
+        // underlying surface is created and destroyed.
+        mHolder = mSurfaceView.getHolder();
+        mHolder.addCallback(this);
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
+...
+}
+</pre>
+
+<p>The preview class must be passed to the {@link android.hardware.Camera} object before the live
+image preview can be started, as seen in {@code setCamera()} method of the sample,
+as shown in the next section.</p>
+
+
+<h3 id="TaskStartPreview">Set and Start the Preview</h2>
+
+<p>A camera instance and its related preview must be created in a specific
+order, with the camera object being first. In the sample application, the
+process of initializing the camera is encapsulated so that {@link
+android.hardware.Camera#startPreview Camera.startPreview()} is called by the
+{@code setCamera()} method, whenever the user does something to change the
+camera. The preview must also be restarted in the preview class {@code
+surfaceChanged()} callback method.</p>
+
+<pre>
+public void setCamera(Camera camera) {
+    if (mCamera == camera) { return; }
+    
+    stopPreviewAndFreeCamera();
+    
+    mCamera = camera;
+    
+    if (mCamera != null) {
+        List&lt;Size> localSizes = mCamera.getParameters().getSupportedPreviewSizes();
+        mSupportedPreviewSizes = localSizes;
+        requestLayout();
+      
+        try {
+            mCamera.setPreviewDisplay(mHolder);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+      
+        /*
+          Important: Call startPreview() to start updating the preview surface. Preview must 
+          be started before you can take a picture.
+          */
+        mCamera.startPreview();
+    }
+}
+</pre>
+
+
+<h2 id="TaskSettings">Modify Camera Settings</h2>
+
+<p>Camera settings change the way that the camera takes pictures, from the zoom
+level to exposure compensation. This example doesn’t do a whole lot with camera
+settings, but the APIs provide a wide array of options. The {@code surfaceChanged()} method in the
+sample app demonstrates how to get and set camera parameters:</p>
+
+<pre>
+public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+    // Now that the size is known, set up the camera parameters and begin
+    // the preview.
+    Camera.Parameters parameters = mCamera.getParameters();
+    parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+    requestLayout();
+    mCamera.setParameters(parameters);
+
+    /*
+      Important: Call startPreview() to start updating the preview surface. Preview must be
+      started before you can take a picture.
+    */
+    mCamera.startPreview();
+}
+</pre>
+
+
+<h2 id="TaskOrientation">Set the Preview Orientation</h2>
+
+<p>Most camera applications lock the display into landscape mode because that is the natural
+orientation of the camera sensor. This setting does not prevent you from taking portrait-mode
+photos, because the orientation of the device is recorded in the EXIF header. The {@link
+android.hardware.Camera#setDisplayOrientation setCameraDisplayOrientation()} method lets you change
+how the preview is displayed without affecting how the image is recorded. However, in Android prior
+to API level 14, you must stop your preview before changing the orientation and then restart it.</p>
+
+
+<h2 id="TaskTakePicture">Take a Picture</h2>
+
+<p>Use the {@link android.hardware.Camera#takePicture Camera.takePicture()}
+method to take a picture once the preview is started. You can create {@link
+android.hardware.Camera.PictureCallback} and {@link
+android.hardware.Camera.ShutterCallback} objects and pass them into {@link
+android.hardware.Camera#takePicture Camera.takePicture()}.  Since the Android
+Camera application already does a great job capturing JPEG images, you should
+probably implement the raw-image callback.</p>
+
+<p>If you want to grab images continously, you can create a {@link
+android.hardware.Camera.PreviewCallback} that implements {@link
+android.hardware.Camera.PreviewCallback#onPreviewFrame onPreviewFrame()}. For
+something in between, you can capture only selected preview frames, or set up a
+delayed action to call {@link android.hardware.Camera#takePicture
+takePicture()}.</p>
+
+
+<h2 id="TaskRestartPreview">Restart the Preview</h2>
+
+<p>After a picture is taken, you must to restart the preview before the user
+can take another picture. In the example, the restart is done by overloading
+the shutter button, as shown below.</p>
+
+<pre>
+&#64;Override
+public void onClick(View v) {
+    switch(mPreviewState) {
+    case K_STATE_FROZEN:
+        mCamera.startPreview();
+        mPreviewState = K_STATE_PREVIEW;
+        break;
+
+    default:
+        mCamera.takePicture( null, rawCallback, null);
+        mPreviewState = K_STATE_BUSY;
+    } // switch
+    shutterBtnConfig();
+}
+</pre>
+
+
+<h2 id="TaskReleaseCamera">Stop the Preview and Release the Camera</h2>
+
+<p>Once your application is done using the camera, it's time to clean up. In
+particular, you must release the {@link android.hardware.Camera} object, or you risk crashing other
+applications, including new instances of your own application.</p>
+
+<p>When should you stop the preview and release the camera? Well, having your
+preview surface destroyed is a pretty good hint that it’s time to stop the
+preview and release the camera, as shown in these methods from the {@code
+Preview} class.</p>
+
+<pre>
+public void surfaceDestroyed(SurfaceHolder holder) {
+    // Surface will be destroyed when we return, so stop the preview.
+    if (mCamera != null) {
+        /*
+          Call stopPreview() to stop updating the preview surface.
+        */
+        mCamera.stopPreview();
+    }
+}
+
+/**
+  * When this function returns, mCamera will be null.
+  */
+private void stopPreviewAndFreeCamera() {
+
+    if (mCamera != null) {
+        /*
+          Call stopPreview() to stop updating the preview surface.
+        */
+        mCamera.stopPreview();
+    
+        /*
+          Important: Call release() to release the camera for use by other applications. 
+          Applications should release the camera immediately in onPause() (and re-open() it in
+          onResume()).
+        */
+        mCamera.release();
+    
+        mCamera = null;
+    }
+}
+</pre>
+
+<p>In the example application, this procedure is also part of the {@code
+setCamera()} method, so initializing a camera always begins with stopping the
+preview.</p>
+

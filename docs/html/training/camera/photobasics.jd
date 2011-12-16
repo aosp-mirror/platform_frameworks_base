@@ -1,0 +1,258 @@
+page.title=Taking Photos Simply
+parent.title=Capturing Photos with the Camera
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Recording Videos Simply
+next.link=videobasics.html
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#TaskManifest">Request Camera Permission</a></li>
+      <li><a href="#TaskCaptureIntent">Take a Photo with the Camera App</a></li>
+      <li><a href="#TaskPhotoView">View the Photo</a></li>
+      <li><a href="#TaskPath">Save the Photo</a></li>
+      <li><a href="#TaskGallery">Add the Photo to a Gallery</a></li>
+      <li><a href="#TaskScalePhoto">Decode a Scaled Image</a></li>
+    </ol>
+
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}guide/topics/media/camera.html">Camera</a></li>
+      <li><a href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent 
+      Filters</a></li>
+    </ul>
+
+    <h2>Try it out</h2>
+    <div class="download-box">
+      <a href="{@docRoot}shareables/training/PhotoIntentActivity.zip" class="button">Download the
+sample</a>
+      <p class="filename">PhotoIntentActivity.zip</p>
+    </div>
+
+  </div>
+</div>
+
+<p>This lesson explains how to capture photos using an existing camera
+application.</p>
+
+<p>Suppose you are implementing a crowd-sourced weather service that makes a
+global weather map by blending together pictures of the sky taken by devices
+running your client app. Integrating photos is only a small part of your
+application. You want to take photos with minimal fuss, not reinvent the
+camera. Happily, most Android-powered devices already have at least one camera
+application installed. In this lesson, you learn how to make it take a picture
+for you.</p>
+
+
+<h2 id="TaskManifest">Request Camera Permission</h2>
+
+<p>If an essential function of your application is taking pictures, then restrict
+its visibility in Android Market to devices that have a camera.  To advertise
+that your application depends on having a camera, put a <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html"> {@code
+&lt;uses-feature&gt;}</a> tag in your manifest file:</p>
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera" /&gt;
+    ...
+&lt;/manifest ... >
+</pre>
+
+<p>If your application uses, but does not require a camera in order to function, add {@code
+android:required="false"} to the tag. In doing so, Android Market will allow devices without a
+camera to download your application. It's then your responsibility to check for the availability
+of the camera at runtime by calling {@link
+android.content.pm.PackageManager#hasSystemFeature hasSystemFeature(PackageManager.FEATURE_CAMERA)}.
+If a camera is not available, you should then disable your camera features.</p>
+
+
+<h2 id="TaskCaptureIntent">Take a Photo with the Camera App</h2> 
+
+<p>The Android way of delegating actions to other applications is to invoke an {@link
+android.content.Intent} that describes what you want done. This process involves three pieces: The
+{@link android.content.Intent} itself, a call to start the external {@link android.app.Activity},
+and some code to handle the image data when focus returns to your activity.</p>
+
+<p>Here's a function that invokes an intent to capture a photo.</p>
+
+<pre>
+private void dispatchTakePictureIntent(int actionCode) {
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    startActivityForResult(takePictureIntent, actionCode);
+}
+</pre>
+
+
+<p>Congratulations: with this code, your application has gained the ability to
+make another camera application do its bidding! Of course, if no compatible
+application is ready to catch the intent, then your app will fall down like a
+botched stage dive. Here is a function to check whether an app can handle your intent:</p>
+
+<pre>
+public static boolean isIntentAvailable(Context context, String action) {
+    final PackageManager packageManager = context.getPackageManager();
+    final Intent intent = new Intent(action);
+    List&lt;ResolveInfo> list =
+            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+    return list.size() > 0;
+}
+</pre>
+
+
+<h2 id="TaskPhotoView">View the Photo</h2>
+
+<p>If the simple feat of taking a photo is not the culmination of your app's
+ambition, then you probably want to get the image back from the camera
+application and do something with it.</p>
+
+<p>The Android Camera application encodes the photo in the return {@link android.content.Intent}
+delivered to {@link android.app.Activity#onActivityResult onActivityResult()} as a small {@link
+android.graphics.Bitmap} in the extras, under the key {@code "data"}. The following code retrieves
+this image and displays it in an {@link android.widget.ImageView}.</p>
+
+<pre>
+private void handleSmallCameraPhoto(Intent intent) {
+    Bundle extras = intent.getExtras();
+    mImageBitmap = (Bitmap) extras.get("data");
+    mImageView.setImageBitmap(mImageBitmap);
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> This thumbnail image from {@code "data"} might be good for an
+icon, but not a lot more. Dealing with a full-sized image takes a bit more
+work.</p>
+
+
+<h2 id="TaskPath">Save the Photo</h2> 
+
+<p>The Android Camera application saves a full-size photo if you give it a file to
+save into. You must provide a path that includes the storage volume,
+folder, and file name.</p>
+
+<p>There is an easy way to get the path for photos, but it works only on Android 2.2 (API level 8)
+and later:</p>
+
+<pre> 
+storageDir = new File(
+    Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_PICTURES
+    ), 
+    getAlbumName()
+);		
+</pre> 
+
+<p>For earlier API levels, you have to provide the name of the photo
+directory yourself.</p>
+
+<pre> 
+storageDir = new File (
+    Environment.getExternalStorageDirectory()
+        + PICTURES_DIR
+        + getAlbumName()
+);
+</pre> 
+
+<p class="note"><strong>Note:</strong> The path component {@code PICTURES_DIR} is
+just {@code Pictures/}, the standard location for shared photos on the external/shared
+storage.</p>
+
+
+<h3 id="TaskFileName">Set the file name</h3> 
+
+<p>As shown in the previous section, the file location for an image should be
+driven by the device environment. What you need to do yourself is choose a
+collision-resistant file-naming scheme. You may wish also to save the path in a
+member variable for later use. Here's an example solution:</p>
+
+<pre> 
+private File createImageFile() throws IOException {
+    // Create an image file name
+    String timeStamp = 
+        new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+    File image = File.createTempFile(
+        imageFileName, 
+        JPEG_FILE_SUFFIX, 
+        getAlbumDir()
+    );
+    mCurrentPhotoPath = image.getAbsolutePath();
+    return image;
+}
+</pre> 
+
+
+<h3 id="TaskIntentFileName">Append the file name onto the Intent</h3>
+
+<p>Once you have a place to save your image, pass that location to the camera
+application via the {@link android.content.Intent}.</p>
+
+<pre>
+File f = createImageFile();
+takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+</pre>
+
+
+<h2 id="TaskGallery">Add the Photo to a Gallery</h2>
+
+<p>When you create a photo through an intent, you should know where your image is located, because
+you said where to save it in the first place.  For everyone else, perhaps the easiest way to make
+your photo accessible is to make it accessible from the system's Media Provider.</p>
+
+<p>The following example method demonstrates how to invoke the system's media scanner to add your
+photo to the Media Provider's database, making it available in the Android Gallery application
+and to other apps.</p>
+
+<pre>
+private void galleryAddPic() {
+    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+    File f = new File(mCurrentPhotoPath);
+    Uri contentUri = Uri.fromFile(f);
+    mediaScanIntent.setData(contentUri);
+    this.sendBroadcast(mediaScanIntent);
+}
+</pre>
+
+
+<h2 id="TaskScalePhoto">Decode a Scaled Image</h2>
+
+<p>Managing multiple full-sized images can be tricky with limited memory. If
+you find your application running out of memory after displaying just a few
+images, you can dramatically reduce the amount of dynamic heap used by
+expanding the JPEG into a memory array that's already scaled to match the size
+of the destination view. The following example method demonstrates this
+technique.</p>
+
+<pre>
+private void setPic() {
+    // Get the dimensions of the View
+    int targetW = mImageView.getWidth();
+    int targetH = mImageView.getHeight();
+  
+    // Get the dimensions of the bitmap
+    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+    bmOptions.inJustDecodeBounds = true;
+    BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+    int photoW = bmOptions.outWidth;
+    int photoH = bmOptions.outHeight;
+  
+    // Determine how much to scale down the image
+    int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+  
+    // Decode the image file into a Bitmap sized to fill the View
+    bmOptions.inJustDecodeBounds = false;
+    bmOptions.inSampleSize = scaleFactor;
+    bmOptions.inPurgeable = true;
+  
+    Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+    mImageView.setImageBitmap(bitmap);
+}
+</pre>
+
