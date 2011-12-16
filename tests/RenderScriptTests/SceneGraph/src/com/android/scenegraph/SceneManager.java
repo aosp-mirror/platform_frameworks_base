@@ -46,6 +46,19 @@ public class SceneManager extends SceneGraphBase {
     int mWidth;
     int mHeight;
 
+    public static boolean isSDCardPath(String path) {
+        int sdCardIndex = path.indexOf("sdcard/");
+        // We are looking for /sdcard/ or sdcard/
+        if (sdCardIndex == 0 || sdCardIndex == 1) {
+            return true;
+        }
+        sdCardIndex = path.indexOf("mnt/sdcard/");
+        if (sdCardIndex == 0 || sdCardIndex == 1) {
+            return true;
+        }
+        return false;
+    }
+
     public static class SceneLoadedCallback implements Runnable {
         Scene mLoadedScene;
         String mName;
@@ -96,6 +109,16 @@ public class SceneManager extends SceneGraphBase {
 
         mQuad = tmb.create(true);
         return mQuad;
+    }
+
+    public Renderable getRenderableQuad(String name, RenderState state) {
+        Renderable quad = new Renderable();
+        quad.setTransform(new MatrixTransform());
+        quad.setMesh(getScreenAlignedQuad());
+        quad.setName(name);
+        quad.setRenderState(state);
+        quad.setCullType(1);
+        return quad;
     }
 
     public void initRS(RenderScriptGL rs, Resources res, int w, int h) {

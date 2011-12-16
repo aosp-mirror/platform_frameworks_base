@@ -65,9 +65,7 @@ public class ColladaScene {
         mRS = rs;
         mRes = res;
 
-        if (modelName.indexOf("sdcard/") != -1) {
-            mLoadFromSD = true;
-        }
+        mLoadFromSD = SceneManager.isSDCardPath(modelName);
 
         new ColladaLoaderTask().execute(modelName);
     }

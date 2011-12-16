@@ -81,16 +81,6 @@ class FullscreenBlur {
                                                          Allocation.USAGE_GRAPHICS_RENDER_TARGET);
     }
 
-    private static Renderable getRenderableQuad(String name, RenderState state, SceneManager sceneManager) {
-        Renderable quad = new Renderable();
-        quad.setTransform(new MatrixTransform());
-        quad.setMesh(sceneManager.getScreenAlignedQuad());
-        quad.setName(name);
-        quad.setRenderState(state);
-        quad.setCullType(1);
-        return quad;
-    }
-
     static void addBlurPasses(Scene scene, RenderScriptGL rs, SceneManager sceneManager) {
         ArrayList<RenderableBase> allDraw = scene.getRenderables();
         int numDraw = allDraw.size();
@@ -131,7 +121,7 @@ class FullscreenBlur {
         selectColorPass.setShouldClearDepth(false);
         selectColorPass.setCamera(scene.getCameras().get(1));
         // Make blur shape
-        Renderable quad = getRenderableQuad("ScreenAlignedQuadS", selectCol, sceneManager);
+        Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadS", selectCol);
         quad.updateTextures(rs, sRenderTargetBlur0Color, 0);
         selectColorPass.appendRenderable(quad);
         scene.appendRenderPass(selectColorPass);
@@ -143,7 +133,7 @@ class FullscreenBlur {
         horizontalBlurPass.setShouldClearDepth(false);
         horizontalBlurPass.setCamera(scene.getCameras().get(1));
         // Make blur shape
-        quad = getRenderableQuad("ScreenAlignedQuadH", hBlur, sceneManager);
+        quad = sceneManager.getRenderableQuad("ScreenAlignedQuadH", hBlur);
         quad.updateTextures(rs, sRenderTargetBlur2Color, 0);
         horizontalBlurPass.appendRenderable(quad);
         scene.appendRenderPass(horizontalBlurPass);
@@ -155,7 +145,7 @@ class FullscreenBlur {
         verticalBlurPass.setShouldClearDepth(false);
         verticalBlurPass.setCamera(scene.getCameras().get(1));
         // Make blur shape
-        quad = getRenderableQuad("ScreenAlignedQuadV", vBlur, sceneManager);
+        quad = sceneManager.getRenderableQuad("ScreenAlignedQuadV", vBlur);
         quad.updateTextures(rs, sRenderTargetBlur1Color, 0);
         verticalBlurPass.appendRenderable(quad);
         scene.appendRenderPass(verticalBlurPass);
@@ -173,7 +163,7 @@ class FullscreenBlur {
         compositePass.setClearDepth(1.0f);
         compositePass.setShouldClearDepth(false);
         compositePass.setCamera(scene.getCameras().get(1));
-        Renderable quad = getRenderableQuad("ScreenAlignedQuad", drawTex, sceneManager);
+        Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuad", drawTex);
         quad.updateTextures(rs, sRenderTargetBlur2Color, 0);
         compositePass.appendRenderable(quad);
 
