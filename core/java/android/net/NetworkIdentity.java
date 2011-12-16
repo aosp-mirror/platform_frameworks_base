@@ -45,7 +45,7 @@ public class NetworkIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mType, mSubType, mSubscriberId);
+        return Objects.hashCode(mType, mSubType, mSubscriberId, mRoaming);
     }
 
     @Override
