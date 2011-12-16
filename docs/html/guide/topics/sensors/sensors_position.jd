@@ -1,0 +1,317 @@
+page.title=Position Sensors
+parent.title=Sensors
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+     <li><a href="#sensors-pos-orient">Using the Orientation Sensor</a></li>
+    <li><a href="#sensors-pos-mag">Using the Geomagnetic Field Sensor</a></li>
+    <li><a href="#sensors-pos-prox">Using the Proximity Sensor</a></li>
+  </ol>
+  <h2>Key classes and interfaces</h2>
+  <ol>
+    <li>{@link android.hardware.Sensor}</li>
+    <li>{@link android.hardware.SensorEvent}</li>
+    <li>{@link android.hardware.SensorManager}</li>
+    <li>{@link android.hardware.SensorEventListener}</li>
+  </ol>
+  <h2>Related samples</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer
+        Play</a></li>
+    <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
+API Demos (OS - RotationVectorDemo)</a></li>
+    <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/Sensors.html">API Demos
+(OS - Sensors)</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/sensors/index.html">Sensors</a></li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion
+        Sensors</a></li>
+    <li><a href="{@docRoot}guide/topics/sensors/sensors_environment.html">Environment
+        Sensors</a></li>
+  </ol>
+  </div>
+</div>
+
+<p>The Android platform provides two sensors that let you determine the position of a device: the
+geomagnetic field sensor and the orientation sensor. The Android platform also
+provides a sensor that lets you determine how close the face of a device is to an object (known as
+the proximity sensor). The geomagnetic field sensor and the proximity sensor are hardware-based.
+Most
+handset and tablet manufacturers include a geomagnetic field sensor. Likewise, handset manufacturers
+usually include a proximity sensor to determine when a handset is being held close to a user's face
+(for example, during a phone call). The orientation sensor is software-based and derives its data
+from the accelerometer and the geomagnetic field sensor.</p>
+
+<p class="note"><strong>Note:</strong> The orientation sensor was deprecated in Android 2.2 (API
+Level 8).</p>
+
+<p>Position sensors are useful for determining a device's physical position in the
+world's frame of reference. For example, you can use the geomagnetic field sensor in
+combination with the accelerometer to determine a device's position relative to
+the magnetic North Pole. You can also use the orientation sensor (or similar sensor-based
+orientation methods) to determine a device's position in your application's frame of reference.
+Position sensors are not typically used to monitor device movement or motion, such as shake, tilt,
+or thrust (for more information, see <a
+href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion Sensors</a>).</p>
+
+<p>The geomagnetic field sensor and orientation sensor return multi-dimensional arrays of sensor
+values
+for each {@link android.hardware.SensorEvent}. For example, the orientation sensor provides
+geomagnetic
+field strength values for each of the three coordinate axes during a single sensor event. Likewise,
+the orientation sensor provides azimuth (yaw), pitch, and roll values during a single sensor event.
+For more information about the coordinate systems that are used by sensors, see <a
+href="{@docRoot}guide/topics/sensors/sensors_overview.html#sensors-coords">Sensor Coordinate
+Systems</a>. The proximity sensor provides a single value for each sensor event. Table 1 summarizes
+the position sensors that are supported on the Android platform.</p>
+
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> Position sensors that are supported on the Android platform.</p>
+<table>
+  <tr>
+    <th scope="col" style="white-space:nowrap">Sensor</th>
+    <th scope="col" style="white-space:nowrap">Sensor event data</th>
+    <th scope="col" style="white-space:nowrap">Description</th>
+    <th scope="col" style="white-space:nowrap">Units of measure</th>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Geomagnetic field strength along the x axis.</td>
+    <td rowspan="3">&mu;T</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Geomagnetic field strength along the y axis.</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Geomagnetic field strength along the z axis.</td>
+  </tr>
+  <tr>
+    <td rowspan="3">{@link android.hardware.Sensor#TYPE_ORIENTATION}<sup>1</sup></td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Azimuth (angle around the z-axis).</td>
+    <td rowspan="3">Degrees</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[1]</code></td>
+    <td>Pitch (angle around the x-axis).</td>
+  </tr>
+  <tr>
+    <td><code>SensorEvent.values[2]</code></td>
+    <td>Roll (angle around the y-axis).</td>
+  </tr>
+  <tr>
+    <td>{@link android.hardware.Sensor#TYPE_PROXIMITY}</td>
+    <td><code>SensorEvent.values[0]</code></td>
+    <td>Distance from object.<sup>2</sup></td>
+    <td>cm</td>
+  </tr>
+</table>
+
+<p class="note"><sup><strong>1</strong></sup> This sensor was deprecated in Android 2.2 (API Level
+  8). The sensor framework provides alternate methods for acquiring device orientation, which are
+discussed in <a href="#sensors-pos-orient">Using the Orientation Sensor</a>.</p>
+
+<p class="note"><sup><strong>2</strong></sup> Some proximity sensors provide only binary values
+representing near and far.</p>
+
+<h2 id="sensors-pos-orient">Using the Orientation Sensor</h2>
+
+<p>The orientation sensor lets you monitor the position of a device relative to the earth's frame of
+reference (specifically, magnetic north). The following code shows you how to get an instance of the
+default orientation sensor :</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+</pre>
+
+<p>The orientation sensor derives its data by using a device's geomagnetic field sensor in
+combination with a device's accelerometer. Using these two hardware sensors, an orientation sensor
+provides data for the following three dimensions:</p>
+
+<ul>
+  <li>Azimuth (degrees of rotation around the z axis). This is the angle between magnetic north
+and the device's y axis. For example, if the device's y axis is aligned with magnetic north
+this value is 0, and if the device's y axis is pointing south this value is 180. Likewise, when
+the y axis is pointing east this value is 90 and when it is pointing west this value is 270.</li>
+  <li>Pitch (degrees of rotation around the x axis). This value is positive when the positive z axis
+rotates toward the positive y axis, and it is negative when the positive z axis
+rotates toward the negative y axis. The range of values is 180 degrees to -180
+degrees.</li>
+  <li>Roll (degrees of rotation around the y axis). This value is positive when the positive z axis
+rotates toward the positive x axis, and it is negative when the positive z axis
+rotates toward the negative x axis. The range of values is 90 degrees to -90
+degrees.</li>
+</ul>
+
+<p>This definition is different from yaw, pitch, and roll used in aviation, where the X axis is
+along the long side of the plane (tail to nose). Also, for historical reasons the roll angle is
+positive in the clockwise direction (mathematically speaking, it should be positive in the
+counter-clockwise direction).</p>
+
+<p>The orientation sensor derives its data by processing the raw sensor data from the accelerometer
+and the geomagnetic field sensor. Because of the heavy processing that is involved, the accuracy and
+precision of the orientation sensor is diminished (specifically, this sensor is only reliable when
+the roll component is 0). As a result, the orientation sensor was deprecated in Android 2.2 (API
+level 8). Instead of using raw data from the orientation sensor, we recommend that you use the
+{@link android.hardware.SensorManager#getRotationMatrix getRotationMatrix()} method in conjunction
+with the {@link android.hardware#getOrientation getOrientation()} method to compute orientation
+values. You can also use the {@link android.hardware.SensorManager#remapCoordinateSystem
+remapCoordinateSystem()} method to translate the orientation values to your application's frame of
+reference.</p>
+
+<p>The following code sample shows how to acquire orientation data directly from the orientation
+sensor. We recommend that you do this only if a device has negligible roll.</p>
+
+<pre>
+public class SensorActivity extends Activity implements SensorEventListener {
+
+  private SensorManager mSensorManager;
+  private Sensor mOrientation;
+
+  &#64;Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+  }
+
+  &#64;Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    // Do something here if sensor accuracy changes.
+    // You must implement this callback in your code.
+  }
+
+  &#64;Override
+  protected void onResume() {
+    super.onResume();
+    mSensorManager.registerListener(this, mOrientation, SensorManager.SENSOR_DELAY_NORMAL);
+  }
+
+  &#64;Override
+  protected void onPause() {
+    super.onPause();
+    mSensorManager.unregisterListener(this);
+  }
+
+  &#64;Override
+  public void onSensorChanged(SensorEvent event) {
+    float azimuth_angle = event.values[0];
+    float pitch_angle = event.values[1];
+    float roll_angle = event.values[2];
+    // Do something with these orientation angles.
+  }
+}
+</pre>
+
+<p>You do not usually need to perform any data processing or filtering of the raw data that you
+obtain from an orientation sensor, other than translating the sensor's coordinate system to your
+application's frame of reference. The <a
+href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer Play</a> sample shows
+you how to translate acceleration sensor data into another frame of reference; the technique is
+similar to the one you might use with the orientation sensor.</p>
+
+<h2 id="sensors-pos-mag">Using the Geomagnetic Field Sensor</h2>
+
+<p>The geomagnetic field sensor lets you monitor changes in the earth's magnetic field. The
+following code shows you how to get an instance of the default geomagnetic field sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+</pre>
+
+<p>This sensor provides raw field strength data (in &mu;T) for each of the three coordinate axes.
+Usually, you do not need to use this sensor directly. Instead, you can use the rotation vector
+sensor to determine raw rotational movement or you can use the accelerometer and geomagnetic field
+sensor in conjunction with the {@link android.hardware.SensorManager#getRotationMatrix
+getRotationMatrix()} method to obtain the rotation matrix and the inclination matrix. You can then
+use these matrices with the {@link android.hardware.SensorManager#getOrientation getOrientation()}
+and {@link android.hardware.SensorManager#getInclination getInclination()} methods to obtain azimuth
+and geomagnetic inclination data.</p>
+
+<h2 id="sensors-pos-prox">Using the Proximity Sensor</h2>
+<p>The proximity sensor lets you determine how far away an object is from a device. The following
+code shows you how to get an instance of the default proximity sensor:</p>
+
+<pre>
+private SensorManager mSensorManager;
+private Sensor mSensor;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+</pre>
+
+<p>The proximity sensor is usually used to determine how far away a person's head is from the face
+of a handset device (for example, when a user is making or receiving a phone call). Most
+proximity sensors return the absolute distance, in cm, but some return only near and
+far values. The following code shows you how to use the proximity sensor:</p>
+
+<pre>
+public class SensorActivity extends Activity implements SensorEventListener {
+  private SensorManager mSensorManager;
+  private Sensor mProximity;
+
+  &#64;Override
+  public final void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    // Get an instance of the sensor service, and use that to get an instance of
+    // a particular sensor.
+    mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+  }
+
+  &#64;Override
+  public final void onAccuracyChanged(Sensor sensor, int accuracy) {
+    // Do something here if sensor accuracy changes.
+  }
+
+  &#64;Override
+  public final void onSensorChanged(SensorEvent event) {
+    float distance = event.values[0];
+    // Do something with this sensor data.
+  }
+
+  &#64;Override
+  protected void onResume() {
+    // Register a listener for the sensor.
+    super.onResume();
+    mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+  }
+
+  &#64;Override
+  protected void onPause() {
+    // Be sure to unregister the sensor when the activity pauses.
+    super.onPause();
+    mSensorManager.unregisterListener(this);
+  }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Some proximity sensors return binary values that represent
+"near" or "far." In this case, the sensor usually reports its maximum range value in the far state
+and a lesser value in the near state. Typically, the far value is a value > 5 cm, but this can vary
+from sensor to sensor. You can determine a sensor's maximum range by using the {@link
+android.hardware.Sensor#getMaximumRange} method.</p>
