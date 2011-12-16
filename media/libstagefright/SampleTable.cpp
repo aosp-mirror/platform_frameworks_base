@@ -632,6 +632,13 @@ status_t SampleTable::findSyncSampleNear(
             break;
         }
     }
+    if (left == mNumSyncSamples) {
+        if (flags == kFlagAfter) {
+            LOGE("tried to find a sync frame after the last one: %d", left);
+            return ERROR_OUT_OF_RANGE;
+        }
+        left = left - 1;
+    }
 
     // Now ssi[left] is the sync sample index just before (or at)
     // start_sample_index.
