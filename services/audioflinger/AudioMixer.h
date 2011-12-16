@@ -80,10 +80,10 @@ public:
     void        enable();
     void        disable();
 
-    status_t    setActiveTrack(int track);
+    void        setActiveTrack(int track);
     status_t    setParameter(int target, int name, void *value);
 
-    status_t    setBufferProvider(AudioBufferProvider* bufferProvider);
+    void        setBufferProvider(AudioBufferProvider* bufferProvider);
     void        process();
 
     uint32_t    trackNames() const { return mTrackNames; }

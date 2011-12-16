@@ -18,6 +18,7 @@
 #define LOG_TAG "AudioMixer"
 //#define LOG_NDEBUG 0
 
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
@@ -161,13 +162,12 @@ void AudioMixer::disable()
     }
 }
 
-status_t AudioMixer::setActiveTrack(int track)
+void AudioMixer::setActiveTrack(int track)
 {
-    if (uint32_t(track-TRACK0) >= MAX_NUM_TRACKS) {
-        return BAD_VALUE;
-    }
-    mActiveTrack = track - TRACK0;
-    return NO_ERROR;
+    // this also catches track < TRACK0
+    track -= TRACK0;
+    assert(uint32_t(track) < MAX_NUM_TRACKS);
+    mActiveTrack = track;
 }
 
 status_t AudioMixer::setParameter(int target, int name, void *value)
@@ -324,10 +324,9 @@ void AudioMixer::track_t::adjustVolumeRamp(bool aux)
 }
 
 
-status_t AudioMixer::setBufferProvider(AudioBufferProvider* buffer)
+void AudioMixer::setBufferProvider(AudioBufferProvider* buffer)
 {
     mState.tracks[ mActiveTrack ].bufferProvider = buffer;
-    return NO_ERROR;
 }
 
 
