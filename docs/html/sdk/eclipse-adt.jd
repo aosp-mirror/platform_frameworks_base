@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=16.0.0
-adt.zip.download=ADT-16.0.0.zip
-adt.zip.bytes=6999205
-adt.zip.checksum=b7e512572580291279469845386b31b6
+adt.zip.version=16.0.1
+adt.zip.download=ADT-16.0.1.zip
+adt.zip.bytes=7000078
+adt.zip.checksum=03a2a23650ddac128c8b9e8aaf0aa433
 
 @jd:body
 
@@ -113,6 +113,39 @@ padding: .25em 1em;
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
 width="9px" />
+ADT 16.0.1</a> <em>(December 2011)</em>
+  <div class="toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Eclipse Helios (Version 3.6) or higher is required for ADT 16.0.1.</li>
+      <li>ADT 16.0.1 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools
+        r16</a>. If you haven't already installed SDK Tools r16 into your SDK, use the Android SDK
+        Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>Bug fixes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed build issue where the 9-patch could be packaged as normal bitmap in some cases.</li>
+      <li>Fixed minor issues in the <a href="http://tools.android.com/recent/lint">Lint</a>
+        tool.</li>
+      <li>Fixed minor issues in the SDK Manager.</li>
+    </ul>
+  </dd>
+</dl>
+
+</div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
 ADT 16.0.0</a> <em>(December 2011)</em>
   <div class="toggleme">
 <dl>
@@ -131,7 +164,7 @@ r16 into your SDK, use the Android SDK Manager to do so.</li>
   <dt>General improvements:</dt>
   <dd>
     <ul>
-      <li>Added Lint tools to detect common errors in Android projects. (<a
+      <li>Added Lint tool to detect common errors in Android projects. (<a
 href="http://tools.android.com/recent/lint">more info</a>)</li>
     </ul>
   </dd>

@@ -46,12 +46,62 @@ by the directory name, such as {@code v4/} and {@code v13/}.</p>
 the Support Package, as denoted by revision number.</p>
 
 
-
 <div class="toggle-content open">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" />
-    Support Package, revision 4 (October 2011)
+    Support Package, revision 6 (December 2011)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Changes to ViewPager:
+            <ul>
+              <li>Added extra decorative view support for {@link android.support.v4.view.ViewPager}.
+                Decorative views may be supplied as child views of a pager in XML layout.</li>
+              <li>Added {@link android.support.v4.view.PagerAdapter#getPageTitle
+                PagerAdapter.getPageTitle()} to supply title strings for pages, which defaults to no
+                title for each page.</li>
+              <li>Added {@link android.support.v4.view.PagerTitleStrip}, a non-interactive title
+                strip, that can be added as a child of ViewPager. Developers can supply text
+                appearance and color, as well as layout sizing and gravity information.</li>
+              <li>Updated PagerAdapter methods to take ViewGroup objects, rather than View to avoid
+                class casting in adapter implementations. For more information, see
+                {@link android.support.v4.view.PagerAdapter}.</li>
+              <li>Updated ViewPager to use Launcher Workspace-style fling behavior.</li>
+              <li>Bug fixes for user interface interaction and test automation.</li>
+            </ul>
+          </li>
+          
+          <li>Support for Fragments:
+            <ul>
+              <li>Changed {@code setStartDeferred()} method to {@link
+                android.support.v4.app.Fragment#setUserVisibleHint}.</li>
+              <li>Added deferred start for off-screen pages to improve performance.</li>
+            </ul>  
+          </li>
+          
+          <li>Support for Accessiblity APIs:
+            <ul>
+              <li>Updated {@link android.support.v4.view.AccessibilityDelegateCompat} methods
+                to return empty lists instead of null.</li>
+              <li>Added new APIs needed by the v4 samples.</li>
+            </ul>
+          </li>
+          
+        </ul>
+      </dd>
+    </dl>
+  </div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
+    Support Package, revision 5 (December 2011)
   </a></p>
 
   <div class="toggle-content-toggleme" style="padding-left:2em">
@@ -88,6 +138,36 @@ the Support Package, as denoted by revision number.</p>
             </ul>
           </li>
 
+          <li>Changes to <code>ViewPager</code>:
+            <ul>
+              <li>Added support for margins between pages.
+              An optional {@link android.graphics.drawable.Drawable} can be provided
+              to fill the margins.</li>
+              <li>Added support for {@link android.widget.EdgeEffect}.</li>
+              <li>Added support for keyboard navigation</li>
+              <li>Added support to control how many pages are kept to either side
+              of the current page.</li>
+              <li>Improved touch physics.</li>
+              <li>Bug fixes for user interface behavior.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
+    Support Package, revision 4 (October 2011)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
           <li>Added <code>EdgeEffectCompat</code> to
           support {@link android.widget.EdgeEffect}.</li>
           
@@ -106,19 +186,7 @@ the Support Package, as denoted by revision number.</p>
               <li>Various bug fixes.</li>
             </ul>
           </li>
-          <li>Changes to <code>ViewPager</code>:
-            <ul>
-              <li>Added support for margins between pages.
-              An optional {@link android.graphics.drawable.Drawable} can be provided
-              to fill the margins.</li>
-              <li>Added support for {@link android.widget.EdgeEffect}.</li>
-              <li>Added support for keyboard navigation</li>
-              <li>Added support to control how many pages are kept to either side
-              of the current page.</li>
-              <li>Improved touch physics.</li>
-            </ul>
-          </li>
-
+          
           <li>Fixed a {@link android.content.Loader} bug that caused issues in
           canceling {@link android.os.AsyncTask}s when running on Froyo and older
           versions of the platform. The support
@@ -202,7 +270,8 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
     <dd>
       <ul>
         <li>Support for fragment animations</li>
-        <li>Fix {@code Fragment.onActivityResult()} bug</li>
+        <li>Fix {@code android.support.v4.app.Fragment#onActivityResult Fragment.onActivityResult()}
+          bug</li>
       </ul>
     </dd>
     </dl>
@@ -261,8 +330,7 @@ libs/} directory.
   </li>
   <li>Add the JAR to your project build path. 
     <p>In Eclipse, right-click the JAR file in the Package Explorer, select <strong>Build
-Path</strong> &gt; <strong>Add to Build Path</strong>. You should then see the JAR file appear in a
-new directory called Referenced Libraries.</p>
+Path</strong> &gt; <strong>Add to Build Path</strong>.</p>
   </li>
 </ol>
 
