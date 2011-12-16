@@ -32,6 +32,7 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSansMono.ttf:system/fonts/DroidSansMono.ttf \
     frameworks/base/data/fonts/DroidSansArmenian.ttf:system/fonts/DroidSansArmenian.ttf \
     frameworks/base/data/fonts/DroidSansGeorgian.ttf:system/fonts/DroidSansGeorgian.ttf \
+    frameworks/base/data/fonts/AndroidEmoji.ttf:system/fonts/AndroidEmoji.ttf \
     frameworks/base/data/fonts/Clockopia.ttf:system/fonts/Clockopia.ttf \
     frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
     frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf \

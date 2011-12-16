@@ -71,6 +71,11 @@
     </family>
     <family>
         <fileset>
+            <file>AndroidEmoji.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>DroidSansFallback.ttf</file>
         </fileset>
     </family>
