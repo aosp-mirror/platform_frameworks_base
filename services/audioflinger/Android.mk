@@ -11,9 +11,11 @@ LOCAL_SRC_FILES:=               \
     AudioPolicyService.cpp
 
 LOCAL_C_INCLUDES := \
-    system/media/audio_effects/include
+    system/media/audio_effects/include \
+    system/media/audio_utils/include
 
 LOCAL_SHARED_LIBRARIES := \
+    libaudioutils \
     libcutils \
     libutils \
     libbinder \

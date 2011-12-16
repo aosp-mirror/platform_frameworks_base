@@ -31,17 +31,11 @@
 
 #include <system/audio.h>
 
+#include <audio_utils/primitives.h>
+
 #include "AudioMixer.h"
 
 namespace android {
-// ----------------------------------------------------------------------------
-
-static inline int16_t clamp16(int32_t sample)
-{
-    if ((sample>>15) ^ (sample>>31))
-        sample = 0x7FFF ^ (sample>>31);
-    return sample;
-}
 
 // ----------------------------------------------------------------------------
 
@@ -482,88 +476,6 @@ void AudioMixer::process__validate(state_t* state)
     }
 }
 
-static inline
-int32_t mulAdd(int16_t in, int16_t v, int32_t a)
-{
-#if defined(__arm__) && !defined(__thumb__)
-    int32_t out;
-    asm( "smlabb %[out], %[in], %[v], %[a] \n"
-         : [out]"=r"(out)
-         : [in]"%r"(in), [v]"r"(v), [a]"r"(a)
-         : );
-    return out;
-#else
-    return a + in * int32_t(v);
-#endif
-}
-
-static inline
-int32_t mul(int16_t in, int16_t v)
-{
-#if defined(__arm__) && !defined(__thumb__)
-    int32_t out;
-    asm( "smulbb %[out], %[in], %[v] \n"
-         : [out]"=r"(out)
-         : [in]"%r"(in), [v]"r"(v)
-         : );
-    return out;
-#else
-    return in * int32_t(v);
-#endif
-}
-
-static inline
-int32_t mulAddRL(int left, uint32_t inRL, uint32_t vRL, int32_t a)
-{
-#if defined(__arm__) && !defined(__thumb__)
-    int32_t out;
-    if (left) {
-        asm( "smlabb %[out], %[inRL], %[vRL], %[a] \n"
-             : [out]"=r"(out)
-             : [inRL]"%r"(inRL), [vRL]"r"(vRL), [a]"r"(a)
-             : );
-    } else {
-        asm( "smlatt %[out], %[inRL], %[vRL], %[a] \n"
-             : [out]"=r"(out)
-             : [inRL]"%r"(inRL), [vRL]"r"(vRL), [a]"r"(a)
-             : );
-    }
-    return out;
-#else
-    if (left) {
-        return a + int16_t(inRL&0xFFFF) * int16_t(vRL&0xFFFF);
-    } else {
-        return a + int16_t(inRL>>16) * int16_t(vRL>>16);
-    }
-#endif
-}
-
-static inline
-int32_t mulRL(int left, uint32_t inRL, uint32_t vRL)
-{
-#if defined(__arm__) && !defined(__thumb__)
-    int32_t out;
-    if (left) {
-        asm( "smulbb %[out], %[inRL], %[vRL] \n"
-             : [out]"=r"(out)
-             : [inRL]"%r"(inRL), [vRL]"r"(vRL)
-             : );
-    } else {
-        asm( "smultt %[out], %[inRL], %[vRL] \n"
-             : [out]"=r"(out)
-             : [inRL]"%r"(inRL), [vRL]"r"(vRL)
-             : );
-    }
-    return out;
-#else
-    if (left) {
-        return int16_t(inRL&0xFFFF) * int16_t(vRL&0xFFFF);
-    } else {
-        return int16_t(inRL>>16) * int16_t(vRL>>16);
-    }
-#endif
-}
-
 
 void AudioMixer::track__genericResample(track_t* t, int32_t* out, size_t outFrameCount, int32_t* temp, int32_t* aux)
 {
@@ -846,19 +758,6 @@ void AudioMixer::track__16BitsMono(track_t* t, int32_t* out, size_t frameCount, 
         }
     }
     t->in = in;
-}
-
-void AudioMixer::ditherAndClamp(int32_t* out, int32_t const *sums, size_t c)
-{
-    for (size_t i=0 ; i<c ; i++) {
-        int32_t l = *sums++;
-        int32_t r = *sums++;
-        int32_t nl = l >> 12;
-        int32_t nr = r >> 12;
-        l = clamp16(nl);
-        r = clamp16(nr);
-        *out++ = (r<<16) | (l & 0xFFFF);
-    }
 }
 
 // no-op case

@@ -47,6 +47,7 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/media/libvideoeditor/osal/inc
 
 LOCAL_SHARED_LIBRARIES := \
+    libaudioutils \
     libcutils \
     libdl \
     libutils \
