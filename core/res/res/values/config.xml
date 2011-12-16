@@ -601,9 +601,9 @@
     <!-- The restoring is handled by modem if it is true-->
     <bool translatable="false" name="skip_restoring_network_selection">false</bool>
 
-    <!-- Number of database connections opened and managed by framework layer
+    <!-- Maximum number of database connections opened and managed by framework layer
          to handle queries on each database. -->
-    <integer name="db_connection_pool_size">1</integer>
+    <integer name="db_connection_pool_size">4</integer>
 
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
