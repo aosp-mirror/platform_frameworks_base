@@ -13,9 +13,7 @@ next.link=device-management-policy.html
 <!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
 <h2>Dependencies and prerequisites</h2>
 <ul>
-  <li>Android 2.0 (API Level 5) or higher</li>
-  <li>Experience with <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media
-Playback</a></li>
+  <li>Android 2.2 (API Level 8) or higher</li>
 </ul>
 
 <!-- related docs (NOT javadocs) -->
