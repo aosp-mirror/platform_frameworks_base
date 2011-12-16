@@ -43,8 +43,8 @@ new Google+ post with photos from the Android Gallery app.</p>
 <h2 id="update-manifest">Update Your Manifest</h2>
 
 <p>Intent filters inform the system what intents an application component is willing to accept. 
-Just as you constructed an intent with action {@link android.content.Intent#ACTION_SEND} in the 
-<a href="{@docRoot}training/sharing/send.html">Send Content to Other Apps Using Intents</a> 
+Similar to how you constructed an intent with action {@link android.content.Intent#ACTION_SEND} in 
+the <a href="{@docRoot}training/sharing/send.html">Send Content to Other Apps Using Intents</a> 
 lesson, you create intent filters in order to be able to receive intents with this action. You 
 define an intent filter in your manifest, using the 
 <code><a
@@ -78,9 +78,9 @@ Filters</a></p>
 
 <p>When another application tries to share any of these things by constructing an intent and passing
 it to {@link android.content.Context#startActivity(android.content.Intent) startActivity()}, your
-application will be listed as an option in the intent chooser (see figure 1). If the user selects
-your application, the corresponding activity (<code>.ui.MyActivity</code> in the example above) will
-be started. It is then up to you to handle the content appropriately within your code and UI.</p>
+application will be listed as an option in the intent chooser. If the user selects your application, 
+the corresponding activity (<code>.ui.MyActivity</code> in the example above) will be started. It 
+is then up to you to handle the content appropriately within your code and UI.</p>
 
 
 <h2 id="handling-content">Handle the Incoming Content</h2>
