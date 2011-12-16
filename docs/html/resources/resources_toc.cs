@@ -97,6 +97,25 @@
         </ul>
       </li>
 
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>training/id-auth/index.html">
+            <span class="en">Remembering Users</span>
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/id-auth/identify.html">
+            <span class="en">Remembering Your User</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/id-auth/authenticate.html">
+            <span class="en">Authenticating to OAuth2 Services</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/id-auth/custom_auth.html">
+            <span class="en">Creating a Custom Account Type</span>
+          </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>training/sharing/index.html">
