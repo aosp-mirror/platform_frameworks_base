@@ -17,7 +17,7 @@ page.title=JNI Tips
   <li><a href="#extended_checking">Extended Checking</a> </li>
   <li><a href="#native_libraries">Native Libraries</a></li>
   <li><a href="#64_bit">64-bit Considerations</a></li>
-  <li><a href="#unsupported">Unsupported Features</a></li>
+  <li><a href="#unsupported">Unsupported Features/Backwards Compatibility</a></li>
   <li><a href="#faq_ULE">FAQ: Why do I get <code>UnsatisfiedLinkError</code></a></li>
   <li><a href="#faq_FindClass">FAQ: Why didn't <code>FindClass</code> find my class?</a></li>
   <li><a href="#faq_sharing">FAQ: How do I share raw data with native code?</a></li>
@@ -514,40 +514,57 @@ that use 64-bit pointers, <strong>you need to stash your native pointers in a
 
 
 <a name="unsupported" id="unsupported"></a>
-<h2>Unsupported Features</h2>
+<h2>Unsupported Features/Backwards Compatibility</h2>
 
-<p>All JNI 1.6 features are supported, with the following exceptions:</p>
+<p>All JNI 1.6 features are supported, with the following exception:</p>
 <ul>
     <li><code>DefineClass</code> is not implemented.  Android does not use
     Java bytecodes or class files, so passing in binary class data
     doesn't work.</li>
-    <li>"Weak global" references are implemented, but may only be passed
-    to <code>NewLocalRef</code>, <code>NewGlobalRef</code>, and
-    <code>DeleteWeakGlobalRef</code>.  (The spec strongly encourages
-    programmers to create hard references to weak globals before doing
-    anything with them, so this should not be at all limiting.)</li>
-    <li><code>GetObjectRefType</code> (new in JNI 1.6) is implemented but not fully
-    functional &mdash; it can't always tell the difference between "local" and
-    "global" references.</li>
 </ul>
 
-<p>For backward compatibility, you may need to be aware of:</p>
+<p>For backward compatibility with older Android releases, you may need to
+be aware of:</p>
 <ul>
-    <li>Until Android 2.0 (Eclair), the '$' character was not properly
+    <li><b>Dynamic lookup of native functions</b>
+    <p>Until Android 2.0 (Eclair), the '$' character was not properly
     converted to "_00024" during searches for method names.  Working
     around this requires using explicit registration or moving the
     native methods out of inner classes.
-    <li>Until Android 2.0 (Eclair), it was not possible to use a <code>pthread_key_create</code>
+    <li><b>Detaching threads</b>
+    <p>Until Android 2.0 (Eclair), it was not possible to use a <code>pthread_key_create</code>
     destructor function to avoid the "thread must be detached before
     exit" check.  (The runtime also uses a pthread key destructor function,
     so it'd be a race to see which gets called first.)
-    <li>Until Android 2.2 (Froyo), weak global references were not implemented.
+    <li><b>Weak global references</b>
+    <p>Until Android 2.2 (Froyo), weak global references were not implemented.
     Older versions will vigorously reject attempts to use them.  You can use
     the Android platform version constants to test for support.
-    <li>Until Android 4.0 (Ice Cream Sandwich), JNI local references were
+    <p>Until Android 4.0 (Ice Cream Sandwich), weak global references could only
+    be passed to <code>NewLocalRef</code>, <code>NewGlobalRef</code>, and
+    <code>DeleteWeakGlobalRef</code>. (The spec strongly encourages
+    programmers to create hard references to weak globals before doing
+    anything with them, so this should not be at all limiting.)
+    <p>From Android 4.0 (Ice Cream Sandwich) on, weak global references can be
+    used like any other JNI references.</li>
+    <li><b>Local references</b>
+    <p>Until Android 4.0 (Ice Cream Sandwich), local references were
     actually direct pointers. Ice Cream Sandwich added the indirection
     necessary to support better garbage collectors, but this means that lots
-    of JNI bugs are undetectable on older releases.
+    of JNI bugs are undetectable on older releases. See
+    <a href="http://android-developers.blogspot.com/2011/11/jni-local-reference-changes-in-ics.html">JNI Local Reference Changes in ICS</a> for more details.
+    <li><b>Determining reference type with <code>GetObjectRefType</code></b>
+    <p>Until Android 4.0 (Ice Cream Sandwich), as a consequence of the use of
+    direct pointers (see above), it was impossible to implement
+    <code>GetObjectRefType</code> correctly. Instead we used a heuristic
+    that looked through the weak globals table, the arguments, the locals
+    table, and the globals table in that order. The first time it found your
+    direct pointer, it would report that your reference was of the type it
+    happened to be examining. This meant, for example, that if 
+    you called <code>GetObjectRefType</code> on a global jclass that happened
+    to be the same as the jclass passed as an implicit argument to your static 
+    native method, you'd get <code>JNILocalRefType</code> rather than
+    <code>JNIGlobalRefType</code>.
 </ul>
 
 
