@@ -1,9 +1,9 @@
 page.title=Planning for Multiple Touchscreen Sizes
-parent.title=Designing Effective and Intuitive App Navigation
+parent.title=Designing Effective Navigation
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Planning Screens and their Relationships
+previous.title=Planning Screens and Their Relationships
 previous.link=screen-planning.html
 next.title=Providing Descendant and Lateral Navigation
 next.link=descendant-lateral.html
