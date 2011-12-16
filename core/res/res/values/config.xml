@@ -278,13 +278,13 @@
     <!-- Don't name config resources like this.  It should look like config_annoyDianne -->
     <bool name="config_annoy_dianne">true</bool>
 
+    <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
+
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
 
     <!-- If this is true, the screen will fade off. -->
     <bool name="config_animateScreenLights">true</bool>
-
-    <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
 
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
@@ -308,6 +308,14 @@
     <!-- The number of degrees to rotate the display when the device is in a car dock.
          A value of -1 means no change in orientation by default. -->
     <integer name="config_carDockRotation">-1</integer>
+
+    <!-- Control the default UI mode type to use when there is no other type override
+         happening.  One of the following values (See Configuration.java):
+             1  UI_MODE_TYPE_NORMAL
+             4  UI_MODE_TYPE_TELEVISION
+             5  UI_MODE_TYPE_APPLIANCE
+         Any other values will have surprising consequences. -->
+    <integer name="config_defaultUiModeType">1</integer>
 
     <!-- Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
