@@ -94,7 +94,7 @@ padding: .25em 1em;
   <ul>
     <li>Added Lint tools to detect common errors in Android projects. 
       (<a href="http://tools.android.com/recent/lint">more info</a>)</li>
-    <a>Added sensor emulation support, which allows the emulator to read sensor data from a
+    <li>Added sensor emulation support, which allows the emulator to read sensor data from a
       physical Android device. 
       (<a href="http://tools.android.com/recent/sensoremulation">more info</a>)</li>
     <li>Added support for using a webcam to emulate a camera on Mac OS X.</li>
@@ -201,7 +201,7 @@ padding: .25em 1em;
 commands, see the
 <a href="{@docRoot}guide/developing/building/building-cmdline.html#AntReference">Ant Command
 Reference</a>.</li>
-    <li>Changed how library projects are built.</a></li>
+    <li>Changed how library projects are built.</li>
     <li>Improved incremental builds, so that resource compilation runs less frequently. Builds no
     longer run when you edit strings or layouts (unless you add a new <code>id</code>) and no longer
     run once for each library project.</li>
