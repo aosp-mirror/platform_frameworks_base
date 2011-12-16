@@ -338,7 +338,9 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         (uint32_t(buffer->height) != h) ||
         (uint32_t(buffer->format) != format) ||
         ((uint32_t(buffer->usage) & usage) != usage)) {
-            usage |= GraphicBuffer::USAGE_HW_VIDEO_ENCODER;
+            // XXX: This will be changed to USAGE_HW_VIDEO_ENCODER once driver
+            // issues with that flag get fixed.
+            usage |= GraphicBuffer::USAGE_HW_TEXTURE;
             status_t error;
             sp<GraphicBuffer> graphicBuffer(
                     mGraphicBufferAlloc->createGraphicBuffer(
