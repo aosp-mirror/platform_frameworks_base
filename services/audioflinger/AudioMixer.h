@@ -81,7 +81,7 @@ public:
     void        disable();
 
     void        setActiveTrack(int track);
-    status_t    setParameter(int target, int name, void *value);
+    void        setParameter(int target, int name, void *value);
 
     void        setBufferProvider(AudioBufferProvider* bufferProvider);
     void        process();
