@@ -90,6 +90,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
+    private final int mDefaultUiModeType;
     private final boolean mCarModeKeepsScreenOn;
     private final boolean mDeskModeKeepsScreenOn;
 
@@ -347,6 +348,8 @@ class UiModeManagerService extends IUiModeManager.Stub {
 
         mConfiguration.setToDefaults();
 
+        mDefaultUiModeType = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultUiModeType);
         mCarModeKeepsScreenOn = (context.getResources().getInteger(
                 com.android.internal.R.integer.config_carDockKeepsScreenOn) == 1);
         mDeskModeKeepsScreenOn = (context.getResources().getInteger(
@@ -452,7 +455,7 @@ class UiModeManagerService extends IUiModeManager.Stub {
     }
 
     final void updateConfigurationLocked(boolean sendIt) {
-        int uiMode = Configuration.UI_MODE_TYPE_NORMAL;
+        int uiMode = mDefaultUiModeType;
         if (mCarModeEnabled) {
             uiMode = Configuration.UI_MODE_TYPE_CAR;
         } else if (isDeskDockState(mDockState)) {

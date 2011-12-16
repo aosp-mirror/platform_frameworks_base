@@ -228,6 +228,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int UI_MODE_TYPE_DESK = 0x02;
     public static final int UI_MODE_TYPE_CAR = 0x03;
     public static final int UI_MODE_TYPE_TELEVISION = 0x04;
+    public static final int UI_MODE_TYPE_APPLIANCE = 0x05;
 
     public static final int UI_MODE_NIGHT_MASK = 0x30;
     public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
@@ -239,7 +240,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <p>The {@link #UI_MODE_TYPE_MASK} bits define the overall ui mode of the
      * device. They may be one of {@link #UI_MODE_TYPE_UNDEFINED},
      * {@link #UI_MODE_TYPE_NORMAL}, {@link #UI_MODE_TYPE_DESK},
-     * or {@link #UI_MODE_TYPE_CAR}.
+     * {@link #UI_MODE_TYPE_CAR}, {@link #UI_MODE_TYPE_TELEVISION}, or
+     * {@link #UI_MODE_TYPE_APPLIANCE}.
      *
      * <p>The {@link #UI_MODE_NIGHT_MASK} defines whether the screen
      * is in a special mode. They may be one of {@link #UI_MODE_NIGHT_UNDEFINED},
@@ -391,6 +393,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case UI_MODE_TYPE_DESK: sb.append(" desk"); break;
             case UI_MODE_TYPE_CAR: sb.append(" car"); break;
             case UI_MODE_TYPE_TELEVISION: sb.append(" television"); break;
+            case UI_MODE_TYPE_APPLIANCE: sb.append(" appliance"); break;
             default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
         }
         switch ((uiMode&UI_MODE_NIGHT_MASK)) {
