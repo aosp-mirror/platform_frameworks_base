@@ -2,12 +2,87 @@ page.title=Sensors
 @jd:body
 
 <div id="qv-wrapper">
-<div id="qv">
+  <div id="qv">
+  <h2>Topics</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors Overview</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion Sensors</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_position.html">Position
+          Sensors</a></li>
+      <li><a href="{@docRoot}guide/topics/sensors/sensors_environment.html">Environment
+          Sensors</a></li>
+    </ol>
+  <h2>Key classes and interfaces</h2>
+    <ol>
+      <li>{@link android.hardware.Sensor}</li>
+      <li>{@link android.hardware.SensorEvent}</li>
+      <li>{@link android.hardware.SensorManager}</li>
+      <li>{@link android.hardware.SensorEventListener}</li>
+    </ol>
+  <h2>Related samples</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/samples/AccelerometerPlay/index.html">Accelerometer
+          Play</a></li>
+      <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
+API Demos (OS - RotationVectorDemo)</a></li>
+      <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/Sensors.html">API Demos
+(OS - Sensors)</a></li>
+    </ol>
+  </div>
+</div>
 
+<p>Most Android-powered devices have built-in sensors that measure motion, orientation,
+and various environmental conditions. These sensors are capable of providing raw data with high
+precision and accuracy, and are useful if you want to monitor three-dimensional device movement or
+positioning, or you want to monitor changes in the ambient environment near a device. For example, a
+game might track readings from a device's gravity sensor to infer complex user gestures
+and motions, such as tilt, shake, rotation, or swing. Likewise, a weather application might use a
+device's temperature sensor and humidity sensor to calculate and report the dewpoint, or a travel
+application might use the geomagnetic field sensor and accelerometer to report a compass
+bearing.</p>
 
+<p>The Android platform supports four broad categories of sensors:</p>
 
-<h2>Accelerometer</h2>
-<p>The accelerometer sensors allow you to detect the various movements of the device.</p>
+<ul>
+  <li>Motion sensors
+    <p>These sensors measure acceleration forces and rotational forces along three axes. This
+      category includes accelerometers, gravity sensors, gyroscopes, and rotational vector
+      sensors.</p>
+  </li>
+  <li>Environmental sensors
+    <p>These sensors measure various environmental parameters, such as ambient air temperature
+      and pressure, illumination, and humidity. This category includes barometers, photometers, and
+      thermometers.</p>
+  </li>
+  <li>Position sensors
+    <p>These sensors measure the physical position of a device. This category includes
+      orientation sensors and magnetometers.</p>
+  </li>
+</ul>
 
-<h2>Compass</h2>
-<p>The compass provides data on the devices current polar orientation.</p>
+<p>To access these sensors, you can use the Android sensor framework. The sensor framework provides
+several classes and interfaces that help you perform a wide variety of sensor-related tasks. To
+learn more about the framework and the sensors that are supported on the Android system, read the
+following documents:</p>
+
+<dl>
+  <dt><strong><a href="{@docRoot}guide/topics/sensors/sensors_overview.html">Sensors
+        Overview</a></strong></dt>
+    <dd>Learn how to list the sensors that are on a device, set up sensor event listeners, and
+      acquire sensor data. Also learn best practices for accessing and using sensors.</dd>
+  <dt><strong><a href="{@docRoot}guide/topics/sensors/sensors_motion.html">Motion
+        Sensors</a></strong></dt>
+    <dd>Learn how to use the sensors that provide acceleration data, such as the accelerometer,
+      gravity sensor, and linear acceleration sensor. Also learn how to use the sensors that
+      provide rotational data, such as gyroscopes and rotational vector sensors.</dd>
+  <dt><strong><a href="{@docRoot}guide/topics/sensors/sensors_position.html">Position
+      Sensors</a></strong></dt>
+    <dd>Learn how to use the sensors that provide orientation and compass data, such as the
+      orientation sensor and the geomagnetic field sensor.</dd>
+  <dt><strong><a href="{@docRoot}guide/topics/sensors/environment.html">Environment
+        Sensors</a></strong></dt>
+    <dd>Learn how to use the sensors that provide environmental data, such as the light,
+      humidity, pressure, temperature, and proximity sensors.</dd>
+</dl>
