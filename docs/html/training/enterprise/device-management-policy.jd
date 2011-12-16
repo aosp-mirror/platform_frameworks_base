@@ -33,7 +33,7 @@ class="button">Download the sample</a>
 </div>
 
 
-<p>Since Android 2.2 (API level 8), the Android platform offes system-level device management
+<p>Since Android 2.2 (API level 8), the Android platform offers system-level device management
 capabilities through the Device Administration APIs.</p>
 
 <p>In this lesson, you will learn how to create a security-aware application that manages access to
