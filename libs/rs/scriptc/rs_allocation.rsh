@@ -168,29 +168,95 @@ extern const void * __attribute__((overloadable))
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
-extern const rs_element __attribute__((overloadable))
+extern rs_element __attribute__((overloadable))
     rsAllocationGetElement(rs_allocation);
 
-extern const uint32_t __attribute__((overloadable))
+extern uint32_t __attribute__((overloadable))
     rsMeshGetVertexAllocationCount(rs_mesh);
 
-extern const uint32_t __attribute__((overloadable))
+extern uint32_t __attribute__((overloadable))
     rsMeshGetPrimitiveCount(rs_mesh);
 
-extern const uint32_t __attribute__((overloadable))
-    rsMeshGetVertexAllocationCount(rs_mesh);
-
-extern const rs_allocation __attribute__((overloadable))
+extern rs_allocation __attribute__((overloadable))
     rsMeshGetVertexAllocation(rs_mesh, uint32_t index);
 
-extern const uint32_t __attribute__((overloadable))
-    rsMeshGetPrimitiveCount(rs_mesh);
-
-extern const rs_allocation __attribute__((overloadable))
+extern rs_allocation __attribute__((overloadable))
     rsMeshGetIndexAllocation(rs_mesh, uint32_t index);
 
-extern const rs_primitive __attribute__((overloadable))
+extern rs_primitive __attribute__((overloadable))
     rsMeshGetPrimitive(rs_mesh, uint32_t index);
+
+/**
+ * @param e element to get data from
+ * @return number of sub-elements in this element
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSubElementCount(rs_element e);
+
+/**
+ * @param e element to get data from
+ * @param index index of the sub-element to return
+ * @return sub-element in this element at given index
+ */
+extern rs_element __attribute__((overloadable))
+    rsElementGetSubElement(rs_element, uint32_t index);
+
+/**
+ * @param e element to get data from
+ * @param index index of the sub-element to return
+ * @return length of the sub-element name
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSubElementNameLength(rs_element e, uint32_t index);
+
+/**
+ * @param e element to get data from
+ * @param index index of the sub-element
+ * @param name array to store the name into
+ * @param nameLength length of the provided name array
+ * @return number of characters written
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSubElementName(rs_element e, uint32_t index, char *name, uint32_t nameLength);
+
+/**
+ * @param e element to get data from
+ * @param index index of the sub-element
+ * @return array size of sub-element in this element at given
+ *         index
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSubElementArraySize(rs_element e, uint32_t index);
+
+/**
+ * @param e element to get data from
+ * @param index index of the sub-element
+ * @return offset in bytes of sub-element in this element at
+ *         given index
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSubElementOffsetBytes(rs_element e, uint32_t index);
+
+/**
+ * @param e element to get data from
+ * @return total size of the element in bytes
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetSizeBytes(rs_element e);
+
+/**
+ * @param e element to get data from
+ * @return element's data type
+ */
+extern rs_data_type __attribute__((overloadable))
+    rsElementGetDataType(rs_element e);
+
+/**
+ * @param e element to get data from
+ * @return element's data size
+ */
+extern rs_data_kind __attribute__((overloadable))
+    rsElementGetDataKind(rs_element e);
 
 #endif
 

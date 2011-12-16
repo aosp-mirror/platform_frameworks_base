@@ -150,8 +150,14 @@ static void sortToBucket(SgRenderable *obj) {
     }
     const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     if (rsIsObject(renderState->ps)) {
-        if ((rsgProgramStoreGetBlendSrcFunc(renderState->ps) == RS_BLEND_SRC_ONE) &&
-            (rsgProgramStoreGetBlendDstFunc(renderState->ps) == RS_BLEND_DST_ZERO)) {
+#define MR1_API
+#ifndef MR1_API
+        bool isOpaque = (rsgProgramStoreGetBlendSrcFunc(renderState->ps) == RS_BLEND_SRC_ONE) &&
+                        (rsgProgramStoreGetBlendDstFunc(renderState->ps) == RS_BLEND_DST_ZERO);
+#else
+        bool isOpaque = false;
+#endif
+        if (isOpaque) {
             gFrontToBack[gFrontToBackCount++] = (uint32_t)obj;
         } else {
             gBackToFront[gBackToFrontCount++] = (uint32_t)obj;

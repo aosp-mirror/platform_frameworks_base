@@ -62,12 +62,14 @@ public class Element extends BaseObj {
 
     /**
      * DataType represents the basic type information for a basic element.  The
-     * naming convention follows.  For numeric types its FLOAT, SIGNED, UNSIGNED
-     * followed by the _BITS where BITS is the size of the data.  BOOLEAN is a
-     * true / false (1,0) represented in an 8 bit container.  The UNSIGNED
-     * variants with multiple bit definitions are for packed graphical data
-     * formats and represents vectors with per vector member sizes which are
-     * treated as a single unit for packing and alignment purposes.
+     * naming convention follows.  For numeric types it is FLOAT,
+     * SIGNED, or UNSIGNED followed by the _BITS where BITS is the
+     * size of the data.  BOOLEAN is a true / false (1,0)
+     * represented in an 8 bit container.  The UNSIGNED variants
+     * with multiple bit definitions are for packed graphical data
+     * formats and represent vectors with per vector member sizes
+     * which are treated as a single unit for packing and alignment
+     * purposes.
      *
      * MATRIX the three matrix types contain FLOAT_32 elements and are treated
      * as 32 bits for alignment purposes.
@@ -225,6 +227,22 @@ public class Element extends BaseObj {
             throw new RSIllegalArgumentException("Illegal sub-element index");
         }
         return mOffsetInBytes[index];
+    }
+
+    /**
+    * @hide
+    * @return element data type
+    */
+    public DataType getDataType() {
+        return mType;
+    }
+
+    /**
+    * @hide
+    * @return element data kind
+    */
+    public DataKind getDataKind() {
+        return mKind;
     }
 
     /**
