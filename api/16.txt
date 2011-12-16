@@ -23165,7 +23165,7 @@ package android.view {
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
-    field public static android.util.Property ALPHA;
+    field public static final android.util.Property ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
@@ -23222,11 +23222,11 @@ package android.view {
     field protected static final int[] PRESSED_SELECTED_STATE_SET;
     field protected static final int[] PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] PRESSED_WINDOW_FOCUSED_STATE_SET;
-    field public static android.util.Property ROTATION;
-    field public static android.util.Property ROTATION_X;
-    field public static android.util.Property ROTATION_Y;
-    field public static android.util.Property SCALE_X;
-    field public static android.util.Property SCALE_Y;
+    field public static final android.util.Property ROTATION;
+    field public static final android.util.Property ROTATION_X;
+    field public static final android.util.Property ROTATION_Y;
+    field public static final android.util.Property SCALE_X;
+    field public static final android.util.Property SCALE_Y;
     field public static final int SCROLLBARS_INSIDE_INSET = 16777216; // 0x1000000
     field public static final int SCROLLBARS_INSIDE_OVERLAY = 0; // 0x0
     field public static final int SCROLLBARS_OUTSIDE_INSET = 50331648; // 0x3000000
@@ -23242,13 +23242,13 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
-    field public static android.util.Property TRANSLATION_X;
-    field public static android.util.Property TRANSLATION_Y;
+    field public static final android.util.Property TRANSLATION_X;
+    field public static final android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
     field public static final int VISIBLE = 0; // 0x0
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
-    field public static android.util.Property X;
-    field public static android.util.Property Y;
+    field public static final android.util.Property X;
+    field public static final android.util.Property Y;
   }
 
   public static class View.AccessibilityDelegate {
