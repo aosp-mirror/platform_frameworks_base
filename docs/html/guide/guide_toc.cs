@@ -312,7 +312,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/sensors/index.html">
               <span class="en">Sensors</span>
-              </a><span class="new">new!</span></div>
+              </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/sensors/sensors_overview.html">
               <span class="en">Sensors Overview</span>
