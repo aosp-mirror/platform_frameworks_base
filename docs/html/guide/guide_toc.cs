@@ -244,7 +244,7 @@
     <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
-          </a><span class="new-child">new!</span></div>
+          </a> <span class="new-child">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
               <span class="en">Canvas and Drawables</span></a></li>
