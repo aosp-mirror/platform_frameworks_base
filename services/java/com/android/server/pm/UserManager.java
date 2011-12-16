@@ -140,6 +140,13 @@ public class UserManager {
             fallbackToSingleUser();
         } catch (XmlPullParserException pe) {
             fallbackToSingleUser();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
@@ -265,13 +272,19 @@ public class UserManager {
                     }
                 }
             }
-            fis.close();
 
             UserInfo userInfo = new UserInfo(id, name, flags);
             return userInfo;
 
         } catch (IOException ioe) {
         } catch (XmlPullParserException pe) {
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                }
+            }
         }
         return null;
     }
