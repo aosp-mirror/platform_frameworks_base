@@ -547,7 +547,7 @@ private:
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
-                    Vector<ConfigEvent *>   mConfigEvents;
+                    Vector<ConfigEvent>     mConfigEvents;
                     bool                    mStandby;
                     int                     mId;
                     bool                    mExiting;

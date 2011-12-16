@@ -1066,9 +1066,9 @@ void AudioFlinger::ThreadBase::sendConfigEvent(int event, int param)
 // sendConfigEvent_l() must be called with ThreadBase::mLock held
 void AudioFlinger::ThreadBase::sendConfigEvent_l(int event, int param)
 {
-    ConfigEvent *configEvent = new ConfigEvent();
-    configEvent->mEvent = event;
-    configEvent->mParam = param;
+    ConfigEvent configEvent;
+    configEvent.mEvent = event;
+    configEvent.mParam = param;
     mConfigEvents.add(configEvent);
     ALOGV("sendConfigEvent() num events %d event %d, param %d", mConfigEvents.size(), event, param);
     mWaitWorkCV.signal();
@@ -1079,15 +1079,14 @@ void AudioFlinger::ThreadBase::processConfigEvents()
     mLock.lock();
     while(!mConfigEvents.isEmpty()) {
         ALOGV("processConfigEvents() remaining events %d", mConfigEvents.size());
-        ConfigEvent *configEvent = mConfigEvents[0];
+        ConfigEvent configEvent = mConfigEvents[0];
         mConfigEvents.removeAt(0);
         // release mLock before locking AudioFlinger mLock: lock order is always
         // AudioFlinger then ThreadBase to avoid cross deadlock
         mLock.unlock();
         mAudioFlinger->mLock.lock();
-        audioConfigChanged_l(configEvent->mEvent, configEvent->mParam);
+        audioConfigChanged_l(configEvent.mEvent, configEvent.mParam);
         mAudioFlinger->mLock.unlock();
-        delete configEvent;
         mLock.lock();
     }
     mLock.unlock();
@@ -1134,7 +1133,7 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
     snprintf(buffer, SIZE, " Index event param\n");
     result.append(buffer);
     for (size_t i = 0; i < mConfigEvents.size(); i++) {
-        snprintf(buffer, SIZE, " %02d    %02d    %d\n", i, mConfigEvents[i]->mEvent, mConfigEvents[i]->mParam);
+        snprintf(buffer, SIZE, " %02d    %02d    %d\n", i, mConfigEvents[i].mEvent, mConfigEvents[i].mParam);
         result.append(buffer);
     }
     result.append("\n");
