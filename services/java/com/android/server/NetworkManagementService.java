@@ -46,6 +46,8 @@ import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.INetworkManagementService;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -133,8 +135,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private Thread mThread;
     private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
-    // TODO: replace with RemoteCallbackList
-    private ArrayList<INetworkManagementEventObserver> mObservers;
+    private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
+            new RemoteCallbackList<INetworkManagementEventObserver>();
 
     private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
@@ -155,7 +157,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      */
     private NetworkManagementService(Context context) {
         mContext = context;
-        mObservers = new ArrayList<INetworkManagementEventObserver>();
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
             return;
@@ -202,30 +203,29 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void registerObserver(INetworkManagementEventObserver obs) {
+    public void registerObserver(INetworkManagementEventObserver observer) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Slog.d(TAG, "Registering observer");
-        mObservers.add(obs);
+        mObservers.register(observer);
     }
 
     @Override
-    public void unregisterObserver(INetworkManagementEventObserver obs) {
+    public void unregisterObserver(INetworkManagementEventObserver observer) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Slog.d(TAG, "Unregistering observer");
-        mObservers.remove(mObservers.indexOf(obs));
+        mObservers.unregister(observer);
     }
 
     /**
      * Notify our observers of an interface status change
      */
     private void notifyInterfaceStatusChanged(String iface, boolean up) {
-        for (INetworkManagementEventObserver obs : mObservers) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
             try {
-                obs.interfaceStatusChanged(iface, up);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
+                mObservers.getBroadcastItem(i).interfaceStatusChanged(iface, up);
+            } catch (RemoteException e) {
             }
         }
+        mObservers.finishBroadcast();
     }
 
     /**
@@ -233,26 +233,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * (typically, an Ethernet cable has been plugged-in or unplugged).
      */
     private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
-        for (INetworkManagementEventObserver obs : mObservers) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
             try {
-                obs.interfaceLinkStateChanged(iface, up);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
+                mObservers.getBroadcastItem(i).interfaceLinkStateChanged(iface, up);
+            } catch (RemoteException e) {
             }
         }
+        mObservers.finishBroadcast();
     }
 
     /**
      * Notify our observers of an interface addition.
      */
     private void notifyInterfaceAdded(String iface) {
-        for (INetworkManagementEventObserver obs : mObservers) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
             try {
-                obs.interfaceAdded(iface);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
+                mObservers.getBroadcastItem(i).interfaceAdded(iface);
+            } catch (RemoteException e) {
             }
         }
+        mObservers.finishBroadcast();
     }
 
     /**
@@ -264,26 +266,28 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mActiveAlertIfaces.remove(iface);
         mActiveQuotaIfaces.remove(iface);
 
-        for (INetworkManagementEventObserver obs : mObservers) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
             try {
-                obs.interfaceRemoved(iface);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
+                mObservers.getBroadcastItem(i).interfaceRemoved(iface);
+            } catch (RemoteException e) {
             }
         }
+        mObservers.finishBroadcast();
     }
 
     /**
      * Notify our observers of a limit reached.
      */
     private void notifyLimitReached(String limitName, String iface) {
-        for (INetworkManagementEventObserver obs : mObservers) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
             try {
-                obs.limitReached(limitName, iface);
-            } catch (Exception ex) {
-                Slog.w(TAG, "Observer notifier failed", ex);
+                mObservers.getBroadcastItem(i).limitReached(limitName, iface);
+            } catch (RemoteException e) {
             }
         }
+        mObservers.finishBroadcast();
     }
 
     /**
