@@ -129,16 +129,16 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 4.0",
+      'name':"Android 4.0.3",
       'img':"ics-android.png",
-      'title':"Ice Cream Sandwich!",
-      'desc': "<p>Android 4.0 is here, delivering a unified UI for phones and tablets and "
-+ "innovative features for users and developers. Check out the <a "
+      'title':"Android 4.0.3",
+      'desc': "<p>Android 4.0.3 is an update to the Ice Cream Sandwich release that adds a "
++ "handful of new features for users and developers. Check out the <a "
 + "href='http://developer.android.com/sdk/android-4.0-highlights.html'>Platform Highlights</a> "
-+ "for an overview of the new features in Android 4.0.</p>"
-+ "<p>For more information about API changes, read the "
-+ "<a href='{@docRoot}sdk/android-4.0.html'>platform notes</a> and <a "
-+ "href='{@docRoot}sdk/api_diff/14/changes.html'>diff report</a>. If you're new to Android, "
++ "for an overview of all features in Android 4.0.x.</p>"
++ "<p>For information about API changes in 4.0.3 (API level 15), read the "
++ "<a href='{@docRoot}sdk/android-4.0.3.html'>platform notes</a> and <a "
++ "href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>. If you're new to Android, "
 + "get started with the <a href='/sdk/index.html'>SDK starter package</a>.</p>"
     },
 
