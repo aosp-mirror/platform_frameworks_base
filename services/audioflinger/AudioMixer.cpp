@@ -50,8 +50,8 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     mState.enabledTracks= 0;
     mState.needsChanged = 0;
     mState.frameCount   = frameCount;
-    mState.outputTemp   = 0;
-    mState.resampleTemp = 0;
+    mState.outputTemp   = NULL;
+    mState.resampleTemp = NULL;
     mState.hook         = process__nop;
     track_t* t = mState.tracks;
     for (int i=0 ; i<32 ; i++) {
@@ -73,11 +73,11 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         t->format = 16;
         t->channelMask = AUDIO_CHANNEL_OUT_STEREO;
         t->buffer.raw = 0;
-        t->bufferProvider = 0;
-        t->hook = 0;
-        t->resampler = 0;
+        t->bufferProvider = NULL;
+        t->hook = NULL;
+        t->resampler = NULL;
         t->sampleRate = mSampleRate;
-        t->in = 0;
+        t->in = NULL;
         t->mainBuffer = NULL;
         t->auxBuffer = NULL;
         t++;
@@ -133,7 +133,7 @@ void AudioMixer::deleteTrackName(int name)
         if (track.resampler) {
             // delete  the resampler
             delete track.resampler;
-            track.resampler = 0;
+            track.resampler = NULL;
             track.sampleRate = mSampleRate;
             invalidateState(1<<name);
         }
@@ -296,7 +296,7 @@ bool AudioMixer::track_t::setResampler(uint32_t value, uint32_t devSampleRate)
     if (value!=devSampleRate || resampler) {
         if (sampleRate != value) {
             sampleRate = value;
-            if (resampler == 0) {
+            if (resampler == NULL) {
                 resampler = AudioResampler::create(
                         format, channelCount, devSampleRate);
             }
@@ -308,12 +308,12 @@ bool AudioMixer::track_t::setResampler(uint32_t value, uint32_t devSampleRate)
 
 bool AudioMixer::track_t::doesResample() const
 {
-    return resampler != 0;
+    return resampler != NULL;
 }
 
 void AudioMixer::track_t::resetResampler()
 {
-    if (resampler != 0) {
+    if (resampler != NULL) {
         resampler->reset();
     }
 }
@@ -436,11 +436,11 @@ void AudioMixer::process__validate(state_t* state)
         } else {
             if (state->outputTemp) {
                 delete [] state->outputTemp;
-                state->outputTemp = 0;
+                state->outputTemp = NULL;
             }
             if (state->resampleTemp) {
                 delete [] state->resampleTemp;
-                state->resampleTemp = 0;
+                state->resampleTemp = NULL;
             }
             state->hook = process__genericNoResampling;
             if (all16BitsStereoNoResample && !volumeRamp) {
