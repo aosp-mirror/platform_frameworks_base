@@ -96,8 +96,8 @@ class="toggle-content-img" alt="" />
 
   <div class="toggle-content-toggleme" style="padding-left:2em;">
     <ol class="toc" style="margin-left:-1em">
-      <li><a href="#contacts">Social stream API in contacts provider</a></li>
-      <li><a href="#calendar">Calendar provider</a></li>
+      <li><a href="#contacts">Social stream API in Contacts Provider</a></li>
+      <li><a href="#calendar">Calendar Provider</a></li>
       <li><a href="#widgets">Home screen widgets</a></li>
       <li><a href="#textservices">Spell-checking</a></li>
       <li><a href="#bluetooth">Bluetooth</a></li>
@@ -116,7 +116,7 @@ class="toggle-content-img" alt="" />
 
 
 
-<h3 id="contacts">Social stream API in Contacts provider</h3>
+<h3 id="contacts">Social stream API in Contacts Provider</h3>
 
 <p>Applications that use social stream data such as status updates and check-ins
 can now sync that data with each of the user’s contacts, providing items in a
@@ -142,10 +142,11 @@ request permission from the user by declaring <code>&lt;uses-permission
 android:name="android.permission.READ_SOCIAL_STREAM"&gt;</code> and/or <code>&lt;uses-permission
 android:name="android.permission.WRITE_SOCIAL_STREAM"&gt;</code> in their manifest files.</p>
 
-<h3 id="calendar">Calendar provider</h4>
+<h3 id="calendar">Calendar Provider</h4>
 <ul>
 <li>Adds the class {@link android.provider.CalendarContract.Colors} to represent
-a color table in the Calendar provider. The class provivdes fields for accessing
+a color table in the <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar
+Provider</a>. The class provides fields for accessing
 colors available for a given account. Colors are referenced by 
 {@link android.provider.CalendarContract.ColorsColumns#COLOR_KEY COLOR_KEY}
 which must be unique for a given account name/type. These values can only be
@@ -265,14 +266,14 @@ android.speech.tts.TextToSpeech.Engine#getFeatures(java.util.Locale)
 getFeatures()}for querying and enabling network TTS support.
 <li>Adds a new listener class, {@link
 android.speech.tts.UtteranceProgressListener}, that engines can register to
-receive notification of speech-sythesis errors.</li>
+receive notification of speech-synthesis errors.</li>
 </ul>
 
 <h3 id="database">Database</h3>
 
 <ul>
 <li>A new {@link android.database.CrossProcessCursorWrapper} class lets content
-providers return results for a cross-process query more effieciently. The new
+providers return results for a cross-process query more efficiently. The new
 class is a useful building block for wrapping cursors that will be sent to
 processes remotely. It can also transform normal {@link android.database.Cursor}
 objects into {@link android.database.CrossProcessCursor} objects
@@ -290,7 +291,7 @@ android.database.CursorWindow#CursorWindow(boolean)} is now deprecated.</li>
 
 <h3 id="intents">Intents</h3>
 
-<p>Adds  for categories for targeting common types of applications on the
+<p>Adds new categories for targeting common types of applications on the
 device, such as {@link android.content.Intent#CATEGORY_APP_BROWSER}, {@link
 android.content.Intent#CATEGORY_APP_CALENDAR}, {@link
 android.content.Intent#CATEGORY_APP_MAPS}, and more.</li>
@@ -319,7 +320,7 @@ let you check and manage video stabilization for a {@link android.hardware.Camer
 <li>{@link android.Manifest.permission#READ_SOCIAL_STREAM} and 
 {@link android.Manifest.permission#WRITE_SOCIAL_STREAM}: Allow a sync
 adapter to read and write social stream data to a contact in the shared
-contacts provider.</li>
+Contacts Provider.</li>
 </ul>
 
 
