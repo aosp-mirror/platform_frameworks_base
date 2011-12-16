@@ -552,7 +552,7 @@ the minimum functionality required by your application.</p>
 <p>If your application does not directly use JavaScript within a <code><a
 href="{@docRoot}reference/android/webkit/WebView.html">WebView</a></code>, do
 not call
-<a href="{@docRoot}reference/android/webkit/WebSettings.html#setJavaScriptEnabled(boolean)
+<a href="{@docRoot}reference/android/webkit/WebSettings.html#setJavaScriptEnabled(boolean)">
 <code>setJavaScriptEnabled()</code></a>. We have seen this method invoked
 in sample code that might be repurposed in production application -- so
 remove it if necessary. By default, <code><a
@@ -685,6 +685,15 @@ use phone identifiers such as the phone number or IMEI which may be associated
 with personal information.  This topic is discussed in more detail in the <a
 href="http://android-developers.blogspot.com/2011/03/identifying-app-installatio
 ns.html">Android Developer Blog</a>.</p>
+
+<p>Application developers should be careful writing to on-device logs.
+In Android, logs are a shared resource, and are available
+to an application with the
+<a href="{@docRoot}reference/android/Manifest.permission.html#READ_LOGS">
+<code>READ_LOGS</code></a> permission. Even though the phone log data
+is temporary and erased on reboot, inappropriate logging of user information
+could inadvertently leak user data to other applications.</p>
+
 
 <h3>Handling Credentials</h3>
 
