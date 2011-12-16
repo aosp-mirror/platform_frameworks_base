@@ -45,28 +45,10 @@ or something fully integrated in your app UI, this lesson shows you how.</p>
 process of directly controlling the camera. As Android's own Camera application does, the
 recommended way to access the camera is to open {@link android.hardware.Camera} on a separate thread
 that's launched from {@link android.app.Activity#onCreate onCreate()}. This approach is a good idea
-since it can take a while and might bog down the UI thread. However, in the sample application
-associated with this lesson, opening the camera is deferred to the {@link
+since it can take a while and might bog down the UI thread. In a more basic implementation,
+opening the camera can be deferred to the {@link
 android.app.Activity#onResume onResume()} method to facilitate code reuse and keep the flow of
 control simple.</p>
-
-<pre>
-private void openCameraPerIdAndSetPreview() {
-    if (! safeCameraOpen(mCameraId)) {
-        mCameraId = getFirstRearCameraID();
-        safeCameraOpen(mCameraId);
-    }
-
-    mPreview.setCamera(mCamera);
-}
-</pre>
-
-<p>Since API level 9, the camera framework supports multiple cameras. If you use the
-legacy API and call {@link android.hardware.Camera#open open()} without an
-argument, you get the first rear-facing camera. Dealing with multiple cameras
-is an advanced topic and beyond the scope of this lesson. If you are really
-interested, check out the implementation of {@code getFirstRearCameraID()} in
-the sample app (downloadable at the top).</p>
 
 <p>Calling {@link android.hardware.Camera#open Camera.open()} throws an
 exception if the camera is already in use by another application, so we wrap it
@@ -78,7 +60,7 @@ private boolean safeCameraOpen(int id) {
   
     try {
         releaseCameraAndPreview();
-        mCamera = Camera.open(mCameraId);
+        mCamera = Camera.open(id);
         qOpened = (mCamera != null);
     } catch (Exception e) {
         Log.e(getString(R.string.app_name), "failed to open Camera");
@@ -97,6 +79,10 @@ private void releaseCameraAndPreview() {
 }
 </pre>
 
+<p>Since API level 9, the camera framework supports multiple cameras. If you use the
+legacy API and call {@link android.hardware.Camera#open open()} without an
+argument, you get the first rear-facing camera.</p>
+
 
 <h2 id="camera-preview">Create the Camera Preview</h2>
 
@@ -113,12 +99,9 @@ data from the camera hardware the application.</p>
 
 <pre>
 class Preview extends ViewGroup implements SurfaceHolder.Callback {
-...
 
     SurfaceView mSurfaceView;
     SurfaceHolder mHolder;
-
-...
 
     Preview(Context context) {
         super(context);
@@ -137,14 +120,13 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
 </pre>
 
 <p>The preview class must be passed to the {@link android.hardware.Camera} object before the live
-image preview can be started, as seen in {@code setCamera()} method of the sample,
-as shown in the next section.</p>
+image preview can be started, as shown in the next section.</p>
 
 
 <h3 id="TaskStartPreview">Set and Start the Preview</h2>
 
 <p>A camera instance and its related preview must be created in a specific
-order, with the camera object being first. In the sample application, the
+order, with the camera object being first. In the snippet below, the
 process of initializing the camera is encapsulated so that {@link
 android.hardware.Camera#startPreview Camera.startPreview()} is called by the
 {@code setCamera()} method, whenever the user does something to change the
@@ -183,9 +165,8 @@ public void setCamera(Camera camera) {
 <h2 id="TaskSettings">Modify Camera Settings</h2>
 
 <p>Camera settings change the way that the camera takes pictures, from the zoom
-level to exposure compensation. This example doesn’t do a whole lot with camera
-settings, but the APIs provide a wide array of options. The {@code surfaceChanged()} method in the
-sample app demonstrates how to get and set camera parameters:</p>
+level to exposure compensation. This example changes only the preview size;
+see the source code of the Camera application for many more.</p>
 
 <pre>
 public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -221,9 +202,7 @@ to API level 14, you must stop your preview before changing the orientation and 
 method to take a picture once the preview is started. You can create {@link
 android.hardware.Camera.PictureCallback} and {@link
 android.hardware.Camera.ShutterCallback} objects and pass them into {@link
-android.hardware.Camera#takePicture Camera.takePicture()}.  Since the Android
-Camera application already does a great job capturing JPEG images, you should
-probably implement the raw-image callback.</p>
+android.hardware.Camera#takePicture Camera.takePicture()}.</p>
 
 <p>If you want to grab images continously, you can create a {@link
 android.hardware.Camera.PreviewCallback} that implements {@link
@@ -236,8 +215,8 @@ takePicture()}.</p>
 <h2 id="TaskRestartPreview">Restart the Preview</h2>
 
 <p>After a picture is taken, you must to restart the preview before the user
-can take another picture. In the example, the restart is done by overloading
-the shutter button, as shown below.</p>
+can take another picture. In this example, the restart is done by overloading
+the shutter button.</p>
 
 <pre>
 &#64;Override
@@ -302,7 +281,7 @@ private void stopPreviewAndFreeCamera() {
 }
 </pre>
 
-<p>In the example application, this procedure is also part of the {@code
+<p>Earlier in the lesson, this procedure was also part of the {@code
 setCamera()} method, so initializing a camera always begins with stopping the
 preview.</p>
 
