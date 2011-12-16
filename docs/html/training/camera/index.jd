@@ -1,4 +1,4 @@
-page.title=Capturing Photos with the Camera
+page.title=Capturing Photos
 
 trainingnavtop=true
 startpage=true
@@ -28,7 +28,8 @@ next.link=photobasics.html
 <h2>Try it out</h2>
 
 <div class="download-box">
- <a href="{@docRoot}shareables/training/PhotoIntentActivity.zip" class="button">Download the sample</a>
+ <a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip"
+class="button">Download the sample</a>
  <p class="filename">PhotoIntentActivity.zip</p>
 </div>
 
