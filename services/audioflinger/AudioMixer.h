@@ -50,8 +50,7 @@ public:
         // track units (32 units)
         TRACK0          = 0x1000,
 
-        // enable/disable
-        MIXING          = 0x2000,
+        // 0x2000 is unused
 
         // setParameter targets
         TRACK           = 0x3000,
@@ -78,8 +77,8 @@ public:
     int         getTrackName();
     void        deleteTrackName(int name);
 
-    status_t    enable(int name);
-    status_t    disable(int name);
+    void        enable();
+    void        disable();
 
     status_t    setActiveTrack(int track);
     status_t    setParameter(int target, int name, void *value);

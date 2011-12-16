@@ -2202,7 +2202,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
             // XXX: these things DON'T need to be done each time
             mAudioMixer->setBufferProvider(track);
-            mAudioMixer->enable(AudioMixer::MIXING);
+            mAudioMixer->enable();
 
             mAudioMixer->setParameter(param, AudioMixer::VOLUME0, (void *)left);
             mAudioMixer->setParameter(param, AudioMixer::VOLUME1, (void *)right);
@@ -2248,7 +2248,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     mixerStatus = MIXER_TRACKS_ENABLED;
                 }
             }
-            mAudioMixer->disable(AudioMixer::MIXING);
+            mAudioMixer->disable();
         }
     }
 
