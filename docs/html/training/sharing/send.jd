@@ -40,7 +40,7 @@ from other applications by specifying them in your manifest.</p>
 
 <p>Sending and receiving data between applications with intents is most commonly used for social 
 sharing of content. Intents allow users to share information quickly and easily, using their 
-favorite social applications.</p>
+favorite applications.</p>
 
 <p><strong>Note:</strong> The best way to add a share action item to an 
 {@link android.app.ActionBar} is to use {@link android.widget.ShareActionProvider}, which became 
