@@ -1,8 +1,8 @@
-page.title=Identifying Users
+﻿page.title=Remembering Users
 
 trainingnavtop=true
 startpage=true
-next.title=Identifying Your User
+next.title=Remembering Your User
 next.link=identify.html
 
 @jd:body
@@ -39,7 +39,7 @@ make your application a richer, more personal experience.</p>
 user's identity, enabling you to:</p>
 
 <ul>
-<li>Identify the user by detecting and selecting an account
+<li>Personalize your app by remembering users by their account name(s)
 <li>Authenticate the user to make sure they are who they say they are
 <li>Gain permission to access the user's online data via services like
 the Google APIs
@@ -51,7 +51,7 @@ back-end services
 <h2>Lessons</h2>
 
 <dl>
-  <dt><b><a href="identify.html">Identifying Your User</a></b></dt>
+  <dt><b><a href="identify.html">Remembering Your User</a></b></dt>
     <dd>Use {@link android.accounts.AccountManager} to learn the user's account name(s).</dd>
 
   <dt><b><a href="authenticate.html">Authenticating to OAuth2 Services</a></b></dt>

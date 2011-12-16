@@ -1,5 +1,5 @@
-page.title=Creating a Custom Account Type
-parent.title=Identifying and Authenticating Users
+﻿page.title=Creating a Custom Account Type
+parent.title=Remembering and Authenticating Users
 parent.link=index.html
 
 trainingnavtop=true
@@ -28,8 +28,9 @@ SampleSyncAdapter app</a></li>
   </div>
 </div>
 
-<p>In the previous lessons, we've talked about using Google accounts to identify Google users and
-access Google APIs. But what if you've got your own online service? It turns out
+<p>So far we've talked about accessing Google APIs, which use accounts and users
+defined by Google. If you have your own online service, though, it won't have
+Google accounts or users, so what do you do? It turns out
 to be relatively straightforward to install new account types on a user's
 device. This lesson explains how to create a custom account type that works the
 same way as the built-in accounts do. </p>
