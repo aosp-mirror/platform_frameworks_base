@@ -26,9 +26,9 @@ Intent Filters</a></li>
 integrate with each other. Why reinvent functionality that isn't core to your application when it
 already exists in another application?</p> 
 
-<p>This class shows some common ways you can send and receive content between
+<p>This class covers some common ways you can send and receive content between
 applications using {@link android.content.Intent} APIs and the {@link
-android.view.ActionProvider}.</p>
+android.view.ActionProvider} object.</p>
 
 
 <h2>Lessons</h2>
@@ -40,7 +40,7 @@ applications with intents.</dd>
  
   <dt><b><a href="receive.html">Receiving Content from Other Apps</a></b></dt> 
     <dd>Learn how to set up your application to receive text and binary data from intents.</dd> 
-                                    
+
   <dt><b><a href="shareaction.html">Adding an Easy Share Action</a></b></dt> 
     <dd>Learn how to add a "share" action item to your action bar.</dd> 
 </dl> 

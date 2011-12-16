@@ -109,7 +109,7 @@ private void setShareIntent(Intent shareIntent) {
 want to set it and then update it as the UI changes. For example, when you view photos full screen 
 in the Gallery app, the sharing intent changes as you flip between photos.</p>
 
-<p>For further discussion about the {@link android.widget.ShareActionProvider}, see the <a
+<p>For further discussion about the {@link android.widget.ShareActionProvider} object, see the <a
 href="{@docRoot}guide/topics/ui/actionbar.html#ActionProvider">Action Bar</a> guide.</p>
 
 
