@@ -65,6 +65,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.Display;
 import android.view.HardwareRenderer;
@@ -1037,6 +1038,14 @@ public final class ActivityThread {
         public void dumpGfxInfo(FileDescriptor fd, String[] args) {
             dumpGraphicsInfo(fd);
             WindowManagerImpl.getDefault().dumpGfxInfo(fd);
+        }
+
+        @Override
+        public void dumpDbInfo(FileDescriptor fd, String[] args) {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(fd));
+            PrintWriterPrinter printer = new PrintWriterPrinter(pw);
+            SQLiteDebug.dump(printer, args);
+            pw.flush();
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {

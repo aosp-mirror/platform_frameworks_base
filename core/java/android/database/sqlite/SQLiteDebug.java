@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.util.Printer;
 
 /**
  * Provides debugging info about all SQLite databases running in the current process.
@@ -178,6 +179,13 @@ public final class SQLiteDebug {
         getPagerStats(stats);
         stats.dbStats = SQLiteDatabase.getDbStats();
         return stats;
+    }
+
+    /**
+     * Dumps detailed information about all databases used by the process.
+     * @param printer The printer for dumping database state.
+     */
+    public static void dump(Printer printer, String[] args) {
     }
 
     /**
