@@ -1,9 +1,9 @@
-page.title=Authenticating to OAuth2 Services
-parent.title=Identifying and Authenticating Users
+﻿page.title=Authenticating to OAuth2 Services
+parent.title=Remembering and Authenticating Users
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Identifying Your User
+previous.title=Remembering Your User
 previous.link=identify.html
 next.title=Creating a Custom Account Type
 next.link=custom_auth.html
@@ -72,11 +72,10 @@ API.</li>
 
 <h2 id="RequestToken">Request an Auth Token</h2>
 
-<p>Now you're ready to request an auth token. Auth tokens usually expire after
-some period of time, so you'll have to renew them.</p>
+<p>Now you're ready to request an auth token. This is a multi-step process.</p>
 
- <!-- TODO: I think a flowchart would be useful here, or perhaps a link to an as-yet-to-be-created
-flowchart that lives in the docs. -->
+<img src="{@docRoot}images/training/oauth_dance.png" alt="Procedure for obtaining
+a valid auth token from the Android Account Manager"/>
 
 <p>To get an auth token you first need to request the
 {@link android.Manifest.permission#ACCOUNT_MANAGER}
@@ -84,13 +83,13 @@ to yourmanifest file. To actually do anything useful with the
 token, you'll also need to add the {@link android.Manifest.permission#INTERNET}
 permission.</p>
 
-<code>
+<pre>
 &lt;manifest ... >
     &lt;uses-permission android:name="android.permission.ACCOUNT_MANAGER" /&gt;
     &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
     ...
 &lt;/manifest>
-</code>
+</pre>
 
 
 <p>Once your app has these permissions set, you can call {@link
