@@ -1,0 +1,105 @@
+page.title=Planning for Multiple Touchscreen Sizes
+parent.title=Designing Effective and Intuitive App Navigation
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Planning Screens and their Relationships
+previous.link=screen-planning.html
+next.title=Providing Descendant and Lateral Navigation
+next.link=descendant-lateral.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#multi-pane-layouts">Group Screens with Multi-pane Layouts</a></li>
+  <li><a href="#orientations">Design for Multiple Tablet Orientations</a></li>
+  <li><a href="#group-screens">Group Screens in the Screen Map</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>The exhaustive screen map from the previous lesson isn't tied to a particular device form factor, although it can generally look and work okay on a handset or similar-size device. But Android applications need to adapt to a number of different types of devices, from 3" handsets to 10" tablets to 42" TVs. In this lesson we explore reasons and tactics for grouping together multiple screens from the exhaustive map.</p>
+
+<p class="note"><strong>Note: </strong> Designing applications for television sets also requires attention to other factors, including interaction methods (i.e., the lack of a touch screen), legibility of text at large reading distances, and more. Although this discussion is outside the scope of this class, you can find more information on designing for TVs in the <a href="https://developers.google.com/tv">Google TV</a> documentation for <a href="https://developers.google.com/tv/android/docs/gtv_android_patterns">design patterns</a>.</p>
+
+<h2 id="multi-pane-layouts">Group Screens with Multi-pane Layouts</h2>
+
+<p>3 to 4-inch screens are generally only suitable for showing a single vertical pane of content at a time, be it a list of items, or detail information about an item, etc. Thus on such devices, screens generally map one-to-one with levels in the information hierarchy (<em>categories</em> &rarr; <em>object list</em> &rarr; <em>object detail</em>).</p>
+
+<p>Larger screens such as those found on tablets and TVs, on the other hand, generally have much more available screen space and are able to present multiple panes of content. In landscape, panes are usually ordered from left to right in increasing detail order. Users are especially accustomed to multiple panes on larger screens from years and years of desktop application and desktop web site use. Many desktop applications and websites offer a left-hand navigation pane or use a master/detail two-pane layout.</p>
+
+<p>In addition to addressing these user expectations, it's usually necessary to provide multiple panes of information on tablets to avoid leaving too much whitespace or unwittingly introducing awkward interactions, for example 10 x 0.5-inch buttons.</p>
+
+<p>The following figures demonstrate some of the problems that can arise when moving a UI (user interface) design into a larger layout and how to address these issues with multi-pane layouts:</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png"
+  alt="Single pane layouts on large screens in landscape lead to awkward whitespace and exceedingly long line lengths" id="figure-multipane-bad">
+
+<p class="img-caption"><strong>Figure 1.</strong> Single pane layouts on large screens in landscape lead to awkward whitespace and exceedingly long line lengths.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png"
+  alt="Multi-pane layouts in landscape offer better a visual balance while offering more utility and legibility" id="figure-multipane-good">
+
+<p class="img-caption"><strong>Figure 2.</strong> Multi-pane layouts in landscape result in a better visual balance while offering more utility and legibility.</p>
+
+
+<p class="note"><strong>Implementation Note:</strong> After deciding on the screen size at which to draw the line between single-pane and multi-pane layouts, you can provide different layouts containing one or multiple panes for devices in varying screen size buckets (such as <code>large</code>/<code>xlarge</code>) or varying minimum screen widths (such as <code>sw600dp</code>).</p>
+
+<p class="note"><strong>Implementation Note:</strong> While a single screen is implemented as an {@link android.app.Activity} subclass, individual content panes can be implemented as {@link android.app.Fragment} subclasses. This maximizes code re-use across different form factors and across screens that share content.</p>
+
+
+<h2 id="orientations">Design for Multiple Tablet Orientations</h2>
+
+<p>Although we haven't begun arranging user interface elements on our screens yet, this is a good time to consider how your multi-pane screens will adapt to different device orientations. Multi-pane layouts in landscape work quite well because of the large amount of available horizontal space. However, in the portrait orientation, your horizontal space is more limited, so you may need to design a separate layout for this orientation.</p>
+
+<p>Below are a few common strategies for creating portrait tablet layouts.</p>
+
+<ul>
+  <li><strong>Stretch</strong>
+    <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-stretch.png"
+      alt="Stretch strategy">
+    <p>The most straightforward strategy is to simply stretch each pane's width to best present the content in each pane in the portrait orientation. Panes could have fixed widths or take a certain percentage of the available screen width.</p></li>
+
+  <li><strong>Expand/collapse</strong>
+    <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-collapse.png"
+      alt="Expand/collapse strategy">
+    <p>A variation on the stretch strategy is to collapse the contents of the left pane when in portrait. This works quite well with master/detail panes where the left (master) pane contains easily collapsible list items. An example would be for a realtime chat application. In landscape, the left list could contain chat contact photos, names, and online statuses. In portrait, horizontal space could be collapsed by hiding contact names and only showing photos and online status indicator icons.</p></li>
+
+  <li><strong>Show/Hide</strong>
+    <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-show-hide.png"
+      alt="Show/Hide strategy">
+    <p>In this scenario, the left pane is completely hidden in portrait mode. However, <em>to ensure the functional parity</em> of your screen in portrait and landscape, the left pane should be made available via an onscreen affordance (such as a button). It's usually appropriate to use the <em>Up</em> button in the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> to show the left pane, as is discussed in a <a href="ancestral-temporal.html">later lesson</a>.</p></li>
+
+  <li><strong>Stack</strong>
+    <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-stack.png"
+      alt="Stack strategy">
+    <p>The last strategy is to vertically stack your normally horizontally-arranged panes in portrait. This strategy works well when your panes aren't simple text-based lists, or when there are multiple blocks of content running along the primary content pane. Be careful to avoid the awkward whitespace problem discussed above when using this strategy.</p></li>
+
+</ul>
+
+
+<h2 id="group-screens">Group Screens in the Screen Map</h2>
+
+<p>Now that we are able to group individual screens together by providing multi-pane layouts on larger-screen devices, let's apply this technique to our exhaustive screen map from the <a href="screen-planning.html">previous lesson</a> to get a better sense of our application's hierarchy on such devices:</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-screen-map.png"
+  alt="Updated example news application screen map for tablets" id="figure-multipane-screen-map">
+
+<p class="img-caption"><strong>Figure 3.</strong> Updated example news application screen map for tablets.</p>
+
+
+<p>In the next lesson we discuss <em>descendant</em> and <em>lateral</em> navigation, and explore more ways of grouping screens to maximize the intuitiveness and speed of content access in the application's user interface.</p>

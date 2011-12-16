@@ -1,0 +1,78 @@
+page.title=Planning Screens and their Relationships
+parent.title=Designing Effective and Intuitive App Navigation
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Planning for Multiple Touchscreen Sizes
+next.link=multiple-sizes.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#screen-list">Create a Screen List</a></li>
+  <li><a href="#diagram-relationships">Diagram Screen Relationships</a></li>
+  <li><a href="#beyond-simplistic-design">Go Beyond a Simplistic Design</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Most apps have an inherent information model that can be expressed as a tree or graph of object types. In more obvious terms, you can draw a diagram of different kinds of information that represents the types of things users interact with in your app. Software engineers and data architects often use entity-relationship diagrams (ERDs) to describe an application's information model.</p>
+
+<p>Let's consider an example application that allows users to browse through a set of categorized news stories and photos. One possible model for such an app is shown below in the form of an ERD.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-screen-planning-erd.png"
+  alt="Entity-relationship diagram for the example news application" id="figure-erd">
+
+<p class="img-caption"><strong>Figure 1.</strong> Entity-relationship diagram for the example news application.</p>
+
+
+<h2 id="screen-list">Create a Screen List</h2>
+
+<p>Once you define the information model, you can begin to define the contexts necessary to enable users to effectively discover, view, and act upon the data in your application. In practice, one way to do this is to <em>determine the exhaustive set of screens</em> needed to allow users to navigate to and interact with the data. The set of screens we actually expose should generally vary depending on the target device; it's important to consider this early in the design process to ensure that the application can adapt to its environment.</p>
+
+<p>In our example application, we want to enable users to <strong>view</strong>, <strong>save</strong>, and <strong>share</strong> <em>categorized</em> <strong>stories</strong> and <strong>photos</strong>. Below is an exhaustive list of screens that covers these use cases.</p>
+
+<ul>
+  <li>Home or "launchpad" screen for accessing stories and photos</li>
+  <li>List of categories</li>
+  <li>List of news stories for a given category</li>
+  <li>Story detail view (from which we can save and share)</li>
+  <li>List of photos, uncategorized</li>
+  <li>Photo detail view (from which we can save and share)</li>
+  <li>List of all saved items</li>
+  <li>List of saved photos</li>
+  <li>List of saved stories</li>
+</ul>
+
+
+<h2 id="diagram-relationships">Diagram Screen Relationships</h2>
+
+<p>Now we can define the directed relationships between screens; an arrow from one screen <em>A</em> to another screen <em>B</em> implies that screen <em>B</em> should be directly reachable via some user interaction in screen <em>A</em>. Once we define both the set of screens and the relationships between them, we can express these in concert as a screen map, which shows all of your screens and their relationships:</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-screen-planning-exhaustive-map.png"
+  alt="Exhaustive screen map for the example news application" id="figure-exhaustive-map">
+
+<p class="img-caption"><strong>Figure 2.</strong> Exhaustive screen map for the example news application.</p>
+
+<p>If we later wanted to allow users to submit news stories or upload photos, we could add additional screens to this diagram.</p>
+
+
+<h2 id="beyond-simplistic-design">Go Beyond a Simplistic Design</h2>
+
+<p>At this point, it's possible to design a completely functional application from this exhaustive screen map. A simplistic user interface could consist of lists and buttons leading to child screens:</p>
+
+<ul>
+  <li>Buttons leading to different sections (e.g., stories, photos, saved items)</li>
+  <li>Vertical lists representing collections (e.g., story lists, photo lists, etc.)</li>
+  <li>Detail information (e.g., story view, full-screen photo view, etc.)</li>
+</ul>
+
+<p>However, you can use screen grouping techniques and more sophisticated navigation elements to present content in a more intuitive and device-sensitive way. In the next lesson, we explore screen grouping techniques, such as providing multi-pane layouts for tablet devices. Later, we'll dive into the various navigation patterns common on Android.</p>
