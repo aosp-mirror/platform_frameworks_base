@@ -88,6 +88,7 @@ in some "blobs", each color representing one APK.</p>
 <table cellpadding="10" cellspacing="0" border="1">
   <tbody>
     <tr>
+      <td></td>
       <td>3</td>
       <td>4</td>
       <td>5</td>
@@ -143,7 +144,7 @@ in some "blobs", each color representing one APK.</p>
       <td class="purpleCell"></td>
     </tr>
     <tr>
-      <td>large</td>
+      <td>xlarge</td>
       <td class="redCell"></td>
       <td class="redCell"></td>
       <td class="redCell"></td>
@@ -241,6 +242,7 @@ the sample chart from earlier:</p>
 <table cellpadding="10" cellspacing="0" border="1">
   <tbody>
     <tr>
+      <td></td>
       <td>3</td>
       <td>4</td>
       <td>5</td>
@@ -296,7 +298,7 @@ the sample chart from earlier:</p>
       <td class="purpleCell"></td>
     </tr>
     <tr>
-      <td>large</td>
+      <td>xlarge</td>
       <td class="redCell"></td>
       <td class="redCell"></td>
       <td class="redCell"></td>
