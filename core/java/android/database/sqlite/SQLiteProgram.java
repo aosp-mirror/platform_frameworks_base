@@ -32,9 +32,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private static final String TAG = "SQLiteProgram";
 
     /** The database this program is compiled against.
-     * @deprecated do not use this
+     * @hide
      */
-    @Deprecated
     protected SQLiteDatabase mDatabase;
 
     /** The SQL used to create this query */
@@ -43,9 +42,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /**
      * Native linkage, do not modify. This comes from the database and should not be modified
      * in here or in the native code.
-     * @deprecated do not use this
+     * @hide
      */
-    @Deprecated
     protected int nHandle;
 
     /**
@@ -56,9 +54,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /**
      * SQLiteCompiledSql statement id is populated with the corresponding object from the above
      * member. This member is used by the native_bind_* methods
-     * @deprecated do not use this
+     * @hide
      */
-    @Deprecated
     protected int nStatement;
 
     /**
@@ -208,18 +205,6 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     /* package */ String getSqlString() {
         return mSql;
-    }
-
-    /**
-     * @deprecated This method is deprecated and must not be used.
-     *
-     * @param sql the SQL string to compile
-     * @param forceCompilation forces the SQL to be recompiled in the event that there is an
-     *  existing compiled SQL program already around
-     */
-    @Deprecated
-    protected void compile(String sql, boolean forceCompilation) {
-        // TODO is there a need for this?
     }
 
     private void bind(int type, int index, Object value) {
@@ -407,25 +392,28 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     /**
-     * @deprecated This method is deprecated and must not be used.
+     * @hide
      * Compiles SQL into a SQLite program.
      *
      * <P>The database lock must be held when calling this method.
      * @param sql The SQL to compile.
      */
-    @Deprecated
     protected final native void native_compile(String sql);
 
     /**
-     * @deprecated This method is deprecated and must not be used.
+     * @hide
      */
-    @Deprecated
     protected final native void native_finalize();
 
+    /** @hide */
     protected final native void native_bind_null(int index);
+    /** @hide */
     protected final native void native_bind_long(int index, long value);
+    /** @hide */
     protected final native void native_bind_double(int index, double value);
+    /** @hide */
     protected final native void native_bind_string(int index, String value);
+    /** @hide */
     protected final native void native_bind_blob(int index, byte[] value);
     private final native void native_clear_bindings();
 }
