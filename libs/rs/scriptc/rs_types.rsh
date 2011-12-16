@@ -400,6 +400,8 @@ typedef enum {
     RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET = 0x0010
 } rs_allocation_usage_type;
 
+#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
+
 typedef enum {
     RS_PRIMITIVE_POINT,
     RS_PRIMITIVE_LINE,
@@ -409,6 +411,77 @@ typedef enum {
     RS_PRIMITIVE_TRIANGLE_FAN
 } rs_primitive;
 
-#endif //defined(RS_VERSION) && (RS_VERSION >= 14)
+/**
+ * \brief Enumeration for possible element data types
+ *
+ * DataType represents the basic type information for a basic element.  The
+ * naming convention follows.  For numeric types it is FLOAT,
+ * SIGNED, or UNSIGNED followed by the _BITS where BITS is the
+ * size of the data.  BOOLEAN is a true / false (1,0)
+ * represented in an 8 bit container.  The UNSIGNED variants
+ * with multiple bit definitions are for packed graphical data
+ * formats and represent vectors with per vector member sizes
+ * which are treated as a single unit for packing and alignment
+ * purposes.
+ *
+ * MATRIX the three matrix types contain FLOAT_32 elements and are treated
+ * as 32 bits for alignment purposes.
+ *
+ * RS_* objects.  32 bit opaque handles.
+ */
+typedef enum {
+    RS_TYPE_NONE,
+    RS_TYPE_FLOAT_16,
+    RS_TYPE_FLOAT_32,
+    RS_TYPE_FLOAT_64,
+    RS_TYPE_SIGNED_8,
+    RS_TYPE_SIGNED_16,
+    RS_TYPE_SIGNED_32,
+    RS_TYPE_SIGNED_64,
+    RS_TYPE_UNSIGNED_8,
+    RS_TYPE_UNSIGNED_16,
+    RS_TYPE_UNSIGNED_32,
+    RS_TYPE_UNSIGNED_64,
+
+    RS_TYPE_BOOLEAN,
+
+    RS_TYPE_UNSIGNED_5_6_5,
+    RS_TYPE_UNSIGNED_5_5_5_1,
+    RS_TYPE_UNSIGNED_4_4_4_4,
+
+    RS_TYPE_MATRIX_4X4,
+    RS_TYPE_MATRIX_3X3,
+    RS_TYPE_MATRIX_2X2,
+
+    RS_TYPE_ELEMENT = 1000,
+    RS_TYPE_TYPE,
+    RS_TYPE_ALLOCATION,
+    RS_TYPE_SAMPLER,
+    RS_TYPE_SCRIPT,
+    RS_TYPE_MESH,
+    RS_TYPE_PROGRAM_FRAGMENT,
+    RS_TYPE_PROGRAM_VERTEX,
+    RS_TYPE_PROGRAM_RASTER,
+    RS_TYPE_PROGRAM_STORE,
+} rs_data_type;
+
+/**
+ * \brief Enumeration for possible element data kind
+ *
+ * The special interpretation of the data if required.  This is primarly
+ * useful for graphical data.  USER indicates no special interpretation is
+ * expected.  PIXEL is used in conjunction with the standard data types for
+ * representing texture formats.
+ */
+typedef enum {
+    RS_KIND_USER,
+
+    RS_KIND_PIXEL_L = 7,
+    RS_KIND_PIXEL_A,
+    RS_KIND_PIXEL_LA,
+    RS_KIND_PIXEL_RGB,
+    RS_KIND_PIXEL_RGBA,
+    RS_KIND_PIXEL_DEPTH,
+} rs_data_kind;
 
 #endif
