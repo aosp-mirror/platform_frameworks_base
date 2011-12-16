@@ -50,7 +50,7 @@ next.link=descendant-lateral.html
 <p class="img-caption"><strong>Figure 1.</strong> Single pane layouts on large screens in landscape lead to awkward whitespace and exceedingly long line lengths.</p>
 
 
-<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png"
+<img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png"
   alt="Multi-pane layouts in landscape offer better a visual balance while offering more utility and legibility" id="figure-multipane-good">
 
 <p class="img-caption"><strong>Figure 2.</strong> Multi-pane layouts in landscape result in a better visual balance while offering more utility and legibility.</p>
