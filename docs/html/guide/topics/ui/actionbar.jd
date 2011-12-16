@@ -113,9 +113,10 @@ accessible to the user in a predictable way.
 href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">options menu</a> directly in the action bar,
 as "action items." Action items can also provide an "action view," which provides an embedded
 widget for even more immediate action behaviors. Menu items that are not promoted
-to an action item are available in the overflow menu, revealed by either the device MENU button
+to an action item are available in the overflow menu, revealed by either the device <em>Menu</em>
+button
 (when available) or by an "overflow menu" button in the action bar (when the device does not
-include a MENU button).</p>
+include a <em>Menu</em> button).</p>
 </li>
 </ul>
 
@@ -124,6 +125,10 @@ include a MENU button).</p>
 href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app (on a
 landscape handset), showing the logo on the left, navigation tabs, and an action item on the
 right (plus the overflow menu button).</p>
+
+<p class="note"><strong>Note:</strong> If you're looking for information about the contextual
+action bar for displaying contextual action items, see the <a
+href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menu</a> guide.</p>
 
 
 <div class="design-announce">
@@ -225,9 +230,10 @@ later&mdash;calling {@link android.app.Activity#getActionBar()} will return null
 href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">options menu</a>. To do this, you can
 declare that the menu item should appear in the action bar as an "action item." An action item can
 include an icon and/or a text title. If a menu item does not appear as an action item, then the
-system places it in the overflow menu. The overflow menu is revealed either by the device MENU
+system places it in the overflow menu. The overflow menu is revealed either by the device
+<em>Menu</em>
 button (if provided by the device) or an additional button in the action bar (if the device does not
-provide the MENU button).</p>
+provide the <em>Menu</em> button).</p>
 
 <div class="figure" style="width:359px">
   <img src="{@docRoot}images/ui/actionbar-item-withtext.png" height="57" alt="" />
