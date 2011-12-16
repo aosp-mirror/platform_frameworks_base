@@ -1,0 +1,125 @@
+page.title=Putting it All Together: Wireframing the Example Application
+parent.title=Designing Effective and Intuitive App Navigation
+parent.link=index.html
+
+trainingnavtop=true
+previous.title=Providing Ancestral and Temporal Navigation
+previous.link=ancestral-temporal.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to:</h2>
+<ol>
+  <li><a href="#choose-patterns">Choose Patterns</a></li>
+  <li><a href="#wireframe">Sketch and Wireframe</a></li>
+  <li><a href="#wireframe-digital">Create Digital Wireframes</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Now that we have a solid understanding of navigation patterns and screen grouping techniques, it's time to apply them to our screens. Let's take another look at our exhaustive screen map for the example news application from the <a href="screen-planning.html">first lesson</a>, below.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-screen-planning-exhaustive-map.png"
+  alt="Exhaustive screen map for the example news application" id="figure-exhaustive-map">
+
+<p class="img-caption"><strong>Figure 1.</strong> Exhaustive screen map for the example news application.</p>
+
+
+<p>Our next step is to choose and apply navigation patterns discussed in the previous lessons to this screen map, maximizing navigation speed and minimizing the number of touches to access data, while keeping the interface intuitive and consistent with Android best practices. We also need to make different choices for our different target device form factors. For simplicity, let's focus on tablets and handsets.</p>
+
+
+<h2 id="choose-patterns">Choose Patterns</h2>
+
+<p>First, our second-level screens (<em>Story Category List</em>, <em>Photo List</em>, and <em>Saved Item List</em>) can be grouped together using tabs. Note that we don't necessarily have to use horizontally arranged tabs; in some cases a drop-down list UI element can serve as a suitable replacement, especially on devices with narrow screens such as handsets. We can also group the <em>Saved Photo List</em> and <em>Saved Story List</em> screens together using tabs on handsets, or use multiple vertical content panes on tablets.</p>
+
+<p>Finally, let's look at how we present news stories. The first option to simplify navigation across different story categories is to use horizontal paging, with a set of labels above the horizontal swiping surface, indicating the currently visible and adjacently accessible categories. On tablets in the landscape orientation, we can go a step further and present the horizontally-pageable <em>Story List</em> screen as a left pane, and the <em>Story View</em> screen as the primary content pane on the right.</p>
+
+<p>Below are diagrams representing the new screen maps for handsets and tablets after applying these navigation patterns.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-wireframing-map-example-phone.png"
+  alt="Final screen map for the example news application on handsets" id="figure-map-example-phone">
+
+<p class="img-caption"><strong>Figure 2.</strong> Final screen map for the example news application on handsets.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-wireframing-map-example-tablet.png"
+  alt="Final screen map for the example news application on tablets, in landscape" id="figure-map-example-tablet">
+
+<p class="img-caption"><strong>Figure 3.</strong> Final screen map for the example news application on tablets, in landscape.</p>
+
+
+<p>At this point, it's a good idea to think of screen map variations, in case your chosen patterns don't apply well in practice (when you sketch the application's screen layouts). Below is an example screen map variation for tablets that presents story lists for different categories side-by-side, with story view screens remaining independent.</p>
+
+
+<img src="{@docRoot}images/training/app-navigation-wireframing-map-example-tablet-alt.png"
+  alt="Example alternate screen map for tablets, in landscape." id="figure-map-example-tablet-alt">
+
+<p class="img-caption"><strong>Figure 4.</strong> Example alternate screen map for tablets, in landscape.</p>
+
+
+<h2 id="wireframe">Sketch and Wireframe</h2>
+
+<p><em><a href="http://en.wikipedia.org/wiki/Website_wireframe">Wireframing</a></em> is the step in the design process where you begin to lay out your screens. Get creative and begin imagining how to arrange UI elements to allow users to navigate your app. Keep in mind that at this point, pixel-perfect precision (creating high-fidelity mockups) is not important.</p>
+
+<p>The easiest and fastest way to get started is to sketch out your screens by hand using paper and pencils. Once you begin sketching, you may uncover practicality issues in your original screen map or decisions on which patterns to use. In some cases, patterns may apply well to a given design problem in theory, but in practice they may break down and cause visual clutter or interactional issues (for example, if there are two rows of tabs on the screen). If that happens, explore other navigation patterns, or variations on chosen patterns, to arrive at a more optimal set of sketches.</p>
+
+<p>After you're satisfied with initial sketches, it's a good idea to move on to digital wireframing using software such as Adobe&reg; Illustrator, Adobe&reg; Fireworks, OmniGraffle, or any other vector illustration tools. When choosing which tool to use, consider the following features:</p>
+
+<ul>
+  <li>Are interactive wireframes possible? Tools such as Adobe&reg; Fireworks offer this functionality.</li>
+  <li>Is there screen 'master' functionality, allowing re-use of visual elements across different screens? For example, Action Bars should be visible on almost every screen in your application.</li>
+  <li>What's the learning curve? Professional vector illustration tools may have a steep learning curve, while tools designed for wireframing may offer a smaller set of features that are more relevant to the task.</li>
+</ul>
+
+<p>Lastly, the XML Layout Editor that comes with the <a href="{@docRoot}guide/developing/tools/adt.html">Android Development Tools (ADT)</a> plugin for Eclipse can often be used for prototyping. However, you should be careful to focus more on the high-level layout and less on visual design details at this point.</p>
+
+
+<h2 id="wireframe-digital">Create Digital Wireframes</h2>
+
+<p>After sketching out layouts on paper and choosing a digital wireframing tool that works for you, you can create the digital wireframes that will serve as the starting point for your application's visual design. Below are example wireframes for our news application, corresponding one-to-one with our screen maps from earlier in this lesson.</p>
+
+
+<a href="{@docRoot}images/training/app-navigation-wireframing-wires-phone.png">
+  <img src="{@docRoot}images/training/app-navigation-wireframing-wires-phone.png"
+    alt="Example news application wireframes, for handsets in portrait."
+    width="800"
+    id="figure-wires-phone">
+</a>
+
+<p class="img-caption"><strong>Figure 5.</strong> Example news application wireframes, for handsets in portrait.
+<strong>(<a href="example-wireframe-tablet.svg">Download SVG</a>)</strong></p>
+
+
+<a href="{@docRoot}images/training/app-navigation-wireframing-wires-tablet.png">
+  <img src="{@docRoot}images/training/app-navigation-wireframing-wires-tablet.png"
+    alt="Example news application wireframes, for tablets in landscape."
+    width="800"
+    id="figure-wires-tablet">
+</a>
+
+<p class="img-caption"><strong>Figure 6.</strong> Example news application wireframes, for tablets in landscape. Also includes an alternate layout for presenting story lists.
+<strong>(<a href="example-wireframe-tablet.svg">Download SVG</a>)</strong></p>
+
+
+<p><strong>(<a href="example-wireframe-device-template.svg">Download SVG for device wireframe art</a>)</strong></p>
+
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>Now that you've designed effective and intuitive intra-app navigation for your application, you can begin to spend time refining the user interface for each individual screen. For example, you can choose to use richer widgets in place of simple text labels, images, and buttons when displaying interactive content. You can also begin defining the visual styling of your application, incorporating elements from your brand's visual language in the process.</p>
+
+<p>Lastly, it may be time to begin implementing your designs and writing the code for the application using the Android SDK. To get started, take a look at the following resources:</p>
+
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/index.html">Developer's Guide: User Interface</a>: learn how to implement your user interface designs using the Android SDK.</li>
+  <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>: implement tabs, up navigation, on-screen actions, etc.
+  <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a>: implement re-usable, multi-pane layouts
+  <li><a href="{@docRoot}sdk/compatibility-library.html">Support Library</a>: implement horizontal paging using <code>ViewPager</code></li>
+</ul>

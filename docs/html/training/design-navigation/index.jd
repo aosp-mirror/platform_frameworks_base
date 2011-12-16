@@ -1,0 +1,47 @@
+page.title=Designing Effective and Intuitive App Navigation
+
+trainingnavtop=true
+startpage=true
+next.title=Planning Screens and their Relationships
+next.link=screen-planning.html
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+
+<p>This class is not specific to any particular version of the Android platform. It is also primarily design-focused and does not require knowledge of the Android SDK. That said, you should have experience using an Android device for a better understanding of the context in which Android applications run.</p>
+
+<p>You should also have basic familiarity with the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, used across most applications in devices running Android 3.0 and later.</p>
+
+
+</div>
+</div>
+
+
+<p>One of the very first steps to designing and developing an Android application is to determine what users are able to see and do with the app. Once you know what kinds of data users are interacting with in the app, the next step is to design the interactions that allow users to navigate across, into, and back out from the different pieces of content within the app.</p>
+
+<p>This class shows you how to plan out the high-level screen hierarchy for your application and then choose appropriate forms of navigation to allow users to effectively and intuitively traverse your content. Each lesson covers various stages in the interaction design process for navigation in Android applications, in roughly chronological order. After going through the lessons in this class, you should be able to apply the methodology and navigation paradigms outlined here to your own applications, providing a coherent navigation experience for your users.</p>
+
+
+<h2 id="lessons">Lessons</h2>
+
+
+<dl>
+  <dt><strong><a href="screen-planning.html">Planning Screens and their Relationships</a></strong></dt>
+    <dd>Learn how to choose which screens your application should contain. Also learn how to choose which screens should be directly reachable from others. This lesson introduces a hypothetical news application to serve as an example for later lessons.</dd>
+
+  <dt><strong><a href="multiple-sizes.html">Planning for Multiple Touchscreen Sizes</a></strong></dt>
+    <dd>Learn how to group related screens together on larger-screen devices to optimize use of available screen space.</dd>
+
+  <dt><strong><a href="descendant-lateral.html">Providing Descendant and Lateral Navigation</a></strong></dt>
+    <dd>Learn about techniques for allowing users to navigate deep into, as well as across, your content hierarchy. Also learn about pros and cons of, and best practices for, specific navigational UI elements for various situations.</dd>
+
+  <dt><strong><a href="ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></strong></dt>
+    <dd>Learn how to allow users to navigate upwards in the content hierarchy. Also learn about best practices for the BACK button and temporal navigation, or navigation to previous screens that may not be hierarchically related.</dd>
+
+  <dt><strong><a href="wireframing.html">Putting it All Together: Wireframing the Example Application</a></strong></dt>
+    <dd>Learn how to create screen wireframes (low-fidelity graphic mockups) representing the screens in a news application based on the desired information model. These wireframes utilize navigational elements discussed in previous lessons to demonstrate intuitive and efficient navigation.</dd>
+</dl>
