@@ -1,0 +1,17 @@
+page.title=Orientation to Android Training
+
+@jd:body
+
+<div class="figure" style="width:450px;margin-top:-30px">
+  <img src="{@docRoot}images/training/training-prof.png" alt="" />
+</div>
+
+<p>Welcome to Android Training. Here you'll find a collection of classes that aim to help you
+build great apps for Android, using best practices in a variety of framework topics.</p>
+
+<p>Each class explains the steps required to solve a problem or implement a feature using plenty of
+code snippets and sample code for you to use in your apps.</p>
+
+<p>This is just the beginning. We plan to add many more classes, expand and refine existing classes,
+and build Training Courses that help you enhance your apps using an objective-oriented
+collections of classes.</p>
