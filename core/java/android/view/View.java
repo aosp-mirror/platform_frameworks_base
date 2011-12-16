@@ -13871,7 +13871,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>alpha</code> functionality handled by the
      * {@link View#setAlpha(float)} and {@link View#getAlpha()} methods.
      */
-    public static Property<View, Float> ALPHA = new FloatProperty<View>("alpha") {
+    public static final Property<View, Float> ALPHA = new FloatProperty<View>("alpha") {
         @Override
         public void setValue(View object, float value) {
             object.setAlpha(value);
@@ -13887,7 +13887,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>translationX</code> functionality handled by the
      * {@link View#setTranslationX(float)} and {@link View#getTranslationX()} methods.
      */
-    public static Property<View, Float> TRANSLATION_X = new FloatProperty<View>("translationX") {
+    public static final Property<View, Float> TRANSLATION_X = new FloatProperty<View>("translationX") {
         @Override
         public void setValue(View object, float value) {
             object.setTranslationX(value);
@@ -13903,7 +13903,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>translationY</code> functionality handled by the
      * {@link View#setTranslationY(float)} and {@link View#getTranslationY()} methods.
      */
-    public static Property<View, Float> TRANSLATION_Y = new FloatProperty<View>("translationY") {
+    public static final Property<View, Float> TRANSLATION_Y = new FloatProperty<View>("translationY") {
         @Override
         public void setValue(View object, float value) {
             object.setTranslationY(value);
@@ -13919,7 +13919,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>x</code> functionality handled by the
      * {@link View#setX(float)} and {@link View#getX()} methods.
      */
-    public static Property<View, Float> X = new FloatProperty<View>("x") {
+    public static final Property<View, Float> X = new FloatProperty<View>("x") {
         @Override
         public void setValue(View object, float value) {
             object.setX(value);
@@ -13935,7 +13935,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>y</code> functionality handled by the
      * {@link View#setY(float)} and {@link View#getY()} methods.
      */
-    public static Property<View, Float> Y = new FloatProperty<View>("y") {
+    public static final Property<View, Float> Y = new FloatProperty<View>("y") {
         @Override
         public void setValue(View object, float value) {
             object.setY(value);
@@ -13951,7 +13951,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>rotation</code> functionality handled by the
      * {@link View#setRotation(float)} and {@link View#getRotation()} methods.
      */
-    public static Property<View, Float> ROTATION = new FloatProperty<View>("rotation") {
+    public static final Property<View, Float> ROTATION = new FloatProperty<View>("rotation") {
         @Override
         public void setValue(View object, float value) {
             object.setRotation(value);
@@ -13967,7 +13967,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>rotationX</code> functionality handled by the
      * {@link View#setRotationX(float)} and {@link View#getRotationX()} methods.
      */
-    public static Property<View, Float> ROTATION_X = new FloatProperty<View>("rotationX") {
+    public static final Property<View, Float> ROTATION_X = new FloatProperty<View>("rotationX") {
         @Override
         public void setValue(View object, float value) {
             object.setRotationX(value);
@@ -13983,7 +13983,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>rotationY</code> functionality handled by the
      * {@link View#setRotationY(float)} and {@link View#getRotationY()} methods.
      */
-    public static Property<View, Float> ROTATION_Y = new FloatProperty<View>("rotationY") {
+    public static final Property<View, Float> ROTATION_Y = new FloatProperty<View>("rotationY") {
         @Override
         public void setValue(View object, float value) {
             object.setRotationY(value);
@@ -13999,7 +13999,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>scaleX</code> functionality handled by the
      * {@link View#setScaleX(float)} and {@link View#getScaleX()} methods.
      */
-    public static Property<View, Float> SCALE_X = new FloatProperty<View>("scaleX") {
+    public static final Property<View, Float> SCALE_X = new FloatProperty<View>("scaleX") {
         @Override
         public void setValue(View object, float value) {
             object.setScaleX(value);
@@ -14015,7 +14015,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * A Property wrapper around the <code>scaleY</code> functionality handled by the
      * {@link View#setScaleY(float)} and {@link View#getScaleY()} methods.
      */
-    public static Property<View, Float> SCALE_Y = new FloatProperty<View>("scaleY") {
+    public static final Property<View, Float> SCALE_Y = new FloatProperty<View>("scaleY") {
         @Override
         public void setValue(View object, float value) {
             object.setScaleY(value);
