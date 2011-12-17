@@ -291,6 +291,7 @@ public:
 
 private:
     void generate_ctor();
+    void generate_get_endpoint_info();
 };
 
 RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfaceType)
@@ -310,6 +311,7 @@ RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfa
 
     // methods
     generate_ctor();
+    generate_get_endpoint_info();
 }
 
 RpcProxyClass::~RpcProxyClass()
@@ -331,6 +333,19 @@ RpcProxyClass::generate_ctor()
 
     ctor->statements->Add(new Assignment(this->broker, broker));
     ctor->statements->Add(new Assignment(this->endpoint, endpoint));
+}
+
+void
+RpcProxyClass::generate_get_endpoint_info()
+{
+    Method* get = new Method;
+    get->modifiers = PUBLIC;
+    get->returnType = RPC_ENDPOINT_INFO_TYPE;
+    get->name = "getEndpointInfo";
+    get->statements = new StatementBlock;
+    this->elements.push_back(get);
+
+    get->statements->Add(new ReturnStatement(this->endpoint));
 }
 
 // =================================================
