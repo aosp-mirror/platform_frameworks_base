@@ -85,9 +85,12 @@ Font::~Font() {
     }
 }
 
-void Font::invalidateTextureCache() {
+void Font::invalidateTextureCache(CacheTextureLine *cacheLine) {
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
-        mCachedGlyphs.valueAt(i)->mIsValid = false;
+        CachedGlyphInfo* cachedGlyph = mCachedGlyphs.valueAt(i);
+        if (cacheLine == NULL || cachedGlyph->mCachedTextureLine == cacheLine) {
+            cachedGlyph->mIsValid = false;
+        }
     }
 }
 
@@ -412,6 +415,40 @@ void FontRenderer::flushAllAndInvalidate() {
     for (uint32_t i = 0; i < mCacheLines.size(); i++) {
         mCacheLines[i]->mCurrentCol = 0;
     }
+}
+
+void FontRenderer::deallocateTextureMemory(CacheTexture *cacheTexture) {
+    if (cacheTexture && cacheTexture->mTexture) {
+        glDeleteTextures(1, &cacheTexture->mTextureId);
+        delete cacheTexture->mTexture;
+        cacheTexture->mTexture = NULL;
+    }
+}
+
+void FontRenderer::flushLargeCaches() {
+    if ((!mCacheTexture128 || !mCacheTexture128->mTexture) &&
+            (!mCacheTexture256 || !mCacheTexture256->mTexture) &&
+            (!mCacheTexture512 || !mCacheTexture512->mTexture)) {
+        // Typical case; no large glyph caches allocated
+        return;
+    }
+
+    for (uint32_t i = 0; i < mCacheLines.size(); i++) {
+        CacheTextureLine* cacheLine = mCacheLines[i];
+        if ((cacheLine->mCacheTexture == mCacheTexture128 ||
+                cacheLine->mCacheTexture == mCacheTexture256 ||
+                cacheLine->mCacheTexture == mCacheTexture512) &&
+                cacheLine->mCacheTexture->mTexture != NULL) {
+            cacheLine->mCurrentCol = 0;
+            for (uint32_t i = 0; i < mActiveFonts.size(); i++) {
+                mActiveFonts[i]->invalidateTextureCache(cacheLine);
+            }
+        }
+    }
+
+    deallocateTextureMemory(mCacheTexture128);
+    deallocateTextureMemory(mCacheTexture256);
+    deallocateTextureMemory(mCacheTexture512);
 }
 
 void FontRenderer::allocateTextureMemory(CacheTexture *cacheTexture) {

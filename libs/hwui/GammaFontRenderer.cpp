@@ -113,6 +113,13 @@ void GammaFontRenderer::flush() {
 
     delete mRenderers[min];
     mRenderers[min] = NULL;
+
+    // Also eliminate the caches for large glyphs, as they consume significant memory
+    for (int i = 0; i < kGammaCount; ++i) {
+        if (mRenderers[i]) {
+            mRenderers[i]->flushLargeCaches();
+        }
+    }
 }
 
 FontRenderer* GammaFontRenderer::getRenderer(Gamma gamma) {
