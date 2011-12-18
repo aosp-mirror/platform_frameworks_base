@@ -187,7 +187,7 @@
           </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/enterprise/device-management-policy.html">
-            <span class="en">Enhancing Secirity with Device Management Policies</span>
+            <span class="en">Enhancing Security with Device Management Policies</span>
           </a>
           </li>
         </ul>
