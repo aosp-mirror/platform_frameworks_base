@@ -35,15 +35,6 @@
 
 // ---------------------------------------------------------------------------
 
-/* ideally AID_GRAPHICS would be in a semi-public header
- * or there would be a way to map a user/group name to its id
- */
-#ifndef AID_GRAPHICS
-#define AID_GRAPHICS 1003
-#endif
-
-// ---------------------------------------------------------------------------
-
 namespace android {
 
 enum {
