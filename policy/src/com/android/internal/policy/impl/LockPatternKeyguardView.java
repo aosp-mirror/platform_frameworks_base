@@ -587,15 +587,20 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                 (failedBackupAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT);
         if (tooManyFaceUnlockTries) Log.i(TAG, "tooManyFaceUnlockTries: " + tooManyFaceUnlockTries);
         if (mUpdateMonitor.getPhoneState() == TelephonyManager.CALL_STATE_IDLE
+                && usingFaceLock()
                 && !mHasOverlay
                 && !tooManyFaceUnlockTries
                 && !backupIsTimedOut) {
             bindToFaceLock();
+
             // Show FaceLock area, but only for a little bit so lockpattern will become visible if
             // FaceLock fails to start or crashes
-            if (usingFaceLock()) {
-                showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_SERVICE_TIMEOUT);
-            }
+            showFaceLockAreaWithTimeout(FACELOCK_VIEW_AREA_SERVICE_TIMEOUT);
+
+            // When switching between portrait and landscape view while FaceLock is running, the
+            // screen will eventually go dark unless we poke the wakelock when FaceLock is
+            // restarted
+            mKeyguardScreenCallback.pokeWakelock();
         } else {
             hideFaceLockArea();
         }
@@ -1377,7 +1382,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         public void unlock() {
             if (DEBUG) Log.d(TAG, "FaceLock unlock()");
             showFaceLockArea(); // Keep fallback covered
-            stopFaceLock();
+            stopAndUnbindFromFaceLock();
 
             mKeyguardScreenCallback.keyguardDone(true);
             mKeyguardScreenCallback.reportSuccessfulUnlockAttempt();
@@ -1389,7 +1394,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
         public void cancel() {
             if (DEBUG) Log.d(TAG, "FaceLock cancel()");
             hideFaceLockArea(); // Expose fallback
-            stopFaceLock();
+            stopAndUnbindFromFaceLock();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
@@ -1400,7 +1405,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             if (DEBUG) Log.d(TAG, "FaceLock reportFailedAttempt()");
             mUpdateMonitor.reportFailedFaceUnlockAttempt();
             hideFaceLockArea(); // Expose fallback
-            stopFaceLock();
+            stopAndUnbindFromFaceLock();
             mKeyguardScreenCallback.pokeWakelock(BACKUP_LOCK_TIMEOUT);
         }
 
