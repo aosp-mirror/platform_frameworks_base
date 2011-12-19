@@ -376,9 +376,14 @@ public final class NfcAdapter {
      * for many NFC API methods. Those methods will fail when called on an NfcAdapter
      * object created from this method.<p>
      * @deprecated use {@link #getDefaultAdapter(Context)}
+     * @hide
      */
     @Deprecated
     public static NfcAdapter getDefaultAdapter() {
+        // introduce in API version 9 (GB 2.3)
+        // deprecated in API version 10 (GB 2.3.3)
+        // removed from public API in version 16 (ICS MR2)
+        // will need to maintain this as a hidden API for a while longer...
         Log.w(TAG, "WARNING: NfcAdapter.getDefaultAdapter() is deprecated, use " +
                 "NfcAdapter.getDefaultAdapter(Context) instead", new Exception());
 
