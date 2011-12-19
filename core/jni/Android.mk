@@ -76,8 +76,6 @@ LOCAL_SRC_FILES:= \
 	android_net_TrafficStats.cpp \
 	android_net_wifi_Wifi.cpp \
 	android_nio_utils.cpp \
-	android_nfc_NdefMessage.cpp \
-	android_nfc_NdefRecord.cpp \
 	android_text_format_Time.cpp \
 	android_util_AssetManager.cpp \
 	android_util_Binder.cpp \
@@ -214,7 +212,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libmedia \
 	libwpa_client \
 	libjpeg \
-	libnfc_ndef \
 	libusbhost \
 	libharfbuzz \
 	libz \

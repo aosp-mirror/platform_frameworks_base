@@ -12602,10 +12602,12 @@ package android.nfc {
   public class FormatException extends java.lang.Exception {
     ctor public FormatException();
     ctor public FormatException(java.lang.String);
+    ctor public FormatException(java.lang.String, java.lang.Throwable);
   }
 
   public final class NdefMessage implements android.os.Parcelable {
     ctor public NdefMessage(byte[]) throws android.nfc.FormatException;
+    ctor public NdefMessage(android.nfc.NdefRecord, android.nfc.NdefRecord...);
     ctor public NdefMessage(android.nfc.NdefRecord[]);
     method public int describeContents();
     method public android.nfc.NdefRecord[] getRecords();
@@ -12616,8 +12618,10 @@ package android.nfc {
 
   public final class NdefRecord implements android.os.Parcelable {
     ctor public NdefRecord(short, byte[], byte[], byte[]);
-    ctor public NdefRecord(byte[]) throws android.nfc.FormatException;
+    ctor public deprecated NdefRecord(byte[]) throws android.nfc.FormatException;
     method public static android.nfc.NdefRecord createApplicationRecord(java.lang.String);
+    method public static android.nfc.NdefRecord createExternal(java.lang.String, java.lang.String, byte[]);
+    method public static android.nfc.NdefRecord createMime(java.lang.String, byte[]);
     method public static android.nfc.NdefRecord createUri(android.net.Uri);
     method public static android.nfc.NdefRecord createUri(java.lang.String);
     method public int describeContents();
@@ -12625,7 +12629,7 @@ package android.nfc {
     method public byte[] getPayload();
     method public short getTnf();
     method public byte[] getType();
-    method public byte[] toByteArray();
+    method public deprecated byte[] toByteArray();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final byte[] RTD_ALTERNATIVE_CARRIER;
@@ -12650,7 +12654,6 @@ package android.nfc {
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], java.lang.String[][]);
     method public deprecated void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
-    method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
     method public boolean isNdefPushEnabled();
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
