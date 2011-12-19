@@ -47,7 +47,7 @@ public:
 
     enum { // names
 
-        // track units (MAX_NUM_TRACKS units)
+        // track names (MAX_NUM_TRACKS units)
         TRACK0          = 0x1000,
 
         // 0x2000 is unused
@@ -74,16 +74,16 @@ public:
     };
 
 
+    // For all APIs with "name": TRACK0 <= name < TRACK0 + MAX_NUM_TRACKS
     int         getTrackName();
     void        deleteTrackName(int name);
 
-    void        enable();
-    void        disable();
+    void        enable(int name);
+    void        disable(int name);
 
-    void        setActiveTrack(int track);
-    void        setParameter(int target, int name, void *value);
+    void        setParameter(int name, int target, int param, void *value);
 
-    void        setBufferProvider(AudioBufferProvider* bufferProvider);
+    void        setBufferProvider(int name, AudioBufferProvider* bufferProvider);
     void        process();
 
     uint32_t    trackNames() const { return mTrackNames; }
@@ -178,7 +178,7 @@ private:
         track_t         tracks[MAX_NUM_TRACKS]; __attribute__((aligned(32)));
     };
 
-    int             mActiveTrack;
+    // bitmask of allocated track names, where bit 0 corresponds to TRACK0 etc.
     uint32_t        mTrackNames;
     const uint32_t  mSampleRate;
 

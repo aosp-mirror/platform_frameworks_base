@@ -2101,12 +2101,13 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         sp<Track> t = activeTracks[i].promote();
         if (t == 0) continue;
 
+        // this const just means the local variable doesn't change
         Track* const track = t.get();
         audio_track_cblk_t* cblk = track->cblk();
 
         // The first time a track is added we wait
         // for all its buffers to be filled before processing it
-        mAudioMixer->setActiveTrack(track->name());
+        int name = track->name();
         // make sure that we have enough frames to mix one full buffer.
         // enforce this condition only once to enable draining the buffer in case the client
         // app does not call stop() and relies on underrun to stop:
@@ -2124,7 +2125,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         if ((cblk->framesReady() >= minFrames) && track->isReady() &&
                 !track->isPaused() && !track->isTerminated())
         {
-            //ALOGV("track %d u=%08x, s=%08x [OK] on thread %p", track->name(), cblk->user, cblk->server, this);
+            //ALOGV("track %d u=%08x, s=%08x [OK] on thread %p", name, cblk->user, cblk->server, this);
 
             mixedTracks++;
 
@@ -2137,8 +2138,8 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 if (chain != 0) {
                     tracksWithEffect++;
                 } else {
-                    LOGW("prepareTracks_l(): track %08x attached to effect but no chain found on session %d",
-                            track->name(), track->sessionId());
+                    LOGW("prepareTracks_l(): track %d attached to effect but no chain found on session %d",
+                            name, track->sessionId());
                 }
             }
 
@@ -2151,7 +2152,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     track->mState = TrackBase::ACTIVE;
                     param = AudioMixer::RAMP_VOLUME;
                 }
-                mAudioMixer->setParameter(AudioMixer::RESAMPLE, AudioMixer::RESET, NULL);
+                mAudioMixer->setParameter(name, AudioMixer::RESAMPLE, AudioMixer::RESET, NULL);
             } else if (cblk->server != 0) {
                 // If the track is stopped before the first frame was mixed,
                 // do not apply ramp
@@ -2203,26 +2204,31 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
             aux = int16_t(va);
 
             // XXX: these things DON'T need to be done each time
-            mAudioMixer->setBufferProvider(track);
-            mAudioMixer->enable();
+            mAudioMixer->setBufferProvider(name, track);
+            mAudioMixer->enable(name);
 
-            mAudioMixer->setParameter(param, AudioMixer::VOLUME0, (void *)left);
-            mAudioMixer->setParameter(param, AudioMixer::VOLUME1, (void *)right);
-            mAudioMixer->setParameter(param, AudioMixer::AUXLEVEL, (void *)aux);
+            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME0, (void *)left);
+            mAudioMixer->setParameter(name, param, AudioMixer::VOLUME1, (void *)right);
+            mAudioMixer->setParameter(name, param, AudioMixer::AUXLEVEL, (void *)aux);
             mAudioMixer->setParameter(
+                name,
                 AudioMixer::TRACK,
                 AudioMixer::FORMAT, (void *)track->format());
             mAudioMixer->setParameter(
+                name,
                 AudioMixer::TRACK,
                 AudioMixer::CHANNEL_MASK, (void *)track->channelMask());
             mAudioMixer->setParameter(
+                name,
                 AudioMixer::RESAMPLE,
                 AudioMixer::SAMPLE_RATE,
                 (void *)(cblk->sampleRate));
             mAudioMixer->setParameter(
+                name,
                 AudioMixer::TRACK,
                 AudioMixer::MAIN_BUFFER, (void *)track->mainBuffer());
             mAudioMixer->setParameter(
+                name,
                 AudioMixer::TRACK,
                 AudioMixer::AUX_BUFFER, (void *)track->auxBuffer());
 
@@ -2230,7 +2236,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
             track->mRetryCount = kMaxTrackRetries;
             mixerStatus = MIXER_TRACKS_READY;
         } else {
-            //ALOGV("track %d u=%08x, s=%08x [NOT READY] on thread %p", track->name(), cblk->user, cblk->server, this);
+            //ALOGV("track %d u=%08x, s=%08x [NOT READY] on thread %p", name, cblk->user, cblk->server, this);
             if (track->isStopped()) {
                 track->reset();
             }
@@ -2242,7 +2248,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 // No buffers for this track. Give it a few chances to
                 // fill a buffer, then remove it from active list.
                 if (--(track->mRetryCount) <= 0) {
-                    ALOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", track->name(), this);
+                    ALOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", name, this);
                     tracksToRemove->add(track);
                     // indicate to client process that the track was disabled because of underrun
                     android_atomic_or(CBLK_DISABLED_ON, &cblk->flags);
@@ -2250,7 +2256,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     mixerStatus = MIXER_TRACKS_ENABLED;
                 }
             }
-            mAudioMixer->disable();
+            mAudioMixer->disable(name);
         }
     }
 
