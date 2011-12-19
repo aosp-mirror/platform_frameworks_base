@@ -168,23 +168,53 @@ extern const void * __attribute__((overloadable))
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
+/**
+ * @param a allocation to get data from
+ * @return element describing allocation layout
+ */
 extern rs_element __attribute__((overloadable))
-    rsAllocationGetElement(rs_allocation);
+    rsAllocationGetElement(rs_allocation a);
 
+/**
+ * @param m mesh to get data from
+ * @return number of allocations in the mesh that contain vertex
+ *         data
+ */
 extern uint32_t __attribute__((overloadable))
-    rsMeshGetVertexAllocationCount(rs_mesh);
+    rsMeshGetVertexAllocationCount(rs_mesh m);
 
+/**
+ * @param m mesh to get data from
+ * @return number of primitive groups in the mesh. This would
+ *         include simple primitives as well as allocations
+ *         containing index data
+ */
 extern uint32_t __attribute__((overloadable))
-    rsMeshGetPrimitiveCount(rs_mesh);
+    rsMeshGetPrimitiveCount(rs_mesh m);
 
+/**
+ * @param m mesh to get data from
+ * @param index index of the vertex allocation
+ * @return allocation containing vertex data
+ */
 extern rs_allocation __attribute__((overloadable))
-    rsMeshGetVertexAllocation(rs_mesh, uint32_t index);
+    rsMeshGetVertexAllocation(rs_mesh m, uint32_t index);
 
+/**
+ * @param m mesh to get data from
+ * @param index index of the index allocation
+ * @return allocation containing index data
+ */
 extern rs_allocation __attribute__((overloadable))
-    rsMeshGetIndexAllocation(rs_mesh, uint32_t index);
+    rsMeshGetIndexAllocation(rs_mesh m, uint32_t index);
 
+/**
+ * @param m mesh to get data from
+ * @param index index of the primitive
+ * @return primitive describing how the mesh is rendered
+ */
 extern rs_primitive __attribute__((overloadable))
-    rsMeshGetPrimitive(rs_mesh, uint32_t index);
+    rsMeshGetPrimitive(rs_mesh m, uint32_t index);
 
 /**
  * @param e element to get data from
