@@ -15,6 +15,8 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "mediaserver"
+
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
