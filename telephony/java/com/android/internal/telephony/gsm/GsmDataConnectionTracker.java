@@ -993,17 +993,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return false;
         }
 
-        // First, check to see if ApnContext already has DC.
-        // This could happen if the retries are currently  engaged.
-        dc = (GsmDataConnection)apnContext.getDataConnection();
+
+        dc = (GsmDataConnection) checkForConnectionForApnContext(apnContext);
 
         if (dc == null) {
-
-            dc = (GsmDataConnection) checkForConnectionForApnContext(apnContext);
-
-            if (dc == null) {
-                dc = findReadyDataConnection(apn);
-            }
+            dc = findReadyDataConnection(apn);
 
             if (dc == null) {
                 if (DBG) log("setupData: No ready GsmDataConnection found!");
@@ -1020,20 +1014,22 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 if (DBG) log("setupData: No free GsmDataConnection found!");
                 return false;
             }
-
-            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
-            dc.setProfileId( profileId );
-            dc.setActiveApnType(apnContext.getApnType());
-            int refCount = dcac.getRefCountSync();
-            if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
-
-            // configure retry count if no other Apn is using the same connection.
-            if (refCount == 0) {
-                configureRetry(dc, apn.canHandleType(Phone.APN_TYPE_DEFAULT));
-            }
-            apnContext.setDataConnectionAc(dcac);
-            apnContext.setDataConnection(dc);
+        } else {
+            apn = mDataConnectionAsyncChannels.get(dc.getDataConnectionId()).getApnSettingSync();
         }
+
+        DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
+        dc.setProfileId( profileId );  //  assumed no connection sharing on profiled types
+
+        int refCount = dcac.getRefCountSync();
+        if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
+
+        // configure retry count if no other Apn is using the same connection.
+        if (refCount == 0) {
+            configureRetry(dc, apn.canHandleType(Phone.APN_TYPE_DEFAULT));
+        }
+        apnContext.setDataConnectionAc(dcac);
+        apnContext.setDataConnection(dc);
 
         apnContext.setApnSetting(apn);
         apnContext.setState(State.INITING);
@@ -1732,27 +1728,46 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             dunSetting = fetchDunApn();
         }
 
+        DataConnection potential = null;
         for (ApnContext c : mApnContexts.values()) {
             DataConnection conn = c.getDataConnection();
             if (conn != null) {
                 ApnSetting apnSetting = c.getApnSetting();
                 if (dunSetting != null) {
                     if (dunSetting.equals(apnSetting)) {
-                        if (DBG) {
-                            log("checkForConnectionForApnContext: apnContext=" + apnContext +
-                                    " found conn=" + conn);
+                        switch (c.getState()) {
+                            case CONNECTED:
+                                if (DBG) {
+                                    log("checkForConnectionForApnContext: apnContext=" +
+                                            apnContext + " found conn=" + conn);
+                                }
+                                return conn;
+                            case CONNECTING:
+                                potential = conn;
                         }
-                        return conn;
                     }
                 } else if (apnSetting != null && apnSetting.canHandleType(apnType)) {
-                    if (DBG) {
-                        log("checkForConnectionForApnContext: apnContext=" + apnContext +
-                                " found conn=" + conn);
+                    switch (c.getState()) {
+                        case CONNECTED:
+                            if (DBG) {
+                                log("checkForConnectionForApnContext: apnContext=" + apnContext +
+                                        " found conn=" + conn);
+                            }
+                            return conn;
+                        case CONNECTING:
+                            potential = conn;
                     }
-                    return conn;
                 }
             }
         }
+        if (potential != null) {
+            if (DBG) {
+                log("checkForConnectionForApnContext: apnContext=" + apnContext +
+                    " found conn=" + potential);
+            }
+            return potential;
+        }
+
         if (DBG) log("checkForConnectionForApnContext: apnContext=" + apnContext + " NO conn");
         return null;
     }

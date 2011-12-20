@@ -36,7 +36,6 @@ public class GsmDataConnection extends DataConnection {
 
     //***** Instance Variables
     protected int mProfileId = RILConstants.DATA_PROFILE_DEFAULT;
-    protected String mActiveApnType = Phone.APN_TYPE_DEFAULT;
     //***** Constructor
     private GsmDataConnection(PhoneBase phone, String name, int id, RetryManager rm) {
         super(phone, name, id, rm);
@@ -111,10 +110,6 @@ public class GsmDataConnection extends DataConnection {
 
     public int getProfileId() {
         return mProfileId;
-    }
-
-    public void setActiveApnType(String apnType) {
-        mActiveApnType = apnType;
     }
 
     @Override
