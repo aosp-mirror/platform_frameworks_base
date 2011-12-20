@@ -133,6 +133,14 @@ public class AnimationUtils {
 
     }
 
+    /**
+     * Loads a {@link LayoutAnimationController} object from a resource
+     *
+     * @param context Application context used to access resources
+     * @param id The resource id of the animation to load
+     * @return The animation object reference by the specified id
+     * @throws NotFoundException when the layout animation controller cannot be loaded
+     */
     public static LayoutAnimationController loadLayoutAnimation(Context context, int id)
             throws NotFoundException {
         
