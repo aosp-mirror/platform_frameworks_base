@@ -114,11 +114,6 @@ private:
         NEEDS_AUX_ENABLED      = 0x00010000,
     };
 
-    static inline int32_t applyVolume(int32_t in, int32_t v) {
-        return in * v;
-    }
-
-
     struct state_t;
     struct track_t;
 
@@ -198,7 +193,9 @@ private:
     static void process__genericNoResampling(state_t* state);
     static void process__genericResampling(state_t* state);
     static void process__OneTrack16BitsStereoNoResampling(state_t* state);
+#if 0
     static void process__TwoTracks16BitsStereoNoResampling(state_t* state);
+#endif
 };
 
 // ----------------------------------------------------------------------------
