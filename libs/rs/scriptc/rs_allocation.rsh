@@ -234,7 +234,8 @@ extern rs_element __attribute__((overloadable))
 /**
  * @param e element to get data from
  * @param index index of the sub-element to return
- * @return length of the sub-element name
+ * @return length of the sub-element name including the null
+ *         terminator (size of buffer needed to write the name)
  */
 extern uint32_t __attribute__((overloadable))
     rsElementGetSubElementNameLength(rs_element e, uint32_t index);
@@ -244,7 +245,8 @@ extern uint32_t __attribute__((overloadable))
  * @param index index of the sub-element
  * @param name array to store the name into
  * @param nameLength length of the provided name array
- * @return number of characters written
+ * @return number of characters actually written, excluding the
+ *         null terminator
  */
 extern uint32_t __attribute__((overloadable))
     rsElementGetSubElementName(rs_element e, uint32_t index, char *name, uint32_t nameLength);

@@ -46,12 +46,8 @@ void Type::clear() {
         delete [] mLODs;
         mLODs = NULL;
     }
-    mDimX = 0;
-    mDimY = 0;
-    mDimZ = 0;
-    mDimLOD = 0;
-    mFaces = false;
     mElement.clear();
+    memset(&mHal, 0, sizeof(mHal));
 }
 
 TypeState::TypeState() {
@@ -62,16 +58,16 @@ TypeState::~TypeState() {
 }
 
 size_t Type::getOffsetForFace(uint32_t face) const {
-    rsAssert(mFaces);
+    rsAssert(mHal.state.faces);
     return 0;
 }
 
 void Type::compute() {
     uint32_t oldLODCount = mLODCount;
-    if (mDimLOD) {
-        uint32_t l2x = rsFindHighBit(mDimX) + 1;
-        uint32_t l2y = rsFindHighBit(mDimY) + 1;
-        uint32_t l2z = rsFindHighBit(mDimZ) + 1;
+    if (mHal.state.dimLOD) {
+        uint32_t l2x = rsFindHighBit(mHal.state.dimX) + 1;
+        uint32_t l2y = rsFindHighBit(mHal.state.dimY) + 1;
+        uint32_t l2z = rsFindHighBit(mHal.state.dimZ) + 1;
 
         mLODCount = rsMax(l2x, l2y);
         mLODCount = rsMax(mLODCount, l2z);
@@ -85,9 +81,9 @@ void Type::compute() {
         mLODs = new LOD[mLODCount];
     }
 
-    uint32_t tx = mDimX;
-    uint32_t ty = mDimY;
-    uint32_t tz = mDimZ;
+    uint32_t tx = mHal.state.dimX;
+    uint32_t ty = mHal.state.dimY;
+    uint32_t tz = mHal.state.dimZ;
     size_t offset = 0;
     for (uint32_t lod=0; lod < mLODCount; lod++) {
         mLODs[lod].mX = tx;
@@ -103,10 +99,11 @@ void Type::compute() {
     // At this point the offset is the size of a mipmap chain;
     mMipChainSizeBytes = offset;
 
-    if (mFaces) {
+    if (mHal.state.faces) {
         offset *= 6;
     }
     mTotalSizeBytes = offset;
+    mHal.state.element = mElement.get();
 }
 
 uint32_t Type::getLODOffset(uint32_t lod, uint32_t x) const {
@@ -127,7 +124,8 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
     return offset;
 }
 
-uint32_t Type::getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face, uint32_t x, uint32_t y) const {
+uint32_t Type::getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face,
+                                uint32_t x, uint32_t y) const {
     uint32_t offset = mLODs[lod].mOffset;
     offset += (x + y * mLODs[lod].mX) * mElement->getSizeBytes();
 
@@ -141,7 +139,12 @@ uint32_t Type::getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face, uint
 void Type::dumpLOGV(const char *prefix) const {
     char buf[1024];
     ObjectBase::dumpLOGV(prefix);
-    ALOGV("%s   Type: x=%zu y=%zu z=%zu mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
+    ALOGV("%s   Type: x=%u y=%u z=%u mip=%i face=%i", prefix,
+                                                      mHal.state.dimX,
+                                                      mHal.state.dimY,
+                                                      mHal.state.dimZ,
+                                                      mHal.state.dimLOD,
+                                                      mHal.state.faces);
     snprintf(buf, sizeof(buf), "%s element: ", prefix);
     mElement->dumpLOGV(buf);
 }
@@ -155,12 +158,12 @@ void Type::serialize(OStream *stream) const {
 
     mElement->serialize(stream);
 
-    stream->addU32(mDimX);
-    stream->addU32(mDimY);
-    stream->addU32(mDimZ);
+    stream->addU32(mHal.state.dimX);
+    stream->addU32(mHal.state.dimY);
+    stream->addU32(mHal.state.dimZ);
 
-    stream->addU8((uint8_t)(mDimLOD ? 1 : 0));
-    stream->addU8((uint8_t)(mFaces ? 1 : 0));
+    stream->addU8((uint8_t)(mHal.state.dimLOD ? 1 : 0));
+    stream->addU8((uint8_t)(mHal.state.faces ? 1 : 0));
 }
 
 Type *Type::createFromStream(Context *rsc, IStream *stream) {
@@ -232,11 +235,11 @@ ObjectBaseRef<Type> Type::getTypeRef(Context *rsc, const Element *e,
     Type *nt = new Type(rsc);
     returnRef.set(nt);
     nt->mElement.set(e);
-    nt->mDimX = dimX;
-    nt->mDimY = dimY;
-    nt->mDimZ = dimZ;
-    nt->mDimLOD = dimLOD;
-    nt->mFaces = dimFaces;
+    nt->mHal.state.dimX = dimX;
+    nt->mHal.state.dimY = dimY;
+    nt->mHal.state.dimZ = dimZ;
+    nt->mHal.state.dimLOD = dimLOD;
+    nt->mHal.state.faces = dimFaces;
     nt->compute();
 
     ObjectBase::asyncLock();
@@ -248,14 +251,14 @@ ObjectBaseRef<Type> Type::getTypeRef(Context *rsc, const Element *e,
 
 ObjectBaseRef<Type> Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const {
     return getTypeRef(rsc, mElement.get(), dimX,
-                      mDimY, mDimZ, mDimLOD, mFaces);
+                      mHal.state.dimY, mHal.state.dimZ, mHal.state.dimLOD, mHal.state.faces);
 }
 
 ObjectBaseRef<Type> Type::cloneAndResize2D(Context *rsc,
                               uint32_t dimX,
                               uint32_t dimY) const {
     return getTypeRef(rsc, mElement.get(), dimX, dimY,
-                      mDimZ, mDimLOD, mFaces);
+                      mHal.state.dimZ, mHal.state.dimLOD, mHal.state.faces);
 }
 
 
@@ -276,8 +279,8 @@ RsType rsi_TypeCreate(Context *rsc, RsElement _e, uint32_t dimX,
 
 void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize) {
     rsAssert(typeDataSize == 6);
-    // Pack the data in the follofing way mDimX; mDimY; mDimZ;
-    // mDimLOD; mDimFaces; mElement; into typeData
+    // Pack the data in the follofing way mHal.state.dimX; mHal.state.dimY; mHal.state.dimZ;
+    // mHal.state.dimLOD; mHal.state.faces; mElement; into typeData
     Type *t = static_cast<Type *>(type);
 
     (*typeData++) = t->getDimX();
