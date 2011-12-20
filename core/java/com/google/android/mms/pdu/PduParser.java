@@ -934,6 +934,9 @@ public class PduParser {
         int temp = pduDataStream.read();
         assert(-1 != temp);
         int first = temp & 0xFF;
+        if (first == 0) {
+            return null;    //  Blank subject, bail.
+        }
 
         pduDataStream.reset();
         if (first < TEXT_MIN) {
