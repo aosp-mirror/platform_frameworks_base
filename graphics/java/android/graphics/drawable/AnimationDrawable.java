@@ -42,7 +42,7 @@ import android.util.AttributeSet;
  * <p>spin_animation.xml file in res/drawable/ folder:</p>
  * <pre>&lt;!-- Animation frames are wheel0.png -- wheel5.png files inside the
  * res/drawable/ folder --&gt;
- * &lt;animation-list android:id=&quot;selected&quot; android:oneshot=&quot;false&quot;&gt;
+ * &lt;animation-list android:id=&quot;@+id/selected&quot; android:oneshot=&quot;false&quot;&gt;
  *    &lt;item android:drawable=&quot;@drawable/wheel0&quot; android:duration=&quot;50&quot; /&gt;
  *    &lt;item android:drawable=&quot;@drawable/wheel1&quot; android:duration=&quot;50&quot; /&gt;
  *    &lt;item android:drawable=&quot;@drawable/wheel2&quot; android:duration=&quot;50&quot; /&gt;
@@ -216,6 +216,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
             unscheduleSelf(this);
         }
         if (animate) {
+            // Unscheduling may have clobbered this value; restore it to record that we're animating
+            mCurFrame = frame;
             scheduleSelf(this, SystemClock.uptimeMillis() + mAnimationState.mDurations[frame]);
         }
     }
