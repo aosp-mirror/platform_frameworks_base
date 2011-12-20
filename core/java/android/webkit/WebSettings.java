@@ -535,21 +535,6 @@ public class WebSettings {
     }
 
     /**
-     * If WebView only supports touch, a different navigation model will be
-     * applied. Otherwise, the navigation to support both touch and keyboard
-     * will be used.
-     * @hide
-    public void setSupportTouchOnly(boolean touchOnly) {
-        mSupportTounchOnly = touchOnly;
-    }
-     */
-
-    boolean supportTouchOnly() {
-        // for debug only, use mLightTouchEnabled for mSupportTounchOnly
-        return mLightTouchEnabled;
-    }
-
-    /**
      * Set whether the WebView supports zoom
      */
     public void setSupportZoom(boolean support) {
