@@ -1202,13 +1202,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
             }
         }
+
         super.setEnabled(enabled);
-        prepareCursorControllers();
+
         if (enabled) {
             // Make sure IME is updated with current editor info.
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) imm.restartInput(this);
         }
+
+        prepareCursorControllers();
 
         // start or stop the cursor blinking as appropriate
         makeBlink();
@@ -8581,7 +8584,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return True when the TextView isFocused and has a valid zero-length selection (cursor).
      */
     private boolean shouldBlink() {
-        if (!isFocused()) return false;
+        if (!isCursorVisible() || !isFocused()) return false;
 
         final int start = getSelectionStart();
         if (start < 0) return false;
@@ -8593,13 +8596,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void makeBlink() {
-        if (isCursorVisible()) {
-            if (shouldBlink()) {
-                mShowCursor = SystemClock.uptimeMillis();
-                if (mBlink == null) mBlink = new Blink(this);
-                mBlink.removeCallbacks(mBlink);
-                mBlink.postAtTime(mBlink, mShowCursor + BLINK);
-            }
+        if (shouldBlink()) {
+            mShowCursor = SystemClock.uptimeMillis();
+            if (mBlink == null) mBlink = new Blink(this);
+            mBlink.removeCallbacks(mBlink);
+            mBlink.postAtTime(mBlink, mShowCursor + BLINK);
         } else {
             if (mBlink != null) mBlink.removeCallbacks(mBlink);
         }
