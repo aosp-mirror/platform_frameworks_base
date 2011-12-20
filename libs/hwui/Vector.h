@@ -103,7 +103,7 @@ struct Vector2 {
     }
 
     void dump() {
-        LOGD("Vector2[%.2f, %.2f]", x, y);
+        ALOGD("Vector2[%.2f, %.2f]", x, y);
     }
 }; // class Vector2
 

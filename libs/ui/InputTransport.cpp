@@ -55,7 +55,7 @@ InputChannel::InputChannel(const String8& name, int32_t ashmemFd, int32_t receiv
         int32_t sendPipeFd) :
         mName(name), mAshmemFd(ashmemFd), mReceivePipeFd(receivePipeFd), mSendPipeFd(sendPipeFd) {
 #if DEBUG_CHANNEL_LIFECYCLE
-    LOGD("Input channel constructed: name='%s', ashmemFd=%d, receivePipeFd=%d, sendPipeFd=%d",
+    ALOGD("Input channel constructed: name='%s', ashmemFd=%d, receivePipeFd=%d, sendPipeFd=%d",
             mName.string(), ashmemFd, receivePipeFd, sendPipeFd);
 #endif
 
@@ -70,7 +70,7 @@ InputChannel::InputChannel(const String8& name, int32_t ashmemFd, int32_t receiv
 
 InputChannel::~InputChannel() {
 #if DEBUG_CHANNEL_LIFECYCLE
-    LOGD("Input channel destroyed: name='%s', ashmemFd=%d, receivePipeFd=%d, sendPipeFd=%d",
+    ALOGD("Input channel destroyed: name='%s', ashmemFd=%d, receivePipeFd=%d, sendPipeFd=%d",
             mName.string(), mAshmemFd, mReceivePipeFd, mSendPipeFd);
 #endif
 
@@ -150,13 +150,13 @@ status_t InputChannel::sendSignal(char signal) {
 
     if (nWrite == 1) {
 #if DEBUG_CHANNEL_SIGNALS
-        LOGD("channel '%s' ~ sent signal '%c'", mName.string(), signal);
+        ALOGD("channel '%s' ~ sent signal '%c'", mName.string(), signal);
 #endif
         return OK;
     }
 
 #if DEBUG_CHANNEL_SIGNALS
-    LOGD("channel '%s' ~ error sending signal '%c', errno=%d", mName.string(), signal, errno);
+    ALOGD("channel '%s' ~ error sending signal '%c', errno=%d", mName.string(), signal, errno);
 #endif
     return -errno;
 }
@@ -169,27 +169,27 @@ status_t InputChannel::receiveSignal(char* outSignal) {
 
     if (nRead == 1) {
 #if DEBUG_CHANNEL_SIGNALS
-        LOGD("channel '%s' ~ received signal '%c'", mName.string(), *outSignal);
+        ALOGD("channel '%s' ~ received signal '%c'", mName.string(), *outSignal);
 #endif
         return OK;
     }
 
     if (nRead == 0) { // check for EOF
 #if DEBUG_CHANNEL_SIGNALS
-        LOGD("channel '%s' ~ receive signal failed because peer was closed", mName.string());
+        ALOGD("channel '%s' ~ receive signal failed because peer was closed", mName.string());
 #endif
         return DEAD_OBJECT;
     }
 
     if (errno == EAGAIN) {
 #if DEBUG_CHANNEL_SIGNALS
-        LOGD("channel '%s' ~ receive signal failed because no signal available", mName.string());
+        ALOGD("channel '%s' ~ receive signal failed because no signal available", mName.string());
 #endif
         return WOULD_BLOCK;
     }
 
 #if DEBUG_CHANNEL_SIGNALS
-    LOGD("channel '%s' ~ receive signal failed, errno=%d", mName.string(), errno);
+    ALOGD("channel '%s' ~ receive signal failed, errno=%d", mName.string(), errno);
 #endif
     return -errno;
 }
@@ -213,7 +213,7 @@ InputPublisher::~InputPublisher() {
 
 status_t InputPublisher::initialize() {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ initialize",
+    ALOGD("channel '%s' publisher ~ initialize",
             mChannel->getName().string());
 #endif
 
@@ -242,7 +242,7 @@ status_t InputPublisher::initialize() {
 
 status_t InputPublisher::reset() {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ reset",
+    ALOGD("channel '%s' publisher ~ reset",
         mChannel->getName().string());
 #endif
 
@@ -337,7 +337,7 @@ status_t InputPublisher::publishKeyEvent(
         nsecs_t downTime,
         nsecs_t eventTime) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, source=0x%x, "
+    ALOGD("channel '%s' publisher ~ publishKeyEvent: deviceId=%d, source=0x%x, "
             "action=0x%x, flags=0x%x, keyCode=%d, scanCode=%d, metaState=0x%x, repeatCount=%d,"
             "downTime=%lld, eventTime=%lld",
             mChannel->getName().string(),
@@ -379,7 +379,7 @@ status_t InputPublisher::publishMotionEvent(
         const PointerProperties* pointerProperties,
         const PointerCoords* pointerCoords) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=0x%x, "
+    ALOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=0x%x, "
             "action=0x%x, flags=0x%x, edgeFlags=0x%x, metaState=0x%x, buttonState=0x%x, "
             "xOffset=%f, yOffset=%f, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld, eventTime=%lld, "
@@ -439,7 +439,7 @@ status_t InputPublisher::appendMotionSample(
         nsecs_t eventTime,
         const PointerCoords* pointerCoords) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ appendMotionSample: eventTime=%lld",
+    ALOGD("channel '%s' publisher ~ appendMotionSample: eventTime=%lld",
             mChannel->getName().string(), eventTime);
 #endif
 
@@ -457,7 +457,7 @@ status_t InputPublisher::appendMotionSample(
 
     if (newBytesUsed > mAshmemSize) {
 #if DEBUG_TRANSPORT_ACTIONS
-        LOGD("channel '%s' publisher ~ Cannot append motion sample because the shared memory "
+        ALOGD("channel '%s' publisher ~ Cannot append motion sample because the shared memory "
                 "buffer is full.  Buffer size: %d bytes, pointers: %d, samples: %d",
                 mChannel->getName().string(),
                 mAshmemSize, mMotionEventPointerCount, mSharedMessage->motion.sampleCount);
@@ -473,7 +473,7 @@ status_t InputPublisher::appendMotionSample(
                 // Only possible source of contention is the consumer having consumed (or being in the
                 // process of consuming) the message and left the semaphore count at 0.
 #if DEBUG_TRANSPORT_ACTIONS
-                LOGD("channel '%s' publisher ~ Cannot append motion sample because the message has "
+                ALOGD("channel '%s' publisher ~ Cannot append motion sample because the message has "
                         "already been consumed.", mChannel->getName().string());
 #endif
                 return FAILED_TRANSACTION;
@@ -506,7 +506,7 @@ status_t InputPublisher::appendMotionSample(
 
 status_t InputPublisher::sendDispatchSignal() {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ sendDispatchSignal",
+    ALOGD("channel '%s' publisher ~ sendDispatchSignal",
             mChannel->getName().string());
 #endif
 
@@ -516,7 +516,7 @@ status_t InputPublisher::sendDispatchSignal() {
 
 status_t InputPublisher::receiveFinishedSignal(bool* outHandled) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' publisher ~ receiveFinishedSignal",
+    ALOGD("channel '%s' publisher ~ receiveFinishedSignal",
             mChannel->getName().string());
 #endif
 
@@ -552,7 +552,7 @@ InputConsumer::~InputConsumer() {
 
 status_t InputConsumer::initialize() {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' consumer ~ initialize",
+    ALOGD("channel '%s' consumer ~ initialize",
             mChannel->getName().string());
 #endif
 
@@ -579,7 +579,7 @@ status_t InputConsumer::initialize() {
 
 status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent** outEvent) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' consumer ~ consume",
+    ALOGD("channel '%s' consumer ~ consume",
             mChannel->getName().string());
 #endif
 
@@ -650,7 +650,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
 
 status_t InputConsumer::sendFinishedSignal(bool handled) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' consumer ~ sendFinishedSignal: handled=%d",
+    ALOGD("channel '%s' consumer ~ sendFinishedSignal: handled=%d",
             mChannel->getName().string(), handled);
 #endif
 
@@ -661,7 +661,7 @@ status_t InputConsumer::sendFinishedSignal(bool handled) {
 
 status_t InputConsumer::receiveDispatchSignal() {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' consumer ~ receiveDispatchSignal",
+    ALOGD("channel '%s' consumer ~ receiveDispatchSignal",
             mChannel->getName().string());
 #endif
 

@@ -74,7 +74,7 @@ const static int CURRENT_METADATA_VERSION = 1;
 #if TEST_BACKUP_HELPERS
 #define LOGP(f, x...) printf(f "\n", x)
 #else
-#define LOGP(x...) LOGD(x)
+#define LOGP(x...) ALOGD(x)
 #endif
 #endif
 

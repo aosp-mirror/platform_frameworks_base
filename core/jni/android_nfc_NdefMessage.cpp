@@ -117,19 +117,19 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
 
         type = e->NewByteArray(record.TypeLength);
         if (type == NULL) {
-            LOGD("NFC_Set Record Type Error\n");
+            ALOGD("NFC_Set Record Type Error\n");
             goto end;
         }
 
         id = e->NewByteArray(record.IdLength);
         if(id == NULL) {
-            LOGD("NFC_Set Record ID Error\n");
+            ALOGD("NFC_Set Record ID Error\n");
             goto end;
         }
 
         payload = e->NewByteArray(record.PayloadLength);
         if(payload == NULL) {
-            LOGD("NFC_Set Record Payload Error\n");
+            ALOGD("NFC_Set Record Payload Error\n");
             goto end;
         }
 

@@ -350,7 +350,7 @@ void TextLayout::computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
     jfloat totalAdvance = 0;
     if (widths < count) {
 #if DEBUG_ADVANCES
-    LOGD("ICU -- count=%d", widths);
+    ALOGD("ICU -- count=%d", widths);
 #endif
         // Skia operates on code points, not code units, so surrogate pairs return only
         // one value. Expand the result so we have one value per UTF-16 code unit.
@@ -367,17 +367,17 @@ void TextLayout::computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
                 outAdvances[p++] = 0;
             }
 #if DEBUG_ADVANCES
-            LOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
+            ALOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
 #endif
         }
     } else {
 #if DEBUG_ADVANCES
-    LOGD("ICU -- count=%d", count);
+    ALOGD("ICU -- count=%d", count);
 #endif
         for (size_t i = 0; i < count; i++) {
             totalAdvance += outAdvances[i] = SkScalarToFloat(scalarArray[i]);
 #if DEBUG_ADVANCES
-            LOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
+            ALOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
 #endif
         }
     }

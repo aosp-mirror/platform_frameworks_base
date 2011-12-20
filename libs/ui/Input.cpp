@@ -106,11 +106,11 @@ String8 getInputDeviceConfigurationFilePathByName(
     path.append("/usr/");
     appendInputDeviceConfigurationFileRelativePath(path, name, type);
 #if DEBUG_PROBE
-    LOGD("Probing for system provided input device configuration file: path='%s'", path.string());
+    ALOGD("Probing for system provided input device configuration file: path='%s'", path.string());
 #endif
     if (!access(path.string(), R_OK)) {
 #if DEBUG_PROBE
-        LOGD("Found");
+        ALOGD("Found");
 #endif
         return path;
     }
@@ -121,18 +121,18 @@ String8 getInputDeviceConfigurationFilePathByName(
     path.append("/system/devices/");
     appendInputDeviceConfigurationFileRelativePath(path, name, type);
 #if DEBUG_PROBE
-    LOGD("Probing for system user input device configuration file: path='%s'", path.string());
+    ALOGD("Probing for system user input device configuration file: path='%s'", path.string());
 #endif
     if (!access(path.string(), R_OK)) {
 #if DEBUG_PROBE
-        LOGD("Found");
+        ALOGD("Found");
 #endif
         return path;
     }
 
     // Not found.
 #if DEBUG_PROBE
-    LOGD("Probe failed to find input device configuration file: name='%s', type=%d",
+    ALOGD("Probe failed to find input device configuration file: name='%s', type=%d",
             name.string(), type);
 #endif
     return String8();
@@ -782,7 +782,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
     }
 
 #if DEBUG_VELOCITY
-    LOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x, activePointerId=%d",
+    ALOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x, activePointerId=%d",
             eventTime, idBits.value, mActivePointerId);
     for (BitSet32 iterBits(idBits); !iterBits.isEmpty(); ) {
         uint32_t id = iterBits.firstMarkedBit();
@@ -790,7 +790,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
         iterBits.clearBit(id);
         Estimator estimator;
         getEstimator(id, DEFAULT_DEGREE, DEFAULT_HORIZON, &estimator);
-        LOGD("  %d: position (%0.3f, %0.3f), "
+        ALOGD("  %d: position (%0.3f, %0.3f), "
                 "estimator (degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f)",
                 id, positions[index].x, positions[index].y,
                 int(estimator.degree),
@@ -903,7 +903,7 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
 static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32_t n,
         float* outB, float* outDet) {
 #if DEBUG_LEAST_SQUARES
-    LOGD("solveLeastSquares: m=%d, n=%d, x=%s, y=%s", int(m), int(n),
+    ALOGD("solveLeastSquares: m=%d, n=%d, x=%s, y=%s", int(m), int(n),
             vectorToString(x, m).string(), vectorToString(y, m).string());
 #endif
 
@@ -916,7 +916,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         }
     }
 #if DEBUG_LEAST_SQUARES
-    LOGD("  - a=%s", matrixToString(&a[0][0], m, n, false /*rowMajor*/).string());
+    ALOGD("  - a=%s", matrixToString(&a[0][0], m, n, false /*rowMajor*/).string());
 #endif
 
     // Apply the Gram-Schmidt process to A to obtain its QR decomposition.
@@ -937,7 +937,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         if (norm < 0.000001f) {
             // vectors are linearly dependent or zero so no solution
 #if DEBUG_LEAST_SQUARES
-            LOGD("  - no solution, norm=%f", norm);
+            ALOGD("  - no solution, norm=%f", norm);
 #endif
             return false;
         }
@@ -951,8 +951,8 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         }
     }
 #if DEBUG_LEAST_SQUARES
-    LOGD("  - q=%s", matrixToString(&q[0][0], m, n, false /*rowMajor*/).string());
-    LOGD("  - r=%s", matrixToString(&r[0][0], n, n, true /*rowMajor*/).string());
+    ALOGD("  - q=%s", matrixToString(&q[0][0], m, n, false /*rowMajor*/).string());
+    ALOGD("  - r=%s", matrixToString(&r[0][0], n, n, true /*rowMajor*/).string());
 
     // calculate QR, if we factored A correctly then QR should equal A
     float qr[n][m];
@@ -964,7 +964,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
             }
         }
     }
-    LOGD("  - qr=%s", matrixToString(&qr[0][0], m, n, false /*rowMajor*/).string());
+    ALOGD("  - qr=%s", matrixToString(&qr[0][0], m, n, false /*rowMajor*/).string());
 #endif
 
     // Solve R B = Qt Y to find B.  This is easy because R is upper triangular.
@@ -977,7 +977,7 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
         outB[i] /= r[i][i];
     }
 #if DEBUG_LEAST_SQUARES
-    LOGD("  - b=%s", vectorToString(outB, n).string());
+    ALOGD("  - b=%s", vectorToString(outB, n).string());
 #endif
 
     // Calculate the coefficient of determination as 1 - (SSerr / SStot) where
@@ -1004,9 +1004,9 @@ static bool solveLeastSquares(const float* x, const float* y, uint32_t m, uint32
     }
     *outDet = sstot > 0.000001f ? 1.0f - (sserr / sstot) : 1;
 #if DEBUG_LEAST_SQUARES
-    LOGD("  - sserr=%f", sserr);
-    LOGD("  - sstot=%f", sstot);
-    LOGD("  - det=%f", *outDet);
+    ALOGD("  - sserr=%f", sserr);
+    ALOGD("  - sstot=%f", sstot);
+    ALOGD("  - det=%f", *outDet);
 #endif
     return true;
 }
@@ -1073,7 +1073,7 @@ bool VelocityTracker::getEstimator(uint32_t id, uint32_t degree, nsecs_t horizon
             outEstimator->degree = degree;
             outEstimator->confidence = xdet * ydet;
 #if DEBUG_LEAST_SQUARES
-            LOGD("estimate: degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f",
+            ALOGD("estimate: degree=%d, xCoeff=%s, yCoeff=%s, confidence=%f",
                     int(outEstimator->degree),
                     vectorToString(outEstimator->xCoeff, n).string(),
                     vectorToString(outEstimator->yCoeff, n).string(),
@@ -1116,7 +1116,7 @@ void VelocityControl::move(nsecs_t eventTime, float* deltaX, float* deltaY) {
     if ((deltaX && *deltaX) || (deltaY && *deltaY)) {
         if (eventTime >= mLastMovementTime + STOP_TIME) {
 #if DEBUG_ACCELERATION
-            LOGD("VelocityControl: stopped, last movement was %0.3fms ago",
+            ALOGD("VelocityControl: stopped, last movement was %0.3fms ago",
                     (eventTime - mLastMovementTime) * 0.000001f);
 #endif
             reset();
@@ -1147,7 +1147,7 @@ void VelocityControl::move(nsecs_t eventTime, float* deltaX, float* deltaY) {
             }
 
 #if DEBUG_ACCELERATION
-            LOGD("VelocityControl(%0.3f, %0.3f, %0.3f, %0.3f): "
+            ALOGD("VelocityControl(%0.3f, %0.3f, %0.3f, %0.3f): "
                     "vx=%0.3f, vy=%0.3f, speed=%0.3f, accel=%0.3f",
                     mParameters.scale, mParameters.lowThreshold, mParameters.highThreshold,
                     mParameters.acceleration,
@@ -1155,7 +1155,7 @@ void VelocityControl::move(nsecs_t eventTime, float* deltaX, float* deltaY) {
 #endif
         } else {
 #if DEBUG_ACCELERATION
-            LOGD("VelocityControl(%0.3f, %0.3f, %0.3f, %0.3f): unknown velocity",
+            ALOGD("VelocityControl(%0.3f, %0.3f, %0.3f, %0.3f): unknown velocity",
                     mParameters.scale, mParameters.lowThreshold, mParameters.highThreshold,
                     mParameters.acceleration);
 #endif

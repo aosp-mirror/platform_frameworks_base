@@ -47,7 +47,7 @@ status_t ZipEntry::initFromCDE(FILE* fp)
     /* read the CDE */
     result = mCDE.read(fp);
     if (result != NO_ERROR) {
-        LOGD("mCDE.read failed\n");
+        ALOGD("mCDE.read failed\n");
         return result;
     }
 
@@ -56,14 +56,14 @@ status_t ZipEntry::initFromCDE(FILE* fp)
     /* using the info in the CDE, go load up the LFH */
     posn = ftell(fp);
     if (fseek(fp, mCDE.mLocalHeaderRelOffset, SEEK_SET) != 0) {
-        LOGD("local header seek failed (%ld)\n",
+        ALOGD("local header seek failed (%ld)\n",
             mCDE.mLocalHeaderRelOffset);
         return UNKNOWN_ERROR;
     }
 
     result = mLFH.read(fp);
     if (result != NO_ERROR) {
-        LOGD("mLFH.read failed\n");
+        ALOGD("mLFH.read failed\n");
         return result;
     }
 
@@ -81,7 +81,7 @@ status_t ZipEntry::initFromCDE(FILE* fp)
     hasDD = (mLFH.mGPBitFlag & kUsesDataDescr) != 0;
     if (hasDD) {
         // do something clever
-        //LOGD("+++ has data descriptor\n");
+        //ALOGD("+++ has data descriptor\n");
     }
 
     /*
@@ -413,7 +413,7 @@ status_t ZipEntry::LocalFileHeader::read(FILE* fp)
     }
 
     if (ZipEntry::getLongLE(&buf[0x00]) != kSignature) {
-        LOGD("whoops: didn't find expected signature\n");
+        ALOGD("whoops: didn't find expected signature\n");
         result = UNKNOWN_ERROR;
         goto bail;
     }
@@ -506,17 +506,17 @@ status_t ZipEntry::LocalFileHeader::write(FILE* fp)
  */
 void ZipEntry::LocalFileHeader::dump(void) const
 {
-    LOGD(" LocalFileHeader contents:\n");
-    LOGD("  versToExt=%u gpBits=0x%04x compression=%u\n",
+    ALOGD(" LocalFileHeader contents:\n");
+    ALOGD("  versToExt=%u gpBits=0x%04x compression=%u\n",
         mVersionToExtract, mGPBitFlag, mCompressionMethod);
-    LOGD("  modTime=0x%04x modDate=0x%04x crc32=0x%08lx\n",
+    ALOGD("  modTime=0x%04x modDate=0x%04x crc32=0x%08lx\n",
         mLastModFileTime, mLastModFileDate, mCRC32);
-    LOGD("  compressedSize=%lu uncompressedSize=%lu\n",
+    ALOGD("  compressedSize=%lu uncompressedSize=%lu\n",
         mCompressedSize, mUncompressedSize);
-    LOGD("  filenameLen=%u extraLen=%u\n",
+    ALOGD("  filenameLen=%u extraLen=%u\n",
         mFileNameLength, mExtraFieldLength);
     if (mFileName != NULL)
-        LOGD("  filename: '%s'\n", mFileName);
+        ALOGD("  filename: '%s'\n", mFileName);
 }
 
 
@@ -549,7 +549,7 @@ status_t ZipEntry::CentralDirEntry::read(FILE* fp)
     }
 
     if (ZipEntry::getLongLE(&buf[0x00]) != kSignature) {
-        LOGD("Whoops: didn't find expected signature\n");
+        ALOGD("Whoops: didn't find expected signature\n");
         result = UNKNOWN_ERROR;
         goto bail;
     }
@@ -675,22 +675,22 @@ status_t ZipEntry::CentralDirEntry::write(FILE* fp)
  */
 void ZipEntry::CentralDirEntry::dump(void) const
 {
-    LOGD(" CentralDirEntry contents:\n");
-    LOGD("  versMadeBy=%u versToExt=%u gpBits=0x%04x compression=%u\n",
+    ALOGD(" CentralDirEntry contents:\n");
+    ALOGD("  versMadeBy=%u versToExt=%u gpBits=0x%04x compression=%u\n",
         mVersionMadeBy, mVersionToExtract, mGPBitFlag, mCompressionMethod);
-    LOGD("  modTime=0x%04x modDate=0x%04x crc32=0x%08lx\n",
+    ALOGD("  modTime=0x%04x modDate=0x%04x crc32=0x%08lx\n",
         mLastModFileTime, mLastModFileDate, mCRC32);
-    LOGD("  compressedSize=%lu uncompressedSize=%lu\n",
+    ALOGD("  compressedSize=%lu uncompressedSize=%lu\n",
         mCompressedSize, mUncompressedSize);
-    LOGD("  filenameLen=%u extraLen=%u commentLen=%u\n",
+    ALOGD("  filenameLen=%u extraLen=%u commentLen=%u\n",
         mFileNameLength, mExtraFieldLength, mFileCommentLength);
-    LOGD("  diskNumStart=%u intAttr=0x%04x extAttr=0x%08lx relOffset=%lu\n",
+    ALOGD("  diskNumStart=%u intAttr=0x%04x extAttr=0x%08lx relOffset=%lu\n",
         mDiskNumberStart, mInternalAttrs, mExternalAttrs,
         mLocalHeaderRelOffset);
 
     if (mFileName != NULL)
-        LOGD("  filename: '%s'\n", mFileName);
+        ALOGD("  filename: '%s'\n", mFileName);
     if (mFileComment != NULL)
-        LOGD("  comment: '%s'\n", mFileComment);
+        ALOGD("  comment: '%s'\n", mFileComment);
 }
 

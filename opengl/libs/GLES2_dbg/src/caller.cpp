@@ -103,7 +103,7 @@ static const int * GenerateCall_glVertexAttribPointer(DbgContext * const dbg,
 const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message & cmd,
                   glesv2debugger::Message & msg, const int * const prevRet)
 {
-    LOGD("GenerateCall function=%u", cmd.function());
+    ALOGD("GenerateCall function=%u", cmd.function());
     const int * ret = prevRet; // only some functions have return value
     nsecs_t c0 = systemTime(timeMode);
     switch (cmd.function()) {    case glesv2debugger::Message_Function_glActiveTexture:

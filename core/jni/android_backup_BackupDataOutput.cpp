@@ -107,7 +107,7 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_BackupDataOutput(JNIEnv* env)
 {
-    //LOGD("register_android_backup_BackupDataOutput");
+    //ALOGD("register_android_backup_BackupDataOutput");
     return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupDataOutput",
             g_methods, NELEM(g_methods));
 }

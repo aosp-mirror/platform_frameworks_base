@@ -240,7 +240,7 @@ connect:
          * retry the connect. Unfortunately we have to create a new fd.
          * It's not ideal to switch the fd underneath the object, but
          * is currently safe */
-        LOGD("Hit bug 5082381 (EALREADY on ACL collision), trying workaround");
+        ALOGD("Hit bug 5082381 (EALREADY on ACL collision), trying workaround");
         usleep(100000);
         retry++;
         abortNative(env, obj);
@@ -252,7 +252,7 @@ connect:
         goto connect;
     }
     if (!ret && retry > 0)
-        LOGD("...workaround ok");
+        ALOGD("...workaround ok");
 
     if (ret)
         jniThrowIOException(env, errno);
