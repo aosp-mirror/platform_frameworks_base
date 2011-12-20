@@ -55,6 +55,7 @@ import com.google.android.collect.Lists;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1326,7 +1327,17 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         String[] dnsServers = mDefaultDnsServers;
                         Collection<InetAddress> dnses = linkProperties.getDnses();
                         if (dnses != null) {
-                            dnsServers = NetworkUtils.makeStrings(dnses);
+                            // we currently only handle IPv4
+                            ArrayList<InetAddress> v4Dnses =
+                                    new ArrayList<InetAddress>(dnses.size());
+                            for (InetAddress dnsAddress : dnses) {
+                                if (dnsAddress instanceof Inet4Address) {
+                                    v4Dnses.add(dnsAddress);
+                                }
+                            }
+                            if (v4Dnses.size() > 0) {
+                                dnsServers = NetworkUtils.makeStrings(v4Dnses);
+                            }
                         }
                         try {
                             mNMService.setDnsForwarders(dnsServers);
@@ -1384,11 +1395,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             boolean mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
             @Override
             public void enter() {
+                turnOnMasterTetherSettings(); // may transition us out
+
                 mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE; // better try something first pass
                                                         // or crazy tests cases will fail
                 chooseUpstreamType(mTryCell);
                 mTryCell = !mTryCell;
-                turnOnMasterTetherSettings(); // may transition us out
             }
             @Override
             public void exit() {
