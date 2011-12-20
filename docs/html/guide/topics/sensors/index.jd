@@ -81,7 +81,7 @@ following documents:</p>
       Sensors</a></strong></dt>
     <dd>Learn how to use the sensors that provide orientation and compass data, such as the
       orientation sensor and the geomagnetic field sensor.</dd>
-  <dt><strong><a href="{@docRoot}guide/topics/sensors/environment.html">Environment
+  <dt><strong><a href="{@docRoot}guide/topics/sensors/sensors_environment.html">Environment
         Sensors</a></strong></dt>
     <dd>Learn how to use the sensors that provide environmental data, such as the light,
       humidity, pressure, temperature, and proximity sensors.</dd>
