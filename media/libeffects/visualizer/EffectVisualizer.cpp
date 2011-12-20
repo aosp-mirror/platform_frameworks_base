@@ -78,7 +78,7 @@ void Visualizer_reset(VisualizerContext *pContext)
 }
 
 //----------------------------------------------------------------------------
-// Visualizer_configure()
+// Visualizer_setConfig()
 //----------------------------------------------------------------------------
 // Purpose: Set input and output audio configuration.
 //
@@ -91,9 +91,9 @@ void Visualizer_reset(VisualizerContext *pContext)
 //
 //----------------------------------------------------------------------------
 
-int Visualizer_configure(VisualizerContext *pContext, effect_config_t *pConfig)
+int Visualizer_setConfig(VisualizerContext *pContext, effect_config_t *pConfig)
 {
-    ALOGV("Visualizer_configure start");
+    ALOGV("Visualizer_setConfig start");
 
     if (pConfig->inputCfg.samplingRate != pConfig->outputCfg.samplingRate) return -EINVAL;
     if (pConfig->inputCfg.channels != pConfig->outputCfg.channels) return -EINVAL;
@@ -108,6 +108,26 @@ int Visualizer_configure(VisualizerContext *pContext, effect_config_t *pConfig)
     Visualizer_reset(pContext);
 
     return 0;
+}
+
+
+//----------------------------------------------------------------------------
+// Visualizer_getConfig()
+//----------------------------------------------------------------------------
+// Purpose: Get input and output audio configuration.
+//
+// Inputs:
+//  pContext:   effect engine context
+//  pConfig:    pointer to effect_config_t structure holding input and output
+//      configuration parameters
+//
+// Outputs:
+//
+//----------------------------------------------------------------------------
+
+void Visualizer_getConfig(VisualizerContext *pContext, effect_config_t *pConfig)
+{
+    memcpy(pConfig, &pContext->mConfig, sizeof(effect_config_t));
 }
 
 
@@ -144,7 +164,7 @@ int Visualizer_init(VisualizerContext *pContext)
 
     pContext->mCaptureSize = VISUALIZER_CAPTURE_SIZE_MAX;
 
-    Visualizer_configure(pContext, &pContext->mConfig);
+    Visualizer_setConfig(pContext, &pContext->mConfig);
 
     return 0;
 }
@@ -337,13 +357,20 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         }
         *(int *) pReplyData = Visualizer_init(pContext);
         break;
-    case EFFECT_CMD_CONFIGURE:
+    case EFFECT_CMD_SET_CONFIG:
         if (pCmdData == NULL || cmdSize != sizeof(effect_config_t)
                 || pReplyData == NULL || *replySize != sizeof(int)) {
             return -EINVAL;
         }
-        *(int *) pReplyData = Visualizer_configure(pContext,
+        *(int *) pReplyData = Visualizer_setConfig(pContext,
                 (effect_config_t *) pCmdData);
+        break;
+    case EFFECT_CMD_GET_CONFIG:
+        if (pReplyData == NULL ||
+            *replySize != sizeof(effect_config_t)) {
+            return -EINVAL;
+        }
+        Visualizer_getConfig(pContext, (effect_config_t *)pReplyData);
         break;
     case EFFECT_CMD_RESET:
         Visualizer_reset(pContext);

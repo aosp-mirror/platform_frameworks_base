@@ -940,6 +940,19 @@ int Session_SetConfig(preproc_session_t *session, effect_config_t *config)
     return 0;
 }
 
+void Session_GetConfig(preproc_session_t *session, effect_config_t *config)
+{
+    memset(config, 0, sizeof(effect_config_t));
+    config->inputCfg.samplingRate = config->outputCfg.samplingRate = session->samplingRate;
+    config->inputCfg.format = config->outputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
+    config->inputCfg.channels = session->inChannelCount == 1 ?
+                                    AUDIO_CHANNEL_IN_MONO : AUDIO_CHANNEL_IN_STEREO;
+    config->outputCfg.channels = session->outChannelCount == 1 ?
+                                    AUDIO_CHANNEL_IN_MONO : AUDIO_CHANNEL_IN_STEREO;
+    config->inputCfg.mask = config->outputCfg.mask =
+            (EFFECT_CONFIG_SMP_RATE | EFFECT_CONFIG_CHANNELS | EFFECT_CONFIG_FORMAT);
+}
+
 int Session_SetReverseConfig(preproc_session_t *session, effect_config_t *config)
 {
     if (config->inputCfg.samplingRate != config->outputCfg.samplingRate ||
@@ -967,6 +980,17 @@ int Session_SetReverseConfig(preproc_session_t *session, effect_config_t *config
     session->revFrame->_audioChannel = inCnl;
     session->revFrame->_frequencyInHz = session->apmSamplingRate;
     return 0;
+}
+
+void Session_GetReverseConfig(preproc_session_t *session, effect_config_t *config)
+{
+    memset(config, 0, sizeof(effect_config_t));
+    config->inputCfg.samplingRate = config->outputCfg.samplingRate = session->samplingRate;
+    config->inputCfg.format = config->outputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
+    config->inputCfg.channels = config->outputCfg.channels =
+            session->revChannelCount == 1 ? AUDIO_CHANNEL_IN_MONO : AUDIO_CHANNEL_IN_STEREO;
+    config->inputCfg.mask = config->outputCfg.mask =
+            (EFFECT_CONFIG_SMP_RATE | EFFECT_CONFIG_CHANNELS | EFFECT_CONFIG_FORMAT);
 }
 
 void Session_SetProcEnabled(preproc_session_t *session, uint32_t procId, bool enabled)
@@ -1250,13 +1274,13 @@ int PreProcessingFx_Command(effect_handle_t  self,
             *(int *)pReplyData = 0;
             break;
 
-        case EFFECT_CMD_CONFIGURE:
+        case EFFECT_CMD_SET_CONFIG:
             if (pCmdData    == NULL||
                 cmdSize     != sizeof(effect_config_t)||
                 pReplyData  == NULL||
                 *replySize  != sizeof(int)){
                 ALOGV("PreProcessingFx_Command cmdCode Case: "
-                        "EFFECT_CMD_CONFIGURE: ERROR");
+                        "EFFECT_CMD_SET_CONFIG: ERROR");
                 return -EINVAL;
             }
             *(int *)pReplyData = Session_SetConfig(effect->session, (effect_config_t *)pCmdData);
@@ -1266,13 +1290,24 @@ int PreProcessingFx_Command(effect_handle_t  self,
             *(int *)pReplyData = Effect_SetState(effect, PREPROC_EFFECT_STATE_CONFIG);
             break;
 
-        case EFFECT_CMD_CONFIGURE_REVERSE:
-            if (pCmdData    == NULL||
-                cmdSize     != sizeof(effect_config_t)||
-                pReplyData  == NULL||
-                *replySize  != sizeof(int)){
+        case EFFECT_CMD_GET_CONFIG:
+            if (pReplyData == NULL ||
+                *replySize != sizeof(effect_config_t)) {
+                ALOGV("\tLVM_ERROR : PreProcessingFx_Command cmdCode Case: "
+                        "EFFECT_CMD_GET_CONFIG: ERROR");
+                return -EINVAL;
+            }
+
+            Session_GetConfig(effect->session, (effect_config_t *)pCmdData);
+            break;
+
+        case EFFECT_CMD_SET_CONFIG_REVERSE:
+            if (pCmdData == NULL ||
+                cmdSize != sizeof(effect_config_t) ||
+                pReplyData == NULL ||
+                *replySize != sizeof(int)) {
                 ALOGV("PreProcessingFx_Command cmdCode Case: "
-                        "EFFECT_CMD_CONFIGURE_REVERSE: ERROR");
+                        "EFFECT_CMD_SET_CONFIG_REVERSE: ERROR");
                 return -EINVAL;
             }
             *(int *)pReplyData = Session_SetReverseConfig(effect->session,
@@ -1280,6 +1315,16 @@ int PreProcessingFx_Command(effect_handle_t  self,
             if (*(int *)pReplyData != 0) {
                 break;
             }
+            break;
+
+        case EFFECT_CMD_GET_CONFIG_REVERSE:
+            if (pReplyData == NULL ||
+                *replySize != sizeof(effect_config_t)){
+                ALOGV("PreProcessingFx_Command cmdCode Case: "
+                        "EFFECT_CMD_GET_CONFIG_REVERSE: ERROR");
+                return -EINVAL;
+            }
+            Session_GetReverseConfig(effect->session, (effect_config_t *)pCmdData);
             break;
 
         case EFFECT_CMD_RESET:
