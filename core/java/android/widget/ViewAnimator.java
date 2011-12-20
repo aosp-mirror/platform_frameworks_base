@@ -185,6 +185,10 @@ public class ViewAnimator extends FrameLayout {
         } else {
             child.setVisibility(View.GONE);
         }
+        if (index >= 0 && mWhichChild >= index) {
+            // Added item above current one, increment the index of the displayed child
+            setDisplayedChild(mWhichChild + 1);
+        }
     }
 
     @Override
