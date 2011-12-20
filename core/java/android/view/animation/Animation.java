@@ -323,7 +323,7 @@ public abstract class Animation implements Cloneable {
     /**
      * Initialize this animation with the dimensions of the object being
      * animated as well as the objects parents. (This is to support animation
-     * sizes being specifed relative to these dimensions.)
+     * sizes being specified relative to these dimensions.)
      *
      * <p>Objects that interpret Animations should call this method when
      * the sizes of the object being animated and its parent are known, and
