@@ -1037,7 +1037,7 @@ private static Uri getOutputMediaFileUri(int type){
 }
 
 /** Create a File for saving an image or video */
-private static Uri getOutputMediaFile(int type){
+private static File getOutputMediaFile(int type){
     // To be safe, you should check that the SDCard is mounted
     // using Environment.getExternalStorageState() before doing this.
 
