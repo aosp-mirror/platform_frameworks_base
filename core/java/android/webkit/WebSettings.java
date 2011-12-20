@@ -1459,7 +1459,7 @@ public class WebSettings {
      * @param flag True if the WebView should enable WebWorkers.
      * Note that this flag only affects V8. JSC does not have
      * an equivalent setting.
-     * @hide pending api council approval
+     * @hide
      */
     public synchronized void setWorkersEnabled(boolean flag) {
         if (mWorkersEnabled != flag) {
@@ -1710,7 +1710,7 @@ public class WebSettings {
      * Specify the maximum decoded image size. The default is
      * 2 megs for small memory devices and 8 megs for large memory devices.
      * @param size The maximum decoded size, or zero to set to the default.
-     * @hide pending api council approval
+     * @hide
      */
     public void setMaximumDecodedImageSize(long size) {
         if (mMaximumDecodedImageSize != size) {
