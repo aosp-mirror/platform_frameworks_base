@@ -44,13 +44,20 @@ import java.util.Map;
  *
  * <p class="note"><strong>Note:</strong> Using this class require the
  *   {@link android.Manifest.permission#INTERNET} and
- *   {@link android.Manifest.permission#USE_SIP} permissions.<br/><br/>In addition, {@link
+ *   {@link android.Manifest.permission#USE_SIP} permissions. In addition, {@link
  *   #startAudio} requires the
  *   {@link android.Manifest.permission#RECORD_AUDIO},
  *   {@link android.Manifest.permission#ACCESS_WIFI_STATE}, and
  *   {@link android.Manifest.permission#WAKE_LOCK} permissions; and {@link #setSpeakerMode
  *   setSpeakerMode()} requires the
  *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS} permission.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using SIP, read the
+ * <a href="{@docRoot}guide/topics/network/sip.html">Session Initiation Protocol</a>
+ * developer guide.</p>
+ * </div>
  */
 public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();

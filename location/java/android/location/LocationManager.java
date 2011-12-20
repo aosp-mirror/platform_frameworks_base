@@ -42,6 +42,13 @@ import java.util.List;
  * instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.LOCATION_SERVICE)}.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using location services, read the
+ * <a href="{@docRoot}guide/topics/location/index.html">Location and Maps</a>
+ * developer guide.</p>
+ * </div>
  */
 public class LocationManager {
     private static final String TAG = "LocationManager";

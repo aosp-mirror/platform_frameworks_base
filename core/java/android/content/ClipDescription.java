@@ -26,6 +26,13 @@ import java.util.ArrayList;
  * Meta-data describing the contents of a {@link ClipData}.  Provides enough
  * information to know if you can handle the ClipData, but not the data
  * itself.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using the clipboard framework, read the
+ * <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a>
+ * developer guide.</p>
+ * </div>
  */
 public class ClipDescription implements Parcelable {
     /**

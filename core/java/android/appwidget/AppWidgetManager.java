@@ -35,6 +35,12 @@ import java.util.WeakHashMap;
 /**
  * Updates AppWidget state; gets information about installed AppWidget providers and other
  * AppWidget related state.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating app widgets, read the
+ * <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a> developer guide.</p>
+ * </div>
  */
 public class AppWidgetManager {
     static final String TAG = "AppWidgetManager";
