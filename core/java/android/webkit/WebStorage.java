@@ -362,7 +362,7 @@ public final class WebStorage {
     /**
      * Sets the maximum size of the ApplicationCache.
      * This should only ever be called on the WebKit thread.
-     * @hide Pending API council approval
+     * @hide
      */
     public void setAppCacheMaximumSize(long size) {
         nativeSetAppCacheMaximumSize(size);

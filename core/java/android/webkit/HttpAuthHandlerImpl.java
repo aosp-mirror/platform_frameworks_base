@@ -270,7 +270,6 @@ class HttpAuthHandlerImpl extends HttpAuthHandler {
 
     /**
      * Informs the WebView of a new set of credentials.
-     * @hide Pending API council review
      */
     public static void onReceivedCredentials(LoadListener loader,
             String host, String realm, String username, String password) {

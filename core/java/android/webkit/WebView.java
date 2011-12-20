@@ -1069,7 +1069,7 @@ public class WebView extends AbsoluteLayout
      * @param defStyle The default style resource ID.
      * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
-     * @hide pending API council approval.
+     * @hide This is an implementation detail.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
@@ -1734,7 +1734,7 @@ public class WebView extends AbsoluteLayout
      *
      * @param flags JS engine flags in a String
      *
-     * @hide pending API solidification
+     * @hide This is an implementation detail.
      */
     public void setJsFlags(String flags) {
         checkThread();
@@ -4016,7 +4016,7 @@ public class WebView extends AbsoluteLayout
      * Gets the WebViewClient
      * @return the current WebViewClient instance.
      *
-     *@hide pending API council approval.
+     * @hide This is an implementation detail.
      */
     public WebViewClient getWebViewClient() {
         return mCallbackProxy.getWebViewClient();
@@ -4048,7 +4048,7 @@ public class WebView extends AbsoluteLayout
      * Gets the chrome handler.
      * @return the current WebChromeClient instance.
      *
-     * @hide API council approval.
+     * @hide This is an implementation detail.
      */
     public WebChromeClient getWebChromeClient() {
         return mCallbackProxy.getWebChromeClient();
@@ -4431,7 +4431,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Select the word at the last click point.
      *
-     * @hide pending API council approval
+     * @hide This is an implementation detail.
      */
     public boolean selectText() {
         int x = viewToContentX(mLastTouchX + mScrollX);
@@ -5569,7 +5569,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Select all of the text in this WebView.
      *
-     * @hide pending API council approval.
+     * @hide This is an implementation detail.
      */
     public void selectAll() {
         if (0 == mNativeClass) return; // client isn't initialized
@@ -5612,7 +5612,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Copy the selection to the clipboard
      *
-     * @hide pending API council approval.
+     * @hide This is an implementation detail.
      */
     public boolean copySelection() {
         boolean copiedSomething = false;
@@ -5634,7 +5634,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API Council approval.
+     * @hide This is an implementation detail.
      */
     public SearchBox getSearchBox() {
         if ((mWebViewCore == null) || (mWebViewCore.getBrowserFrame() == null)) {
