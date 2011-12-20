@@ -198,7 +198,7 @@ void Element::compute() {
         mHal.state.fields[ct] = mFields[ct].e.get();
         mHal.state.fieldArraySizes[ct] = mFields[ct].arraySize;
         mHal.state.fieldNames[ct] = mFields[ct].name.string();
-        mHal.state.fieldNameLengths[ct] = mFields[ct].name.length();
+        mHal.state.fieldNameLengths[ct] = mFields[ct].name.length() + 1; // to include 0
         mHal.state.fieldOffsetBytes[ct] = mFields[ct].offsetBits >> 3;
     }
 

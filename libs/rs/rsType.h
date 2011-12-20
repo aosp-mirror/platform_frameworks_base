@@ -26,6 +26,24 @@ namespace renderscript {
 
 class Type : public ObjectBase {
 public:
+    struct Hal {
+        mutable void *drv;
+
+        struct State {
+            const Element * element;
+
+            // Size of the structure in the various dimensions.  A missing Dimension is
+            // specified as a 0 and not a 1.
+            uint32_t dimX;
+            uint32_t dimY;
+            uint32_t dimZ;
+            bool dimLOD;
+            bool faces;
+        };
+        State state;
+    };
+    Hal mHal;
+
     Type * createTex2D(const Element *, size_t w, size_t h, bool mip);
 
     size_t getOffsetForFace(uint32_t face) const;
@@ -34,22 +52,25 @@ public:
     size_t getElementSizeBytes() const {return mElement->getSizeBytes();}
     const Element * getElement() const {return mElement.get();}
 
-    uint32_t getDimX() const {return mDimX;}
-    uint32_t getDimY() const {return mDimY;}
-    uint32_t getDimZ() const {return mDimZ;}
-    uint32_t getDimLOD() const {return mDimLOD;}
-    bool getDimFaces() const {return mFaces;}
+    uint32_t getDimX() const {return mHal.state.dimX;}
+    uint32_t getDimY() const {return mHal.state.dimY;}
+    uint32_t getDimZ() const {return mHal.state.dimZ;}
+    uint32_t getDimLOD() const {return mHal.state.dimLOD;}
+    bool getDimFaces() const {return mHal.state.faces;}
 
     uint32_t getLODDimX(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mX;}
     uint32_t getLODDimY(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mY;}
     uint32_t getLODDimZ(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mZ;}
 
-    uint32_t getLODOffset(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mOffset;}
+    uint32_t getLODOffset(uint32_t lod) const {
+        rsAssert(lod < mLODCount); return mLODs[lod].mOffset;
+    }
     uint32_t getLODOffset(uint32_t lod, uint32_t x) const;
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y) const;
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) const;
 
-    uint32_t getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face, uint32_t x, uint32_t y) const;
+    uint32_t getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face,
+                              uint32_t x, uint32_t y) const;
 
     uint32_t getLODCount() const {return mLODCount;}
     bool getIsNp2() const;
@@ -94,14 +115,6 @@ protected:
     // * xyz
 
     ObjectBaseRef<const Element> mElement;
-
-    // Size of the structure in the various dimensions.  A missing Dimension is
-    // specified as a 0 and not a 1.
-    size_t mDimX;
-    size_t mDimY;
-    size_t mDimZ;
-    bool mDimLOD;
-    bool mFaces;
 
     // count of mipmap levels, 0 indicates no mipmapping
 
