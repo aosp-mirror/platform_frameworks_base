@@ -3056,8 +3056,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * {@inheritDoc}
+     * Sets  <code>t</code> to be the static transformation of the child, if set, returning a
+     * boolean to indicate whether a static transform was set. The default implementation
+     * simply returns <code>false</code>; subclasses may override this method for different
+     * behavior.
      *
+     * @param child The child view whose static transform is being requested
+     * @param t The Transformation which will hold the result
+     * @return true if the transformation was set, false otherwise
      * @see #setStaticTransformationsEnabled(boolean)
      */
     protected boolean getChildStaticTransformation(View child, Transformation t) {

@@ -224,7 +224,9 @@ public class AnimationSet extends Animation {
         }
 
         boolean changeBounds = (mFlags & PROPERTY_CHANGE_BOUNDS_MASK) == 0;
-        if (changeBounds && a.willChangeTransformationMatrix()) {
+
+
+        if (changeBounds && a.willChangeBounds()) {
             mFlags |= PROPERTY_CHANGE_BOUNDS_MASK;
         }
 
