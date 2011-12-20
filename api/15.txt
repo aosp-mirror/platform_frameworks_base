@@ -12659,6 +12659,7 @@ package android.nfc {
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], java.lang.String[][]);
     method public deprecated void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
+    method public static deprecated android.nfc.NfcAdapter getDefaultAdapter();
     method public boolean isEnabled();
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
     method public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
