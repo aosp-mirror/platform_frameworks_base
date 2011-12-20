@@ -64,7 +64,7 @@ android_hardware_UsbDeviceConnection_open(JNIEnv *env, jobject thiz, jstring dev
 static void
 android_hardware_UsbDeviceConnection_close(JNIEnv *env, jobject thiz)
 {
-    LOGD("close\n");
+    ALOGD("close\n");
     struct usb_device* device = get_device_from_object(env, thiz);
     if (device) {
         usb_device_close(device);

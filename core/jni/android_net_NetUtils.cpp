@@ -97,7 +97,7 @@ static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
 
-    LOGD("android_net_utils_resetConnections in env=%p clazz=%p iface=%s mask=0x%x\n",
+    ALOGD("android_net_utils_resetConnections in env=%p clazz=%p iface=%s mask=0x%x\n",
           env, clazz, nameStr, mask);
 
     result = ::ifc_reset_connections(nameStr, mask);

@@ -104,7 +104,7 @@ void CallStack::dump(const char* prefix) const {
         char line[MAX_BACKTRACE_LINE_LENGTH];
         format_backtrace_line(i, &mStack[i], &symbols[i],
                 line, MAX_BACKTRACE_LINE_LENGTH);
-        LOGD("%s%s", prefix, line);
+        ALOGD("%s%s", prefix, line);
     }
     free_backtrace_symbols(symbols, mCount);
 }

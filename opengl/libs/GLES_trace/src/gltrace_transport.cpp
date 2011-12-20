@@ -32,7 +32,7 @@ int gServerSocket, gClientSocket;
 
 void startServer(int port) {
     if (gServerSocket > 0) {
-        LOGD("startServer: server socket already open!");
+        ALOGD("startServer: server socket already open!");
         return;
     }
 
@@ -62,7 +62,7 @@ void startServer(int port) {
         exit(-1);
     }
 
-    LOGD("startServer: server started on %d", port);
+    ALOGD("startServer: server started on %d", port);
 
     /* Wait for client connection */
     if ((gClientSocket = accept(gServerSocket, (struct sockaddr *)&client, &sockaddr_len)) < 0) {
@@ -71,7 +71,7 @@ void startServer(int port) {
         exit(-1);
     }
 
-    LOGD("startServer: client connected: %s", inet_ntoa(client.sin_addr));
+    ALOGD("startServer: client connected: %s", inet_ntoa(client.sin_addr));
 }
 
 void stopServer() {

@@ -1060,7 +1060,7 @@ static const char* const kNativeActivityPathName = "android/app/NativeActivity";
         
 int register_android_app_NativeActivity(JNIEnv* env)
 {
-    //LOGD("register_android_app_NativeActivity");
+    //ALOGD("register_android_app_NativeActivity");
     jclass clazz;
     FIND_CLASS(clazz, kNativeActivityPathName);
 

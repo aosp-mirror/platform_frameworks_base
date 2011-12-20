@@ -86,7 +86,7 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
     for (unsigned i = 0; i < numGlyphs; ++i) {
         advances[i] = SkScalarToHBFixed(scalarAdvances[i]);
 #if DEBUG_ADVANCES
-        LOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
+        ALOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
 #endif
     }
     delete glyphs16;
@@ -193,7 +193,7 @@ HB_Error harfbuzzSkiaGetTable(void* font, const HB_Tag tag, HB_Byte* buffer, HB_
     SkTypeface* typeface = static_cast<SkTypeface*>(font);
 
     if (!typeface) {
-        LOGD("Typeface cannot be null");
+        ALOGD("Typeface cannot be null");
         return HB_Err_Invalid_Argument;
     }
     const size_t tableSize = SkFontHost::GetTableSize(typeface->uniqueID(), tag);

@@ -190,7 +190,7 @@ static const float dBConvertInverse = 1.0f / dBConvert;
 float AudioSystem::linearToLog(int volume)
 {
     // float v = volume ? exp(float(100 - volume) * dBConvert) : 0;
-    // LOGD("linearToLog(%d)=%f", volume, v);
+    // ALOGD("linearToLog(%d)=%f", volume, v);
     // return v;
     return volume ? exp(float(100 - volume) * dBConvert) : 0;
 }
@@ -198,7 +198,7 @@ float AudioSystem::linearToLog(int volume)
 int AudioSystem::logToLinear(float volume)
 {
     // int v = volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
-    // LOGD("logTolinear(%d)=%f", v, volume);
+    // ALOGD("logTolinear(%d)=%f", v, volume);
     // return v;
     return volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
 }

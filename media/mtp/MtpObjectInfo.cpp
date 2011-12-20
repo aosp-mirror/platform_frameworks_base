@@ -91,17 +91,17 @@ void MtpObjectInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpObjectInfo::print() {
-    LOGD("MtpObject Info %08X: %s\n", mHandle, mName);
-    LOGD("  mStorageID: %08X mFormat: %04X mProtectionStatus: %d\n",
+    ALOGD("MtpObject Info %08X: %s\n", mHandle, mName);
+    ALOGD("  mStorageID: %08X mFormat: %04X mProtectionStatus: %d\n",
             mStorageID, mFormat, mProtectionStatus);
-    LOGD("  mCompressedSize: %d mThumbFormat: %04X mThumbCompressedSize: %d\n",
+    ALOGD("  mCompressedSize: %d mThumbFormat: %04X mThumbCompressedSize: %d\n",
             mCompressedSize, mFormat, mThumbCompressedSize);
-    LOGD("  mThumbPixWidth: %d mThumbPixHeight: %d\n", mThumbPixWidth, mThumbPixHeight);
-    LOGD("  mImagePixWidth: %d mImagePixHeight: %d mImagePixDepth: %d\n",
+    ALOGD("  mThumbPixWidth: %d mThumbPixHeight: %d\n", mThumbPixWidth, mThumbPixHeight);
+    ALOGD("  mImagePixWidth: %d mImagePixHeight: %d mImagePixDepth: %d\n",
             mImagePixWidth, mImagePixHeight, mImagePixDepth);
-    LOGD("  mParent: %08X mAssociationType: %04X mAssociationDesc: %04X\n",
+    ALOGD("  mParent: %08X mAssociationType: %04X mAssociationDesc: %04X\n",
             mParent, mAssociationType, mAssociationDesc);
-    LOGD("  mSequenceNumber: %d mDateCreated: %ld mDateModified: %ld mKeywords: %s\n",
+    ALOGD("  mSequenceNumber: %d mDateCreated: %ld mDateModified: %ld mKeywords: %s\n",
             mSequenceNumber, mDateCreated, mDateModified, mKeywords);
 }
 

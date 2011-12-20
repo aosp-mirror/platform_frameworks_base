@@ -33,7 +33,7 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_LAYER_RENDERER
-    #define LAYER_RENDERER_LOGD(...) LOGD(__VA_ARGS__)
+    #define LAYER_RENDERER_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define LAYER_RENDERER_LOGD(...)
 #endif

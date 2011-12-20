@@ -184,7 +184,7 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
 
         EGLDisplay idpy = disp[i].dpy;
         if (cnx->egl.eglInitialize(idpy, &cnx->major, &cnx->minor)) {
-            //LOGD("initialized %d dpy=%p, ver=%d.%d, cnx=%p",
+            //ALOGD("initialized %d dpy=%p, ver=%d.%d, cnx=%p",
             //        i, idpy, cnx->major, cnx->minor, cnx);
 
             // display is now initialized

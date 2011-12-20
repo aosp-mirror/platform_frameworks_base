@@ -109,7 +109,7 @@ status_t KeyCharacterMap::load(const String8& filename, KeyCharacterMap** outMap
             status = parser.parse();
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            LOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
+            ALOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
                     tokenizer->getFilename().string(), tokenizer->getLineNumber(),
                     elapsedTime / 1000000.0);
 #endif
@@ -135,7 +135,7 @@ char16_t KeyCharacterMap::getDisplayLabel(int32_t keyCode) const {
         result = key->label;
     }
 #if DEBUG_MAPPING
-    LOGD("getDisplayLabel: keyCode=%d ~ Result %d.", keyCode, result);
+    ALOGD("getDisplayLabel: keyCode=%d ~ Result %d.", keyCode, result);
 #endif
     return result;
 }
@@ -147,7 +147,7 @@ char16_t KeyCharacterMap::getNumber(int32_t keyCode) const {
         result = key->number;
     }
 #if DEBUG_MAPPING
-    LOGD("getNumber: keyCode=%d ~ Result %d.", keyCode, result);
+    ALOGD("getNumber: keyCode=%d ~ Result %d.", keyCode, result);
 #endif
     return result;
 }
@@ -160,7 +160,7 @@ char16_t KeyCharacterMap::getCharacter(int32_t keyCode, int32_t metaState) const
         result = behavior->character;
     }
 #if DEBUG_MAPPING
-    LOGD("getCharacter: keyCode=%d, metaState=0x%08x ~ Result %d.", keyCode, metaState, result);
+    ALOGD("getCharacter: keyCode=%d, metaState=0x%08x ~ Result %d.", keyCode, metaState, result);
 #endif
     return result;
 }
@@ -181,7 +181,7 @@ bool KeyCharacterMap::getFallbackAction(int32_t keyCode, int32_t metaState,
         }
     }
 #if DEBUG_MAPPING
-    LOGD("getFallbackKeyCode: keyCode=%d, metaState=0x%08x ~ Result %s, "
+    ALOGD("getFallbackKeyCode: keyCode=%d, metaState=0x%08x ~ Result %s, "
             "fallback keyCode=%d, fallback metaState=0x%08x.",
             keyCode, metaState, result ? "true" : "false",
             outFallbackAction->keyCode, outFallbackAction->metaState);
@@ -213,7 +213,7 @@ char16_t KeyCharacterMap::getMatch(int32_t keyCode, const char16_t* chars, size_
     ExactMatch: ;
     }
 #if DEBUG_MAPPING
-    LOGD("getMatch: keyCode=%d, chars=[%s], metaState=0x%08x ~ Result %d.",
+    ALOGD("getMatch: keyCode=%d, chars=[%s], metaState=0x%08x ~ Result %d.",
             keyCode, toString(chars, numChars).string(), metaState, result);
 #endif
     return result;
@@ -228,7 +228,7 @@ bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t 
         char16_t ch = chars[i];
         if (!findKey(ch, &keyCode, &metaState)) {
 #if DEBUG_MAPPING
-            LOGD("getEvents: deviceId=%d, chars=[%s] ~ Failed to find mapping for character %d.",
+            ALOGD("getEvents: deviceId=%d, chars=[%s] ~ Failed to find mapping for character %d.",
                     deviceId, toString(chars, numChars).string(), ch);
 #endif
             return false;
@@ -241,10 +241,10 @@ bool KeyCharacterMap::getEvents(int32_t deviceId, const char16_t* chars, size_t 
         addMetaKeys(outEvents, deviceId, metaState, false, now, &currentMetaState);
     }
 #if DEBUG_MAPPING
-    LOGD("getEvents: deviceId=%d, chars=[%s] ~ Generated %d events.",
+    ALOGD("getEvents: deviceId=%d, chars=[%s] ~ Generated %d events.",
             deviceId, toString(chars, numChars).string(), int32_t(outEvents.size()));
     for (size_t i = 0; i < outEvents.size(); i++) {
-        LOGD("  Key: keyCode=%d, metaState=0x%08x, %s.",
+        ALOGD("  Key: keyCode=%d, metaState=0x%08x, %s.",
                 outEvents[i].getKeyCode(), outEvents[i].getMetaState(),
                 outEvents[i].getAction() == AKEY_EVENT_ACTION_DOWN ? "down" : "up");
     }
@@ -455,7 +455,7 @@ KeyCharacterMap::Parser::~Parser() {
 status_t KeyCharacterMap::Parser::parse() {
     while (!mTokenizer->isEof()) {
 #if DEBUG_PARSER
-        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+        ALOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
                 mTokenizer->peekRemainderOfLine().string());
 #endif
 
@@ -541,7 +541,7 @@ status_t KeyCharacterMap::Parser::parseType() {
     }
 
 #if DEBUG_PARSER
-    LOGD("Parsed type: type=%d.", type);
+    ALOGD("Parsed type: type=%d.", type);
 #endif
     mMap->mType = type;
     return NO_ERROR;
@@ -570,7 +570,7 @@ status_t KeyCharacterMap::Parser::parseKey() {
     }
 
 #if DEBUG_PARSER
-    LOGD("Parsed beginning of key: keyCode=%d.", keyCode);
+    ALOGD("Parsed beginning of key: keyCode=%d.", keyCode);
 #endif
     mKeyCode = keyCode;
     mMap->mKeys.add(keyCode, new Key());
@@ -694,7 +694,7 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
             }
             key->label = behavior.character;
 #if DEBUG_PARSER
-            LOGD("Parsed key label: keyCode=%d, label=%d.", mKeyCode, key->label);
+            ALOGD("Parsed key label: keyCode=%d, label=%d.", mKeyCode, key->label);
 #endif
             break;
         case PROPERTY_NUMBER:
@@ -705,7 +705,7 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
             }
             key->number = behavior.character;
 #if DEBUG_PARSER
-            LOGD("Parsed key number: keyCode=%d, number=%d.", mKeyCode, key->number);
+            ALOGD("Parsed key number: keyCode=%d, number=%d.", mKeyCode, key->number);
 #endif
             break;
         case PROPERTY_META: {
@@ -721,7 +721,7 @@ status_t KeyCharacterMap::Parser::parseKeyProperty() {
             newBehavior->next = key->firstBehavior;
             key->firstBehavior = newBehavior;
 #if DEBUG_PARSER
-            LOGD("Parsed key meta: keyCode=%d, meta=0x%x, char=%d, fallback=%d.", mKeyCode,
+            ALOGD("Parsed key meta: keyCode=%d, meta=0x%x, char=%d, fallback=%d.", mKeyCode,
                     newBehavior->metaState, newBehavior->character, newBehavior->fallbackKeyCode);
 #endif
             break;

@@ -259,7 +259,7 @@ static EGLBoolean egl_init_drivers_locked() {
             cnx->hooks[GLESv2_INDEX] = &gHooks[GLESv2_INDEX][IMPL_HARDWARE];
             cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 1, cnx);
         } else {
-            LOGD("3D hardware acceleration is disabled");
+            ALOGD("3D hardware acceleration is disabled");
         }
     }
 

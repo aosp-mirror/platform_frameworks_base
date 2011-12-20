@@ -126,7 +126,7 @@ bool PointerController::getBoundsLocked(float* outMinX, float* outMinY,
 
 void PointerController::move(float deltaX, float deltaY) {
 #if DEBUG_POINTER_UPDATES
-    LOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
+    ALOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
 #endif
     if (deltaX == 0.0f && deltaY == 0.0f) {
         return;
@@ -139,7 +139,7 @@ void PointerController::move(float deltaX, float deltaY) {
 
 void PointerController::setButtonState(int32_t buttonState) {
 #if DEBUG_POINTER_UPDATES
-    LOGD("Set button state 0x%08x", buttonState);
+    ALOGD("Set button state 0x%08x", buttonState);
 #endif
     AutoMutex _l(mLock);
 
@@ -156,7 +156,7 @@ int32_t PointerController::getButtonState() const {
 
 void PointerController::setPosition(float x, float y) {
 #if DEBUG_POINTER_UPDATES
-    LOGD("Set pointer position to x=%0.3f, y=%0.3f", x, y);
+    ALOGD("Set pointer position to x=%0.3f, y=%0.3f", x, y);
 #endif
     AutoMutex _l(mLock);
 
@@ -243,12 +243,12 @@ void PointerController::setPresentation(Presentation presentation) {
 void PointerController::setSpots(const PointerCoords* spotCoords,
         const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
 #if DEBUG_POINTER_UPDATES
-    LOGD("setSpots: idBits=%08x", spotIdBits.value);
+    ALOGD("setSpots: idBits=%08x", spotIdBits.value);
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
         uint32_t id = idBits.firstMarkedBit();
         idBits.clearBit(id);
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
-        LOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
+        ALOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
                 c.getAxisValue(AMOTION_EVENT_AXIS_X),
                 c.getAxisValue(AMOTION_EVENT_AXIS_Y),
                 c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
@@ -290,7 +290,7 @@ void PointerController::setSpots(const PointerCoords* spotCoords,
 
 void PointerController::clearSpots() {
 #if DEBUG_POINTER_UPDATES
-    LOGD("clearSpots");
+    ALOGD("clearSpots");
 #endif
 
     AutoMutex _l(mLock);

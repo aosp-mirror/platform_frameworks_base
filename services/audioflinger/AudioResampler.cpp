@@ -87,7 +87,7 @@ AudioResampler* AudioResampler::create(int bitDepth, int inChannelCount,
     char value[PROPERTY_VALUE_MAX];
     if (property_get("af.resampler.quality", value, 0)) {
         quality = atoi(value);
-        LOGD("forcing AudioResampler quality to %d", quality);
+        ALOGD("forcing AudioResampler quality to %d", quality);
     }
 
     if (quality == DEFAULT)

@@ -69,7 +69,7 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(
       mSkipCurrentFrame(false) {
 
     mTimeBetweenFrameCaptureUs = timeBetweenFrameCaptureUs;
-    LOGD("starting time lapse mode: %lld us",
+    ALOGD("starting time lapse mode: %lld us",
         mTimeBetweenFrameCaptureUs);
 
     mVideoWidth = videoSize.width;
