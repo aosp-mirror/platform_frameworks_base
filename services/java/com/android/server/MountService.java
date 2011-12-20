@@ -1792,7 +1792,7 @@ class MountService extends IMountService.Stub
         try {
             event = mConnector.execute("cryptfs", "checkpw", password);
 
-            final int code = event.getCode();
+            final int code = Integer.parseInt(event.getMessage());
             if (code == 0) {
                 // Decrypt was successful. Post a delayed message before restarting in order
                 // to let the UI to clear itself
