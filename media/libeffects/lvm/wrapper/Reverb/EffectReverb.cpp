@@ -175,7 +175,8 @@ enum {
 //--- local function prototypes
 int  Reverb_init            (ReverbContext *pContext);
 void Reverb_free            (ReverbContext *pContext);
-int  Reverb_configure       (ReverbContext *pContext, effect_config_t *pConfig);
+int  Reverb_setConfig       (ReverbContext *pContext, effect_config_t *pConfig);
+void Reverb_getConfig       (ReverbContext *pContext, effect_config_t *pConfig);
 int  Reverb_setParameter    (ReverbContext *pContext, void *pParam, void *pValue);
 int  Reverb_getParameter    (ReverbContext *pContext,
                              void          *pParam,
@@ -609,7 +610,7 @@ void Reverb_free(ReverbContext *pContext){
 }    /* end Reverb_free */
 
 //----------------------------------------------------------------------------
-// Reverb_configure()
+// Reverb_setConfig()
 //----------------------------------------------------------------------------
 // Purpose: Set input and output audio configuration.
 //
@@ -622,9 +623,9 @@ void Reverb_free(ReverbContext *pContext){
 //
 //----------------------------------------------------------------------------
 
-int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
+int Reverb_setConfig(ReverbContext *pContext, effect_config_t *pConfig){
     LVM_Fs_en   SampleRate;
-    //ALOGV("\tReverb_configure start");
+    //ALOGV("\tReverb_setConfig start");
 
     CHECK_ARG(pContext != NULL);
     CHECK_ARG(pConfig != NULL);
@@ -642,7 +643,7 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
         return -EINVAL;
     }
 
-    //ALOGV("\tReverb_configure calling memcpy");
+    //ALOGV("\tReverb_setConfig calling memcpy");
     memcpy(&pContext->config, pConfig, sizeof(effect_config_t));
 
 
@@ -666,7 +667,7 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
         SampleRate = LVM_FS_48000;
         break;
     default:
-        ALOGV("\rReverb_Configure invalid sampling rate %d", pConfig->inputCfg.samplingRate);
+        ALOGV("\rReverb_setConfig invalid sampling rate %d", pConfig->inputCfg.samplingRate);
         return -EINVAL;
     }
 
@@ -675,28 +676,46 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
         LVREV_ControlParams_st    ActiveParams;
         LVREV_ReturnStatus_en     LvmStatus = LVREV_SUCCESS;
 
-        //ALOGV("\tReverb_configure change sampling rate to %d", SampleRate);
+        //ALOGV("\tReverb_setConfig change sampling rate to %d", SampleRate);
 
         /* Get the current settings */
         LvmStatus = LVREV_GetControlParameters(pContext->hInstance,
                                          &ActiveParams);
 
-        LVM_ERROR_CHECK(LvmStatus, "LVREV_GetControlParameters", "Reverb_configure")
+        LVM_ERROR_CHECK(LvmStatus, "LVREV_GetControlParameters", "Reverb_setConfig")
         if(LvmStatus != LVREV_SUCCESS) return -EINVAL;
 
         LvmStatus = LVREV_SetControlParameters(pContext->hInstance, &ActiveParams);
 
-        LVM_ERROR_CHECK(LvmStatus, "LVREV_SetControlParameters", "Reverb_configure")
-        //ALOGV("\tReverb_configure Succesfully called LVREV_SetControlParameters\n");
+        LVM_ERROR_CHECK(LvmStatus, "LVREV_SetControlParameters", "Reverb_setConfig")
+        //ALOGV("\tReverb_setConfig Succesfully called LVREV_SetControlParameters\n");
 
     }else{
-        //ALOGV("\tReverb_configure keep sampling rate at %d", SampleRate);
+        //ALOGV("\tReverb_setConfig keep sampling rate at %d", SampleRate);
     }
 
-    //ALOGV("\tReverb_configure End");
+    //ALOGV("\tReverb_setConfig End");
     return 0;
-}   /* end Reverb_configure */
+}   /* end Reverb_setConfig */
 
+//----------------------------------------------------------------------------
+// Reverb_getConfig()
+//----------------------------------------------------------------------------
+// Purpose: Get input and output audio configuration.
+//
+// Inputs:
+//  pContext:   effect engine context
+//  pConfig:    pointer to effect_config_t structure holding input and output
+//      configuration parameters
+//
+// Outputs:
+//
+//----------------------------------------------------------------------------
+
+void Reverb_getConfig(ReverbContext *pContext, effect_config_t *pConfig)
+{
+    memcpy(pConfig, &pContext->config, sizeof(effect_config_t));
+}   /* end Reverb_getConfig */
 
 //----------------------------------------------------------------------------
 // Reverb_init()
@@ -1924,24 +1943,36 @@ int Reverb_command(effect_handle_t  self,
             *(int *) pReplyData = 0;
             break;
 
-        case EFFECT_CMD_CONFIGURE:
+        case EFFECT_CMD_SET_CONFIG:
             //ALOGV("\tReverb_command cmdCode Case: "
-            //        "EFFECT_CMD_CONFIGURE start");
-            if (pCmdData    == NULL||
-                cmdSize     != sizeof(effect_config_t)||
-                pReplyData  == NULL||
-                *replySize  != sizeof(int)){
+            //        "EFFECT_CMD_SET_CONFIG start");
+            if (pCmdData == NULL ||
+                cmdSize != sizeof(effect_config_t) ||
+                pReplyData == NULL ||
+                *replySize != sizeof(int)) {
                 ALOGV("\tLVM_ERROR : Reverb_command cmdCode Case: "
-                        "EFFECT_CMD_CONFIGURE: ERROR");
+                        "EFFECT_CMD_SET_CONFIG: ERROR");
                 return -EINVAL;
             }
-            *(int *) pReplyData = Reverb_configure(pContext, (effect_config_t *) pCmdData);
+            *(int *) pReplyData = android::Reverb_setConfig(pContext,
+                                                            (effect_config_t *) pCmdData);
+            break;
+
+        case EFFECT_CMD_GET_CONFIG:
+            if (pReplyData == NULL ||
+                *replySize != sizeof(effect_config_t)) {
+                ALOGV("\tLVM_ERROR : Reverb_command cmdCode Case: "
+                        "EFFECT_CMD_GET_CONFIG: ERROR");
+                return -EINVAL;
+            }
+
+            android::Reverb_getConfig(pContext, (effect_config_t *)pReplyData);
             break;
 
         case EFFECT_CMD_RESET:
             //ALOGV("\tReverb_command cmdCode Case: "
             //        "EFFECT_CMD_RESET start");
-            Reverb_configure(pContext, &pContext->config);
+            Reverb_setConfig(pContext, &pContext->config);
             break;
 
         case EFFECT_CMD_GET_PARAM:{

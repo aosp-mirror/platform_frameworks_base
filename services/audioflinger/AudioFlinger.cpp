@@ -6375,7 +6375,7 @@ status_t AudioFlinger::EffectModule::configure()
     status_t cmdStatus;
     uint32_t size = sizeof(int);
     status_t status = (*mEffectInterface)->command(mEffectInterface,
-                                                   EFFECT_CMD_CONFIGURE,
+                                                   EFFECT_CMD_SET_CONFIG,
                                                    sizeof(effect_config_t),
                                                    &mConfig,
                                                    &size,
