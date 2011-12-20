@@ -128,6 +128,8 @@ public class ScaleAnimation extends Animation {
         mPivotYValue = d.value;
 
         a.recycle();
+
+        initializePivotPoint();
     }
 
     /**
@@ -178,6 +180,7 @@ public class ScaleAnimation extends Animation {
         mPivotYType = ABSOLUTE;
         mPivotXValue = pivotX;
         mPivotYValue = pivotY;
+        initializePivotPoint();
     }
 
     /**
@@ -218,6 +221,20 @@ public class ScaleAnimation extends Animation {
         mPivotXType = pivotXType;
         mPivotYValue = pivotYValue;
         mPivotYType = pivotYType;
+        initializePivotPoint();
+    }
+
+    /**
+     * Called at the end of constructor methods to initialize, if possible, values for
+     * the pivot point. This is only possible for ABSOLUTE pivot values.
+     */
+    private void initializePivotPoint() {
+        if (mPivotXType == ABSOLUTE) {
+            mPivotX = mPivotXValue;
+        }
+        if (mPivotYType == ABSOLUTE) {
+            mPivotY = mPivotYValue;
+        }
     }
 
     @Override
