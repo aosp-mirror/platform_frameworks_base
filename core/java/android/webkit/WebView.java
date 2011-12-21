@@ -1012,10 +1012,19 @@ public class WebView extends AbsoluteLayout
             mExtra = extra;
         }
 
+        /**
+         * Gets the type of the hit test result.
+         * @return See the XXX_TYPE constants defined in this class.
+         */
         public int getType() {
             return mType;
         }
 
+        /**
+         * Gets additional type-dependant information about the result, see
+         * {@link WebView#getHitTestResult()} for details.
+         * @return may either be null or contain extra information about this result.
+         */
         public String getExtra() {
             return mExtra;
         }
@@ -1053,6 +1062,7 @@ public class WebView extends AbsoluteLayout
      * @param context A Context object used to access application assets.
      * @param attrs An AttributeSet passed to our parent.
      * @param defStyle The default style resource ID.
+     * @param privateBrowsing If true the web view will be initialized in private mode.
      */
     public WebView(Context context, AttributeSet attrs, int defStyle,
             boolean privateBrowsing) {
@@ -1070,6 +1080,7 @@ public class WebView extends AbsoluteLayout
      * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
      * @hide This is an implementation detail.
+     * @param privateBrowsing If true the web view will be initialized in private mode.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
@@ -5706,6 +5717,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView no longer needs to implement
      * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
      */
+    // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onChildViewAdded(View parent, View child) {}
 
@@ -5713,6 +5725,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView no longer needs to implement
      * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
      */
+    // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onChildViewRemoved(View p, View child) {}
 
@@ -5720,6 +5733,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView should not have implemented
      * ViewTreeObserver.OnGlobalFocusChangeListener. This method does nothing now.
      */
+    // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
     }
