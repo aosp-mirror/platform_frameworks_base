@@ -307,9 +307,11 @@ public class WifiNative {
 
         if (joinExistingGroup) args.add("join");
 
+        //TODO: This can be adapted based on device plugged in state and
+        //device battery state
         int groupOwnerIntent = config.groupOwnerIntent;
         if (groupOwnerIntent < 0 || groupOwnerIntent > 15) {
-            groupOwnerIntent = 3; //default value
+            groupOwnerIntent = 7; //default value
         }
         args.add("go_intent=" + groupOwnerIntent);
 
