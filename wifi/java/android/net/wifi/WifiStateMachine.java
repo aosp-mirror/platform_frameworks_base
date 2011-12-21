@@ -135,6 +135,8 @@ public class WifiStateMachine extends StateMachine {
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
     private boolean mScanResultIsPending = false;
+    /* Tracks if the current scan settings are active */
+    private boolean mSetScanActive = false;
 
     private boolean mBluetoothConnectionActive = false;
 
@@ -1113,7 +1115,7 @@ public class WifiStateMachine extends StateMachine {
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
         sb.append("Supplicant status").append(LS)
-                .append(WifiNative.statusCommand()).append(LS).append(LS);
+                .append(WifiNative.status()).append(LS).append(LS);
 
         sb.append(WifiConfigStore.dump());
         return sb.toString();
@@ -1408,7 +1410,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private String fetchSSID() {
-        String status = WifiNative.statusCommand();
+        String status = WifiNative.status();
         if (status == null) {
             return null;
         }
@@ -1481,15 +1483,15 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void setHighPerfModeEnabledNative(boolean enable) {
-        if(!WifiNative.setSuspendOptimizationsCommand(!enable)) {
+        if(!WifiNative.setSuspendOptimizations(!enable)) {
             loge("set suspend optimizations failed!");
         }
         if (enable) {
-            if (!WifiNative.setPowerModeCommand(POWER_MODE_ACTIVE)) {
+            if (!WifiNative.setPowerMode(POWER_MODE_ACTIVE)) {
                 loge("set power mode active failed!");
             }
         } else {
-            if (!WifiNative.setPowerModeCommand(POWER_MODE_AUTO)) {
+            if (!WifiNative.setPowerMode(POWER_MODE_AUTO)) {
                 loge("set power mode auto failed!");
             }
         }
@@ -1678,28 +1680,28 @@ public class WifiStateMachine extends StateMachine {
              * coexistence would interrupt that connection.
              */
             // Disable the coexistence mode
-            WifiNative.setBluetoothCoexistenceModeCommand(
+            WifiNative.setBluetoothCoexistenceMode(
                     WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
         }
 
-        mPowerMode =  WifiNative.getPowerModeCommand();
+        mPowerMode =  WifiNative.getPowerMode();
         if (mPowerMode < 0) {
             // Handle the case where supplicant driver does not support
             // getPowerModeCommand.
             mPowerMode = WifiStateMachine.POWER_MODE_AUTO;
         }
         if (mPowerMode != WifiStateMachine.POWER_MODE_ACTIVE) {
-            WifiNative.setPowerModeCommand(WifiStateMachine.POWER_MODE_ACTIVE);
+            WifiNative.setPowerMode(WifiStateMachine.POWER_MODE_ACTIVE);
         }
     }
 
 
     void handlePostDhcpSetup() {
         /* restore power mode */
-        WifiNative.setPowerModeCommand(mPowerMode);
+        WifiNative.setPowerMode(mPowerMode);
 
         // Set the coexistence mode back to its default value
-        WifiNative.setBluetoothCoexistenceModeCommand(
+        WifiNative.setBluetoothCoexistenceMode(
                 WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
     }
 
@@ -1752,8 +1754,8 @@ public class WifiStateMachine extends StateMachine {
         /* DHCP times out after about 30 seconds, we do a
          * disconnect and an immediate reconnect to try again
          */
-        WifiNative.disconnectCommand();
-        WifiNative.reconnectCommand();
+        WifiNative.disconnect();
+        WifiNative.reconnect();
     }
 
     /* Current design is to not set the config on a running hostapd but instead
@@ -2212,7 +2214,7 @@ public class WifiStateMachine extends StateMachine {
                     mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
                     mLastSignalLevel = -1;
 
-                    mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
+                    mWifiInfo.setMacAddress(WifiNative.getMacAddress());
 
                     WifiConfigStore.initialize(mContext);
 
@@ -2271,7 +2273,7 @@ public class WifiStateMachine extends StateMachine {
             long supplicantScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     mDefaultSupplicantScanIntervalMs);
-            WifiNative.setScanIntervalCommand((int)supplicantScanIntervalMs / 1000);
+            WifiNative.setScanInterval((int)supplicantScanIntervalMs / 1000);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2296,12 +2298,12 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     eventLoggingEnabled = false;
-                    setScanResults(WifiNative.scanResultsCommand());
+                    setScanResults(WifiNative.scanResults());
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
                     break;
                 case CMD_PING_SUPPLICANT:
-                    boolean ok = WifiNative.pingCommand();
+                    boolean ok = WifiNative.ping();
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ADD_OR_UPDATE_NETWORK:
@@ -2329,10 +2331,10 @@ public class WifiStateMachine extends StateMachine {
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_BLACKLIST_NETWORK:
-                    WifiNative.addToBlacklistCommand((String)message.obj);
+                    WifiNative.addToBlacklist((String)message.obj);
                     break;
                 case CMD_CLEAR_BLACKLIST:
-                    WifiNative.clearBlacklistCommand();
+                    WifiNative.clearBlacklist();
                     break;
                 case CMD_SAVE_CONFIG:
                     ok = WifiConfigStore.saveConfig();
@@ -2511,7 +2513,7 @@ public class WifiStateMachine extends StateMachine {
              * When this mode is on, some of the low-level scan parameters used by the
              * driver are changed to reduce interference with bluetooth
              */
-            WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
+            WifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
             /* set country code */
             setCountryCode();
             /* set frequency band of operation */
@@ -2530,12 +2532,12 @@ public class WifiStateMachine extends StateMachine {
             }
 
             if (mIsScanMode) {
-                WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
-                WifiNative.disconnectCommand();
+                WifiNative.setScanResultHandling(SCAN_ONLY_MODE);
+                WifiNative.disconnect();
                 transitionTo(mScanModeState);
             } else {
-                WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
-                WifiNative.reconnectCommand();
+                WifiNative.setScanResultHandling(CONNECT_MODE);
+                WifiNative.reconnect();
                 transitionTo(mDisconnectedState);
             }
         }
@@ -2545,15 +2547,19 @@ public class WifiStateMachine extends StateMachine {
             boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_SET_SCAN_TYPE:
-                    if (message.arg1 == SCAN_ACTIVE) {
-                        WifiNative.setScanModeCommand(true);
-                    } else {
-                        WifiNative.setScanModeCommand(false);
-                    }
+                    mSetScanActive = (message.arg1 == SCAN_ACTIVE);
+                    WifiNative.setScanMode(mSetScanActive);
                     break;
                 case CMD_START_SCAN:
                     eventLoggingEnabled = false;
-                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                    boolean forceActive = (message.arg1 == SCAN_ACTIVE);
+                    if (forceActive && !mSetScanActive) {
+                        WifiNative.setScanMode(forceActive);
+                    }
+                    WifiNative.scan();
+                    if (forceActive && !mSetScanActive) {
+                        WifiNative.setScanMode(mSetScanActive);
+                    }
                     mScanResultIsPending = true;
                     break;
                 case CMD_SET_HIGH_PERF_MODE:
@@ -2562,14 +2568,14 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     if (DBG) log("set country code " + country);
-                    if (!WifiNative.setCountryCodeCommand(country.toUpperCase())) {
+                    if (!WifiNative.setCountryCode(country.toUpperCase())) {
                         loge("Failed to set country code " + country);
                     }
                     break;
                 case CMD_SET_FREQUENCY_BAND:
                     int band =  message.arg1;
                     if (DBG) log("set frequency band " + band);
-                    if (WifiNative.setBandCommand(band)) {
+                    if (WifiNative.setBand(band)) {
                         mFrequencyBand.set(band);
                         //Fetch the latest scan results when frequency band is set
                         startScan(true);
@@ -2580,7 +2586,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
                     mBluetoothConnectionActive = (message.arg1 !=
                             BluetoothAdapter.STATE_DISCONNECTED);
-                    WifiNative.setBluetoothCoexistenceScanModeCommand(mBluetoothConnectionActive);
+                    WifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
                     break;
                 case CMD_STOP_DRIVER:
                     int mode = message.arg1;
@@ -2613,11 +2619,11 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DELAYED_STOP_DRIVER:
                     if (message.arg1 != mDelayedStopCounter) break;
                     if (getCurrentState() != mDisconnectedState) {
-                        WifiNative.disconnectCommand();
+                        WifiNative.disconnect();
                         handleNetworkDisconnect();
                     }
                     mWakeLock.acquire();
-                    WifiNative.stopDriverCommand();
+                    WifiNative.stopDriver();
                     transitionTo(mDriverStoppingState);
                     mWakeLock.release();
                     break;
@@ -2716,7 +2722,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_START_DRIVER:
                     mWakeLock.acquire();
-                    WifiNative.startDriverCommand();
+                    WifiNative.startDriver();
                     mWakeLock.release();
                     transitionTo(mDriverStartingState);
                     break;
@@ -2743,8 +2749,8 @@ public class WifiStateMachine extends StateMachine {
                         /* Ignore */
                         return HANDLED;
                     } else {
-                        WifiNative.setScanResultHandlingCommand(message.arg1);
-                        WifiNative.reconnectCommand();
+                        WifiNative.setScanResultHandling(message.arg1);
+                        WifiNative.reconnect();
                         mIsScanMode = false;
                         transitionTo(mDisconnectedState);
                     }
@@ -2811,13 +2817,13 @@ public class WifiStateMachine extends StateMachine {
                     break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
-                    WifiNative.disconnectCommand();
+                    WifiNative.disconnect();
                     break;
                 case CMD_RECONNECT:
-                    WifiNative.reconnectCommand();
+                    WifiNative.reconnect();
                     break;
                 case CMD_REASSOCIATE:
-                    WifiNative.reassociateCommand();
+                    WifiNative.reassociate();
                     break;
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
@@ -2839,7 +2845,7 @@ public class WifiStateMachine extends StateMachine {
                     /* The state tracker handles enabling networks upon completion/failure */
                     mSupplicantStateTracker.sendMessage(CMD_CONNECT_NETWORK);
 
-                    WifiNative.reconnectCommand();
+                    WifiNative.reconnect();
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
@@ -2849,7 +2855,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
-                    WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+                    WifiNative.setScanResultHandling(CONNECT_MODE);
                     /* Handle scan results */
                     return NOT_HANDLED;
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
@@ -2947,7 +2953,7 @@ public class WifiStateMachine extends StateMachine {
                   transitionTo(mDisconnectingState);
                   break;
               case CMD_DISCONNECT:
-                  WifiNative.disconnectCommand();
+                  WifiNative.disconnect();
                   transitionTo(mDisconnectingState);
                   break;
                   /* Ignore connection to same network */
@@ -3014,7 +3020,7 @@ public class WifiStateMachine extends StateMachine {
                   }
                   break;
                 case CMD_DISCONNECT:
-                    WifiNative.disconnectCommand();
+                    WifiNative.disconnect();
                     transitionTo(mDisconnectingState);
                     break;
                 case CMD_SET_SCAN_MODE:
@@ -3030,7 +3036,7 @@ public class WifiStateMachine extends StateMachine {
                      * When scan results are received, the mode is switched
                      * back to CONNECT_MODE.
                      */
-                    WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
+                    WifiNative.setScanResultHandling(SCAN_ONLY_MODE);
                     /* Have the parent state handle the rest */
                     return NOT_HANDLED;
                     /* Ignore connection to same network */
@@ -3098,7 +3104,7 @@ public class WifiStateMachine extends StateMachine {
              * is in SCAN_ONLY_MODE. Restore CONNECT_MODE on exit
              */
             if (mScanResultIsPending) {
-                WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+                WifiNative.setScanResultHandling(CONNECT_MODE);
             }
         }
     }
@@ -3179,7 +3185,7 @@ public class WifiStateMachine extends StateMachine {
                  * cleared
                  */
                 if (!mScanResultIsPending) {
-                    WifiNative.enableBackgroundScanCommand(true);
+                    WifiNative.enableBackgroundScan(true);
                 }
             } else {
                 setScanAlarm(true);
@@ -3191,9 +3197,9 @@ public class WifiStateMachine extends StateMachine {
             switch (message.what) {
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
-                        WifiNative.setScanResultHandlingCommand(message.arg1);
+                        WifiNative.setScanResultHandling(message.arg1);
                         //Supplicant disconnect to prevent further connects
-                        WifiNative.disconnectCommand();
+                        WifiNative.disconnect();
                         mIsScanMode = true;
                         transitionTo(mScanModeState);
                     }
@@ -3201,10 +3207,10 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
                     if (mEnableBackgroundScan) {
-                        WifiNative.enableBackgroundScanCommand(true);
+                        WifiNative.enableBackgroundScan(true);
                         setScanAlarm(false);
                     } else {
-                        WifiNative.enableBackgroundScanCommand(false);
+                        WifiNative.enableBackgroundScan(false);
                         setScanAlarm(true);
                     }
                     break;
@@ -3219,14 +3225,14 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_SCAN:
                     /* Disable background scan temporarily during a regular scan */
                     if (mEnableBackgroundScan) {
-                        WifiNative.enableBackgroundScanCommand(false);
+                        WifiNative.enableBackgroundScan(false);
                     }
                     /* Handled in parent state */
                     return NOT_HANDLED;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Re-enable background scan when a pending scan result is received */
                     if (mEnableBackgroundScan && mScanResultIsPending) {
-                        WifiNative.enableBackgroundScanCommand(true);
+                        WifiNative.enableBackgroundScan(true);
                     }
                     /* Handled in parent state */
                     return NOT_HANDLED;
@@ -3241,7 +3247,7 @@ public class WifiStateMachine extends StateMachine {
         public void exit() {
             /* No need for a background scan upon exit from a disconnected state */
             if (mEnableBackgroundScan) {
-                WifiNative.enableBackgroundScanCommand(false);
+                WifiNative.enableBackgroundScan(false);
             }
             setScanAlarm(false);
         }
