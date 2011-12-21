@@ -727,6 +727,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.CONNECT:
                     if (DBG) logd(getName() + " sending connect");
                     mSavedPeerConfig = (WifiP2pConfig) message.obj;
+                    String updatedPeerDetails = WifiNative.p2pPeer(mSavedPeerConfig.deviceAddress);
+                    mPeers.update(new WifiP2pDevice(updatedPeerDetails));
                     mPersistGroup = false;
                     int netId = configuredNetworkId(mSavedPeerConfig.deviceAddress);
                     if (netId >= 0) {
@@ -736,13 +738,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         //If peer is a GO, we do not need to send provisional discovery,
                         //the supplicant takes care of it.
                         if (isGroupOwner(mSavedPeerConfig.deviceAddress)) {
-                            String pin = WifiNative.p2pConnect(mSavedPeerConfig, JOIN_GROUP);
-                            try {
-                                Integer.parseInt(pin);
-                                notifyInvitationSent(pin, mSavedPeerConfig.deviceAddress);
-                            } catch (NumberFormatException ignore) {
-                                // do nothing if p2pConnect did not return a pin
-                            }
+                            p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                             transitionTo(mGroupNegotiationState);
                         } else {
                             transitionTo(mProvisionDiscoveryState);
@@ -758,8 +754,27 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiMonitor.P2P_INVITATION_RECEIVED_EVENT:
                     WifiP2pGroup group = (WifiP2pGroup) message.obj;
-                    //TODO: fix p2p invitation to handle as a regular config
-                    //and update mSavedPeerConfig
+                    WifiP2pDevice owner = group.getOwner();
+
+                    if (owner == null) {
+                        if (DBG) loge("Ignored invitation from null owner");
+                        break;
+                    }
+
+                    mSavedPeerConfig = new WifiP2pConfig();
+                    mSavedPeerConfig.deviceAddress = group.getOwner().deviceAddress;
+
+                    //Check if we have the owner in peer list and use appropriate
+                    //wps method. Default is to use PBC.
+                    if ((owner = getDeviceFromPeerList(owner.deviceAddress)) != null) {
+                        if (owner.wpsPbcSupported()) {
+                            mSavedPeerConfig.wps.setup = WpsInfo.PBC;
+                        } else if (owner.wpsKeypadSupported()) {
+                            mSavedPeerConfig.wps.setup = WpsInfo.KEYPAD;
+                        } else if (owner.wpsDisplaySupported()) {
+                            mSavedPeerConfig.wps.setup = WpsInfo.DISPLAY;
+                        }
+                    }
                     transitionTo(mUserAuthorizingInvitationState);
                     break;
                 case WifiMonitor.P2P_PROV_DISC_PBC_REQ_EVENT:
@@ -853,9 +868,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case PEER_CONNECTION_USER_ACCEPT:
                     //TODO: handle persistence
                     if (isGroupOwner(mSavedPeerConfig.deviceAddress)) {
-                        WifiNative.p2pConnect(mSavedPeerConfig, JOIN_GROUP);
+                        p2pConnectWithPinDisplay(mSavedPeerConfig, JOIN_GROUP);
                     } else {
-                        WifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
+                        p2pConnectWithPinDisplay(mSavedPeerConfig, FORM_GROUP);
                     }
                     updateDeviceStatus(mSavedPeerConfig.deviceAddress, WifiP2pDevice.INVITED);
                     sendP2pPeersChangedBroadcast();
@@ -1007,20 +1022,22 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
                 case WifiMonitor.AP_STA_CONNECTED_EVENT:
-                    //After a GO setup, STA connected event comes with interface address
-                    String interfaceAddress = (String) message.obj;
-                    String deviceAddress = getDeviceAddress(interfaceAddress);
+                    WifiP2pDevice device = (WifiP2pDevice) message.obj;
+                    String deviceAddress = device.deviceAddress;
                     if (deviceAddress != null) {
                         mGroup.addClient(deviceAddress);
+                        mPeers.updateInterfaceAddress(device);
                         updateDeviceStatus(deviceAddress, WifiP2pDevice.CONNECTED);
                         if (DBG) logd(getName() + " ap sta connected");
                         sendP2pPeersChangedBroadcast();
                     } else {
-                        loge("Connect on unknown device address : " + interfaceAddress);
+                        loge("Connect on null device address, ignore");
                     }
                     break;
                 case WifiMonitor.AP_STA_DISCONNECTED_EVENT:
-                    interfaceAddress = (String) message.obj;
+                    //TODO: the disconnection event is still inconsistent and reports
+                    //interface address. Fix this after wpa_supplicant is fixed.
+                    String interfaceAddress = (String) message.obj;
                     deviceAddress = getDeviceAddress(interfaceAddress);
                     if (deviceAddress != null) {
                         updateDeviceStatus(deviceAddress, WifiP2pDevice.AVAILABLE);
@@ -1039,7 +1056,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         sendP2pPeersChangedBroadcast();
                         if (DBG) loge(getName() + " ap sta disconnected");
                     } else {
-                        loge("Disconnect on unknown device address : " + interfaceAddress);
+                        loge("Disconnect on unknown interface address : " + interfaceAddress);
                     }
                     break;
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
@@ -1087,7 +1104,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     transitionTo(mInactiveState);
                     break;
                 case WifiMonitor.P2P_DEVICE_LOST_EVENT:
-                    WifiP2pDevice device = (WifiP2pDevice) message.obj;
+                    device = (WifiP2pDevice) message.obj;
                     //Device loss for a connected device indicates it is not in discovery any more
                     if (mGroup.contains(device)) {
                         if (DBG) logd("Lost " + device +" , do nothing");
@@ -1388,11 +1405,30 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private String getDeviceAddress(String interfaceAddress) {
         for (WifiP2pDevice d : mPeers.getDeviceList()) {
-            if (interfaceAddress.equals(WifiNative.p2pGetInterfaceAddress(d.deviceAddress))) {
+            if (interfaceAddress.equals(d.interfaceAddress)) {
                 return d.deviceAddress;
             }
         }
         return null;
+    }
+
+    private WifiP2pDevice getDeviceFromPeerList(String deviceAddress) {
+        for (WifiP2pDevice d : mPeers.getDeviceList()) {
+            if (d.deviceAddress.equals(deviceAddress)) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    private void p2pConnectWithPinDisplay(WifiP2pConfig config, boolean join) {
+        String pin = WifiNative.p2pConnect(config, join);
+        try {
+            Integer.parseInt(pin);
+            notifyInvitationSent(pin, config.deviceAddress);
+        } catch (NumberFormatException ignore) {
+            // do nothing if p2pConnect did not return a pin
+        }
     }
 
     private void initializeP2pSettings() {

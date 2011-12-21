@@ -80,6 +80,19 @@ public class WifiP2pDeviceList implements Parcelable {
     }
 
     /** @hide */
+    public void updateInterfaceAddress(WifiP2pDevice device) {
+        for (WifiP2pDevice d : mDevices) {
+            //Found, update interface address
+            if (d.equals(device)) {
+                d.interfaceAddress = device.interfaceAddress;
+                return;
+            }
+        }
+        //Not found, add a new one
+        mDevices.add(device);
+    }
+
+    /** @hide */
     public boolean remove(WifiP2pDevice device) {
         if (device == null) return false;
         return mDevices.remove(device);

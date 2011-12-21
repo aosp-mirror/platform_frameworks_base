@@ -196,7 +196,7 @@ public class WifiMonitor {
     private static final String P2P_PROV_DISC_SHOW_PIN_STR = "P2P-PROV-DISC-SHOW-PIN";
 
     private static final String HOST_AP_EVENT_PREFIX_STR = "AP";
-    /* AP-STA-CONNECTED 42:fc:89:a8:96:09 */
+    /* AP-STA-CONNECTED 42:fc:89:a8:96:09 dev_addr=02:90:4c:a0:92:54 */
     private static final String AP_STA_CONNECTED_STR = "AP-STA-CONNECTED";
     /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 */
     private static final String AP_STA_DISCONNECTED_STR = "AP-STA-DISCONNECTED";
@@ -504,9 +504,17 @@ public class WifiMonitor {
          */
         private void handleHostApEvents(String dataString) {
             String[] tokens = dataString.split(" ");
+            /* AP-STA-CONNECTED 42:fc:89:a8:96:09 dev_addr=02:90:4c:a0:92:54 */
             if (tokens[0].equals(AP_STA_CONNECTED_STR)) {
-                mStateMachine.sendMessage(AP_STA_CONNECTED_EVENT, tokens[1]);
+                String[] nameValue = tokens[2].split("=");
+                if (nameValue.length != 2) return;
+                WifiP2pDevice device = new WifiP2pDevice();
+                device.interfaceAddress = tokens[1];
+                device.deviceAddress = nameValue[1];
+                mStateMachine.sendMessage(AP_STA_CONNECTED_EVENT, device);
+            /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 */
             } else if (tokens[0].equals(AP_STA_DISCONNECTED_STR)) {
+                //TODO: fix this once wpa_supplicant reports this consistently
                 mStateMachine.sendMessage(AP_STA_DISCONNECTED_EVENT, tokens[1]);
             }
         }

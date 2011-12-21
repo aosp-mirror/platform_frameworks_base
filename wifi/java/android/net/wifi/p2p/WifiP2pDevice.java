@@ -34,12 +34,12 @@ public class WifiP2pDevice implements Parcelable {
     /**
      * The device name is a user friendly string to identify a Wi-Fi p2p device
      */
-    public String deviceName;
+    public String deviceName = "";
 
     /**
      * The device MAC address uniquely identifies a Wi-Fi p2p device
      */
-    public String deviceAddress;
+    public String deviceAddress = "";
 
     /**
      * interfaceAddress
@@ -134,7 +134,7 @@ public class WifiP2pDevice implements Parcelable {
      * @hide
      */
     public WifiP2pDevice(String string) throws IllegalArgumentException {
-        String[] tokens = string.split(" ");
+        String[] tokens = string.split("[ \n]");
 
         if (tokens.length < 1) {
             throw new IllegalArgumentException("Malformed supplicant event");
@@ -166,7 +166,7 @@ public class WifiP2pDevice implements Parcelable {
                 continue;
             }
 
-            if (nameValue[0].equals("name")) {
+            if (nameValue[0].equals("name") || nameValue[0].equals("device_name")) {
                 deviceName = trimQuotes(nameValue[1]);
                 continue;
             }
