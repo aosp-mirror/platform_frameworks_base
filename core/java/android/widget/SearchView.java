@@ -75,10 +75,11 @@ import java.util.WeakHashMap;
  * If you want the search field to always be visible, then call setIconifiedByDefault(false).
  * </p>
  *
- * <p>
- * For more information, see the <a href="{@docRoot}guide/topics/search/index.html">Search</a>
- * documentation.
- * <p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about using {@code SearchView}, read the
+ * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
+ * </div>
  *
  * @see android.view.MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW
  * @attr ref android.R.styleable#SearchView_iconifiedByDefault

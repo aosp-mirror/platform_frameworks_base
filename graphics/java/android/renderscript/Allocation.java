@@ -62,6 +62,11 @@ import android.util.TypedValue;
  * The unchecked variants exist to allow apps to copy over arrays of structures from a
  * control language that does not support structures.</p>
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating an application that uses Renderscript, read the
+ * <a href="{@docRoot}guide/topics/graphics/renderscript.html">Renderscript</a> developer guide.</p>
+ * </div>
  **/
 public class Allocation extends BaseObj {
     Type mType;

@@ -61,6 +61,12 @@ import android.util.Log;
  * for future searches by calling {@link android.provider.SearchRecentSuggestions#saveRecentQuery
  * SearchRecentSuggestions.saveRecentQuery()}.</li>
  * </ul>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about using search suggestions in your application, read the
+ * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
+ * </div>
  * 
  * @see android.provider.SearchRecentSuggestions
  */

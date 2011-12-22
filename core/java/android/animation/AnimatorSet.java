@@ -39,6 +39,13 @@ import java.util.List;
  * result in none of the affected animations being played. Because of this (and because
  * circular dependencies do not make logical sense anyway), circular dependencies
  * should be avoided, and the dependency flow of animations should only be in one direction.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about animating with {@code AnimatorSet}, read the
+ * <a href="{@docRoot}guide/topics/graphics/prop-animation.html#choreography">Property
+ * Animation</a> developer guide.</p>
+ * </div>
  */
 public final class AnimatorSet extends Animator {
 

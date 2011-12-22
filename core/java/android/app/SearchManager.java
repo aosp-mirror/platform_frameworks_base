@@ -48,10 +48,11 @@ import java.util.List;
  * {@link android.content.Context#getSystemService
  * context.getSystemService(Context.SEARCH_SERVICE)}.
  *
- * <div class="special">
- * <p>For a guide to using the search dialog and adding search
- * suggestions in your application, see the Dev Guide topic about <strong><a
- * href="{@docRoot}guide/topics/search/index.html">Search</a></strong>.</p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using the search dialog and adding search
+ * suggestions in your application, read the
+ * <a href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
  * </div>
  */
 public class SearchManager

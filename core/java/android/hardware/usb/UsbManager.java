@@ -35,8 +35,13 @@ import java.util.HashMap;
  * {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
  *
  * {@samplecode
- * UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
- * }
+ * UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);}
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about communicating with USB hardware, read the
+ * <a href="{@docRoot}guide/topics/usb/index.html">USB</a> developer guide.</p>
+ * </div>
  */
 public class UsbManager {
     private static final String TAG = "UsbManager";

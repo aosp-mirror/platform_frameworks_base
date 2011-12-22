@@ -34,6 +34,12 @@ import java.io.FileDescriptor;
  * To communicate with the device, you open a {@link UsbDeviceConnection} for the device
  * and use {@link UsbRequest} to send and receive data on an endpoint.
  * {@link UsbDeviceConnection#controlTransfer} is used for control requests on endpoint zero.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about communicating with USB hardware, read the
+ * <a href="{@docRoot}guide/topics/usb/index.html">USB</a> developer guide.</p>
+ * </div>
  */
 public class UsbDevice implements Parcelable {
 
