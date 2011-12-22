@@ -102,8 +102,6 @@ public class AudioService extends IAudioService.Stub {
     private VolumePanel mVolumePanel;
 
     // sendMsg() flags
-    /** Used when a message should be shared across all stream types. */
-    private static final int SHARED_MSG = -1;
     /** If the msg is already queued, replace it with this one. */
     private static final int SENDMSG_REPLACE = 0;
     /** If the msg is already queued, ignore this one and leave the old. */
@@ -126,6 +124,12 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 12;
     private static final int MSG_RCDISPLAY_CLEAR = 13;
     private static final int MSG_RCDISPLAY_UPDATE = 14;
+
+
+    // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
+    // persisted
+    private static final int PERSIST_CURRENT = 0x1;
+    private static final int PERSIST_LAST_AUDIBLE = 0x2;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
@@ -209,14 +213,14 @@ public class AudioService extends IAudioService.Stub {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
                 if (mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
+                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                             null, 1500);
                     mMediaServerOk = false;
                 }
                 break;
             case AudioSystem.AUDIO_STATUS_OK:
                 if (!mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_STARTED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
+                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_STARTED, SENDMSG_NOOP, 0, 0,
                             null, 0);
                     mMediaServerOk = true;
                 }
@@ -556,8 +560,13 @@ public class AudioService extends IAudioService.Stub {
 
                         s.adjustLastAudibleIndex(direction);
                         // Post a persist volume msg
-                        sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, i,
-                                SENDMSG_REPLACE, 0, 1, s, PERSIST_DELAY);
+                        sendMsg(mAudioHandler,
+                                MSG_PERSIST_VOLUME,
+                                SENDMSG_REPLACE,
+                                PERSIST_LAST_AUDIBLE,
+                                0,
+                                s,
+                                PERSIST_DELAY);
                     }
                 }
             }
@@ -566,8 +575,13 @@ public class AudioService extends IAudioService.Stub {
             if (adjustVolume && streamState.adjustIndex(direction)) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist). Do not change volume if stream is muted.
-                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamTypeAlias, SENDMSG_NOOP, 0, 0,
-                        streamState, 0);
+                sendMsg(mAudioHandler,
+                        MSG_SET_SYSTEM_VOLUME,
+                        SENDMSG_NOOP,
+                        0,
+                        0,
+                        streamState,
+                        0);
             }
             index = streamState.mIndex;
         }
@@ -643,15 +657,25 @@ public class AudioService extends IAudioService.Stub {
             if (index != 0) {
                 streamState.setLastAudibleIndex(index);
                 // Post a persist volume msg
-                sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamType,
-                        SENDMSG_REPLACE, 0, 1, streamState, PERSIST_DELAY);
+                sendMsg(mAudioHandler,
+                        MSG_PERSIST_VOLUME,
+                        SENDMSG_REPLACE,
+                        PERSIST_LAST_AUDIBLE,
+                        0,
+                        streamState,
+                        PERSIST_DELAY);
             }
         } else {
             if (streamState.setIndex(index, lastAudible) || force) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist).
-                sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, streamType, SENDMSG_NOOP, 0, 0,
-                        streamState, 0);
+                sendMsg(mAudioHandler,
+                        MSG_SET_SYSTEM_VOLUME,
+                        SENDMSG_NOOP,
+                        0,
+                        0,
+                        streamState,
+                        0);
             }
         }
     }
@@ -745,7 +769,7 @@ public class AudioService extends IAudioService.Stub {
 
         // Post a persist ringer mode msg
         if (persist) {
-            sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE, SHARED_MSG,
+            sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE,
                     SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
         }
     }
@@ -785,7 +809,7 @@ public class AudioService extends IAudioService.Stub {
 
         // Post message to set ringer mode (it in turn will post a message
         // to persist)
-        sendMsg(mAudioHandler, MSG_PERSIST_VIBRATE_SETTING, SHARED_MSG, SENDMSG_NOOP, 0, 0,
+        sendMsg(mAudioHandler, MSG_PERSIST_VIBRATE_SETTING, SENDMSG_NOOP, 0, 0,
                 null, 0);
     }
 
@@ -998,14 +1022,14 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#playSoundEffect(int) */
     public void playSoundEffect(int effectType) {
-        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
+        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SENDMSG_NOOP,
                 effectType, -1, null, 0);
     }
 
     /** @see AudioManager#playSoundEffect(int, float) */
     public void playSoundEffectVolume(int effectType, float volume) {
         loadSoundEffects();
-        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
+        sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SENDMSG_NOOP,
                 effectType, (int) (volume * 1000), null, 0);
     }
 
@@ -1264,7 +1288,7 @@ public class AudioService extends IAudioService.Stub {
         }
         mForcedUseForComm = on ? AudioSystem.FORCE_SPEAKER : AudioSystem.FORCE_NONE;
 
-        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
     }
 
@@ -1280,9 +1304,9 @@ public class AudioService extends IAudioService.Stub {
         }
         mForcedUseForComm = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
 
-        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
-        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_RECORD, mForcedUseForComm, null, 0);
     }
 
@@ -1522,7 +1546,7 @@ public class AudioService extends IAudioService.Stub {
         // without delay to reset the SCO audio state and clear SCO clients.
         // If we could get a proxy, send a delayed failure message that will reset our state
         // in case we don't receive onServiceConnected().
-        sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
+        sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
                 SENDMSG_REPLACE, 0, 0, null, result ? BT_HEADSET_CNCT_TIMEOUT_MS : 0);
         return result;
     }
@@ -1536,7 +1560,7 @@ public class AudioService extends IAudioService.Stub {
                     if (mBluetoothHeadset != null) {
                         if (!mBluetoothHeadset.stopVoiceRecognition(
                                 mBluetoothHeadsetDevice)) {
-                            sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
+                            sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
                                     SENDMSG_REPLACE, 0, 0, null, 0);
                         }
                     } else if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL &&
@@ -1619,7 +1643,7 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                         if (!status) {
-                            sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
+                            sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED,
                                     SENDMSG_REPLACE, 0, 0, null, 0);
                         }
                     }
@@ -1816,17 +1840,9 @@ public class AudioService extends IAudioService.Stub {
     }
 
     // Message helper methods
-    private static int getMsg(int baseMsg, int streamType) {
-        return (baseMsg & 0xffff) | streamType << 16;
-    }
 
-    private static int getMsgBase(int msg) {
-        return msg & 0xffff;
-    }
-
-    private static void sendMsg(Handler handler, int baseMsg, int streamType,
+    private static void sendMsg(Handler handler, int msg,
             int existingMsgPolicy, int arg1, int arg2, Object obj, int delay) {
-        int msg = (streamType == SHARED_MSG) ? baseMsg : getMsg(baseMsg, streamType);
 
         if (existingMsgPolicy == SENDMSG_REPLACE) {
             handler.removeMessages(msg);
@@ -1834,8 +1850,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        handler
-                .sendMessageDelayed(handler.obtainMessage(msg, arg1, arg2, obj), delay);
+        handler.sendMessageDelayed(handler.obtainMessage(msg, arg1, arg2, obj), delay);
     }
 
     boolean checkAudioSettingsPermission(String method) {
@@ -1970,7 +1985,7 @@ public class AudioService extends IAudioService.Stub {
                                 // If the stream is not yet muted by any client, set lvel to 0
                                 if (muteCount() == 0) {
                                     setIndex(0, false);
-                                    sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, mStreamType, SENDMSG_NOOP, 0, 0,
+                                    sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, SENDMSG_NOOP, 0, 0,
                                             VolumeStreamState.this, 0);
                                 }
                             } catch (RemoteException e) {
@@ -2000,7 +2015,7 @@ public class AudioService extends IAudioService.Stub {
                                     // ringer mode allows it
                                     if (!isStreamAffectedByRingerMode(mStreamType) || mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
                                         setIndex(mLastAudibleIndex, false);
-                                        sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, mStreamType, SENDMSG_NOOP, 0, 0,
+                                        sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, SENDMSG_NOOP, 0, 0,
                                                 VolumeStreamState.this, 0);
                                     }
                                 }
@@ -2094,16 +2109,23 @@ public class AudioService extends IAudioService.Stub {
             }
 
             // Post a persist volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, streamState.mStreamType,
-                    SENDMSG_REPLACE, 1, 1, streamState, PERSIST_DELAY);
+            sendMsg(mAudioHandler,
+                    MSG_PERSIST_VOLUME,
+                    SENDMSG_REPLACE,
+                    PERSIST_CURRENT|PERSIST_LAST_AUDIBLE,
+                    0,
+                    streamState,
+                    PERSIST_DELAY);
+
         }
 
-        private void persistVolume(VolumeStreamState streamState, boolean current, boolean lastAudible) {
-            if (current) {
+        private void persistVolume(VolumeStreamState streamState,
+                                   int persistType) {
+            if ((persistType & PERSIST_CURRENT) != 0) {
                 System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
                               (streamState.mIndex + 5)/ 10);
             }
-            if (lastAudible) {
+            if ((persistType & PERSIST_LAST_AUDIBLE) != 0) {
                 System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
                     (streamState.mLastAudibleIndex + 5) / 10);
             }
@@ -2185,16 +2207,15 @@ public class AudioService extends IAudioService.Stub {
 
         @Override
         public void handleMessage(Message msg) {
-            int baseMsgWhat = getMsgBase(msg.what);
 
-            switch (baseMsgWhat) {
+            switch (msg.what) {
 
                 case MSG_SET_SYSTEM_VOLUME:
                     setSystemVolume((VolumeStreamState) msg.obj);
                     break;
 
                 case MSG_PERSIST_VOLUME:
-                    persistVolume((VolumeStreamState) msg.obj, (msg.arg1 != 0), (msg.arg2 != 0));
+                    persistVolume((VolumeStreamState) msg.obj, msg.arg1);
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:
@@ -2211,7 +2232,7 @@ public class AudioService extends IAudioService.Stub {
                         // Force creation of new IAudioFlinger interface so that we are notified
                         // when new media_server process is back to life.
                         AudioSystem.setErrorCallback(mAudioSystemCallback);
-                        sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
+                        sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                                 null, 500);
                     }
                     break;
@@ -2660,7 +2681,7 @@ public class AudioService extends IAudioService.Stub {
                 }
             } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBootCompleted = true;
-                sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SHARED_MSG, SENDMSG_NOOP,
+                sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SENDMSG_NOOP,
                         0, 0, null, 0);
 
                 mKeyguardManager =
