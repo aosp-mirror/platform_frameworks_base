@@ -34,6 +34,12 @@ import java.util.Random;
  * Service, and hooks with which you can inject various dependencies and control
  * the environment in which your Service is tested.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about application testing, read the
+ * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
+ * </div>
+ *
  * <p><b>Lifecycle Support.</b>
  * A Service is accessed with a specific sequence of
  * calls, as described in the

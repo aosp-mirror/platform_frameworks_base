@@ -54,7 +54,15 @@ import junit.textui.ResultPrinter;
 
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
- * an Android package (application). Typical usage:
+ * an Android package (application).
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about application testing, read the
+ * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
+ * </div>
+ *
+ * <h3>Typical Usage</h3>
  * <ol>
  * <li>Write {@link junit.framework.TestCase}s that perform unit, functional, or performance tests
  * against the classes in your package.  Typically these are subclassed from:

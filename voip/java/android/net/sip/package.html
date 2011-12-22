@@ -3,6 +3,11 @@
 <p>Provides access to Session Initiation Protocol (SIP) functionality, such as
 making and answering VOIP calls using SIP.</p>
 
+<p>For more information, see the
+<a href="{@docRoot}guide/topics/network/sip.html">Session Initiation Protocol</a>
+developer guide.</p>
+{@more}
+
 <p>To get started, you need to get an instance of the {@link android.net.sip.SipManager} by
 calling {@link android.net.sip.SipManager#newInstance newInstance()}.</p>
 
@@ -31,9 +36,10 @@ Not all Android-powered devices support VOIP functionality with SIP. Before perf
 activity, you should call {@link android.net.sip.SipManager#isVoipSupported isVoipSupported()}
 to verify that the device supports VOIP calling and {@link
 android.net.sip.SipManager#isApiSupported isApiSupported()} to verify that the device supports the
-SIP APIs.<br/><br/>
+SIP APIs.
 Your application must also request the {@link android.Manifest.permission#INTERNET} and {@link
 android.Manifest.permission#USE_SIP} permissions in order to use the SIP APIs.
 </p>
+
 </BODY>
 </HTML>

@@ -49,6 +49,13 @@ import android.os.Bundle;
  * A typical file would be:</p>
  * 
  * {@sample development/samples/ApiDemos/res/xml/device_admin_sample.xml meta_data}
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about device administration, read the
+ * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
+ * developer guide.</p>
+ * </div>
  */
 public class DeviceAdminReceiver extends BroadcastReceiver {
     private static String TAG = "DevicePolicy";

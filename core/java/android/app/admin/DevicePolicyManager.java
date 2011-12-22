@@ -40,6 +40,13 @@ import java.util.List;
  * Public interface for managing policies enforced on a device.  Most clients
  * of this class must have published a {@link DeviceAdminReceiver} that the user
  * has currently enabled.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about managing policies for device adminstration, read the
+ * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
+ * developer guide.</p>
+ * </div>
  */
 public class DevicePolicyManager {
     private static String TAG = "DevicePolicyManager";
