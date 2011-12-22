@@ -435,8 +435,8 @@ typedef enum {
  */
 typedef enum {
     RS_TYPE_NONE,
-    RS_TYPE_FLOAT_16,
-    RS_TYPE_FLOAT_32,
+    //RS_TYPE_FLOAT_16,
+    RS_TYPE_FLOAT_32 = 2,
     RS_TYPE_FLOAT_64,
     RS_TYPE_SIGNED_8,
     RS_TYPE_SIGNED_16,

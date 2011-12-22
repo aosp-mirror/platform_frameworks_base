@@ -64,6 +64,8 @@ public class RSTestCore {
 
         unitTests = new ArrayList<UnitTest>();
 
+        unitTests.add(new UT_mesh(this, mRes, mCtx));
+        unitTests.add(new UT_element(this, mRes, mCtx));
         unitTests.add(new UT_sampler(this, mRes, mCtx));
         unitTests.add(new UT_program_store(this, mRes, mCtx));
         unitTests.add(new UT_program_raster(this, mRes, mCtx));

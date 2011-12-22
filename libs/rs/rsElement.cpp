@@ -27,6 +27,7 @@ Element::Element(Context *rsc) : ObjectBase(rsc) {
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
+    memset(&mHal, 0, sizeof(mHal));
 }
 
 Element::~Element() {
@@ -176,16 +177,23 @@ void Element::compute() {
         return;
     }
 
-    mHal.state.fields = new const Element*[mFieldCount];
-    mHal.state.fieldArraySizes = new uint32_t[mFieldCount];
-    mHal.state.fieldNames = new const char*[mFieldCount];
-    mHal.state.fieldNameLengths = new uint32_t[mFieldCount];
-    mHal.state.fieldOffsetBytes = new uint32_t[mFieldCount];
-    mHal.state.fieldsCount = mFieldCount;
+    uint32_t noPaddingFieldCount = 0;
+    for (uint32_t ct = 0; ct < mFieldCount; ct ++) {
+        if (mFields[ct].name.string()[0] != '#') {
+            noPaddingFieldCount ++;
+        }
+    }
+
+    mHal.state.fields = new const Element*[noPaddingFieldCount];
+    mHal.state.fieldArraySizes = new uint32_t[noPaddingFieldCount];
+    mHal.state.fieldNames = new const char*[noPaddingFieldCount];
+    mHal.state.fieldNameLengths = new uint32_t[noPaddingFieldCount];
+    mHal.state.fieldOffsetBytes = new uint32_t[noPaddingFieldCount];
+    mHal.state.fieldsCount = noPaddingFieldCount;
 
     size_t bits = 0;
     size_t bitsUnpadded = 0;
-    for (size_t ct=0; ct < mFieldCount; ct++) {
+    for (size_t ct = 0, ctNoPadding = 0; ct < mFieldCount; ct++) {
         mFields[ct].offsetBits = bits;
         mFields[ct].offsetBitsUnpadded = bitsUnpadded;
         bits += mFields[ct].e->getSizeBits() * mFields[ct].arraySize;
@@ -195,11 +203,17 @@ void Element::compute() {
             mHasReference = true;
         }
 
-        mHal.state.fields[ct] = mFields[ct].e.get();
-        mHal.state.fieldArraySizes[ct] = mFields[ct].arraySize;
-        mHal.state.fieldNames[ct] = mFields[ct].name.string();
-        mHal.state.fieldNameLengths[ct] = mFields[ct].name.length() + 1; // to include 0
-        mHal.state.fieldOffsetBytes[ct] = mFields[ct].offsetBits >> 3;
+        if (mFields[ct].name.string()[0] == '#') {
+            continue;
+        }
+
+        mHal.state.fields[ctNoPadding] = mFields[ct].e.get();
+        mHal.state.fieldArraySizes[ctNoPadding] = mFields[ct].arraySize;
+        mHal.state.fieldNames[ctNoPadding] = mFields[ct].name.string();
+        mHal.state.fieldNameLengths[ctNoPadding] = mFields[ct].name.length() + 1; // to include 0
+        mHal.state.fieldOffsetBytes[ctNoPadding] = mFields[ct].offsetBits >> 3;
+
+        ctNoPadding ++;
     }
 
     mHal.state.elementSizeBytes = getSizeBytes();

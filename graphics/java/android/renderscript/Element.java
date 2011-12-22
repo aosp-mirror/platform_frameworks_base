@@ -48,10 +48,35 @@ public class Element extends BaseObj {
     int[] mArraySizes;
     int[] mOffsetInBytes;
 
+    int[] mVisibleElementMap;
+
     DataType mType;
     DataKind mKind;
     boolean mNormalized;
     int mVectorSize;
+
+    private void updateVisibleSubElements() {
+        if (mElements == null) {
+            return;
+        }
+
+        int noPaddingFieldCount = 0;
+        int fieldCount = mElementNames.length;
+        // Find out how many elements are not padding
+        for (int ct = 0; ct < fieldCount; ct ++) {
+            if (mElementNames[ct].charAt(0) != '#') {
+                noPaddingFieldCount ++;
+            }
+        }
+        mVisibleElementMap = new int[noPaddingFieldCount];
+
+        // Make a map that points us at non-padding elements
+        for (int ct = 0, ctNoPadding = 0; ct < fieldCount; ct ++) {
+            if (mElementNames[ct].charAt(0) != '#') {
+                mVisibleElementMap[ctNoPadding ++] = ct;
+            }
+        }
+    }
 
     /**
     * @hide
@@ -77,6 +102,11 @@ public class Element extends BaseObj {
      * RS_* objects.  32 bit opaque handles.
      */
     public enum DataType {
+        /**
+        * @hide
+        * new enum
+        */
+        NONE (0, 0),
         //FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
         FLOAT_64 (3, 8),
@@ -163,10 +193,10 @@ public class Element extends BaseObj {
     * @return number of sub-elements in this element
     */
     public int getSubElementCount() {
-        if (mElements == null) {
+        if (mVisibleElementMap == null) {
             return 0;
         }
-        return mElements.length;
+        return mVisibleElementMap.length;
     }
 
     /**
@@ -175,13 +205,13 @@ public class Element extends BaseObj {
     * @return sub-element in this element at given index
     */
     public Element getSubElement(int index) {
-        if (mElements == null) {
+        if (mVisibleElementMap == null) {
             throw new RSIllegalArgumentException("Element contains no sub-elements");
         }
-        if (index < 0 || index >= mElements.length) {
+        if (index < 0 || index >= mVisibleElementMap.length) {
             throw new RSIllegalArgumentException("Illegal sub-element index");
         }
-        return mElements[index];
+        return mElements[mVisibleElementMap[index]];
     }
 
     /**
@@ -190,13 +220,13 @@ public class Element extends BaseObj {
     * @return sub-element in this element at given index
     */
     public String getSubElementName(int index) {
-        if (mElements == null) {
+        if (mVisibleElementMap == null) {
             throw new RSIllegalArgumentException("Element contains no sub-elements");
         }
-        if (index < 0 || index >= mElements.length) {
+        if (index < 0 || index >= mVisibleElementMap.length) {
             throw new RSIllegalArgumentException("Illegal sub-element index");
         }
-        return mElementNames[index];
+        return mElementNames[mVisibleElementMap[index]];
     }
 
     /**
@@ -205,13 +235,13 @@ public class Element extends BaseObj {
     * @return array size of sub-element in this element at given index
     */
     public int getSubElementArraySize(int index) {
-        if (mElements == null) {
+        if (mVisibleElementMap == null) {
             throw new RSIllegalArgumentException("Element contains no sub-elements");
         }
-        if (index < 0 || index >= mElements.length) {
+        if (index < 0 || index >= mVisibleElementMap.length) {
             throw new RSIllegalArgumentException("Illegal sub-element index");
         }
-        return mArraySizes[index];
+        return mArraySizes[mVisibleElementMap[index]];
     }
 
     /**
@@ -220,13 +250,13 @@ public class Element extends BaseObj {
     * @return offset in bytes of sub-element in this element at given index
     */
     public int getSubElementOffsetBytes(int index) {
-        if (mElements == null) {
+        if (mVisibleElementMap == null) {
             throw new RSIllegalArgumentException("Element contains no sub-elements");
         }
-        if (index < 0 || index >= mElements.length) {
+        if (index < 0 || index >= mVisibleElementMap.length) {
             throw new RSIllegalArgumentException("Illegal sub-element index");
         }
-        return mOffsetInBytes[index];
+        return mOffsetInBytes[mVisibleElementMap[index]];
     }
 
     /**
@@ -696,11 +726,14 @@ public class Element extends BaseObj {
         mElements = e;
         mElementNames = n;
         mArraySizes = as;
+        mType = DataType.NONE;
+        mKind = DataKind.USER;
         mOffsetInBytes = new int[mElements.length];
         for (int ct = 0; ct < mElements.length; ct++ ) {
             mOffsetInBytes[ct] = mSize;
             mSize += mElements[ct].mSize * mArraySizes[ct];
         }
+        updateVisibleSubElements();
     }
 
     Element(int id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
@@ -765,7 +798,7 @@ public class Element extends BaseObj {
                 mSize += mElements[i].mSize * mArraySizes[i];
             }
         }
-
+        updateVisibleSubElements();
     }
 
     /**
