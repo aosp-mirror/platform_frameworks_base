@@ -62,6 +62,12 @@ import java.util.UUID;
  * permission and some also require the
  * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using Bluetooth, read the
+ * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.</p>
+ * </div>
+ *
  * {@see BluetoothDevice}
  * {@see BluetoothServerSocket}
  */

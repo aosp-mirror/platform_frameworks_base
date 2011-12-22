@@ -40,6 +40,12 @@ import android.util.Log;
  * <p>The primary source of elements are from scripts. A script that exports a
  * bind point for a data structure generates a Renderscript element to represent the
  * data exported by the script. The other common source of elements is from bitmap formats.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating an application that uses Renderscript, read the
+ * <a href="{@docRoot}guide/topics/graphics/renderscript.html">Renderscript</a> developer guide.</p>
+ * </div>
  **/
 public class Element extends BaseObj {
     int mSize;

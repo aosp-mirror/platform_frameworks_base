@@ -24,6 +24,13 @@ import android.os.Bundle;
  * LocationListener has been registered with the location manager service
  * using the {@link LocationManager#requestLocationUpdates(String, long, float, LocationListener)}
  * method.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about identifying user location, read the
+ * <a href="{@docRoot}guide/topics/location/obtaining-user-location.html">Obtaining User
+ * Location</a> developer guide.</p>
+ * </div>
  */
 public interface LocationListener {
 

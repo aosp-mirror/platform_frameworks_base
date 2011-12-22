@@ -40,6 +40,13 @@ import java.util.ArrayList;
  * is expressed as a {@link ClipData} object, which defines the protocol
  * for data exchange between applications.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using the clipboard framework, read the
+ * <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a>
+ * developer guide.</p>
+ * </div>
+ *
  * @see android.content.Context#getSystemService
  */
 public class ClipboardManager extends android.text.ClipboardManager {

@@ -50,6 +50,13 @@ import java.util.ArrayList;
  * CharSequence of text, a single Intent object, or a Uri.  See {@link Item}
  * for more details.
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using the clipboard framework, read the
+ * <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy and Paste</a>
+ * developer guide.</p>
+ * </div>
+ *
  * <a name="ImplementingPaste"></a>
  * <h3>Implementing Paste or Drop</h3>
  *
