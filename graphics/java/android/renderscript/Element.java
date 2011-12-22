@@ -84,6 +84,12 @@ public class Element extends BaseObj {
     */
     public int getSizeBytes() {return mSize;}
 
+    /**
+    * @hide
+    * @return element vector size
+    */
+    public int getVectorSize() {return mVectorSize;}
+
 
     /**
      * DataType represents the basic type information for a basic element.  The
@@ -723,6 +729,7 @@ public class Element extends BaseObj {
     Element(int id, RenderScript rs, Element[] e, String[] n, int[] as) {
         super(id, rs);
         mSize = 0;
+        mVectorSize = 1;
         mElements = e;
         mElementNames = n;
         mArraySizes = as;
