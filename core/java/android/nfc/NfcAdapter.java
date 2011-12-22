@@ -42,6 +42,12 @@ import android.util.Log;
  * <p>
  * Use the helper {@link #getDefaultAdapter(Context)} to get the default NFC
  * adapter for this Android device.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using NFC, read the
+ * <a href="{@docRoot}guide/topics/nfc/index.html">Near Field Communication</a> developer guide.</p>
+ * </div>
  */
 public final class NfcAdapter {
     static final String TAG = "NFC";

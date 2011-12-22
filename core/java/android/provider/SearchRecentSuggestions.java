@@ -44,6 +44,13 @@ import java.util.concurrent.Semaphore;
  *
  * <p>For a working example, see SearchSuggestionSampleProvider and SearchQueryResults in
  * samples/ApiDemos/app.
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about using search suggestions in your application, read the
+ * <a href="{@docRoot}guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query
+ * Suggestions</a> developer guide.</p>
+ * </div>
  */
 public class SearchRecentSuggestions {
     // debugging support

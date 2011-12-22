@@ -37,6 +37,13 @@ import javax.sip.address.URI;
  * <p>You can create a {@link SipProfile} using {@link
  * SipProfile.Builder}. You can also retrieve one from a {@link SipSession}, using {@link
  * SipSession#getLocalProfile} and {@link SipSession#getPeerProfile}.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about using SIP, read the
+ * <a href="{@docRoot}guide/topics/network/sip.html">Session Initiation Protocol</a>
+ * developer guide.</p>
+ * </div>
  */
 public class SipProfile implements Parcelable, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;

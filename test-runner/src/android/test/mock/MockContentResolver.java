@@ -43,6 +43,12 @@ import java.util.Map;
  *      Users can also set an authority's entry in the map to null, so that a provider is completely
  *      mocked out.
  * </p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about application testing, read the
+ * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
+ * </div>
  */
 
 public class MockContentResolver extends ContentResolver {
