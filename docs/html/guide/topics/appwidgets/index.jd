@@ -186,36 +186,34 @@ folder.</p>
 <p>Here's a summary of the <code>&lt;appwidget-provider></code> attributes:</p>
 <ul>
   <li>The values for the <code>minWidth</code> and <code>minHeight</code>
-attributes specify the minimum
-    area required by the App Widget's layout. 
-    <p>The default Home screen positions App Widgets in its window based on a
-grid of
-    cells that have a defined height and width. If the values for an App
-Widget's minimum width 
-    or height don't match the dimensions of the cells,
-    then the App Widget dimensions round <em>up</em> to the nearest cell size.
-    (See the <a
-href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">App Widget
-Design 
-    Guidelines</a> for more information on the Home screen cell sizes.)</p>
-    <p>Because the Home screen's layout orientation (and thus, the cell sizes)
-can change,
-    as a rule of thumb, you should assume the worst-case cell size of 74 pixels
-for the height
-    <em>and</em> width of a cell. However, you must subtract 2 from the final
-dimension to account
-    for any integer rounding errors that occur in the pixel count. To find your
-minimum width
-    and height in density-independent pixels (dp), use this formula:<br/>
-      <code>(number of cells * 74) - 2</code><br/>
-    Following this formula, you should use 72 dp for a height of one cell, 294
-dp and for a width of four cells.</p>
-<p class="note"><strong>Note:</strong> To make your app widget portable across
-devices, your app widget's minimum size should never be larger than 4 x 4 cells.
-See the <a
-href="{@docRoot}guide/practices/ui_guidelines/widget_design.html#sizes">App
-Widget Design Guidelines</a> for more discussion of Home screen cell sizes.</p>
+    attributes specify the minimum amount of space the App Widget consumes
+    <em>by default</em>. The default Home screen positions App Widgets in its
+    window based on a grid of cells that have a defined height and width. If
+    the values for an App Widget's minimum width or height don't match the
+    dimensions of the cells, then the App Widget dimensions round
+    <em>up</em> to the nearest cell size.
+    <p>See the <a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html#anatomy_determining_size">
+    App Widget Design Guidelines</a> for more information on sizing your App
+    Widgets.</p>
+
+    <p class="note"><strong>Note:</strong> To make your app widget portable
+    across devices, your app widget's minimum size should never be larger
+    than 4 x 4 cells.</p>
   </li>
+
+  <li>The <code>minResizeWidth</code> and <code>minResizeHeight</code> attributes
+    specify the App Widget's absolute minimum size. These values should specify
+    the size below which the App Widget would be illegible or otherwise unusable.
+    Using these attributes allows the user to resize the widget to a size that
+    may be smaller than the default widget size defined by the
+    <code>minWidth</code> and <code>minHeight</code> attributes.
+    Introduced in Android 3.1.
+
+    <p>See the <a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html#anatomy_determining_size">
+    App Widget Design Guidelines</a> for more information on sizing your App
+    Widgets.</p>
+  </li>
+
   <li>The <code>updatePeriodMillis</code> attribute defines how often the App
 Widget framework should request an update from the {@link
 android.appwidget.AppWidgetProvider} by calling the 
