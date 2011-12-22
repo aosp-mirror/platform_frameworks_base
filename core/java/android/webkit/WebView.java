@@ -1079,8 +1079,8 @@ public class WebView extends AbsoluteLayout
      * @param defStyle The default style resource ID.
      * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
-     * @hide This is an implementation detail.
      * @param privateBrowsing If true the web view will be initialized in private mode.
+     * @hide This is an implementation detail.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
