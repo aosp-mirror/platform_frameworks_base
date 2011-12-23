@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Metrics and Grids
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Metrics and Grids</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Devices vary not only in physical size, but also in screen density (<acronym title="Dots per
+inch">DPI</acronym>). To simplify the way you design for multiple screens, think of each device as
+falling into a particular size bucket and density bucket. The size buckets are <em>handset</em> (smaller than
+600<acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi
+screen.">dp</acronym>) and <em>tablet</em> (larger than or equal 600dp). The density buckets are <acronym
+title="Low density (120 dpi)">LDPI</acronym>, <acronym title="Medium density (160
+dpi)">MDPI</acronym>, <acronym title="High density (240 dpi)">HDPI</acronym>, and <acronym title
+="Extra-high density (320 dpi)">XHDPI</acronym>. Optimize your application's UI by designing
+alternative layouts for some of the different size buckets, and provide alternative bitmap images
+for different density buckets.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+    <img src="../static/content/metrics_diagram.png">
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<h4>Space considerations</h4>
+<p>Devices vary in the amount of density-independent pixels (dp) they can display.</p>
+<p>To see more, visit the
+<a href="http://developer.android.com/resources/dashboard/screens.html" target="_blank">
+Screen Sizes and Densities Device Dashboard</a>.</p>
+
+  </div>
+</div>
+
+<h2>48dp Rhythm</h2>
+
+<p>Touchable UI components are generally laid out along 48dp units.</p>
+
+<img src="../static/content/metrics_48.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<h4>Why 48dp?</h4>
+<p>On average, 48dp translate to a physical size of about 9mm (with some variability). This is
+comfortably in the range of recommended target sizes (7-10 mm) for touchscreen objects and users
+will be able to reliably and accurately target them with their fingers.</p>
+<p>If you design your elements to be at least 48dp high and wide you can guarantee that:</p>
+<ul>
+<li>your targets will never be smaller than the minimum recommended target size of 7mm regardless of
+  what screen they are displayed on.</li>
+<li>you strike a good compromise between overall information density on the one hand, and
+  targetability of UI elements on the other.</li>
+</ul>
+
+<img src="../static/content/metrics_closeup.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<h4>Mind the gaps</h4>
+<p>Spacing between each UI element is 8dp.</p>
+
+<h2>Examples</h2>
+
+<img src="../static/content/metrics_forms.png">
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>
