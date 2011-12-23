@@ -1,10 +1,16 @@
 <HTML>
 <BODY>
 <p>The Renderscript rendering and computational APIs offer a low-level, high performance means of
-carrying out mathematical calculations and 3D graphics rendering. An example of Renderscript in
-applications include the 3D carousel view that is present in Android 3.0 applications such as the
-Books and YouTube applications. This API is intended for developers who are comfortable working with
-native code and want to maximize their performance critical applications.</p>
+carrying out mathematical calculations and 3D graphics rendering.</p>
+
+<p>For more information, see the
+<a href="{@docRoot}guide/topics/graphics/renderscript.html">Renderscript</a> developer guide.</p>
+{@more}
+
+<p>An example of Renderscript in applications include the 3D carousel view that is present in
+Android 3.0 applications such as the Books and YouTube applications. This API is intended for
+developers who are comfortable working with native code and want to maximize their performance
+critical applications.</p>
 
 <p>Renderscript adopts a control and slave architecture where the low-level native code is controlled by the
 higher level Android system that runs in the virtual machine (VM). The VM code handles resource
@@ -14,7 +20,7 @@ the native Renderscript code, which you write in C (C99 standard). The Renderscr
 does the intensive computation and returns the result back to the Android VM.</p>
 
 <p>You can find the Renderscript native
-APIs in the <code>&lt;sdk_root&gt;/platforms/android-3.0/renderscript</code> directory. 
+APIs in the <code>&lt;sdk_root&gt;/platforms/android-11/renderscript</code> directory.
 The Android system APIs are broken into a few main groups:</p>
 
 <h4>Core</h4>
@@ -37,7 +43,7 @@ classes include:</p>
   <li>Byte2, Byte3, and Byte4</li>
   <li>Float2, Float3, Float4</li>
   <li>Int2, Int3, Int4</li>
-  <li>Long2, Long3, Long4</li>  
+  <li>Long2, Long3, Long4</li>
   <li>Matrix2f, Matrix3f, Matrix4f</li>
   <li>Short2, Short3, Short4</li>
 </ul>
@@ -75,11 +81,6 @@ pipeline.</p>
 <li>Sampler</li>
 </ul>
 
-</p>
-<p>
-For information on how to create an application that uses Renderscript, and also the
-see <a href="../../../guide/topics/graphics/renderscript.html">3D with
-Renderscript</a> dev guide. 
 </p>
 </BODY>
 </HTML>

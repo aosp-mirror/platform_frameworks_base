@@ -32,13 +32,16 @@ import android.view.Surface;
 
 
 /**
- * RenderScript base master class.  An instance of this class creates native
+ * Renderscript base master class.  An instance of this class creates native
  * worker threads for processing commands from this object.  This base class
  * does not provide any extended capabilities beyond simple data processing.
  * For extended capabilities use derived classes such as RenderScriptGL.
  *
- *
- *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating an application that uses Renderscript, read the
+ * <a href="{@docRoot}guide/topics/graphics/renderscript.html">Renderscript</a> developer guide.</p>
+ * </div>
  **/
 public class RenderScript {
     static final String LOG_TAG = "RenderScript_jni";

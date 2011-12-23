@@ -39,6 +39,13 @@ import java.util.HashMap;
  * {@link AccelerateDecelerateInterpolator} class, which accelerates into and decelerates
  * out of an animation. This behavior can be changed by calling
  * {@link ValueAnimator#setInterpolator(TimeInterpolator)}.</p>
+ *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about animating with {@code ValueAnimator}, read the
+ * <a href="{@docRoot}guide/topics/graphics/prop-animation.html#value-animator">Property
+ * Animation</a> developer guide.</p>
+ * </div>
  */
 public class ValueAnimator extends Animator {
 
