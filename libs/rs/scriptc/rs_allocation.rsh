@@ -290,5 +290,13 @@ extern rs_data_type __attribute__((overloadable))
 extern rs_data_kind __attribute__((overloadable))
     rsElementGetDataKind(rs_element e);
 
+/**
+ * @param e element to get data from
+ * @return length of the element vector (for float2, float3,
+ *         etc.)
+ */
+extern uint32_t __attribute__((overloadable))
+    rsElementGetVectorSize(rs_element e);
+
 #endif
 

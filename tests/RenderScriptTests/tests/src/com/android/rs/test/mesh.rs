@@ -33,6 +33,12 @@ static bool test_mesh_getters() {
     rs_primitive p0 = rsMeshGetPrimitive(mesh, 0);
     rs_primitive p1 = rsMeshGetPrimitive(mesh, 1);
     rs_primitive p2 = rsMeshGetPrimitive(mesh, 2);
+    rs_primitive p3 = rsMeshGetPrimitive(mesh, 3);
+
+    _RS_ASSERT(p0 == RS_PRIMITIVE_POINT);
+    _RS_ASSERT(p1 == RS_PRIMITIVE_LINE);
+    _RS_ASSERT(p2 == RS_PRIMITIVE_TRIANGLE);
+    _RS_ASSERT(p3 == RS_PRIMITIVE_POINT);
 
     if (failed) {
         rsDebug("test_mesh_getters FAILED", 0);

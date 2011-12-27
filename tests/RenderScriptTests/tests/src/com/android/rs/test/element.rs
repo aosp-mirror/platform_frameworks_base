@@ -94,11 +94,13 @@ static bool test_element_getters() {
     _RS_ASSERT(subElemCount == 0);
     _RS_ASSERT(rsElementGetDataKind(simpleElem) == RS_KIND_USER);
     _RS_ASSERT(rsElementGetDataType(simpleElem) == RS_TYPE_FLOAT_32);
+    _RS_ASSERT(rsElementGetVectorSize(simpleElem) == 3);
 
     subElemCount = rsElementGetSubElementCount(complexElem);
     _RS_ASSERT(subElemCount == 10);
     _RS_ASSERT(rsElementGetDataKind(complexElem) == RS_KIND_USER);
     _RS_ASSERT(rsElementGetDataType(complexElem) == RS_TYPE_NONE);
+    _RS_ASSERT(rsElementGetVectorSize(complexElem) == 1);
     _RS_ASSERT(rsElementGetSizeBytes(complexElem) == sizeof(*complexStruct));
 
     char buffer[64];
@@ -109,13 +111,28 @@ static bool test_element_getters() {
         _RS_ASSERT(rsElementGetSubElementNameLength(complexElem, i) == subElemNamesSizes[i] + 1);
 
         uint32_t written = rsElementGetSubElementName(complexElem, i, buffer, 64);
-        rsDebug(subElemNames[i], subElemNames[i]);
         _RS_ASSERT(written == subElemNamesSizes[i]);
         _RS_ASSERT(equals(buffer, subElemNames[i], written));
 
         _RS_ASSERT(rsElementGetSubElementArraySize(complexElem, i) == subElemArraySizes[i]);
         _RS_ASSERT(rsElementGetSubElementOffsetBytes(complexElem, i) == subElemOffsets[i]);
     }
+
+    // Tests error checking
+    rs_element subElem = rsElementGetSubElement(complexElem, subElemCount);
+    _RS_ASSERT(!rsIsObject(subElem));
+
+    _RS_ASSERT(rsElementGetSubElementNameLength(complexElem, subElemCount) == 0);
+
+    _RS_ASSERT(rsElementGetSubElementName(complexElem, subElemCount, buffer, 64) == 0);
+    _RS_ASSERT(rsElementGetSubElementName(complexElem, 0, NULL, 64) == 0);
+    _RS_ASSERT(rsElementGetSubElementName(complexElem, 0, buffer, 0) == 0);
+    uint32_t written = rsElementGetSubElementName(complexElem, 0, buffer, 5);
+    _RS_ASSERT(written == 4);
+    _RS_ASSERT(buffer[4] == '\0');
+
+    _RS_ASSERT(rsElementGetSubElementArraySize(complexElem, subElemCount) == 0);
+    _RS_ASSERT(rsElementGetSubElementOffsetBytes(complexElem, subElemCount) == 0);
 
     if (failed) {
         rsDebug("test_element_getters FAILED", 0);
