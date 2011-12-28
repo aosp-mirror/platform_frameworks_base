@@ -79,10 +79,8 @@ located in <strong>Settings > Developer options</strong>).</p>
   <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a> document.</li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
       
-      <li>If you're developing on Ubuntu Linux, you need to add a <a
-href="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html">
-<code>udev</code></a> 
-rules file that contains a USB configuration for each type of device
+      <li>If you're developing on Ubuntu Linux, you need to add a
+<code>udev</code> rules file that contains a USB configuration for each type of device
 you want to use for development. In the rules file, each device manufacturer
 is identified by a unique vendor ID, as specified by the
 <code>ATTR{idVendor}</code> property. For a list of vendor IDs, see  <a

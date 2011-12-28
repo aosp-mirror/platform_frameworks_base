@@ -126,8 +126,8 @@ applications.</p>
 <p>Use of <a
 href="{@docRoot}reference/android/content/Context.html#MODE_WORLD_WRITEABLE">
 world writable</a> or <a
-href="{@docRoot}reference/android/content/Context.html#MODE_WORLD_READABLE
-">world readable</a> files for IPC is discouraged because it does not provide
+href="{@docRoot}reference/android/content/Context.html#MODE_WORLD_READABLE">world
+readable</a> files for IPC is discouraged because it does not provide
 the ability to limit data access to particular applications, nor does it
 provide any control on data format. As an alternative, you might consider using
 a ContentProvider which provides read and write permissions, and can make
@@ -199,10 +199,10 @@ ContentProvider</a></code>.</p>
 <p>ContentProviders can also provide more granular access by declaring the <a
 href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
 grantUriPermissions</a> element and using the <code><a
-href="{@docRoot}reference/android/content/Intent.html#FLAG_GRANT_READ_URI_PERMIS
-SION">FLAG_GRANT_READ_URI_PERMISSION</a></code> and <code><a
-href="{@docRoot}reference/android/content/Intent.html#FLAG_GRANT_WRITE_URI_PERMI
-SSION">FLAG_GRANT_WRITE_URI_PERMISSION</a></code> flags in the Intent object
+href="{@docRoot}reference/android/content/Intent.html#FLAG_GRANT_READ_URI_PERMISSION">FLAG_GRANT_READ_URI_PERMISSION</a></code>
+and <code><a
+href="{@docRoot}reference/android/content/Intent.html#FLAG_GRANT_WRITE_URI_PERMISSION">FLAG_GRANT_WRITE_URI_PERMISSION</a></code>
+flags in the Intent object
 that activates the component.  The scope of these permissions can be further
 limited by the <code><a
 href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
@@ -211,14 +211,9 @@ grant-uri-permission element</a></code>.</p>
 <p>When accessing a <code>
 <a href="{@docRoot}reference/android/content/ContentProvider.html">
 ContentProvider</a></code>, use parameterized query methods such as <code>
-<a href="{@docRoot}reference/android/content/ContentProvider.html#query(android.net
-.Uri,%20java.lang.String[],%20java.lang.String,%20java.lang.String[],%20java.lan
-g.String)">query()</a></code>, <code><a
-href="{@docRoot}reference/android/content/ContentProvider.html#update(android.ne
-t.Uri,%20android.content.ContentValues,%20java.lang.String,%20java.lang.String[]
-)">update()</a></code>, and <code><a
-href="{@docRoot}reference/android/content/ContentProvider.html#delete(android.ne
-t.Uri,%20java.lang.String,%20java.lang.String[])">delete()</a></code> to avoid
+<a href="{@docRoot}reference/android/content/ContentProvider.html#query(android.net.Uri,%20java.lang.String[],%20java.lang.String,%20java.lang.String[],%20java.lang.String)">query()</a></code>, <code><a
+href="{@docRoot}reference/android/content/ContentProvider.html#update(android.net.Uri,%20android.content.ContentValues,%20java.lang.String,%20java.lang.String[])">update()</a></code>, and <code><a
+href="{@docRoot}reference/android/content/ContentProvider.html#delete(android.net.Uri,%20java.lang.String,%20java.lang.String[])">delete()</a></code> to avoid
 potential <a href="http://en.wikipedia.org/wiki/SQL_injection">SQL
 Injection</a> from untrusted data. Note that using parameterized methods is not
 sufficient if the <code>selection</code> is built by concatenating user data
@@ -249,8 +244,9 @@ href="{@docRoot}reference/android/R.styleable.html#AndroidManifestActivity">
 Activities</a>, and <a
 href="{@docRoot}reference/android/R.styleable.html#AndroidManifestService">
 Services</a> are all declared in the application manifest.  If your IPC mechanism is
-not intended for use by other applications, set the android:exported property
-to false.  This is useful for applications that consist of multiple processes
+not intended for use by other applications, set the <a
+href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
+property to false.  This is useful for applications that consist of multiple processes
 within the same UID, or if you decide late in development that you do not
 actually want to expose functionality as IPC but you don’t want to rewrite
 the code.</p>
@@ -276,11 +272,10 @@ activity.</p>
 
 <p>Intents are the preferred mechanism for asynchronous IPC in Android.
 Depending on your application requirements, you might use <code><a
-href="{@docRoot}reference/android/content/Context.html#sendBroadcast(android.con
-tent.Intent)">sendBroadcast()</a></code>, <code><a
-href="{@docRoot}reference/android/content/Context.html#sendOrderedBroadcast(andr
-oid.content.Intent,%20java.lang.String)">sendOrderedBroadcast()</a></code>, or
-direct an intent to a specific application component.</p>
+href="{@docRoot}reference/android/content/Context.html#sendBroadcast(android.content.Intent)">sendBroadcast()</a></code>, 
+<code><a
+href="{@docRoot}reference/android/content/Context.html#sendOrderedBroadcast(android.content.Intent,%20java.lang.String)">sendOrderedBroadcast()</a></code>,
+or direct an intent to a specific application component.</p>
 
 <p>Note that ordered broadcasts can be “consumed” by a recipient, so they
 may not be delivered to all applications.  If you are sending an Intent where
@@ -311,14 +306,13 @@ and/or access controls on a specific binder interface, those controls must be
 explicitly added as code in the interface.</p>
 
 <p>If providing an interface that does require access controls, use <code><a
-href="{@docRoot}reference/android/content/Context.html#checkCallingPermission(ja
-va.lang.String)">checkCallingPermission()</a></code> to verify whether the
+href="{@docRoot}reference/android/content/Context.html#checkCallingPermission(java.lang.String)">checkCallingPermission()</a></code>
+to verify whether the
 caller of the Binder has a required permission. This is especially important
 before accessing a Service on behalf of the caller, as the identify of your
 application is passed to other interfaces.  If invoking an interface provided
 by a Service, the <code><a
-href="{@docRoot}reference/android/content/Context.html#bindService(android.conte
-nt.Intent,%20android.content.ServiceConnection,%20int)">bindService()</a></code>
+href="{@docRoot}reference/android/content/Context.html#bindService(android.content.Intent,%20android.content.ServiceConnection,%20int)">bindService()</a></code>
  invocation may fail if you do not have permission to access the given Service.
  If calling an interface provided locally by your own application, it may be
 useful to use the <code><a
@@ -332,14 +326,14 @@ an intent.</p>
 
 <p>By default, receivers are exported and can be invoked by any other
 application. If your <code><a
-href={@docRoot}reference/android/content/BroadcastReceiver.html">
+href="{@docRoot}reference/android/content/BroadcastReceiver.html">
 BroadcastReceivers</a></code> is intended for use by other applications, you
 may want to apply security permissions to receivers using the <code><a
-href="{@docRoot}reference/android/R.styleable.html#AndroidManifestReceiver">
+href="{@docRoot}guide/topics/manifest/receiver-element.html">
 &lt;receiver&gt;</a></code> element within the application manifest.  This will
 prevent applications without appropriate permissions from sending an intent to
 the <code><a
-href={@docRoot}reference/android/content/BroadcastReceiver.html">
+href="{@docRoot}reference/android/content/BroadcastReceiver.html">
 BroadcastReceivers</a></code>.</p>
 
 <h3>Using Services</h3>
@@ -349,19 +343,21 @@ use. Each service class must have a corresponding <service> declaration in its
 package's AndroidManifest.xml.</p>
 
 <p>By default, Services are exported and can be invoked by any other
-application.  Services can be protected using the android:permission attribute
+application.  Services can be protected using the <a
+href="{@docRoot}guide/topics/manifest/service-element.html#prmsn">{@code android:permission}</a>
+attribute
 within the manifest’s <code><a
-href="{@docRoot}reference/android/R.styleable.html#AndroidManifestService">
+href="{@docRoot}guide/topics/manifest/service-element.html">
 &lt;service&gt;</a></code> tag. By doing so, other applications will need to declare
 a corresponding <code><a
-href="{@docRoot}reference/android/R.styleable.html#AndroidManifestService_permis
-sion">&lt;uses-permission&gt;</a></code> element in their own manifest to be
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a>
+</code> element in their own manifest to be
 able to start, stop, or bind to the service.</p>
 
 <p>A Service can protect individual IPC calls into it with permissions, by
 calling <code><a
-href="{@docRoot}reference/android/content/Context.html#checkCallingPermission(ja
-va.lang.String)">checkCallingPermission()</a></code>before executing
+href="{@docRoot}reference/android/content/Context.html#checkCallingPermission(java.lang.String)">checkCallingPermission()</a></code>
+before executing
 the implementation of that call.  We generally recommend using the
 declarative permissions in the manifest, since those are less prone to
 oversight.</p>
@@ -376,9 +372,9 @@ Service to handle IPC, since this modular approach reduces the risk of exposing
 functionality that is not intended for use by other applications.</p>
 
 <p>If you do expose an Activity for purposes of IPC, the  <code><a
-href="{@docRoot}reference/android/R.styleable.html#AndroidManifestActivity_permi
-ssion">android:permission</a></code> attribute in the  <code><a
-href="{@docRoot}reference/android/R.styleable.html#AndroidManifestActivity">
+href="{@docRoot}guide/topics/manifest/activity-element.html#prmsn">android:permission</a></code>
+attribute in the  <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">
 &lt;activity&gt;</a></code> declaration in the application manifest can be used to
 restrict access to only those applications which have the stated
 permissions.</p>
@@ -432,8 +428,8 @@ rkeley.edu/~afelt/felt_usenixsec2011.pdf</a></p>
 <p>Generally, you should strive to create as few permissions as possible while
 satisfying your security requirements.  Creating a new permission is relatively
 uncommon for most applications, since <a
-href="{@docRoot}reference/android/Manifest.permission.html">
-system-defined permissions</a> cover many situations.  Where appropriate,
+href="{@docRoot}reference/android/Manifest.permission.html">system-defined
+permissions</a> cover many situations.  Where appropriate,
 perform access checks using existing permissions.</p>
 
 <p>If you must create a new permission, consider whether you can accomplish
@@ -560,17 +556,14 @@ href="{@docRoot}reference/android/webkit/WebView.html">WebView</a></code> does
 not execute JavaScript so cross-site-scripting is not possible.</p>
 
 <p>Use <code><a
-href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(jav
-a.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> with
+href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> with
 particular care because it allows JavaScript to invoke operations that are
 normally reserved for Android applications.  Only expose <code><a
-href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(jav
-a.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> to
+href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> to
 sources from which all input is trustworthy.  If untrusted input is allowed,
 untrusted JavaScript may be able to invoke Android methods.  In general, we
 recommend only exposing <code><a
-href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(jav
-a.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> to
+href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> to
 JavaScript that is contained within your application APK.</p>
 
 <p>Do not trust information downloaded over HTTP, use HTTPS instead.  Even if
@@ -578,13 +571,11 @@ you are connecting only to a single website that you trust or control, HTTP is
 subject to <a
 href="http://en.wikipedia.org/wiki/Man-in-the-middle_attack">MiTM</a> attacks
 and interception of data.  Sensitive capabilities using <code><a
-href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(jav
-a.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> should
+href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code> should
 not ever be exposed to unverified script downloaded over HTTP. Note that even
 with the use of HTTPS,
 <code><a
-href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(jav
-a.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code>
+href="{@docRoot}reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object,%20java.lang.String)">addJavaScriptInterface()</a></code>
 increases the attack surface of your application to include the server
 infrastructure and all CAs trusted by the Android-powered device.</p>
 
@@ -683,8 +674,7 @@ discussed in the Requesting Permissions section.</p>
 <p>If a GUID is required, create a large, unique number and store it.  Do not
 use phone identifiers such as the phone number or IMEI which may be associated
 with personal information.  This topic is discussed in more detail in the <a
-href="http://android-developers.blogspot.com/2011/03/identifying-app-installatio
-ns.html">Android Developer Blog</a>.</p>
+href="http://android-developers.blogspot.com/2011/03/identifying-app-installations.html">Android Developer Blog</a>.</p>
 
 <p>Application developers should be careful writing to on-device logs.
 In Android, logs are a shared resource, and are available
@@ -724,9 +714,8 @@ credentials to the wrong application.</p>
 <p>If credentials are to be used only by applications that you create, then you
 can verify the application which accesses the <code><a
 href="{@docRoot}reference/android/accounts/AccountManager.html">
-AccountManager</a></code> using <code><a href="<code><a
-href="{@docRoot}h/reference/android/content/pm/PackageManager.html#checkSignatur
-es(java.lang.String,%20java.lang.String)">checkSignature()</a></code>.
+AccountManager</a></code> using <code><a
+href="{@docRoot}reference/android/content/pm/PackageManager.html#checkSignatures(java.lang.String,%20java.lang.String)">checkSignature()</a></code>.
 Alternatively, if only one application will use the credential, you might use a
 <code><a
 href={@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> for
@@ -756,15 +745,15 @@ RSA provided in the <code><a
 href="{@docRoot}reference/javax/crypto/Cipher.html">Cipher</a></code> class.</p>
 
 <p>Use a secure random number generator (
-<a href="http://developer.android.com/reference/java/security/SecureRandom.html">
+<a href="{@docRoot}reference/java/security/SecureRandom.html">
 <code>SecureRandom</code></a>) to initialize any cryptographic keys (<a
-href="http://developer.android.com/reference/javax/crypto/KeyGenerator.html">
+href="{@docRoot}reference/javax/crypto/KeyGenerator.html">
 <code>KeyGenerator</code></a>). Use of a key that is not generated with a secure random
 number generator significantly weakens the strength of the algorithm, and may
 allow offline attacks.</p>
 
 <p>If you need to store a key for repeated use, use a mechanism like <code><a
-href={@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> that
+href="{@docRoot}reference/java/security/KeyStore.html">KeyStore</a></code> that
 provides a mechanism for long term storage and retrieval of cryptographic
 keys.</p>
 
