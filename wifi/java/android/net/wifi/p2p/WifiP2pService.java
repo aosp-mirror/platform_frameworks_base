@@ -1180,9 +1180,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case PEER_CONNECTION_USER_ACCEPT:
                     if (mSavedPeerConfig.wps.setup == WpsInfo.PBC) {
-                        WifiNative.wpsPbc();
+                        WifiNative.startWpsPbc();
                     } else {
-                        WifiNative.wpsPin(mSavedPeerConfig.wps.pin);
+                        WifiNative.startWpsPinKeypad(mSavedPeerConfig.wps.pin);
                     }
                     mSavedPeerConfig = null;
                     transitionTo(mGroupCreatedState);
