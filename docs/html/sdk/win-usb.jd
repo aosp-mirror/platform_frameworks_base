@@ -24,18 +24,9 @@ page.title=Google USB Driver
 </div>
 </div>
 
-<p>The Google USB driver is a downloadable component for Windows developers, available
-for download from the AVD and SDK Manager.</p>
-
-<p>The Google USB Driver is only for Android Developer Phones (ADP), Nexus One, and Nexus S.
-If you're using a different Android-powered device,
-then you need to get a USB driver from the device OEM. For help finding the appropriate
-driver, see the list of <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a>.</p>
-
-<div class="sidebox-wrapper">
-<div class="sidebox">
-  <p>The Google USB driver for Windows provides support for the following
-Android-powered devices:</p>
+<p>The Google USB driver is a downloadable component for the Android SDK, available
+from the SDK Manager. The driver is for Windows only and provides the necessary drivers for the
+following devices:</p>
   <ul>
     <li>ADP1 / T-Mobile G1*</li>
     <li>ADP2 / Google Ion / T-Mobile myTouch 3G*</li>
@@ -44,19 +35,20 @@ Android-powered devices:</p>
     <li>Nexus S</li>
   </ul>
   <p>* <em>Or similar hardware on other carriers</em></p>
-  <p>Any additional devices will require Windows drivers provided by
-the hardware manufacturer. See <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a>.</p>
-</div>
-</div>
+  
+  <p>All other devices require Windows drivers provided by the hardware manufacturer, as listed in
+the <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a> document. The Galaxy Nexus
+driver is also distributed by <a
+href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
+(listed as model SCH-I515).</p>
 
 <p class="note"><strong>Note:</strong>
-If you're developing on Mac OS X or Linux, then you do not need to install a
-USB driver. Refer to <a
-href="{@docRoot}guide/developing/device.html#setting-up">Setting up a
-Device</a> to start development with a device.</p>
+If you're developing on Mac OS X or Linux, then you do not need to install a USB driver. Refer to <a
+href="{@docRoot}guide/developing/device.html#setting-up">Setting up a Device</a> to start
+development with a device.</p>
 
-<p>The sections below provide instructions on how to download the USB Driver
-for Windows and install it on your development computer. </p>
+<p>The sections below provide instructions on how to download and install the Google USB Driver
+for Windows. </p>
 
 
 
