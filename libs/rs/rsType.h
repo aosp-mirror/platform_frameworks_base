@@ -22,7 +22,14 @@
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
-
+/*****************************************************************************
+ * CAUTION
+ *
+ * Any layout changes for this class may require a corresponding change to be
+ * made to frameworks/compile/libbcc/lib/ScriptCRT/rs_core.c, which contains
+ * a partial copy of the information below.
+ *
+ *****************************************************************************/
 
 class Type : public ObjectBase {
 public:

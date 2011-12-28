@@ -90,12 +90,12 @@ String8 RsdShader::getGLSLInputString() const {
     String8 s;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
         const Element *e = mRSProgram->mHal.state.inputElements[ct];
-        for (uint32_t field=0; field < e->getFieldCount(); field++) {
-            const Element *f = e->getField(field);
+        for (uint32_t field=0; field < e->mHal.state.fieldsCount; field++) {
+            const Element *f = e->mHal.state.fields[field];
 
             // Cannot be complex
-            rsAssert(!f->getFieldCount());
-            switch (f->getComponent().getVectorSize()) {
+            rsAssert(!f->mHal.state.fieldsCount);
+            switch (f->mHal.state.vectorSize) {
             case 1: s.append("attribute float ATTRIB_"); break;
             case 2: s.append("attribute vec2 ATTRIB_"); break;
             case 3: s.append("attribute vec3 ATTRIB_"); break;
@@ -104,7 +104,7 @@ String8 RsdShader::getGLSLInputString() const {
                 rsAssert(0);
             }
 
-            s.append(e->getFieldName(field));
+            s.append(e->mHal.state.fieldNames[field]);
             s.append(";\n");
         }
     }
@@ -114,17 +114,13 @@ String8 RsdShader::getGLSLInputString() const {
 void RsdShader::appendAttributes() {
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
         const Element *e = mRSProgram->mHal.state.inputElements[ct];
-        for (uint32_t field=0; field < e->getFieldCount(); field++) {
-            const Element *f = e->getField(field);
-            const char *fn = e->getFieldName(field);
-
-            if (fn[0] == '#') {
-                continue;
-            }
+        for (uint32_t field=0; field < e->mHal.state.fieldsCount; field++) {
+            const Element *f = e->mHal.state.fields[field];
+            const char *fn = e->mHal.state.fieldNames[field];
 
             // Cannot be complex
-            rsAssert(!f->getFieldCount());
-            switch (f->getComponent().getVectorSize()) {
+            rsAssert(!f->mHal.state.fieldsCount);
+            switch (f->mHal.state.vectorSize) {
             case 1: mShader.append("attribute float ATTRIB_"); break;
             case 2: mShader.append("attribute vec2 ATTRIB_"); break;
             case 3: mShader.append("attribute vec3 ATTRIB_"); break;
@@ -211,24 +207,20 @@ bool RsdShader::loadShader(const Context *rsc) {
 void RsdShader::appendUserConstants() {
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
         const Element *e = mRSProgram->mHal.state.constantTypes[ct]->getElement();
-        for (uint32_t field=0; field < e->getFieldCount(); field++) {
-            const Element *f = e->getField(field);
-            const char *fn = e->getFieldName(field);
-
-            if (fn[0] == '#') {
-                continue;
-            }
+        for (uint32_t field=0; field < e->mHal.state.fieldsCount; field++) {
+            const Element *f = e->mHal.state.fields[field];
+            const char *fn = e->mHal.state.fieldNames[field];
 
             // Cannot be complex
-            rsAssert(!f->getFieldCount());
-            if (f->getType() == RS_TYPE_MATRIX_4X4) {
+            rsAssert(!f->mHal.state.fieldsCount);
+            if (f->mHal.state.dataType == RS_TYPE_MATRIX_4X4) {
                 mShader.append("uniform mat4 UNI_");
-            } else if (f->getType() == RS_TYPE_MATRIX_3X3) {
+            } else if (f->mHal.state.dataType == RS_TYPE_MATRIX_3X3) {
                 mShader.append("uniform mat3 UNI_");
-            } else if (f->getType() == RS_TYPE_MATRIX_2X2) {
+            } else if (f->mHal.state.dataType == RS_TYPE_MATRIX_2X2) {
                 mShader.append("uniform mat2 UNI_");
             } else {
-                switch (f->getComponent().getVectorSize()) {
+                switch (f->mHal.state.vectorSize) {
                 case 1: mShader.append("uniform float UNI_"); break;
                 case 2: mShader.append("uniform vec2 UNI_"); break;
                 case 3: mShader.append("uniform vec3 UNI_"); break;
@@ -239,8 +231,8 @@ void RsdShader::appendUserConstants() {
             }
 
             mShader.append(fn);
-            if (e->getFieldArraySize(field) > 1) {
-                mShader.appendFormat("[%d]", e->getFieldArraySize(field));
+            if (e->mHal.state.fieldArraySizes[field] > 1) {
+                mShader.appendFormat("[%d]", e->mHal.state.fieldArraySizes[field]);
             }
             mShader.append(";\n");
         }
@@ -248,8 +240,8 @@ void RsdShader::appendUserConstants() {
 }
 
 void RsdShader::logUniform(const Element *field, const float *fd, uint32_t arraySize ) {
-    RsDataType dataType = field->getType();
-    uint32_t elementSize = field->getSizeBytes() / sizeof(float);
+    RsDataType dataType = field->mHal.state.dataType;
+    uint32_t elementSize = field->mHal.state.elementSizeBytes / sizeof(float);
     for (uint32_t i = 0; i < arraySize; i ++) {
         if (arraySize > 1) {
             ALOGV("Array Element [%u]", i);
@@ -270,7 +262,7 @@ void RsdShader::logUniform(const Element *field, const float *fd, uint32_t array
             ALOGV("{%f, %f",  fd[0], fd[2]);
             ALOGV(" %f, %f}", fd[1], fd[3]);
         } else {
-            switch (field->getComponent().getVectorSize()) {
+            switch (field->mHal.state.vectorSize) {
             case 1:
                 ALOGV("Uniform 1 = %f", fd[0]);
                 break;
@@ -295,7 +287,7 @@ void RsdShader::logUniform(const Element *field, const float *fd, uint32_t array
 
 void RsdShader::setUniform(const Context *rsc, const Element *field, const float *fd,
                          int32_t slot, uint32_t arraySize ) {
-    RsDataType dataType = field->getType();
+    RsDataType dataType = field->mHal.state.dataType;
     if (dataType == RS_TYPE_MATRIX_4X4) {
         RSD_CALL_GL(glUniformMatrix4fv, slot, arraySize, GL_FALSE, fd);
     } else if (dataType == RS_TYPE_MATRIX_3X3) {
@@ -303,7 +295,7 @@ void RsdShader::setUniform(const Context *rsc, const Element *field, const float
     } else if (dataType == RS_TYPE_MATRIX_2X2) {
         RSD_CALL_GL(glUniformMatrix2fv, slot, arraySize, GL_FALSE, fd);
     } else {
-        switch (field->getComponent().getVectorSize()) {
+        switch (field->mHal.state.vectorSize) {
         case 1:
             RSD_CALL_GL(glUniform1fv, slot, arraySize, fd);
             break;
@@ -458,15 +450,11 @@ void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool 
 
         const uint8_t *data = static_cast<const uint8_t *>(alloc->getPtr());
         const Element *e = mRSProgram->mHal.state.constantTypes[ct]->getElement();
-        for (uint32_t field=0; field < e->getFieldCount(); field++) {
-            const Element *f = e->getField(field);
-            const char *fieldName = e->getFieldName(field);
-            // If this field is padding, skip it
-            if (fieldName[0] == '#') {
-                continue;
-            }
+        for (uint32_t field=0; field < e->mHal.state.fieldsCount; field++) {
+            const Element *f = e->mHal.state.fields[field];
+            const char *fieldName = e->mHal.state.fieldNames[field];
 
-            uint32_t offset = e->getFieldOffsetBytes(field);
+            uint32_t offset = e->mHal.state.fieldOffsetBytes[field];
             const float *fd = reinterpret_cast<const float *>(&data[offset]);
 
             int32_t slot = -1;
@@ -505,7 +493,7 @@ void RsdShader::initAttribAndUniformArray() {
     mAttribCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
         const Element *elem = mRSProgram->mHal.state.inputElements[ct];
-        for (uint32_t field=0; field < elem->getFieldCount(); field++) {
+        for (uint32_t field=0; field < elem->mHal.state.fieldsCount; field++) {
             if (elem->getFieldName(field)[0] != '#') {
                 mAttribCount ++;
             }
@@ -515,12 +503,7 @@ void RsdShader::initAttribAndUniformArray() {
     mUniformCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
         const Element *elem = mRSProgram->mHal.state.constantTypes[ct]->getElement();
-
-        for (uint32_t field=0; field < elem->getFieldCount(); field++) {
-            if (elem->getFieldName(field)[0] != '#') {
-                mUniformCount ++;
-            }
-        }
+        mUniformCount += elem->mHal.state.fieldsCount;
     }
     mUniformCount += mRSProgram->mHal.state.texturesCount;
 
@@ -540,17 +523,17 @@ void RsdShader::initAttribAndUniformArray() {
 
 void RsdShader::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths,
                                    uint32_t *count, const char *prefix) {
-    rsAssert(e->getFieldCount());
-    for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
-        const Element *ce = e->getField(ct);
-        if (ce->getFieldCount()) {
+    rsAssert(e->mHal.state.fieldsCount);
+    for (uint32_t ct=0; ct < e->mHal.state.fieldsCount; ct++) {
+        const Element *ce = e->mHal.state.fields[ct];
+        if (ce->mHal.state.fieldsCount) {
             initAddUserElement(ce, names, arrayLengths, count, prefix);
-        } else if (e->getFieldName(ct)[0] != '#') {
+        } else {
             String8 tmp(prefix);
-            tmp.append(e->getFieldName(ct));
+            tmp.append(e->mHal.state.fieldNames[ct]);
             names[*count].setTo(tmp.string());
             if (arrayLengths) {
-                arrayLengths[*count] = e->getFieldArraySize(ct);
+                arrayLengths[*count] = e->mHal.state.fieldArraySizes[ct];
             }
             (*count)++;
         }
