@@ -22,8 +22,11 @@ Refer to <a href="{@docRoot}guide/developing/device.html#setting-up">Setting up 
 start development with a device.</p>
 
 <p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
-(purchased from the Android Market publisher site), a Nexus One, or a Nexus S, then you should
-use the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver.</p>
+(purchased from the Android Market publisher site), a Nexus One, or a Nexus S, then you need
+the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
+Nexus driver, however, is distributed by <a
+href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
+(listed as model SCH-I515).</p>
 
 <p>For instructions about how to install the driver on Windows, follow the guide for <a
  href="{@docRoot}sdk/win-usb.html#InstallingDriver">Installing the USB Driver</a>.</p>
