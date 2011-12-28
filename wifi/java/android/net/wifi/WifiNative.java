@@ -28,20 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Native calls for sending requests to the supplicant daemon, and for
- * receiving asynchronous events. All methods of the form "xxxxCommand()"
- * must be single-threaded, to avoid requests and responses initiated
- * from multiple threads from being intermingled.
- * <p/>
- * Note that methods whose names are not of the form "xxxCommand()" do
- * not talk to the supplicant daemon.
- * Also, note that all WifiNative calls should happen in the
- * WifiStateTracker class except for waitForEvent() call which is
- * on a separate monitor channel for WifiMonitor
+ * Native calls for bring up/shut down of the supplicant daemon and for
+ * sending requests to the supplicant daemon
  *
- * TODO: clean up the API and move the functionality from JNI to here. We should
- * be able to get everything done with doBooleanCommand, doIntCommand and
- * doStringCommand native commands
+ * waitForEvent() is called on the monitor thread for events. All other methods
+ * must be serialized from the framework.
  *
  * {@hide}
  */
@@ -50,8 +41,6 @@ public class WifiNative {
     static final int BLUETOOTH_COEXISTENCE_MODE_ENABLED = 0;
     static final int BLUETOOTH_COEXISTENCE_MODE_DISABLED = 1;
     static final int BLUETOOTH_COEXISTENCE_MODE_SENSE = 2;
-
-    public native static String getErrorString(int errorCode);
 
     public native static boolean loadDriver();
 
@@ -63,14 +52,6 @@ public class WifiNative {
 
     public native static boolean startP2pSupplicant();
 
-    /* Does a graceful shutdown of supplicant. Is a common stop function for both p2p and sta.
-     *
-     * Note that underneath we use a harsh-sounding "terminate" supplicant command
-     * for a graceful stop and a mild-sounding "stop" interface
-     * to kill the process
-     */
-    public native static boolean stopSupplicant();
-
     /* Sends a kill signal to supplicant. To be used when we have lost connection
        or when the supplicant is hung */
     public native static boolean killSupplicant();
@@ -79,76 +60,216 @@ public class WifiNative {
 
     public native static void closeSupplicantConnection();
 
-    public native static boolean pingCommand();
+    /**
+     * Wait for the supplicant to send an event, returning the event string.
+     * @return the event string sent by the supplicant.
+     */
+    public native static String waitForEvent();
 
-    public native static boolean scanCommand(boolean forceActive);
+    private native static boolean doBooleanCommand(String command);
 
-    public native static boolean setScanModeCommand(boolean setActive);
+    private native static int doIntCommand(String command);
 
-    public native static String listNetworksCommand();
+    private native static String doStringCommand(String command);
 
-    public native static int addNetworkCommand();
+    public static boolean ping() {
+        String pong = doStringCommand("PING");
+        return (pong != null && pong.equals("PONG"));
+    }
 
-    public native static boolean setNetworkVariableCommand(int netId, String name, String value);
+    public static boolean scan() {
+       return doBooleanCommand("SCAN");
+    }
 
-    public native static String getNetworkVariableCommand(int netId, String name);
+    public static boolean setScanMode(boolean setActive) {
+        if (setActive) {
+            return doBooleanCommand("DRIVER SCAN-ACTIVE");
+        } else {
+            return doBooleanCommand("DRIVER SCAN-PASSIVE");
+        }
+    }
 
-    public native static boolean removeNetworkCommand(int netId);
+    /* Does a graceful shutdown of supplicant. Is a common stop function for both p2p and sta.
+     *
+     * Note that underneath we use a harsh-sounding "terminate" supplicant command
+     * for a graceful stop and a mild-sounding "stop" interface
+     * to kill the process
+     */
+    public static boolean stopSupplicant() {
+        return doBooleanCommand("TERMINATE");
+    }
 
-    public native static boolean enableNetworkCommand(int netId, boolean disableOthers);
+    public static String listNetworks() {
+        return doStringCommand("LIST_NETWORKS");
+    }
 
-    public native static boolean disableNetworkCommand(int netId);
+    public static int addNetwork() {
+        return doIntCommand("ADD_NETWORK");
+    }
 
-    public native static boolean reconnectCommand();
+    public static boolean setNetworkVariable(int netId, String name, String value) {
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(value)) return false;
+        return doBooleanCommand("SET_NETWORK " + netId + " " + name + " " + value);
+    }
 
-    public native static boolean reassociateCommand();
+    public static String getNetworkVariable(int netId, String name) {
+        if (TextUtils.isEmpty(name)) return null;
+        return doStringCommand("GET_NETWORK " + netId + " " + name);
+    }
 
-    public native static boolean disconnectCommand();
+    public static boolean removeNetwork(int netId) {
+        return doBooleanCommand("REMOVE_NETWORK " + netId);
+    }
 
-    public native static String statusCommand();
+    public static boolean enableNetwork(int netId, boolean disableOthers) {
+        if (disableOthers) {
+            return doBooleanCommand("SELECT_NETWORK " + netId);
+        } else {
+            return doBooleanCommand("ENABLE_NETWORK " + netId);
+        }
+    }
 
-    public native static String getMacAddressCommand();
+    public static boolean disableNetwork(int netId) {
+        return doBooleanCommand("DISABLE_NETWORK " + netId);
+    }
 
-    public native static String scanResultsCommand();
+    public static boolean reconnect() {
+        return doBooleanCommand("RECONNECT");
+    }
 
-    public native static boolean startDriverCommand();
+    public static boolean reassociate() {
+        return doBooleanCommand("REASSOCIATE");
+    }
 
-    public native static boolean stopDriverCommand();
+    public static boolean disconnect() {
+        return doBooleanCommand("DISCONNECT");
+    }
+
+    public static String status() {
+        return doStringCommand("STATUS");
+    }
+
+    public static String getMacAddress() {
+        //Macaddr = XX.XX.XX.XX.XX.XX
+        String ret = doStringCommand("DRIVER MACADDR");
+        if (!TextUtils.isEmpty(ret)) {
+            String[] tokens = ret.split(" = ");
+            if (tokens.length == 2) return tokens[1];
+        }
+        return null;
+    }
+
+    public static String scanResults() {
+        return doStringCommand("SCAN_RESULTS");
+    }
+
+    public static boolean startDriver() {
+        return doBooleanCommand("DRIVER START");
+    }
+
+    public static boolean stopDriver() {
+        return doBooleanCommand("DRIVER STOP");
+    }
 
 
     /**
      * Start filtering out Multicast V4 packets
      * @return {@code true} if the operation succeeded, {@code false} otherwise
+     *
+     * Multicast filtering rules work as follows:
+     *
+     * The driver can filter multicast (v4 and/or v6) and broadcast packets when in
+     * a power optimized mode (typically when screen goes off).
+     *
+     * In order to prevent the driver from filtering the multicast/broadcast packets, we have to
+     * add a DRIVER RXFILTER-ADD rule followed by DRIVER RXFILTER-START to make the rule effective
+     *
+     * DRIVER RXFILTER-ADD Num
+     *   where Num = 0 - Unicast, 1 - Broadcast, 2 - Mutil4 or 3 - Multi6
+     *
+     * and DRIVER RXFILTER-START
+     * In order to stop the usage of these rules, we do
+     *
+     * DRIVER RXFILTER-STOP
+     * DRIVER RXFILTER-REMOVE Num
+     *   where Num is as described for RXFILTER-ADD
+     *
+     * The  SETSUSPENDOPT driver command overrides the filtering rules
      */
-    public native static boolean startFilteringMulticastV4Packets();
+    public static boolean startFilteringMulticastV4Packets() {
+        return doBooleanCommand("DRIVER RXFILTER-STOP")
+            && doBooleanCommand("DRIVER RXFILTER-REMOVE 2")
+            && doBooleanCommand("DRIVER RXFILTER-START");
+    }
 
     /**
      * Stop filtering out Multicast V4 packets.
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public native static boolean stopFilteringMulticastV4Packets();
+    public static boolean stopFilteringMulticastV4Packets() {
+        return doBooleanCommand("DRIVER RXFILTER-STOP")
+            && doBooleanCommand("DRIVER RXFILTER-ADD 2")
+            && doBooleanCommand("DRIVER RXFILTER-START");
+    }
 
     /**
      * Start filtering out Multicast V6 packets
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public native static boolean startFilteringMulticastV6Packets();
+    public static boolean startFilteringMulticastV6Packets() {
+        return doBooleanCommand("DRIVER RXFILTER-STOP")
+            && doBooleanCommand("DRIVER RXFILTER-REMOVE 3")
+            && doBooleanCommand("DRIVER RXFILTER-START");
+    }
 
     /**
      * Stop filtering out Multicast V6 packets.
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public native static boolean stopFilteringMulticastV6Packets();
+    public static boolean stopFilteringMulticastV6Packets() {
+        return doBooleanCommand("DRIVER RXFILTER-STOP")
+            && doBooleanCommand("DRIVER RXFILTER-ADD 3")
+            && doBooleanCommand("DRIVER RXFILTER-START");
+    }
 
-    public native static boolean setPowerModeCommand(int mode);
+    public static int getPowerMode() {
+        String ret = doStringCommand("DRIVER GETPOWER");
+        if (!TextUtils.isEmpty(ret)) {
+            // reply comes back in the form "powermode = XX" where XX is the
+            // number we're interested in.
+            String[] tokens = ret.split(" = ");
+            try {
+                if (tokens.length == 2) return Integer.parseInt(tokens[1]);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
 
-    public native static int getBandCommand();
+    public static boolean setPowerMode(int mode) {
+        return doBooleanCommand("DRIVER POWERMODE " + mode);
+    }
 
-    public native static boolean setBandCommand(int band);
+    public static int getBand() {
+       String ret = doStringCommand("DRIVER GETBAND");
+        if (!TextUtils.isEmpty(ret)) {
+            //reply is "BAND X" where X is the band
+            String[] tokens = ret.split(" ");
+            try {
+                if (tokens.length == 2) return Integer.parseInt(tokens[1]);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
 
-    public native static int getPowerModeCommand();
+    public static boolean setBand(int band) {
+        return doBooleanCommand("DRIVER SETBAND " + band);
+    }
 
-    /**
+   /**
      * Sets the bluetooth coexistence mode.
      *
      * @param mode One of {@link #BLUETOOTH_COEXISTENCE_MODE_DISABLED},
@@ -156,7 +277,9 @@ public class WifiNative {
      *            {@link #BLUETOOTH_COEXISTENCE_MODE_SENSE}.
      * @return Whether the mode was successfully set.
      */
-    public native static boolean setBluetoothCoexistenceModeCommand(int mode);
+    public static boolean setBluetoothCoexistenceMode(int mode) {
+        return doBooleanCommand("DRIVER BTCOEXMODE " + mode);
+    }
 
     /**
      * Enable or disable Bluetooth coexistence scan mode. When this mode is on,
@@ -166,43 +289,57 @@ public class WifiNative {
      * @param isSet whether to enable or disable this mode
      * @return {@code true} if the command succeeded, {@code false} otherwise.
      */
-    public native static boolean setBluetoothCoexistenceScanModeCommand(boolean setCoexScanMode);
+    public static boolean setBluetoothCoexistenceScanMode(boolean setCoexScanMode) {
+        if (setCoexScanMode) {
+            return doBooleanCommand("DRIVER BTCOEXSCAN-START");
+        } else {
+            return doBooleanCommand("DRIVER BTCOEXSCAN-STOP");
+        }
+    }
 
-    public native static boolean saveConfigCommand();
+    public static boolean saveConfig() {
+        // Make sure we never write out a value for AP_SCAN other than 1
+        return doBooleanCommand("AP_SCAN 1") && doBooleanCommand("SAVE_CONFIG");
+    }
 
-    public native static boolean reloadConfigCommand();
+    public static boolean setScanResultHandling(int mode) {
+        return doBooleanCommand("AP_SCAN " + mode);
+    }
 
-    public native static boolean setScanResultHandlingCommand(int mode);
+    public static boolean addToBlacklist(String bssid) {
+        if (TextUtils.isEmpty(bssid)) return false;
+        return doBooleanCommand("BLACKLIST " + bssid);
+    }
 
-    public native static boolean addToBlacklistCommand(String bssid);
+    public static boolean clearBlacklist() {
+        return doBooleanCommand("BLACKLIST clear");
+    }
 
-    public native static boolean clearBlacklistCommand();
+    public static boolean setSuspendOptimizations(boolean enabled) {
+        if (enabled) {
+            return doBooleanCommand("DRIVER SETSUSPENDOPT 0");
+        } else {
+            return doBooleanCommand("DRIVER SETSUSPENDOPT 1");
+        }
+    }
 
-    public native static boolean startWpsPbcCommand(String bssid);
+    public static boolean setCountryCode(String countryCode) {
+        return doBooleanCommand("DRIVER COUNTRY " + countryCode);
+    }
 
-    public native static boolean startWpsWithPinFromAccessPointCommand(String bssid, String apPin);
+    public static void enableBackgroundScan(boolean enable) {
+        //Note: BGSCAN-START and BGSCAN-STOP are documented in core/res/res/values/config.xml
+        //and will need an update if the names are changed
+        if (enable) {
+            doBooleanCommand("DRIVER BGSCAN-START");
+        } else {
+            doBooleanCommand("DRIVER BGSCAN-STOP");
+        }
+    }
 
-    public native static String startWpsWithPinFromDeviceCommand(String bssid);
-
-    public native static boolean setSuspendOptimizationsCommand(boolean enabled);
-
-    public native static boolean setCountryCodeCommand(String countryCode);
-
-    /**
-     * Wait for the supplicant to send an event, returning the event string.
-     * @return the event string sent by the supplicant.
-     */
-    public native static String waitForEvent();
-
-    public native static void enableBackgroundScanCommand(boolean enable);
-
-    public native static void setScanIntervalCommand(int scanInterval);
-
-    private native static boolean doBooleanCommand(String command);
-
-    private native static int doIntCommand(String command);
-
-    private native static String doStringCommand(String command);
+    public static void setScanInterval(int scanInterval) {
+        doBooleanCommand("SCAN_INTERVAL " + scanInterval);
+    }
 
     /** Example output:
      * RSSI=-65
@@ -214,33 +351,46 @@ public class WifiNative {
         return doStringCommand("SIGNAL_POLL");
     }
 
-    public static boolean wpsPbc() {
+    public static boolean startWpsPbc() {
         return doBooleanCommand("WPS_PBC");
     }
 
-    public static boolean wpsPin(String pin) {
+    public static boolean startWpsPbc(String bssid) {
+        return doBooleanCommand("WPS_PBC " + bssid);
+    }
+
+    public static boolean startWpsPinKeypad(String pin) {
         return doBooleanCommand("WPS_PIN any " + pin);
+    }
+
+    public static String startWpsPinDisplay(String bssid) {
+        return doStringCommand("WPS_PIN " + bssid);
+    }
+
+    /* Configures an access point connection */
+    public static boolean startWpsRegistrar(String bssid, String pin) {
+        return doBooleanCommand("WPS_REG " + bssid + " " + pin);
     }
 
     public static boolean setPersistentReconnect(boolean enabled) {
         int value = (enabled == true) ? 1 : 0;
-        return WifiNative.doBooleanCommand("SET persistent_reconnect " + value);
+        return doBooleanCommand("SET persistent_reconnect " + value);
     }
 
     public static boolean setDeviceName(String name) {
-        return WifiNative.doBooleanCommand("SET device_name " + name);
+        return doBooleanCommand("SET device_name " + name);
     }
 
     public static boolean setDeviceType(String type) {
-        return WifiNative.doBooleanCommand("SET device_type " + type);
+        return doBooleanCommand("SET device_type " + type);
     }
 
     public static boolean setConfigMethods(String cfg) {
-        return WifiNative.doBooleanCommand("SET config_methods " + cfg);
+        return doBooleanCommand("SET config_methods " + cfg);
     }
 
     public static boolean setP2pSsidPostfix(String postfix) {
-        return WifiNative.doBooleanCommand("SET p2p_ssid_postfix " + postfix);
+        return doBooleanCommand("SET p2p_ssid_postfix " + postfix);
     }
 
     public static boolean p2pFind() {
@@ -397,7 +547,7 @@ public class WifiNative {
     }
 
     public static String p2pGetDeviceAddress() {
-        String status = statusCommand();
+        String status = status();
         if (status == null) return "";
 
         String[] tokens = status.split("\n");
