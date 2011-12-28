@@ -17,32 +17,20 @@
 package android.net.http;
 
 
-import com.android.internal.net.DomainNameValidator;
-
-import org.apache.harmony.security.provider.cert.X509CertImpl;
-import org.apache.harmony.xnet.provider.jsse.SSLParametersImpl;
-
 import java.io.IOException;
-
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.util.Date;
-
+import javax.net.ssl.DefaultHostnameVerifier;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
+import org.apache.harmony.security.provider.cert.X509CertImpl;
+import org.apache.harmony.xnet.provider.jsse.SSLParametersImpl;
 
 /**
  * Class responsible for all server certificate validation functionality
- * 
+ *
  * {@hide}
  */
 class CertificateChainValidator {
@@ -52,6 +40,9 @@ class CertificateChainValidator {
      */
     private static final CertificateChainValidator sInstance
             = new CertificateChainValidator();
+
+    private static final DefaultHostnameVerifier sVerifier
+            = new DefaultHostnameVerifier();
 
     /**
      * @return The singleton instance of the certificates chain validator
@@ -147,7 +138,10 @@ class CertificateChainValidator {
             throw new IllegalArgumentException("certificate for this site is null");
         }
 
-        if (!DomainNameValidator.match(currCertificate, domain)) {
+        boolean valid = domain != null
+                && !domain.isEmpty()
+                && sVerifier.verify(domain, currCertificate);
+        if (!valid) {
             if (HttpLog.LOGV) {
                 HttpLog.v("certificate not for this host: " + domain);
             }
