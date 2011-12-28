@@ -572,6 +572,9 @@ public class WifiStateMachine extends StateMachine {
         mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         mLastSignalLevel = -1;
 
+        /* Set default interface for all primary socket communication */
+        WifiNative.setDefaultInterface(mInterfaceName);
+
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent scanIntent = new Intent(ACTION_START_SCAN, null);
         mScanIntent = PendingIntent.getBroadcast(mContext, SCAN_REQUEST, scanIntent, 0);
