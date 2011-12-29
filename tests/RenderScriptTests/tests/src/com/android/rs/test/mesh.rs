@@ -38,7 +38,7 @@ static bool test_mesh_getters() {
     _RS_ASSERT(p0 == RS_PRIMITIVE_POINT);
     _RS_ASSERT(p1 == RS_PRIMITIVE_LINE);
     _RS_ASSERT(p2 == RS_PRIMITIVE_TRIANGLE);
-    _RS_ASSERT(p3 == RS_PRIMITIVE_POINT);
+    _RS_ASSERT(p3 == RS_PRIMITIVE_INVALID);
 
     if (failed) {
         rsDebug("test_mesh_getters FAILED", 0);

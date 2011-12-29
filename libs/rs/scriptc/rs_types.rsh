@@ -412,7 +412,9 @@ typedef enum {
     RS_PRIMITIVE_LINE_STRIP,
     RS_PRIMITIVE_TRIANGLE,
     RS_PRIMITIVE_TRIANGLE_STRIP,
-    RS_PRIMITIVE_TRIANGLE_FAN
+    RS_PRIMITIVE_TRIANGLE_FAN,
+
+    RS_PRIMITIVE_INVALID = 100,
 } rs_primitive;
 
 /**
@@ -467,6 +469,8 @@ typedef enum {
     RS_TYPE_PROGRAM_VERTEX,
     RS_TYPE_PROGRAM_RASTER,
     RS_TYPE_PROGRAM_STORE,
+
+    RS_TYPE_INVALID = 10000,
 } rs_data_type;
 
 /**
@@ -486,6 +490,8 @@ typedef enum {
     RS_KIND_PIXEL_RGB,
     RS_KIND_PIXEL_RGBA,
     RS_KIND_PIXEL_DEPTH,
+
+    RS_KIND_INVALID = 100,
 } rs_data_kind;
 
 #endif
