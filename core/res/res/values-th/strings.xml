@@ -73,11 +73,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"บริการข้อมูลถูกปิดกั้น"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"บริการฉุกเฉินถูกปิดกั้น"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"บริการเสียงถูกปิดกั้น"</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"บริการเสียงทั้งหมดถูกปิดกั้น"</string>
+    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"บริการเสียงทั้งหมดถูกบล็อก"</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"บริการ SMS ถูกปิดกั้น"</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"บริการเสียง/ข้อมูลถูกปิดกั้น"</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"บริการเสียง/ข้อมูลถูกบล็อก"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"บริการเสียง/SMS ถูกปิดกั้น"</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"บริการเสียง/ข้อมูล/SMS ทั้งหมดถูกปิดกั้น"</string>
+    <string name="RestrictedOnAll" msgid="5643028264466092821">"บริการเสียง/ข้อมูล/SMS ทั้งหมดถูกบล็อก"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"เสียง"</string>
     <string name="serviceClassData" msgid="872456782077937893">"ข้อมูล"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"โทรสาร"</string>
@@ -108,27 +108,27 @@
     <string name="fcComplete" msgid="3118848230966886575">"รหัสคุณลักษณะเสร็จสมบูรณ์"</string>
     <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสคุณลักษณะไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ตกลง"</string>
-    <string name="httpError" msgid="6603022914760066338">"เกิดข้อผิดพลาดกับเครือข่าย"</string>
-    <string name="httpErrorLookup" msgid="4517085806977851374">"ไม่พบ URL"</string>
+    <string name="httpError" msgid="7956392511146698522">"เกิดข้อผิดพลาดของเครือข่าย"</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"ไม่พบ URL"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"ไม่สนับสนุนสกีมการตรวจสอบสิทธิ์ของไซต์นี้"</string>
-    <string name="httpErrorAuth" msgid="7293960746955020542">"การตรวจสอบสิทธิ์สำเร็จแล้ว"</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"ไม่สามารถตรวจสอบสิทธิ์"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"การตรวจสอบสิทธิ์ทางพร็อกซีเซิร์ฟเวอร์ไม่สำเร็จ"</string>
-    <string name="httpErrorConnect" msgid="7623096283505770433">"เชื่อมต่อไปยังเซิร์ฟเวอร์ไม่สำเร็จ"</string>
-    <string name="httpErrorIO" msgid="4270874999047767599">"เซิร์ฟเวอร์ไม่สามารถสื่อสาร โปรดลองอีกครั้งในภายหลัง"</string>
+    <string name="httpErrorConnect" msgid="8714273236364640549">"ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์"</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"ไม่สามารถสื่อสารกับเซิร์ฟเวอร์ ลองอีกครั้งในภายหลัง"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"หมดเวลาเชื่อมต่อกับเซิร์ฟเวอร์"</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"หน้าเว็บมีการเปลี่ยนเส้นทางเซิร์ฟเวอร์มากเกินไป"</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"ไม่สนับสนุนโปรโตคอลนี้"</string>
-    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"สร้างการเชื่อมต่อที่ปลอดภัยไม่ได้"</string>
-    <string name="httpErrorBadUrl" msgid="6088183159988619736">"เปิดหน้าเว็บไม่ได้เนื่องจาก URL ไม่ถูกต้อง"</string>
-    <string name="httpErrorFile" msgid="8250549644091165175">"เข้าถึงไฟล์ไม่ได้"</string>
-    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"ไม่พบไฟล์ที่ขอ"</string>
+    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"ไม่สามารถสร้างการเชื่อมต่อที่ปลอดภัย"</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"ไม่สามารถเปิดหน้าเว็บนี้เนื่องจาก URL ไม่ถูกต้อง"</string>
+    <string name="httpErrorFile" msgid="2170788515052558676">"ไม่สามารถเข้าถึงไฟล์"</string>
+    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"ไม่พบไฟล์ที่ร้องขอ"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"กำลังประมวลผลคำขอมากเกินไป โปรดลองใหม่อีกครั้ง"</string>
-    <string name="notification_title" msgid="1259940370369187045">"ข้อผิดพลาดในการลงชื่อเข้าใช้สำหรับ <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="notification_title" msgid="8967710025036163822">"ข้อผิดพลาดในการลงชื่อเข้าใช้ <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"ซิงค์"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ซิงค์"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"มีการลบ <xliff:g id="CONTENT_TYPE">%s</xliff:g> มากเกินไป"</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"ที่เก็บข้อมูลของแท็บเล็ตเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
-    <string name="low_memory" product="default" msgid="6632412458436461203">"ที่เก็บข้อมูลโทรศัพท์เต็ม! ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
     <string name="me" msgid="6545696007631404292">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ตัวเลือกของแท็บเล็ต"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ตัวเลือกโทรศัพท์"</string>
@@ -137,6 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"ปิดระบบไร้สาย"</string>
     <string name="screen_lock" msgid="799094655496098153">"ล็อกหน้าจอ"</string>
     <string name="power_off" msgid="4266614107412865048">"ปิดเครื่อง"</string>
+    <string name="silent_mode_silent" msgid="319298163018473078">"ปิดเสียง"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"เสียงเรียกเข้าแบบสั่น"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"เปิดเสียง"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิดระบบ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
@@ -157,16 +160,16 @@
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ระบบ Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"บริการที่ต้องเสียค่าใช้จ่าย"</string>
-    <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"อนุญาตให้แอปพลิเคชันทำสิ่งที่คุณต้องเสียค่าใช้จ่าย"</string>
+    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ทำสิ่งที่คุณต้องเสียค่าใช้จ่าย"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"ข้อความของคุณ"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"อ่านและเขียน SMS อีเมล และข้อความอื่นๆ ของคุณ"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ข้อมูลส่วนบุคคลของคุณ"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"การเข้าถึงสมุดโทรศัพท์และปฏิทินที่จัดเก็บอยู่บนแท็บเล็ตโดยตรง"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"เข้าถึงที่อยู่ติดต่อและปฏิทินของที่จัดเก็บบนโทรศัพท์โดยตรง"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"ตำแหน่งของคุณ"</string>
-    <string name="permgroupdesc_location" msgid="2430258821648348660">"ตรวจดูตำแหน่งทางกายภาพของคุณ"</string>
+    <string name="permgroupdesc_location" msgid="5704679763124170100">"ตรวจดูตำแหน่งทางกายภาพของคุณ"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"การสื่อสารของเครือข่าย"</string>
-    <string name="permgroupdesc_network" msgid="4917593670797570584">"อนุญาตให้แอปพลิเคชันเข้าถึงคุณลักษณะของเครือข่ายหลายอย่าง"</string>
+    <string name="permgroupdesc_network" msgid="4478299413241861987">"เข้าถึงคุณลักษณะเครือข่ายต่างๆ"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"บัญชีของคุณ"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"เข้าถึงบัญชีที่ใช้งานได้"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"การควบคุมฮาร์ดแวร์"</string>
@@ -211,11 +214,11 @@
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"จัดลำดับแอปพลิเคชันที่ทำงานอยู่ใหม่"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"อนุญาตให้แอปพลิเคชันย้ายงานไปยังส่วนหน้าและพื้นหลัง แอปพลิเคชันที่เป็นอันตรายอาจบังคับตัวเองให้ไปที่ส่วนหน้าโดยไม่มีการควบคุมจากคุณ"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"หยุดแอปพลิเคชันที่ทำงานอยู่"</string>
-    <string name="permdesc_removeTasks" msgid="1000226123143185094">"อนุญาตให้แอปพลิเคชันลบงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
+    <string name="permdesc_removeTasks" msgid="1394714352062635493">"อนุญาตให้แอปพลิเคชันลบงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"เปิดใช้งานการแก้ไขบกพร่องของแอปพลิเคชัน"</string>
-    <string name="permdesc_setDebugApp" msgid="6215654419903651172">"อนุญาตให้แอปพลิเคชันเปิดการแก้ไขข้อบกพร่องสำหรับแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติการทำงานของแอปพลิเคชันอื่นๆ ได้"</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"อนุญาตให้แอปพลิเคชันเปิดการแก้ไขข้อบกพร่องสำหรับแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติการทำงานของแอปพลิเคชันอื่นๆ ได้"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"เปลี่ยนการตั้งค่า UI ของคุณ"</string>
-    <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"อนุญาตให้แอปพลิเคชันเปลี่ยนการกำหนดค่าปัจจุบัน เช่น ภาษาหรือขนาดตัวอักษรโดยรวม"</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"อนุญาตให้แอปพลิเคชันเปลี่ยนการกำหนดค่าปัจจุบัน เช่น ภาษาหรือขนาดตัวอักษรโดยรวม"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"เปิดใช้งานโหมดใช้ในรถยนต์"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"อนุญาตให้แอปพลิเคชันเปิดใช้งานโหมดรถยนต์"</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"จบกระบวนการพื้นหลัง"</string>
@@ -251,11 +254,11 @@
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"ยืนยันการสำรองข้อมูลหรือการคืนค่าทั้งหมด"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"อนุญาตให้แอปพลิเคชันเปิดส่วนติดต่อผู้ใช้สำหรับยืนยันการสำรองข้อมูลเต็มรูปแบบ การอนุญาตนี้ไม่ใช้กับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"แสดงหน้าต่างที่ไม่ได้รับอนุญาต"</string>
-    <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"อนุญาตให้แอปพลิเคชันสร้างหน้าต่างที่มีวัตถุประสงค์เพื่อใช้โดยส่วนติดต่อผู้ใช้ของระบบภายใน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"อนุญาตให้แอปพลิเคชันสร้างหน้าต่างสำหรับให้ใช้โดยส่วนติดต่อผู้ใช้ของระบบภายใน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"แสดงการแจ้งเตือนในระดับระบบ"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"อนุญาตให้แอปพลิเคชันแสดงหน้าต่างการแจ้งเตือนของระบบ แอปพลิเคชันที่เป็นอันตรายอาจเข้าควบคุมทั้งหน้าจอ"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"แก้ไขความเร็วภาพเคลื่อนไหวสากล"</string>
-    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"อนุญาตให้แอปพลิเคชันเปลี่ยนความเร็วในการเคลื่อนไหวทั่วไป (ภาพเคลื่อนไหวได้เร็วขึ้นหรือช้าลง) ได้ตลอดเวลา"</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"อนุญาตให้แอปพลิเคชันเปลี่ยนความเร็วในการเคลื่อนไหวทั่วไป (ภาพเคลื่อนไหวได้เร็วขึ้นหรือช้าลง) ได้ตลอดเวลา"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"จัดการโทเค็นของแอปพลิเคชัน"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"อนุญาตให้แอปพลิเคชันสร้างและจัดการโทเค็นของตนเอง โดยข้ามการจัดลำดับ Z ปกติไป ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"กดปุ่มต่างๆ และปุ่ม Ctrl"</string>
@@ -302,7 +305,7 @@
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"อนุญาตให้แอปพลิเคชันอ่านจากไฟล์บันทึกต่างๆ ของระบบ เพื่อค้นหาข้อมูลทั่วไปเกี่ยวกับสิ่งที่คุณกำลังทำอยู่กับแท็บเล็ต ซึ่งอาจรวมไปถึงข้อมูลส่วนบุคคลหรือส่วนตัว"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"อนุญาตให้แอปพลิเคชันอ่านจากไฟล์บันทึกต่างๆ ของระบบ เพื่อค้นหาข้อมูลทั่วไปเกี่ยวกับสิ่งที่คุณกำลังทำอยู่กับโทรศัพท์ ซึ่งอาจรวมไปถึงข้อมูลส่วนบุคคลหรือส่วนตัว"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ใช้ตัวถอดรหัสสื่อใดๆ ก็ได้สำหรับการเล่น"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"อนุญาตให้แอปพลิเคชันใช้ตัวถอดรหัสสื่อใดก็ได้ที่ติดตั้งไว้เพื่อถอดรหัสสำหรับการเล่น"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"อนุญาตให้แอปพลิเคชันใช้ตัวถอดรหัสสื่อใดก็ได้ที่ติดตั้งไว้เพื่อถอดรหัสสำหรับการเล่น"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"อ่าน/เขียนไปยังรีซอร์สที่เป็นเจ้าของโดยกลุ่มวินิจฉัย"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"อนุญาตให้แอปพลิเคชันอ่านและเขียนไปยังทรัพยากรที่เป็นของกลุ่มวินิจฉัย เช่น ไฟล์ใน /dev การทำเช่นนี้อาจส่งผลต่อความเสถียรและความปลอดภัยของระบบ และควรใช้สำหรับการวินิจฉัยเกี่ยวกับฮาร์ดแวร์โดยเฉพาะที่ทำโดยผู้ผลิตหรือผู้ให้บริการเท่านั้น"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"เปิดหรือปิดใช้งานคอมโพเนนต์ของแอปพลิเคชัน"</string>
@@ -436,7 +439,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงเขตเวลาของแท็บเล็ต"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงเขตเวลาของโทรศัพท์"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ทำหน้าที่เป็น AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"อนุญาตให้แอปพลิเคชันโทรไปยัง AccountAuthenticators"</string>
+    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"อนุญาตให้แอปพลิเคชันโทรไปยัง AccountAuthenticators"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"พบบัญชีที่ไม่รู้จัก"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"อนุญาตให้แอปพลิเคชันเรียกรายการบัญชีที่แท็บเล็ตรู้จัก"</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"อนุญาตให้แอปพลิเคชันเรียกรายการบัญชีที่โทรศัพท์รู้จัก"</string>
@@ -468,9 +471,9 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"อนุญาตให้แอปพลิเคชันกำหนดค่าแท็บเล็ตบลูทูธในตัวเครื่อง รวมทั้งค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"อนุญาตให้แอปพลิเคชันกำหนดค่าโทรศัพท์บลูทูธในตัวเครื่อง ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"ดูสถานะของ WiMAX"</string>
-    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับสถานะของ WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับสถานะของ WiMAX"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"เปลี่ยนสถานะของ WiMAX"</string>
-    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อกับเครือข่าย WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อกับเครือข่าย WiMAX"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"สร้างการเชื่อมต่อบลูทูธ"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าของแท็บเล็ตบลูทูธในตัวเครื่อง ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อกับอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าของโทรศัพท์บลูทูธในพื้นที่ ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อด้วยอุปกรณ์ที่จับคู่ไว้"</string>
@@ -507,27 +510,27 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"จัดการนโยบายเครือข่าย"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"อนุญาตให้แอปพลิเคชันจัดการนโยบายเครือข่ายและกำหนดกฎเฉพาะแอปพลิเคชัน"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"แก้ไขการบันทึกบัญชีการใช้งานเครือข่าย"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"อนุญาตให้แอปพลิเคชันแก้ไขวิธีการบันทึกบัญชีการใช้งานเครือข่ายของแอปพลิเคชัน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"อนุญาตให้แอปพลิเคชันแก้ไขวิธีการบันทึกบัญชีการใช้งานเครือข่ายของแอปพลิเคชัน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
+    <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
-    <string name="policydesc_resetPassword" msgid="5391240616981297361">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ล็อกหน้าจอ"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"ควบคุมว่าหน้าจอจะล็อกอย่างไรและเมื่อใด"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"ควบคุมว่าหน้าจอจะล็อกอย่างไรและเมื่อใด"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"ตั้งค่าวันหมดอายุของรหัสผ่านล็อกหน้าจอ"</string>
-    <string name="policydesc_expirePassword" msgid="4844430354224822074">"ควบคุมความถี่ในการเปลี่ยนรหัสผ่านล็อกหน้าจอ"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ควบคุมความถี่ในการเปลี่ยนรหัสผ่านล็อกหน้าจอ"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ตั้งค่าการเข้ารหัสที่เก็บข้อมูล"</string>
-    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
-    <string name="policydesc_disableCamera" msgid="5680054212889413366">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -648,7 +651,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"แตะเพื่อพิมพ์รหัสผ่าน"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"พิมพ์รหัสผ่านเพื่อปลดล็อก"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"พิมพ์ PIN เพื่อปลดล็อก"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"รหัส PIN ไม่ถูกต้อง!"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"หากต้องการปลดล็อก กด เมนู ตามด้วย 0"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"หมายเลขฉุกเฉิน"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"ไม่มีบริการ"</string>
@@ -661,6 +664,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ถูกต้อง!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ลองอีกครั้ง"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ลองอีกครั้ง"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"มีความพยายามที่จะใช้ Face Unlock เกินขีดจำกัด"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"กำลังชาร์จ, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"ชาร์จแล้ว"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -694,14 +698,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"ลองใหม่อีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ลืมรูปแบบหรือ"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"ปลดล็อกบัญชี"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"ลองหลายรูปแบบมากเกินไป!"</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"หากต้องการปลดล็อก ให้ลงชื่อเข้าใช้ด้วยบัญชี Google ของคุณ"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"ลองหลายรูปแบบมากเกินไป"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"หากต้องการปลดล็อก ให้ลงชื่อเข้าใช้ด้วยบัญชี Google ของคุณ"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ชื่อผู้ใช้ (อีเมล)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"รหัสผ่าน"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ลงชื่อเข้าใช้"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"กำลังตรวจสอบ..."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"กำลังตรวจสอบ…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ปลดล็อก"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"เปิดเสียง"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"ปิดเสียง"</string>
@@ -718,13 +722,13 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"การทำงาน FACTORY_TEST ได้รับการสนับสนุนเฉพาะสำหรับแพ็คเก็จที่ติดตั้งใน /system/app เท่านั้น"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"ไม่พบแพคเกจที่มีการทำงาน FACTORY_TEST"</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"รีบูต"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"หน้าเว็บที่ \"<xliff:g id="TITLE">%s</xliff:g>\" ระบุว่า:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"หน้าเว็บที่ \"<xliff:g id="TITLE">%s</xliff:g>\" ระบุว่า:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"ไปจากหน้าเว็บนี้หรือไม่"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"แตะ \"ตกลง\" เพื่อทำต่อ หรือ \"ยกเลิก\" เพื่ออยู่ที่หน้าเว็บปัจจุบัน"</string>
     <string name="save_password_label" msgid="6860261758665825069">"ยืนยัน"</string>
-    <string name="double_tap_toast" msgid="2729045387923870404">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"ป้อนอัตโนมัติ"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"ตั้งค่าการป้อนอัตโนมัติ"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"ป้อนอัตโนมัติ"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"ค่าป้อนอัตโนมัติ"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -859,9 +863,9 @@
     <string name="weeks" msgid="6509623834583944518">"สัปดาห์"</string>
     <string name="year" msgid="4001118221013892076">"ปี"</string>
     <string name="years" msgid="6881577717993213522">" ปี"</string>
-    <string name="VideoView_error_title" msgid="5927895235831021723">"ไม่สามารถเล่นวิดีโอ"</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"ปัญหาเกี่ยวกับวิดีโอ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"วิดีโอนี้ไม่สามารถสตรีมไปยังอุปกรณ์นี้"</string>
-    <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"วิดีโอนี้เล่นไม่ได้"</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ไม่สามารถเล่นวิดีโอนี้"</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"ตกลง"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"เที่ยง"</string>
@@ -897,7 +901,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"ทำงานให้เสร็จโดยใช้"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ใช้ค่าเริ่มต้นสำหรับการทำงานนี้"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ล้างค่าเริ่มต้นในการตั้งค่าระบบ &gt; แอปพลิเคชัน &gt; ดาวน์โหลด"</string>
-    <string name="chooseActivity" msgid="1009246475582238425">"เลือกการทำงาน"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"เลือกการทำงาน"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"เลือกแอปพลิเคชันสำหรับอุปกรณ์ USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ไม่มีแอปพลิเคชันใดทำงานนี้ได้"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -931,11 +935,11 @@
     <string name="old_app_description" msgid="2082094275580358049">"อย่าเริ่มแอปพลิเคชันใหม่"</string>
     <string name="new_app_action" msgid="5472756926945440706">"เริ่มต้น <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"หยุดการทำงานของแอปพลิเคชันเก่าโดยไม่บันทึก"</string>
-    <string name="sendText" msgid="5132506121645618310">"เลือกการทำงานของข้อความ"</string>
+    <string name="sendText" msgid="5209874571959469142">"เลือกการทำงานกับข้อความ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ระดับความดังเสียงเรียกเข้า"</string>
     <string name="volume_music" msgid="5421651157138628171">"ระดับเสียงของสื่อ"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"กำลังเล่นผ่านบลูทูธ"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"เลือกปิดเสียงเรียกเข้า"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ตั้งปิดเสียงเรียกเข้า"</string>
     <string name="volume_call" msgid="3941680041282788711">"ระดับเสียงขณะโทร"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ระดับเสียงบลูทูธขณะโทร"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"ระดับเสียงปลุก"</string>
@@ -959,17 +963,22 @@
     <item quantity="one" msgid="1634101450343277345">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
     <item quantity="other" msgid="7915895323644292768">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ลงชื่อเข้าใช้เครือข่าย WiFi"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"ลงชื่อเข้าใช้เครือข่าย WiFi"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ไม่สามารถเชื่อมต่อ Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" มีสัญญาณอินเทอร์เน็ตไม่ดี"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" มีสัญญาณอินเทอร์เน็ตไม่ดี"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"เริ่มการทำงาน Wi-Fi Direct ซึ่งจะเป็นการปิดการทำงาน Wi-Fi ไคลเอ็นต์/ฮอตสปอต"</string>
-    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"ไม่สามารถเริ่ม Wi-Fi Direct ได้"</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> คลิก \"ตกลง\" เพื่อยอมรับ"</string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> ป้อน PIN เพื่อดำเนินการต่อ"</string>
-    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"ต้องป้อน PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> บนอุปกรณ์เพียร์ <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> เพื่อให้การตั้งค่าการเชื่อมต่อดำเนินการต่อ"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"เริ่มการทำงาน WiFi Direct ซึ่งจะเป็นการปิดการทำงาน WiFi ไคลเอ็นต์/ฮอตสปอต"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ไม่สามารถเริ่ม WiFi Direct ได้"</string>
+    <string name="accept" msgid="1645267259272829559">"ยอมรับ"</string>
+    <string name="decline" msgid="2112225451706137894">"ปฏิเสธ"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"ส่งข้อความเชิญแล้ว"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"ข้อความเชิญเพื่อเชื่อมต่อ"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"จาก:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"ถึง:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"พิมพ์ PIN ที่ต้องการ:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"เปิด Wi-Fi Direct อยู่"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"แตะเพื่อตั้งค่า"</string>
     <string name="select_character" msgid="3365550120617701745">"ใส่อักขระ"</string>
@@ -982,7 +991,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"เครือข่ายมือถือจะไม่สามารถใช้งานได้จนกว่าคุณจะรีสตาร์ทโดยใส่ซิมการ์ดที่ถูกต้องแล้ว"</string>
     <string name="sim_done_button" msgid="827949989369963775">"เสร็จสิ้น"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"เพิ่มซิมการ์ดแล้ว"</string>
-    <string name="sim_added_message" msgid="1209265974048554242">"คุณต้องรีสตาร์ทอุปกรณ์ของคุณเพื่อเข้าถึงเครือข่ายมือถือ"</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"รีสตาร์ทอุปกรณ์ของคุณเพื่อเข้าถึงเครือข่ายมือถือ"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"รีสตาร์ท"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ตั้งเวลา"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
@@ -991,31 +1000,31 @@
     <string name="no_permissions" msgid="7283357728219338112">"ไม่ต้องการการอนุญาต"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"ซ่อน"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"แสดงทั้งหมด"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"พื้นที่เก็บข้อมูลขนาดใหญ่ USB"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"ที่จัดเก็บข้อมูลจำนวนมากแบบ USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"เชื่อมต่อ USB แล้ว"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างถ้าคุณต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับที่เก็บข้อมูล USB ของ Android"</string>
-    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างถ้าต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับการ์ด SD ของ Android"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างหากคุณต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับที่จัดเก็บข้อมูล USB ของแอนดรอยด์"</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"คุณได้เชื่อมต่อกับคอมพิวเตอร์ผ่าน USB แล้ว แตะปุ่มด้านล่างหากต้องการคัดลอกไฟล์ระหว่างคอมพิวเตอร์กับการ์ด SD ของแอนดรอยด์"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"เปิดที่เก็บข้อมูล USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"เกิดปัญหาในการใช้ที่เก็บข้อมูล USB ของคุณเพื่อเก็บข้อมูลจำนวนมากแบบ USB"</string>
-    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"เกิดปัญหาในการใช้การ์ด SD เพื่อเก็บข้อมูลจำนวนมากแบบ USB"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"เกิดปัญหาในการใช้ที่จัดเก็บข้อมูล USB ของคุณเพื่อเก็บข้อมูลจำนวนมากแบบ USB"</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"เกิดปัญหาในการใช้การ์ด SD เพื่อเก็บข้อมูลจำนวนมากแบบ USB"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"เชื่อมต่อ USB แล้ว"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"เลือกเพื่อคัดลอกไฟล์ไปยัง/จากคอมพิวเตอร์ของคุณ"</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"แตะเพื่อคัดลอกไฟล์ไปยัง/จากคอมพิวเตอร์ของคุณ"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"ปิดที่เก็บข้อมูล USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"เลือกเพื่อปิดที่เก็บข้อมูล USB"</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"แตะเพื่อปิดที่จัดเก็บข้อมูล USB"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"ใช้การจัดเก็บใน USB"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"ก่อนปิดที่เก็บข้อมูล USB ตรวจสอบให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อม (“นำออก”) ที่เก็บข้อมูล USB ของ Android จากคอมพิวเตอร์แล้ว"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"ก่อนปิดที่จัดเก็บข้อมูล USB ตรวจดูให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อม (\"นำออก\") การ์ด SD ของ Android จากคอมพิวเตอร์แล้ว"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (“นำออก”) ที่จัดเก็บข้อมูล USB ของแอนดรอยด์จากคอมพิวเตอร์แล้ว"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (\"นำออก\") การ์ด SD ของแอนดรอยด์จากคอมพิวเตอร์"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"ปิดที่เก็บข้อมูล USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"พบปัญหาในการปิดที่เก็บข้อมูล USB ตรวจสอบให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อมโฮสต์ USB แล้ว จากนั้นลองใหม่อีกครั้ง"</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"เกิดปัญหาในการปิดที่จัดเก็บข้อมูล USB ตรวจสอบให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อมโฮสต์ USB แล้ว จากนั้นลองใหม่อีกครั้ง"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"เปิดที่เก็บข้อมูล USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"หากคุณเปิดที่จัดเก็บข้อมูล USB แอปพลิเคชันบางอย่างที่คุณใช้อยู่จะหยุดและอาจใช้งานไม่ได้จนกว่าคุณจะปิดที่จัดเก็บข้อมูล USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"หากคุณเปิดที่จัดเก็บข้อมูล USB แอปพลิเคชันบางอย่างที่คุณใช้อยู่อาจหยุดทำงานและไม่สามารถใช้ได้จนกว่าจะปิดที่จัดเก็บข้อมูล USB"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"การทำงานของ USB ไม่สำเร็จ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ตกลง"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"เชื่อมต่อเป็นอุปกรณ์สื่อ"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"เชื่อมต่อเป็นกล้องถ่ายรูป"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"เชื่อมต่อเป็นตัวติดตั้ง"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"เชื่อมต่อกับอุปกรณ์เสริม USB แล้ว"</string>
-    <string name="usb_notification_message" msgid="4447869605109736382">"แตะสำหรับตัวเลือก USB อื่นๆ"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"แตะสำหรับตัวเลือก USB อื่นๆ"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ฟอร์แมต USB หรือไม่"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ฟอร์แมตการ์ด SD หรือไม่"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ไฟล์ทั้งหมดที่เก็บไว้ในที่จัดเก็บข้อมูล USB ของคุณจะถูกลบทิ้ง การทำงานนี้ไม่สามารถย้อนกลับได้!"</string>
@@ -1033,12 +1042,12 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"กำลังตรวจสอบหาข้อผิดพลาด"</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"ที่เก็บข้อมูล USB ว่างเปล่า"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"การ์ด SD ว่างเปล่า"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"ที่เก็บข้อมูล USB ว่างเปล่าหรือมีระบบไฟล์ที่ไม่ได้รับการสนับสนุน"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"การ์ด SD ว่างเปล่าหรือมีระบบไฟล์ที่ไม่ได้รับการสนับสนุน"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"ที่จัดเก็บข้อมูล USB ว่างเปล่าหรือมีระบบไฟล์ที่ไม่ได้รับการสนับสนุน"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"การ์ด SD ว่างเปล่าหรือมีระบบไฟล์ที่ไม่ได้รับการสนับสนุน"</string>
     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"ที่เก็บข้อมูล USB เสียหาย"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"การ์ด SD เสียหาย"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"ที่เก็บข้อมูล USB เสียหาย คุณอาจต้องฟอร์แมตใหม่"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"การ์ด SD เสียหาย คุณอาจต้องฟอร์แมตซ้ำ"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"ที่จัดเก็บข้อมูล USB เสียหาย ลองฟอร์แมตอีกครั้ง"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"การ์ด SD เสียหาย ลองฟอร์แมตอีกครั้ง"</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"ที่เก็บข้อมูล USB ถูกนำออกโดยไม่คาดคิด"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"การ์ด SD ถูกนำออกโดยไม่คาดหมาย"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"ยกเลิกการต่อเชื่อมที่เก็บข้อมูล USB ก่อนนำออกเพื่อป้องกันข้อมูลสูญหาย"</string>
@@ -1051,13 +1060,13 @@
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"นำการ์ด SD ออกแล้ว"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"ที่เก็บข้อมูล USB ถูกนำออกแล้ว ใส่สื่อใหม่"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"การ์ด SD ถูกนำออก ใส่การ์ดใหม่"</string>
-    <string name="activity_list_empty" msgid="4168820609403385789">"ไม่พบกิจกรรมที่ตรงกัน"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"ไม่พบกิจกรรมที่ตรงกัน"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"อัปเดตสถิติการใช้ส่วนประกอบ"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"อนุญาตให้แอปพลิเคชันแก้ไขสถิติการใช้งานของส่วนประกอบที่เก็บรวบรวมไว้ ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"คัดลอกเนื้อหา"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"อนุญาตให้แอปพลิเคชันเรียกใช้บริการที่เก็บค่าเริ่มต้นเพื่อคัดลอกเนื้อหา ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
-    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"ข้อผิดพลาดในการขยายวิดเจ็ต"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ไป"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ค้นหา"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ส่ง"</string>
@@ -1069,35 +1078,35 @@
     <string name="create_contact_using" msgid="4947405226788104538">"สร้างที่อยู่ติดต่อ "\n"โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"แอปพลิเคชันต่อไปนี้ขอให้มีการอนุญาตให้เข้าถึงบัญชีของคุณในขณะนี้และในอนาคต"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"คุณต้องการอนุญาตหรือไม่"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"คำขอเข้าถึง"</string>
+    <string name="grant_permissions_header_text" msgid="6874497408201826708">"คำขอเข้าถึง"</string>
     <string name="allow" msgid="7225948811296386551">"อนุญาต"</string>
     <string name="deny" msgid="2081879885755434506">"ปฏิเสธ"</string>
-    <string name="permission_request_notification_title" msgid="5390555465778213840">"ขอการอนุญาต"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"ขอรับการอนุญาต "\n" สำหรับบัญชี <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"การอนุญาตที่ขอ"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"การอนุญาตที่ขอ"\n"สำหรับบัญชี <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"วิธีป้อนข้อมูล"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ซิงค์"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"การเข้าถึง"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"วอลเปเปอร์"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"เปลี่ยนวอลเปเปอร์"</string>
-    <string name="vpn_title" msgid="8219003246858087489">"VPN เปิดใช้งานแล้ว"</string>
+    <string name="vpn_title" msgid="19615213552042827">"VPN เปิดใช้งานแล้ว"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"เปิดใช้งาน VPN โดย <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"แตะเพื่อจัดการเครือข่าย"</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"เชื่อมต่อกับ <xliff:g id="SESSION">%s</xliff:g> แตะเพื่อจัดการเครือข่าย"</string>
+    <string name="vpn_text" msgid="3011306607126450322">"แตะเพื่อจัดการเครือข่าย"</string>
+    <string name="vpn_text_long" msgid="6407351006249174473">"เชื่อมต่อกับ <xliff:g id="SESSION">%s</xliff:g> แตะเพื่อจัดการเครือข่าย"</string>
     <string name="upload_file" msgid="2897957172366730416">"เลือกไฟล์"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ไม่ได้เลือกไฟล์ไว้"</string>
     <string name="reset" msgid="2448168080964209908">"รีเซ็ต"</string>
     <string name="submit" msgid="1602335572089911941">"ส่ง"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"เปิดการใช้งานโหมดรถยนต์"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"เลือกเพื่อออกจากโหมดใช้ในรถยนต์"</string>
+    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"แตะเพื่อออกจากโหมดรถยนต์"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"การปล่อยสัญญาณหรือฮอตสปอตทำงานอยู่"</string>
-    <string name="tethered_notification_message" msgid="3067108323903048927">"แตะเพื่อกำหนดค่า"</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"แตะเพื่อตั้งค่า"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ย้อนกลับ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ถัดไป"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"ข้าม"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"การใช้งานข้อมูลมือถือในระดับสูง"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"เกินจำนวนสูงสุดของข้อมูลมือถือ"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"แตะเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการใช้ข้อมูลมือถือ"</string>
     <string name="no_matches" msgid="8129421908915840737">"ไม่พบรายการที่ตรงกัน"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ค้นหาบนหน้า"</string>
   <plurals name="matches_found">
@@ -1105,10 +1114,10 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> จาก <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"เสร็จสิ้น"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"กำลังยกเลิกการต่อเชื่อมที่เก็บข้อมูล USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"กำลังยกเลิกการต่อเชื่อมการ์ด SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"กำลังลบที่เก็บข้อมูล USB..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"กำลังลบการ์ด SD..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"กำลังยกเลิกการต่อเชื่อมที่จัดเก็บข้อมูล USB..."</string>
+    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"กำลังยกเลิกการต่อเชื่อมการ์ด SD..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"กำลังลบที่จัดเก็บข้อมูล USB..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"กำลังลบการ์ด SD..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"ไม่สามารถลบที่เก็บข้อมูล USB"</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"ไม่สามารถลบการ์ด SD"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"การ์ด SD ถูกนำออกก่อนที่จะยกเลิกการต่อเชื่อม"</string>
@@ -1127,17 +1136,17 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"ใช่"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"ไม่"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"เกินจำนวนการลบสูงสุด"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"พบรายการที่ถูกลบ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> บัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำอะไร"</string>
-    <string name="sync_really_delete" msgid="8933566316059338692">"ลบรายการ"</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"เลิกทำการลบ"</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"ไม่ต้องทำอะไรในขณะนี้"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"มีรายการที่จะลบ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ในบัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำสิ่งใด"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"ลบรายการ"</string>
+    <string name="sync_undo_deletes" msgid="2941317360600338602">"เลิกทำการลบ"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"ไม่ต้องทำอะไรในขณะนี้"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"เลือกบัญชี"</string>
     <string name="add_account_label" msgid="2935267344849993553">"เพิ่มบัญชี"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"คุณต้องการใช้บัญชีใด"</string>
+    <string name="choose_account_text" msgid="6303348737197849675">"คุณต้องการใช้บัญชีใด"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"เพิ่มบัญชี"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"การเพิ่ม"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"การลด"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"แตะ <xliff:g id="VALUE">%s</xliff:g> ค้างไว้"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"แตะ <xliff:g id="VALUE">%s</xliff:g> ค้างไว้"</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"เลื่อนขึ้นเพื่อเพิ่มและเลื่อนลงเพื่อลด"</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"เพิ่มนาที"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"ลดนาที"</string>
@@ -1179,29 +1188,29 @@
     <string name="description_target_silent" msgid="893551287746522182">"ปิดเสียง"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"เปิดเสียง"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"กวาดเพื่อปลดล็อก"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"เสียบชุดหูฟังเพื่อฟังเสียงเมื่อพิมพ์รหัสผ่าน"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"เสียบชุดหูฟังเพื่อฟังเสียงเมื่อพิมพ์รหัสผ่าน"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"เครื่องหมายจุด"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"นำทางไปหน้าแรก"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"นำทางขึ้น"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ตัวเลือกเพิ่มเติม"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"ที่เก็บข้อมูลภายใน"</string>
-    <string name="storage_sd_card" msgid="8921771478629812343">"การ์ด SD"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"ที่จัดเก็บข้อมูลภายใน"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"การ์ด SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ที่เก็บข้อมูล USB"</string>
-    <string name="extract_edit_menu_button" msgid="302060189057163906">"แก้ไข..."</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"แก้ไข"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"คำเตือนการใช้ข้อมูล"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"ปิดใช้งานข้อมูล 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"ปิดใช้งานข้อมูล Wi-Fi แล้ว"</string>
-    <string name="data_usage_limit_body" msgid="4313857592916426843">"แตะเพื่อเปิดใช้งาน"</string>
+    <string name="data_usage_limit_body" msgid="3317964706973601386">"แตะเพื่อเปิดใช้งาน"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"เกินขีดจำกัดข้อมูลมือถือ"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"เกินขีดจำกัดข้อมูล Wi-Fi แล้ว"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> เกินขีดจำกัดที่ระบุไว้"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"จำกัดข้อมูลแบ็กกราวด์"</string>
-    <string name="data_usage_restricted_body" msgid="5087354814839059798">"แตะเพื่อนำข้อจำกัดออก"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"แตะเพื่อนำข้อจำกัดออก"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"ใบรับรองความปลอดภัย"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ใบรับรองนี้ใช้งานได้"</string>
     <string name="issued_to" msgid="454239480274921032">"ออกให้แก่:"</string>
@@ -1221,7 +1230,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"แบ่งปันกับ"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"ล็อกอุปกรณ์อยู่"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <string name="sending" msgid="8715108995741758718">"กำลังส่ง..."</string>
+    <string name="sending" msgid="3245653681008218030">"กำลังส่ง…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"เปิดเบราว์เซอร์หรือไม่"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"รับสายหรือไม่"</string>
+    <string name="SetupCallDefault" msgid="5834948469253758575">"รับสายหรือไม่"</string>
 </resources>

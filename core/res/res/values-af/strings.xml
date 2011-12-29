@@ -73,11 +73,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datadiens word geblokkeer."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Nooddiens word geblokkeer."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Stemdiens word geblokkeer."</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Alle stemdienste is geblokkeer."</string>
+    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Alle stemdienste is geblokkeer."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"SMS-diens word geblokkeer."</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Stem-/datadienste is geblokkeer."</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Stem/data-dienste is geblokkeer."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Stem-/SMS-dienste is geblokkeer."</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"Alle stem-/data-/SMS-dienste is geblokkeer."</string>
+    <string name="RestrictedOnAll" msgid="5643028264466092821">"Alle stem-/data-/SMS-dienste is geblokkeer."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Stem"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
@@ -108,27 +108,27 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kenmerkkode klaar."</string>
     <string name="fcError" msgid="3327560126588500777">"Verbindingsprobleem of ongeldige kenmerk-kode."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="6603022914760066338">"\'n Netwerkfout het voorgekom."</string>
-    <string name="httpErrorLookup" msgid="4517085806977851374">"Die URL kon nie gevind word nie."</string>
+    <string name="httpError" msgid="7956392511146698522">"Daar was \'n netwerkfout."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Kon nie die URL vind nie."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Die werfmagtiging-skema word nie ondersteun nie."</string>
-    <string name="httpErrorAuth" msgid="7293960746955020542">"Bevestiging was onsuksesvol."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"Kon nie staaf nie."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Geldigheidsvastelling deur die instaanbediener was onsuksesvol."</string>
-    <string name="httpErrorConnect" msgid="7623096283505770433">"Die verbinding na die bediener was onsuksesvol."</string>
-    <string name="httpErrorIO" msgid="4270874999047767599">"Die bediener kon nie kommunikeer nie. Probeer later weer."</string>
+    <string name="httpErrorConnect" msgid="8714273236364640549">"Kon nie aan die bediener koppel nie."</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"Kon nie met die bediener kommunikeer nie. Herprobeer later."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Die verbinding na die bediener het uitgetel."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Die bladsy bevat te veel bedienerherverwysings."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Die protokol word nie ondersteun nie."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"\'n Veilige verbinding kon nie vasgestel word nie."</string>
-    <string name="httpErrorBadUrl" msgid="6088183159988619736">"Die bladsy kon nie oopgemaak word nie, want die URL is ongeldig."</string>
-    <string name="httpErrorFile" msgid="8250549644091165175">"Die lêer kon nie oopgemaak word nie."</string>
-    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Die versoekte lêer is nie gevind nie."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Kan nie \'n beveiligde verbinding bewerkstellig nie."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Kon nie die bladsy oop maak nie, want die URL is ongeldig."</string>
+    <string name="httpErrorFile" msgid="2170788515052558676">"Kon nie toegang tot die lêer kry nie."</string>
+    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Kon nie die verlangde lêer vind nie."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Te veel versoeke word verwerk. Probeer weer later."</string>
-    <string name="notification_title" msgid="1259940370369187045">"Aanmeldfout vir <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="notification_title" msgid="8967710025036163822">"Aanmeldfout vir <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sinkroniseer"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinkroniseer"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Te veel <xliff:g id="CONTENT_TYPE">%s</xliff:g> uitgevee."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Tabletberging is vol! Vee \'n klompie lêers uit om plek te maak."</string>
-    <string name="low_memory" product="default" msgid="6632412458436461203">"Foonberging is vol! Vee sommige lêers uit om spasie te maak."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Foon se berging is vol. Vee \'n aantal lêers uit om spasie vry te maak."</string>
     <string name="me" msgid="6545696007631404292">"Ek"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-opsies"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Foonopsies"</string>
@@ -137,6 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Skakel draadloos af"</string>
     <string name="screen_lock" msgid="799094655496098153">"Skermslot"</string>
     <string name="power_off" msgid="4266614107412865048">"Sit af"</string>
+    <string name="silent_mode_silent" msgid="319298163018473078">"Luitoestel af"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Luitoestel vibreer"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Luitoestel aan"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Sit tans af…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Jou tablet gaan nou afskakel."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Jou foon gaan nou afsit."</string>
@@ -157,16 +160,16 @@
     <string name="safeMode" msgid="2788228061547930246">"Veiligmodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-stelsel"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dienste wat jou geld kos"</string>
-    <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Laat programme toe om dinge te doen wat jou geld kan kos."</string>
+    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Doen dinge wat jou geld kan kos."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Jou boodskappe"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Lees en skryf jou SMS, e-pos en ander boodskappe."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Jou persoonlike inligting"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkte toegang tot jou kontakte en kalender wat op die tablet gestoor is."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkte toegang tot jou kontakte en kalender wat op die foon gestoor is."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Jou ligging"</string>
-    <string name="permgroupdesc_location" msgid="2430258821648348660">"Monitor jou fisiese ligging"</string>
+    <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitor jou fisiese ligging."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netwerkkommunikasie"</string>
-    <string name="permgroupdesc_network" msgid="4917593670797570584">"Laat programme toe om verskillende netwerkfunksies te gebruik."</string>
+    <string name="permgroupdesc_network" msgid="4478299413241861987">"Kry toegang tot verskeie netwerkfunksies."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jou rekeninge"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Kry toegang tot beskikbare rekeninge."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardewarekontroles"</string>
@@ -211,11 +214,11 @@
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"herrangskik lopende programme"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Laat die program toe om take na die voorgrond en agtergrond te skuif. Kwaadwillige programme kan hulself sonder jou beheer na vore dwing."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
-    <string name="permdesc_removeTasks" msgid="1000226123143185094">"Laat \'n program toe om take te verwyder en programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
+    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>
-    <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Laat \'n program toe om ontfouting vir \'n ander program af te skakel. Kwaadwillige programme kan dit dalk gebruik om ander programme te dood."</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Laat die program toe om ontfouting vir \'n ander program af te skakel. Kwaadwillige programme kan dit dalk gebruik om ander programme te dood."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Verander jou UI-instellings"</string>
-    <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Laat \'n program toe om die huidige opstelling te verander, soos die locale of algemene lettergrootte."</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Laat die program toe om die huidige opstelling te verander, soos die locale of algehele lettergrootte."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktiveer motormodus"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Laat die program toe om die motormodus te aktiveer."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"stop agtergrondprosesse"</string>
@@ -251,11 +254,11 @@
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"bevestig \'n volledige rugsteun- of teruglaaihandeling"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Laat die program toe om die volle rugsteun-bevestiging-UI te laat loop. Moet nie deur enige program gebruik word nie."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"wys ongemagtigde vensters"</string>
-    <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Laat \'n program toe om vensters te skep wat bedoel is om deur die interne stelselgebruikerkoppelvlak gebruik te word. Nie vir gebruik deur normale programme nie."</string>
+    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Laat die program toe om vensters te skep wat bedoel is om deur die interne stelsel se gebruikerkoppelvlak gebruik te word. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vertoon kennisgewings op stelselvlak"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Laat die program toe om stelselopletberig-vensters te wys. Kwaadwillige programme kan die hele skerm oorneem."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"verander globale animasiespoed"</string>
-    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Laat \'n program toe om die globale animasiespoed te eniger tyd te verander (vinniger of stadiger)."</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Laat die program toe om die globale animasiespoed te eniger tyd te verander (vinniger of stadiger animasie)."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"bestuur programtokens"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Laat die program toe om sy eie tokens te skep en te bestuur, deur hul normale Z-volgorde te omseil. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"druk sleutels en beheerknoppies"</string>
@@ -302,7 +305,7 @@
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Laat die program toe om uit die stelsel se verskeie loglêers te lees. Dit laat \'n program toe om algemene inligting te ontdek oor wat jy met die tablet doen, wat moontlik persoonlike of private inligting kan insluit."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Laat die program toe om uit die stelsel se verskeie loglêers te lees. Dit laat \'n program toe om algemene inligting te ontdek oor wat jy met die foon doen, wat moontlik persoonlike of private inligting kan insluit."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gebruik enige mediadekodeerder vir terugspeel"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Hiermee kan \'n program enige geïnstalleerde mediadekodeerder gebruik om te dekodeer vir terugspeel."</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Laat die program toe om enige geïnstalleer mediadekodeerder te gebruik om te kan dekodeer vir terugspeel."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lees/skryf na bronne wat diag besit"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Laat die program toe om na enige hulpbron wat deur die diag-groep besit word, te skryf, byvoorbeeld lêers in /dev. Dit kan potensieel stelselstabiliteit en sekuriteit affekteer. Dit moet NET gebruik word vir hardewarespesifieke diagnose deur die vervaardiger of operateur."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktiveer of deaktiveer programkomponente"</string>
@@ -436,7 +439,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Laat die program toe om die tablet se tydsone te verander."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Laat die program toe om die foon se tydsone te verander."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"tree op as die AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Laat \'n program toe om oproepe na AccountAuthenticators te maak."</string>
+    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Laat die program toe om oproepe na AccountAuthenticators te maak."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"ontdek bekende rekeninge"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Laat die program toe om \'n lys rekeninge te kry wat aan die tablet bekend is."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Laat die program toe om \'n lys rekeninge te kry wat aan die foon bekend is."</string>
@@ -468,9 +471,9 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Laat die program toe om die plaaslike Bluetooth-tablet op te stel, en om met afstandbeheer toestelle saam te bind."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Laat die program toe om die plaaslike Bluetooth-foon op te stel en te ontdek en met afgeleë toestelle saam te bind."</string>
     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Sien WiMAX-status"</string>
-    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Laat \'n program toe om die inligting oor die status van WiMAX te sien."</string>
+    <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Laat die program toe om die inligting te sien oor die status van WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Verander WiMAX-status"</string>
-    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Laat \'n program toe om aan die WiMAX-netwerk te koppel en te ontkoppel."</string>
+    <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Laat die program toe om aan WiMAX-toegangspunte te koppel en daarvan te ontkoppel."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"skep Bluetooth-verbindings"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Laat die program toe om die opstelling van die plaaslike Bluetooth-tablet te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Laat die program toe om die opstelling van die plaaslike Bluetooth-foon te sien, en om verbindings met saamgebinde toestelle te maak en te aanvaar."</string>
@@ -494,7 +497,7 @@
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Laat die program toe om nuwe woorde in die gebruikerwoordeboek te skryf."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"verander/vee uit USB-berging se inhoud"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"wysig/vee uit SD-kaart se inhoud"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-berging te skryf."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Laat die program toe om die USB-geheue te skryf."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Laat die program toe om na die SD-kaart te skryf."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"verander/vee uit interne mediabergingsinhoud"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Laat die program toe om die inhoud van die interne mediaberging te verander."</string>
@@ -507,27 +510,27 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"bestuur netwerkbeleid"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Laat die program toe om netwerkbeleide te bestuur en program-spesifieke reëls te definieer."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verander verrekening van netwerkgebruik"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"Laat \'n program toe om te verander hoe netwerkgebruik teenoor programme gemeet word. Nie vir gebruik deur normale programme nie."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Laat die program toe om te verander hoe netwerkgebruik teenoor programme gemeet word. Nie vir gebruik deur normale programme nie."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Beheer die lengte van en watter karakters in skermontsluit-wagwoorde gebruik kan word"</string>
+    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Beheer lengte en watter karakters wat in die skermontsluit-wagwoorde gebruik word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word, en sluit die tablet of veel al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word, en sluit die foon of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Wysig die wagwoord wat die skerm ontsluit"</string>
-    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Wysig die wagwoord wat die skerm ontsluit"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Verander die skermontsluit-wagwoord."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Sluit die skerm"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"Beheer hoe en wanneer die skerm sluit"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheer hoe en wanneer die skerm sluit."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vee alle data uit"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Vee die tablet se data sonder waarskuwing uit deur \'n fabrieksterugstelling te doen"</string>
-    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Vee die foon se data sonder waarskuwing uit deur \'n fabrieksterugstelling uit te voer"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Stel die toestel se globale instaan"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel die toestel se globale instaan wat gebruik moet word terwyl die beleid geaktiveer is. Net die eerste toesteladministrateur stel die effektiewe globale instaan op."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Stel skermslotwagwoord se vervaldatum"</string>
-    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Beheer hoe gereeld die skermslotwagwoord verander moet word"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Beheer hoe gereeld die skermslot-wagwoord verander moet word."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Stel bergingsenkripsie"</string>
-    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Vereis dat gestoorde programdata geënkripteer word"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vereis dat gestoorde programdata geënkripteer word."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiveer kameras"</string>
-    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Voorkom gebruik van alle toestelkamera\'s"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Voorkom die gebruik van alle toestelkameras."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Tuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -648,7 +651,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Raak om wagwoord in te voer"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Voer wagwoord in om te ontsluit"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Voer PIN in om te ontsluit"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Verkeerde PIN-kode!"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Verkeerde PIN-kode."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Om te ontsluit, druk Kieslys dan 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Noodnommer"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Geen diens nie."</string>
@@ -661,6 +664,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Reg!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Probeer weer"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Probeer weer"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maksimum gesigontsluit-pogings oorskry"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Laai, (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Gehef."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -694,14 +698,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Probeer weer oor <xliff:g id="NUMBER">%d</xliff:g> sekondes."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Patroon vergeet?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Ontsluit rekening"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Te veel patroonprobeerslae!"</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Om te ontsluit, meld aan met jou Google-rekening"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Te veel patroonpogings"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Om te ontsluit, meld aan met jou Google-rekening."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Gebruikernaam (e-pos)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wagwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Meld aan"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ongeldige gebruikernaam of wagwoord."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google. com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontroleer tans..."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Kontroleer tans..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontsluit"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Klank aan"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Klank af"</string>
@@ -718,13 +722,13 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die FACTORY_TEST-handeling word net ondersteun vir pakkette wat in /system/app geïnstalleer is."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Geen pakket is gevind wat die FACTORY_TEST-handeling bied nie."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Herlaai"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"Die bladsy by \'<xliff:g id="TITLE">%s</xliff:g> sê:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Die bladsy by \"<xliff:g id="TITLE">%s</xliff:g>\" sê:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"Navigeer weg van hierdie bladsy?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Raak OK om voort te gaan, of Kanselleer om op die huidige bladsy te bly."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bevestig"</string>
-    <string name="double_tap_toast" msgid="2729045387923870404">"Wenk: Dubbelraak om in en uit te zoem."</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"Outo-invul"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"Stel outo-invul op"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Wenk: Dubbeltik om in en uit te zoem."</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"Outovul"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"Stel outovul op"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -859,9 +863,9 @@
     <string name="weeks" msgid="6509623834583944518">"weke"</string>
     <string name="year" msgid="4001118221013892076">"jaar"</string>
     <string name="years" msgid="6881577717993213522">"jaar"</string>
-    <string name="VideoView_error_title" msgid="5927895235831021723">"Kan nie video speel nie"</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobleem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Hierdie video is nie geldig vir stroming na hierdie toestel nie."</string>
-    <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Hierdie video kan nie gespeel word nie."</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Kan nie hierdie video speel nie."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"twaalfuur in die middag"</string>
@@ -897,7 +901,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Voltooi handeling met"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gebruik hierdie aksie by verstek."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Vee die verstek instelling uit in Stelselinstellings &gt; Programme &gt; Afgelaai."</string>
-    <string name="chooseActivity" msgid="1009246475582238425">"Kies \'n handeling"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Kies \'n handeling"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Kies \'n program vir die USB-toestel"</string>
     <string name="noApplications" msgid="2991814273936504689">"Geen programme kan hierdie handeling uitvoer nie."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -931,11 +935,11 @@
     <string name="old_app_description" msgid="2082094275580358049">"Moenie die nuwe program begin nie."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Begin <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Stop die ou program sonder om te stoor."</string>
-    <string name="sendText" msgid="5132506121645618310">"Kies \'n handeling vir teks"</string>
+    <string name="sendText" msgid="5209874571959469142">"Kies \'n handeling vir teks"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Luiervolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Speel deur Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Stil luitoon gekies"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stil luitoon opgestel"</string>
     <string name="volume_call" msgid="3941680041282788711">"Oproepvolume"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth-inoproep-volume"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolume"</string>
@@ -959,17 +963,22 @@
     <item quantity="one" msgid="1634101450343277345">"Oop Wi-Fi-netwerke beskikbaar"</item>
     <item quantity="other" msgid="7915895323644292768">"Oop Wi-Fi-netwerke beskikbaar"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Meld aan by Wi-Fi-netwerk"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Meld aan by Wi-Fi-netwerk"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kon nie aan Wi-Fikoppel nie"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" het \'n swak internetverbinding."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" het \'n swak internetverbinding."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Begin Wi-Fi Direct-handeling. Dit sal Wi-Fi-kliënt/warmkol-werking afskakel."</string>
-    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Kon nie Wi-Fi Direct begin nie"</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct-verbindingsopstel-versoek van <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK om te aanvaar."</string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct-verbindingsopstel-versoek van <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Voer PIN in om voort te gaan."</string>
-    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS-PIN<xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> moet ingevoer word in die eweknietoestel <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> sodat verbindingsopstelling kan voortgaan"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Begin Wi-Fi Direct. Dit sal die Wi-Fi-kliënt/warmkol afskakel."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kon nie Wi-Fi Direct begin nie."</string>
+    <string name="accept" msgid="1645267259272829559">"Aanvaar"</string>
+    <string name="decline" msgid="2112225451706137894">"Weier"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Uitnodiging gestuur"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Uitnodiging om te koppel"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Van:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Aan:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer die vereiste PIN in:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direk is aan"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Raak vir instellings"</string>
     <string name="select_character" msgid="3365550120617701745">"Voeg karakter in"</string>
@@ -982,7 +991,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"Die mobielnetwerk sal nie beskikbaar wees nie totdat jy weer begin met \'n geldige SIM-kaart."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Klaar"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kaart bygevoeg"</string>
-    <string name="sim_added_message" msgid="1209265974048554242">"Jy moet jou toestel weer aanskakel om toegang tot die mobielnetwerk te kry."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"Herbegin jou toestel om toegang tot die mobiele netwerk te kry."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Herbegin"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stel tyd"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Stel datum"</string>
@@ -991,34 +1000,34 @@
     <string name="no_permissions" msgid="7283357728219338112">"Geen toestemmings benodig nie"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Versteek"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Wys alle"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-massaberging"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB-geheue"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB gekoppel"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Jy het aan jou rekenaar gekoppel via USB. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se USB-berging wil kopieer."</string>
-    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Jy het aan jou rekenaar gekoppel via USB. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android SD-kaart wil kopieer."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Jy het via USB aan jou rekenaar gekoppel. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se USB-geheue wil kopieer."</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Jy het via USB aan jou rekenaar gekoppel. Raak die knoppie hier onder as jy lêers tussen jou rekenaar en jou Android se SD-kaart wil kopieer."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Skakel USB-berging aan"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Kon nie jou USB-berging vir USB-massaberging gebruik nie."</string>
-    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Kon nie jou SD-kaart vir USB-massaberging gebruik nie."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"Kon nie jou USB-geheue as USB-geheue gebruik nie."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"Kon nie jou SD-kaart as USB-geheue gebruik nie."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB gekoppel"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Kies om lêers na/van jou rekenaar te kopieer."</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"Raak om lêers na/van jou rekenaar te kopieer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Skakel USB-berging af"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Kies om USB-berging af te skakel."</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Raak om USB-geheue af te skakel."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-berging in gebruik"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Voordat jy USB-berging afskakel, maak seker dat jy jou Android se USB-berging van jou rekenaar ontheg (\"uitgestoot\") het."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Voordat jy die USB-berging afskakel, maak seker dat jy jou Android se SD-kaart uit die rekenaar ontheg (uitgeskiet) het."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Voor jy die USB-geheue afskakel, ontheg jou Android se USB-geheue uit jou rekenaar (haal dit uit)."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Voor jy die USB-geheue afskakel, ontheg jou Android se SD-kaart uit jou rekenaar (haal dit uit)."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Skakel USB-berging af"</string>
-    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Kon nie USB-berging afskakel nie. Kontroleer of jy die USB-gasheer ontheg het, en probeer dan weer."</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Kon nie USB-geheue afskakel nie. Kontroleer of jy die USB-gasheer ontheg het, en herprobeer dan."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Skakel USB-berging aan"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"As jy die USB-berging aanskakel, sal sekere programme wat jy gebruik, stop en onbeskikbaar wees totdat jy die USB-berging afskakel."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"As jy die USB-geheue aanskakel, sal sekere programme wat jy gebruik, stop en onbeskikbaar wees totdat jy die USB-geheue afskakel."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-handeling was onsuksesvol"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Gekoppel as \'n mediatoestel"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Gekoppel as \'n kamera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Gekoppel as \'n installeerder"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Gekoppel aan \'n USB-toebehoorsel"</string>
-    <string name="usb_notification_message" msgid="4447869605109736382">"Raak vir ander USB-opsies"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-berging?"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"Raak vir ander USB-opsies."</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formateer USB-geheue?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formateer SD-kaart?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-berging gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle lêers wat op jou  USB-geheue gestoor is, sal uitgevee word. Hierdie handeling kan nie omgekeer word nie!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle data op jou kaart sal verlore gaan."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formaat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
@@ -1033,12 +1042,12 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Kontroleer vir foute."</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Leë USB-berging"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Blanko SD-kaart"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB-berging leeg of het \'n nieondersteunde lêerstelsel."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-kaart leeg of het nieondersteunde lêerstelsel."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB-geheue is leeg of is van \'n nieondersteunde lêerstelsel."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD-kaart is leeg of is van \'n nieondersteunde lêerstelsel."</string>
     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Beskadigde USB-berging"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Beskadigde SD-kaart"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB-berging beskadig. Jy sal dit dalk moet herformateer."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-kaart beskadig. Jy sal dit dalk moet herformateer."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB-geheue is beskadig. Probeer dit herformateer."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD-kaart is beskadig. Probeer dit herformateer."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-berging onverwags verwyder"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-kaart onverwags verwyder"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Ontheg USB-berging voordat jy dit verwyder om dataverlies te vermy."</string>
@@ -1051,13 +1060,13 @@
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Verwyder SD-kaart"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-berging is verwyder. Voeg nuwe media in."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kaart  verwyder. Sit \'n nuwe een in."</string>
-    <string name="activity_list_empty" msgid="4168820609403385789">"Geen passende aktiwiteite gevind nie"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"Geen passende aktiwiteite gevind nie."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"dateer komponentgebruik-statistieke op"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Laat die program toe om komponentgebruik-statistieke te versamel. Nie vir gebruik deur normale programme nie."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kopieer inhoud"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Laat die program toe om die verstek houerdiens in te roep om inhoud te kopieer. Nie vir gebruik deur normale programme nie."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Raak twee keer vir zoembeheer"</string>
-    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Kon nie legstuk vergroot nie"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gaan"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Soek"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Stuur"</string>
@@ -1069,35 +1078,35 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Skep kontak"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Die volgende een of meer programme versoek toestemming om jou rekening gebruik (nou én in die toekoms)."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Wil jy hierdie versoek toestaan?"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Toegangsversoek"</string>
+    <string name="grant_permissions_header_text" msgid="6874497408201826708">"Toegangsversoek"</string>
     <string name="allow" msgid="7225948811296386551">"Laat toe"</string>
     <string name="deny" msgid="2081879885755434506">"Weier"</string>
-    <string name="permission_request_notification_title" msgid="5390555465778213840">"Toestemming versoek"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Toestemming versoek "\n"vir rekening <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"Toestemming versoek"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming versoek"\n"vir rekening <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkroniseer"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Toeganklikheid"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Muurpapier"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Verander muurpapier"</string>
-    <string name="vpn_title" msgid="8219003246858087489">"VPN is geaktiveer."</string>
+    <string name="vpn_title" msgid="19615213552042827">"VPN geaktiveer"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN is geaktiveer deur <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"Tik om netwerk te bestuur."</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"Gekoppel aan <xliff:g id="SESSION">%s</xliff:g>. Tik om die netwerk te bestuur."</string>
+    <string name="vpn_text" msgid="3011306607126450322">"Raak om die netwerk te bestuur."</string>
+    <string name="vpn_text_long" msgid="6407351006249174473">"Gekoppel aan <xliff:g id="SESSION">%s</xliff:g>. Raak om die netwerk te bestuur."</string>
     <string name="upload_file" msgid="2897957172366730416">"Kies lêer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Geen lêer gekies nie"</string>
     <string name="reset" msgid="2448168080964209908">"Stel terug"</string>
     <string name="submit" msgid="1602335572089911941">"Dien in"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Motormodus geaktiveer"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Kies om motormodus te verlaat."</string>
+    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Raak om motormodus te verlaat."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Verbinding of Wi-Fi-warmkol aktief"</string>
-    <string name="tethered_notification_message" msgid="3067108323903048927">"Raak om op te stel"</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"Raak om op te stel."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Terug"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Volgende"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Slaan oor"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Hoë mobiele dataverbruik"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Raak om meer te wete te kom oor mobiele datagebruik"</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Raak om meer te wete te kom oor mobiele datagebruik."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobiele datalimiet oorskry"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"Raak om meer te wete te kom oor mobiele datagebruik"</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"Raak om meer te wete te kom oor mobiele datagebruik."</string>
     <string name="no_matches" msgid="8129421908915840737">"Geen passings nie"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Vind op bladsy"</string>
   <plurals name="matches_found">
@@ -1105,10 +1114,10 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Klaar"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Ontheg tans USB-berging..."</string>
-    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Ontheg tans SD-kaart..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Vee tans USB-berging uit..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Vee tans SD-kaart uit..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Ontheg tans USB-geheue..."</string>
+    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Ontheg tans SD-kaart..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Vee tans USB-geheue uit..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Vee tans SD-kaart uit..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Kon nie USB-berging uitvee nie."</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"Kon nie SD-kaart uitvee nie."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD-kaart is verwyder voordat dit ontheg is."</string>
@@ -1127,17 +1136,17 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nee"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Uitveeperk is oorskry"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Daar is <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> uitgeveede items vir <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, rekening <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Wat wil jy doen?"</string>
-    <string name="sync_really_delete" msgid="8933566316059338692">"Vee die items uit."</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"Ontdoen die uitvee."</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"Doen vir eers niks."</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Daar is <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> uitgeveede items vir <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, rekening <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Wat wil jy doen?"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"Vee die items uit"</string>
+    <string name="sync_undo_deletes" msgid="2941317360600338602">"Ontdoen die uitgeveedes"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"Doen vir eers niks nie"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Kies \'n rekening"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Voeg \'n rekening by"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"Watter rekening wil jy gebruik?"</string>
+    <string name="choose_account_text" msgid="6303348737197849675">"Watter rekening wil jy gebruik?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Voeg rekening by"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Verhoging"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Verminder"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> tik en hou."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> raak en hou."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"Skuif op om by te tel en af om af te trek."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Tel \'n minuut by"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Trek \'n minuut af"</string>
@@ -1179,29 +1188,29 @@
     <string name="description_target_silent" msgid="893551287746522182">"Stil"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"Klank aan"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Sleep om te ontsluit."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Koppel \'n kopstuk om te hoor hoe wagwoordsleutels hardop gesê word."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Prop \'n kopfoon in om te hoor hoe wagwoordsleutels hardop gesê word."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigeer tuis"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigeer op"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Meer opsies"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"Interne berging"</string>
-    <string name="storage_sd_card" msgid="8921771478629812343">"SD-kaart"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Interne geheue"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD-kaart"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-berging"</string>
-    <string name="extract_edit_menu_button" msgid="302060189057163906">"Redigeer tans..."</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redigeer"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Dataverbruik-waarskuwing"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Raak om gebruik en instellings te bekyk"</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"Raak gebruik/instellings te sien."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G-data gedeaktiveer"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-data gedeaktiveer"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobieldata gedeaktiveer"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi-data gedeaktiveer"</string>
-    <string name="data_usage_limit_body" msgid="4313857592916426843">"Raak om te aktiveer"</string>
+    <string name="data_usage_limit_body" msgid="3317964706973601386">"Raak om te aktiveer."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-datalimiet oorskry"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-datalimiet oorskry"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiele datalimiet oorskry"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi se datalimiet oorskry"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> meer as gespesifiseerde limiet"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> oor gespesifiseerde limiet."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Agtergronddata is beperk"</string>
-    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Raak om beperking te verwyder"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Raak om beperking te verwyder."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Sekuriteitsertifikaat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Die sertifikaat is geldig."</string>
     <string name="issued_to" msgid="454239480274921032">"Uitgereik aan:"</string>
@@ -1221,7 +1230,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deel met"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Toestel gesluit."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <string name="sending" msgid="8715108995741758718">"Stuur tans..."</string>
+    <string name="sending" msgid="3245653681008218030">"Stuur tans…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Begin webblaaier?"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"Aanvaar oproep?"</string>
+    <string name="SetupCallDefault" msgid="5834948469253758575">"Aanvaar oproep?"</string>
 </resources>

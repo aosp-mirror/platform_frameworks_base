@@ -73,11 +73,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"Naka-block ang serbisyo ng data."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Naka-block ang pang-emergency na serbisyo."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Naka-block ang serbisyo ng voice."</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Naka-block ang lahat ng mga serbisyo ng voice."</string>
+    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"Naka-block ang lahat ng mga serbisyo sa boses."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"Naka-block ang SMS service."</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Naka-block ang mga serbisyo ng Voice/Data."</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Naka-block ang mga serbisyo sa boses/data."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Naka-block ang mga serbisyo ng Voice/SMS."</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"Naka-block ang lahat ng mga serbisyo ng Voice/Data/SMS."</string>
+    <string name="RestrictedOnAll" msgid="5643028264466092821">"Naka-block ang lahat ng serbisyo sa boses/data/SMS."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voice"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -108,27 +108,27 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kumpleto na ang code ng tampok."</string>
     <string name="fcError" msgid="3327560126588500777">"Problema sa koneksyon o di-wastong code ng tampok."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="6603022914760066338">"Naganap ang isang error sa network."</string>
-    <string name="httpErrorLookup" msgid="4517085806977851374">"Hindi makita ang URL."</string>
+    <string name="httpError" msgid="7956392511146698522">"Nagkaroon ng error sa network."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Hindi mahanap ang URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Hindi sinusuportahan ang scheme na pagpapatotoo ng site."</string>
-    <string name="httpErrorAuth" msgid="7293960746955020542">"Hindi tagumpay ang pagpapatotoo."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"Hindi mapatotohanan."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Hindi matagumpay ang pagpapatotoo sa pamamagitan ng proxy server."</string>
-    <string name="httpErrorConnect" msgid="7623096283505770433">"Hindi matagumpay ang koneksyon sa server."</string>
-    <string name="httpErrorIO" msgid="4270874999047767599">"Hindi magawang makipag-ugnay ng server. Subukang muli sa ibang pagkakataon."</string>
+    <string name="httpErrorConnect" msgid="8714273236364640549">"Hindi makakonekta sa server."</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"Hindi magawang makipag-ugnay sa server. Subukang muli sa ibang pagkakataon."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Na-time out ang koneksyon sa server."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Naglalaman ang pahinang ito ng masyadong maraming pag-redirect ng server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Hindi sinusuportahan ang protocol."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Hindi maitatag ang isang secure na koneksyon."</string>
-    <string name="httpErrorBadUrl" msgid="6088183159988619736">"Hindi mabuksan ang pahinang ito dahil di-wasto ang URL."</string>
-    <string name="httpErrorFile" msgid="8250549644091165175">"Hindi ma-access ang file na ito."</string>
-    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Hindi nakita ang hiniling na file."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Hindi makapagtaguyod ng secure na koneksyon."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Hindi mabuksan ang pahina dahil di-wasto ang URL."</string>
+    <string name="httpErrorFile" msgid="2170788515052558676">"Hindi ma-access ang file."</string>
+    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Hindi mahanap ang hinihiling na file."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Pinoproseso ang masyadong maraming kahilingan. Subukang muli sa ibang pagkakataon."</string>
-    <string name="notification_title" msgid="1259940370369187045">"Error sa pag-sign in para sa <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="notification_title" msgid="8967710025036163822">"Error sa pag-signin para sa <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"I-sync"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"I-sync"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Masyadong maraming pagtanggal ng <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Puno na ang imbakan ng tablet! Magtanggal ng ilang mga file upang magbakante ng puwang."</string>
-    <string name="low_memory" product="default" msgid="6632412458436461203">"Puno na ang imbakan ng telepono! Magtanggal ng ilang file upang magbakante ng espasyo."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"Puno na ang storage ng tablet. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Puno na ang storage ng telepono. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Mga pagpipilian sa tablet"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Mga pagpipilian sa telepono"</string>
@@ -137,6 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"I-off ang wireless"</string>
     <string name="screen_lock" msgid="799094655496098153">"Pag-lock sa screen"</string>
     <string name="power_off" msgid="4266614107412865048">"I-off"</string>
+    <string name="silent_mode_silent" msgid="319298163018473078">"I-off ang ringer"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"I-vibrate ang ringer"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"I-on ang ringer"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Nagsa-shut down…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Mag-shut down ang iyong tablet."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Magsa-shut down ang iyong telepono."</string>
@@ -157,16 +160,16 @@
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Mga serbisyong ginagastusan mo"</string>
-    <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"Pinapayagan ang apps na gumawa ng mga bagay na mapapagastos ka."</string>
+    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Gumawa ng mga bagay na magpapagastos sa iyo."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Iyong mga mensahe"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Basahin at isulat ang iyong SMS, e-mail, at iba pang mga mensahe."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Iyong personal na impormasyon"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direktang access sa iyong mga contact at kalendaryong nakaimbak sa tablet."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direktang access sa iyong mga contact at kalendaryong nakaimbak sa telepono."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Iyong lokasyon"</string>
-    <string name="permgroupdesc_location" msgid="2430258821648348660">"Subaybayan ang iyong aktwal na lokasyon"</string>
+    <string name="permgroupdesc_location" msgid="5704679763124170100">"Subaybayan ang iyong pisikal na lokasyon."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Pakikipag-ugnay sa network"</string>
-    <string name="permgroupdesc_network" msgid="4917593670797570584">"Payagan ang apps na i-access ang iba\'t ibang mga tampok ng network."</string>
+    <string name="permgroupdesc_network" msgid="4478299413241861987">"Mag-access ng iba\'t ibang mga tampok ng network."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Iyong mga account"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"I-access ang mga available na account."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Mga kontrol ng hardware"</string>
@@ -211,11 +214,11 @@
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pinapayagan ang app na ilipat ang mga gawain sa foreground at background. Maaaring puwersahin ng nakakahamak na apps ang mga sarili nito sa harapan nang wala ang iyong pagkontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
-    <string name="permdesc_removeTasks" msgid="1000226123143185094">"Pinapayagan ang isang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pag-uugali ng iba pang apps."</string>
+    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Pinapayagan ang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pagkilos ng iba pang apps."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"paganahin ang pag-debug ng app"</string>
-    <string name="permdesc_setDebugApp" msgid="6215654419903651172">"Pinapayagan ang isang app na i-on ang pag-debug para sa isa pang app. Maaari itong gamitin ng nakakahamak na apps upang i-off ang iba pang apps."</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Pinapayagan ang app na i-on ang pag-debug para sa isa pang app. Maaari itong gamitin ng nakakahamak na apps upang i-off ang iba pang apps."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"baguhin ang iyong mga setting ng UI"</string>
-    <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"Pinapayagan ang app na baguhin ang kasalukuyang configuration, gaya ng lokal o pangkalahatang laki ng font."</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Pinapayagan ang app na baguhin ang kasalukuyang configuration, gaya ng lokal o pangkalahatang laki ng font."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"paganahin ang car mode"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Pinapayagan ang app na paganahin ang car mode."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"isara ang mga proseso ng background"</string>
@@ -251,11 +254,11 @@
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Kumpirmahin ang isang buong pagpapatakbo ng pag-backup o pagpapanumbalik"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Pinapayagan ang app na ilunsad ang buong backup na UI ng pagkumpirma. Hindi gagamitin ng anumang app."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ipakita ang mga hindi pinahintulutang window"</string>
-    <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"Pinapayagan ang isang app na lumikha ng mga window na nakalaan upang magamit ng panloob na interface ng user ng system. Hindi para sa paggamit ng normal na apps."</string>
+    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Pinapayagan ang app na lumikha ng mga window na nakalaan upang gamitin ng user interface ng panloob na system. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"ipakita ang mga alerto sa antas ng system"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"Pinapayagan ang app na ipakita ang mga window ng alerto ng system. Maaaring pangasiwaan ng nakakahamak na apps ang buong screen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"baguhin ang bilis ng global animation"</string>
-    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"Pinapayagan ang app na baguhin ang bilis ng global animation (mas mabilis o mas mabagal na mga animation) anumang oras."</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Pinapayagan ang app na baguhin ang bilis ng global animation (mas mabilis o mas mabagal na mga animation) anumang oras."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"pamahalaan ang mga token ng app"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Pinapayagan ang app na lumikha ng at pamahalaan ang sariling mga token ng mga ito, na bina-bypass ang normal na Z-ordering ng mga ito. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pindutin ang mga key at kontrolin ang mga pindutan"</string>
@@ -302,7 +305,7 @@
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Pinapayagan ang app na magbasa mula sa iba\'t ibang mga file ng log ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa tablet, potensyal na kabilang ang personal o pribadong impormasyon."</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Pinapayagan ang app na magbasa mula sa iba\'t ibang mga file ng log ng system. Pinapayagan ito nito na tumuklas ng pangkalahatang impormasyon tungkol sa kung ano ang iyong ginagawa sa telepono, potensyal na kabilang ang personal o pribadong impormasyon."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"gumamit ng anumang media decoder para sa pag-playback"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"Pinapayagan ka ng application na gumamit ng anumang naka-install na media decoder upang mag-decode para sa pag-playback."</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Pinapayagan ang app na gumamit ng anumang naka-install na media decoder upang mag-decode para sa pag-playback."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"magbasa/magsulat sa mga mapagkukunang pag-aari ng diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pinapayagan ang app na magbasa at magsulat sa anumang mapagkukunang pag-aari ng pangkat ng diag; halimbawa, mga file sa /dev. Maaaring potensyal na maapektuhan nito ang katatagan at seguridad ng system. Dapat LAMANG itong gamitin para sa diagnostics na tukoy sa hardware ng tagagawa o operator."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"paganahin o huwag paganahin ang mga bahagi ng app"</string>
@@ -436,7 +439,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Pinapayagan ang app na baguhin ang time zone ng tablet."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Pinapayagan ang app na baguhin ang time zone ng telepono."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"gumanap bilang AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"Pinapayagan ang isang app tumawag sa AccountAuthenticators."</string>
+    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Pinapayagan ang app na tumawag sa AccountAuthenticators."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"tuklasin ang mga kilalang account"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"Pinapayagan ang app na makuha ang listahan ng mga account na kilala ng tablet."</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"Pinapayagan ang app na makuha ang listahan ng mga account na kilala ng telepono."</string>
@@ -468,9 +471,9 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth tablet, at tumuklas ng at ipares sa mga malayuang device."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Pinapayagan ang app na i-configure ang lokal na Bluetooth na telepono, at tumuklas ng at ipares sa mga malayuang device."</string>
     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"Tingnan ang katayuan ng WiMAX"</string>
-    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Pinapayagan ang application na tingnan ang impormasyon tungkol sa katayuan ng WiMAX."</string>
+    <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"Pinapayagan ang app na tingnan ang impormasyon tungkol sa katayuan ng WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Baguhin ang katayuan ng WiMAX"</string>
-    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Pinapayagan ang isang application na makakonekta sa at maalis sa pagkakakonekta mula sa network ng WiMAX."</string>
+    <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"Pinapayagan ang app na kumonekta at magdiskonekta sa network ng WiMAX."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"lumikha ng mga koneksyon ng Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"Pinapayagan ang app na tingnan ang configuration ng lokal na Bluetooth tablet, at upang gumawa at tumanggap ng mga koneksyon sa mga nakapares na device."</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"Pinapayagan ang app na tingnan ang configuration ng lokal na Bluetooth na telepono, at upang gumawa at tumanggap ng mga koneksyon sa mga nakapares na device."</string>
@@ -507,27 +510,27 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"pamahalaan ang patakaran ng network"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Pinapayagan ang app na pamahalaan ang mga patakaran ng network at ilarawan ang mga patakarang tukoy sa app."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"Pinapayagan ang app na baguhin kung paano pinapahalagahan ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Pinapayagan ang app na baguhin kung paano isinasaalang-alang ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen"</string>
+    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Subaybayan ang bilang ng mga hindi tamang password na na-type. kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Palitan ang password sa pag-unlock ng screen"</string>
-    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Palitan ang password sa pag-unlock ng screen"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Palitan ang password sa pag-unlock ng screen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"I-lock ang screen"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"Kontrolin kung paano at kailan magla-lock ang screen"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolin kung paano at kailan magla-lock ang screen."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Burahin ang lahat ng data"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Burahin ang data ng tablet nang walang babala, sa pamamagitan ng pagsasagawa ng pag-reset sa data ng factory"</string>
-    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Burahin ang data ng telepono nang walang babala, sa pamamagitan ng pagsasagawa ng pag-reset sa data ng factory"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Burahin ang data ng tablet nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Burahin ang data ng telepono nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Itakda ang pandaigdigang proxy ng device"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Itakda ang pandaigdigang proxy ng device na gagamitin habang pinagana ang patakaran. Tanging ang unang admin ng device ang magtatakda sa may bisang pandaigdigang proxy."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Itakda expire password pag-lock scr"</string>
-    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolin kung gaano kadalas dapat na mapalitan ang password sa pag-lock ng screen"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kontrolin kung gaano kadalas dapat palitan ang password sa pag-lock ng screen."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng imbakan"</string>
-    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"Hilinging naka-encrypt ang nakaimbak na data ng app"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Hilinging naka-encrypt ang nakaimbak na data ng app."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Huwag paganahin mga camera"</string>
-    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Pigilan ang paggamit ng lahat ng camera ng device"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Pigilan ang paggamit sa lahat ng camera ng device."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -648,7 +651,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Pindutin upang i-type password"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"I-type ang password upang i-unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"I-type ang PIN upang i-unlock"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Maling PIN code!"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Maling PIN code."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Upang i-unlock, pindutin ang Menu pagkatapos ay 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Pang-emergency na numero"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Walang serbisyo."</string>
@@ -661,6 +664,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Tama!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Subukang muli"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Subukang muli"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Nalagpasan na ang maximum na mga pagtatangka sa Face Unlock"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Nagcha-charge, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Naka-charge."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -694,14 +698,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Subukang muli sa loob ng <xliff:g id="NUMBER">%d</xliff:g> (na) segundo."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Nakalimutan ang pattern?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Pag-unlock sa account"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Masyadong maraming pagtatangka sa pattern!"</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Upang i-unlock, mag-sign in sa iyong Google account"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Masyadong maraming pagtatangka sa pattern"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Upang i-unlock, mag-sign in gamit ang iyong Google account."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Username (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Mag-sign in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Di-wastong username o password."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Nakalimutan ang iyong username o password?"\n"Bisitahin ang "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Sinusuri..."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Nakalimutan ang iyong username o password?"\n"Bisitahin ang "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Tinitingnan..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"I-unlock"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"I-on ang tunog"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"I-off ang tunog"</string>
@@ -718,13 +722,13 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Suportado lang ang pagkilos na FACTORY_TEST para sa mga package na naka-install sa /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Walang nakitang package na nagbibigay ng pagkilos na FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"I-reboot"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"Sinasabi ng pahina sa \'<xliff:g id="TITLE">%s</xliff:g>\' na:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Isinasaad ng pahina sa \"<xliff:g id="TITLE">%s</xliff:g>\" na:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"Mag-navigate palayo mula sa pahinang ito?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Pindutin ang OK upang magpatuloy, o Kanselahin upang manatili sa kasalukuyang pahina."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Kumpirmahin"</string>
-    <string name="double_tap_toast" msgid="2729045387923870404">"Tip: I-double-touch upang mag-zoom in at out."</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"AutoFill"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"Setup AutoFill"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Mag-double tap upang mag-zoom in at out."</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"I-set up ang Autofill."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -859,9 +863,9 @@
     <string name="weeks" msgid="6509623834583944518">"mga linggo"</string>
     <string name="year" msgid="4001118221013892076">"taon"</string>
     <string name="years" msgid="6881577717993213522">"mga taon"</string>
-    <string name="VideoView_error_title" msgid="5927895235831021723">"Hindi ma-play ang video"</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"Problema sa video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Hindi wasto ang video na ito para sa streaming sa device na ito."</string>
-    <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"Hindi mape-play ang video na ito."</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Hindi ma-play ang video na ito."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"tanghali"</string>
@@ -897,7 +901,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Kumpletuhin ang pagkilos gamit ang"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Gamitin bilang default para sa pagkilos na ito."</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"I-clear ang default sa mga setting ng System &gt; Apps &gt; Na-download."</string>
-    <string name="chooseActivity" msgid="1009246475582238425">"Pumili ng pagkilos"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Pumili ng pagkilos"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pumili ng isang app para sa USB device"</string>
     <string name="noApplications" msgid="2991814273936504689">"Walang apps ang makakapagsagawa ng pagkilos na ito."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -931,11 +935,11 @@
     <string name="old_app_description" msgid="2082094275580358049">"Huwag simulan ang bagong app."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Simulan ang <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ihinto ang lumang app nang hindi nagse-save."</string>
-    <string name="sendText" msgid="5132506121645618310">"Pumili ng pagkilos para sa teksto"</string>
+    <string name="sendText" msgid="5209874571959469142">"Pumili ng pagkilos para sa teksto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lakas ng tunog ng ringer"</string>
     <string name="volume_music" msgid="5421651157138628171">"Lakas ng tunog ng media"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Nagpe-play sa pamamagitan ng Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Pinili ang tahimik na ringtone"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Naitakda ang tahimik na ringtone"</string>
     <string name="volume_call" msgid="3941680041282788711">"Lakas ng tunog ng papasok na tawag"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Lakas ng tunog ng bluetooth in-call"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Lakas ng tunog ng alarm"</string>
@@ -959,17 +963,22 @@
     <item quantity="one" msgid="1634101450343277345">"Available ang bukas na Wi-Fi network"</item>
     <item quantity="other" msgid="7915895323644292768">"Buksan ang mga available na Wi-Fi network"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Mag-sign in sa Wi-Fi network"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Mag-sign in sa network ng Wi-Fi"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ay mayroong mahinang koneksyon sa internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ay mayroong mahinang koneksyon sa Internet."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Simulan ang pagpapatakbo ng Wi-Fi Direct. I-o-off nito ang pagpapatakbo ng client/hotspot ng Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Hindi masimulan ang Wi-Fi Direct"</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Kahilingan sa pag-setup ng koneksyon ng Wi-Fi Direct mula sa <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. I-click ang OK upang tanggapin."</string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Kahilingan sa pag-setup ng koneksyon ng Wi-Fi Direct mula sa <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Ilagay ang pin upang magpatuloy."</string>
-    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Kailangang mailagay ang pin ng WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> sa device ng kaibigan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> para magpatuloy ang pag-setup ng koneksyon"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Simulan ang Wi-Fi Direct. I-o-off nito ang client/hotspot ng Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Hindi masimulan ang Wi-Fi Direct"</string>
+    <string name="accept" msgid="1645267259272829559">"Tanggapin"</string>
+    <string name="decline" msgid="2112225451706137894">"Tanggihan"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Naipadala ang imbitasyon"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Imbitasyong kumonekta"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Mula kay:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kay:"</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"I-type ang kinakailangang PIN:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Ang Wi-Fi Direct ay naka-on"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Pindutin para sa mga setting"</string>
     <string name="select_character" msgid="3365550120617701745">"Magpasok ng character"</string>
@@ -982,7 +991,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"Hindi magiging available ang mobile network hanggang mag-restart ka gamit ang isang may-bisang SIM card"</string>
     <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Idinagdag ang SIM card"</string>
-    <string name="sim_added_message" msgid="1209265974048554242">"Dapat mong i-restart ang iyong device upang ma-access ang mobile network."</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"I-restart ang iyong device upang ma-access ang mobile network."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
@@ -991,31 +1000,31 @@
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Itago"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Ipakita lahat"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB Mass Storage"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB mass storage"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Nakakonekta ang USB"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Kumonekta ka sa iyong computer sa pamamagitan ng USB. Pindutin ang pindutan sa ibaba kung gusto mong kumopya ng mga file sa pagitan ng iyong computer at imbakan na USB ng iyong Android."</string>
-    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Kumonekta ka sa iyong computer sa pamamagitan ng USB. Pindutin ang pindutan sa ibaba kung gusto mong kumopya ng mga file sa pagitan ng iyong computer at SD card ng iyong Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Kumonekta ka sa iyong computer sa pamamagitan ng USB. Pindutin ang button sa ibaba kung gusto mong kumopya ng mga file sa pagitan ng iyong computer at USB storage ng iyong Android."</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"Kumonekta ka sa iyong computer sa pamamagitan ng USB. Pindutin ang button sa ibaba kung gusto mong kumopya ng mga file sa pagitan ng iyong computer at SD card ng iyong Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"I-on ang USB storage"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"May problema sa paggamit ng iyong imbakan na USB para sa maramihang imbakan na USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Nagkaproblema sa paggamit ng iyong SD card para sa maramihang imbakan na USB."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"May problema sa paggamit ng iyong USB storage para sa USB mass storage."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"May problema sa paggamit ng iyong SD card para sa USB mass storage."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Nakakonekta ang USB"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Piliin upang kopyahin ang mga file sa/mula sa iyong computer."</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"Pindutin upang kumopya ng mga file papunta/mula sa iyong computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"I-off ang USB storage"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Piliin upang i-off ang USB storage."</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"Pindutin upang i-off ang USB storage."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Ginagamit ang USB storage"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Bago i-off ang imbakan na USB, tiyaking na-unmount (“na-eject”) ang imbakan na USB ng Android mula sa iyong computer."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Bago i-off ang USB storage, tiyaking na-unmount (“inalis”) mo ang SD card ng iyong Android mula sa iyong computer."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"Bago i-off ang USB storage, i-unmount (\"i-eject\") ang USB storage ng iyong Android mula sa iyong computer."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"Bago i-off ang USB storage, i-unmount (\"i-eject\") ang SD card ng iyong Android mula sa iyong computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"I-off ang USB storage"</string>
-    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Nagkaproblema sa pag-off ng USB storage. Tingnan upang matiyak na na-unmount mo ang host ng USB, pagkatapos ay subukan muli."</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"Nagkaroon ng problema sa pag-off ng USB storage. Tiyaking na-unmount mo ang USB host, pagkatapos ay subukang muli."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"I-on ang USB storage"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"Kung i-on mo ang USB storage, hihinto ang ilang apps na iyong ginagamit at maaaring maging hindi available hanggang sa i-off mo ang USB storage."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Kung i-on mo ang USB storage, hihinto ang ilang apps na iyong ginagamit at maaaring maging hindi available hanggang sa i-off mo ang USB storage."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Hindi matagumpay ang USB operation"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Nakakonekta bilang isang media device"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Nakakonekta bilang isang camera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Nakakonekta bilang isang installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Nakakonekta sa isang accessory ng USB"</string>
-    <string name="usb_notification_message" msgid="4447869605109736382">"I-touch para sa mga ibang pagpipilian sa USB"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"Pindutin para sa iba pang mga pagpipilian sa USB."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Iformat USB storage?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"I-format ang SD card?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Mabubura ang lahat ng file na nakaimbak sa iyong USB storage. Hindi mababawi ang pagkilos na ito!"</string>
@@ -1033,12 +1042,12 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Sinusuri para sa mga error."</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Blangkong imbakan na USB"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Blangkong SD card"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Blangko ang imbakan na USB o may hindi sinusuportahang filesystem."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"blangko ang SD card o may hindi suportadong filesystem."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"Blangko ang USB storage o may hindi sinusuportahang filesystem."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"Blangko ang SD card o may hindi sinusuportahang filesystem."</string>
     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Nasirang imbakan na USB"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Sirang SD card"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Nasira ang imbakan na USB. Maaaring kailangan mo itong i-reformat."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Nasira ang SD card. Maaaring kailanganin mo itong i-reformat."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"Sira ang USB storage. Subukan itong i-reformat."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"Sira ang SD card. Subukan itong i-reformat."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Di inasahan naalis USB storage"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Hindi inaasahang inalis ang SD card"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"I-unmount ang imbakan na USB bago alisin upang maiwasan ang pagkawala ng data."</string>
@@ -1051,13 +1060,13 @@
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Naalis na SD card"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Inalis ang imbakan na USB. Magpasok ng bagong media."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Inalis ang SD card. Magpasok ng bago."</string>
-    <string name="activity_list_empty" msgid="4168820609403385789">"Walang nakitang mga tumutugmang aktibidad"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"Walang nahanap na mga tumutugmang aktibidad."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"i-update ang mga istatistika ng paggamit ng nilalaman"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Pinapayagan ang app na baguhin ang nakolektang mga istatistika ng paggamit ng bahagi. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kopyahin ang nilalaman"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Pinapayagan ang app na i-apela ang default na serbisyo ng container upang kopyahin ang nilalaman. Hindi para sa paggamit ng normal na apps."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
-    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Error sa pagpapalaki ng widget"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Hindi maidagdag ang widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Pumunta"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Paghahanap"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Ipadala"</string>
@@ -1069,35 +1078,35 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Lumikha ng contact"\n"gamit ang <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Ang sumusunod na isa o higit pang mga app ay humihiling ng pahintulot na i-access ang iyong account, ngayon at sa hinaharap."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Gusto mo bang payagan ang kahilingang ito?"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Kahilingan sa Access"</string>
+    <string name="grant_permissions_header_text" msgid="6874497408201826708">"Kahilingan sa pag-access"</string>
     <string name="allow" msgid="7225948811296386551">"Payagan"</string>
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
-    <string name="permission_request_notification_title" msgid="5390555465778213840">"Hiniling ang Pahintulot"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Hiniling ang pahintulot"\n"para sa account na <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot"\n"para sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
-    <string name="vpn_title" msgid="8219003246858087489">"Isinaaktibo ang VPN."</string>
+    <string name="vpn_title" msgid="19615213552042827">"Naka-activate ang VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Isinaaktibo ang VPN ng <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"Tapikin upang pamahalaan ang network."</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"Nakakonekta sa <xliff:g id="SESSION">%s</xliff:g>. Tapikin upang pamahalaan ang network."</string>
+    <string name="vpn_text" msgid="3011306607126450322">"Pindutin upang pamahalaan ang network."</string>
+    <string name="vpn_text_long" msgid="6407351006249174473">"Nakakonekta sa <xliff:g id="SESSION">%s</xliff:g>. Pindutin upang pamahalaan ang network."</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
     <string name="submit" msgid="1602335572089911941">"Isumite"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Pinagana ang car mode"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Piliin upang lumabas sa car mode."</string>
+    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Pindutin upang lumabas sa car mode."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Pagsasama o aktibong hotspot"</string>
-    <string name="tethered_notification_message" msgid="3067108323903048927">"Galawin upang i-configure"</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"Pindutin upang i-set up."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Bumalik"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Susunod"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Laktawan"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Mataas na paggamit ng data ng mobile"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Galawin upang matuto nang higit pa tungkol sa paggamit ng data ng mobile"</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Pindutin upang matuto nang higit pa tungkol sa paggamit ng mobile data."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Lumagpas na sa limitasyon ng data ng mobile"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"Galawin upang matuto nang higit pa tungkol sa paggamit ng data ng mobile"</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"Pindutin upang matuto nang higit pa tungkol sa paggamit ng mobile data."</string>
     <string name="no_matches" msgid="8129421908915840737">"Walang mga tugma"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Maghanap sa pahina"</string>
   <plurals name="matches_found">
@@ -1105,10 +1114,10 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ng <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Tapos na"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Ina-unmount ang imbakan na USB..."</string>
-    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Ina-unmount ang SD card..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Binubura ang imbakan na USB..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Binubura ang SD card..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Ina-unmount ang USB storage..."</string>
+    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Ina-unmount ang SD card..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Binubura ang USB storage..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"Binubura ang SD card..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Hindi mabura ang USB storage."</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"Hindi mabura ang SD card."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Inalis ang SD card bago na-unmount."</string>
@@ -1127,17 +1136,17 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Oo"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Hindi"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Nalagpasan na ang limitasyon sa pagtanggal"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Mayroong <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> (na) natanggal na item para sa <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account na <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Ano ang gusto mong gawin?"</string>
-    <string name="sync_really_delete" msgid="8933566316059338692">"Tanggalin ang mga item."</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"I-undo ang mga pagtanggal."</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"Walang gawin sa ngayon."</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Mayroong <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> (na) tinanggal na item para sa <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account na <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Ano ang nais mong gawin?"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"Tanggalin ang mga item"</string>
+    <string name="sync_undo_deletes" msgid="2941317360600338602">"I-undo ang mga pagtanggal"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"Walang gawin sa ngayon"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Pumili ng isang account"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Magdagdag ng account"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"Aling account ang gusto mong gamitin?"</string>
+    <string name="choose_account_text" msgid="6303348737197849675">"Aling account ang nais mong gamitin?"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Magdagdag ng account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Taasan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Babaan"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> tapikin at pindutin nang matagal."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> pindutin nang matagal."</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"I-slide pataas upang magdagdag at pababa upang magbawas."</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"Minuto ng pagdaragdag"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"Minuto ng pagbawas"</string>
@@ -1179,29 +1188,29 @@
     <string name="description_target_silent" msgid="893551287746522182">"Tahimik"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"I-on ang tunog"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Mag-swipe upang i-unlock."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"Mag-plug in ng isang headset upang marinig ang mga password key na binabanggit nang malakas."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Mag-plug in ng isang headset upang marinig ang mga password key na binabanggit."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Dot."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Magnabiga sa home"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Magnabiga pataas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Higit pang mga pagpipilian"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"Panloob na Storage"</string>
-    <string name="storage_sd_card" msgid="8921771478629812343">"SD Card"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Panloob na storage"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD card"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
-    <string name="extract_edit_menu_button" msgid="302060189057163906">"I-edit..."</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"Pindutin upang tingnan ang paggamit at mga setting"</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"Pindutin upang tingnan ang paggamit at mga setting."</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Di pinagana ang data ng 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Di pinagana ang data ng 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Di pinagana ang data ng mobile"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Hindi pinagana ang data ng Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="4313857592916426843">"Pindutin upang paganahin"</string>
+    <string name="data_usage_limit_body" msgid="3317964706973601386">"Pindutin upang paganahin."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Lumampas sa limitasyon ng data sa mobile"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Lumampas sa limitasyon ng data ng Wi-Fi"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"Ang <xliff:g id="SIZE">%s</xliff:g> ay lumalampas sa tinukoy na limitasyon"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Lampas ng <xliff:g id="SIZE">%s</xliff:g> sa tinukoy na limitasyon."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pinaghihigpitan ang data ng background"</string>
-    <string name="data_usage_restricted_body" msgid="5087354814839059798">"Pindutin upang alisin ang paghihigpit"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Pindutin upang alisin ang paghihigpit."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificate ng seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"May-bisa ang certificate na ito."</string>
     <string name="issued_to" msgid="454239480274921032">"Ibinigay kay:"</string>
@@ -1221,7 +1230,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ibahagi sa"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Naka-lock ang device."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
-    <string name="sending" msgid="8715108995741758718">"Ipinapadala..."</string>
+    <string name="sending" msgid="3245653681008218030">"Ipinapadala..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Ilunsad ang Browser?"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"Tanggapin ang Tawag?"</string>
+    <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
 </resources>
