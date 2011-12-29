@@ -1772,4 +1772,15 @@ public interface Phone {
      * @return an interface to the UsimServiceTable record, or null if not available
      */
     UsimServiceTable getUsimServiceTable();
+
+    /**
+     * Unregister from all events it registered for and dispose objects
+     * created by this object.
+     */
+    void dispose();
+
+    /**
+     * Remove references to external object stored in this object.
+     */
+    void removeReferences();
 }

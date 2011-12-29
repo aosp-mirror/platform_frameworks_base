@@ -184,7 +184,7 @@ public class SIMRecords extends IccRecords {
         // recordsToLoad is set to 0 because no requests are made yet
         recordsToLoad = 0;
 
-        p.mCM.registerForSIMReady(this, EVENT_SIM_READY, null);
+        p.mIccCard.registerForReady(this, EVENT_SIM_READY, null);
         p.mCM.registerForOffOrNotAvailable(
                         this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         p.mCM.setOnSmsOnSim(this, EVENT_SMS_ON_SIM, null);
@@ -198,13 +198,13 @@ public class SIMRecords extends IccRecords {
     @Override
     public void dispose() {
         //Unregister for all events
-        phone.mCM.unregisterForSIMReady(this);
+        phone.mIccCard.unregisterForReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
         phone.mCM.unregisterForIccRefresh(this);
     }
 
     protected void finalize() {
-        if(DBG) Log.d(LOG_TAG, "SIMRecords finalized");
+        if(DBG) log("finalized");
     }
 
     protected void onRadioOffOrNotAvailable() {
@@ -412,8 +412,7 @@ public class SIMRecords extends IccRecords {
                     obtainMessage (EVENT_UPDATE_DONE, EF_VOICE_MAIL_INDICATOR_CPHS));
             }
         } catch (ArrayIndexOutOfBoundsException ex) {
-            Log.w(LOG_TAG,
-                "Error saving voice mail state to SIM. Probably malformed SIM record", ex);
+            logw("Error saving voice mail state to SIM. Probably malformed SIM record", ex);
         }
     }
 
@@ -468,8 +467,7 @@ public class SIMRecords extends IccRecords {
                         obtainMessage (EVENT_UPDATE_DONE, EF_CFF_CPHS));
             }
         } catch (ArrayIndexOutOfBoundsException ex) {
-            Log.w(LOG_TAG,
-                    "Error saving call fowarding flag to SIM. "
+            logw("Error saving call fowarding flag to SIM. "
                             + "Probably malformed SIM record", ex);
 
         }
@@ -495,11 +493,11 @@ public class SIMRecords extends IccRecords {
     @Override
     public String getOperatorNumeric() {
         if (imsi == null) {
-            Log.d(LOG_TAG, "getOperatorNumeric: IMSI == null");
+            log("getOperatorNumeric: IMSI == null");
             return null;
         }
         if (mncLength == UNINITIALIZED || mncLength == UNKNOWN) {
-            Log.d(LOG_TAG, "getSIMOperatorNumeric: bad mncLength");
+            log("getSIMOperatorNumeric: bad mncLength");
             return null;
         }
 
@@ -517,6 +515,12 @@ public class SIMRecords extends IccRecords {
 
         boolean isRecordLoadResponse = false;
 
+        if (!phone.mIsTheCurrentActivePhone) {
+            loge("Received message " + msg + "[" + msg.what + "] " +
+                    " while being destroyed. Ignoring.");
+            return;
+        }
+
         try { switch (msg.what) {
             case EVENT_SIM_READY:
                 onSimReady();
@@ -533,7 +537,7 @@ public class SIMRecords extends IccRecords {
                 ar = (AsyncResult)msg.obj;
 
                 if (ar.exception != null) {
-                    Log.e(LOG_TAG, "Exception querying IMSI, Exception:" + ar.exception);
+                    loge("Exception querying IMSI, Exception:" + ar.exception);
                     break;
                 }
 
@@ -542,11 +546,11 @@ public class SIMRecords extends IccRecords {
                 // IMSI (MCC+MNC+MSIN) is at least 6 digits, but not more
                 // than 15 (and usually 15).
                 if (imsi != null && (imsi.length() < 6 || imsi.length() > 15)) {
-                    Log.e(LOG_TAG, "invalid IMSI " + imsi);
+                    loge("invalid IMSI " + imsi);
                     imsi = null;
                 }
 
-                Log.d(LOG_TAG, "IMSI: " + /* imsi.substring(0, 6) +*/ "xxxxxxx");
+                log("IMSI: " + /* imsi.substring(0, 6) +*/ "xxxxxxx");
 
                 if (((mncLength == UNKNOWN) || (mncLength == 2)) &&
                         ((imsi != null) && (imsi.length() >= 6))) {
@@ -567,7 +571,7 @@ public class SIMRecords extends IccRecords {
                         mncLength = MccTable.smallestDigitsMccForMnc(mcc);
                     } catch (NumberFormatException e) {
                         mncLength = UNKNOWN;
-                        Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
+                        loge("Corrupt IMSI!");
                     }
                 }
 
@@ -589,15 +593,14 @@ public class SIMRecords extends IccRecords {
                 isValidMbdn = false;
                 if (ar.exception == null) {
                     // Refer TS 51.011 Section 10.3.44 for content details
-                    Log.d(LOG_TAG, "EF_MBI: " +
-                            IccUtils.bytesToHexString(data));
+                    log("EF_MBI: " + IccUtils.bytesToHexString(data));
 
                     // Voice mail record number stored first
                     mailboxIndex = (int)data[0] & 0xff;
 
                     // check if dailing numbe id valid
                     if (mailboxIndex != 0 && mailboxIndex != 0xff) {
-                        Log.d(LOG_TAG, "Got valid mailbox number for MBDN");
+                        log("Got valid mailbox number for MBDN");
                         isValidMbdn = true;
                     }
                 }
@@ -633,7 +636,7 @@ public class SIMRecords extends IccRecords {
 
                 if (ar.exception != null) {
 
-                    Log.d(LOG_TAG, "Invalid or missing EF"
+                    log("Invalid or missing EF"
                         + ((msg.what == EVENT_GET_CPHS_MAILBOX_DONE) ? "[MAILBOX]" : "[MBDN]"));
 
                     // Bug #645770 fall back to CPHS
@@ -653,7 +656,7 @@ public class SIMRecords extends IccRecords {
 
                 adn = (AdnRecord)ar.result;
 
-                Log.d(LOG_TAG, "VM: " + adn +
+                log("VM: " + adn +
                         ((msg.what == EVENT_GET_CPHS_MAILBOX_DONE) ? " EF[MAILBOX]" : " EF[MBDN]"));
 
                 if (adn.isEmpty() && msg.what == EVENT_GET_MBDN_DONE) {
@@ -678,7 +681,7 @@ public class SIMRecords extends IccRecords {
                 ar = (AsyncResult)msg.obj;
 
                 if (ar.exception != null) {
-                    Log.d(LOG_TAG, "Invalid or missing EF[MSISDN]");
+                    log("Invalid or missing EF[MSISDN]");
                     break;
                 }
 
@@ -687,7 +690,7 @@ public class SIMRecords extends IccRecords {
                 msisdn = adn.getNumber();
                 msisdnTag = adn.getAlphaTag();
 
-                Log.d(LOG_TAG, "MSISDN: " + /*msisdn*/ "xxxxxxx");
+                log("MSISDN: " + /*msisdn*/ "xxxxxxx");
             break;
 
             case EVENT_SET_MSISDN_DONE:
@@ -711,13 +714,12 @@ public class SIMRecords extends IccRecords {
                     break;
                 }
 
-                Log.d(LOG_TAG, "EF_MWIS: " +
-                   IccUtils.bytesToHexString(data));
+                log("EF_MWIS: " + IccUtils.bytesToHexString(data));
 
                 efMWIS = data;
 
                 if ((data[0] & 0xff) == 0xff) {
-                    Log.d(LOG_TAG, "SIMRecords: Uninitialized record MWIS");
+                    log("Uninitialized record MWIS");
                     break;
                 }
 
@@ -775,7 +777,7 @@ public class SIMRecords extends IccRecords {
 
                 iccid = IccUtils.bcdToString(data, 0, data.length);
 
-                Log.d(LOG_TAG, "iccid: " + iccid);
+                log("iccid: " + iccid);
 
             break;
 
@@ -791,16 +793,15 @@ public class SIMRecords extends IccRecords {
                         break;
                     }
 
-                    Log.d(LOG_TAG, "EF_AD: " +
-                            IccUtils.bytesToHexString(data));
+                    log("EF_AD: " + IccUtils.bytesToHexString(data));
 
                     if (data.length < 3) {
-                        Log.d(LOG_TAG, "SIMRecords: Corrupt AD data on SIM");
+                        log("Corrupt AD data on SIM");
                         break;
                     }
 
                     if (data.length == 3) {
-                        Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
+                        log("MNC length not present in EF_AD");
                         break;
                     }
 
@@ -829,13 +830,13 @@ public class SIMRecords extends IccRecords {
                                 mncLength = MccTable.smallestDigitsMccForMnc(mcc);
                             } catch (NumberFormatException e) {
                                 mncLength = UNKNOWN;
-                                Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
+                                loge("Corrupt IMSI!");
                             }
                         } else {
                             // Indicate we got this info, but it didn't contain the length.
                             mncLength = UNKNOWN;
 
-                            Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
+                            log("MNC length not present in EF_AD");
                         }
                     }
                     if (imsi != null && mncLength != UNKNOWN) {
@@ -862,8 +863,7 @@ public class SIMRecords extends IccRecords {
                     break;
                 }
 
-                Log.d(LOG_TAG, "EF_CFF_CPHS: " +
-                        IccUtils.bytesToHexString(data));
+                log("EF_CFF_CPHS: " + IccUtils.bytesToHexString(data));
                 mEfCff = data;
 
                 if (mEfCfis == null) {
@@ -890,7 +890,7 @@ public class SIMRecords extends IccRecords {
             case EVENT_UPDATE_DONE:
                 ar = (AsyncResult)msg.obj;
                 if (ar.exception != null) {
-                    Log.i(LOG_TAG, "SIMRecords update failed", ar.exception);
+                    logw("update failed. ", ar.exception);
                 }
             break;
 
@@ -939,10 +939,10 @@ public class SIMRecords extends IccRecords {
                 int[] index = (int[])ar.result;
 
                 if (ar.exception != null || index.length != 1) {
-                    Log.e(LOG_TAG, "[SIMRecords] Error on SMS_ON_SIM with exp "
+                    loge("Error on SMS_ON_SIM with exp "
                             + ar.exception + " length " + index.length);
                 } else {
-                    Log.d(LOG_TAG, "READ EF_SMS RECORD index=" + index[0]);
+                    log("READ EF_SMS RECORD index=" + index[0]);
                     phone.getIccFileHandler().loadEFLinearFixed(EF_SMS,index[0],
                             obtainMessage(EVENT_GET_SMS_DONE));
                 }
@@ -954,8 +954,7 @@ public class SIMRecords extends IccRecords {
                 if (ar.exception == null) {
                     handleSms((byte[])ar.result);
                 } else {
-                    Log.e(LOG_TAG, "[SIMRecords] Error on GET_SMS with exp "
-                            + ar.exception);
+                    loge("Error on GET_SMS with exp " + ar.exception);
                 }
                 break;
             case EVENT_GET_SST_DONE:
@@ -1048,7 +1047,7 @@ public class SIMRecords extends IccRecords {
             case EVENT_SIM_REFRESH:
                 isRecordLoadResponse = false;
                 ar = (AsyncResult)msg.obj;
-		if (DBG) log("Sim REFRESH with exception: " + ar.exception);
+                if (DBG) log("Sim REFRESH with exception: " + ar.exception);
                 if (ar.exception == null) {
                     handleSimRefresh((int[])(ar.result));
                 }
@@ -1063,8 +1062,7 @@ public class SIMRecords extends IccRecords {
                     break;
                 }
 
-                Log.d(LOG_TAG, "EF_CFIS: " +
-                   IccUtils.bytesToHexString(data));
+                log("EF_CFIS: " + IccUtils.bytesToHexString(data));
 
                 mEfCfis = data;
 
@@ -1080,13 +1078,13 @@ public class SIMRecords extends IccRecords {
                 ar = (AsyncResult)msg.obj;
 
                 if (ar.exception != null) {
-                    Log.e(LOG_TAG,"Exception in fetching EF_CSP data " + ar.exception);
+                    loge("Exception in fetching EF_CSP data " + ar.exception);
                     break;
                 }
 
                 data = (byte[])ar.result;
 
-                Log.i(LOG_TAG,"EF_CSP: " + IccUtils.bytesToHexString(data));
+                log("EF_CSP: " + IccUtils.bytesToHexString(data));
                 handleEfCspData(data);
                 break;
 
@@ -1095,7 +1093,7 @@ public class SIMRecords extends IccRecords {
 
         }}catch (RuntimeException exc) {
             // I don't want these exceptions to be fatal
-            Log.w(LOG_TAG, "Exception parsing SIM record", exc);
+            logw("Exception parsing SIM record", exc);
         } finally {
             // Count up record load responses even if they are fails
             if (isRecordLoadResponse) {
@@ -1118,7 +1116,7 @@ public class SIMRecords extends IccRecords {
                 break;
             case EF_CSP_CPHS:
                 recordsToLoad++;
-                Log.i(LOG_TAG, "[CSP] SIM Refresh for EF_CSP_CPHS");
+                log("[CSP] SIM Refresh for EF_CSP_CPHS");
                 phone.getIccFileHandler().loadEFTransparent(EF_CSP_CPHS,
                         obtainMessage(EVENT_GET_CSP_CPHS_DONE));
                 break;
@@ -1242,13 +1240,13 @@ public class SIMRecords extends IccRecords {
         if (recordsToLoad == 0 && recordsRequested == true) {
             onAllRecordsLoaded();
         } else if (recordsToLoad < 0) {
-            Log.e(LOG_TAG, "SIMRecords: recordsToLoad <0, programmer error suspected");
+            loge("recordsToLoad <0, programmer error suspected");
             recordsToLoad = 0;
         }
     }
 
     protected void onAllRecordsLoaded() {
-        Log.d(LOG_TAG, "SIMRecords: record load complete");
+        log("record load complete");
 
         String operator = getOperatorNumeric();
 
@@ -1261,7 +1259,7 @@ public class SIMRecords extends IccRecords {
                     MccTable.countryCodeForMcc(Integer.parseInt(imsi.substring(0,3))));
         }
         else {
-            Log.e("SIM", "[SIMRecords] onAllRecordsLoaded: imsi is NULL!");
+            loge("onAllRecordsLoaded: imsi is NULL!");
         }
 
         setVoiceMailByCountry(operator);
@@ -1304,7 +1302,7 @@ public class SIMRecords extends IccRecords {
         recordsRequested = true;
         IccFileHandler iccFh = phone.getIccFileHandler();
 
-        Log.v(LOG_TAG, "SIMRecords:fetchSimRecords " + recordsToLoad);
+        logv("fetchSimRecords " + recordsToLoad);
 
         phone.mCM.getIMSI(obtainMessage(EVENT_GET_IMSI_DONE));
         recordsToLoad++;
@@ -1590,6 +1588,14 @@ public class SIMRecords extends IccRecords {
         Log.e(LOG_TAG, "[SIMRecords] " + s);
     }
 
+    protected void logw(String s, Throwable tr) {
+        Log.w(LOG_TAG, "[SIMRecords] " + s, tr);
+    }
+
+    protected void logv(String s) {
+        Log.v(LOG_TAG, "[SIMRecords] " + s);
+    }
+
     /**
      * Return true if "Restriction of menu options for manual PLMN selection"
      * bit is set or EF_CSP data is unavailable, return false otherwise.
@@ -1619,8 +1625,7 @@ public class SIMRecords extends IccRecords {
         mCspPlmnEnabled = true;
         for (int i = 0; i < usedCspGroups; i++) {
              if (data[2 * i] == valueAddedServicesGroup) {
-                 Log.i(LOG_TAG, "[CSP] found ValueAddedServicesGroup, value "
-                       + data[(2 * i) + 1]);
+                 log("[CSP] found ValueAddedServicesGroup, value " + data[(2 * i) + 1]);
                  if ((data[(2 * i) + 1] & 0x80) == 0x80) {
                      // Bit 8 is for
                      // "Restriction of menu options for manual PLMN selection".
@@ -1630,13 +1635,13 @@ public class SIMRecords extends IccRecords {
                      mCspPlmnEnabled = false;
                      // Operator Selection menu should be disabled.
                      // Operator Selection Mode should be set to Automatic.
-                     Log.i(LOG_TAG,"[CSP] Set Automatic Network Selection");
+                     log("[CSP] Set Automatic Network Selection");
                      phone.setNetworkSelectionModeAutomatic(null);
                  }
                  return;
              }
         }
 
-        Log.w(LOG_TAG, "[CSP] Value Added Service Group (0xC0), not found!");
+        log("[CSP] Value Added Service Group (0xC0), not found!");
     }
 }

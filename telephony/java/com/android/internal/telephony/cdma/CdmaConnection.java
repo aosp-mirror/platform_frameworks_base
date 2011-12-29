@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
 import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.telephony.RILConstants;
 
 /**
  * {@hide}
@@ -429,8 +430,9 @@ public class CdmaConnection extends Connection {
                 } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE
                         || serviceState == ServiceState.STATE_EMERGENCY_ONLY) {
                     return DisconnectCause.OUT_OF_SERVICE;
-                } else if (phone.mCM.getNvState() != CommandsInterface.RadioState.NV_READY
-                        && phone.getIccCard().getState() != RuimCard.State.READY) {
+                } else if (phone.mCdmaSubscriptionSource ==
+                               CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_RUIM
+                           && phone.getIccCard().getState() != RuimCard.State.READY) {
                     return DisconnectCause.ICC_ERROR;
                 } else if (causeCode==CallFailCause.NORMAL_CLEARING) {
                     return DisconnectCause.NORMAL;

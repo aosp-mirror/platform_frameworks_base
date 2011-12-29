@@ -120,9 +120,7 @@ public class CatService extends Handler implements AppInterface {
         mIccRecords = ir;
 
         // Register for SIM ready event.
-        mCmdIf.registerForSIMReady(this, MSG_ID_SIM_READY, null);
-        mCmdIf.registerForRUIMReady(this, MSG_ID_SIM_READY, null);
-        mCmdIf.registerForNVReady(this, MSG_ID_SIM_READY, null);
+        ic.registerForReady(this, MSG_ID_SIM_READY, null);
         mIccRecords.registerForRecordsLoaded(this, MSG_ID_ICC_RECORDS_LOADED, null);
 
         CatLog.d(this, "Is running");
