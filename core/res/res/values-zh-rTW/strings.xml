@@ -73,11 +73,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"已封鎖數據傳輸服務。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"已封鎖緊急服務。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"已封鎖語音服務。"</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"已封鎖所有語音服務。"</string>
+    <string name="RestrictedOnAllVoice" msgid="3396963652108151260">"已封鎖所有語音服務。"</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"已封鎖 SMS 服務。"</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"已封鎖語音/資料服務。"</string>
+    <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據傳輸服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"已封鎖所有語音/資料/SMS 服務。"</string>
+    <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/簡訊服務。"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"語音服務"</string>
     <string name="serviceClassData" msgid="872456782077937893">"資料"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"傳真"</string>
@@ -108,27 +108,27 @@
     <string name="fcComplete" msgid="3118848230966886575">"功能碼輸入完成。"</string>
     <string name="fcError" msgid="3327560126588500777">"連線發生問題或功能碼無效。"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"確定"</string>
-    <string name="httpError" msgid="6603022914760066338">"發生網路錯誤。"</string>
-    <string name="httpErrorLookup" msgid="4517085806977851374">"找不到網址。"</string>
+    <string name="httpError" msgid="7956392511146698522">"發生網路錯誤。"</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"找不到網址。"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"不支援的網站驗證機制。"</string>
-    <string name="httpErrorAuth" msgid="7293960746955020542">"驗證失敗。"</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"無法驗證。"</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"透過 proxy 伺服器驗證失敗。"</string>
-    <string name="httpErrorConnect" msgid="7623096283505770433">"連線到伺服器失敗。"</string>
-    <string name="httpErrorIO" msgid="4270874999047767599">"無法連上伺服器，請稍後再試。"</string>
+    <string name="httpErrorConnect" msgid="8714273236364640549">"無法連線至伺服器。"</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"無法與伺服器進行通訊，請稍後再試。"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"連線到伺服器逾時。"</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"此網頁包含太多伺服器轉址。"</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"不支援的通訊協定。"</string>
-    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"無法建立安全連線。"</string>
-    <string name="httpErrorBadUrl" msgid="6088183159988619736">"由於網址錯誤，無法開啟此網頁。"</string>
-    <string name="httpErrorFile" msgid="8250549644091165175">"無法存取此檔案。"</string>
-    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"找不到要求的檔案。"</string>
+    <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"無法建立安全連線。"</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"網址無效，因此無法開啟網頁。"</string>
+    <string name="httpErrorFile" msgid="2170788515052558676">"無法存取檔案。"</string>
+    <string name="httpErrorFileNotFound" msgid="6203856612042655084">"找不到所要求的檔案。"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"太多執行要求。請稍後再試一次。"</string>
-    <string name="notification_title" msgid="1259940370369187045">"<xliff:g id="ACCOUNT">%1$s</xliff:g>登入錯誤"</string>
+    <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> 發生登入錯誤"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"同步處理"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"同步處理"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"平板電腦的儲存空間已用盡！請刪除一些檔案，以釋放出可用空間。"</string>
-    <string name="low_memory" product="default" msgid="6632412458436461203">"手機儲存空間已滿！請刪除一些檔案增加空間。"</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"平板電腦的儲存空間已滿。請刪除一些檔案，以釋放出可用空間。"</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"手機儲存空間已滿。請刪除一些檔案，以釋放可用空間。"</string>
     <string name="me" msgid="6545696007631404292">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"電話選項"</string>
@@ -137,6 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線網路"</string>
     <string name="screen_lock" msgid="799094655496098153">"螢幕鎖定"</string>
     <string name="power_off" msgid="4266614107412865048">"關機"</string>
+    <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"關機中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"手機即將關機。"</string>
@@ -157,16 +160,16 @@
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要額外費用的服務。"</string>
-    <string name="permgroupdesc_costMoney" msgid="8596717365335027057">"允許應用程式執行需付費的作業或服務。"</string>
+    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"執行需付費的作業或服務。"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"您的簡訊"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"讀取及寫入您的簡訊、電子郵件和其他訊息。"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"您的個人資訊"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"直接存取平板電腦上儲存的聯絡人和日曆。"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"直接存取手機上的聯絡人與日曆。"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"您的位置"</string>
-    <string name="permgroupdesc_location" msgid="2430258821648348660">"監視實際位置"</string>
+    <string name="permgroupdesc_location" msgid="5704679763124170100">"監控您的實際位置。"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"網路通訊"</string>
-    <string name="permgroupdesc_network" msgid="4917593670797570584">"允許應用程式存取各種網路功能。"</string>
+    <string name="permgroupdesc_network" msgid="4478299413241861987">"存取各種網路功能。"</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帳戶"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"存取可用帳戶。"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬體控制"</string>
@@ -211,11 +214,11 @@
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"重新排序正在執行的應用程式"</string>
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允許應用程式將工作移至前景或背景。請注意，惡意應用程式可能利用此功能自行移動至前景。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
-    <string name="permdesc_removeTasks" msgid="1000226123143185094">"允許應用程式移除工作並終止執行工作的應用程式。請注意，惡意應用程式可能利用此功能干擾其他應用程式的行為。"</string>
+    <string name="permdesc_removeTasks" msgid="1394714352062635493">"允許應用程式移除工作並終止執行工作的應用程式。請注意，惡意應用程式可能利用此功能干擾其他應用程式的行為。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"啟用應用程式偵錯"</string>
-    <string name="permdesc_setDebugApp" msgid="6215654419903651172">"允許應用程式為其他程式開啟偵錯功能。請注意，惡意應用程式可能利用此功能終止其他應用程式。"</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"允許應用程式為其他程式開啟偵錯功能。提醒您，惡意應用程式可能會利用這個功能終止其他應用程式。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"變更介面設定"</string>
-    <string name="permdesc_changeConfiguration" msgid="4104052649900380324">"允許應用程式變更目前設定，例如地區設定或字型大小。"</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"允許應用程式變更目前設定，例如地區設定或字型大小。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"啟用行車模式"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"允許應用程式啟用車用模式。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"關閉背景程序"</string>
@@ -251,11 +254,11 @@
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"確認完整備份或還原作業"</string>
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"允許應用程式啟動完整備份確認使用者介面 (不建議任何應用程式使用)。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
-    <string name="permdesc_internalSystemWindow" msgid="6510907081810231374">"允許應用程式為內部系統使用者介面建立視窗 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"允許應用程式為內部系統使用者介面建立視窗 (不建議一般應用程式使用)。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"顯示系統警示"</string>
     <string name="permdesc_systemAlertWindow" msgid="8507863469978066409">"允許應用程式顯示系統警告視窗。請注意，惡意應用程式可能利用此功能操控整個螢幕。"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"編輯全域動畫速度"</string>
-    <string name="permdesc_setAnimationScale" msgid="6505093307223395456">"允許應用程式隨時變更全域的動畫速度 (更快或更慢)。"</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"允許應用程式隨時變更全域的動畫速度 (更快或更慢)。"</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"管理應用程式憑證"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"允許應用程序略過一般程序，直接建立及管理本身的憑證 (一般應用程式不需使用)。"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"按鍵及控制按鈕"</string>
@@ -302,7 +305,7 @@
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的平板電腦使用資訊，可能包含您的個人或私人資訊。"</string>
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的手機使用資訊，可能包含您的個人或私人資訊。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒體解碼器進行播放"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="2101444559995480174">"允許應用程式使用任何已安裝的媒體解碼器進行解碼以播放影片。"</string>
+    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允許應用程式使用任何已安裝的媒體解碼器進行解碼以播放影片。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允許應用程式讀取或寫入診斷群組擁有的任何資源，例如 /dev 底下的檔案。這可能會影響系統的穩定性和安全性，因此應由製造商或電信業者操作，且只用在特定硬體診斷。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"啟用或停用應用程式元件"</string>
@@ -436,7 +439,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"允許應用程式變更平板電腦的時區。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"允許應用程式變更手機的時區。"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"作為 AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="2684502137670299915">"允許應用程式呼叫 AccountAuthenticators。"</string>
+    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"允許應用程式呼叫 AccountAuthenticators。"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"發現已知帳戶。"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="3238360555257773358">"允許應用程式取得平板電腦已知的帳戶清單。"</string>
     <string name="permdesc_getAccounts" product="default" msgid="2735689364629830348">"允許應用程式取得手機已知的帳戶清單。"</string>
@@ -468,9 +471,9 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允許應用程式設定本機藍牙平板電腦，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允許應用程式設定本機藍牙手機，以及搜尋遠端裝置並配對連線。"</string>
     <string name="permlab_accessWimaxState" msgid="1232061307208861588">"查看 WiMAX 狀態"</string>
-    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允許應用程式查看 WiMAX 連線狀態相關資訊。"</string>
+    <string name="permdesc_accessWimaxState" msgid="5914958077555177749">"允許應用程式查看 WiMax 狀態相關資訊。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"變更 WiMAX 狀態"</string>
-    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允許應用程式建立或中斷 WiMAX 網路連線。"</string>
+    <string name="permdesc_changeWimaxState" msgid="3328853825006455912">"允許應用程式建立或中斷 WiMAX 網路連線。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"建立藍牙連線"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="7007851048416363446">"允許應用程式查看本機藍牙平板電腦設定，並可建立及接受與其他配對裝置的連線。"</string>
     <string name="permdesc_bluetooth" product="default" msgid="31846362767164948">"允許應用程式查看本機藍牙手機設定，並可建立及接受與其他配對裝置的連線。"</string>
@@ -507,27 +510,27 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網路政策"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允許應用程式管理網路政策並定義應用程式專用規則。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改網路使用量計算方式"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8553240749784321765">"允許應用程式修改應用程式網路使用量的計算方式 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允許應用程式修改應用程式網路使用量的計算方式 (不建議一般應用程式使用)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"控制螢幕解鎖密碼所允許的長度和字元"</string>
+    <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"變更螢幕解鎖密碼"</string>
-    <string name="policydesc_resetPassword" msgid="5391240616981297361">"變更螢幕解鎖密碼"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"變更螢幕解鎖密碼。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"鎖定螢幕"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"控制鎖定螢幕的方式和時間"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"控制鎖定螢幕的方式和時間。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"恢復原廠設定時，系統會在不提出警告的情況下直接清除平板電腦的資料"</string>
-    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"執行重設為原廠設定時，系統會直接清除手機資料而不提出警告"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"恢復原廠設定，不提出警告就直接清除平板電腦的資料。"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"恢復原廠設定，不提出警告就直接清除手機的資料。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"設定裝置全域 Proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"設定螢幕上鎖密碼到期日"</string>
-    <string name="policydesc_expirePassword" msgid="4844430354224822074">"控制螢幕上鎖密碼的變更頻率"</string>
+    <string name="policydesc_expirePassword" msgid="1729725226314691591">"控制螢幕上鎖密碼的變更頻率。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
-    <string name="policydesc_encryptedStorage" msgid="8877192718681120469">"必須為儲存的應用程式資料加密"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相機"</string>
-    <string name="policydesc_disableCamera" msgid="5680054212889413366">"禁止使用所有裝置相機"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有裝置相機。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -648,7 +651,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"輕觸即可輸入密碼"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"輸入 PIN 即可解鎖"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN 碼不正確。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急電話號碼"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"沒有服務。"</string>
@@ -661,6 +664,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正確！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"再試一次"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"再試一次"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超過人臉解鎖嘗試次數上限"</string>
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"充電中 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"充電完成。"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -694,14 +698,14 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘記解鎖圖形？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"解除封鎖帳戶"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"解鎖圖形出錯次數過多！"</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"如要解除鎖定，請使用 Google 帳戶登入"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"圖形嘗試次數過多"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"如要解除鎖定，請使用 Google 帳戶登入。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"使用者名稱 (電子郵件)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密碼"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登入"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"使用者名稱或密碼錯誤。"</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"忘了使用者名稱或密碼？"\n"請前往 "<b>"google.com/accounts/recovery"</b></string>
-    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"檢查中..."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"忘了使用者名稱或密碼？"\n"請造訪 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"檢查中..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"關閉音效"</string>
@@ -718,13 +722,13 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有安裝在 /system/app 裡的程式才能支援 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"找不到提供 FACTORY_TEST 的程式。"</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"重新開機"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"「<xliff:g id="TITLE">%s</xliff:g>」的網頁指出："</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"「<xliff:g id="TITLE">%s</xliff:g>」網頁指出："</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="730366588032430474">"離開這個頁面？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"輕觸 [確定] 離開這個頁面，或輕觸 [取消] 停留在這個頁面。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
-    <string name="double_tap_toast" msgid="2729045387923870404">"提示：輕觸兩下即可縮放。"</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"自動填入功能"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"設定自動填入功能"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"設定自動填入功能"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
@@ -859,9 +863,9 @@
     <string name="weeks" msgid="6509623834583944518">"週"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <string name="VideoView_error_title" msgid="5927895235831021723">"無法播放影片"</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"影片發生問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"這部影片的格式無效，因此無法在此裝置中串流播放。"</string>
-    <string name="VideoView_error_text_unknown" msgid="4309847331399592194">"無法播放這部影片。"</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"無法播放這部影片。"</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"確定"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>，<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"中午"</string>
@@ -897,7 +901,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"選擇要使用的應用程式"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"設為預設應用程式。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"前往 [系統設定] &gt; [應用程式] &gt; [下載] 清除預設值。"</string>
-    <string name="chooseActivity" msgid="1009246475582238425">"選取一項操作"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"選擇一種動作"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="2991814273936504689">"沒有應用程式可執行這項操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -931,11 +935,11 @@
     <string name="old_app_description" msgid="2082094275580358049">"請勿啟動新的應用程式。"</string>
     <string name="new_app_action" msgid="5472756926945440706">"啟動 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"停止舊的應用程式且不儲存。"</string>
-    <string name="sendText" msgid="5132506121645618310">"訊息傳送方式"</string>
+    <string name="sendText" msgid="5209874571959469142">"選取傳送文字內容的方式"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"鈴聲音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒體音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"透過藍牙播放"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"已選取靜音鈴聲"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"已將鈴聲設為靜音"</string>
     <string name="volume_call" msgid="3941680041282788711">"來電音量"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"藍牙通話音量"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"鬧鐘音量"</string>
@@ -959,17 +963,22 @@
     <item quantity="one" msgid="1634101450343277345">"開啟可用 Wi-Fi 網路"</item>
     <item quantity="other" msgid="7915895323644292768">"開啟可用 Wi-Fi 網路"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 WiFi 網路"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登入 WiFi 網路"</string>
     <!-- no translation found for wifi_available_sign_in_detailed (6797764740339907572) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"無法連線至 Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" 網際網路連線狀況不佳。"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 的網際網路連線狀況不佳。"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"啟動 Wi-Fi Direct 作業，這會關閉 Wi-Fi 用戶端/無線基地台作業。"</string>
-    <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"無法啟動 Wi-Fi Direct"</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求，按一下 [確定] 即可接受。"</string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求。輸入 PIN 即可繼續進行。"</string>
-    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"必須在對端裝置 <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> 上輸入 WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>，才能繼續進行連線設定"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"啟動 WiFi Direct 作業，這會關閉 WiFi 用戶端/無線基地台作業。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"無法啟動 WiFi Direct。"</string>
+    <string name="accept" msgid="1645267259272829559">"接受"</string>
+    <string name="decline" msgid="2112225451706137894">"拒絕"</string>
+    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"邀請函已傳送"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"連線邀請"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"寄件者："</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件者："</string>
+    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"請輸入必要的 PIN："</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct 已開啟"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"輕觸即可設定"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
@@ -982,7 +991,7 @@
     <string name="sim_removed_message" msgid="2333164559970958645">"您必須先插入有效的 SIM 卡再重新啟動手機，才能使用行動網路。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 卡已新增"</string>
-    <string name="sim_added_message" msgid="1209265974048554242">"您必須重新啟動裝置，才能使用行動網路。"</string>
+    <string name="sim_added_message" msgid="6599945301141050216">"請重新啟動裝置，才能使用行動網路。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"設定時間"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
@@ -991,31 +1000,31 @@
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>" 隱藏"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 大量儲存裝置"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 大量儲存裝置"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已連接"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"您已透過 USB 與電腦建立連線。如要在電腦和 Android 的 USB 儲存裝置之間複製檔案，請輕觸下方按鈕。"</string>
-    <string name="usb_storage_message" product="default" msgid="4510858346516069238">"您已透過 USB 與電腦建立連線。如要在電腦和 Android 的 SD 卡之間複製檔案，請輕觸下方按鈕。"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已透過 USB 與電腦建立連線。如要在電腦和 Android 的 USB 儲存裝置之間複製檔案，請輕觸下方按鈕。"</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"您已透過 USB 與電腦建立連線。如要在電腦和 Android 的 SD 卡之間複製檔案，請輕觸下方按鈕。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"開啟 USB 儲存裝置"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"使用您的 USB 儲存裝置作為 USB 大量儲存裝置時發生問題。"</string>
-    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"使用您的 SD 卡作為 USB 大量儲存裝置時發生問題。"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"使用 USB 儲存裝置做為 USB 大量儲存裝置時發生問題。"</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"使用 SD 卡做為 USB 大量儲存裝置時發生問題。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已連接"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"選取此項將檔案複製到電腦，或從電腦複製。"</string>
+    <string name="usb_storage_notification_message" msgid="939822783828183763">"輕觸即可將檔案複製到電腦或複製電腦中的檔案。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"關閉 USB 儲存裝置"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"選取此處可關閉 USB 儲存裝置。"</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"輕觸即可關閉 USB 儲存裝置。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 儲存空間使用中"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"關閉 USB 儲存裝置前，請務必先從電腦卸載 (退出) Android 手機的 USB 儲存裝置。"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"關閉 USB 儲存裝置前，請務必先將 Android 系統的 SD 卡從電腦上卸下 (退出)。"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"關閉 USB 儲存裝置前，請先從電腦卸載 (退出) Android 手機的 USB 儲存裝置。"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"關閉 USB 儲存裝置前，請先從電腦卸載 (退出) Android 手機的 SD 卡。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"關閉 USB 儲存裝置"</string>
-    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"開啟 USB 儲存裝置"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="6206212680430268343">"如果您開啟 USB 儲存裝置，則某些正在使用中的應用程式會停止運作，而且可能無法使用，直到 USB 儲存裝置關閉後才會恢復正常。"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您開啟 USB 儲存裝置，則某些正在使用中的應用程式會停止運作，而且可能無法使用，直到關閉 USB 儲存裝置後才會恢復正常。"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已視為媒體裝置連線"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"已視為相機連線"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"已視為安裝程式連線"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已連接 USB 配件"</string>
-    <string name="usb_notification_message" msgid="4447869605109736382">"輕觸即可顯示其他 USB 選項"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"輕觸即可顯示其他 USB 選項。"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"將 USB 儲存裝置格式化？"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"將 SD 卡格式化？"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB 儲存裝置上儲存的所有檔案即將遭到清除。這項動作無法復原！"</string>
@@ -1033,12 +1042,12 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"正在檢查錯誤。"</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB 儲存裝置無內容"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD 卡為空白"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB 儲存裝置無內容或使用不受支援的檔案系統。"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD 卡內無檔案系統，或檔案系統不受支援。"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB 儲存裝置無內容，或使用不受支援的檔案系統。"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD 卡無內容，或使用不受支援的檔案系統。"</string>
     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB 儲存裝置已毀損"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD 卡已損壞"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB 儲存裝置已損壞，您可能必須重新格式化。"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD 卡已毀損，您可能必須重新格式化。"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB 儲存裝置已損壞。請嘗試將儲存裝置重新格式化。"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD 記憶卡已損壞。請嘗試將記憶卡重新格式化。"</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB 儲存裝置未正常移除"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 卡未正常移除"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"請先卸載 USB 儲存裝置，再將其移除，以免資料遺失。"</string>
@@ -1051,13 +1060,13 @@
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除 SD 卡"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB 儲存裝置已移除，請插入新媒體。"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除，請插入新的 SD 卡。"</string>
-    <string name="activity_list_empty" msgid="4168820609403385789">"找不到符合的活動"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"找不到相符的活動。"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新元件使用統計資料"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允許應用程式修改收集到的元件使用統計資料 (不建議一般應用程式使用)。"</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"複製內容"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允許觸發預設容器服務，以便複製內容 (不建議一般應用程式使用)。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"輕觸兩下即可控制縮放"</string>
-    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"擴大小工具時發生錯誤"</string>
+    <string name="gadget_host_error_inflating" msgid="4882004314906466162">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜尋"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"傳送"</string>
@@ -1069,35 +1078,35 @@
     <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"下列一或多個應用程式要求取得今後都可存取您帳戶的權限。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您確定要允許這個要求嗎？"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"存取要求"</string>
+    <string name="grant_permissions_header_text" msgid="6874497408201826708">"存取權限要求"</string>
     <string name="allow" msgid="7225948811296386551">"允許"</string>
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
-    <string name="permission_request_notification_title" msgid="5390555465778213840">"已要求權限"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 的"\n"權限要求"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出"\n"權限要求。"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
-    <string name="vpn_title" msgid="8219003246858087489">"VPN 已啟用。"</string>
+    <string name="vpn_title" msgid="19615213552042827">"VPN 已啟用"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> 已啟用 VPN"</string>
-    <string name="vpn_text" msgid="1610714069627824309">"輕按一下即可管理網路。"</string>
-    <string name="vpn_text_long" msgid="4907843483284977618">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕按一下即可管理網路。"</string>
+    <string name="vpn_text" msgid="3011306607126450322">"輕觸即可管理網路。"</string>
+    <string name="vpn_text_long" msgid="6407351006249174473">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕觸即可管理網路。"</string>
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未選擇任何檔案"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已啟用車用模式"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
+    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"輕觸即可結束車用模式。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"網路共用或無線基地台已啟用"</string>
-    <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
+    <string name="tethered_notification_message" msgid="6857031760103062982">"輕觸即可設定。"</string>
     <string name="back_button_label" msgid="2300470004503343439">"返回"</string>
     <string name="next_button_label" msgid="1080555104677992408">"繼續"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"略過"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"高行動資料用量"</string>
-    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
+    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"輕觸即可進一步瞭解行動數據用量。"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已達行動資料上限"</string>
-    <string name="throttled_notification_message" msgid="4712369856601275146">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
+    <string name="throttled_notification_message" msgid="5443457321354907181">"輕觸即可進一步瞭解行動數據用量。"</string>
     <string name="no_matches" msgid="8129421908915840737">"沒有相符項目"</string>
     <string name="find_on_page" msgid="1946799233822820384">"在頁面中尋找"</string>
   <plurals name="matches_found">
@@ -1105,10 +1114,10 @@
     <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個相符項目)"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"正在卸載 USB 儲存裝置..."</string>
-    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸載 SD 卡..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在清除 USB 儲存裝置..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"正在清除 SD 卡..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸載 USB 儲存裝置..."</string>
+    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸載 SD 卡..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"正在清除 USB 儲存裝置..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"正在清除 SD 卡..."</string>
     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"無法清除 USB 儲存裝置。"</string>
     <string name="format_error" product="default" msgid="7315248696644510935">"無法清除 SD 卡。"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸載就已移除。"</string>
@@ -1127,17 +1136,17 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"是"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"否"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"已超過刪除上限"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> 同步化 (<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 帳戶) 有 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 個刪除項目。您想如何處理？"</string>
-    <string name="sync_really_delete" msgid="8933566316059338692">"刪除這些項目。"</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"復原刪除。"</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"暫不執行。"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"帳戶 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 的<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>會刪除 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 個項目。您要如何處理？"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"刪除這些項目"</string>
+    <string name="sync_undo_deletes" msgid="2941317360600338602">"復原刪除"</string>
+    <string name="sync_do_nothing" msgid="3743764740430821845">"暫不執行"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"選擇帳戶"</string>
     <string name="add_account_label" msgid="2935267344849993553">"新增帳戶"</string>
-    <string name="choose_account_text" msgid="6891230675141555481">"您要使用哪個帳戶？"</string>
+    <string name="choose_account_text" msgid="6303348737197849675">"您要使用哪個帳戶？"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"新增帳戶"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減少"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="1343063395404990189">"<xliff:g id="VALUE">%s</xliff:g> 持續輕按。"</string>
+    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> 輕觸並按住。"</string>
     <string name="number_picker_increment_scroll_action" msgid="4628981789985093179">"向上滑動即可增加，向下滑動即可減少。"</string>
     <string name="time_picker_increment_minute_button" msgid="2843066823236250329">"增加分鐘數"</string>
     <string name="time_picker_decrement_minute_button" msgid="4357907223628449595">"減少分鐘數"</string>
@@ -1179,29 +1188,29 @@
     <string name="description_target_silent" msgid="893551287746522182">"靜音"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"開啟音效"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"滑動即可解鎖。"</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="5913502399391940888">"接上耳機即可聽見系統朗讀密碼鍵。"</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"連接耳機即可聽取系統朗讀密碼按鍵。"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"點。"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"瀏覽首頁"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"向上瀏覽"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多選項"</string>
-    <string name="storage_internal" msgid="7556050805474115618">"內部儲存空間"</string>
-    <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"內部儲存空間"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
-    <string name="extract_edit_menu_button" msgid="302060189057163906">"編輯..."</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"資料用量警告"</string>
-    <string name="data_usage_warning_body" msgid="7217480745540055170">"輕觸即可查看使用量和設定"</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"輕觸即可查看使用量和設定。"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"已停用 2G-3G 數據"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"已停用 4G 數據"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"已停用行動數據"</string>
     <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi 數據已停用"</string>
-    <string name="data_usage_limit_body" msgid="4313857592916426843">"輕觸即可啟用"</string>
+    <string name="data_usage_limit_body" msgid="3317964706973601386">"輕觸即可啟用。"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超過 2G-3G 數據上限"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超過 4G 數據上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超過行動數據上限"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"已超過 Wi-Fi 數據上限"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> 超過規定上限。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"已限制背景資料"</string>
-    <string name="data_usage_restricted_body" msgid="5087354814839059798">"輕觸即可解除限制"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"輕觸即可解除限制。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全性憑證"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"憑證有效。"</string>
     <string name="issued_to" msgid="454239480274921032">"發佈至："</string>
@@ -1221,7 +1230,7 @@
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享活動"</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
-    <string name="sending" msgid="8715108995741758718">"傳送中..."</string>
+    <string name="sending" msgid="3245653681008218030">"傳送中..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"啟動「瀏覽器」嗎？"</string>
-    <string name="SetupCallDefault" msgid="6870275517518479651">"接聽電話嗎？"</string>
+    <string name="SetupCallDefault" msgid="5834948469253758575">"接聽電話嗎？"</string>
 </resources>
