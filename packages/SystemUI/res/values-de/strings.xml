@@ -25,11 +25,11 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Benachrichtigungen zeigen"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Aus Liste entfernen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"App-Info"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Keine neuen Apps"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Kürzlich verwendete Apps schließen"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Keine kürzlich geöffneten Apps"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Kürzlich geöffnete Apps schließen"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 kürzlich verwendete App"</item>
-    <item quantity="other" msgid="1040784359794890744">"%d kürzlich verwendete Apps"</item>
+    <item quantity="one" msgid="5854176083865845541">"1 kürzlich geöffnete App"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d kürzlich geöffnete Apps"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Keine Benachrichtigungen"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktuell"</string>
@@ -76,7 +76,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Zurück"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Startbildschirm"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menü"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"Kürzlich verwendete Apps"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Kürzlich geöffnete Apps"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Schaltfläche zum Ändern der Eingabemethode"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Schaltfläche für Kompatibilitätszoom"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom auf einen größeren Bildschirm"</string>
