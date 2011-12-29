@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,6 +43,8 @@ public class WifiNative {
     static final int BLUETOOTH_COEXISTENCE_MODE_DISABLED = 1;
     static final int BLUETOOTH_COEXISTENCE_MODE_SENSE = 2;
 
+    static String sDefaultInterface;
+
     public native static boolean loadDriver();
 
     public native static boolean isDriverLoaded();
@@ -56,21 +59,49 @@ public class WifiNative {
        or when the supplicant is hung */
     public native static boolean killSupplicant();
 
-    public native static boolean connectToSupplicant();
+    public native static boolean connectToSupplicant(String iface);
 
-    public native static void closeSupplicantConnection();
+    public native static void closeSupplicantConnection(String iface);
 
     /**
      * Wait for the supplicant to send an event, returning the event string.
      * @return the event string sent by the supplicant.
      */
-    public native static String waitForEvent();
+    public native static String waitForEvent(String iface);
 
-    private native static boolean doBooleanCommand(String command);
+    private native static boolean doBooleanCommand(String iface, String command);
 
-    private native static int doIntCommand(String command);
+    private native static int doIntCommand(String iface, String command);
 
-    private native static String doStringCommand(String command);
+    private native static String doStringCommand(String iface, String command);
+
+    public static void setDefaultInterface(String iface) {
+        sDefaultInterface = iface;
+    }
+
+    public static boolean connectToSupplicant() {
+        return connectToSupplicant(sDefaultInterface);
+    }
+
+    public static void closeSupplicantConnection() {
+        closeSupplicantConnection(sDefaultInterface);
+    }
+
+    public static String waitForEvent() {
+        return waitForEvent(sDefaultInterface);
+    }
+
+    private static boolean doBooleanCommand(String command) {
+        return doBooleanCommand(sDefaultInterface, command);
+    }
+
+    private static int doIntCommand(String command) {
+        return doIntCommand(sDefaultInterface, command);
+    }
+
+    private static String doStringCommand(String command) {
+        return doStringCommand(sDefaultInterface, command);
+    }
 
     public static boolean ping() {
         String pong = doStringCommand("PING");
