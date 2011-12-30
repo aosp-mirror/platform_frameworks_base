@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
+import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -35,6 +36,7 @@ import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.UsimServiceTable;
 import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
+import com.android.internal.telephony.CallManager;
 
 import java.util.List;
 
@@ -42,7 +44,6 @@ public class PhoneProxy extends Handler implements Phone {
     public final static Object lockForRadioTechnologyChange = new Object();
 
     private Phone mActivePhone;
-    private String mOutgoingPhone;
     private CommandsInterface mCommandsInterface;
     private IccSmsInterfaceManagerProxy mIccSmsInterfaceManagerProxy;
     private IccPhoneBookInterfaceManagerProxy mIccPhoneBookInterfaceManagerProxy;
@@ -50,7 +51,13 @@ public class PhoneProxy extends Handler implements Phone {
 
     private boolean mResetModemOnRadioTechnologyChange = false;
 
-    private static final int EVENT_RADIO_TECHNOLOGY_CHANGED = 1;
+    private int mRilVersion;
+
+    private static final int EVENT_VOICE_RADIO_TECH_CHANGED = 1;
+    private static final int EVENT_RADIO_ON = 2;
+    private static final int EVENT_REQUEST_VOICE_RADIO_TECH_DONE = 3;
+    private static final int EVENT_RIL_CONNECTED = 4;
+
     private static final String LOG_TAG = "PHONE";
 
     //***** Class Methods
@@ -64,89 +71,181 @@ public class PhoneProxy extends Handler implements Phone {
                 phone.getIccPhoneBookInterfaceManager());
         mPhoneSubInfoProxy = new PhoneSubInfoProxy(phone.getPhoneSubInfo());
         mCommandsInterface = ((PhoneBase)mActivePhone).mCM;
-        mCommandsInterface.registerForRadioTechnologyChanged(
-                this, EVENT_RADIO_TECHNOLOGY_CHANGED, null);
+
+        mCommandsInterface.registerForRilConnected(this, EVENT_RIL_CONNECTED, null);
+        mCommandsInterface.registerForOn(this, EVENT_RADIO_ON, null);
+        mCommandsInterface.registerForVoiceRadioTechChanged(
+                             this, EVENT_VOICE_RADIO_TECH_CHANGED, null);
     }
 
     @Override
     public void handleMessage(Message msg) {
+        AsyncResult ar = (AsyncResult) msg.obj;
         switch(msg.what) {
-        case EVENT_RADIO_TECHNOLOGY_CHANGED:
-            //switch Phone from CDMA to GSM or vice versa
-            mOutgoingPhone = mActivePhone.getPhoneName();
-            logd("Switching phone from " + mOutgoingPhone + "Phone to " +
-                    (mOutgoingPhone.equals("GSM") ? "CDMAPhone" : "GSMPhone") );
-            boolean oldPowerState = false; // old power state to off
-            if (mResetModemOnRadioTechnologyChange) {
-                if (mCommandsInterface.getRadioState().isOn()) {
-                    oldPowerState = true;
-                    logd("Setting Radio Power to Off");
-                    mCommandsInterface.setRadioPower(false, null);
-                }
-            }
-
-            if(mOutgoingPhone.equals("GSM")) {
-                logd("Make a new CDMAPhone and destroy the old GSMPhone.");
-
-                ((GSMPhone)mActivePhone).dispose();
-                Phone oldPhone = mActivePhone;
-
-                //Give the garbage collector a hint to start the garbage collection asap
-                // NOTE this has been disabled since radio technology change could happen during
-                //   e.g. a multimedia playing and could slow the system. Tests needs to be done
-                //   to see the effects of the GC call here when system is busy.
-                //System.gc();
-
-                mActivePhone = PhoneFactory.getCdmaPhone();
-                ((GSMPhone)oldPhone).removeReferences();
-                oldPhone = null;
-            } else {
-                logd("Make a new GSMPhone and destroy the old CDMAPhone.");
-
-                ((CDMAPhone)mActivePhone).dispose();
-                //mActivePhone = null;
-                Phone oldPhone = mActivePhone;
-
-                // Give the GC a hint to start the garbage collection asap
-                // NOTE this has been disabled since radio technology change could happen during
-                //   e.g. a multimedia playing and could slow the system. Tests needs to be done
-                //   to see the effects of the GC call here when system is busy.
-                //System.gc();
-
-                mActivePhone = PhoneFactory.getGsmPhone();
-                ((CDMAPhone)oldPhone).removeReferences();
-                oldPhone = null;
-            }
-
-            if (mResetModemOnRadioTechnologyChange) {
-                logd("Resetting Radio");
-                mCommandsInterface.setRadioPower(oldPowerState, null);
-            }
-
-            //Set the new interfaces in the proxy's
-            mIccSmsInterfaceManagerProxy.setmIccSmsInterfaceManager(
-                    mActivePhone.getIccSmsInterfaceManager());
-            mIccPhoneBookInterfaceManagerProxy.setmIccPhoneBookInterfaceManager(
-                    mActivePhone.getIccPhoneBookInterfaceManager());
-            mPhoneSubInfoProxy.setmPhoneSubInfo(this.mActivePhone.getPhoneSubInfo());
-            mCommandsInterface = ((PhoneBase)mActivePhone).mCM;
-
-            //Send an Intent to the PhoneApp that we had a radio technology change
-            Intent intent = new Intent(TelephonyIntents.ACTION_RADIO_TECHNOLOGY_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra(Phone.PHONE_NAME_KEY, mActivePhone.getPhoneName());
-            ActivityManagerNative.broadcastStickyIntent(intent, null);
+        case EVENT_RADIO_ON:
+            /* Proactively query voice radio technologies */
+            mCommandsInterface.getVoiceRadioTechnology(
+                    this.obtainMessage(EVENT_REQUEST_VOICE_RADIO_TECH_DONE));
             break;
+
+        case EVENT_RIL_CONNECTED:
+            if (ar.exception == null && ar.result != null) {
+                mRilVersion = (Integer) ar.result;
+            } else {
+                logd("Unexpected exception on EVENT_RIL_CONNECTED");
+                mRilVersion = -1;
+            }
+            break;
+
+        case EVENT_VOICE_RADIO_TECH_CHANGED:
+        case EVENT_REQUEST_VOICE_RADIO_TECH_DONE:
+
+            if (ar.exception == null) {
+                if ((ar.result != null) && (((int[]) ar.result).length != 0)) {
+                    int newVoiceTech = ((int[]) ar.result)[0];
+                    updatePhoneObject(newVoiceTech);
+                } else {
+                    loge("Voice Radio Technology event " + msg.what + " has no tech!");
+                }
+            } else {
+                loge("Voice Radio Technology event " + msg.what + " exception!" + ar.exception);
+            }
+            break;
+
         default:
-            Log.e(LOG_TAG,"Error! This handler was not registered for this message type. Message: "
+            loge("Error! This handler was not registered for this message type. Message: "
                     + msg.what);
-        break;
+            break;
         }
         super.handleMessage(msg);
     }
 
     private static void logd(String msg) {
         Log.d(LOG_TAG, "[PhoneProxy] " + msg);
+    }
+
+    private void logw(String msg) {
+        Log.w(LOG_TAG, "[PhoneProxy] " + msg);
+    }
+
+    private void loge(String msg) {
+        Log.e(LOG_TAG, "[PhoneProxy] " + msg);
+    }
+
+    private void updatePhoneObject(int newVoiceRadioTech) {
+
+        if (mActivePhone != null) {
+            if(mRilVersion == 6 && getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
+                /*
+                 * On v6 RIL, when LTE_ON_CDMA is TRUE, always create CDMALTEPhone
+                 * irrespective of the voice radio tech reported.
+                 */
+                if (mActivePhone.getPhoneType() == PHONE_TYPE_CDMA) {
+                    logd("LTE ON CDMA property is set. Use CDMA Phone" +
+                            " newVoiceRadioTech = " + newVoiceRadioTech +
+                            " Active Phone = " + mActivePhone.getPhoneName());
+                    return;
+                } else {
+                    logd("LTE ON CDMA property is set. Switch to CDMALTEPhone" +
+                            " newVoiceRadioTech = " + newVoiceRadioTech +
+                            " Active Phone = " + mActivePhone.getPhoneName());
+                    newVoiceRadioTech = ServiceState.RADIO_TECHNOLOGY_1xRTT;
+                }
+            } else {
+                if ((ServiceState.isCdma(newVoiceRadioTech) &&
+                        mActivePhone.getPhoneType() == PHONE_TYPE_CDMA) ||
+                        (ServiceState.isGsm(newVoiceRadioTech) &&
+                                mActivePhone.getPhoneType() == PHONE_TYPE_GSM)) {
+                    // Nothing changed. Keep phone as it is.
+                    logd("Ignoring voice radio technology changed message." +
+                            " newVoiceRadioTech = " + newVoiceRadioTech +
+                            " Active Phone = " + mActivePhone.getPhoneName());
+                    return;
+                }
+            }
+        }
+
+        if (newVoiceRadioTech == ServiceState.RADIO_TECHNOLOGY_UNKNOWN) {
+            // We need some voice phone object to be active always, so never
+            // delete the phone without anything to replace it with!
+            logd("Ignoring voice radio technology changed message. newVoiceRadioTech = Unknown."
+                    + " Active Phone = " + mActivePhone.getPhoneName());
+            return;
+        }
+
+        boolean oldPowerState = false; // old power state to off
+        if (mResetModemOnRadioTechnologyChange) {
+            if (mCommandsInterface.getRadioState().isOn()) {
+                oldPowerState = true;
+                logd("Setting Radio Power to Off");
+                mCommandsInterface.setRadioPower(false, null);
+            }
+        }
+
+        deleteAndCreatePhone(newVoiceRadioTech);
+
+        if (mResetModemOnRadioTechnologyChange && oldPowerState) { // restore power state
+            logd("Resetting Radio");
+            mCommandsInterface.setRadioPower(oldPowerState, null);
+        }
+
+        // Set the new interfaces in the proxy's
+        mIccSmsInterfaceManagerProxy.setmIccSmsInterfaceManager(
+                mActivePhone.getIccSmsInterfaceManager());
+        mIccPhoneBookInterfaceManagerProxy.setmIccPhoneBookInterfaceManager(mActivePhone
+                .getIccPhoneBookInterfaceManager());
+        mPhoneSubInfoProxy.setmPhoneSubInfo(this.mActivePhone.getPhoneSubInfo());
+
+        mCommandsInterface = ((PhoneBase)mActivePhone).mCM;
+
+        // Send an Intent to the PhoneApp that we had a radio technology change
+        Intent intent = new Intent(TelephonyIntents.ACTION_RADIO_TECHNOLOGY_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.putExtra(Phone.PHONE_NAME_KEY, mActivePhone.getPhoneName());
+        ActivityManagerNative.broadcastStickyIntent(intent, null);
+
+    }
+
+    private void deleteAndCreatePhone(int newVoiceRadioTech) {
+
+        String outgoingPhoneName = "Unknown";
+        Phone oldPhone = mActivePhone;
+
+        if (oldPhone != null) {
+            outgoingPhoneName = ((PhoneBase) oldPhone).getPhoneName();
+        }
+
+        logd("Switching Voice Phone : " + outgoingPhoneName + " >>> "
+                + (ServiceState.isGsm(newVoiceRadioTech) ? "GSM" : "CDMA"));
+
+        if (oldPhone != null) {
+            CallManager.getInstance().unregisterPhone(oldPhone);
+            logd("Disposing old phone..");
+            oldPhone.dispose();
+        }
+
+        // Give the garbage collector a hint to start the garbage collection
+        // asap NOTE this has been disabled since radio technology change could
+        // happen during e.g. a multimedia playing and could slow the system.
+        // Tests needs to be done to see the effects of the GC call here when
+        // system is busy.
+        // System.gc();
+
+        if (ServiceState.isCdma(newVoiceRadioTech)) {
+            mActivePhone = PhoneFactory.getCdmaPhone();
+        } else if (ServiceState.isGsm(newVoiceRadioTech)) {
+            mActivePhone = PhoneFactory.getGsmPhone();
+        }
+
+        if (oldPhone != null) {
+            oldPhone.removeReferences();
+        }
+
+        if(mActivePhone != null) {
+            CallManager.getInstance().registerPhone(mActivePhone);
+        }
+
+        oldPhone = null;
     }
 
     public ServiceState getServiceState() {
@@ -858,5 +957,16 @@ public class PhoneProxy extends Handler implements Phone {
     @Override
     public UsimServiceTable getUsimServiceTable() {
         return mActivePhone.getUsimServiceTable();
+    }
+
+    public void dispose() {
+        mCommandsInterface.unregisterForOn(this);
+        mCommandsInterface.unregisterForVoiceRadioTechChanged(this);
+        mCommandsInterface.unregisterForRilConnected(this);
+    }
+
+    public void removeReferences() {
+        mActivePhone = null;
+        mCommandsInterface = null;
     }
 }

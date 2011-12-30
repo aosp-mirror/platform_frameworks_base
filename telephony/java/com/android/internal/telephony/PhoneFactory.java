@@ -25,6 +25,7 @@ import android.os.SystemProperties;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.cdma.CDMALTEPhone;
+import com.android.internal.telephony.cdma.CdmaSubscriptionSourceManager;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.sip.SipPhone;
 import com.android.internal.telephony.sip.SipPhoneFactory;
@@ -47,7 +48,8 @@ public class PhoneFactory {
     static private Looper sLooper;
     static private Context sContext;
 
-    static final int preferredCdmaSubscription = RILConstants.PREFERRED_CDMA_SUBSCRIPTION;
+    static final int preferredCdmaSubscription =
+                         CdmaSubscriptionSourceManager.PREFERRED_CDMA_SUBSCRIPTION;
 
     //***** Class Methods
 
@@ -114,11 +116,11 @@ public class PhoneFactory {
                 int lteOnCdma = BaseCommands.getLteOnCdmaModeStatic();
                 switch (lteOnCdma) {
                     case Phone.LTE_ON_CDMA_FALSE:
-                        cdmaSubscription = RILConstants.SUBSCRIPTION_FROM_NV;
+                        cdmaSubscription = CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_NV;
                         Log.i(LOG_TAG, "lteOnCdma is 0 use SUBSCRIPTION_FROM_NV");
                         break;
                     case Phone.LTE_ON_CDMA_TRUE:
-                        cdmaSubscription = RILConstants.SUBSCRIPTION_FROM_RUIM;
+                        cdmaSubscription = CdmaSubscriptionSourceManager.SUBSCRIPTION_FROM_RUIM;
                         Log.i(LOG_TAG, "lteOnCdma is 1 use SUBSCRIPTION_FROM_RUIM");
                         break;
                     case Phone.LTE_ON_CDMA_UNKNOWN:

@@ -39,9 +39,6 @@ public abstract class BaseCommands implements CommandsInterface {
     //***** Instance Variables
     protected Context mContext;
     protected RadioState mState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mSimState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mRuimState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mNvState = RadioState.RADIO_UNAVAILABLE;
     protected Object mStateMonitor = new Object();
 
     protected RegistrantList mRadioStateChangedRegistrants = new RegistrantList();
@@ -49,15 +46,10 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mAvailRegistrants = new RegistrantList();
     protected RegistrantList mOffOrNotAvailRegistrants = new RegistrantList();
     protected RegistrantList mNotAvailRegistrants = new RegistrantList();
-    protected RegistrantList mSIMReadyRegistrants = new RegistrantList();
-    protected RegistrantList mSIMLockedRegistrants = new RegistrantList();
-    protected RegistrantList mRUIMReadyRegistrants = new RegistrantList();
-    protected RegistrantList mRUIMLockedRegistrants = new RegistrantList();
-    protected RegistrantList mNVReadyRegistrants = new RegistrantList();
     protected RegistrantList mCallStateRegistrants = new RegistrantList();
     protected RegistrantList mVoiceNetworkStateRegistrants = new RegistrantList();
     protected RegistrantList mDataNetworkStateRegistrants = new RegistrantList();
-    protected RegistrantList mRadioTechnologyChangedRegistrants = new RegistrantList();
+    protected RegistrantList mVoiceRadioTechChangedRegistrants = new RegistrantList();
     protected RegistrantList mIccStatusChangedRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOffRegistrants = new RegistrantList();
@@ -117,19 +109,6 @@ public abstract class BaseCommands implements CommandsInterface {
     public RadioState getRadioState() {
         return mState;
     }
-
-    public RadioState getSimState() {
-        return mSimState;
-    }
-
-    public RadioState getRuimState() {
-        return mRuimState;
-    }
-
-    public RadioState getNvState() {
-        return mNvState;
-    }
-
 
     public void registerForRadioStateChanged(Handler h, int what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
@@ -217,100 +196,6 @@ public abstract class BaseCommands implements CommandsInterface {
         }
     }
 
-
-    /** Any transition into SIM_READY */
-    public void registerForSIMReady(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-
-        synchronized (mStateMonitor) {
-            mSIMReadyRegistrants.add(r);
-
-            if (mSimState.isSIMReady()) {
-                r.notifyRegistrant(new AsyncResult(null, null, null));
-            }
-        }
-    }
-
-    public void unregisterForSIMReady(Handler h) {
-        synchronized (mStateMonitor) {
-            mSIMReadyRegistrants.remove(h);
-        }
-    }
-
-    /** Any transition into RUIM_READY */
-    public void registerForRUIMReady(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-
-        synchronized (mStateMonitor) {
-            mRUIMReadyRegistrants.add(r);
-
-            if (mRuimState.isRUIMReady()) {
-                r.notifyRegistrant(new AsyncResult(null, null, null));
-            }
-        }
-    }
-
-    public void unregisterForRUIMReady(Handler h) {
-        synchronized(mStateMonitor) {
-            mRUIMReadyRegistrants.remove(h);
-        }
-    }
-
-    /** Any transition into NV_READY */
-    public void registerForNVReady(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-
-        synchronized (mStateMonitor) {
-            mNVReadyRegistrants.add(r);
-
-            if (mNvState.isNVReady()) {
-                r.notifyRegistrant(new AsyncResult(null, null, null));
-            }
-        }
-    }
-
-    public void unregisterForNVReady(Handler h) {
-        synchronized (mStateMonitor) {
-            mNVReadyRegistrants.remove(h);
-        }
-    }
-
-    public void registerForSIMLockedOrAbsent(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-
-        synchronized (mStateMonitor) {
-            mSIMLockedRegistrants.add(r);
-
-            if (mSimState == RadioState.SIM_LOCKED_OR_ABSENT) {
-                r.notifyRegistrant(new AsyncResult(null, null, null));
-            }
-        }
-    }
-
-    public void unregisterForSIMLockedOrAbsent(Handler h) {
-        synchronized (mStateMonitor) {
-            mSIMLockedRegistrants.remove(h);
-        }
-    }
-
-    public void registerForRUIMLockedOrAbsent(Handler h, int what, Object obj) {
-        Registrant r = new Registrant (h, what, obj);
-
-        synchronized (mStateMonitor) {
-            mRUIMLockedRegistrants.add(r);
-
-            if (mRuimState == RadioState.RUIM_LOCKED_OR_ABSENT) {
-                r.notifyRegistrant(new AsyncResult(null, null, null));
-            }
-        }
-    }
-
-    public void unregisterForRUIMLockedOrAbsent(Handler h) {
-        synchronized (mStateMonitor) {
-            mRUIMLockedRegistrants.remove(h);
-        }
-    }
-
     public void registerForCallStateChanged(Handler h, int what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
@@ -341,13 +226,13 @@ public abstract class BaseCommands implements CommandsInterface {
         mDataNetworkStateRegistrants.remove(h);
     }
 
-    public void registerForRadioTechnologyChanged(Handler h, int what, Object obj) {
+    public void registerForVoiceRadioTechChanged(Handler h, int what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
-        mRadioTechnologyChangedRegistrants.add(r);
+        mVoiceRadioTechChangedRegistrants.add(r);
     }
 
-    public void unregisterForRadioTechnologyChanged(Handler h) {
-        mRadioTechnologyChangedRegistrants.remove(h);
+    public void unregisterForVoiceRadioTechChanged(Handler h) {
+        mVoiceRadioTechChangedRegistrants.remove(h);
     }
 
     public void registerForIccStatusChanged(Handler h, int what, Object obj) {
@@ -697,8 +582,7 @@ public abstract class BaseCommands implements CommandsInterface {
      * This function is called only by RIL.java when receiving unsolicited
      * RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED
      *
-     * RadioState has 5 values : RADIO_OFF, RADIO_UNAVAILABLE, SIM_NOT_READY,
-     * SIM_LOCKED_OR_ABSENT, and SIM_READY.
+     * RadioState has 3 values : RADIO_OFF, RADIO_UNAVAILABLE, RADIO_ON.
      *
      * @param newState new RadioState decoded from RIL_UNSOL_RADIO_STATE_CHANGED
      */
@@ -719,22 +603,6 @@ public abstract class BaseCommands implements CommandsInterface {
                 return;
             }
 
-            // FIXME: Use Constants or Enums
-            if(mState.getType() == 0) {
-                mSimState = mState;
-                mRuimState = mState;
-                mNvState = mState;
-            }
-            else if (mState.getType() == 1) {
-                mSimState = mState;
-            }
-            else if (mState.getType() == 2) {
-                mRuimState = mState;
-            }
-            else if (mState.getType() == 3) {
-                mNvState = mState;
-            }
-
             mRadioStateChangedRegistrants.notifyRegistrants();
 
             if (mState.isAvailable() && !oldState.isAvailable()) {
@@ -748,30 +616,6 @@ public abstract class BaseCommands implements CommandsInterface {
                 mNotAvailRegistrants.notifyRegistrants();
             }
 
-            if (mState.isSIMReady() && !oldState.isSIMReady()) {
-                Log.d(LOG_TAG,"Notifying: SIM ready");
-                mSIMReadyRegistrants.notifyRegistrants();
-            }
-
-            if (mState == RadioState.SIM_LOCKED_OR_ABSENT) {
-                Log.d(LOG_TAG,"Notifying: SIM locked or absent");
-                mSIMLockedRegistrants.notifyRegistrants();
-            }
-
-            if (mState.isRUIMReady() && !oldState.isRUIMReady()) {
-                Log.d(LOG_TAG,"Notifying: RUIM ready");
-                mRUIMReadyRegistrants.notifyRegistrants();
-            }
-
-            if (mState == RadioState.RUIM_LOCKED_OR_ABSENT) {
-                Log.d(LOG_TAG,"Notifying: RUIM locked or absent");
-                mRUIMLockedRegistrants.notifyRegistrants();
-            }
-            if (mState.isNVReady() && !oldState.isNVReady()) {
-                Log.d(LOG_TAG,"Notifying: NV ready");
-                mNVReadyRegistrants.notifyRegistrants();
-            }
-
             if (mState.isOn() && !oldState.isOn()) {
                 Log.d(LOG_TAG,"Notifying: Radio On");
                 mOnRegistrants.notifyRegistrants();
@@ -782,33 +626,6 @@ public abstract class BaseCommands implements CommandsInterface {
             ) {
                 Log.d(LOG_TAG,"Notifying: radio off or not available");
                 mOffOrNotAvailRegistrants.notifyRegistrants();
-            }
-
-            /* Radio Technology Change events
-             * NOTE: isGsm and isCdma have no common states in RADIO_OFF or RADIO_UNAVAILABLE; the
-             *   current phone is determined by mPhoneType
-             * NOTE: at startup no phone have been created and the RIL determines the mPhoneType
-             *   looking based on the networkMode set by the PhoneFactory in the constructor
-             */
-
-            if (mState.isGsm() && oldState.isCdma()) {
-                Log.d(LOG_TAG,"Notifying: radio technology change CDMA to GSM");
-                mRadioTechnologyChangedRegistrants.notifyRegistrants();
-            }
-
-            if (mState.isGsm() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_CDMA)) {
-                Log.d(LOG_TAG,"Notifying: radio technology change CDMA OFF to GSM");
-                mRadioTechnologyChangedRegistrants.notifyRegistrants();
-            }
-
-            if (mState.isCdma() && oldState.isGsm()) {
-                Log.d(LOG_TAG,"Notifying: radio technology change GSM to CDMA");
-                mRadioTechnologyChangedRegistrants.notifyRegistrants();
-            }
-
-            if (mState.isCdma() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_GSM)) {
-                Log.d(LOG_TAG,"Notifying: radio technology change GSM OFF to CDMA");
-                mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
         }
     }

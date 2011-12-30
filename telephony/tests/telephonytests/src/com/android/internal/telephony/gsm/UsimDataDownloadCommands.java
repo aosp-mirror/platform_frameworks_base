@@ -608,4 +608,8 @@ class UsimDataDownloadCommands extends BaseCommands {
     @Override
     public void requestIsimAuthentication(String nonce, Message response) {
     }
+
+    @Override
+    public void getVoiceRadioTechnology(Message response) {
+    }
 }

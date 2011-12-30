@@ -97,6 +97,11 @@ public class ServiceState implements Parcelable {
     public static final int RADIO_TECHNOLOGY_LTE = 14;
     /** @hide */
     public static final int RADIO_TECHNOLOGY_HSPAP = 15;
+    /**
+     * GSM radio technology only supports voice. It does not support data.
+     * @hide
+     */
+    public static final int RADIO_TECHNOLOGY_GSM = 16;
 
     /**
      * Available registration states for GSM, UMTS and CDMA.
@@ -447,6 +452,9 @@ public class ServiceState implements Parcelable {
             case 15:
                 rtString = "HSPAP";
                 break;
+            case 16:
+                rtString = "GSM";
+                break;
             default:
                 rtString = "Unexpected";
                 Log.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
@@ -653,5 +661,29 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public int getSystemId() {
         return this.mSystemId;
+    }
+
+    /** @hide */
+    public static boolean isGsm(int radioTechnology) {
+        return radioTechnology == RADIO_TECHNOLOGY_GPRS
+                || radioTechnology == RADIO_TECHNOLOGY_EDGE
+                || radioTechnology == RADIO_TECHNOLOGY_UMTS
+                || radioTechnology == RADIO_TECHNOLOGY_HSDPA
+                || radioTechnology == RADIO_TECHNOLOGY_HSUPA
+                || radioTechnology == RADIO_TECHNOLOGY_HSPA
+                || radioTechnology == RADIO_TECHNOLOGY_LTE
+                || radioTechnology == RADIO_TECHNOLOGY_HSPAP
+                || radioTechnology == RADIO_TECHNOLOGY_GSM;
+    }
+
+    /** @hide */
+    public static boolean isCdma(int radioTechnology) {
+        return radioTechnology == RADIO_TECHNOLOGY_IS95A
+                || radioTechnology == RADIO_TECHNOLOGY_IS95B
+                || radioTechnology == RADIO_TECHNOLOGY_1xRTT
+                || radioTechnology == RADIO_TECHNOLOGY_EVDO_0
+                || radioTechnology == RADIO_TECHNOLOGY_EVDO_A
+                || radioTechnology == RADIO_TECHNOLOGY_EVDO_B
+                || radioTechnology == RADIO_TECHNOLOGY_EHRPD;
     }
 }

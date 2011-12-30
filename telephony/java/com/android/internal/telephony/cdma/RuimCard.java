@@ -27,19 +27,17 @@ public final class RuimCard extends IccCard {
 
     RuimCard(CDMAPhone phone, String LOG_TAG, boolean dbg) {
         super(phone, LOG_TAG, dbg);
-        mPhone.mCM.registerForRUIMLockedOrAbsent(mHandler, EVENT_ICC_LOCKED_OR_ABSENT, null);
-        mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        mPhone.mCM.registerForRUIMReady(mHandler, EVENT_ICC_READY, null);
+        is3gpp = false;
+        mCdmaSSM = CdmaSubscriptionSourceManager.getInstance(mPhone.getContext(),
+                       mPhone.mCM, mHandler, EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED, null);
+
         updateStateProperty();
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        //Unregister for all events
-        mPhone.mCM.unregisterForRUIMLockedOrAbsent(mHandler);
-        mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
-        mPhone.mCM.unregisterForRUIMReady(mHandler);
+        mCdmaSSM.dispose(mHandler);
     }
 
     @Override
