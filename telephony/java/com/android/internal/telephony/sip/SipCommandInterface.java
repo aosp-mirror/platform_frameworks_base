@@ -412,4 +412,7 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
 
     public void requestIsimAuthentication(String nonce, Message response) {
     }
+
+    public void getVoiceRadioTechnology(Message result) {
+    }
 }

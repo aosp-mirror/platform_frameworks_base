@@ -20,6 +20,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.IccCard;
 
 import android.content.Intent;
 import android.telephony.SignalStrength;
@@ -39,21 +40,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     CDMALTEPhone mCdmaLtePhone;
 
     private ServiceState  mLteSS;  // The last LTE state from Voice Registration
-    private boolean mNeedToRegForSimLoaded = true;
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
-        cm.registerForSIMReady(this, EVENT_SIM_READY, null);
         mCdmaLtePhone = phone;
 
         mLteSS = new ServiceState();
         if (DBG) log("CdmaLteServiceStateTracker Constructors");
-    }
-
-    @Override
-    public void dispose() {
-        cm.unregisterForSIMReady(this);
-        super.dispose();
     }
 
     @Override
@@ -67,23 +60,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             ar = (AsyncResult)msg.obj;
             handlePollStateResult(msg.what, ar);
             break;
-        case EVENT_SIM_READY:
-            if (DBG) log("handleMessage EVENT_SIM_READY");
-            isSubscriptionFromRuim = false;
-            // Register SIM_RECORDS_LOADED dynamically.
-            // This is to avoid confilct with RUIM_READY scenario)
-            if (mNeedToRegForSimLoaded) {
-                phone.mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
-                mNeedToRegForSimLoaded = false;
-            }
-            pollState();
-            // Signal strength polling stops when radio is off.
-            queueNextSignalStrengthPoll();
-
-            // load ERI file
-            phone.prepareEri();
-            break;
-        case EVENT_SIM_RECORDS_LOADED:
+        case EVENT_RUIM_RECORDS_LOADED:
             CdmaLteUiccRecords sim = (CdmaLteUiccRecords)phone.mIccRecords;
             if ((sim != null) && sim.isProvisioned()) {
                 mMdn = sim.getMdn();
@@ -367,9 +344,9 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 ss.setOperatorAlphaLong(eriText);
             }
 
-            if (cm.getSimState().isSIMReady()) {
-                // SIM is found on the device. If ERI roaming is OFF and SID/NID matches
-                // one configfured in SIM, use operator name from CSIM record.
+            if (phone.mIccCard.getState() == IccCard.State.READY) {
+                // SIM is found on the device. If ERI roaming is OFF, and SID/NID matches
+                // one configfured in SIM, use operator name  from CSIM record.
                 boolean showSpn =
                     ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
                 int iconIndex = ss.getCdmaEriIconIndex();

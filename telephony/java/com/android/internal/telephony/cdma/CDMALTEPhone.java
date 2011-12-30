@@ -79,10 +79,12 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     protected void initSstIcc() {
-        mSST = new CdmaLteServiceStateTracker(this);
-        mIccRecords = new CdmaLteUiccRecords(this);
         mIccCard = new SimCard(this, LOG_TAG, DBG);
+        mIccRecords = new CdmaLteUiccRecords(this);
         mIccFileHandler = new CdmaLteUiccFileHandler(this);
+        // CdmaLteServiceStateTracker registers with IccCard to know
+        // when the card is ready. So create mIccCard before the ServiceStateTracker
+        mSST = new CdmaLteServiceStateTracker(this);
     }
 
     @Override
