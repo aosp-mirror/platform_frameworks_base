@@ -787,11 +787,17 @@
   <java-symbol type="string" name="sipAddressTypeHome" />
   <java-symbol type="string" name="sipAddressTypeOther" />
   <java-symbol type="string" name="sipAddressTypeWork" />
-  <java-symbol type="string" name="sms_control_default_app_name" />
   <java-symbol type="string" name="sms_control_message" />
-  <java-symbol type="string" name="sms_control_no" />
   <java-symbol type="string" name="sms_control_title" />
+  <java-symbol type="string" name="sms_control_no" />
   <java-symbol type="string" name="sms_control_yes" />
+  <java-symbol type="string" name="sms_premium_short_code_confirm_message" />
+  <java-symbol type="string" name="sms_premium_short_code_confirm_title" />
+  <java-symbol type="string" name="sms_short_code_confirm_allow" />
+  <java-symbol type="string" name="sms_short_code_confirm_deny" />
+  <java-symbol type="string" name="sms_short_code_confirm_message" />
+  <java-symbol type="string" name="sms_short_code_confirm_report" />
+  <java-symbol type="string" name="sms_short_code_confirm_title" />
   <java-symbol type="string" name="submit" />
   <java-symbol type="string" name="sync_binding_label" />
   <java-symbol type="string" name="sync_do_nothing" />
@@ -1095,6 +1101,7 @@
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
   <java-symbol type="xml" name="power_profile" />
   <java-symbol type="xml" name="time_zones_by_country" />
+  <java-symbol type="xml" name="sms_short_codes" />
 
   <java-symbol type="raw" name="incognito_mode_start_page" />
   <java-symbol type="raw" name="loaderror" />

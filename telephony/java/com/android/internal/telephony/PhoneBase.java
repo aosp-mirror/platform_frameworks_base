@@ -250,7 +250,7 @@ public abstract class PhoneBase extends Handler implements Phone {
 
         // Initialize device storage and outgoing SMS usage monitors for SMSDispatchers.
         mSmsStorageMonitor = new SmsStorageMonitor(this);
-        mSmsUsageMonitor = new SmsUsageMonitor(context.getContentResolver());
+        mSmsUsageMonitor = new SmsUsageMonitor(context);
     }
 
     public void dispose() {

@@ -17,34 +17,40 @@
 package com.android.internal.telephony;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
-import android.provider.Settings;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.ServiceState;
 import android.telephony.SmsCbMessage;
 import android.telephony.SmsMessage;
-import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.util.HexDump;
 
@@ -54,21 +60,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-import com.android.internal.R;
-
+import static android.telephony.SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE;
 import static android.telephony.SmsManager.RESULT_ERROR_GENERIC_FAILURE;
+import static android.telephony.SmsManager.RESULT_ERROR_LIMIT_EXCEEDED;
 import static android.telephony.SmsManager.RESULT_ERROR_NO_SERVICE;
 import static android.telephony.SmsManager.RESULT_ERROR_NULL_PDU;
 import static android.telephony.SmsManager.RESULT_ERROR_RADIO_OFF;
-import static android.telephony.SmsManager.RESULT_ERROR_LIMIT_EXCEEDED;
-import static android.telephony.SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE;
 
 public abstract class SMSDispatcher extends Handler {
     static final String TAG = "SMS";    // accessed from inner class
     private static final String SEND_NEXT_MSG_EXTRA = "SendNextMsg";
-
-    /** Default timeout for SMS sent query */
-    private static final int DEFAULT_SMS_TIMEOUT = 6000;
 
     /** Permission required to receive SMS and SMS-CB messages. */
     public static final String RECEIVE_SMS_PERMISSION = "android.permission.RECEIVE_SMS";
@@ -102,23 +103,27 @@ public abstract class SMSDispatcher extends Handler {
     /** Retry sending a previously failed SMS message */
     private static final int EVENT_SEND_RETRY = 3;
 
-    /** SMS confirm required */
-    private static final int EVENT_POST_ALERT = 4;
+    /** Confirmation required for sending a large number of messages. */
+    private static final int EVENT_SEND_LIMIT_REACHED_CONFIRMATION = 4;
 
     /** Send the user confirmed SMS */
     static final int EVENT_SEND_CONFIRMED_SMS = 5;  // accessed from inner class
 
-    /** Alert is timeout */
-    private static final int EVENT_ALERT_TIMEOUT = 6;
-
-    /** Stop the sending */
+    /** Don't send SMS (user did not confirm). */
     static final int EVENT_STOP_SENDING = 7;        // accessed from inner class
+
+    /** Confirmation required for third-party apps sending to an SMS short code. */
+    private static final int EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE = 8;
+
+    /** Confirmation required for third-party apps sending to an SMS short code. */
+    private static final int EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE = 9;
 
     protected final Phone mPhone;
     protected final Context mContext;
     protected final ContentResolver mResolver;
     protected final CommandsInterface mCm;
     protected final SmsStorageMonitor mStorageMonitor;
+    protected final TelephonyManager mTelephonyManager;
 
     protected final WapPushOverSms mWapPush;
 
@@ -144,7 +149,8 @@ public abstract class SMSDispatcher extends Handler {
     /** Outgoing message counter. Shared by all dispatchers. */
     private final SmsUsageMonitor mUsageMonitor;
 
-    private final ArrayList<SmsTracker> mSTrackers = new ArrayList<SmsTracker>(MO_MSG_QUEUE_LIMIT);
+    /** Number of outgoing SmsTrackers waiting for user confirmation. */
+    private int mPendingTrackerCount;
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
     private PowerManager.WakeLock mWakeLock;
@@ -182,6 +188,7 @@ public abstract class SMSDispatcher extends Handler {
         mCm = phone.mCM;
         mStorageMonitor = storageMonitor;
         mUsageMonitor = usageMonitor;
+        mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
         createWakelock();
 
@@ -279,50 +286,43 @@ public abstract class SMSDispatcher extends Handler {
             sendSms((SmsTracker) msg.obj);
             break;
 
-        case EVENT_POST_ALERT:
+        case EVENT_SEND_LIMIT_REACHED_CONFIRMATION:
             handleReachSentLimit((SmsTracker)(msg.obj));
             break;
 
-        case EVENT_ALERT_TIMEOUT:
-            ((AlertDialog)(msg.obj)).dismiss();
-            msg.obj = null;
-            if (mSTrackers.isEmpty() == false) {
-                try {
-                    SmsTracker sTracker = mSTrackers.remove(0);
-                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
-                } catch (CanceledException ex) {
-                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
-                }
-            }
-            if (false) {
-                Log.d(TAG, "EVENT_ALERT_TIMEOUT, message stop sending");
-            }
+        case EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE:
+            handleConfirmShortCode(false, (SmsTracker)(msg.obj));
+            break;
+
+        case EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE:
+            handleConfirmShortCode(true, (SmsTracker)(msg.obj));
             break;
 
         case EVENT_SEND_CONFIRMED_SMS:
-            if (mSTrackers.isEmpty() == false) {
-                SmsTracker sTracker = mSTrackers.remove(mSTrackers.size() - 1);
-                if (sTracker.isMultipart()) {
-                    sendMultipartSms(sTracker);
-                } else {
-                    sendSms(sTracker);
-                }
-                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
+        {
+            SmsTracker tracker = (SmsTracker) msg.obj;
+            if (tracker.isMultipart()) {
+                sendMultipartSms(tracker);
+            } else {
+                sendSms(tracker);
             }
+            mPendingTrackerCount--;
             break;
+        }
 
         case EVENT_STOP_SENDING:
-            if (mSTrackers.isEmpty() == false) {
-                // Remove the latest one.
+        {
+            SmsTracker tracker = (SmsTracker) msg.obj;
+            if (tracker.mSentIntent != null) {
                 try {
-                    SmsTracker sTracker = mSTrackers.remove(mSTrackers.size() - 1);
-                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+                    tracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
                 } catch (CanceledException ex) {
-                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+                    Log.e(TAG, "failed to send RESULT_ERROR_LIMIT_EXCEEDED");
                 }
-                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
             }
+            mPendingTrackerCount--;
             break;
+        }
         }
     }
 
@@ -397,7 +397,7 @@ public abstract class SMSDispatcher extends Handler {
             int ss = mPhone.getServiceState().getState();
 
             if (ss != ServiceState.STATE_IN_SERVICE) {
-                handleNotInService(ss, tracker);
+                handleNotInService(ss, tracker.mSentIntent);
             } else if ((((CommandException)(ar.exception)).getCommandError()
                     == CommandException.Error.SMS_FAIL_RETRY) &&
                    tracker.mRetryCount < MAX_SEND_RETRIES) {
@@ -446,15 +446,15 @@ public abstract class SMSDispatcher extends Handler {
      *                  OUT_OF_SERVICE
      *                  EMERGENCY_ONLY
      *                  POWER_OFF
-     * @param tracker   An SmsTracker for the current message.
+     * @param sentIntent the PendingIntent to send the error to
      */
-    protected static void handleNotInService(int ss, SmsTracker tracker) {
-        if (tracker.mSentIntent != null) {
+    protected static void handleNotInService(int ss, PendingIntent sentIntent) {
+        if (sentIntent != null) {
             try {
                 if (ss == ServiceState.STATE_POWER_OFF) {
-                    tracker.mSentIntent.send(RESULT_ERROR_RADIO_OFF);
+                    sentIntent.send(RESULT_ERROR_RADIO_OFF);
                 } else {
-                    tracker.mSentIntent.send(RESULT_ERROR_NO_SERVICE);
+                    sentIntent.send(RESULT_ERROR_NO_SERVICE);
                 }
             } catch (CanceledException ex) {}
         }
@@ -865,9 +865,10 @@ public abstract class SMSDispatcher extends Handler {
      * @param deliveryIntent if not NULL this <code>Intent</code> is
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended data ("pdu").
+     * @param destAddr the destination phone number (for short code confirmation)
      */
     protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
+            PendingIntent deliveryIntent, String destAddr) {
         if (mSmsSendDisabled) {
             if (sentIntent != null) {
                 try {
@@ -891,61 +892,190 @@ public abstract class SMSDispatcher extends Handler {
         map.put("smsc", smsc);
         map.put("pdu", pdu);
 
-        SmsTracker tracker = new SmsTracker(map, sentIntent,
-                deliveryIntent);
-        int ss = mPhone.getServiceState().getState();
+        // Get calling app package name via UID from Binder call
+        PackageManager pm = mContext.getPackageManager();
+        String[] packageNames = pm.getPackagesForUid(Binder.getCallingUid());
 
-        if (ss != ServiceState.STATE_IN_SERVICE) {
-            handleNotInService(ss, tracker);
-        } else {
-            String appName = getAppNameByIntent(sentIntent);
-            if (mUsageMonitor.check(appName, SINGLE_PART_SMS)) {
-                sendSms(tracker);
+        if (packageNames == null || packageNames.length == 0) {
+            // Refuse to send SMS if we can't get the calling package name.
+            Log.e(TAG, "Can't get calling app package name: refusing to send SMS");
+            if (sentIntent != null) {
+                try {
+                    sentIntent.send(RESULT_ERROR_GENERIC_FAILURE);
+                } catch (CanceledException ex) {
+                    Log.e(TAG, "failed to send error result");
+                }
+            }
+            return;
+        }
+
+        String appPackage = packageNames[0];
+
+        // Strip non-digits from destination phone number before checking for short codes
+        // and before displaying the number to the user if confirmation is required.
+        SmsTracker tracker = new SmsTracker(map, sentIntent, deliveryIntent, appPackage,
+                PhoneNumberUtils.extractNetworkPortion(destAddr));
+
+        // checkDestination() returns true if the destination is not a premium short code or the
+        // sending app is approved to send to short codes. Otherwise, a message is sent to our
+        // handler with the SmsTracker to request user confirmation before sending.
+        if (checkDestination(tracker)) {
+            // check for excessive outgoing SMS usage by this app
+            if (!mUsageMonitor.check(appPackage, SINGLE_PART_SMS)) {
+                sendMessage(obtainMessage(EVENT_SEND_LIMIT_REACHED_CONFIRMATION, tracker));
+                return;
+            }
+
+            int ss = mPhone.getServiceState().getState();
+
+            if (ss != ServiceState.STATE_IN_SERVICE) {
+                handleNotInService(ss, tracker.mSentIntent);
             } else {
-                sendMessage(obtainMessage(EVENT_POST_ALERT, tracker));
+                sendSms(tracker);
             }
         }
     }
 
     /**
-     * Post an alert while SMS needs user confirm.
+     * Check if destination is a potential premium short code and sender is not pre-approved to
+     * send to short codes.
      *
-     * An SmsTracker for the current message.
+     * @param tracker the tracker for the SMS to send
+     * @return true if the destination is approved; false if user confirmation event was sent
      */
-    protected void handleReachSentLimit(SmsTracker tracker) {
-        if (mSTrackers.size() >= MO_MSG_QUEUE_LIMIT) {
-            // Deny the sending when the queue limit is reached.
+    boolean checkDestination(SmsTracker tracker) {
+        if (mUsageMonitor.isApprovedShortCodeSender(tracker.mAppPackage)) {
+            return true;            // app is pre-approved to send to short codes
+        } else {
+            String countryIso = mTelephonyManager.getSimCountryIso();
+            if (countryIso == null || countryIso.length() != 2) {
+                Log.e(TAG, "Can't get SIM country code: trying network country code");
+                countryIso = mTelephonyManager.getNetworkCountryIso();
+            }
+
+            switch (mUsageMonitor.checkDestination(tracker.mDestAddress, countryIso)) {
+                case SmsUsageMonitor.CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE:
+                    sendMessage(obtainMessage(EVENT_CONFIRM_SEND_TO_POSSIBLE_PREMIUM_SHORT_CODE,
+                            tracker));
+                    return false;   // wait for user confirmation before sending
+
+                case SmsUsageMonitor.CATEGORY_PREMIUM_SHORT_CODE:
+                    sendMessage(obtainMessage(EVENT_CONFIRM_SEND_TO_PREMIUM_SHORT_CODE,
+                            tracker));
+                    return false;   // wait for user confirmation before sending
+
+                case SmsUsageMonitor.CATEGORY_NOT_SHORT_CODE:
+                case SmsUsageMonitor.CATEGORY_FREE_SHORT_CODE:
+                case SmsUsageMonitor.CATEGORY_STANDARD_SHORT_CODE:
+                default:
+                    return true;    // destination is not a premium short code
+            }
+        }
+    }
+
+    /**
+     * Deny sending an SMS if the outgoing queue limit is reached. Used when the message
+     * must be confirmed by the user due to excessive usage or potential premium SMS detected.
+     * @param tracker the SmsTracker for the message to send
+     * @return true if the message was denied; false to continue with send confirmation
+     */
+    private boolean denyIfQueueLimitReached(SmsTracker tracker) {
+        if (mPendingTrackerCount >= MO_MSG_QUEUE_LIMIT) {
+            // Deny sending message when the queue limit is reached.
             try {
                 tracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
             } catch (CanceledException ex) {
                 Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
             }
-            return;
+            return true;
+        }
+        mPendingTrackerCount++;
+        return false;
+    }
+
+    /**
+     * Returns the label for the specified app package name.
+     * @param appPackage the package name of the app requesting to send an SMS
+     * @return the label for the specified app, or the package name if getApplicationInfo() fails
+     */
+    private CharSequence getAppLabel(String appPackage) {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            ApplicationInfo appInfo = pm.getApplicationInfo(appPackage, 0);
+            return appInfo.loadLabel(pm);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "PackageManager Name Not Found for package " + appPackage);
+            return appPackage;  // fall back to package name if we can't get app label
+        }
+    }
+
+    /**
+     * Post an alert when SMS needs confirmation due to excessive usage.
+     * @param tracker an SmsTracker for the current message.
+     */
+    protected void handleReachSentLimit(SmsTracker tracker) {
+        if (denyIfQueueLimitReached(tracker)) {
+            return;     // queue limit reached; error was returned to caller
         }
 
+        CharSequence appLabel = getAppLabel(tracker.mAppPackage);
         Resources r = Resources.getSystem();
+        Spanned messageText = Html.fromHtml(r.getString(R.string.sms_control_message, appLabel));
 
-        String appName = getAppNameByIntent(tracker.mSentIntent);
+        ConfirmDialogListener listener = new ConfirmDialogListener(tracker);
 
         AlertDialog d = new AlertDialog.Builder(mContext)
-                .setTitle(r.getString(R.string.sms_control_title))
-                .setMessage(appName + " " + r.getString(R.string.sms_control_message))
-                .setPositiveButton(r.getString(R.string.sms_control_yes), mListener)
-                .setNegativeButton(r.getString(R.string.sms_control_no), mListener)
+                .setTitle(R.string.sms_control_title)
+                .setIcon(R.drawable.stat_sys_warning)
+                .setMessage(messageText)
+                .setPositiveButton(r.getString(R.string.sms_control_yes), listener)
+                .setNegativeButton(r.getString(R.string.sms_control_no), listener)
+                .setOnCancelListener(listener)
                 .create();
 
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         d.show();
-
-        mSTrackers.add(tracker);
-        sendMessageDelayed ( obtainMessage(EVENT_ALERT_TIMEOUT, d),
-                DEFAULT_SMS_TIMEOUT);
     }
 
-    protected static String getAppNameByIntent(PendingIntent intent) {
+    /**
+     * Post an alert for user confirmation when sending to a potential short code.
+     * @param isPremium true if the destination is known to be a premium short code
+     * @param tracker the SmsTracker for the current message.
+     */
+    protected void handleConfirmShortCode(boolean isPremium, SmsTracker tracker) {
+        if (denyIfQueueLimitReached(tracker)) {
+            return;     // queue limit reached; error was returned to caller
+        }
+
+        int messageId;
+        int titleId;
+        if (isPremium) {
+            messageId = R.string.sms_premium_short_code_confirm_message;
+            titleId = R.string.sms_premium_short_code_confirm_title;
+        } else {
+            messageId = R.string.sms_short_code_confirm_message;
+            titleId = R.string.sms_short_code_confirm_title;
+        }
+
+        CharSequence appLabel = getAppLabel(tracker.mAppPackage);
         Resources r = Resources.getSystem();
-        return (intent != null) ? intent.getTargetPackage()
-            : r.getString(R.string.sms_control_default_app_name);
+        Spanned messageText = Html.fromHtml(r.getString(messageId, appLabel, tracker.mDestAddress));
+
+        ConfirmDialogListener listener = new ConfirmDialogListener(tracker);
+
+        AlertDialog d = new AlertDialog.Builder(mContext)
+                .setTitle(titleId)
+                .setIcon(R.drawable.stat_sys_warning)
+                .setMessage(messageText)
+                .setPositiveButton(r.getString(R.string.sms_short_code_confirm_allow), listener)
+                .setNegativeButton(r.getString(R.string.sms_short_code_confirm_deny), listener)
+// TODO: add third button for "Report malicious app" feature
+//                .setNeutralButton(r.getString(R.string.sms_short_code_confirm_report), listener)
+                .setOnCancelListener(listener)
+                .create();
+
+        d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        d.show();
     }
 
     /**
@@ -982,7 +1112,7 @@ public abstract class SMSDispatcher extends Handler {
                 if (sentIntents != null && sentIntents.size() > i) {
                     sentIntent = sentIntents.get(i);
                 }
-                handleNotInService(ss, new SmsTracker(null, sentIntent, null));
+                handleNotInService(ss, sentIntent);
             }
             return;
         }
@@ -1032,12 +1162,17 @@ public abstract class SMSDispatcher extends Handler {
         public final PendingIntent mSentIntent;
         public final PendingIntent mDeliveryIntent;
 
+        public final String mAppPackage;
+        public final String mDestAddress;
+
         public SmsTracker(HashMap<String, Object> data, PendingIntent sentIntent,
-                PendingIntent deliveryIntent) {
+                PendingIntent deliveryIntent, String appPackage, String destAddr) {
             mData = data;
             mSentIntent = sentIntent;
             mDeliveryIntent = deliveryIntent;
             mRetryCount = 0;
+            mAppPackage = appPackage;
+            mDestAddress = destAddr;
         }
 
         /**
@@ -1050,19 +1185,35 @@ public abstract class SMSDispatcher extends Handler {
         }
     }
 
-    private final DialogInterface.OnClickListener mListener =
-        new DialogInterface.OnClickListener() {
+    /**
+     * Dialog listener for SMS confirmation dialog.
+     */
+    private final class ConfirmDialogListener
+            implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
 
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    Log.d(TAG, "click YES to send out sms");
-                    sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
-                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
-                    Log.d(TAG, "click NO to stop sending");
-                    sendMessage(obtainMessage(EVENT_STOP_SENDING));
-                }
+        private final SmsTracker mTracker;
+
+        ConfirmDialogListener(SmsTracker tracker) {
+            mTracker = tracker;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                Log.d(TAG, "CONFIRM sending SMS");
+                sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS, mTracker));
+            } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                Log.d(TAG, "DENY sending SMS");
+                sendMessage(obtainMessage(EVENT_STOP_SENDING, mTracker));
             }
-        };
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            Log.d(TAG, "dialog dismissed: don't send SMS");
+            sendMessage(obtainMessage(EVENT_STOP_SENDING, mTracker));
+        }
+    }
 
     private final BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
