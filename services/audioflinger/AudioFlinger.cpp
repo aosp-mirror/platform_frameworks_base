@@ -40,6 +40,7 @@
 #include <media/AudioTrack.h>
 #include <media/AudioRecord.h>
 #include <media/IMediaPlayerService.h>
+#include <media/IMediaDeathNotifier.h>
 
 #include <private/media/AudioTrackShared.h>
 #include <private/media/AudioEffectShared.h>
@@ -118,11 +119,9 @@ static bool settingsAllowed() {
 
 // To collect the amplifier usage
 static void addBatteryData(uint32_t params) {
-    sp<IBinder> binder =
-        defaultServiceManager()->getService(String16("media.player"));
-    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
-    if (service.get() == NULL) {
-        ALOGW("Cannot connect to the MediaPlayerService for battery tracking");
+    sp<IMediaPlayerService> service = IMediaDeathNotifier::getMediaPlayerService();
+    if (service == NULL) {
+        // it already logged
         return;
     }
 
