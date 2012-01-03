@@ -165,6 +165,12 @@ class CommandParamsFactory extends Handler {
              case PROVIDE_LOCAL_INFORMATION:
                 cmdPending = processProvideLocalInfo(cmdDet, ctlvs);
                 break;
+             case OPEN_CHANNEL:
+             case CLOSE_CHANNEL:
+             case RECEIVE_DATA:
+             case SEND_DATA:
+                 cmdPending = processBIPClient(cmdDet, ctlvs);
+                 break;
             default:
                 // unsupported proactive commands
                 mCmdParams = new CommandParams(cmdDet);
@@ -890,6 +896,45 @@ class CommandParamsFactory extends Handler {
                 CatLog.d(this, "PLI[" + cmdDet.commandQualifier + "] Command Not Supported");
                 mCmdParams = new CommandParams(cmdDet);
                 throw new ResultException(ResultCode.BEYOND_TERMINAL_CAPABILITY);
+        }
+        return false;
+    }
+
+    private boolean processBIPClient(CommandDetails cmdDet,
+                                     List<ComprehensionTlv> ctlvs) throws ResultException {
+        AppInterface.CommandType commandType =
+                                    AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
+        if (commandType != null) {
+            CatLog.d(this, "process "+ commandType.name());
+        }
+
+        TextMessage textMsg = new TextMessage();
+        IconId iconId = null;
+        ComprehensionTlv ctlv = null;
+        boolean has_alpha_id = false;
+
+        // parse alpha identifier
+        ctlv = searchForTag(ComprehensionTlvTag.ALPHA_ID, ctlvs);
+        if (ctlv != null) {
+            textMsg.text = ValueParser.retrieveAlphaId(ctlv);
+            CatLog.d(this, "alpha TLV text=" + textMsg.text);
+            has_alpha_id = true;
+        }
+
+        // parse icon identifier
+        ctlv = searchForTag(ComprehensionTlvTag.ICON_ID, ctlvs);
+        if (ctlv != null) {
+            iconId = ValueParser.retrieveIconId(ctlv);
+            textMsg.iconSelfExplanatory = iconId.selfExplanatory;
+        }
+
+        textMsg.responseNeeded = false;
+        mCmdParams = new BIPClientParams(cmdDet, textMsg, has_alpha_id);
+
+        if (iconId != null) {
+            mIconLoadState = LOAD_SINGLE_ICON;
+            mIconLoader.loadIcon(iconId.recordNumber, this.obtainMessage(MSG_ID_LOAD_ICON_DONE));
+            return true;
         }
         return false;
     }
