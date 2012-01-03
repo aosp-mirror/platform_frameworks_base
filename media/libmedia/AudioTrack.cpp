@@ -215,7 +215,7 @@ status_t AudioTrack::set(
 
     mVolume[LEFT] = 1.0f;
     mVolume[RIGHT] = 1.0f;
-    mSendLevel = 0;
+    mSendLevel = 0.0f;
     mFrameCount = frameCount;
     mNotificationFramesReq = notificationFrames;
     mSessionId = sessionId;
@@ -499,14 +499,14 @@ void AudioTrack::getVolume(float* left, float* right)
 status_t AudioTrack::setAuxEffectSendLevel(float level)
 {
     ALOGV("setAuxEffectSendLevel(%f)", level);
-    if (level > 1.0f) {
+    if (level < 0.0f || level > 1.0f) {
         return BAD_VALUE;
     }
     AutoMutex lock(mLock);
 
     mSendLevel = level;
 
-    mCblk->sendLevel = uint16_t(level * 0x1000);
+    mCblk->setSendLevel(level);
 
     return NO_ERROR;
 }
@@ -818,7 +818,7 @@ status_t AudioTrack::createTrack_l(
     }
 
     mCblk->volumeLR = (uint32_t(uint16_t(mVolume[RIGHT] * 0x1000)) << 16) | uint16_t(mVolume[LEFT] * 0x1000);
-    mCblk->sendLevel = uint16_t(mSendLevel * 0x1000);
+    mCblk->setSendLevel(mSendLevel);
     mAudioTrack->attachAuxEffect(mAuxEffectId);
     mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
@@ -1311,7 +1311,7 @@ audio_track_cblk_t::audio_track_cblk_t()
     : lock(Mutex::SHARED), cv(Condition::SHARED), user(0), server(0),
     userBase(0), serverBase(0), buffers(0), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), volumeLR(0),
-    sendLevel(0), flags(0)
+    mSendLevel(0), flags(0)
 {
 }
 

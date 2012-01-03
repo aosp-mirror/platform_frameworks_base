@@ -2183,7 +2183,13 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 vl = (uint32_t)(v * cblk->volume[0]) << 12;
                 vr = (uint32_t)(v * cblk->volume[1]) << 12;
 
-                va = (uint32_t)(v * cblk->sendLevel);
+                uint16_t sendLevel = cblk->getSendLevel_U4_12();
+                // send level comes from shared memory and so may be corrupt
+                if (sendLevel >= 0x1000) {
+                    ALOGV("Track send level out of range: %04X", sendLevel);
+                    sendLevel = 0x1000;
+                }
+                va = (uint32_t)(v * sendLevel);
             }
             // Delegate volume control to effect in track effect chain if needed
             if (chain != 0 && chain->setVolume_l(&vl, &vr)) {

@@ -85,7 +85,9 @@ struct audio_track_cblk_t
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
 
                 uint16_t    waitTimeMs;      // Cumulated wait time
-                uint16_t    sendLevel;
+private:
+                uint16_t    mSendLevel;      // Fixed point U4.12 so 0x1000 means 1.0
+public:
     volatile    int32_t     flags;
 
                 // Cache line boundary (32 bytes)
@@ -98,6 +100,19 @@ struct audio_track_cblk_t
                 uint32_t    framesAvailable_l();
                 uint32_t    framesReady();
                 bool        tryLock();
+
+                // No barriers on the following operations, so the ordering of loads/stores
+                // with respect to other parameters is UNPREDICTABLE. That's considered safe.
+
+                // for AudioTrack client only, caller must limit to 0.0 <= sendLevel <= 1.0
+                void        setSendLevel(float sendLevel) {
+                    mSendLevel = uint16_t(sendLevel * 0x1000);
+                }
+
+                // for AudioFlinger only; the return value must be validated by the caller
+                uint16_t    getSendLevel_U4_12() const {
+                    return mSendLevel;
+                }
 };
 
 
