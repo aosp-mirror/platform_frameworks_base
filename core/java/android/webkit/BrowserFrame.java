@@ -942,6 +942,13 @@ class BrowserFrame extends Handler {
         if (androidResource != null) {
             return new WebResourceResponse(null, null, androidResource);
         }
+
+        // Note that we check this after looking for an android_asset or
+        // android_res URL, as we allow those even if file access is disabled.
+        if (!mSettings.getAllowFileAccess() && url.startsWith("file://")) {
+            return new WebResourceResponse(null, null, null);
+        }
+
         WebResourceResponse response = mCallbackProxy.shouldInterceptRequest(url);
         if (response == null && "browser:incognito".equals(url)) {
             try {
