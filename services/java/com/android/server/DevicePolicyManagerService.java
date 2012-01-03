@@ -831,6 +831,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static void validateQualityConstant(int quality) {
         switch (quality) {
             case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
+            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
             case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
