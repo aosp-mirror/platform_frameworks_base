@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
 #include <stdlib.h>
 #include <cutils/log.h>
 #include <cutils/properties.h>
@@ -33,6 +34,47 @@ using gltrace::GLTraceContext;
 using gltrace::TCPStream;
 
 static GLTraceState *sGLTraceState;
+static pthread_t sReceiveThreadId;
+
+/**
+ * Task that monitors the control stream from the host and updates
+ * the trace status according to commands received from the host.
+ */
+static void *commandReceiveTask(void *arg) {
+    GLTraceState *state = (GLTraceState *)arg;
+    TCPStream *stream = state->getStream();
+
+    // Currently, there are very few user configurable settings.
+    // As a result, they can be encoded in a single integer.
+    int cmd;
+    enum TraceSettingsMasks {
+        READ_FB_ON_EGLSWAP_MASK = 1 << 0,
+        READ_FB_ON_GLDRAW_MASK = 1 << 1,
+        READ_TEXTURE_DATA_ON_GLTEXIMAGE_MASK = 1 << 2,
+    };
+
+    while (true) {
+        int n = stream->receive(&cmd, 4);
+        if (n != 4) {
+            break;
+        }
+
+        cmd = ntohl(cmd);
+
+        bool collectFbOnEglSwap = (cmd & READ_FB_ON_EGLSWAP_MASK) != 0;
+        bool collectFbOnGlDraw = (cmd & READ_FB_ON_GLDRAW_MASK) != 0;
+        bool collectTextureData = (cmd & READ_TEXTURE_DATA_ON_GLTEXIMAGE_MASK) != 0;
+
+        state->setCollectFbOnEglSwap(collectFbOnEglSwap);
+        state->setCollectFbOnGlDraw(collectFbOnGlDraw);
+        state->setCollectTextureDataOnGlTexImage(collectTextureData);
+
+        ALOGD("trace options: eglswap: %d, gldraw: %d, texImage: %d",
+            collectFbOnEglSwap, collectFbOnGlDraw, collectTextureData);
+    }
+
+    return NULL;
+}
 
 void GLTrace_start() {
     char value[PROPERTY_VALUE_MAX];
@@ -51,6 +93,8 @@ void GLTrace_start() {
 
     // initialize tracing state
     sGLTraceState = new GLTraceState(stream);
+
+    pthread_create(&sReceiveThreadId, NULL, commandReceiveTask, sGLTraceState);
 }
 
 void GLTrace_stop() {

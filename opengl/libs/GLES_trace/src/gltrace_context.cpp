@@ -59,6 +59,11 @@ void releaseContext() {
 GLTraceState::GLTraceState(TCPStream *stream) {
     mTraceContextIds = 0;
     mStream = stream;
+
+    mCollectFbOnEglSwap = false;
+    mCollectFbOnGlDraw = false;
+    mCollectTextureDataOnGlTexImage = false;
+    pthread_rwlock_init(&mTraceOptionsRwLock, NULL);
 }
 
 GLTraceState::~GLTraceState() {
@@ -72,12 +77,49 @@ TCPStream *GLTraceState::getStream() {
     return mStream;
 }
 
+void GLTraceState::safeSetValue(bool *ptr, bool value, pthread_rwlock_t *lock) {
+    pthread_rwlock_wrlock(lock);
+    *ptr = value;
+    pthread_rwlock_unlock(lock);
+}
+
+bool GLTraceState::safeGetValue(bool *ptr, pthread_rwlock_t *lock) {
+    pthread_rwlock_rdlock(lock);
+    bool value = *ptr;
+    pthread_rwlock_unlock(lock);
+    return value;
+}
+
+void GLTraceState::setCollectFbOnEglSwap(bool en) {
+    safeSetValue(&mCollectFbOnEglSwap, en, &mTraceOptionsRwLock);
+}
+
+void GLTraceState::setCollectFbOnGlDraw(bool en) {
+    safeSetValue(&mCollectFbOnGlDraw, en, &mTraceOptionsRwLock);
+}
+
+void GLTraceState::setCollectTextureDataOnGlTexImage(bool en) {
+    safeSetValue(&mCollectTextureDataOnGlTexImage, en, &mTraceOptionsRwLock);
+}
+
+bool GLTraceState::shouldCollectFbOnEglSwap() {
+    return safeGetValue(&mCollectFbOnEglSwap, &mTraceOptionsRwLock);
+}
+
+bool GLTraceState::shouldCollectFbOnGlDraw() {
+    return safeGetValue(&mCollectFbOnGlDraw, &mTraceOptionsRwLock);
+}
+
+bool GLTraceState::shouldCollectTextureDataOnGlTexImage() {
+    return safeGetValue(&mCollectTextureDataOnGlTexImage, &mTraceOptionsRwLock);
+}
+
 GLTraceContext *GLTraceState::createTraceContext(int version, EGLContext eglContext) {
     int id = __sync_fetch_and_add(&mTraceContextIds, 1);
 
     const size_t DEFAULT_BUFFER_SIZE = 8192;
     BufferedOutputStream *stream = new BufferedOutputStream(mStream, DEFAULT_BUFFER_SIZE);
-    GLTraceContext *traceContext = new GLTraceContext(id, stream);
+    GLTraceContext *traceContext = new GLTraceContext(id, this, stream);
     mPerContextState[eglContext] = traceContext;
 
     return traceContext;
@@ -87,8 +129,9 @@ GLTraceContext *GLTraceState::getTraceContext(EGLContext c) {
     return mPerContextState[c];
 }
 
-GLTraceContext::GLTraceContext(int id, BufferedOutputStream *stream) {
+GLTraceContext::GLTraceContext(int id, GLTraceState *state, BufferedOutputStream *stream) {
     mId = id;
+    mState = state;
 
     fbcontents = fbcompressed = NULL;
     fbcontentsSize = 0;
@@ -97,6 +140,10 @@ GLTraceContext::GLTraceContext(int id, BufferedOutputStream *stream) {
 
 int GLTraceContext::getId() {
     return mId;
+}
+
+GLTraceState *GLTraceContext::getGlobalTraceState() {
+    return mState;
 }
 
 void GLTraceContext::resizeFBMemory(unsigned minSize) {

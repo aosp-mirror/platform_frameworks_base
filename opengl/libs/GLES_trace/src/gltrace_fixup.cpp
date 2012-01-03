@@ -283,7 +283,9 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
         fixup_glGetString(glmsg);
         break;
     case GLMessage::glTexImage2D:
-        fixup_glTexImage2D(glmsg);
+        if (context->getGlobalTraceState()->shouldCollectTextureDataOnGlTexImage()) {
+            fixup_glTexImage2D(glmsg);
+        }
         break;
     case GLMessage::glShaderSource:
         fixup_glShaderSource(glmsg);
@@ -304,10 +306,16 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
         fixup_glUniformMatrixGeneric(4, glmsg);
         break;
     case GLMessage::glDrawArrays:
-    case GLMessage::glDrawElements:
         /* void glDrawArrays(GLenum mode, GLint first, GLsizei count) */
+        if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
+            fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
+        }
+        break;
+    case GLMessage::glDrawElements:
         /* void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) */
-        fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
+        if (context->getGlobalTraceState()->shouldCollectFbOnGlDraw()) {
+            fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
+        }
         break;
     default:
         break;

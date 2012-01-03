@@ -18,6 +18,7 @@
 #define __GLTRACE_CONTEXT_H_
 
 #include <map>
+#include <pthread.h>
 
 #include "hooks.h"
 #include "gltrace_transport.h"
@@ -29,9 +30,12 @@ using ::android::gl_hooks_t;
 
 enum FBBinding {CURRENTLY_BOUND_FB, FB0};
 
+class GLTraceState;
+
 /** GL Trace Context info associated with each EGLContext */
 class GLTraceContext {
     int mId;                    /* unique context id */
+    GLTraceState *mState;       /* parent GL Trace state (for per process GL Trace State Info) */
 
     void *fbcontents;           /* memory area to read framebuffer contents */
     void *fbcompressed;         /* destination for lzf compressed framebuffer */
@@ -43,8 +47,9 @@ class GLTraceContext {
 public:
     gl_hooks_t *hooks;
 
-    GLTraceContext(int id, BufferedOutputStream *stream);
+    GLTraceContext(int id, GLTraceState *state, BufferedOutputStream *stream);
     int getId();
+    GLTraceState *getGlobalTraceState();
     void getCompressedFB(void **fb, unsigned *fbsize,
                             unsigned *fbwidth, unsigned *fbheight,
                             FBBinding fbToRead);
@@ -56,6 +61,17 @@ class GLTraceState {
     int mTraceContextIds;
     TCPStream *mStream;
     std::map<EGLContext, GLTraceContext*> mPerContextState;
+
+    /* Options controlling additional data to be collected on
+       certain trace calls. */
+    bool mCollectFbOnEglSwap;
+    bool mCollectFbOnGlDraw;
+    bool mCollectTextureDataOnGlTexImage;
+    pthread_rwlock_t mTraceOptionsRwLock;
+
+    /* helper methods to get/set values using provided lock for mutual exclusion. */
+    void safeSetValue(bool *ptr, bool value, pthread_rwlock_t *lock);
+    bool safeGetValue(bool *ptr, pthread_rwlock_t *lock);
 public:
     GLTraceState(TCPStream *stream);
     ~GLTraceState();
@@ -64,6 +80,16 @@ public:
     GLTraceContext *getTraceContext(EGLContext c);
 
     TCPStream *getStream();
+
+    /* Methods to set trace options. */
+    void setCollectFbOnEglSwap(bool en);
+    void setCollectFbOnGlDraw(bool en);
+    void setCollectTextureDataOnGlTexImage(bool en);
+
+    /* Methods to retrieve trace options. */
+    bool shouldCollectFbOnEglSwap();
+    bool shouldCollectFbOnGlDraw();
+    bool shouldCollectTextureDataOnGlTexImage();
 };
 
 void setupTraceContextThreadSpecific(GLTraceContext *context);
