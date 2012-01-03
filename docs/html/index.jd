@@ -57,7 +57,7 @@ href="http://android-developers.blogspot.com/2011/07/new-android-market-for-phon
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><a href="http://www.android.com/market.html"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></a></td>
+                                      <td class="imageCell"><a href="http://market.android.com/publish"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">Publish</h2>
                                               <p>Android Market is an open service that lets you distribute your apps to handsets.</p>
