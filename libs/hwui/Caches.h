@@ -193,6 +193,11 @@ public:
     void setScissor(GLint x, GLint y, GLint width, GLint height);
 
     /**
+     * Resets the scissor state.
+     */
+    void resetScissor();
+
+    /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
      * indices for the region mesh.

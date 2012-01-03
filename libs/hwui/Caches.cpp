@@ -325,6 +325,10 @@ void Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
     }
 }
 
+void Caches::resetScissor() {
+    mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
+}
+
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
