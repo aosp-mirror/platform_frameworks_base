@@ -72,7 +72,7 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             if (dbg->captureDraw > 0) {
                 dbg->captureDraw--;
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
-//                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+//                ALOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
 //                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
                 pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
                                                   dbg->readBytesPerPixel);

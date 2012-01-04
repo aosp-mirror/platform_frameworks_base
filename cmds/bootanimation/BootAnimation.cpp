@@ -83,7 +83,7 @@ sp<SurfaceComposerClient> BootAnimation::session() const {
 void BootAnimation::binderDied(const wp<IBinder>& who)
 {
     // woah, surfaceflinger died!
-    LOGD("SurfaceFlinger died, exiting...");
+    ALOGD("SurfaceFlinger died, exiting...");
 
     // calling requestExit() is not enough here because the Surface code
     // might be blocked on a condition variable that will never be updated.
@@ -394,13 +394,13 @@ bool BootAnimation::movie()
         int fps, width, height, count, pause;
         char path[256];
         if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
-            //LOGD("> w=%d, h=%d, fps=%d", fps, width, height);
+            //ALOGD("> w=%d, h=%d, fps=%d", fps, width, height);
             animation.width = width;
             animation.height = height;
             animation.fps = fps;
         }
         if (sscanf(l, "p %d %d %s", &count, &pause, path) == 3) {
-            //LOGD("> count=%d, pause=%d, path=%s", count, pause, path);
+            //ALOGD("> count=%d, pause=%d, path=%s", count, pause, path);
             Animation::Part part;
             part.count = count;
             part.pause = pause;

@@ -242,7 +242,7 @@ unsigned int DbgContext::GetBufferSize()
 void DbgContext::glUseProgram(GLuint program)
 {
     while (GLenum error = hooks->gl.glGetError())
-        LOGD("DbgContext::glUseProgram(%u): before glGetError() = 0x%.4X",
+        ALOGD("DbgContext::glUseProgram(%u): before glGetError() = 0x%.4X",
              program, error);
     this->program = program;
     maxAttrib = 0;
@@ -286,7 +286,7 @@ void DbgContext::glUseProgram(GLuint program)
     }
     delete name;
     while (GLenum error = hooks->gl.glGetError())
-        LOGD("DbgContext::glUseProgram(%u): after glGetError() = 0x%.4X",
+        ALOGD("DbgContext::glUseProgram(%u): after glGetError() = 0x%.4X",
              program, error);
 }
 

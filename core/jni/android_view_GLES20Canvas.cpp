@@ -66,7 +66,7 @@ using namespace uirenderer;
 
 // Debug
 #if DEBUG_RENDERER
-    #define RENDERER_LOGD(...) LOGD(__VA_ARGS__)
+    #define RENDERER_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define RENDERER_LOGD(...)
 #endif

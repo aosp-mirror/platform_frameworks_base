@@ -283,7 +283,7 @@ bool AssetManager::getZipEntryCrcLocked(const String8& zipPath, const char* entr
 bool AssetManager::createIdmapFileLocked(const String8& originalPath, const String8& overlayPath,
                                          const String8& idmapPath)
 {
-    LOGD("%s: originalPath=%s overlayPath=%s idmapPath=%s\n",
+    ALOGD("%s: originalPath=%s overlayPath=%s idmapPath=%s\n",
          __FUNCTION__, originalPath.string(), overlayPath.string(), idmapPath.string());
     ResTable tables[2];
     const String8* paths[2] = { &originalPath, &overlayPath };
@@ -923,7 +923,7 @@ Asset* AssetManager::openInLocaleVendorLocked(const char* fileName, AccessMode m
              */
             if (found) {
                 if (pAsset == NULL)
-                    LOGD("Expected file not found: '%s'\n", path.string());
+                    ALOGD("Expected file not found: '%s'\n", path.string());
                 return pAsset;
             }
         }
@@ -1333,7 +1333,7 @@ bool AssetManager::scanAndMergeDirLocked(SortedVector<AssetDir::FileInfo>* pMerg
                 //printf("+++ no match on '%s'\n", (const char*) match);
             }
 
-            LOGD("HEY: size=%d removing %d\n", (int)pContents->size(), i);
+            ALOGD("HEY: size=%d removing %d\n", (int)pContents->size(), i);
             pContents->removeAt(i);
             i--;        // adjust "for" loop
             count--;    //  and loop limit
@@ -1652,7 +1652,7 @@ void AssetManager::loadFileNameCacheLocked(void)
 
 #ifdef DO_TIMINGS
     timer.stop();
-    LOGD("Cache scan took %.3fms\n",
+    ALOGD("Cache scan took %.3fms\n",
         timer.durationUsecs() / 1000.0);
 #endif
 
@@ -1784,7 +1784,7 @@ AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
     mZipFile = new ZipFileRO;
     ALOGV("+++ opening zip '%s'\n", mPath.string());
     if (mZipFile->open(mPath.string()) != NO_ERROR) {
-        LOGD("failed to open Zip archive '%s'\n", mPath.string());
+        ALOGD("failed to open Zip archive '%s'\n", mPath.string());
         delete mZipFile;
         mZipFile = NULL;
     }

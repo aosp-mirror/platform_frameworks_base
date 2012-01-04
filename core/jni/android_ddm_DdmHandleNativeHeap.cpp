@@ -87,7 +87,7 @@ static jbyteArray getLeakInfo(JNIEnv *env, jobject clazz)
                 header.mapSize += amount;
             } while (header.mapSize < MAPS_FILE_SIZE);
             
-            LOGD("**** read %d bytes from '%s'", (int) header.mapSize, path);
+            ALOGD("**** read %d bytes from '%s'", (int) header.mapSize, path);
         }
     }
 
@@ -105,7 +105,7 @@ static jbyteArray getLeakInfo(JNIEnv *env, jobject clazz)
     bytes = env->GetByteArrayElements(array, NULL);
     ptr = bytes;
 
-//    LOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d", 
+//    ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d", 
 //            header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
 
     memcpy(ptr, &header, sizeof(header));

@@ -61,11 +61,11 @@ void MtpStorageInfo::read(MtpDataPacket& packet) {
 }
 
 void MtpStorageInfo::print() {
-    LOGD("Storage Info %08X:\n\tmStorageType: %d\n\tmFileSystemType: %d\n\tmAccessCapability: %d\n",
+    ALOGD("Storage Info %08X:\n\tmStorageType: %d\n\tmFileSystemType: %d\n\tmAccessCapability: %d\n",
             mStorageID, mStorageType, mFileSystemType, mAccessCapability);
-    LOGD("\tmMaxCapacity: %lld\n\tmFreeSpaceBytes: %lld\n\tmFreeSpaceObjects: %d\n",
+    ALOGD("\tmMaxCapacity: %lld\n\tmFreeSpaceBytes: %lld\n\tmFreeSpaceObjects: %d\n",
             mMaxCapacity, mFreeSpaceBytes, mFreeSpaceObjects);
-    LOGD("\tmStorageDescription: %s\n\tmVolumeIdentifier: %s\n",
+    ALOGD("\tmStorageDescription: %s\n\tmVolumeIdentifier: %s\n",
             mStorageDescription, mVolumeIdentifier);
 }
 

@@ -1956,7 +1956,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
-                            LOGD("Silence is golden");
+                            ALOGD("Silence is golden");
                             setMasterMute(true);
                         }
                     }
@@ -2617,7 +2617,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
-                            LOGD("Silence is golden");
+                            ALOGD("Silence is golden");
                             setMasterMute(true);
                         }
                     }
@@ -3011,7 +3011,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
-                            LOGD("Silence is golden");
+                            ALOGD("Silence is golden");
                             setMasterMute(true);
                         }
                     }
@@ -3192,7 +3192,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
 {
     ALOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
-    // LOGD("Creating track with %d buffers @ %d bytes", bufferCount, bufferSize);
+    // ALOGD("Creating track with %d buffers @ %d bytes", bufferCount, bufferSize);
    size_t size = sizeof(audio_track_cblk_t);
    uint8_t channelCount = popcount(channelMask);
    size_t bufferSize = frameCount*channelCount*sizeof(int16_t);

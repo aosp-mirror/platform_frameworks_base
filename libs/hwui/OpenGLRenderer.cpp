@@ -169,7 +169,7 @@ void OpenGLRenderer::finish() {
 #if DEBUG_OPENGL
     GLenum status = GL_NO_ERROR;
     while ((status = glGetError()) != GL_NO_ERROR) {
-        LOGD("GL error from OpenGLRenderer: 0x%x", status);
+        ALOGD("GL error from OpenGLRenderer: 0x%x", status);
         switch (status) {
             case GL_OUT_OF_MEMORY:
                 LOGE("  OpenGLRenderer is out of memory!");
@@ -2122,7 +2122,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
 #if DEBUG_GLYPHS
-    LOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
+    ALOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
 #endif
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());

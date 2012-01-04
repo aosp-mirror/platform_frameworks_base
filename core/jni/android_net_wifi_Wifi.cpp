@@ -164,7 +164,7 @@ static jboolean android_net_wifi_doBooleanCommand(JNIEnv* env, jobject, jstring 
     if (command.c_str() == NULL) {
         return JNI_FALSE;
     }
-    if (DBG) LOGD("doBoolean: %s", command.c_str());
+    if (DBG) ALOGD("doBoolean: %s", command.c_str());
     return doBooleanCommand(ifname.c_str(), "OK", "%s", command.c_str());
 }
 
@@ -177,7 +177,7 @@ static jint android_net_wifi_doIntCommand(JNIEnv* env, jobject, jstring jIface,
     if (command.c_str() == NULL) {
         return -1;
     }
-    if (DBG) LOGD("doInt: %s", command.c_str());
+    if (DBG) ALOGD("doInt: %s", command.c_str());
     return doIntCommand(ifname.c_str(), "%s", command.c_str());
 }
 
@@ -190,7 +190,7 @@ static jstring android_net_wifi_doStringCommand(JNIEnv* env, jobject, jstring jI
     if (command.c_str() == NULL) {
         return NULL;
     }
-    if (DBG) LOGD("doString: %s", command.c_str());
+    if (DBG) ALOGD("doString: %s", command.c_str());
     return doStringCommand(env, ifname.c_str(), "%s", command.c_str());
 }
 

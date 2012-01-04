@@ -185,13 +185,13 @@ int SurfaceTextureClient::getSlotFromBufferLocked(
         // a buffer.
         if (mSlots[i] == NULL) {
             if (!dumpedState) {
-                LOGD("getSlotFromBufferLocked: encountered NULL buffer in slot %d "
+                ALOGD("getSlotFromBufferLocked: encountered NULL buffer in slot %d "
                         "looking for buffer %p", i, buffer->handle);
                 for (int j = 0; j < NUM_BUFFER_SLOTS; j++) {
                     if (mSlots[j] == NULL) {
-                        LOGD("getSlotFromBufferLocked:   %02d: NULL", j);
+                        ALOGD("getSlotFromBufferLocked:   %02d: NULL", j);
                     } else {
-                        LOGD("getSlotFromBufferLocked:   %02d: %p", j, mSlots[j]->handle);
+                        ALOGD("getSlotFromBufferLocked:   %02d: %p", j, mSlots[j]->handle);
                     }
                 }
                 dumpedState = true;

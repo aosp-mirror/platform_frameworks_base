@@ -36,7 +36,7 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_PROGRAMS
-    #define PROGRAM_LOGD(...) LOGD(__VA_ARGS__)
+    #define PROGRAM_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define PROGRAM_LOGD(...)
 #endif

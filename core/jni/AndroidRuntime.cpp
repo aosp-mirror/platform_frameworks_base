@@ -285,7 +285,7 @@ status_t AndroidRuntime::callMain(const char* className,
     JNIEnv* env;
     jmethodID methodId;
 
-    LOGD("Calling main entry %s", className);
+    ALOGD("Calling main entry %s", className);
 
     env = getJNIEnv();
     if (clazz == NULL || env == NULL) {
@@ -415,7 +415,7 @@ static void readLocale(char* language, char* region)
     }
     strncat(language, propLang, 2);
     strncat(region, propRegn, 2);
-    //LOGD("language=%s region=%s\n", language, region);
+    //ALOGD("language=%s region=%s\n", language, region);
 }
 
 /*
@@ -628,7 +628,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         "-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y";
     mOptions.add(opt);
 
-    LOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
+    ALOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
         opt.optionString = "-Xcheck:jni";
@@ -797,7 +797,7 @@ char* AndroidRuntime::toSlashClassName(const char* className)
  */
 void AndroidRuntime::start(const char* className, const char* options)
 {
-    LOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
+    ALOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
             className != NULL ? className : "(unknown)");
 
     blockSigpipe();
@@ -824,7 +824,7 @@ void AndroidRuntime::start(const char* className, const char* options)
     }
 
     //const char* kernelHack = getenv("LD_ASSUME_KERNEL");
-    //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
+    //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* start the virtual machine */
     JNIEnv* env;
@@ -887,7 +887,7 @@ void AndroidRuntime::start(const char* className, const char* options)
     }
     free(slashClassName);
 
-    LOGD("Shutting down VM\n");
+    ALOGD("Shutting down VM\n");
     if (mJavaVM->DetachCurrentThread() != JNI_OK)
         LOGW("Warning: unable to detach main thread\n");
     if (mJavaVM->DestroyJavaVM() != 0)
@@ -1063,7 +1063,7 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
     for (size_t i = 0; i < count; i++) {
         if (array[i].mProc(env) < 0) {
 #ifndef NDEBUG
-            LOGD("----------!!! %s failed to load\n", array[i].mName);
+            ALOGD("----------!!! %s failed to load\n", array[i].mName);
 #endif
             return -1;
         }

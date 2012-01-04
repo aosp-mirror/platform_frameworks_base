@@ -58,7 +58,7 @@ int main()
     //reg2.dump("reg2");
     //reg3.dump("reg3");
 
-    LOGD("---");
+    ALOGD("---");
     reg2 = reg0 | reg0.translate(100, 0);
     reg0.dump("reg0");
     reg1.dump("reg1");
