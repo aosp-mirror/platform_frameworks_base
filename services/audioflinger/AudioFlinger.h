@@ -1383,7 +1383,7 @@ private:
                 mutable     Mutex                   mHardwareLock;
                 audio_hw_device_t*                  mPrimaryHardwareDev;
                 Vector<audio_hw_device_t*>          mAudioHwDevs;
-    mutable     int                                 mHardwareStatus;
+    mutable     hardware_call_state                 mHardwareStatus;    // for dump only
 
 
                 DefaultKeyedVector< int, sp<PlaybackThread> >  mPlaybackThreads;
