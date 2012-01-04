@@ -546,12 +546,12 @@ of each message, given as <code>&lt;priority&gt;/&lt;tag&gt;</code>. </p>
 <p>Log messages contain a number of metadata fields, in addition to the tag and priority. You can modify the output format for messages so that they display a specific metadata field. To do so, you use the <code>-v</code> option and specify one of the supported output formats listed below. </p>
 
 <ul>
-    <li><code>brief</code> &mdash; Display priority/tag and PID of originating process (the default format).</li>
+    <li><code>brief</code> &mdash; Display priority/tag and the PID of process issuing the message (the default format).</li>
 	<li><code>process</code> &mdash; Display PID only.</li>
 	<li><code>tag</code> &mdash; Display the priority/tag only. </li>
-	<li><code>thread</code> &mdash; Display process:thread and priority/tag only. </li>
 	<li><code>raw</code> &mdash; Display the raw log message, with no other metadata fields.</li>
-	<li><code>time</code> &mdash; Display the date, invocation time, priority/tag, and PID of the originating process.</li>
+	<li><code>time</code> &mdash; Display the date, invocation time, priority/tag, and PID of the process issuing the message.</li>
+	<li><code>threadtime</code> &mdash; Display the date, invocation time, priority, tag, and the PID and TID of the thread issuing the message.</li>
 	<li><code>long</code> &mdash; Display all metadata fields and separate messages with a blank lines.</li>
 </ul>
 
