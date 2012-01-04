@@ -1536,10 +1536,11 @@ void GLMessage_FrameBuffer::Swap(GLMessage_FrameBuffer* other) {
 
 #ifndef _MSC_VER
 const int GLMessage::kContextIdFieldNumber;
+const int GLMessage::kStartTimeFieldNumber;
+const int GLMessage::kDurationFieldNumber;
 const int GLMessage::kFunctionFieldNumber;
 const int GLMessage::kArgsFieldNumber;
 const int GLMessage::kReturnValueFieldNumber;
-const int GLMessage::kDurationFieldNumber;
 const int GLMessage::kFbFieldNumber;
 #endif  // !_MSC_VER
 
@@ -1562,9 +1563,10 @@ GLMessage::GLMessage(const GLMessage& from)
 void GLMessage::SharedCtor() {
   _cached_size_ = 0;
   context_id_ = 0;
+  start_time_ = GOOGLE_LONGLONG(0);
+  duration_ = 0;
   function_ = 3000;
   returnvalue_ = NULL;
-  duration_ = 0;
   fb_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -1598,12 +1600,13 @@ GLMessage* GLMessage::New() const {
 void GLMessage::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     context_id_ = 0;
+    start_time_ = GOOGLE_LONGLONG(0);
+    duration_ = 0;
     function_ = 3000;
-    if (_has_bit(3)) {
+    if (_has_bit(5)) {
       if (returnvalue_ != NULL) returnvalue_->::android::gltrace::GLMessage_DataType::Clear();
     }
-    duration_ = 0;
-    if (_has_bit(5)) {
+    if (_has_bit(6)) {
       if (fb_ != NULL) fb_->::android::gltrace::GLMessage_FrameBuffer::Clear();
     }
   }
@@ -1628,12 +1631,44 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_function;
+        if (input->ExpectTag(16)) goto parse_start_time;
         break;
       }
       
-      // required .android.gltrace.GLMessage.Function function = 2 [default = invalid];
+      // required int64 start_time = 2;
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_start_time:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &start_time_)));
+          _set_bit(1);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_duration;
+        break;
+      }
+      
+      // required int32 duration = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_duration:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &duration_)));
+          _set_bit(2);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_function;
+        break;
+      }
+      
+      // required .android.gltrace.GLMessage.Function function = 4 [default = invalid];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_function:
@@ -1647,12 +1682,12 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_args;
+        if (input->ExpectTag(42)) goto parse_args;
         break;
       }
       
-      // repeated .android.gltrace.GLMessage.DataType args = 3;
-      case 3: {
+      // repeated .android.gltrace.GLMessage.DataType args = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_args:
@@ -1661,13 +1696,13 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_args;
-        if (input->ExpectTag(34)) goto parse_returnValue;
+        if (input->ExpectTag(42)) goto parse_args;
+        if (input->ExpectTag(50)) goto parse_returnValue;
         break;
       }
       
-      // optional .android.gltrace.GLMessage.DataType returnValue = 4;
-      case 4: {
+      // optional .android.gltrace.GLMessage.DataType returnValue = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_returnValue:
@@ -1676,28 +1711,12 @@ bool GLMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(45)) goto parse_duration;
+        if (input->ExpectTag(58)) goto parse_fb;
         break;
       }
       
-      // optional float duration = 5;
-      case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
-         parse_duration:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
-                 input, &duration_)));
-          _set_bit(4);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(50)) goto parse_fb;
-        break;
-      }
-      
-      // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
-      case 6: {
+      // optional .android.gltrace.GLMessage.FrameBuffer fb = 7;
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_fb:
@@ -1732,33 +1751,38 @@ void GLMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->context_id(), output);
   }
   
-  // required .android.gltrace.GLMessage.Function function = 2 [default = invalid];
+  // required int64 start_time = 2;
   if (_has_bit(1)) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      2, this->function(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->start_time(), output);
   }
   
-  // repeated .android.gltrace.GLMessage.DataType args = 3;
+  // required int32 duration = 3;
+  if (_has_bit(2)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->duration(), output);
+  }
+  
+  // required .android.gltrace.GLMessage.Function function = 4 [default = invalid];
+  if (_has_bit(3)) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      4, this->function(), output);
+  }
+  
+  // repeated .android.gltrace.GLMessage.DataType args = 5;
   for (int i = 0; i < this->args_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessage(
-      3, this->args(i), output);
+      5, this->args(i), output);
   }
   
-  // optional .android.gltrace.GLMessage.DataType returnValue = 4;
-  if (_has_bit(3)) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessage(
-      4, this->returnvalue(), output);
-  }
-  
-  // optional float duration = 5;
-  if (_has_bit(4)) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(5, this->duration(), output);
-  }
-  
-  // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+  // optional .android.gltrace.GLMessage.DataType returnValue = 6;
   if (_has_bit(5)) {
     ::google::protobuf::internal::WireFormatLite::WriteMessage(
-      6, this->fb(), output);
+      6, this->returnvalue(), output);
+  }
+  
+  // optional .android.gltrace.GLMessage.FrameBuffer fb = 7;
+  if (_has_bit(6)) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessage(
+      7, this->fb(), output);
   }
   
 }
@@ -1774,25 +1798,34 @@ int GLMessage::ByteSize() const {
           this->context_id());
     }
     
-    // required .android.gltrace.GLMessage.Function function = 2 [default = invalid];
+    // required int64 start_time = 2;
+    if (has_start_time()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
+          this->start_time());
+    }
+    
+    // required int32 duration = 3;
+    if (has_duration()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->duration());
+    }
+    
+    // required .android.gltrace.GLMessage.Function function = 4 [default = invalid];
     if (has_function()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->function());
     }
     
-    // optional .android.gltrace.GLMessage.DataType returnValue = 4;
+    // optional .android.gltrace.GLMessage.DataType returnValue = 6;
     if (has_returnvalue()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->returnvalue());
     }
     
-    // optional float duration = 5;
-    if (has_duration()) {
-      total_size += 1 + 4;
-    }
-    
-    // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+    // optional .android.gltrace.GLMessage.FrameBuffer fb = 7;
     if (has_fb()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -1800,7 +1833,7 @@ int GLMessage::ByteSize() const {
     }
     
   }
-  // repeated .android.gltrace.GLMessage.DataType args = 3;
+  // repeated .android.gltrace.GLMessage.DataType args = 5;
   total_size += 1 * this->args_size();
   for (int i = 0; i < this->args_size(); i++) {
     total_size +=
@@ -1827,15 +1860,18 @@ void GLMessage::MergeFrom(const GLMessage& from) {
       set_context_id(from.context_id());
     }
     if (from._has_bit(1)) {
-      set_function(from.function());
+      set_start_time(from.start_time());
     }
-    if (from._has_bit(3)) {
-      mutable_returnvalue()->::android::gltrace::GLMessage_DataType::MergeFrom(from.returnvalue());
-    }
-    if (from._has_bit(4)) {
+    if (from._has_bit(2)) {
       set_duration(from.duration());
     }
+    if (from._has_bit(3)) {
+      set_function(from.function());
+    }
     if (from._has_bit(5)) {
+      mutable_returnvalue()->::android::gltrace::GLMessage_DataType::MergeFrom(from.returnvalue());
+    }
+    if (from._has_bit(6)) {
       mutable_fb()->::android::gltrace::GLMessage_FrameBuffer::MergeFrom(from.fb());
     }
   }
@@ -1848,7 +1884,7 @@ void GLMessage::CopyFrom(const GLMessage& from) {
 }
 
 bool GLMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
   
   for (int i = 0; i < args_size(); i++) {
     if (!this->args(i).IsInitialized()) return false;
@@ -1865,10 +1901,11 @@ bool GLMessage::IsInitialized() const {
 void GLMessage::Swap(GLMessage* other) {
   if (other != this) {
     std::swap(context_id_, other->context_id_);
+    std::swap(start_time_, other->start_time_);
+    std::swap(duration_, other->duration_);
     std::swap(function_, other->function_);
     args_.Swap(&other->args_);
     std::swap(returnvalue_, other->returnvalue_);
-    std::swap(duration_, other->duration_);
     std::swap(fb_, other->fb_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);

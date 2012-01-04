@@ -1249,17 +1249,31 @@ class GLMessage : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 context_id() const;
   inline void set_context_id(::google::protobuf::int32 value);
   
-  // required .android.gltrace.GLMessage.Function function = 2 [default = invalid];
+  // required int64 start_time = 2;
+  inline bool has_start_time() const;
+  inline void clear_start_time();
+  static const int kStartTimeFieldNumber = 2;
+  inline ::google::protobuf::int64 start_time() const;
+  inline void set_start_time(::google::protobuf::int64 value);
+  
+  // required int32 duration = 3;
+  inline bool has_duration() const;
+  inline void clear_duration();
+  static const int kDurationFieldNumber = 3;
+  inline ::google::protobuf::int32 duration() const;
+  inline void set_duration(::google::protobuf::int32 value);
+  
+  // required .android.gltrace.GLMessage.Function function = 4 [default = invalid];
   inline bool has_function() const;
   inline void clear_function();
-  static const int kFunctionFieldNumber = 2;
+  static const int kFunctionFieldNumber = 4;
   inline ::android::gltrace::GLMessage_Function function() const;
   inline void set_function(::android::gltrace::GLMessage_Function value);
   
-  // repeated .android.gltrace.GLMessage.DataType args = 3;
+  // repeated .android.gltrace.GLMessage.DataType args = 5;
   inline int args_size() const;
   inline void clear_args();
-  static const int kArgsFieldNumber = 3;
+  static const int kArgsFieldNumber = 5;
   inline const ::android::gltrace::GLMessage_DataType& args(int index) const;
   inline ::android::gltrace::GLMessage_DataType* mutable_args(int index);
   inline ::android::gltrace::GLMessage_DataType* add_args();
@@ -1268,24 +1282,17 @@ class GLMessage : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::RepeatedPtrField< ::android::gltrace::GLMessage_DataType >*
       mutable_args();
   
-  // optional .android.gltrace.GLMessage.DataType returnValue = 4;
+  // optional .android.gltrace.GLMessage.DataType returnValue = 6;
   inline bool has_returnvalue() const;
   inline void clear_returnvalue();
-  static const int kReturnValueFieldNumber = 4;
+  static const int kReturnValueFieldNumber = 6;
   inline const ::android::gltrace::GLMessage_DataType& returnvalue() const;
   inline ::android::gltrace::GLMessage_DataType* mutable_returnvalue();
   
-  // optional float duration = 5;
-  inline bool has_duration() const;
-  inline void clear_duration();
-  static const int kDurationFieldNumber = 5;
-  inline float duration() const;
-  inline void set_duration(float value);
-  
-  // optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+  // optional .android.gltrace.GLMessage.FrameBuffer fb = 7;
   inline bool has_fb() const;
   inline void clear_fb();
-  static const int kFbFieldNumber = 6;
+  static const int kFbFieldNumber = 7;
   inline const ::android::gltrace::GLMessage_FrameBuffer& fb() const;
   inline ::android::gltrace::GLMessage_FrameBuffer* mutable_fb();
   
@@ -1294,16 +1301,17 @@ class GLMessage : public ::google::protobuf::MessageLite {
   mutable int _cached_size_;
   
   ::google::protobuf::int32 context_id_;
+  ::google::protobuf::int64 start_time_;
+  ::google::protobuf::int32 duration_;
   int function_;
   ::google::protobuf::RepeatedPtrField< ::android::gltrace::GLMessage_DataType > args_;
   ::android::gltrace::GLMessage_DataType* returnvalue_;
-  float duration_;
   ::android::gltrace::GLMessage_FrameBuffer* fb_;
   friend void  protobuf_AddDesc_gltrace_2eproto();
   friend void protobuf_AssignDesc_gltrace_2eproto();
   friend void protobuf_ShutdownFile_gltrace_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -1622,24 +1630,56 @@ inline void GLMessage::set_context_id(::google::protobuf::int32 value) {
   context_id_ = value;
 }
 
-// required .android.gltrace.GLMessage.Function function = 2 [default = invalid];
-inline bool GLMessage::has_function() const {
+// required int64 start_time = 2;
+inline bool GLMessage::has_start_time() const {
   return _has_bit(1);
+}
+inline void GLMessage::clear_start_time() {
+  start_time_ = GOOGLE_LONGLONG(0);
+  _clear_bit(1);
+}
+inline ::google::protobuf::int64 GLMessage::start_time() const {
+  return start_time_;
+}
+inline void GLMessage::set_start_time(::google::protobuf::int64 value) {
+  _set_bit(1);
+  start_time_ = value;
+}
+
+// required int32 duration = 3;
+inline bool GLMessage::has_duration() const {
+  return _has_bit(2);
+}
+inline void GLMessage::clear_duration() {
+  duration_ = 0;
+  _clear_bit(2);
+}
+inline ::google::protobuf::int32 GLMessage::duration() const {
+  return duration_;
+}
+inline void GLMessage::set_duration(::google::protobuf::int32 value) {
+  _set_bit(2);
+  duration_ = value;
+}
+
+// required .android.gltrace.GLMessage.Function function = 4 [default = invalid];
+inline bool GLMessage::has_function() const {
+  return _has_bit(3);
 }
 inline void GLMessage::clear_function() {
   function_ = 3000;
-  _clear_bit(1);
+  _clear_bit(3);
 }
 inline ::android::gltrace::GLMessage_Function GLMessage::function() const {
   return static_cast< ::android::gltrace::GLMessage_Function >(function_);
 }
 inline void GLMessage::set_function(::android::gltrace::GLMessage_Function value) {
   GOOGLE_DCHECK(::android::gltrace::GLMessage_Function_IsValid(value));
-  _set_bit(1);
+  _set_bit(3);
   function_ = value;
 }
 
-// repeated .android.gltrace.GLMessage.DataType args = 3;
+// repeated .android.gltrace.GLMessage.DataType args = 5;
 inline int GLMessage::args_size() const {
   return args_.size();
 }
@@ -1664,52 +1704,36 @@ GLMessage::mutable_args() {
   return &args_;
 }
 
-// optional .android.gltrace.GLMessage.DataType returnValue = 4;
+// optional .android.gltrace.GLMessage.DataType returnValue = 6;
 inline bool GLMessage::has_returnvalue() const {
-  return _has_bit(3);
+  return _has_bit(5);
 }
 inline void GLMessage::clear_returnvalue() {
   if (returnvalue_ != NULL) returnvalue_->::android::gltrace::GLMessage_DataType::Clear();
-  _clear_bit(3);
+  _clear_bit(5);
 }
 inline const ::android::gltrace::GLMessage_DataType& GLMessage::returnvalue() const {
   return returnvalue_ != NULL ? *returnvalue_ : *default_instance_->returnvalue_;
 }
 inline ::android::gltrace::GLMessage_DataType* GLMessage::mutable_returnvalue() {
-  _set_bit(3);
+  _set_bit(5);
   if (returnvalue_ == NULL) returnvalue_ = new ::android::gltrace::GLMessage_DataType;
   return returnvalue_;
 }
 
-// optional float duration = 5;
-inline bool GLMessage::has_duration() const {
-  return _has_bit(4);
-}
-inline void GLMessage::clear_duration() {
-  duration_ = 0;
-  _clear_bit(4);
-}
-inline float GLMessage::duration() const {
-  return duration_;
-}
-inline void GLMessage::set_duration(float value) {
-  _set_bit(4);
-  duration_ = value;
-}
-
-// optional .android.gltrace.GLMessage.FrameBuffer fb = 6;
+// optional .android.gltrace.GLMessage.FrameBuffer fb = 7;
 inline bool GLMessage::has_fb() const {
-  return _has_bit(5);
+  return _has_bit(6);
 }
 inline void GLMessage::clear_fb() {
   if (fb_ != NULL) fb_->::android::gltrace::GLMessage_FrameBuffer::Clear();
-  _clear_bit(5);
+  _clear_bit(6);
 }
 inline const ::android::gltrace::GLMessage_FrameBuffer& GLMessage::fb() const {
   return fb_ != NULL ? *fb_ : *default_instance_->fb_;
 }
 inline ::android::gltrace::GLMessage_FrameBuffer* GLMessage::mutable_fb() {
-  _set_bit(5);
+  _set_bit(6);
   if (fb_ == NULL) fb_ = new ::android::gltrace::GLMessage_FrameBuffer;
   return fb_;
 }

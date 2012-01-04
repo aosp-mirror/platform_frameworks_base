@@ -17,6 +17,7 @@
  */
 
 #include <cutils/log.h>
+#include <utils/Timers.h>
 #include <GLES2/gl2.h>
 
 #include "gltrace.pb.h"
@@ -26,7 +27,6 @@
 
 namespace android {
 namespace gltrace {
-
 
 // Definitions for GL2 APIs
 
@@ -43,9 +43,11 @@ void GLTrace_glActiveTexture(GLenum texture) {
     arg_texture->add_intvalue((int)texture);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glActiveTexture(texture);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -68,9 +70,11 @@ void GLTrace_glAttachShader(GLuint program, GLuint shader) {
     arg_shader->add_intvalue(shader);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glAttachShader(program, shader);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -99,9 +103,11 @@ void GLTrace_glBindAttribLocation(GLuint program, GLuint index, const GLchar* na
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindAttribLocation(program, index, name);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -124,9 +130,11 @@ void GLTrace_glBindBuffer(GLenum target, GLuint buffer) {
     arg_buffer->add_intvalue(buffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindBuffer(target, buffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -149,9 +157,11 @@ void GLTrace_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     arg_framebuffer->add_intvalue(framebuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindFramebuffer(target, framebuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -174,9 +184,11 @@ void GLTrace_glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindRenderbuffer(target, renderbuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -199,9 +211,11 @@ void GLTrace_glBindTexture(GLenum target, GLuint texture) {
     arg_texture->add_intvalue(texture);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindTexture(target, texture);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -236,9 +250,11 @@ void GLTrace_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     arg_alpha->add_floatvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendColor(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -255,9 +271,11 @@ void GLTrace_glBlendEquation(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendEquation(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -280,9 +298,11 @@ void GLTrace_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
     arg_modeAlpha->add_intvalue((int)modeAlpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendEquationSeparate(modeRGB, modeAlpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -305,9 +325,11 @@ void GLTrace_glBlendFunc(GLenum sfactor, GLenum dfactor) {
     arg_dfactor->add_intvalue((int)dfactor);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendFunc(sfactor, dfactor);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -342,9 +364,11 @@ void GLTrace_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, 
     arg_dstAlpha->add_intvalue((int)dstAlpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -379,9 +403,11 @@ void GLTrace_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GL
     arg_usage->add_intvalue((int)usage);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBufferData(target, size, data, usage);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -416,9 +442,11 @@ void GLTrace_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, co
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBufferSubData(target, offset, size, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -435,7 +463,9 @@ GLenum GLTrace_glCheckFramebufferStatus(GLenum target) {
     arg_target->add_intvalue((int)target);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLenum retValue = glContext->hooks->gl.glCheckFramebufferStatus(target);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -443,7 +473,7 @@ GLenum GLTrace_glCheckFramebufferStatus(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -462,9 +492,11 @@ void GLTrace_glClear(GLbitfield mask) {
     arg_mask->add_intvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClear(mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -499,9 +531,11 @@ void GLTrace_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     arg_alpha->add_floatvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearColor(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -518,9 +552,11 @@ void GLTrace_glClearDepthf(GLclampf depth) {
     arg_depth->add_floatvalue(depth);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearDepthf(depth);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -537,9 +573,11 @@ void GLTrace_glClearStencil(GLint s) {
     arg_s->add_intvalue(s);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearStencil(s);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -574,9 +612,11 @@ void GLTrace_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboole
     arg_alpha->add_boolvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColorMask(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -593,9 +633,11 @@ void GLTrace_glCompileShader(GLuint shader) {
     arg_shader->add_intvalue(shader);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCompileShader(shader);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -654,9 +696,11 @@ void GLTrace_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalf
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -721,9 +765,11 @@ void GLTrace_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -782,9 +828,11 @@ void GLTrace_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat,
     arg_border->add_intvalue(border);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -843,9 +891,11 @@ void GLTrace_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -856,7 +906,9 @@ GLuint GLTrace_glCreateProgram(void) {
     glmsg.set_function(GLMessage::glCreateProgram);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLuint retValue = glContext->hooks->gl.glCreateProgram();
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -864,7 +916,7 @@ GLuint GLTrace_glCreateProgram(void) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -883,7 +935,9 @@ GLuint GLTrace_glCreateShader(GLenum type) {
     arg_type->add_intvalue((int)type);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLuint retValue = glContext->hooks->gl.glCreateShader(type);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -891,7 +945,7 @@ GLuint GLTrace_glCreateShader(GLenum type) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -910,9 +964,11 @@ void GLTrace_glCullFace(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCullFace(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -935,9 +991,11 @@ void GLTrace_glDeleteBuffers(GLsizei n, const GLuint* buffers) {
     arg_buffers->add_intvalue((int)buffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteBuffers(n, buffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -960,9 +1018,11 @@ void GLTrace_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
     arg_framebuffers->add_intvalue((int)framebuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteFramebuffers(n, framebuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -979,9 +1039,11 @@ void GLTrace_glDeleteProgram(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteProgram(program);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1004,9 +1066,11 @@ void GLTrace_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
     arg_renderbuffers->add_intvalue((int)renderbuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteRenderbuffers(n, renderbuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1023,9 +1087,11 @@ void GLTrace_glDeleteShader(GLuint shader) {
     arg_shader->add_intvalue(shader);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteShader(shader);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1048,9 +1114,11 @@ void GLTrace_glDeleteTextures(GLsizei n, const GLuint* textures) {
     arg_textures->add_intvalue((int)textures);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteTextures(n, textures);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1067,9 +1135,11 @@ void GLTrace_glDepthFunc(GLenum func) {
     arg_func->add_intvalue((int)func);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthFunc(func);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1086,9 +1156,11 @@ void GLTrace_glDepthMask(GLboolean flag) {
     arg_flag->add_boolvalue(flag);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthMask(flag);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1111,9 +1183,11 @@ void GLTrace_glDepthRangef(GLclampf zNear, GLclampf zFar) {
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthRangef(zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1136,9 +1210,11 @@ void GLTrace_glDetachShader(GLuint program, GLuint shader) {
     arg_shader->add_intvalue(shader);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDetachShader(program, shader);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1155,9 +1231,11 @@ void GLTrace_glDisable(GLenum cap) {
     arg_cap->add_intvalue((int)cap);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDisable(cap);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1174,9 +1252,11 @@ void GLTrace_glDisableVertexAttribArray(GLuint index) {
     arg_index->add_intvalue(index);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDisableVertexAttribArray(index);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1205,9 +1285,11 @@ void GLTrace_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
     arg_count->add_intvalue(count);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawArrays(mode, first, count);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1242,9 +1324,11 @@ void GLTrace_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoi
     arg_indices->add_intvalue((int)indices);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawElements(mode, count, type, indices);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1261,9 +1345,11 @@ void GLTrace_glEnable(GLenum cap) {
     arg_cap->add_intvalue((int)cap);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEnable(cap);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1280,9 +1366,11 @@ void GLTrace_glEnableVertexAttribArray(GLuint index) {
     arg_index->add_intvalue(index);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEnableVertexAttribArray(index);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1293,9 +1381,11 @@ void GLTrace_glFinish(void) {
     glmsg.set_function(GLMessage::glFinish);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFinish();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1306,9 +1396,11 @@ void GLTrace_glFlush(void) {
     glmsg.set_function(GLMessage::glFlush);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFlush();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1343,9 +1435,11 @@ void GLTrace_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum 
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1386,9 +1480,11 @@ void GLTrace_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum tex
     arg_level->add_intvalue(level);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferTexture2D(target, attachment, textarget, texture, level);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1405,9 +1501,11 @@ void GLTrace_glFrontFace(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFrontFace(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1430,9 +1528,11 @@ void GLTrace_glGenBuffers(GLsizei n, GLuint* buffers) {
     arg_buffers->add_intvalue((int)buffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenBuffers(n, buffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1449,9 +1549,11 @@ void GLTrace_glGenerateMipmap(GLenum target) {
     arg_target->add_intvalue((int)target);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenerateMipmap(target);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1474,9 +1576,11 @@ void GLTrace_glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
     arg_framebuffers->add_intvalue((int)framebuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenFramebuffers(n, framebuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1499,9 +1603,11 @@ void GLTrace_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
     arg_renderbuffers->add_intvalue((int)renderbuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenRenderbuffers(n, renderbuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1524,9 +1630,11 @@ void GLTrace_glGenTextures(GLsizei n, GLuint* textures) {
     arg_textures->add_intvalue((int)textures);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenTextures(n, textures);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1579,9 +1687,11 @@ void GLTrace_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GL
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetActiveAttrib(program, index, bufsize, length, size, type, name);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1634,9 +1744,11 @@ void GLTrace_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, G
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetActiveUniform(program, index, bufsize, length, size, type, name);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1671,9 +1783,11 @@ void GLTrace_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* cou
     arg_shaders->add_intvalue((int)shaders);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetAttachedShaders(program, maxcount, count, shaders);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1696,7 +1810,9 @@ int GLTrace_glGetAttribLocation(GLuint program, const GLchar* name) {
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     int retValue = glContext->hooks->gl.glGetAttribLocation(program, name);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -1704,7 +1820,7 @@ int GLTrace_glGetAttribLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -1729,9 +1845,11 @@ void GLTrace_glGetBooleanv(GLenum pname, GLboolean* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetBooleanv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1760,9 +1878,11 @@ void GLTrace_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params) 
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetBufferParameteriv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1773,7 +1893,9 @@ GLenum GLTrace_glGetError(void) {
     glmsg.set_function(GLMessage::glGetError);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLenum retValue = glContext->hooks->gl.glGetError();
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -1781,7 +1903,7 @@ GLenum GLTrace_glGetError(void) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -1806,9 +1928,11 @@ void GLTrace_glGetFloatv(GLenum pname, GLfloat* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFloatv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1843,9 +1967,11 @@ void GLTrace_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachm
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1868,9 +1994,11 @@ void GLTrace_glGetIntegerv(GLenum pname, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetIntegerv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1899,9 +2027,11 @@ void GLTrace_glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetProgramiv(program, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1936,9 +2066,11 @@ void GLTrace_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* lengt
     arg_infolog->add_intvalue((int)infolog);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetProgramInfoLog(program, bufsize, length, infolog);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1967,9 +2099,11 @@ void GLTrace_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* pa
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetRenderbufferParameteriv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -1998,9 +2132,11 @@ void GLTrace_glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetShaderiv(shader, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2035,9 +2171,11 @@ void GLTrace_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length,
     arg_infolog->add_intvalue((int)infolog);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetShaderInfoLog(shader, bufsize, length, infolog);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2072,9 +2210,11 @@ void GLTrace_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype,
     arg_precision->add_intvalue((int)precision);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2109,9 +2249,11 @@ void GLTrace_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, 
     arg_source->add_intvalue((int)source);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetShaderSource(shader, bufsize, length, source);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2128,7 +2270,9 @@ const GLubyte* GLTrace_glGetString(GLenum name) {
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     const GLubyte* retValue = glContext->hooks->gl.glGetString(name);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2136,7 +2280,7 @@ const GLubyte* GLTrace_glGetString(GLenum name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2167,9 +2311,11 @@ void GLTrace_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexParameterfv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2198,9 +2344,11 @@ void GLTrace_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexParameteriv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2229,9 +2377,11 @@ void GLTrace_glGetUniformfv(GLuint program, GLint location, GLfloat* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetUniformfv(program, location, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2260,9 +2410,11 @@ void GLTrace_glGetUniformiv(GLuint program, GLint location, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetUniformiv(program, location, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2285,7 +2437,9 @@ int GLTrace_glGetUniformLocation(GLuint program, const GLchar* name) {
     arg_name->add_intvalue((int)name);
 
     // call function
+    nsecs_t start_time = systemTime();
     int retValue = glContext->hooks->gl.glGetUniformLocation(program, name);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2293,7 +2447,7 @@ int GLTrace_glGetUniformLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2324,9 +2478,11 @@ void GLTrace_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetVertexAttribfv(index, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2355,9 +2511,11 @@ void GLTrace_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetVertexAttribiv(index, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2386,9 +2544,11 @@ void GLTrace_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** poin
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetVertexAttribPointerv(index, pname, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2411,9 +2571,11 @@ void GLTrace_glHint(GLenum target, GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glHint(target, mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2430,7 +2592,9 @@ GLboolean GLTrace_glIsBuffer(GLuint buffer) {
     arg_buffer->add_intvalue(buffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsBuffer(buffer);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2438,7 +2602,7 @@ GLboolean GLTrace_glIsBuffer(GLuint buffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2457,7 +2621,9 @@ GLboolean GLTrace_glIsEnabled(GLenum cap) {
     arg_cap->add_intvalue((int)cap);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsEnabled(cap);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2465,7 +2631,7 @@ GLboolean GLTrace_glIsEnabled(GLenum cap) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2484,7 +2650,9 @@ GLboolean GLTrace_glIsFramebuffer(GLuint framebuffer) {
     arg_framebuffer->add_intvalue(framebuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsFramebuffer(framebuffer);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2492,7 +2660,7 @@ GLboolean GLTrace_glIsFramebuffer(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2511,7 +2679,9 @@ GLboolean GLTrace_glIsProgram(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsProgram(program);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2519,7 +2689,7 @@ GLboolean GLTrace_glIsProgram(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2538,7 +2708,9 @@ GLboolean GLTrace_glIsRenderbuffer(GLuint renderbuffer) {
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsRenderbuffer(renderbuffer);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2546,7 +2718,7 @@ GLboolean GLTrace_glIsRenderbuffer(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2565,7 +2737,9 @@ GLboolean GLTrace_glIsShader(GLuint shader) {
     arg_shader->add_intvalue(shader);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsShader(shader);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2573,7 +2747,7 @@ GLboolean GLTrace_glIsShader(GLuint shader) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2592,7 +2766,9 @@ GLboolean GLTrace_glIsTexture(GLuint texture) {
     arg_texture->add_intvalue(texture);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsTexture(texture);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -2600,7 +2776,7 @@ GLboolean GLTrace_glIsTexture(GLuint texture) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -2619,9 +2795,11 @@ void GLTrace_glLineWidth(GLfloat width) {
     arg_width->add_floatvalue(width);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLineWidth(width);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2638,9 +2816,11 @@ void GLTrace_glLinkProgram(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLinkProgram(program);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2663,9 +2843,11 @@ void GLTrace_glPixelStorei(GLenum pname, GLint param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPixelStorei(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2688,9 +2870,11 @@ void GLTrace_glPolygonOffset(GLfloat factor, GLfloat units) {
     arg_units->add_floatvalue(units);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPolygonOffset(factor, units);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2743,9 +2927,11 @@ void GLTrace_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenu
     arg_pixels->add_intvalue((int)pixels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glReadPixels(x, y, width, height, format, type, pixels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2756,9 +2942,11 @@ void GLTrace_glReleaseShaderCompiler(void) {
     glmsg.set_function(GLMessage::glReleaseShaderCompiler);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glReleaseShaderCompiler();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2793,9 +2981,11 @@ void GLTrace_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRenderbufferStorage(target, internalformat, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2818,9 +3008,11 @@ void GLTrace_glSampleCoverage(GLclampf value, GLboolean invert) {
     arg_invert->add_boolvalue(invert);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glSampleCoverage(value, invert);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2855,9 +3047,11 @@ void GLTrace_glScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glScissor(x, y, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2898,9 +3092,11 @@ void GLTrace_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryforma
     arg_length->add_intvalue(length);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glShaderBinary(n, shaders, binaryformat, binary, length);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2935,9 +3131,11 @@ void GLTrace_glShaderSource(GLuint shader, GLsizei count, const GLchar** string,
     arg_length->add_intvalue((int)length);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glShaderSource(shader, count, string, length);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -2966,9 +3164,11 @@ void GLTrace_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     arg_mask->add_intvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilFunc(func, ref, mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3003,9 +3203,11 @@ void GLTrace_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint m
     arg_mask->add_intvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilFuncSeparate(face, func, ref, mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3022,9 +3224,11 @@ void GLTrace_glStencilMask(GLuint mask) {
     arg_mask->add_intvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilMask(mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3047,9 +3251,11 @@ void GLTrace_glStencilMaskSeparate(GLenum face, GLuint mask) {
     arg_mask->add_intvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilMaskSeparate(face, mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3078,9 +3284,11 @@ void GLTrace_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
     arg_zpass->add_intvalue((int)zpass);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilOp(fail, zfail, zpass);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3115,9 +3323,11 @@ void GLTrace_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum 
     arg_zpass->add_intvalue((int)zpass);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStencilOpSeparate(face, fail, zfail, zpass);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3182,9 +3392,11 @@ void GLTrace_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsi
     arg_pixels->add_intvalue((int)pixels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3213,9 +3425,11 @@ void GLTrace_glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterf(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3244,9 +3458,11 @@ void GLTrace_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterfv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3275,9 +3491,11 @@ void GLTrace_glTexParameteri(GLenum target, GLenum pname, GLint param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameteri(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3306,9 +3524,11 @@ void GLTrace_glTexParameteriv(GLenum target, GLenum pname, const GLint* params) 
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameteriv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3373,9 +3593,11 @@ void GLTrace_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yo
     arg_pixels->add_intvalue((int)pixels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3398,9 +3620,11 @@ void GLTrace_glUniform1f(GLint location, GLfloat x) {
     arg_x->add_floatvalue(x);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform1f(location, x);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3429,9 +3653,11 @@ void GLTrace_glUniform1fv(GLint location, GLsizei count, const GLfloat* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform1fv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3454,9 +3680,11 @@ void GLTrace_glUniform1i(GLint location, GLint x) {
     arg_x->add_intvalue(x);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform1i(location, x);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3485,9 +3713,11 @@ void GLTrace_glUniform1iv(GLint location, GLsizei count, const GLint* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform1iv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3516,9 +3746,11 @@ void GLTrace_glUniform2f(GLint location, GLfloat x, GLfloat y) {
     arg_y->add_floatvalue(y);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform2f(location, x, y);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3547,9 +3779,11 @@ void GLTrace_glUniform2fv(GLint location, GLsizei count, const GLfloat* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform2fv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3578,9 +3812,11 @@ void GLTrace_glUniform2i(GLint location, GLint x, GLint y) {
     arg_y->add_intvalue(y);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform2i(location, x, y);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3609,9 +3845,11 @@ void GLTrace_glUniform2iv(GLint location, GLsizei count, const GLint* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform2iv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3646,9 +3884,11 @@ void GLTrace_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z) {
     arg_z->add_floatvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform3f(location, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3677,9 +3917,11 @@ void GLTrace_glUniform3fv(GLint location, GLsizei count, const GLfloat* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform3fv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3714,9 +3956,11 @@ void GLTrace_glUniform3i(GLint location, GLint x, GLint y, GLint z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform3i(location, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3745,9 +3989,11 @@ void GLTrace_glUniform3iv(GLint location, GLsizei count, const GLint* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform3iv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3788,9 +4034,11 @@ void GLTrace_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloa
     arg_w->add_floatvalue(w);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform4f(location, x, y, z, w);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3819,9 +4067,11 @@ void GLTrace_glUniform4fv(GLint location, GLsizei count, const GLfloat* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform4fv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3862,9 +4112,11 @@ void GLTrace_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w) {
     arg_w->add_intvalue(w);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform4i(location, x, y, z, w);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3893,9 +4145,11 @@ void GLTrace_glUniform4iv(GLint location, GLsizei count, const GLint* v) {
     arg_v->add_intvalue((int)v);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniform4iv(location, count, v);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3930,9 +4184,11 @@ void GLTrace_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpo
     arg_value->add_intvalue((int)value);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniformMatrix2fv(location, count, transpose, value);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -3967,9 +4223,11 @@ void GLTrace_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpo
     arg_value->add_intvalue((int)value);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniformMatrix3fv(location, count, transpose, value);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4004,9 +4262,11 @@ void GLTrace_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpo
     arg_value->add_intvalue((int)value);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUniformMatrix4fv(location, count, transpose, value);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4023,9 +4283,11 @@ void GLTrace_glUseProgram(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glUseProgram(program);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4042,9 +4304,11 @@ void GLTrace_glValidateProgram(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glValidateProgram(program);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4067,9 +4331,11 @@ void GLTrace_glVertexAttrib1f(GLuint indx, GLfloat x) {
     arg_x->add_floatvalue(x);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib1f(indx, x);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4092,9 +4358,11 @@ void GLTrace_glVertexAttrib1fv(GLuint indx, const GLfloat* values) {
     arg_values->add_intvalue((int)values);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib1fv(indx, values);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4123,9 +4391,11 @@ void GLTrace_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y) {
     arg_y->add_floatvalue(y);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib2f(indx, x, y);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4148,9 +4418,11 @@ void GLTrace_glVertexAttrib2fv(GLuint indx, const GLfloat* values) {
     arg_values->add_intvalue((int)values);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib2fv(indx, values);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4185,9 +4457,11 @@ void GLTrace_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z) {
     arg_z->add_floatvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib3f(indx, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4210,9 +4484,11 @@ void GLTrace_glVertexAttrib3fv(GLuint indx, const GLfloat* values) {
     arg_values->add_intvalue((int)values);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib3fv(indx, values);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4253,9 +4529,11 @@ void GLTrace_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfl
     arg_w->add_floatvalue(w);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib4f(indx, x, y, z, w);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4278,9 +4556,11 @@ void GLTrace_glVertexAttrib4fv(GLuint indx, const GLfloat* values) {
     arg_values->add_intvalue((int)values);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttrib4fv(indx, values);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4327,9 +4607,11 @@ void GLTrace_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboole
     arg_ptr->add_intvalue((int)ptr);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4364,9 +4646,11 @@ void GLTrace_glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glViewport(x, y, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4392,9 +4676,11 @@ void GLTrace_glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image) {
     arg_image->add_intvalue((int)image);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEGLImageTargetTexture2DOES(target, image);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4417,9 +4703,11 @@ void GLTrace_glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES
     arg_image->add_intvalue((int)image);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEGLImageTargetRenderbufferStorageOES(target, image);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4460,9 +4748,11 @@ void GLTrace_glGetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *len
     arg_binary->add_intvalue((int)binary);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetProgramBinaryOES(program, bufSize, length, binaryFormat, binary);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4497,9 +4787,11 @@ void GLTrace_glProgramBinaryOES(GLuint program, GLenum binaryFormat, const GLvoi
     arg_length->add_intvalue(length);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glProgramBinaryOES(program, binaryFormat, binary, length);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4522,7 +4814,9 @@ void* GLTrace_glMapBufferOES(GLenum target, GLenum access) {
     arg_access->add_intvalue((int)access);
 
     // call function
+    nsecs_t start_time = systemTime();
     void* retValue = glContext->hooks->gl.glMapBufferOES(target, access);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -4530,7 +4824,7 @@ void* GLTrace_glMapBufferOES(GLenum target, GLenum access) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -4549,7 +4843,9 @@ GLboolean GLTrace_glUnmapBufferOES(GLenum target) {
     arg_target->add_intvalue((int)target);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glUnmapBufferOES(target);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -4557,7 +4853,7 @@ GLboolean GLTrace_glUnmapBufferOES(GLenum target) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -4588,9 +4884,11 @@ void GLTrace_glGetBufferPointervOES(GLenum target, GLenum pname, GLvoid** params
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetBufferPointervOES(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4661,9 +4959,11 @@ void GLTrace_glTexImage3DOES(GLenum target, GLint level, GLenum internalformat, 
     arg_pixels->add_intvalue((int)pixels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexImage3DOES(target, level, internalformat, width, height, depth, border, format, type, pixels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4740,9 +5040,11 @@ void GLTrace_glTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint
     arg_pixels->add_intvalue((int)pixels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4807,9 +5109,11 @@ void GLTrace_glCopyTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, G
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCopyTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, x, y, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4874,9 +5178,11 @@ void GLTrace_glCompressedTexImage3DOES(GLenum target, GLint level, GLenum intern
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCompressedTexImage3DOES(target, level, internalformat, width, height, depth, border, imageSize, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -4953,9 +5259,11 @@ void GLTrace_glCompressedTexSubImage3DOES(GLenum target, GLint level, GLint xoff
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCompressedTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5002,9 +5310,11 @@ void GLTrace_glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum 
     arg_zoffset->add_intvalue(zoffset);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferTexture3DOES(target, attachment, textarget, texture, level, zoffset);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5021,9 +5331,11 @@ void GLTrace_glBindVertexArrayOES(GLuint array) {
     arg_array->add_intvalue(array);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindVertexArrayOES(array);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5046,9 +5358,11 @@ void GLTrace_glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays) {
     arg_arrays->add_intvalue((int)arrays);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteVertexArraysOES(n, arrays);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5071,9 +5385,11 @@ void GLTrace_glGenVertexArraysOES(GLsizei n, GLuint *arrays) {
     arg_arrays->add_intvalue((int)arrays);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenVertexArraysOES(n, arrays);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5090,7 +5406,9 @@ GLboolean GLTrace_glIsVertexArrayOES(GLuint array) {
     arg_array->add_intvalue(array);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsVertexArrayOES(array);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -5098,7 +5416,7 @@ GLboolean GLTrace_glIsVertexArrayOES(GLuint array) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -5129,9 +5447,11 @@ void GLTrace_glGetPerfMonitorGroupsAMD(GLint *numGroups, GLsizei groupsSize, GLu
     arg_groups->add_intvalue((int)groups);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorGroupsAMD(numGroups, groupsSize, groups);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5172,9 +5492,11 @@ void GLTrace_glGetPerfMonitorCountersAMD(GLuint group, GLint *numCounters, GLint
     arg_counters->add_intvalue((int)counters);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorCountersAMD(group, numCounters, maxActiveCounters, counterSize, counters);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5209,9 +5531,11 @@ void GLTrace_glGetPerfMonitorGroupStringAMD(GLuint group, GLsizei bufSize, GLsiz
     arg_groupString->add_intvalue((int)groupString);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorGroupStringAMD(group, bufSize, length, groupString);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5252,9 +5576,11 @@ void GLTrace_glGetPerfMonitorCounterStringAMD(GLuint group, GLuint counter, GLsi
     arg_counterString->add_intvalue((int)counterString);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorCounterStringAMD(group, counter, bufSize, length, counterString);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5289,9 +5615,11 @@ void GLTrace_glGetPerfMonitorCounterInfoAMD(GLuint group, GLuint counter, GLenum
     arg_data->add_intvalue((int)data);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorCounterInfoAMD(group, counter, pname, data);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5314,9 +5642,11 @@ void GLTrace_glGenPerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     arg_monitors->add_intvalue((int)monitors);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenPerfMonitorsAMD(n, monitors);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5339,9 +5669,11 @@ void GLTrace_glDeletePerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     arg_monitors->add_intvalue((int)monitors);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeletePerfMonitorsAMD(n, monitors);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5382,9 +5714,11 @@ void GLTrace_glSelectPerfMonitorCountersAMD(GLuint monitor, GLboolean enable, GL
     arg_countersList->add_intvalue((int)countersList);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glSelectPerfMonitorCountersAMD(monitor, enable, group, numCounters, countersList);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5401,9 +5735,11 @@ void GLTrace_glBeginPerfMonitorAMD(GLuint monitor) {
     arg_monitor->add_intvalue(monitor);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBeginPerfMonitorAMD(monitor);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5420,9 +5756,11 @@ void GLTrace_glEndPerfMonitorAMD(GLuint monitor) {
     arg_monitor->add_intvalue(monitor);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEndPerfMonitorAMD(monitor);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5463,9 +5801,11 @@ void GLTrace_glGetPerfMonitorCounterDataAMD(GLuint monitor, GLenum pname, GLsize
     arg_bytesWritten->add_intvalue((int)bytesWritten);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPerfMonitorCounterDataAMD(monitor, pname, dataSize, data, bytesWritten);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5494,9 +5834,11 @@ void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, cons
     arg_attachments->add_intvalue((int)attachments);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDiscardFramebufferEXT(target, numAttachments, attachments);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5531,9 +5873,11 @@ void GLTrace_glMultiDrawArraysEXT(GLenum mode, GLint *first, GLsizei *count, GLs
     arg_primcount->add_intvalue(primcount);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiDrawArraysEXT(mode, first, count, primcount);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5574,9 +5918,11 @@ void GLTrace_glMultiDrawElementsEXT(GLenum mode, const GLsizei *count, GLenum ty
     arg_primcount->add_intvalue(primcount);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiDrawElementsEXT(mode, count, type, indices, primcount);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5617,9 +5963,11 @@ void GLTrace_glRenderbufferStorageMultisampleIMG(GLenum target, GLsizei samples,
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRenderbufferStorageMultisampleIMG(target, samples, internalformat, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5666,9 +6014,11 @@ void GLTrace_glFramebufferTexture2DMultisampleIMG(GLenum target, GLenum attachme
     arg_samples->add_intvalue(samples);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferTexture2DMultisampleIMG(target, attachment, textarget, texture, level, samples);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5691,9 +6041,11 @@ void GLTrace_glDeleteFencesNV(GLsizei n, const GLuint *fences) {
     arg_fences->add_intvalue((int)fences);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteFencesNV(n, fences);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5716,9 +6068,11 @@ void GLTrace_glGenFencesNV(GLsizei n, GLuint *fences) {
     arg_fences->add_intvalue((int)fences);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenFencesNV(n, fences);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5735,7 +6089,9 @@ GLboolean GLTrace_glIsFenceNV(GLuint fence) {
     arg_fence->add_intvalue(fence);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsFenceNV(fence);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -5743,7 +6099,7 @@ GLboolean GLTrace_glIsFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -5762,7 +6118,9 @@ GLboolean GLTrace_glTestFenceNV(GLuint fence) {
     arg_fence->add_intvalue(fence);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glTestFenceNV(fence);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -5770,7 +6128,7 @@ GLboolean GLTrace_glTestFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -5801,9 +6159,11 @@ void GLTrace_glGetFenceivNV(GLuint fence, GLenum pname, GLint *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFenceivNV(fence, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5820,9 +6180,11 @@ void GLTrace_glFinishFenceNV(GLuint fence) {
     arg_fence->add_intvalue(fence);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFinishFenceNV(fence);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5845,9 +6207,11 @@ void GLTrace_glSetFenceNV(GLuint fence, GLenum condition) {
     arg_condition->add_intvalue((int)condition);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glSetFenceNV(fence, condition);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5864,9 +6228,11 @@ void GLTrace_glCoverageMaskNV(GLboolean mask) {
     arg_mask->add_boolvalue(mask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCoverageMaskNV(mask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5883,9 +6249,11 @@ void GLTrace_glCoverageOperationNV(GLenum operation) {
     arg_operation->add_intvalue((int)operation);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCoverageOperationNV(operation);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5914,9 +6282,11 @@ void GLTrace_glGetDriverControlsQCOM(GLint *num, GLsizei size, GLuint *driverCon
     arg_driverControls->add_intvalue((int)driverControls);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetDriverControlsQCOM(num, size, driverControls);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5951,9 +6321,11 @@ void GLTrace_glGetDriverControlStringQCOM(GLuint driverControl, GLsizei bufSize,
     arg_driverControlString->add_intvalue((int)driverControlString);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetDriverControlStringQCOM(driverControl, bufSize, length, driverControlString);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5970,9 +6342,11 @@ void GLTrace_glEnableDriverControlQCOM(GLuint driverControl) {
     arg_driverControl->add_intvalue(driverControl);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEnableDriverControlQCOM(driverControl);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -5989,9 +6363,11 @@ void GLTrace_glDisableDriverControlQCOM(GLuint driverControl) {
     arg_driverControl->add_intvalue(driverControl);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDisableDriverControlQCOM(driverControl);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6020,9 +6396,11 @@ void GLTrace_glExtGetTexturesQCOM(GLuint *textures, GLint maxTextures, GLint *nu
     arg_numTextures->add_intvalue((int)numTextures);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetTexturesQCOM(textures, maxTextures, numTextures);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6051,9 +6429,11 @@ void GLTrace_glExtGetBuffersQCOM(GLuint *buffers, GLint maxBuffers, GLint *numBu
     arg_numBuffers->add_intvalue((int)numBuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetBuffersQCOM(buffers, maxBuffers, numBuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6082,9 +6462,11 @@ void GLTrace_glExtGetRenderbuffersQCOM(GLuint *renderbuffers, GLint maxRenderbuf
     arg_numRenderbuffers->add_intvalue((int)numRenderbuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetRenderbuffersQCOM(renderbuffers, maxRenderbuffers, numRenderbuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6113,9 +6495,11 @@ void GLTrace_glExtGetFramebuffersQCOM(GLuint *framebuffers, GLint maxFramebuffer
     arg_numFramebuffers->add_intvalue((int)numFramebuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetFramebuffersQCOM(framebuffers, maxFramebuffers, numFramebuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6156,9 +6540,11 @@ void GLTrace_glExtGetTexLevelParameterivQCOM(GLuint texture, GLenum face, GLint 
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetTexLevelParameterivQCOM(texture, face, level, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6187,9 +6573,11 @@ void GLTrace_glExtTexObjectStateOverrideiQCOM(GLenum target, GLenum pname, GLint
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtTexObjectStateOverrideiQCOM(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6266,9 +6654,11 @@ void GLTrace_glExtGetTexSubImageQCOM(GLenum target, GLint level, GLint xoffset, 
     arg_texels->add_intvalue((int)texels);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetTexSubImageQCOM(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, texels);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6291,9 +6681,11 @@ void GLTrace_glExtGetBufferPointervQCOM(GLenum target, GLvoid **params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetBufferPointervQCOM(target, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6322,9 +6714,11 @@ void GLTrace_glExtGetShadersQCOM(GLuint *shaders, GLint maxShaders, GLint *numSh
     arg_numShaders->add_intvalue((int)numShaders);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetShadersQCOM(shaders, maxShaders, numShaders);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6353,9 +6747,11 @@ void GLTrace_glExtGetProgramsQCOM(GLuint *programs, GLint maxPrograms, GLint *nu
     arg_numPrograms->add_intvalue((int)numPrograms);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetProgramsQCOM(programs, maxPrograms, numPrograms);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6372,7 +6768,9 @@ GLboolean GLTrace_glExtIsProgramBinaryQCOM(GLuint program) {
     arg_program->add_intvalue(program);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glExtIsProgramBinaryQCOM(program);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -6380,7 +6778,7 @@ GLboolean GLTrace_glExtIsProgramBinaryQCOM(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -6417,9 +6815,11 @@ void GLTrace_glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, 
     arg_length->add_intvalue((int)length);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glExtGetProgramBinarySourceQCOM(program, shadertype, source, length);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6460,9 +6860,11 @@ void GLTrace_glStartTilingQCOM(GLuint x, GLuint y, GLuint width, GLuint height, 
     arg_preserveMask->add_intvalue(preserveMask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glStartTilingQCOM(x, y, width, height, preserveMask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6479,9 +6881,11 @@ void GLTrace_glEndTilingQCOM(GLbitfield preserveMask) {
     arg_preserveMask->add_intvalue(preserveMask);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEndTilingQCOM(preserveMask);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6507,9 +6911,11 @@ void GLTrace_glAlphaFunc(GLenum func, GLclampf ref) {
     arg_ref->add_floatvalue(ref);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glAlphaFunc(func, ref);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6532,9 +6938,11 @@ void GLTrace_glClipPlanef(GLenum plane, const GLfloat *equation) {
     arg_equation->add_intvalue((int)equation);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanef(plane, equation);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6569,9 +6977,11 @@ void GLTrace_glColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) 
     arg_alpha->add_floatvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColor4f(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6594,9 +7004,11 @@ void GLTrace_glFogf(GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogf(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6619,9 +7031,11 @@ void GLTrace_glFogfv(GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogfv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6668,9 +7082,11 @@ void GLTrace_glFrustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFrustumf(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6693,9 +7109,11 @@ void GLTrace_glGetClipPlanef(GLenum pname, GLfloat eqn[4]) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetClipPlanef(pname, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6724,9 +7142,11 @@ void GLTrace_glGetLightfv(GLenum light, GLenum pname, GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetLightfv(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6755,9 +7175,11 @@ void GLTrace_glGetMaterialfv(GLenum face, GLenum pname, GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetMaterialfv(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6786,9 +7208,11 @@ void GLTrace_glGetTexEnvfv(GLenum env, GLenum pname, GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexEnvfv(env, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6811,9 +7235,11 @@ void GLTrace_glLightModelf(GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelf(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6836,9 +7262,11 @@ void GLTrace_glLightModelfv(GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelfv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6867,9 +7295,11 @@ void GLTrace_glLightf(GLenum light, GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightf(light, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6898,9 +7328,11 @@ void GLTrace_glLightfv(GLenum light, GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightfv(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6917,9 +7349,11 @@ void GLTrace_glLoadMatrixf(const GLfloat *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLoadMatrixf(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6948,9 +7382,11 @@ void GLTrace_glMaterialf(GLenum face, GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialf(face, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6979,9 +7415,11 @@ void GLTrace_glMaterialfv(GLenum face, GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialfv(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -6998,9 +7436,11 @@ void GLTrace_glMultMatrixf(const GLfloat *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultMatrixf(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7041,9 +7481,11 @@ void GLTrace_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, G
     arg_q->add_floatvalue(q);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiTexCoord4f(target, s, t, r, q);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7072,9 +7514,11 @@ void GLTrace_glNormal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
     arg_nz->add_floatvalue(nz);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glNormal3f(nx, ny, nz);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7121,9 +7565,11 @@ void GLTrace_glOrthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, 
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glOrthof(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7146,9 +7592,11 @@ void GLTrace_glPointParameterf(GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterf(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7171,9 +7619,11 @@ void GLTrace_glPointParameterfv(GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterfv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7190,9 +7640,11 @@ void GLTrace_glPointSize(GLfloat size) {
     arg_size->add_floatvalue(size);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointSize(size);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7227,9 +7679,11 @@ void GLTrace_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     arg_z->add_floatvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRotatef(angle, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7258,9 +7712,11 @@ void GLTrace_glScalef(GLfloat x, GLfloat y, GLfloat z) {
     arg_z->add_floatvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glScalef(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7289,9 +7745,11 @@ void GLTrace_glTexEnvf(GLenum target, GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvf(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7320,9 +7778,11 @@ void GLTrace_glTexEnvfv(GLenum target, GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvfv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7351,9 +7811,11 @@ void GLTrace_glTranslatef(GLfloat x, GLfloat y, GLfloat z) {
     arg_z->add_floatvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTranslatef(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7376,9 +7838,11 @@ void GLTrace_glAlphaFuncx(GLenum func, GLclampx ref) {
     arg_ref->add_intvalue(ref);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glAlphaFuncx(func, ref);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7413,9 +7877,11 @@ void GLTrace_glClearColorx(GLclampx red, GLclampx green, GLclampx blue, GLclampx
     arg_alpha->add_intvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearColorx(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7432,9 +7898,11 @@ void GLTrace_glClearDepthx(GLclampx depth) {
     arg_depth->add_intvalue(depth);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearDepthx(depth);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7451,9 +7919,11 @@ void GLTrace_glClientActiveTexture(GLenum texture) {
     arg_texture->add_intvalue((int)texture);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClientActiveTexture(texture);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7476,9 +7946,11 @@ void GLTrace_glClipPlanex(GLenum plane, const GLfixed *equation) {
     arg_equation->add_intvalue((int)equation);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanex(plane, equation);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7513,9 +7985,11 @@ void GLTrace_glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
     arg_alpha->add_intvalue((int)alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColor4ub(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7550,9 +8024,11 @@ void GLTrace_glColor4x(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) 
     arg_alpha->add_intvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColor4x(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7587,9 +8063,11 @@ void GLTrace_glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoi
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColorPointer(size, type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7612,9 +8090,11 @@ void GLTrace_glDepthRangex(GLclampx zNear, GLclampx zFar) {
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthRangex(zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7631,9 +8111,11 @@ void GLTrace_glDisableClientState(GLenum array) {
     arg_array->add_intvalue((int)array);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDisableClientState(array);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7650,9 +8132,11 @@ void GLTrace_glEnableClientState(GLenum array) {
     arg_array->add_intvalue((int)array);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glEnableClientState(array);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7675,9 +8159,11 @@ void GLTrace_glFogx(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogx(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7700,9 +8186,11 @@ void GLTrace_glFogxv(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogxv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7749,9 +8237,11 @@ void GLTrace_glFrustumx(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFrustumx(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7774,9 +8264,11 @@ void GLTrace_glGetClipPlanex(GLenum pname, GLfixed eqn[4]) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetClipPlanex(pname, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7799,9 +8291,11 @@ void GLTrace_glGetFixedv(GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFixedv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7830,9 +8324,11 @@ void GLTrace_glGetLightxv(GLenum light, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetLightxv(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7861,9 +8357,11 @@ void GLTrace_glGetMaterialxv(GLenum face, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetMaterialxv(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7886,9 +8384,11 @@ void GLTrace_glGetPointerv(GLenum pname, GLvoid **params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetPointerv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7917,9 +8417,11 @@ void GLTrace_glGetTexEnviv(GLenum env, GLenum pname, GLint *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexEnviv(env, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7948,9 +8450,11 @@ void GLTrace_glGetTexEnvxv(GLenum env, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexEnvxv(env, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -7979,9 +8483,11 @@ void GLTrace_glGetTexParameterxv(GLenum target, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexParameterxv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8004,9 +8510,11 @@ void GLTrace_glLightModelx(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelx(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8029,9 +8537,11 @@ void GLTrace_glLightModelxv(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelxv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8060,9 +8570,11 @@ void GLTrace_glLightx(GLenum light, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightx(light, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8091,9 +8603,11 @@ void GLTrace_glLightxv(GLenum light, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightxv(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8110,9 +8624,11 @@ void GLTrace_glLineWidthx(GLfixed width) {
     arg_width->add_intvalue(width);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLineWidthx(width);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8123,9 +8639,11 @@ void GLTrace_glLoadIdentity(void) {
     glmsg.set_function(GLMessage::glLoadIdentity);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLoadIdentity();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8142,9 +8660,11 @@ void GLTrace_glLoadMatrixx(const GLfixed *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLoadMatrixx(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8161,9 +8681,11 @@ void GLTrace_glLogicOp(GLenum opcode) {
     arg_opcode->add_intvalue((int)opcode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLogicOp(opcode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8192,9 +8714,11 @@ void GLTrace_glMaterialx(GLenum face, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialx(face, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8223,9 +8747,11 @@ void GLTrace_glMaterialxv(GLenum face, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialxv(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8242,9 +8768,11 @@ void GLTrace_glMatrixMode(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMatrixMode(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8261,9 +8789,11 @@ void GLTrace_glMultMatrixx(const GLfixed *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultMatrixx(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8304,9 +8834,11 @@ void GLTrace_glMultiTexCoord4x(GLenum target, GLfixed s, GLfixed t, GLfixed r, G
     arg_q->add_intvalue(q);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiTexCoord4x(target, s, t, r, q);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8335,9 +8867,11 @@ void GLTrace_glNormal3x(GLfixed nx, GLfixed ny, GLfixed nz) {
     arg_nz->add_intvalue(nz);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glNormal3x(nx, ny, nz);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8366,9 +8900,11 @@ void GLTrace_glNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glNormalPointer(type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8415,9 +8951,11 @@ void GLTrace_glOrthox(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, 
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glOrthox(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8440,9 +8978,11 @@ void GLTrace_glPointParameterx(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterx(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8465,9 +9005,11 @@ void GLTrace_glPointParameterxv(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterxv(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8484,9 +9026,11 @@ void GLTrace_glPointSizex(GLfixed size) {
     arg_size->add_intvalue(size);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointSizex(size);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8509,9 +9053,11 @@ void GLTrace_glPolygonOffsetx(GLfixed factor, GLfixed units) {
     arg_units->add_intvalue(units);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPolygonOffsetx(factor, units);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8522,9 +9068,11 @@ void GLTrace_glPopMatrix(void) {
     glmsg.set_function(GLMessage::glPopMatrix);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPopMatrix();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8535,9 +9083,11 @@ void GLTrace_glPushMatrix(void) {
     glmsg.set_function(GLMessage::glPushMatrix);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPushMatrix();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8572,9 +9122,11 @@ void GLTrace_glRotatex(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRotatex(angle, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8597,9 +9149,11 @@ void GLTrace_glSampleCoveragex(GLclampx value, GLboolean invert) {
     arg_invert->add_boolvalue(invert);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glSampleCoveragex(value, invert);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8628,9 +9182,11 @@ void GLTrace_glScalex(GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glScalex(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8647,9 +9203,11 @@ void GLTrace_glShadeModel(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glShadeModel(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8684,9 +9242,11 @@ void GLTrace_glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GL
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexCoordPointer(size, type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8715,9 +9275,11 @@ void GLTrace_glTexEnvi(GLenum target, GLenum pname, GLint param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvi(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8746,9 +9308,11 @@ void GLTrace_glTexEnvx(GLenum target, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvx(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8777,9 +9341,11 @@ void GLTrace_glTexEnviv(GLenum target, GLenum pname, const GLint *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnviv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8808,9 +9374,11 @@ void GLTrace_glTexEnvxv(GLenum target, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvxv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8839,9 +9407,11 @@ void GLTrace_glTexParameterx(GLenum target, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterx(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8870,9 +9440,11 @@ void GLTrace_glTexParameterxv(GLenum target, GLenum pname, const GLfixed *params
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterxv(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8901,9 +9473,11 @@ void GLTrace_glTranslatex(GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTranslatex(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8938,9 +9512,11 @@ void GLTrace_glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvo
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glVertexPointer(size, type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8969,9 +9545,11 @@ void GLTrace_glPointSizePointerOES(GLenum type, GLsizei stride, const GLvoid *po
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointSizePointerOES(type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -8997,9 +9575,11 @@ void GLTrace_glBlendEquationSeparateOES(GLenum modeRGB, GLenum modeAlpha) {
     arg_modeAlpha->add_intvalue((int)modeAlpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendEquationSeparateOES(modeRGB, modeAlpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9034,9 +9614,11 @@ void GLTrace_glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLenum srcAlph
     arg_dstAlpha->add_intvalue((int)dstAlpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendFuncSeparateOES(srcRGB, dstRGB, srcAlpha, dstAlpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9053,9 +9635,11 @@ void GLTrace_glBlendEquationOES(GLenum mode) {
     arg_mode->add_intvalue((int)mode);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBlendEquationOES(mode);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9096,9 +9680,11 @@ void GLTrace_glDrawTexsOES(GLshort x, GLshort y, GLshort z, GLshort width, GLsho
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexsOES(x, y, z, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9139,9 +9725,11 @@ void GLTrace_glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexiOES(x, y, z, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9182,9 +9770,11 @@ void GLTrace_glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfix
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexxOES(x, y, z, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9201,9 +9791,11 @@ void GLTrace_glDrawTexsvOES(const GLshort *coords) {
     arg_coords->add_intvalue((int)coords);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexsvOES(coords);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9220,9 +9812,11 @@ void GLTrace_glDrawTexivOES(const GLint *coords) {
     arg_coords->add_intvalue((int)coords);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexivOES(coords);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9239,9 +9833,11 @@ void GLTrace_glDrawTexxvOES(const GLfixed *coords) {
     arg_coords->add_intvalue((int)coords);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexxvOES(coords);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9282,9 +9878,11 @@ void GLTrace_glDrawTexfOES(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLflo
     arg_height->add_floatvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexfOES(x, y, z, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9301,9 +9899,11 @@ void GLTrace_glDrawTexfvOES(const GLfloat *coords) {
     arg_coords->add_intvalue((int)coords);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDrawTexfvOES(coords);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9326,9 +9926,11 @@ void GLTrace_glAlphaFuncxOES(GLenum func, GLclampx ref) {
     arg_ref->add_intvalue(ref);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glAlphaFuncxOES(func, ref);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9363,9 +9965,11 @@ void GLTrace_glClearColorxOES(GLclampx red, GLclampx green, GLclampx blue, GLcla
     arg_alpha->add_intvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearColorxOES(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9382,9 +9986,11 @@ void GLTrace_glClearDepthxOES(GLclampx depth) {
     arg_depth->add_intvalue(depth);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearDepthxOES(depth);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9407,9 +10013,11 @@ void GLTrace_glClipPlanexOES(GLenum plane, const GLfixed *equation) {
     arg_equation->add_intvalue((int)equation);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanexOES(plane, equation);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9444,9 +10052,11 @@ void GLTrace_glColor4xOES(GLfixed red, GLfixed green, GLfixed blue, GLfixed alph
     arg_alpha->add_intvalue(alpha);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glColor4xOES(red, green, blue, alpha);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9469,9 +10079,11 @@ void GLTrace_glDepthRangexOES(GLclampx zNear, GLclampx zFar) {
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthRangexOES(zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9494,9 +10106,11 @@ void GLTrace_glFogxOES(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogxOES(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9519,9 +10133,11 @@ void GLTrace_glFogxvOES(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFogxvOES(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9568,9 +10184,11 @@ void GLTrace_glFrustumxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed 
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFrustumxOES(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9593,9 +10211,11 @@ void GLTrace_glGetClipPlanexOES(GLenum pname, GLfixed eqn[4]) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetClipPlanexOES(pname, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9618,9 +10238,11 @@ void GLTrace_glGetFixedvOES(GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFixedvOES(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9649,9 +10271,11 @@ void GLTrace_glGetLightxvOES(GLenum light, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetLightxvOES(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9680,9 +10304,11 @@ void GLTrace_glGetMaterialxvOES(GLenum face, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetMaterialxvOES(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9711,9 +10337,11 @@ void GLTrace_glGetTexEnvxvOES(GLenum env, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexEnvxvOES(env, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9742,9 +10370,11 @@ void GLTrace_glGetTexParameterxvOES(GLenum target, GLenum pname, GLfixed *params
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexParameterxvOES(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9767,9 +10397,11 @@ void GLTrace_glLightModelxOES(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelxOES(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9792,9 +10424,11 @@ void GLTrace_glLightModelxvOES(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightModelxvOES(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9823,9 +10457,11 @@ void GLTrace_glLightxOES(GLenum light, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightxOES(light, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9854,9 +10490,11 @@ void GLTrace_glLightxvOES(GLenum light, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLightxvOES(light, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9873,9 +10511,11 @@ void GLTrace_glLineWidthxOES(GLfixed width) {
     arg_width->add_intvalue(width);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLineWidthxOES(width);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9892,9 +10532,11 @@ void GLTrace_glLoadMatrixxOES(const GLfixed *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLoadMatrixxOES(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9923,9 +10565,11 @@ void GLTrace_glMaterialxOES(GLenum face, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialxOES(face, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9954,9 +10598,11 @@ void GLTrace_glMaterialxvOES(GLenum face, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMaterialxvOES(face, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -9973,9 +10619,11 @@ void GLTrace_glMultMatrixxOES(const GLfixed *m) {
     arg_m->add_intvalue((int)m);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultMatrixxOES(m);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10016,9 +10664,11 @@ void GLTrace_glMultiTexCoord4xOES(GLenum target, GLfixed s, GLfixed t, GLfixed r
     arg_q->add_intvalue(q);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiTexCoord4xOES(target, s, t, r, q);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10047,9 +10697,11 @@ void GLTrace_glNormal3xOES(GLfixed nx, GLfixed ny, GLfixed nz) {
     arg_nz->add_intvalue(nz);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glNormal3xOES(nx, ny, nz);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10096,9 +10748,11 @@ void GLTrace_glOrthoxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed to
     arg_zFar->add_intvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glOrthoxOES(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10121,9 +10775,11 @@ void GLTrace_glPointParameterxOES(GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterxOES(pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10146,9 +10802,11 @@ void GLTrace_glPointParameterxvOES(GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointParameterxvOES(pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10165,9 +10823,11 @@ void GLTrace_glPointSizexOES(GLfixed size) {
     arg_size->add_intvalue(size);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPointSizexOES(size);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10190,9 +10850,11 @@ void GLTrace_glPolygonOffsetxOES(GLfixed factor, GLfixed units) {
     arg_units->add_intvalue(units);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glPolygonOffsetxOES(factor, units);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10227,9 +10889,11 @@ void GLTrace_glRotatexOES(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRotatexOES(angle, x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10252,9 +10916,11 @@ void GLTrace_glSampleCoveragexOES(GLclampx value, GLboolean invert) {
     arg_invert->add_boolvalue(invert);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glSampleCoveragexOES(value, invert);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10283,9 +10949,11 @@ void GLTrace_glScalexOES(GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glScalexOES(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10314,9 +10982,11 @@ void GLTrace_glTexEnvxOES(GLenum target, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvxOES(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10345,9 +11015,11 @@ void GLTrace_glTexEnvxvOES(GLenum target, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexEnvxvOES(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10376,9 +11048,11 @@ void GLTrace_glTexParameterxOES(GLenum target, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterxOES(target, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10407,9 +11081,11 @@ void GLTrace_glTexParameterxvOES(GLenum target, GLenum pname, const GLfixed *par
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexParameterxvOES(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10438,9 +11114,11 @@ void GLTrace_glTranslatexOES(GLfixed x, GLfixed y, GLfixed z) {
     arg_z->add_intvalue(z);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTranslatexOES(x, y, z);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10457,7 +11135,9 @@ GLboolean GLTrace_glIsRenderbufferOES(GLuint renderbuffer) {
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsRenderbufferOES(renderbuffer);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -10465,7 +11145,7 @@ GLboolean GLTrace_glIsRenderbufferOES(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -10490,9 +11170,11 @@ void GLTrace_glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindRenderbufferOES(target, renderbuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10515,9 +11197,11 @@ void GLTrace_glDeleteRenderbuffersOES(GLsizei n, const GLuint* renderbuffers) {
     arg_renderbuffers->add_intvalue((int)renderbuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteRenderbuffersOES(n, renderbuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10540,9 +11224,11 @@ void GLTrace_glGenRenderbuffersOES(GLsizei n, GLuint* renderbuffers) {
     arg_renderbuffers->add_intvalue((int)renderbuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenRenderbuffersOES(n, renderbuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10577,9 +11263,11 @@ void GLTrace_glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsi
     arg_height->add_intvalue(height);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glRenderbufferStorageOES(target, internalformat, width, height);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10608,9 +11296,11 @@ void GLTrace_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint*
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetRenderbufferParameterivOES(target, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10627,7 +11317,9 @@ GLboolean GLTrace_glIsFramebufferOES(GLuint framebuffer) {
     arg_framebuffer->add_intvalue(framebuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLboolean retValue = glContext->hooks->gl.glIsFramebufferOES(framebuffer);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -10635,7 +11327,7 @@ GLboolean GLTrace_glIsFramebufferOES(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -10660,9 +11352,11 @@ void GLTrace_glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     arg_framebuffer->add_intvalue(framebuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glBindFramebufferOES(target, framebuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10685,9 +11379,11 @@ void GLTrace_glDeleteFramebuffersOES(GLsizei n, const GLuint* framebuffers) {
     arg_framebuffers->add_intvalue((int)framebuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDeleteFramebuffersOES(n, framebuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10710,9 +11406,11 @@ void GLTrace_glGenFramebuffersOES(GLsizei n, GLuint* framebuffers) {
     arg_framebuffers->add_intvalue((int)framebuffers);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenFramebuffersOES(n, framebuffers);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10729,7 +11427,9 @@ GLenum GLTrace_glCheckFramebufferStatusOES(GLenum target) {
     arg_target->add_intvalue((int)target);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLenum retValue = glContext->hooks->gl.glCheckFramebufferStatusOES(target);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -10737,7 +11437,7 @@ GLenum GLTrace_glCheckFramebufferStatusOES(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -10774,9 +11474,11 @@ void GLTrace_glFramebufferRenderbufferOES(GLenum target, GLenum attachment, GLen
     arg_renderbuffer->add_intvalue(renderbuffer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10817,9 +11519,11 @@ void GLTrace_glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum 
     arg_level->add_intvalue(level);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferTexture2DOES(target, attachment, textarget, texture, level);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10854,9 +11558,11 @@ void GLTrace_glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum atta
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10873,9 +11579,11 @@ void GLTrace_glGenerateMipmapOES(GLenum target) {
     arg_target->add_intvalue((int)target);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGenerateMipmapOES(target);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10892,9 +11600,11 @@ void GLTrace_glCurrentPaletteMatrixOES(GLuint matrixpaletteindex) {
     arg_matrixpaletteindex->add_intvalue(matrixpaletteindex);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glCurrentPaletteMatrixOES(matrixpaletteindex);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10905,9 +11615,11 @@ void GLTrace_glLoadPaletteFromModelViewMatrixOES(void) {
     glmsg.set_function(GLMessage::glLoadPaletteFromModelViewMatrixOES);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glLoadPaletteFromModelViewMatrixOES();
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10942,9 +11654,11 @@ void GLTrace_glMatrixIndexPointerOES(GLint size, GLenum type, GLsizei stride, co
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMatrixIndexPointerOES(size, type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -10979,9 +11693,11 @@ void GLTrace_glWeightPointerOES(GLint size, GLenum type, GLsizei stride, const G
     arg_pointer->add_intvalue((int)pointer);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glWeightPointerOES(size, type, stride, pointer);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11004,7 +11720,9 @@ GLbitfield GLTrace_glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]) {
     arg_exponent->add_intvalue((int)exponent);
 
     // call function
+    nsecs_t start_time = systemTime();
     GLbitfield retValue = glContext->hooks->gl.glQueryMatrixxOES(mantissa, exponent);
+    nsecs_t end_time = systemTime();
 
     // set return value
     GLMessage_DataType *rt = glmsg.mutable_returnvalue();
@@ -11012,7 +11730,7 @@ GLbitfield GLTrace_glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 
     return retValue;
@@ -11037,9 +11755,11 @@ void GLTrace_glDepthRangefOES(GLclampf zNear, GLclampf zFar) {
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDepthRangefOES(zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11086,9 +11806,11 @@ void GLTrace_glFrustumfOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFrustumfOES(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11135,9 +11857,11 @@ void GLTrace_glOrthofOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat to
     arg_zFar->add_floatvalue(zFar);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glOrthofOES(left, right, bottom, top, zNear, zFar);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11160,9 +11884,11 @@ void GLTrace_glClipPlanefOES(GLenum plane, const GLfloat *equation) {
     arg_equation->add_intvalue((int)equation);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanefOES(plane, equation);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11185,9 +11911,11 @@ void GLTrace_glGetClipPlanefOES(GLenum pname, GLfloat eqn[4]) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetClipPlanefOES(pname, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11204,9 +11932,11 @@ void GLTrace_glClearDepthfOES(GLclampf depth) {
     arg_depth->add_floatvalue(depth);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClearDepthfOES(depth);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11235,9 +11965,11 @@ void GLTrace_glTexGenfOES(GLenum coord, GLenum pname, GLfloat param) {
     arg_param->add_floatvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGenfOES(coord, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11266,9 +11998,11 @@ void GLTrace_glTexGenfvOES(GLenum coord, GLenum pname, const GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGenfvOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11297,9 +12031,11 @@ void GLTrace_glTexGeniOES(GLenum coord, GLenum pname, GLint param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGeniOES(coord, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11328,9 +12064,11 @@ void GLTrace_glTexGenivOES(GLenum coord, GLenum pname, const GLint *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGenivOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11359,9 +12097,11 @@ void GLTrace_glTexGenxOES(GLenum coord, GLenum pname, GLfixed param) {
     arg_param->add_intvalue(param);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGenxOES(coord, pname, param);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11390,9 +12130,11 @@ void GLTrace_glTexGenxvOES(GLenum coord, GLenum pname, const GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glTexGenxvOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11421,9 +12163,11 @@ void GLTrace_glGetTexGenfvOES(GLenum coord, GLenum pname, GLfloat *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexGenfvOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11452,9 +12196,11 @@ void GLTrace_glGetTexGenivOES(GLenum coord, GLenum pname, GLint *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexGenivOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11483,9 +12229,11 @@ void GLTrace_glGetTexGenxvOES(GLenum coord, GLenum pname, GLfixed *params) {
     arg_params->add_intvalue((int)params);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glGetTexGenxvOES(coord, pname, params);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11508,9 +12256,11 @@ void GLTrace_glClipPlanefIMG(GLenum p, const GLfloat *eqn) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanefIMG(p, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
@@ -11533,12 +12283,13 @@ void GLTrace_glClipPlanexIMG(GLenum p, const GLfixed *eqn) {
     arg_eqn->add_intvalue((int)eqn);
 
     // call function
+    nsecs_t start_time = systemTime();
     glContext->hooks->gl.glClipPlanexIMG(p, eqn);
+    nsecs_t end_time = systemTime();
 
-    fixupGLMessage(glContext, &glmsg);
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
-
 
 
 }; // namespace gltrace
