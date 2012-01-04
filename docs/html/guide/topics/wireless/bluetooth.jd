@@ -29,6 +29,7 @@ other devices</li>
     <li><a href="#Profiles">Working with Profiles</a> 
       <ol>
         <li><a href="#AT-Commands">Vendor-specific AT commands</a>
+        <li><a href="#HDP">Health Device Profile</a>
       </ol></li>
   </ol> 
  
@@ -43,6 +44,7 @@ other devices</li>
   <h2>Related samples</h2> 
   <ol> 
     <li><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat</a></li> 
+    <li><a href="{@docRoot}resources/samples/BluetoothHDP/index.html">Bluetooth HDP (Health Device Profile)</a></li>
   </ol> 
  
 </div> 
@@ -132,11 +134,27 @@ Headset and Hands-Free (v1.5) profiles.</dd>
 audio can be streamed from one device to another over a Bluetooth connection.
 "A2DP" stands for Advanced Audio Distribution Profile.</dd> 
 
-<dt>{@link android.bluetooth.BluetoothProfile.ServiceListener}</dt> 
+<dt>{@link android.bluetooth.BluetoothHealth}</dt>
+<dd> Represents a Health Device Profile proxy that controls the Bluetooth service.</dd>
+
+<dt>{@link android.bluetooth.BluetoothHealthCallback}</dt>
+
+<dd>An abstract class that you use to implement {@link
+android.bluetooth.BluetoothHealth} callbacks. You must extend this class and
+implement the callback methods to receive updates about changes in the
+application’s registration state and Bluetooth channel state.</dd>
+
+<dt>{@link android.bluetooth.BluetoothHealthAppConfiguration}</dt>
+
+<dd>Represents an application configuration that the Bluetooth Health third-party 
+application registers to communicate with a remote Bluetooth health
+device.</dd> 
+
+<dt>{@link android.bluetooth.BluetoothProfile.ServiceListener}</dt>
 
 <dd>An interface that notifies {@link android.bluetooth.BluetoothProfile} IPC
 clients when they have  been connected to or disconnected from the service (that
-is, the internal service that runs a particular profile). </dd> 
+is, the internal service that runs a particular profile). </dd>
  
 </dl> 
  
@@ -889,13 +907,24 @@ Bluetooth Headset Service via interprocess communication (<a
 href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#IPC">IPC</a
 >). This includes both  Bluetooth Headset and Hands-Free (v1.5) profiles. The
 {@link android.bluetooth.BluetoothHeadset} class includes support for AT commands.
-For more discussion of this topic, see <a href="#AT-Commands">Vendor-specific AT commands</a></li> 
+For more discussion of this topic, see <a href="#AT-Commands">Vendor-specific AT commands</a></li>
 
   <li><strong>A2DP</strong>. The Advanced Audio Distribution Profile (A2DP)
 profile defines how high quality audio can be streamed from one device to
 another over a Bluetooth connection. Android provides the {@link
 android.bluetooth.BluetoothA2dp} class, which is a proxy for controlling
 the Bluetooth A2DP  Service via IPC.</li> 
+
+ <li><strong>Health Device</strong>. Android 4.0 (API level 14) introduces
+support for the Bluetooth Health Device Profile (HDP). This lets you create
+applications that use Bluetooth to communicate with health devices that support
+Bluetooth, such as heart-rate monitors, blood meters, thermometers, scales, and
+so on. For a list of supported devices and their corresponding device data
+specialization codes, refer to <strong>Bluetooth Assigned Numbers</strong> at <a
+href="http://www.bluetooth.org">www.bluetooth.org</a>. Note that these values
+are also referenced in the ISO/IEEE 11073-20601 [7] specification as
+MDC_DEV_SPEC_PROFILE_* in the Nomenclature Codes Annex. For more discussion of
+HDP, see <a href="#HDP">Health Device Profile</a>.</li> 
 
 </ul> 
 
@@ -925,7 +954,9 @@ to the profile proxy object.</li>
 state of the connection and perform other operations that are relevant to that
 profile.</li> 
 </ol> 
-<p> For example, this code snippet shows how to connect to a {@link android.bluetooth.BluetoothHeadset} proxy object so that you can control the
+
+<p> For example, this code snippet shows how to connect to a {@link
+android.bluetooth.BluetoothHeadset} proxy object so that you can control the
 Headset profile:</p> 
 
 <pre>BluetoothHeadset mBluetoothHeadset;
@@ -955,6 +986,8 @@ private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile
 mBluetoothAdapter.closeProfileProxy(mBluetoothHeadset);
 </pre> 
 
+
+
 <h3 id="AT-Commands">Vendor-specific AT commands</h3> 
 
 <p>Starting in Android 3.0, applications can register to receive system
@@ -964,3 +997,81 @@ broadcasts that indicate a connected device's battery level and could notify the
 user or take other action as needed. Create a broadcast receiver for the {@link
 android.bluetooth.BluetoothHeadset#ACTION_VENDOR_SPECIFIC_HEADSET_EVENT} intent
 to handle vendor-specific AT commands for the headset.</p>
+
+<h3 id="HDP">Health Device Profile</h3>
+
+<p>Android 4.0 (API level 14) introduces support for the Bluetooth Health Device
+Profile (HDP). This lets you create applications that use Bluetooth to
+communicate with health devices that support Bluetooth, such as heart-rate
+monitors, blood meters, thermometers, and scales. The Bluetooth Health API
+includes the classes {@link android.bluetooth.BluetoothHealth}, {@link
+android.bluetooth.BluetoothHealthCallback}, and {@link
+android.bluetooth.BluetoothHealthAppConfiguration}, which are described in <a
+href="#TheBasics">The Basics</a>. </p>
+
+<p>In using the Bluetooth Health API, it's helpful to understand these key HDP concepts:</p>
+<table>
+  <tr>
+    <th>Concept</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><strong>Source</strong></td>
+
+    <td>A role defined in HDP. A <em>source</em> is a  health device that
+transmits medical data (weight scale, glucose meter, thermometer, etc.) to a
+smart device such as an Android phone or tablet. </td>
+  </tr>
+  <tr>
+    <td><strong>Sink</strong></td>
+
+    <td>A role defined in HDP. In HDP, a <em>sink</em> is the smart device that
+receives the medical data. In an Android HDP application, the sink is
+represented by a {@link android.bluetooth.BluetoothHealthAppConfiguration}
+object.</td>
+  </tr>
+  <tr>
+    <td><strong>Registration</strong></td>
+    <td>Refers to registering a sink for a particular health device.</td>
+  </tr>
+  <tr>
+    <td><strong>Connection</strong></td>
+
+    <td>Refers to opening a channel between a health device and a smart device
+such as an Android phone or tablet.</td>
+  </tr>
+</table>
+
+<h4>Creating an HDP Application</h4>
+
+<p>Here are the basic steps involved in creating an Android HDP application:</p>
+<ol>
+
+  <li>Get a reference to the {@link android.bluetooth.BluetoothHealth} proxy
+object. <p>Similar to regular headset and A2DP profile devices, you must call
+{@link android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()}
+with a {@link android.bluetooth.BluetoothProfile.ServiceListener} and the {@link
+android.bluetooth.BluetoothProfile.ServiceListener#HEALTH} profile type to
+establish a connection with the profile proxy object.</p> </li>
+
+  <li>Create a {@link android.bluetooth.BluetoothHealthCallback} and register an
+application configuration 
+({@link android.bluetooth.BluetoothHealthAppConfiguration})
+that acts as a health
+sink.</li>
+
+  <li>Establish a connection to a health device.  Some devices will initiate the
+connection.  It is unnecessary to carry out this step for those devices.</li>
+
+  <li>When connected successfully to a health device, read/write to the health
+device using the file descriptor. <p>The received data needs to be interpreted
+using a health manager which implements the IEEE 11073-xxxxx
+specifications.</p></li>
+
+  <li>When done, close the health channel and unregister the application.  The
+channel also closes when there is extended inactivity.</li>
+</ol>
+
+<p>For a complete code sample that illustrates these steps, see <a
+href="{@docRoot}resources/samples/BluetoothHDP/index.html">Bluetooth HDP (Health
+Device Profile)</a>. </p>
