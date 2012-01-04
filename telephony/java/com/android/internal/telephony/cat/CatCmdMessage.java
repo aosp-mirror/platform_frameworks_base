@@ -85,6 +85,13 @@ public class CatCmdMessage implements Parcelable {
             mCallSettings.confirmMsg = ((CallSetupParams) cmdParams).confirmMsg;
             mCallSettings.callMsg = ((CallSetupParams) cmdParams).callMsg;
             break;
+        case OPEN_CHANNEL:
+        case CLOSE_CHANNEL:
+        case RECEIVE_DATA:
+        case SEND_DATA:
+            BIPClientParams param = (BIPClientParams) cmdParams;
+            mTextMsg = param.textMsg;
+            break;
         }
     }
 
