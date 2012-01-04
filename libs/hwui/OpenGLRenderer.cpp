@@ -206,6 +206,7 @@ void OpenGLRenderer::resume() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glEnable(GL_SCISSOR_TEST);
+    mCaches.resetScissor();
     dirtyClip();
 
     mCaches.activeTexture(0);
@@ -2517,32 +2518,38 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         ProgramDescription& description, bool swapSrcDst) {
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
     if (blend) {
-        if (mode <= SkXfermode::kScreen_Mode) {
-            if (!mCaches.blend) {
-                glEnable(GL_BLEND);
-            }
-
-            GLenum sourceMode = swapSrcDst ? gBlendsSwap[mode].src : gBlends[mode].src;
-            GLenum destMode = swapSrcDst ? gBlendsSwap[mode].dst : gBlends[mode].dst;
-
-            if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
-                glBlendFunc(sourceMode, destMode);
-                mCaches.lastSrcMode = sourceMode;
-                mCaches.lastDstMode = destMode;
-            }
-        } else {
-            // These blend modes are not supported by OpenGL directly and have
-            // to be implemented using shaders. Since the shader will perform
-            // the blending, turn blending off here
+        // These blend modes are not supported by OpenGL directly and have
+        // to be implemented using shaders. Since the shader will perform
+        // the blending, turn blending off here
+        // If the blend mode cannot be implemented using shaders, fall
+        // back to the default SrcOver blend mode instead
+        if (mode > SkXfermode::kScreen_Mode) {
             if (mCaches.extensions.hasFramebufferFetch()) {
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;
-            }
 
-            if (mCaches.blend) {
-                glDisable(GL_BLEND);
+                if (mCaches.blend) {
+                    glDisable(GL_BLEND);
+                    mCaches.blend = false;
+                }
+
+                return;
+            } else {
+                mode = SkXfermode::kSrcOver_Mode;
             }
-            blend = false;
+        }
+
+        if (!mCaches.blend) {
+            glEnable(GL_BLEND);
+        }
+
+        GLenum sourceMode = swapSrcDst ? gBlendsSwap[mode].src : gBlends[mode].src;
+        GLenum destMode = swapSrcDst ? gBlendsSwap[mode].dst : gBlends[mode].dst;
+
+        if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
+            glBlendFunc(sourceMode, destMode);
+            mCaches.lastSrcMode = sourceMode;
+            mCaches.lastDstMode = destMode;
         }
     } else if (mCaches.blend) {
         glDisable(GL_BLEND);
