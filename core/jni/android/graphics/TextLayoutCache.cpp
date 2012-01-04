@@ -176,7 +176,6 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                         value->getElapsedTime() * 0.000001f,
                         String8(text + start, count).string());
             }
-            value.clear();
         }
     } else {
         // This is a cache hit, just log timestamp and user infos
