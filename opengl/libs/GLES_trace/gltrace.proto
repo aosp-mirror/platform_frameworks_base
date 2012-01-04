@@ -480,9 +480,12 @@ message GLMessage {
     }
 
     required int32      context_id = 1;                     // GL context ID
-    required Function   function = 2 [default = invalid];   // GL function called
-    repeated DataType   args = 3;                           // GL function's arguments
-    optional DataType   returnValue = 4;                    // GL function's return value
-    optional float      duration = 5;                       // duration of GL call
-    optional FrameBuffer fb = 6;                            // contents of the framebuffer
+    required int64      start_time = 2;                     // time when call was invoked
+    required int32      duration = 3;                       // duration of the call
+
+    required Function   function = 4 [default = invalid];   // GL function called
+    repeated DataType   args = 5;                           // GL function's arguments
+    optional DataType   returnValue = 6;                    // GL function's return value
+
+    optional FrameBuffer fb = 7;                            // contents of the framebuffer
 };

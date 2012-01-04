@@ -15,6 +15,7 @@
  */
 
 #include <cutils/log.h>
+#include <utils/Timers.h>
 
 #include "gltrace.pb.h"
 #include "gltrace_context.h"
@@ -43,6 +44,10 @@ void GLTrace_eglCreateContext(int version, int contextId) {
     arg_context->set_type(GLMessage::DataType::INT);
     arg_context->add_intvalue(contextId);
 
+    // set start time and duration
+    glmessage.set_start_time(systemTime());
+    glmessage.set_duration(0);
+
     glContext->traceGLMessage(&glmessage);
 }
 
@@ -59,6 +64,10 @@ void GLTrace_eglMakeCurrent(int contextId) {
     arg_context->set_type(GLMessage::DataType::INT);
     arg_context->add_intvalue(contextId);
 
+    // set start time and duration
+    glmessage.set_start_time(systemTime());
+    glmessage.set_duration(0);
+
     glContext->traceGLMessage(&glmessage);
 }
 
@@ -71,6 +80,11 @@ void GLTrace_eglSwapBuffers(void *dpy, void *draw) {
 
     // read FB0 since that is what is displayed on the screen
     fixup_addFBContents(glContext, &glmessage, FB0);
+
+    // set start time and duration
+    glmessage.set_start_time(systemTime());
+    glmessage.set_duration(0);
+
     glContext->traceGLMessage(&glmessage);
 }
 

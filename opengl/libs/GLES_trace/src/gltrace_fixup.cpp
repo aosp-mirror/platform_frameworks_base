@@ -240,9 +240,13 @@ void fixup_glGetFloatv(GLMessage *glmsg) {
     arg_params->add_floatvalue(*src);
 }
 
-void fixupGLMessage(GLTraceContext *context, GLMessage *glmsg) {
+void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessage *glmsg) {
     // for all messages, set the current context id
     glmsg->set_context_id(context->getId());
+
+    // set start time and duration
+    glmsg->set_start_time(start);
+    glmsg->set_duration((unsigned)(end - start));
 
     // do any custom message dependent processing
     switch (glmsg->function()) {
