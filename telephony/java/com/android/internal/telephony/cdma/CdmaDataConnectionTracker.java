@@ -159,6 +159,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
+    protected void restartDataStallAlarm() {}
+
+    @Override
     protected void setState(State s) {
         if (DBG) log ("setState: " + s);
         if (mState != s) {
