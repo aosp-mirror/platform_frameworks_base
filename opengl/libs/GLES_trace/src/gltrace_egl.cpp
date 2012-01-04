@@ -24,16 +24,54 @@
 namespace android {
 namespace gltrace {
 
+void GLTrace_eglCreateContext(int version, int contextId) {
+    GLMessage glmessage;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmessage.set_context_id(contextId);
+    glmessage.set_function(GLMessage::eglCreateContext);
+
+    // copy argument version
+    GLMessage_DataType *arg_version = glmessage.add_args();
+    arg_version->set_isarray(false);
+    arg_version->set_type(GLMessage::DataType::INT);
+    arg_version->add_intvalue(version);
+
+    // copy argument context
+    GLMessage_DataType *arg_context = glmessage.add_args();
+    arg_context->set_isarray(false);
+    arg_context->set_type(GLMessage::DataType::INT);
+    arg_context->add_intvalue(contextId);
+
+    glContext->traceGLMessage(&glmessage);
+}
+
+void GLTrace_eglMakeCurrent(int contextId) {
+    GLMessage glmessage;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmessage.set_context_id(contextId);
+    glmessage.set_function(GLMessage::eglMakeCurrent);
+
+    // copy argument context
+    GLMessage_DataType *arg_context = glmessage.add_args();
+    arg_context->set_isarray(false);
+    arg_context->set_type(GLMessage::DataType::INT);
+    arg_context->add_intvalue(contextId);
+
+    glContext->traceGLMessage(&glmessage);
+}
+
 void GLTrace_eglSwapBuffers(void *dpy, void *draw) {
     GLMessage glmessage;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmessage.set_context_id(1);
+    glmessage.set_context_id(glContext->getId());
     glmessage.set_function(GLMessage::eglSwapBuffers);
 
     // read FB0 since that is what is displayed on the screen
-    fixup_addFBContents(&glmessage, FB0);
-    traceGLMessage(&glmessage);
+    fixup_addFBContents(glContext, &glmessage, FB0);
+    glContext->traceGLMessage(&glmessage);
 }
 
 };

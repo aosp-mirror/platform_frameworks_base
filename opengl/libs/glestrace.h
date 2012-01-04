@@ -25,7 +25,7 @@ namespace android {
 
 /* Hooks to be called by "interesting" EGL functions. */
 void GLTrace_eglCreateContext(int version, EGLContext c);
-void GLTrace_eglMakeCurrent(unsigned version, gl_hooks_t *hooks);
+void GLTrace_eglMakeCurrent(unsigned version, gl_hooks_t *hooks, EGLContext c);
 void GLTrace_eglReleaseThread();
 void GLTrace_eglSwapBuffers(void*, void*);
 
