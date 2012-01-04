@@ -563,7 +563,7 @@ status_t AudioFlinger::setMasterVolume(float value)
     return NO_ERROR;
 }
 
-status_t AudioFlinger::setMode(int mode)
+status_t AudioFlinger::setMode(audio_mode_t mode)
 {
     status_t ret = initCheck();
     if (ret != NO_ERROR) {
@@ -5883,7 +5883,7 @@ sp<AudioFlinger::EffectChain> AudioFlinger::ThreadBase::getEffectChain_l(int ses
     return chain;
 }
 
-void AudioFlinger::ThreadBase::setMode(uint32_t mode)
+void AudioFlinger::ThreadBase::setMode(audio_mode_t mode)
 {
     Mutex::Autolock _l(mLock);
     size_t size = mEffectChains.size();
@@ -6681,7 +6681,7 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
     return status;
 }
 
-status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
+status_t AudioFlinger::EffectModule::setMode(audio_mode_t mode)
 {
     Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
@@ -6690,7 +6690,7 @@ status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
         uint32_t size = sizeof(status_t);
         status = (*mEffectInterface)->command(mEffectInterface,
                                               EFFECT_CMD_SET_AUDIO_MODE,
-                                              sizeof(int),
+                                              sizeof(audio_mode_t),
                                               &mode,
                                               &size,
                                               &cmdStatus);
@@ -7340,7 +7340,7 @@ void AudioFlinger::EffectChain::setDevice_l(uint32_t device)
 }
 
 // setMode_l() must be called with PlaybackThread::mLock held
-void AudioFlinger::EffectChain::setMode_l(uint32_t mode)
+void AudioFlinger::EffectChain::setMode_l(audio_mode_t mode)
 {
     size_t size = mEffects.size();
     for (size_t i = 0; i < size; i++) {

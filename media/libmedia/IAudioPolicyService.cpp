@@ -91,7 +91,7 @@ public:
         return static_cast <audio_policy_dev_state_t>(reply.readInt32());
     }
 
-    virtual status_t setPhoneState(int state)
+    virtual status_t setPhoneState(audio_mode_t state)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
@@ -394,7 +394,7 @@ status_t BnAudioPolicyService::onTransact(
 
         case SET_PHONE_STATE: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            reply->writeInt32(static_cast <uint32_t>(setPhoneState(data.readInt32())));
+            reply->writeInt32(static_cast <uint32_t>(setPhoneState((audio_mode_t) data.readInt32())));
             return NO_ERROR;
         } break;
 

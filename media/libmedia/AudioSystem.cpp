@@ -156,7 +156,7 @@ status_t AudioSystem::getStreamMute(int stream, bool* mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::setMode(int mode)
+status_t AudioSystem::setMode(audio_mode_t mode)
 {
     if (uint32_t(mode) >= AUDIO_MODE_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -536,7 +536,7 @@ audio_policy_dev_state_t AudioSystem::getDeviceConnectionState(audio_devices_t d
     return aps->getDeviceConnectionState(device, device_address);
 }
 
-status_t AudioSystem::setPhoneState(int state)
+status_t AudioSystem::setPhoneState(audio_mode_t state)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
