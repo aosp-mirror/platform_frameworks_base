@@ -273,18 +273,18 @@ public:
      * left and right volumes. Levels must be >= 0.0 and <= 1.0.
      */
             status_t    setVolume(float left, float right);
-            void        getVolume(float* left, float* right);
+            void        getVolume(float* left, float* right) const;
 
     /* Set the send level for this track. An auxiliary effect should be attached
      * to the track with attachEffect(). Level must be >= 0.0 and <= 1.0.
      */
             status_t    setAuxEffectSendLevel(float level);
-            void        getAuxEffectSendLevel(float* level);
+            void        getAuxEffectSendLevel(float* level) const;
 
     /* Set sample rate for this track, mostly used for games' sound effects
      */
             status_t    setSampleRate(int sampleRate);
-            uint32_t    getSampleRate();
+            uint32_t    getSampleRate() const;
 
     /* Enables looping and sets the start and end points of looping.
      *
@@ -299,7 +299,7 @@ public:
      *          (loopEnd-loopStart) <= framecount()
      */
             status_t    setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount);
-            status_t    getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount);
+            status_t    getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount) const;
 
     /* Sets marker position. When playback reaches the number of frames specified, a callback with
      * event type EVENT_MARKER is called. Calling setMarkerPosition with marker == 0 cancels marker
@@ -315,7 +315,7 @@ public:
      *  - INVALID_OPERATION: the AudioTrack has no callback installed.
      */
             status_t    setMarkerPosition(uint32_t marker);
-            status_t    getMarkerPosition(uint32_t *marker);
+            status_t    getMarkerPosition(uint32_t *marker) const;
 
 
     /* Sets position update period. Every time the number of frames specified has been played,
@@ -333,7 +333,7 @@ public:
      *  - INVALID_OPERATION: the AudioTrack has no callback installed.
      */
             status_t    setPositionUpdatePeriod(uint32_t updatePeriod);
-            status_t    getPositionUpdatePeriod(uint32_t *updatePeriod);
+            status_t    getPositionUpdatePeriod(uint32_t *updatePeriod) const;
 
     /* Sets playback head position within AudioTrack buffer. The new position is specified
      * in number of frames.
@@ -384,7 +384,7 @@ public:
      * Returned value:
      *  AudioTrack session ID.
      */
-            int    getSessionId();
+            int    getSessionId() const;
 
     /* Attach track auxiliary output to specified effect. Use effectId = 0
      * to detach track from effect.
