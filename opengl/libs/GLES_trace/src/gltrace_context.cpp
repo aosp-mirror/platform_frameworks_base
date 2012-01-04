@@ -15,6 +15,7 @@
  */
 
 #include <pthread.h>
+#include <cutils/log.h>
 
 extern "C" {
 #include "liblzf/lzf.h"
@@ -42,12 +43,8 @@ void setGLTraceContext(GLTraceContext *c) {
     pthread_setspecific(sTLSKey, c);
 }
 
-void initContext(unsigned version, gl_hooks_t *hooks) {
+void setupTraceContextThreadSpecific(GLTraceContext *context) {
     pthread_once(&sPthreadOnceKey, createTLSKey);
-
-    GLTraceContext *context = new GLTraceContext();
-    context->hooks = hooks;
-
     setGLTraceContext(context);
 }
 
@@ -59,9 +56,47 @@ void releaseContext() {
     }
 }
 
-GLTraceContext::GLTraceContext() {
+GLTraceState::GLTraceState(TCPStream *stream) {
+    mTraceContextIds = 0;
+    mStream = stream;
+}
+
+GLTraceState::~GLTraceState() {
+    if (mStream) {
+        mStream->closeStream();
+        mStream = NULL;
+    }
+}
+
+TCPStream *GLTraceState::getStream() {
+    return mStream;
+}
+
+GLTraceContext *GLTraceState::createTraceContext(int version, EGLContext eglContext) {
+    int id = __sync_fetch_and_add(&mTraceContextIds, 1);
+
+    const size_t DEFAULT_BUFFER_SIZE = 8192;
+    BufferedOutputStream *stream = new BufferedOutputStream(mStream, DEFAULT_BUFFER_SIZE);
+    GLTraceContext *traceContext = new GLTraceContext(id, stream);
+    mPerContextState[eglContext] = traceContext;
+
+    return traceContext;
+}
+
+GLTraceContext *GLTraceState::getTraceContext(EGLContext c) {
+    return mPerContextState[c];
+}
+
+GLTraceContext::GLTraceContext(int id, BufferedOutputStream *stream) {
+    mId = id;
+
     fbcontents = fbcompressed = NULL;
     fbcontentsSize = 0;
+    mBufferedOutputStream = stream;
+}
+
+int GLTraceContext::getId() {
+    return mId;
 }
 
 void GLTraceContext::resizeFBMemory(unsigned minSize) {
@@ -113,6 +148,17 @@ void GLTraceContext::getCompressedFB(void **fb, unsigned *fbsize, unsigned *fbwi
     *fb = fbcompressed;
     *fbwidth = viewport[2];
     *fbheight = viewport[3];
+}
+
+void GLTraceContext::traceGLMessage(GLMessage *msg) {
+    mBufferedOutputStream->send(msg);
+
+    GLMessage_Function func = msg->function();
+    if (func == GLMessage::eglSwapBuffers
+        || func == GLMessage::glDrawArrays
+        || func == GLMessage::glDrawElements) {
+        mBufferedOutputStream->flush();
+    }
 }
 
 }; // namespace gltrace

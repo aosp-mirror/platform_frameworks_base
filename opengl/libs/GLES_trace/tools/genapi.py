@@ -146,7 +146,6 @@ TRACE_CALL_TEMPLATE = pyratemp.Template(
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::$!func!$);
 <!--(if len(parsedArgs) > 0)-->
     <!--(for argname, argtype in parsedArgs)-->
@@ -174,8 +173,8 @@ TRACE_CALL_TEMPLATE = pyratemp.Template(
     rt->$!retDataType.getProtobufCall()!$retValue);
 <!--(end)-->
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 <!--(if retType != "void")-->
 
     return retValue;

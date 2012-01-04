@@ -34,7 +34,6 @@ void GLTrace_glActiveTexture(GLenum texture) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glActiveTexture);
 
     // copy argument texture
@@ -46,15 +45,14 @@ void GLTrace_glActiveTexture(GLenum texture) {
     // call function
     glContext->hooks->gl.glActiveTexture(texture);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glAttachShader(GLuint program, GLuint shader) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glAttachShader);
 
     // copy argument program
@@ -72,15 +70,14 @@ void GLTrace_glAttachShader(GLuint program, GLuint shader) {
     // call function
     glContext->hooks->gl.glAttachShader(program, shader);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindAttribLocation(GLuint program, GLuint index, const GLchar* name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindAttribLocation);
 
     // copy argument program
@@ -104,15 +101,14 @@ void GLTrace_glBindAttribLocation(GLuint program, GLuint index, const GLchar* na
     // call function
     glContext->hooks->gl.glBindAttribLocation(program, index, name);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindBuffer(GLenum target, GLuint buffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindBuffer);
 
     // copy argument target
@@ -130,15 +126,14 @@ void GLTrace_glBindBuffer(GLenum target, GLuint buffer) {
     // call function
     glContext->hooks->gl.glBindBuffer(target, buffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindFramebuffer);
 
     // copy argument target
@@ -156,15 +151,14 @@ void GLTrace_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     // call function
     glContext->hooks->gl.glBindFramebuffer(target, framebuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindRenderbuffer);
 
     // copy argument target
@@ -182,15 +176,14 @@ void GLTrace_glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
     // call function
     glContext->hooks->gl.glBindRenderbuffer(target, renderbuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindTexture(GLenum target, GLuint texture) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindTexture);
 
     // copy argument target
@@ -208,15 +201,14 @@ void GLTrace_glBindTexture(GLenum target, GLuint texture) {
     // call function
     glContext->hooks->gl.glBindTexture(target, texture);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendColor);
 
     // copy argument red
@@ -246,15 +238,14 @@ void GLTrace_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     // call function
     glContext->hooks->gl.glBlendColor(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendEquation(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendEquation);
 
     // copy argument mode
@@ -266,15 +257,14 @@ void GLTrace_glBlendEquation(GLenum mode) {
     // call function
     glContext->hooks->gl.glBlendEquation(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendEquationSeparate);
 
     // copy argument modeRGB
@@ -292,15 +282,14 @@ void GLTrace_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
     // call function
     glContext->hooks->gl.glBlendEquationSeparate(modeRGB, modeAlpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendFunc(GLenum sfactor, GLenum dfactor) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendFunc);
 
     // copy argument sfactor
@@ -318,15 +307,14 @@ void GLTrace_glBlendFunc(GLenum sfactor, GLenum dfactor) {
     // call function
     glContext->hooks->gl.glBlendFunc(sfactor, dfactor);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendFuncSeparate);
 
     // copy argument srcRGB
@@ -356,15 +344,14 @@ void GLTrace_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, 
     // call function
     glContext->hooks->gl.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBufferData);
 
     // copy argument target
@@ -394,15 +381,14 @@ void GLTrace_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GL
     // call function
     glContext->hooks->gl.glBufferData(target, size, data, usage);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBufferSubData);
 
     // copy argument target
@@ -432,15 +418,14 @@ void GLTrace_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, co
     // call function
     glContext->hooks->gl.glBufferSubData(target, offset, size, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLenum GLTrace_glCheckFramebufferStatus(GLenum target) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCheckFramebufferStatus);
 
     // copy argument target
@@ -458,8 +443,8 @@ GLenum GLTrace_glCheckFramebufferStatus(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -468,7 +453,6 @@ void GLTrace_glClear(GLbitfield mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClear);
 
     // copy argument mask
@@ -480,15 +464,14 @@ void GLTrace_glClear(GLbitfield mask) {
     // call function
     glContext->hooks->gl.glClear(mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearColor);
 
     // copy argument red
@@ -518,15 +501,14 @@ void GLTrace_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf 
     // call function
     glContext->hooks->gl.glClearColor(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearDepthf(GLclampf depth) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearDepthf);
 
     // copy argument depth
@@ -538,15 +520,14 @@ void GLTrace_glClearDepthf(GLclampf depth) {
     // call function
     glContext->hooks->gl.glClearDepthf(depth);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearStencil(GLint s) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearStencil);
 
     // copy argument s
@@ -558,15 +539,14 @@ void GLTrace_glClearStencil(GLint s) {
     // call function
     glContext->hooks->gl.glClearStencil(s);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColorMask);
 
     // copy argument red
@@ -596,15 +576,14 @@ void GLTrace_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboole
     // call function
     glContext->hooks->gl.glColorMask(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCompileShader(GLuint shader) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCompileShader);
 
     // copy argument shader
@@ -616,15 +595,14 @@ void GLTrace_glCompileShader(GLuint shader) {
     // call function
     glContext->hooks->gl.glCompileShader(shader);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCompressedTexImage2D);
 
     // copy argument target
@@ -678,15 +656,14 @@ void GLTrace_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalf
     // call function
     glContext->hooks->gl.glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCompressedTexSubImage2D);
 
     // copy argument target
@@ -746,15 +723,14 @@ void GLTrace_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset
     // call function
     glContext->hooks->gl.glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCopyTexImage2D);
 
     // copy argument target
@@ -808,15 +784,14 @@ void GLTrace_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat,
     // call function
     glContext->hooks->gl.glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCopyTexSubImage2D);
 
     // copy argument target
@@ -870,15 +845,14 @@ void GLTrace_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLin
     // call function
     glContext->hooks->gl.glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLuint GLTrace_glCreateProgram(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCreateProgram);
 
     // call function
@@ -890,8 +864,8 @@ GLuint GLTrace_glCreateProgram(void) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -900,7 +874,6 @@ GLuint GLTrace_glCreateShader(GLenum type) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCreateShader);
 
     // copy argument type
@@ -918,8 +891,8 @@ GLuint GLTrace_glCreateShader(GLenum type) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -928,7 +901,6 @@ void GLTrace_glCullFace(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCullFace);
 
     // copy argument mode
@@ -940,15 +912,14 @@ void GLTrace_glCullFace(GLenum mode) {
     // call function
     glContext->hooks->gl.glCullFace(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteBuffers(GLsizei n, const GLuint* buffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteBuffers);
 
     // copy argument n
@@ -966,15 +937,14 @@ void GLTrace_glDeleteBuffers(GLsizei n, const GLuint* buffers) {
     // call function
     glContext->hooks->gl.glDeleteBuffers(n, buffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteFramebuffers);
 
     // copy argument n
@@ -992,15 +962,14 @@ void GLTrace_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {
     // call function
     glContext->hooks->gl.glDeleteFramebuffers(n, framebuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteProgram(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteProgram);
 
     // copy argument program
@@ -1012,15 +981,14 @@ void GLTrace_glDeleteProgram(GLuint program) {
     // call function
     glContext->hooks->gl.glDeleteProgram(program);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteRenderbuffers);
 
     // copy argument n
@@ -1038,15 +1006,14 @@ void GLTrace_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers) {
     // call function
     glContext->hooks->gl.glDeleteRenderbuffers(n, renderbuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteShader(GLuint shader) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteShader);
 
     // copy argument shader
@@ -1058,15 +1025,14 @@ void GLTrace_glDeleteShader(GLuint shader) {
     // call function
     glContext->hooks->gl.glDeleteShader(shader);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteTextures(GLsizei n, const GLuint* textures) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteTextures);
 
     // copy argument n
@@ -1084,15 +1050,14 @@ void GLTrace_glDeleteTextures(GLsizei n, const GLuint* textures) {
     // call function
     glContext->hooks->gl.glDeleteTextures(n, textures);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDepthFunc(GLenum func) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthFunc);
 
     // copy argument func
@@ -1104,15 +1069,14 @@ void GLTrace_glDepthFunc(GLenum func) {
     // call function
     glContext->hooks->gl.glDepthFunc(func);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDepthMask(GLboolean flag) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthMask);
 
     // copy argument flag
@@ -1124,15 +1088,14 @@ void GLTrace_glDepthMask(GLboolean flag) {
     // call function
     glContext->hooks->gl.glDepthMask(flag);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDepthRangef(GLclampf zNear, GLclampf zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthRangef);
 
     // copy argument zNear
@@ -1150,15 +1113,14 @@ void GLTrace_glDepthRangef(GLclampf zNear, GLclampf zFar) {
     // call function
     glContext->hooks->gl.glDepthRangef(zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDetachShader(GLuint program, GLuint shader) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDetachShader);
 
     // copy argument program
@@ -1176,15 +1138,14 @@ void GLTrace_glDetachShader(GLuint program, GLuint shader) {
     // call function
     glContext->hooks->gl.glDetachShader(program, shader);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDisable(GLenum cap) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDisable);
 
     // copy argument cap
@@ -1196,15 +1157,14 @@ void GLTrace_glDisable(GLenum cap) {
     // call function
     glContext->hooks->gl.glDisable(cap);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDisableVertexAttribArray(GLuint index) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDisableVertexAttribArray);
 
     // copy argument index
@@ -1216,15 +1176,14 @@ void GLTrace_glDisableVertexAttribArray(GLuint index) {
     // call function
     glContext->hooks->gl.glDisableVertexAttribArray(index);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawArrays);
 
     // copy argument mode
@@ -1248,15 +1207,14 @@ void GLTrace_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
     // call function
     glContext->hooks->gl.glDrawArrays(mode, first, count);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawElements);
 
     // copy argument mode
@@ -1286,15 +1244,14 @@ void GLTrace_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoi
     // call function
     glContext->hooks->gl.glDrawElements(mode, count, type, indices);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEnable(GLenum cap) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEnable);
 
     // copy argument cap
@@ -1306,15 +1263,14 @@ void GLTrace_glEnable(GLenum cap) {
     // call function
     glContext->hooks->gl.glEnable(cap);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEnableVertexAttribArray(GLuint index) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEnableVertexAttribArray);
 
     // copy argument index
@@ -1326,43 +1282,40 @@ void GLTrace_glEnableVertexAttribArray(GLuint index) {
     // call function
     glContext->hooks->gl.glEnableVertexAttribArray(index);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFinish(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFinish);
 
     // call function
     glContext->hooks->gl.glFinish();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFlush(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFlush);
 
     // call function
     glContext->hooks->gl.glFlush();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferRenderbuffer);
 
     // copy argument target
@@ -1392,15 +1345,14 @@ void GLTrace_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum 
     // call function
     glContext->hooks->gl.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferTexture2D);
 
     // copy argument target
@@ -1436,15 +1388,14 @@ void GLTrace_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum tex
     // call function
     glContext->hooks->gl.glFramebufferTexture2D(target, attachment, textarget, texture, level);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFrontFace(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFrontFace);
 
     // copy argument mode
@@ -1456,15 +1407,14 @@ void GLTrace_glFrontFace(GLenum mode) {
     // call function
     glContext->hooks->gl.glFrontFace(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenBuffers(GLsizei n, GLuint* buffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenBuffers);
 
     // copy argument n
@@ -1482,15 +1432,14 @@ void GLTrace_glGenBuffers(GLsizei n, GLuint* buffers) {
     // call function
     glContext->hooks->gl.glGenBuffers(n, buffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenerateMipmap(GLenum target) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenerateMipmap);
 
     // copy argument target
@@ -1502,15 +1451,14 @@ void GLTrace_glGenerateMipmap(GLenum target) {
     // call function
     glContext->hooks->gl.glGenerateMipmap(target);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenFramebuffers);
 
     // copy argument n
@@ -1528,15 +1476,14 @@ void GLTrace_glGenFramebuffers(GLsizei n, GLuint* framebuffers) {
     // call function
     glContext->hooks->gl.glGenFramebuffers(n, framebuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenRenderbuffers);
 
     // copy argument n
@@ -1554,15 +1501,14 @@ void GLTrace_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers) {
     // call function
     glContext->hooks->gl.glGenRenderbuffers(n, renderbuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenTextures(GLsizei n, GLuint* textures) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenTextures);
 
     // copy argument n
@@ -1580,15 +1526,14 @@ void GLTrace_glGenTextures(GLsizei n, GLuint* textures) {
     // call function
     glContext->hooks->gl.glGenTextures(n, textures);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetActiveAttrib);
 
     // copy argument program
@@ -1636,15 +1581,14 @@ void GLTrace_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GL
     // call function
     glContext->hooks->gl.glGetActiveAttrib(program, index, bufsize, length, size, type, name);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetActiveUniform);
 
     // copy argument program
@@ -1692,15 +1636,14 @@ void GLTrace_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, G
     // call function
     glContext->hooks->gl.glGetActiveUniform(program, index, bufsize, length, size, type, name);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetAttachedShaders);
 
     // copy argument program
@@ -1730,15 +1673,14 @@ void GLTrace_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* cou
     // call function
     glContext->hooks->gl.glGetAttachedShaders(program, maxcount, count, shaders);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 int GLTrace_glGetAttribLocation(GLuint program, const GLchar* name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetAttribLocation);
 
     // copy argument program
@@ -1762,8 +1704,8 @@ int GLTrace_glGetAttribLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -1772,7 +1714,6 @@ void GLTrace_glGetBooleanv(GLenum pname, GLboolean* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetBooleanv);
 
     // copy argument pname
@@ -1790,15 +1731,14 @@ void GLTrace_glGetBooleanv(GLenum pname, GLboolean* params) {
     // call function
     glContext->hooks->gl.glGetBooleanv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetBufferParameteriv);
 
     // copy argument target
@@ -1822,15 +1762,14 @@ void GLTrace_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params) 
     // call function
     glContext->hooks->gl.glGetBufferParameteriv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLenum GLTrace_glGetError(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetError);
 
     // call function
@@ -1842,8 +1781,8 @@ GLenum GLTrace_glGetError(void) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -1852,7 +1791,6 @@ void GLTrace_glGetFloatv(GLenum pname, GLfloat* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFloatv);
 
     // copy argument pname
@@ -1870,15 +1808,14 @@ void GLTrace_glGetFloatv(GLenum pname, GLfloat* params) {
     // call function
     glContext->hooks->gl.glGetFloatv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFramebufferAttachmentParameteriv);
 
     // copy argument target
@@ -1908,15 +1845,14 @@ void GLTrace_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachm
     // call function
     glContext->hooks->gl.glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetIntegerv(GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetIntegerv);
 
     // copy argument pname
@@ -1934,15 +1870,14 @@ void GLTrace_glGetIntegerv(GLenum pname, GLint* params) {
     // call function
     glContext->hooks->gl.glGetIntegerv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetProgramiv);
 
     // copy argument program
@@ -1966,15 +1901,14 @@ void GLTrace_glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
     // call function
     glContext->hooks->gl.glGetProgramiv(program, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetProgramInfoLog);
 
     // copy argument program
@@ -2004,15 +1938,14 @@ void GLTrace_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* lengt
     // call function
     glContext->hooks->gl.glGetProgramInfoLog(program, bufsize, length, infolog);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetRenderbufferParameteriv);
 
     // copy argument target
@@ -2036,15 +1969,14 @@ void GLTrace_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* pa
     // call function
     glContext->hooks->gl.glGetRenderbufferParameteriv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetShaderiv);
 
     // copy argument shader
@@ -2068,15 +2000,14 @@ void GLTrace_glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
     // call function
     glContext->hooks->gl.glGetShaderiv(shader, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetShaderInfoLog);
 
     // copy argument shader
@@ -2106,15 +2037,14 @@ void GLTrace_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length,
     // call function
     glContext->hooks->gl.glGetShaderInfoLog(shader, bufsize, length, infolog);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetShaderPrecisionFormat);
 
     // copy argument shadertype
@@ -2144,15 +2074,14 @@ void GLTrace_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype,
     // call function
     glContext->hooks->gl.glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetShaderSource);
 
     // copy argument shader
@@ -2182,15 +2111,14 @@ void GLTrace_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, 
     // call function
     glContext->hooks->gl.glGetShaderSource(shader, bufsize, length, source);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 const GLubyte* GLTrace_glGetString(GLenum name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetString);
 
     // copy argument name
@@ -2208,8 +2136,8 @@ const GLubyte* GLTrace_glGetString(GLenum name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2218,7 +2146,6 @@ void GLTrace_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexParameterfv);
 
     // copy argument target
@@ -2242,15 +2169,14 @@ void GLTrace_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
     // call function
     glContext->hooks->gl.glGetTexParameterfv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexParameteriv);
 
     // copy argument target
@@ -2274,15 +2200,14 @@ void GLTrace_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
     // call function
     glContext->hooks->gl.glGetTexParameteriv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetUniformfv(GLuint program, GLint location, GLfloat* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetUniformfv);
 
     // copy argument program
@@ -2306,15 +2231,14 @@ void GLTrace_glGetUniformfv(GLuint program, GLint location, GLfloat* params) {
     // call function
     glContext->hooks->gl.glGetUniformfv(program, location, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetUniformiv(GLuint program, GLint location, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetUniformiv);
 
     // copy argument program
@@ -2338,15 +2262,14 @@ void GLTrace_glGetUniformiv(GLuint program, GLint location, GLint* params) {
     // call function
     glContext->hooks->gl.glGetUniformiv(program, location, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 int GLTrace_glGetUniformLocation(GLuint program, const GLchar* name) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetUniformLocation);
 
     // copy argument program
@@ -2370,8 +2293,8 @@ int GLTrace_glGetUniformLocation(GLuint program, const GLchar* name) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2380,7 +2303,6 @@ void GLTrace_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetVertexAttribfv);
 
     // copy argument index
@@ -2404,15 +2326,14 @@ void GLTrace_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params) {
     // call function
     glContext->hooks->gl.glGetVertexAttribfv(index, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetVertexAttribiv);
 
     // copy argument index
@@ -2436,15 +2357,14 @@ void GLTrace_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params) {
     // call function
     glContext->hooks->gl.glGetVertexAttribiv(index, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetVertexAttribPointerv);
 
     // copy argument index
@@ -2468,15 +2388,14 @@ void GLTrace_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** poin
     // call function
     glContext->hooks->gl.glGetVertexAttribPointerv(index, pname, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glHint(GLenum target, GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glHint);
 
     // copy argument target
@@ -2494,15 +2413,14 @@ void GLTrace_glHint(GLenum target, GLenum mode) {
     // call function
     glContext->hooks->gl.glHint(target, mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glIsBuffer(GLuint buffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsBuffer);
 
     // copy argument buffer
@@ -2520,8 +2438,8 @@ GLboolean GLTrace_glIsBuffer(GLuint buffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2530,7 +2448,6 @@ GLboolean GLTrace_glIsEnabled(GLenum cap) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsEnabled);
 
     // copy argument cap
@@ -2548,8 +2465,8 @@ GLboolean GLTrace_glIsEnabled(GLenum cap) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2558,7 +2475,6 @@ GLboolean GLTrace_glIsFramebuffer(GLuint framebuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsFramebuffer);
 
     // copy argument framebuffer
@@ -2576,8 +2492,8 @@ GLboolean GLTrace_glIsFramebuffer(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2586,7 +2502,6 @@ GLboolean GLTrace_glIsProgram(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsProgram);
 
     // copy argument program
@@ -2604,8 +2519,8 @@ GLboolean GLTrace_glIsProgram(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2614,7 +2529,6 @@ GLboolean GLTrace_glIsRenderbuffer(GLuint renderbuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsRenderbuffer);
 
     // copy argument renderbuffer
@@ -2632,8 +2546,8 @@ GLboolean GLTrace_glIsRenderbuffer(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2642,7 +2556,6 @@ GLboolean GLTrace_glIsShader(GLuint shader) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsShader);
 
     // copy argument shader
@@ -2660,8 +2573,8 @@ GLboolean GLTrace_glIsShader(GLuint shader) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2670,7 +2583,6 @@ GLboolean GLTrace_glIsTexture(GLuint texture) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsTexture);
 
     // copy argument texture
@@ -2688,8 +2600,8 @@ GLboolean GLTrace_glIsTexture(GLuint texture) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -2698,7 +2610,6 @@ void GLTrace_glLineWidth(GLfloat width) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLineWidth);
 
     // copy argument width
@@ -2710,15 +2621,14 @@ void GLTrace_glLineWidth(GLfloat width) {
     // call function
     glContext->hooks->gl.glLineWidth(width);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLinkProgram(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLinkProgram);
 
     // copy argument program
@@ -2730,15 +2640,14 @@ void GLTrace_glLinkProgram(GLuint program) {
     // call function
     glContext->hooks->gl.glLinkProgram(program);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPixelStorei(GLenum pname, GLint param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPixelStorei);
 
     // copy argument pname
@@ -2756,15 +2665,14 @@ void GLTrace_glPixelStorei(GLenum pname, GLint param) {
     // call function
     glContext->hooks->gl.glPixelStorei(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPolygonOffset(GLfloat factor, GLfloat units) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPolygonOffset);
 
     // copy argument factor
@@ -2782,15 +2690,14 @@ void GLTrace_glPolygonOffset(GLfloat factor, GLfloat units) {
     // call function
     glContext->hooks->gl.glPolygonOffset(factor, units);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glReadPixels);
 
     // copy argument x
@@ -2838,29 +2745,27 @@ void GLTrace_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenu
     // call function
     glContext->hooks->gl.glReadPixels(x, y, width, height, format, type, pixels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glReleaseShaderCompiler(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glReleaseShaderCompiler);
 
     // call function
     glContext->hooks->gl.glReleaseShaderCompiler();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRenderbufferStorage);
 
     // copy argument target
@@ -2890,15 +2795,14 @@ void GLTrace_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei
     // call function
     glContext->hooks->gl.glRenderbufferStorage(target, internalformat, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glSampleCoverage(GLclampf value, GLboolean invert) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glSampleCoverage);
 
     // copy argument value
@@ -2916,15 +2820,14 @@ void GLTrace_glSampleCoverage(GLclampf value, GLboolean invert) {
     // call function
     glContext->hooks->gl.glSampleCoverage(value, invert);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glScissor);
 
     // copy argument x
@@ -2954,15 +2857,14 @@ void GLTrace_glScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     // call function
     glContext->hooks->gl.glScissor(x, y, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glShaderBinary);
 
     // copy argument n
@@ -2998,15 +2900,14 @@ void GLTrace_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryforma
     // call function
     glContext->hooks->gl.glShaderBinary(n, shaders, binaryformat, binary, length);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, const GLint* length) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glShaderSource);
 
     // copy argument shader
@@ -3036,15 +2937,14 @@ void GLTrace_glShaderSource(GLuint shader, GLsizei count, const GLchar** string,
     // call function
     glContext->hooks->gl.glShaderSource(shader, count, string, length);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilFunc);
 
     // copy argument func
@@ -3068,15 +2968,14 @@ void GLTrace_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     // call function
     glContext->hooks->gl.glStencilFunc(func, ref, mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilFuncSeparate);
 
     // copy argument face
@@ -3106,15 +3005,14 @@ void GLTrace_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint m
     // call function
     glContext->hooks->gl.glStencilFuncSeparate(face, func, ref, mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilMask(GLuint mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilMask);
 
     // copy argument mask
@@ -3126,15 +3024,14 @@ void GLTrace_glStencilMask(GLuint mask) {
     // call function
     glContext->hooks->gl.glStencilMask(mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilMaskSeparate(GLenum face, GLuint mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilMaskSeparate);
 
     // copy argument face
@@ -3152,15 +3049,14 @@ void GLTrace_glStencilMaskSeparate(GLenum face, GLuint mask) {
     // call function
     glContext->hooks->gl.glStencilMaskSeparate(face, mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilOp);
 
     // copy argument fail
@@ -3184,15 +3080,14 @@ void GLTrace_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
     // call function
     glContext->hooks->gl.glStencilOp(fail, zfail, zpass);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStencilOpSeparate);
 
     // copy argument face
@@ -3222,15 +3117,14 @@ void GLTrace_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum 
     // call function
     glContext->hooks->gl.glStencilOpSeparate(face, fail, zfail, zpass);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexImage2D);
 
     // copy argument target
@@ -3290,15 +3184,14 @@ void GLTrace_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsi
     // call function
     glContext->hooks->gl.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterf);
 
     // copy argument target
@@ -3322,15 +3215,14 @@ void GLTrace_glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glTexParameterf(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterfv);
 
     // copy argument target
@@ -3354,15 +3246,14 @@ void GLTrace_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params
     // call function
     glContext->hooks->gl.glTexParameterfv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameteri(GLenum target, GLenum pname, GLint param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameteri);
 
     // copy argument target
@@ -3386,15 +3277,14 @@ void GLTrace_glTexParameteri(GLenum target, GLenum pname, GLint param) {
     // call function
     glContext->hooks->gl.glTexParameteri(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameteriv(GLenum target, GLenum pname, const GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameteriv);
 
     // copy argument target
@@ -3418,15 +3308,14 @@ void GLTrace_glTexParameteriv(GLenum target, GLenum pname, const GLint* params) 
     // call function
     glContext->hooks->gl.glTexParameteriv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexSubImage2D);
 
     // copy argument target
@@ -3486,15 +3375,14 @@ void GLTrace_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yo
     // call function
     glContext->hooks->gl.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform1f(GLint location, GLfloat x) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform1f);
 
     // copy argument location
@@ -3512,15 +3400,14 @@ void GLTrace_glUniform1f(GLint location, GLfloat x) {
     // call function
     glContext->hooks->gl.glUniform1f(location, x);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform1fv(GLint location, GLsizei count, const GLfloat* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform1fv);
 
     // copy argument location
@@ -3544,15 +3431,14 @@ void GLTrace_glUniform1fv(GLint location, GLsizei count, const GLfloat* v) {
     // call function
     glContext->hooks->gl.glUniform1fv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform1i(GLint location, GLint x) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform1i);
 
     // copy argument location
@@ -3570,15 +3456,14 @@ void GLTrace_glUniform1i(GLint location, GLint x) {
     // call function
     glContext->hooks->gl.glUniform1i(location, x);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform1iv(GLint location, GLsizei count, const GLint* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform1iv);
 
     // copy argument location
@@ -3602,15 +3487,14 @@ void GLTrace_glUniform1iv(GLint location, GLsizei count, const GLint* v) {
     // call function
     glContext->hooks->gl.glUniform1iv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform2f(GLint location, GLfloat x, GLfloat y) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform2f);
 
     // copy argument location
@@ -3634,15 +3518,14 @@ void GLTrace_glUniform2f(GLint location, GLfloat x, GLfloat y) {
     // call function
     glContext->hooks->gl.glUniform2f(location, x, y);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform2fv(GLint location, GLsizei count, const GLfloat* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform2fv);
 
     // copy argument location
@@ -3666,15 +3549,14 @@ void GLTrace_glUniform2fv(GLint location, GLsizei count, const GLfloat* v) {
     // call function
     glContext->hooks->gl.glUniform2fv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform2i(GLint location, GLint x, GLint y) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform2i);
 
     // copy argument location
@@ -3698,15 +3580,14 @@ void GLTrace_glUniform2i(GLint location, GLint x, GLint y) {
     // call function
     glContext->hooks->gl.glUniform2i(location, x, y);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform2iv(GLint location, GLsizei count, const GLint* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform2iv);
 
     // copy argument location
@@ -3730,15 +3611,14 @@ void GLTrace_glUniform2iv(GLint location, GLsizei count, const GLint* v) {
     // call function
     glContext->hooks->gl.glUniform2iv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform3f);
 
     // copy argument location
@@ -3768,15 +3648,14 @@ void GLTrace_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z) {
     // call function
     glContext->hooks->gl.glUniform3f(location, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform3fv(GLint location, GLsizei count, const GLfloat* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform3fv);
 
     // copy argument location
@@ -3800,15 +3679,14 @@ void GLTrace_glUniform3fv(GLint location, GLsizei count, const GLfloat* v) {
     // call function
     glContext->hooks->gl.glUniform3fv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform3i(GLint location, GLint x, GLint y, GLint z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform3i);
 
     // copy argument location
@@ -3838,15 +3716,14 @@ void GLTrace_glUniform3i(GLint location, GLint x, GLint y, GLint z) {
     // call function
     glContext->hooks->gl.glUniform3i(location, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform3iv(GLint location, GLsizei count, const GLint* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform3iv);
 
     // copy argument location
@@ -3870,15 +3747,14 @@ void GLTrace_glUniform3iv(GLint location, GLsizei count, const GLint* v) {
     // call function
     glContext->hooks->gl.glUniform3iv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform4f);
 
     // copy argument location
@@ -3914,15 +3790,14 @@ void GLTrace_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloa
     // call function
     glContext->hooks->gl.glUniform4f(location, x, y, z, w);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform4fv(GLint location, GLsizei count, const GLfloat* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform4fv);
 
     // copy argument location
@@ -3946,15 +3821,14 @@ void GLTrace_glUniform4fv(GLint location, GLsizei count, const GLfloat* v) {
     // call function
     glContext->hooks->gl.glUniform4fv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform4i);
 
     // copy argument location
@@ -3990,15 +3864,14 @@ void GLTrace_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w) {
     // call function
     glContext->hooks->gl.glUniform4i(location, x, y, z, w);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniform4iv(GLint location, GLsizei count, const GLint* v) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniform4iv);
 
     // copy argument location
@@ -4022,15 +3895,14 @@ void GLTrace_glUniform4iv(GLint location, GLsizei count, const GLint* v) {
     // call function
     glContext->hooks->gl.glUniform4iv(location, count, v);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniformMatrix2fv);
 
     // copy argument location
@@ -4060,15 +3932,14 @@ void GLTrace_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpo
     // call function
     glContext->hooks->gl.glUniformMatrix2fv(location, count, transpose, value);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniformMatrix3fv);
 
     // copy argument location
@@ -4098,15 +3969,14 @@ void GLTrace_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpo
     // call function
     glContext->hooks->gl.glUniformMatrix3fv(location, count, transpose, value);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUniformMatrix4fv);
 
     // copy argument location
@@ -4136,15 +4006,14 @@ void GLTrace_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpo
     // call function
     glContext->hooks->gl.glUniformMatrix4fv(location, count, transpose, value);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glUseProgram(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUseProgram);
 
     // copy argument program
@@ -4156,15 +4025,14 @@ void GLTrace_glUseProgram(GLuint program) {
     // call function
     glContext->hooks->gl.glUseProgram(program);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glValidateProgram(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glValidateProgram);
 
     // copy argument program
@@ -4176,15 +4044,14 @@ void GLTrace_glValidateProgram(GLuint program) {
     // call function
     glContext->hooks->gl.glValidateProgram(program);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib1f(GLuint indx, GLfloat x) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib1f);
 
     // copy argument indx
@@ -4202,15 +4069,14 @@ void GLTrace_glVertexAttrib1f(GLuint indx, GLfloat x) {
     // call function
     glContext->hooks->gl.glVertexAttrib1f(indx, x);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib1fv(GLuint indx, const GLfloat* values) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib1fv);
 
     // copy argument indx
@@ -4228,15 +4094,14 @@ void GLTrace_glVertexAttrib1fv(GLuint indx, const GLfloat* values) {
     // call function
     glContext->hooks->gl.glVertexAttrib1fv(indx, values);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib2f);
 
     // copy argument indx
@@ -4260,15 +4125,14 @@ void GLTrace_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y) {
     // call function
     glContext->hooks->gl.glVertexAttrib2f(indx, x, y);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib2fv(GLuint indx, const GLfloat* values) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib2fv);
 
     // copy argument indx
@@ -4286,15 +4150,14 @@ void GLTrace_glVertexAttrib2fv(GLuint indx, const GLfloat* values) {
     // call function
     glContext->hooks->gl.glVertexAttrib2fv(indx, values);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib3f);
 
     // copy argument indx
@@ -4324,15 +4187,14 @@ void GLTrace_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z) {
     // call function
     glContext->hooks->gl.glVertexAttrib3f(indx, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib3fv(GLuint indx, const GLfloat* values) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib3fv);
 
     // copy argument indx
@@ -4350,15 +4212,14 @@ void GLTrace_glVertexAttrib3fv(GLuint indx, const GLfloat* values) {
     // call function
     glContext->hooks->gl.glVertexAttrib3fv(indx, values);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib4f);
 
     // copy argument indx
@@ -4394,15 +4255,14 @@ void GLTrace_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfl
     // call function
     glContext->hooks->gl.glVertexAttrib4f(indx, x, y, z, w);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttrib4fv(GLuint indx, const GLfloat* values) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttrib4fv);
 
     // copy argument indx
@@ -4420,15 +4280,14 @@ void GLTrace_glVertexAttrib4fv(GLuint indx, const GLfloat* values) {
     // call function
     glContext->hooks->gl.glVertexAttrib4fv(indx, values);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexAttribPointer);
 
     // copy argument indx
@@ -4470,15 +4329,14 @@ void GLTrace_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboole
     // call function
     glContext->hooks->gl.glVertexAttribPointer(indx, size, type, normalized, stride, ptr);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glViewport);
 
     // copy argument x
@@ -4508,8 +4366,8 @@ void GLTrace_glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     // call function
     glContext->hooks->gl.glViewport(x, y, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 
@@ -4519,7 +4377,6 @@ void GLTrace_glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEGLImageTargetTexture2DOES);
 
     // copy argument target
@@ -4537,15 +4394,14 @@ void GLTrace_glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image) {
     // call function
     glContext->hooks->gl.glEGLImageTargetTexture2DOES(target, image);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEGLImageTargetRenderbufferStorageOES);
 
     // copy argument target
@@ -4563,15 +4419,14 @@ void GLTrace_glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES
     // call function
     glContext->hooks->gl.glEGLImageTargetRenderbufferStorageOES(target, image);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, GLvoid *binary) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetProgramBinaryOES);
 
     // copy argument program
@@ -4607,15 +4462,14 @@ void GLTrace_glGetProgramBinaryOES(GLuint program, GLsizei bufSize, GLsizei *len
     // call function
     glContext->hooks->gl.glGetProgramBinaryOES(program, bufSize, length, binaryFormat, binary);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glProgramBinaryOES(GLuint program, GLenum binaryFormat, const GLvoid *binary, GLint length) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glProgramBinaryOES);
 
     // copy argument program
@@ -4645,15 +4499,14 @@ void GLTrace_glProgramBinaryOES(GLuint program, GLenum binaryFormat, const GLvoi
     // call function
     glContext->hooks->gl.glProgramBinaryOES(program, binaryFormat, binary, length);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void* GLTrace_glMapBufferOES(GLenum target, GLenum access) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMapBufferOES);
 
     // copy argument target
@@ -4677,8 +4530,8 @@ void* GLTrace_glMapBufferOES(GLenum target, GLenum access) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -4687,7 +4540,6 @@ GLboolean GLTrace_glUnmapBufferOES(GLenum target) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glUnmapBufferOES);
 
     // copy argument target
@@ -4705,8 +4557,8 @@ GLboolean GLTrace_glUnmapBufferOES(GLenum target) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -4715,7 +4567,6 @@ void GLTrace_glGetBufferPointervOES(GLenum target, GLenum pname, GLvoid** params
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetBufferPointervOES);
 
     // copy argument target
@@ -4739,15 +4590,14 @@ void GLTrace_glGetBufferPointervOES(GLenum target, GLenum pname, GLvoid** params
     // call function
     glContext->hooks->gl.glGetBufferPointervOES(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexImage3DOES(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexImage3DOES);
 
     // copy argument target
@@ -4813,15 +4663,14 @@ void GLTrace_glTexImage3DOES(GLenum target, GLint level, GLenum internalformat, 
     // call function
     glContext->hooks->gl.glTexImage3DOES(target, level, internalformat, width, height, depth, border, format, type, pixels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexSubImage3DOES);
 
     // copy argument target
@@ -4893,15 +4742,14 @@ void GLTrace_glTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint
     // call function
     glContext->hooks->gl.glTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCopyTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCopyTexSubImage3DOES);
 
     // copy argument target
@@ -4961,15 +4809,14 @@ void GLTrace_glCopyTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, G
     // call function
     glContext->hooks->gl.glCopyTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, x, y, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCompressedTexImage3DOES(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCompressedTexImage3DOES);
 
     // copy argument target
@@ -5029,15 +4876,14 @@ void GLTrace_glCompressedTexImage3DOES(GLenum target, GLint level, GLenum intern
     // call function
     glContext->hooks->gl.glCompressedTexImage3DOES(target, level, internalformat, width, height, depth, border, imageSize, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCompressedTexSubImage3DOES(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCompressedTexSubImage3DOES);
 
     // copy argument target
@@ -5109,15 +4955,14 @@ void GLTrace_glCompressedTexSubImage3DOES(GLenum target, GLint level, GLint xoff
     // call function
     glContext->hooks->gl.glCompressedTexSubImage3DOES(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferTexture3DOES);
 
     // copy argument target
@@ -5159,15 +5004,14 @@ void GLTrace_glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum 
     // call function
     glContext->hooks->gl.glFramebufferTexture3DOES(target, attachment, textarget, texture, level, zoffset);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBindVertexArrayOES(GLuint array) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindVertexArrayOES);
 
     // copy argument array
@@ -5179,15 +5023,14 @@ void GLTrace_glBindVertexArrayOES(GLuint array) {
     // call function
     glContext->hooks->gl.glBindVertexArrayOES(array);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteVertexArraysOES);
 
     // copy argument n
@@ -5205,15 +5048,14 @@ void GLTrace_glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays) {
     // call function
     glContext->hooks->gl.glDeleteVertexArraysOES(n, arrays);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenVertexArraysOES(GLsizei n, GLuint *arrays) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenVertexArraysOES);
 
     // copy argument n
@@ -5231,15 +5073,14 @@ void GLTrace_glGenVertexArraysOES(GLsizei n, GLuint *arrays) {
     // call function
     glContext->hooks->gl.glGenVertexArraysOES(n, arrays);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glIsVertexArrayOES(GLuint array) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsVertexArrayOES);
 
     // copy argument array
@@ -5257,8 +5098,8 @@ GLboolean GLTrace_glIsVertexArrayOES(GLuint array) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -5267,7 +5108,6 @@ void GLTrace_glGetPerfMonitorGroupsAMD(GLint *numGroups, GLsizei groupsSize, GLu
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorGroupsAMD);
 
     // copy argument numGroups
@@ -5291,15 +5131,14 @@ void GLTrace_glGetPerfMonitorGroupsAMD(GLint *numGroups, GLsizei groupsSize, GLu
     // call function
     glContext->hooks->gl.glGetPerfMonitorGroupsAMD(numGroups, groupsSize, groups);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPerfMonitorCountersAMD(GLuint group, GLint *numCounters, GLint *maxActiveCounters, GLsizei counterSize, GLuint *counters) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorCountersAMD);
 
     // copy argument group
@@ -5335,15 +5174,14 @@ void GLTrace_glGetPerfMonitorCountersAMD(GLuint group, GLint *numCounters, GLint
     // call function
     glContext->hooks->gl.glGetPerfMonitorCountersAMD(group, numCounters, maxActiveCounters, counterSize, counters);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPerfMonitorGroupStringAMD(GLuint group, GLsizei bufSize, GLsizei *length, GLchar *groupString) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorGroupStringAMD);
 
     // copy argument group
@@ -5373,15 +5211,14 @@ void GLTrace_glGetPerfMonitorGroupStringAMD(GLuint group, GLsizei bufSize, GLsiz
     // call function
     glContext->hooks->gl.glGetPerfMonitorGroupStringAMD(group, bufSize, length, groupString);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPerfMonitorCounterStringAMD(GLuint group, GLuint counter, GLsizei bufSize, GLsizei *length, GLchar *counterString) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorCounterStringAMD);
 
     // copy argument group
@@ -5417,15 +5254,14 @@ void GLTrace_glGetPerfMonitorCounterStringAMD(GLuint group, GLuint counter, GLsi
     // call function
     glContext->hooks->gl.glGetPerfMonitorCounterStringAMD(group, counter, bufSize, length, counterString);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPerfMonitorCounterInfoAMD(GLuint group, GLuint counter, GLenum pname, GLvoid *data) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorCounterInfoAMD);
 
     // copy argument group
@@ -5455,15 +5291,14 @@ void GLTrace_glGetPerfMonitorCounterInfoAMD(GLuint group, GLuint counter, GLenum
     // call function
     glContext->hooks->gl.glGetPerfMonitorCounterInfoAMD(group, counter, pname, data);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenPerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenPerfMonitorsAMD);
 
     // copy argument n
@@ -5481,15 +5316,14 @@ void GLTrace_glGenPerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     // call function
     glContext->hooks->gl.glGenPerfMonitorsAMD(n, monitors);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeletePerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeletePerfMonitorsAMD);
 
     // copy argument n
@@ -5507,15 +5341,14 @@ void GLTrace_glDeletePerfMonitorsAMD(GLsizei n, GLuint *monitors) {
     // call function
     glContext->hooks->gl.glDeletePerfMonitorsAMD(n, monitors);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glSelectPerfMonitorCountersAMD(GLuint monitor, GLboolean enable, GLuint group, GLint numCounters, GLuint *countersList) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glSelectPerfMonitorCountersAMD);
 
     // copy argument monitor
@@ -5551,15 +5384,14 @@ void GLTrace_glSelectPerfMonitorCountersAMD(GLuint monitor, GLboolean enable, GL
     // call function
     glContext->hooks->gl.glSelectPerfMonitorCountersAMD(monitor, enable, group, numCounters, countersList);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBeginPerfMonitorAMD(GLuint monitor) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBeginPerfMonitorAMD);
 
     // copy argument monitor
@@ -5571,15 +5403,14 @@ void GLTrace_glBeginPerfMonitorAMD(GLuint monitor) {
     // call function
     glContext->hooks->gl.glBeginPerfMonitorAMD(monitor);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEndPerfMonitorAMD(GLuint monitor) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEndPerfMonitorAMD);
 
     // copy argument monitor
@@ -5591,15 +5422,14 @@ void GLTrace_glEndPerfMonitorAMD(GLuint monitor) {
     // call function
     glContext->hooks->gl.glEndPerfMonitorAMD(monitor);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPerfMonitorCounterDataAMD(GLuint monitor, GLenum pname, GLsizei dataSize, GLuint *data, GLint *bytesWritten) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPerfMonitorCounterDataAMD);
 
     // copy argument monitor
@@ -5635,15 +5465,14 @@ void GLTrace_glGetPerfMonitorCounterDataAMD(GLuint monitor, GLenum pname, GLsize
     // call function
     glContext->hooks->gl.glGetPerfMonitorCounterDataAMD(monitor, pname, dataSize, data, bytesWritten);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, const GLenum *attachments) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDiscardFramebufferEXT);
 
     // copy argument target
@@ -5667,15 +5496,14 @@ void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, cons
     // call function
     glContext->hooks->gl.glDiscardFramebufferEXT(target, numAttachments, attachments);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultiDrawArraysEXT(GLenum mode, GLint *first, GLsizei *count, GLsizei primcount) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultiDrawArraysEXT);
 
     // copy argument mode
@@ -5705,15 +5533,14 @@ void GLTrace_glMultiDrawArraysEXT(GLenum mode, GLint *first, GLsizei *count, GLs
     // call function
     glContext->hooks->gl.glMultiDrawArraysEXT(mode, first, count, primcount);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultiDrawElementsEXT(GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultiDrawElementsEXT);
 
     // copy argument mode
@@ -5749,15 +5576,14 @@ void GLTrace_glMultiDrawElementsEXT(GLenum mode, const GLsizei *count, GLenum ty
     // call function
     glContext->hooks->gl.glMultiDrawElementsEXT(mode, count, type, indices, primcount);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRenderbufferStorageMultisampleIMG(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRenderbufferStorageMultisampleIMG);
 
     // copy argument target
@@ -5793,15 +5619,14 @@ void GLTrace_glRenderbufferStorageMultisampleIMG(GLenum target, GLsizei samples,
     // call function
     glContext->hooks->gl.glRenderbufferStorageMultisampleIMG(target, samples, internalformat, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFramebufferTexture2DMultisampleIMG(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferTexture2DMultisampleIMG);
 
     // copy argument target
@@ -5843,15 +5668,14 @@ void GLTrace_glFramebufferTexture2DMultisampleIMG(GLenum target, GLenum attachme
     // call function
     glContext->hooks->gl.glFramebufferTexture2DMultisampleIMG(target, attachment, textarget, texture, level, samples);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteFencesNV(GLsizei n, const GLuint *fences) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteFencesNV);
 
     // copy argument n
@@ -5869,15 +5693,14 @@ void GLTrace_glDeleteFencesNV(GLsizei n, const GLuint *fences) {
     // call function
     glContext->hooks->gl.glDeleteFencesNV(n, fences);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenFencesNV(GLsizei n, GLuint *fences) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenFencesNV);
 
     // copy argument n
@@ -5895,15 +5718,14 @@ void GLTrace_glGenFencesNV(GLsizei n, GLuint *fences) {
     // call function
     glContext->hooks->gl.glGenFencesNV(n, fences);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glIsFenceNV(GLuint fence) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsFenceNV);
 
     // copy argument fence
@@ -5921,8 +5743,8 @@ GLboolean GLTrace_glIsFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -5931,7 +5753,6 @@ GLboolean GLTrace_glTestFenceNV(GLuint fence) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTestFenceNV);
 
     // copy argument fence
@@ -5949,8 +5770,8 @@ GLboolean GLTrace_glTestFenceNV(GLuint fence) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -5959,7 +5780,6 @@ void GLTrace_glGetFenceivNV(GLuint fence, GLenum pname, GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFenceivNV);
 
     // copy argument fence
@@ -5983,15 +5803,14 @@ void GLTrace_glGetFenceivNV(GLuint fence, GLenum pname, GLint *params) {
     // call function
     glContext->hooks->gl.glGetFenceivNV(fence, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFinishFenceNV(GLuint fence) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFinishFenceNV);
 
     // copy argument fence
@@ -6003,15 +5822,14 @@ void GLTrace_glFinishFenceNV(GLuint fence) {
     // call function
     glContext->hooks->gl.glFinishFenceNV(fence);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glSetFenceNV(GLuint fence, GLenum condition) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glSetFenceNV);
 
     // copy argument fence
@@ -6029,15 +5847,14 @@ void GLTrace_glSetFenceNV(GLuint fence, GLenum condition) {
     // call function
     glContext->hooks->gl.glSetFenceNV(fence, condition);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCoverageMaskNV(GLboolean mask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCoverageMaskNV);
 
     // copy argument mask
@@ -6049,15 +5866,14 @@ void GLTrace_glCoverageMaskNV(GLboolean mask) {
     // call function
     glContext->hooks->gl.glCoverageMaskNV(mask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCoverageOperationNV(GLenum operation) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCoverageOperationNV);
 
     // copy argument operation
@@ -6069,15 +5885,14 @@ void GLTrace_glCoverageOperationNV(GLenum operation) {
     // call function
     glContext->hooks->gl.glCoverageOperationNV(operation);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetDriverControlsQCOM(GLint *num, GLsizei size, GLuint *driverControls) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetDriverControlsQCOM);
 
     // copy argument num
@@ -6101,15 +5916,14 @@ void GLTrace_glGetDriverControlsQCOM(GLint *num, GLsizei size, GLuint *driverCon
     // call function
     glContext->hooks->gl.glGetDriverControlsQCOM(num, size, driverControls);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetDriverControlStringQCOM(GLuint driverControl, GLsizei bufSize, GLsizei *length, GLchar *driverControlString) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetDriverControlStringQCOM);
 
     // copy argument driverControl
@@ -6139,15 +5953,14 @@ void GLTrace_glGetDriverControlStringQCOM(GLuint driverControl, GLsizei bufSize,
     // call function
     glContext->hooks->gl.glGetDriverControlStringQCOM(driverControl, bufSize, length, driverControlString);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEnableDriverControlQCOM(GLuint driverControl) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEnableDriverControlQCOM);
 
     // copy argument driverControl
@@ -6159,15 +5972,14 @@ void GLTrace_glEnableDriverControlQCOM(GLuint driverControl) {
     // call function
     glContext->hooks->gl.glEnableDriverControlQCOM(driverControl);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDisableDriverControlQCOM(GLuint driverControl) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDisableDriverControlQCOM);
 
     // copy argument driverControl
@@ -6179,15 +5991,14 @@ void GLTrace_glDisableDriverControlQCOM(GLuint driverControl) {
     // call function
     glContext->hooks->gl.glDisableDriverControlQCOM(driverControl);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetTexturesQCOM(GLuint *textures, GLint maxTextures, GLint *numTextures) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetTexturesQCOM);
 
     // copy argument textures
@@ -6211,15 +6022,14 @@ void GLTrace_glExtGetTexturesQCOM(GLuint *textures, GLint maxTextures, GLint *nu
     // call function
     glContext->hooks->gl.glExtGetTexturesQCOM(textures, maxTextures, numTextures);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetBuffersQCOM(GLuint *buffers, GLint maxBuffers, GLint *numBuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetBuffersQCOM);
 
     // copy argument buffers
@@ -6243,15 +6053,14 @@ void GLTrace_glExtGetBuffersQCOM(GLuint *buffers, GLint maxBuffers, GLint *numBu
     // call function
     glContext->hooks->gl.glExtGetBuffersQCOM(buffers, maxBuffers, numBuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetRenderbuffersQCOM(GLuint *renderbuffers, GLint maxRenderbuffers, GLint *numRenderbuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetRenderbuffersQCOM);
 
     // copy argument renderbuffers
@@ -6275,15 +6084,14 @@ void GLTrace_glExtGetRenderbuffersQCOM(GLuint *renderbuffers, GLint maxRenderbuf
     // call function
     glContext->hooks->gl.glExtGetRenderbuffersQCOM(renderbuffers, maxRenderbuffers, numRenderbuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetFramebuffersQCOM(GLuint *framebuffers, GLint maxFramebuffers, GLint *numFramebuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetFramebuffersQCOM);
 
     // copy argument framebuffers
@@ -6307,15 +6115,14 @@ void GLTrace_glExtGetFramebuffersQCOM(GLuint *framebuffers, GLint maxFramebuffer
     // call function
     glContext->hooks->gl.glExtGetFramebuffersQCOM(framebuffers, maxFramebuffers, numFramebuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetTexLevelParameterivQCOM(GLuint texture, GLenum face, GLint level, GLenum pname, GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetTexLevelParameterivQCOM);
 
     // copy argument texture
@@ -6351,15 +6158,14 @@ void GLTrace_glExtGetTexLevelParameterivQCOM(GLuint texture, GLenum face, GLint 
     // call function
     glContext->hooks->gl.glExtGetTexLevelParameterivQCOM(texture, face, level, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtTexObjectStateOverrideiQCOM(GLenum target, GLenum pname, GLint param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtTexObjectStateOverrideiQCOM);
 
     // copy argument target
@@ -6383,15 +6189,14 @@ void GLTrace_glExtTexObjectStateOverrideiQCOM(GLenum target, GLenum pname, GLint
     // call function
     glContext->hooks->gl.glExtTexObjectStateOverrideiQCOM(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetTexSubImageQCOM(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLvoid *texels) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetTexSubImageQCOM);
 
     // copy argument target
@@ -6463,15 +6268,14 @@ void GLTrace_glExtGetTexSubImageQCOM(GLenum target, GLint level, GLint xoffset, 
     // call function
     glContext->hooks->gl.glExtGetTexSubImageQCOM(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, texels);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetBufferPointervQCOM(GLenum target, GLvoid **params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetBufferPointervQCOM);
 
     // copy argument target
@@ -6489,15 +6293,14 @@ void GLTrace_glExtGetBufferPointervQCOM(GLenum target, GLvoid **params) {
     // call function
     glContext->hooks->gl.glExtGetBufferPointervQCOM(target, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetShadersQCOM(GLuint *shaders, GLint maxShaders, GLint *numShaders) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetShadersQCOM);
 
     // copy argument shaders
@@ -6521,15 +6324,14 @@ void GLTrace_glExtGetShadersQCOM(GLuint *shaders, GLint maxShaders, GLint *numSh
     // call function
     glContext->hooks->gl.glExtGetShadersQCOM(shaders, maxShaders, numShaders);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glExtGetProgramsQCOM(GLuint *programs, GLint maxPrograms, GLint *numPrograms) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetProgramsQCOM);
 
     // copy argument programs
@@ -6553,15 +6355,14 @@ void GLTrace_glExtGetProgramsQCOM(GLuint *programs, GLint maxPrograms, GLint *nu
     // call function
     glContext->hooks->gl.glExtGetProgramsQCOM(programs, maxPrograms, numPrograms);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glExtIsProgramBinaryQCOM(GLuint program) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtIsProgramBinaryQCOM);
 
     // copy argument program
@@ -6579,8 +6380,8 @@ GLboolean GLTrace_glExtIsProgramBinaryQCOM(GLuint program) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -6589,7 +6390,6 @@ void GLTrace_glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, 
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glExtGetProgramBinarySourceQCOM);
 
     // copy argument program
@@ -6619,15 +6419,14 @@ void GLTrace_glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, 
     // call function
     glContext->hooks->gl.glExtGetProgramBinarySourceQCOM(program, shadertype, source, length);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glStartTilingQCOM(GLuint x, GLuint y, GLuint width, GLuint height, GLbitfield preserveMask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glStartTilingQCOM);
 
     // copy argument x
@@ -6663,15 +6462,14 @@ void GLTrace_glStartTilingQCOM(GLuint x, GLuint y, GLuint width, GLuint height, 
     // call function
     glContext->hooks->gl.glStartTilingQCOM(x, y, width, height, preserveMask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEndTilingQCOM(GLbitfield preserveMask) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEndTilingQCOM);
 
     // copy argument preserveMask
@@ -6683,8 +6481,8 @@ void GLTrace_glEndTilingQCOM(GLbitfield preserveMask) {
     // call function
     glContext->hooks->gl.glEndTilingQCOM(preserveMask);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 
@@ -6694,7 +6492,6 @@ void GLTrace_glAlphaFunc(GLenum func, GLclampf ref) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glAlphaFunc);
 
     // copy argument func
@@ -6712,15 +6509,14 @@ void GLTrace_glAlphaFunc(GLenum func, GLclampf ref) {
     // call function
     glContext->hooks->gl.glAlphaFunc(func, ref);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanef(GLenum plane, const GLfloat *equation) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanef);
 
     // copy argument plane
@@ -6738,15 +6534,14 @@ void GLTrace_glClipPlanef(GLenum plane, const GLfloat *equation) {
     // call function
     glContext->hooks->gl.glClipPlanef(plane, equation);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColor4f);
 
     // copy argument red
@@ -6776,15 +6571,14 @@ void GLTrace_glColor4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) 
     // call function
     glContext->hooks->gl.glColor4f(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogf(GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogf);
 
     // copy argument pname
@@ -6802,15 +6596,14 @@ void GLTrace_glFogf(GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glFogf(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogfv(GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogfv);
 
     // copy argument pname
@@ -6828,15 +6621,14 @@ void GLTrace_glFogfv(GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glFogfv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFrustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFrustumf);
 
     // copy argument left
@@ -6878,15 +6670,14 @@ void GLTrace_glFrustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top
     // call function
     glContext->hooks->gl.glFrustumf(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetClipPlanef(GLenum pname, GLfloat eqn[4]) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetClipPlanef);
 
     // copy argument pname
@@ -6904,15 +6695,14 @@ void GLTrace_glGetClipPlanef(GLenum pname, GLfloat eqn[4]) {
     // call function
     glContext->hooks->gl.glGetClipPlanef(pname, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetLightfv(GLenum light, GLenum pname, GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetLightfv);
 
     // copy argument light
@@ -6936,15 +6726,14 @@ void GLTrace_glGetLightfv(GLenum light, GLenum pname, GLfloat *params) {
     // call function
     glContext->hooks->gl.glGetLightfv(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetMaterialfv(GLenum face, GLenum pname, GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetMaterialfv);
 
     // copy argument face
@@ -6968,15 +6757,14 @@ void GLTrace_glGetMaterialfv(GLenum face, GLenum pname, GLfloat *params) {
     // call function
     glContext->hooks->gl.glGetMaterialfv(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexEnvfv(GLenum env, GLenum pname, GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexEnvfv);
 
     // copy argument env
@@ -7000,15 +6788,14 @@ void GLTrace_glGetTexEnvfv(GLenum env, GLenum pname, GLfloat *params) {
     // call function
     glContext->hooks->gl.glGetTexEnvfv(env, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelf(GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelf);
 
     // copy argument pname
@@ -7026,15 +6813,14 @@ void GLTrace_glLightModelf(GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glLightModelf(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelfv(GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelfv);
 
     // copy argument pname
@@ -7052,15 +6838,14 @@ void GLTrace_glLightModelfv(GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glLightModelfv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightf(GLenum light, GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightf);
 
     // copy argument light
@@ -7084,15 +6869,14 @@ void GLTrace_glLightf(GLenum light, GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glLightf(light, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightfv(GLenum light, GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightfv);
 
     // copy argument light
@@ -7116,15 +6900,14 @@ void GLTrace_glLightfv(GLenum light, GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glLightfv(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLoadMatrixf(const GLfloat *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLoadMatrixf);
 
     // copy argument m
@@ -7136,15 +6919,14 @@ void GLTrace_glLoadMatrixf(const GLfloat *m) {
     // call function
     glContext->hooks->gl.glLoadMatrixf(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialf(GLenum face, GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialf);
 
     // copy argument face
@@ -7168,15 +6950,14 @@ void GLTrace_glMaterialf(GLenum face, GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glMaterialf(face, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialfv(GLenum face, GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialfv);
 
     // copy argument face
@@ -7200,15 +6981,14 @@ void GLTrace_glMaterialfv(GLenum face, GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glMaterialfv(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultMatrixf(const GLfloat *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultMatrixf);
 
     // copy argument m
@@ -7220,15 +7000,14 @@ void GLTrace_glMultMatrixf(const GLfloat *m) {
     // call function
     glContext->hooks->gl.glMultMatrixf(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultiTexCoord4f);
 
     // copy argument target
@@ -7264,15 +7043,14 @@ void GLTrace_glMultiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, G
     // call function
     glContext->hooks->gl.glMultiTexCoord4f(target, s, t, r, q);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glNormal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glNormal3f);
 
     // copy argument nx
@@ -7296,15 +7074,14 @@ void GLTrace_glNormal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
     // call function
     glContext->hooks->gl.glNormal3f(nx, ny, nz);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glOrthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glOrthof);
 
     // copy argument left
@@ -7346,15 +7123,14 @@ void GLTrace_glOrthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, 
     // call function
     glContext->hooks->gl.glOrthof(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterf(GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterf);
 
     // copy argument pname
@@ -7372,15 +7148,14 @@ void GLTrace_glPointParameterf(GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glPointParameterf(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterfv(GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterfv);
 
     // copy argument pname
@@ -7398,15 +7173,14 @@ void GLTrace_glPointParameterfv(GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glPointParameterfv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointSize(GLfloat size) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointSize);
 
     // copy argument size
@@ -7418,15 +7192,14 @@ void GLTrace_glPointSize(GLfloat size) {
     // call function
     glContext->hooks->gl.glPointSize(size);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRotatef);
 
     // copy argument angle
@@ -7456,15 +7229,14 @@ void GLTrace_glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
     // call function
     glContext->hooks->gl.glRotatef(angle, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glScalef(GLfloat x, GLfloat y, GLfloat z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glScalef);
 
     // copy argument x
@@ -7488,15 +7260,14 @@ void GLTrace_glScalef(GLfloat x, GLfloat y, GLfloat z) {
     // call function
     glContext->hooks->gl.glScalef(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvf(GLenum target, GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvf);
 
     // copy argument target
@@ -7520,15 +7291,14 @@ void GLTrace_glTexEnvf(GLenum target, GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glTexEnvf(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvfv(GLenum target, GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvfv);
 
     // copy argument target
@@ -7552,15 +7322,14 @@ void GLTrace_glTexEnvfv(GLenum target, GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glTexEnvfv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTranslatef(GLfloat x, GLfloat y, GLfloat z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTranslatef);
 
     // copy argument x
@@ -7584,15 +7353,14 @@ void GLTrace_glTranslatef(GLfloat x, GLfloat y, GLfloat z) {
     // call function
     glContext->hooks->gl.glTranslatef(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glAlphaFuncx(GLenum func, GLclampx ref) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glAlphaFuncx);
 
     // copy argument func
@@ -7610,15 +7378,14 @@ void GLTrace_glAlphaFuncx(GLenum func, GLclampx ref) {
     // call function
     glContext->hooks->gl.glAlphaFuncx(func, ref);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearColorx(GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearColorx);
 
     // copy argument red
@@ -7648,15 +7415,14 @@ void GLTrace_glClearColorx(GLclampx red, GLclampx green, GLclampx blue, GLclampx
     // call function
     glContext->hooks->gl.glClearColorx(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearDepthx(GLclampx depth) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearDepthx);
 
     // copy argument depth
@@ -7668,15 +7434,14 @@ void GLTrace_glClearDepthx(GLclampx depth) {
     // call function
     glContext->hooks->gl.glClearDepthx(depth);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClientActiveTexture(GLenum texture) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClientActiveTexture);
 
     // copy argument texture
@@ -7688,15 +7453,14 @@ void GLTrace_glClientActiveTexture(GLenum texture) {
     // call function
     glContext->hooks->gl.glClientActiveTexture(texture);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanex(GLenum plane, const GLfixed *equation) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanex);
 
     // copy argument plane
@@ -7714,15 +7478,14 @@ void GLTrace_glClipPlanex(GLenum plane, const GLfixed *equation) {
     // call function
     glContext->hooks->gl.glClipPlanex(plane, equation);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColor4ub);
 
     // copy argument red
@@ -7752,15 +7515,14 @@ void GLTrace_glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
     // call function
     glContext->hooks->gl.glColor4ub(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColor4x(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColor4x);
 
     // copy argument red
@@ -7790,15 +7552,14 @@ void GLTrace_glColor4x(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) 
     // call function
     glContext->hooks->gl.glColor4x(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColorPointer);
 
     // copy argument size
@@ -7828,15 +7589,14 @@ void GLTrace_glColorPointer(GLint size, GLenum type, GLsizei stride, const GLvoi
     // call function
     glContext->hooks->gl.glColorPointer(size, type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDepthRangex(GLclampx zNear, GLclampx zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthRangex);
 
     // copy argument zNear
@@ -7854,15 +7614,14 @@ void GLTrace_glDepthRangex(GLclampx zNear, GLclampx zFar) {
     // call function
     glContext->hooks->gl.glDepthRangex(zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDisableClientState(GLenum array) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDisableClientState);
 
     // copy argument array
@@ -7874,15 +7633,14 @@ void GLTrace_glDisableClientState(GLenum array) {
     // call function
     glContext->hooks->gl.glDisableClientState(array);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glEnableClientState(GLenum array) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glEnableClientState);
 
     // copy argument array
@@ -7894,15 +7652,14 @@ void GLTrace_glEnableClientState(GLenum array) {
     // call function
     glContext->hooks->gl.glEnableClientState(array);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogx(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogx);
 
     // copy argument pname
@@ -7920,15 +7677,14 @@ void GLTrace_glFogx(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glFogx(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogxv(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogxv);
 
     // copy argument pname
@@ -7946,15 +7702,14 @@ void GLTrace_glFogxv(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glFogxv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFrustumx(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFrustumx);
 
     // copy argument left
@@ -7996,15 +7751,14 @@ void GLTrace_glFrustumx(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top
     // call function
     glContext->hooks->gl.glFrustumx(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetClipPlanex(GLenum pname, GLfixed eqn[4]) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetClipPlanex);
 
     // copy argument pname
@@ -8022,15 +7776,14 @@ void GLTrace_glGetClipPlanex(GLenum pname, GLfixed eqn[4]) {
     // call function
     glContext->hooks->gl.glGetClipPlanex(pname, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetFixedv(GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFixedv);
 
     // copy argument pname
@@ -8048,15 +7801,14 @@ void GLTrace_glGetFixedv(GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetFixedv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetLightxv(GLenum light, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetLightxv);
 
     // copy argument light
@@ -8080,15 +7832,14 @@ void GLTrace_glGetLightxv(GLenum light, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetLightxv(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetMaterialxv(GLenum face, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetMaterialxv);
 
     // copy argument face
@@ -8112,15 +7863,14 @@ void GLTrace_glGetMaterialxv(GLenum face, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetMaterialxv(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetPointerv(GLenum pname, GLvoid **params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetPointerv);
 
     // copy argument pname
@@ -8138,15 +7888,14 @@ void GLTrace_glGetPointerv(GLenum pname, GLvoid **params) {
     // call function
     glContext->hooks->gl.glGetPointerv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexEnviv(GLenum env, GLenum pname, GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexEnviv);
 
     // copy argument env
@@ -8170,15 +7919,14 @@ void GLTrace_glGetTexEnviv(GLenum env, GLenum pname, GLint *params) {
     // call function
     glContext->hooks->gl.glGetTexEnviv(env, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexEnvxv(GLenum env, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexEnvxv);
 
     // copy argument env
@@ -8202,15 +7950,14 @@ void GLTrace_glGetTexEnvxv(GLenum env, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetTexEnvxv(env, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexParameterxv(GLenum target, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexParameterxv);
 
     // copy argument target
@@ -8234,15 +7981,14 @@ void GLTrace_glGetTexParameterxv(GLenum target, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetTexParameterxv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelx(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelx);
 
     // copy argument pname
@@ -8260,15 +8006,14 @@ void GLTrace_glLightModelx(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glLightModelx(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelxv(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelxv);
 
     // copy argument pname
@@ -8286,15 +8031,14 @@ void GLTrace_glLightModelxv(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glLightModelxv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightx(GLenum light, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightx);
 
     // copy argument light
@@ -8318,15 +8062,14 @@ void GLTrace_glLightx(GLenum light, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glLightx(light, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightxv(GLenum light, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightxv);
 
     // copy argument light
@@ -8350,15 +8093,14 @@ void GLTrace_glLightxv(GLenum light, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glLightxv(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLineWidthx(GLfixed width) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLineWidthx);
 
     // copy argument width
@@ -8370,29 +8112,27 @@ void GLTrace_glLineWidthx(GLfixed width) {
     // call function
     glContext->hooks->gl.glLineWidthx(width);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLoadIdentity(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLoadIdentity);
 
     // call function
     glContext->hooks->gl.glLoadIdentity();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLoadMatrixx(const GLfixed *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLoadMatrixx);
 
     // copy argument m
@@ -8404,15 +8144,14 @@ void GLTrace_glLoadMatrixx(const GLfixed *m) {
     // call function
     glContext->hooks->gl.glLoadMatrixx(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLogicOp(GLenum opcode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLogicOp);
 
     // copy argument opcode
@@ -8424,15 +8163,14 @@ void GLTrace_glLogicOp(GLenum opcode) {
     // call function
     glContext->hooks->gl.glLogicOp(opcode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialx(GLenum face, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialx);
 
     // copy argument face
@@ -8456,15 +8194,14 @@ void GLTrace_glMaterialx(GLenum face, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glMaterialx(face, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialxv(GLenum face, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialxv);
 
     // copy argument face
@@ -8488,15 +8225,14 @@ void GLTrace_glMaterialxv(GLenum face, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glMaterialxv(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMatrixMode(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMatrixMode);
 
     // copy argument mode
@@ -8508,15 +8244,14 @@ void GLTrace_glMatrixMode(GLenum mode) {
     // call function
     glContext->hooks->gl.glMatrixMode(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultMatrixx(const GLfixed *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultMatrixx);
 
     // copy argument m
@@ -8528,15 +8263,14 @@ void GLTrace_glMultMatrixx(const GLfixed *m) {
     // call function
     glContext->hooks->gl.glMultMatrixx(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultiTexCoord4x(GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultiTexCoord4x);
 
     // copy argument target
@@ -8572,15 +8306,14 @@ void GLTrace_glMultiTexCoord4x(GLenum target, GLfixed s, GLfixed t, GLfixed r, G
     // call function
     glContext->hooks->gl.glMultiTexCoord4x(target, s, t, r, q);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glNormal3x(GLfixed nx, GLfixed ny, GLfixed nz) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glNormal3x);
 
     // copy argument nx
@@ -8604,15 +8337,14 @@ void GLTrace_glNormal3x(GLfixed nx, GLfixed ny, GLfixed nz) {
     // call function
     glContext->hooks->gl.glNormal3x(nx, ny, nz);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glNormalPointer);
 
     // copy argument type
@@ -8636,15 +8368,14 @@ void GLTrace_glNormalPointer(GLenum type, GLsizei stride, const GLvoid *pointer)
     // call function
     glContext->hooks->gl.glNormalPointer(type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glOrthox(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glOrthox);
 
     // copy argument left
@@ -8686,15 +8417,14 @@ void GLTrace_glOrthox(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, 
     // call function
     glContext->hooks->gl.glOrthox(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterx(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterx);
 
     // copy argument pname
@@ -8712,15 +8442,14 @@ void GLTrace_glPointParameterx(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glPointParameterx(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterxv(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterxv);
 
     // copy argument pname
@@ -8738,15 +8467,14 @@ void GLTrace_glPointParameterxv(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glPointParameterxv(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointSizex(GLfixed size) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointSizex);
 
     // copy argument size
@@ -8758,15 +8486,14 @@ void GLTrace_glPointSizex(GLfixed size) {
     // call function
     glContext->hooks->gl.glPointSizex(size);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPolygonOffsetx(GLfixed factor, GLfixed units) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPolygonOffsetx);
 
     // copy argument factor
@@ -8784,43 +8511,40 @@ void GLTrace_glPolygonOffsetx(GLfixed factor, GLfixed units) {
     // call function
     glContext->hooks->gl.glPolygonOffsetx(factor, units);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPopMatrix(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPopMatrix);
 
     // call function
     glContext->hooks->gl.glPopMatrix();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPushMatrix(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPushMatrix);
 
     // call function
     glContext->hooks->gl.glPushMatrix();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRotatex(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRotatex);
 
     // copy argument angle
@@ -8850,15 +8574,14 @@ void GLTrace_glRotatex(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glRotatex(angle, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glSampleCoveragex(GLclampx value, GLboolean invert) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glSampleCoveragex);
 
     // copy argument value
@@ -8876,15 +8599,14 @@ void GLTrace_glSampleCoveragex(GLclampx value, GLboolean invert) {
     // call function
     glContext->hooks->gl.glSampleCoveragex(value, invert);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glScalex(GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glScalex);
 
     // copy argument x
@@ -8908,15 +8630,14 @@ void GLTrace_glScalex(GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glScalex(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glShadeModel(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glShadeModel);
 
     // copy argument mode
@@ -8928,15 +8649,14 @@ void GLTrace_glShadeModel(GLenum mode) {
     // call function
     glContext->hooks->gl.glShadeModel(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexCoordPointer);
 
     // copy argument size
@@ -8966,15 +8686,14 @@ void GLTrace_glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const GL
     // call function
     glContext->hooks->gl.glTexCoordPointer(size, type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvi(GLenum target, GLenum pname, GLint param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvi);
 
     // copy argument target
@@ -8998,15 +8717,14 @@ void GLTrace_glTexEnvi(GLenum target, GLenum pname, GLint param) {
     // call function
     glContext->hooks->gl.glTexEnvi(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvx(GLenum target, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvx);
 
     // copy argument target
@@ -9030,15 +8748,14 @@ void GLTrace_glTexEnvx(GLenum target, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glTexEnvx(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnviv(GLenum target, GLenum pname, const GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnviv);
 
     // copy argument target
@@ -9062,15 +8779,14 @@ void GLTrace_glTexEnviv(GLenum target, GLenum pname, const GLint *params) {
     // call function
     glContext->hooks->gl.glTexEnviv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvxv(GLenum target, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvxv);
 
     // copy argument target
@@ -9094,15 +8810,14 @@ void GLTrace_glTexEnvxv(GLenum target, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glTexEnvxv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterx(GLenum target, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterx);
 
     // copy argument target
@@ -9126,15 +8841,14 @@ void GLTrace_glTexParameterx(GLenum target, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glTexParameterx(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterxv(GLenum target, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterxv);
 
     // copy argument target
@@ -9158,15 +8872,14 @@ void GLTrace_glTexParameterxv(GLenum target, GLenum pname, const GLfixed *params
     // call function
     glContext->hooks->gl.glTexParameterxv(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTranslatex(GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTranslatex);
 
     // copy argument x
@@ -9190,15 +8903,14 @@ void GLTrace_glTranslatex(GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glTranslatex(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glVertexPointer);
 
     // copy argument size
@@ -9228,15 +8940,14 @@ void GLTrace_glVertexPointer(GLint size, GLenum type, GLsizei stride, const GLvo
     // call function
     glContext->hooks->gl.glVertexPointer(size, type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointSizePointerOES(GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointSizePointerOES);
 
     // copy argument type
@@ -9260,8 +8971,8 @@ void GLTrace_glPointSizePointerOES(GLenum type, GLsizei stride, const GLvoid *po
     // call function
     glContext->hooks->gl.glPointSizePointerOES(type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 
@@ -9271,7 +8982,6 @@ void GLTrace_glBlendEquationSeparateOES(GLenum modeRGB, GLenum modeAlpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendEquationSeparateOES);
 
     // copy argument modeRGB
@@ -9289,15 +8999,14 @@ void GLTrace_glBlendEquationSeparateOES(GLenum modeRGB, GLenum modeAlpha) {
     // call function
     glContext->hooks->gl.glBlendEquationSeparateOES(modeRGB, modeAlpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendFuncSeparateOES);
 
     // copy argument srcRGB
@@ -9327,15 +9036,14 @@ void GLTrace_glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLenum srcAlph
     // call function
     glContext->hooks->gl.glBlendFuncSeparateOES(srcRGB, dstRGB, srcAlpha, dstAlpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glBlendEquationOES(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBlendEquationOES);
 
     // copy argument mode
@@ -9347,15 +9055,14 @@ void GLTrace_glBlendEquationOES(GLenum mode) {
     // call function
     glContext->hooks->gl.glBlendEquationOES(mode);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexsOES(GLshort x, GLshort y, GLshort z, GLshort width, GLshort height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexsOES);
 
     // copy argument x
@@ -9391,15 +9098,14 @@ void GLTrace_glDrawTexsOES(GLshort x, GLshort y, GLshort z, GLshort width, GLsho
     // call function
     glContext->hooks->gl.glDrawTexsOES(x, y, z, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexiOES);
 
     // copy argument x
@@ -9435,15 +9141,14 @@ void GLTrace_glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
     // call function
     glContext->hooks->gl.glDrawTexiOES(x, y, z, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexxOES);
 
     // copy argument x
@@ -9479,15 +9184,14 @@ void GLTrace_glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfix
     // call function
     glContext->hooks->gl.glDrawTexxOES(x, y, z, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexsvOES(const GLshort *coords) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexsvOES);
 
     // copy argument coords
@@ -9499,15 +9203,14 @@ void GLTrace_glDrawTexsvOES(const GLshort *coords) {
     // call function
     glContext->hooks->gl.glDrawTexsvOES(coords);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexivOES(const GLint *coords) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexivOES);
 
     // copy argument coords
@@ -9519,15 +9222,14 @@ void GLTrace_glDrawTexivOES(const GLint *coords) {
     // call function
     glContext->hooks->gl.glDrawTexivOES(coords);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexxvOES(const GLfixed *coords) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexxvOES);
 
     // copy argument coords
@@ -9539,15 +9241,14 @@ void GLTrace_glDrawTexxvOES(const GLfixed *coords) {
     // call function
     glContext->hooks->gl.glDrawTexxvOES(coords);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexfOES(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexfOES);
 
     // copy argument x
@@ -9583,15 +9284,14 @@ void GLTrace_glDrawTexfOES(GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLflo
     // call function
     glContext->hooks->gl.glDrawTexfOES(x, y, z, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDrawTexfvOES(const GLfloat *coords) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDrawTexfvOES);
 
     // copy argument coords
@@ -9603,15 +9303,14 @@ void GLTrace_glDrawTexfvOES(const GLfloat *coords) {
     // call function
     glContext->hooks->gl.glDrawTexfvOES(coords);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glAlphaFuncxOES(GLenum func, GLclampx ref) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glAlphaFuncxOES);
 
     // copy argument func
@@ -9629,15 +9328,14 @@ void GLTrace_glAlphaFuncxOES(GLenum func, GLclampx ref) {
     // call function
     glContext->hooks->gl.glAlphaFuncxOES(func, ref);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearColorxOES(GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearColorxOES);
 
     // copy argument red
@@ -9667,15 +9365,14 @@ void GLTrace_glClearColorxOES(GLclampx red, GLclampx green, GLclampx blue, GLcla
     // call function
     glContext->hooks->gl.glClearColorxOES(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearDepthxOES(GLclampx depth) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearDepthxOES);
 
     // copy argument depth
@@ -9687,15 +9384,14 @@ void GLTrace_glClearDepthxOES(GLclampx depth) {
     // call function
     glContext->hooks->gl.glClearDepthxOES(depth);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanexOES(GLenum plane, const GLfixed *equation) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanexOES);
 
     // copy argument plane
@@ -9713,15 +9409,14 @@ void GLTrace_glClipPlanexOES(GLenum plane, const GLfixed *equation) {
     // call function
     glContext->hooks->gl.glClipPlanexOES(plane, equation);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glColor4xOES(GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glColor4xOES);
 
     // copy argument red
@@ -9751,15 +9446,14 @@ void GLTrace_glColor4xOES(GLfixed red, GLfixed green, GLfixed blue, GLfixed alph
     // call function
     glContext->hooks->gl.glColor4xOES(red, green, blue, alpha);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDepthRangexOES(GLclampx zNear, GLclampx zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthRangexOES);
 
     // copy argument zNear
@@ -9777,15 +9471,14 @@ void GLTrace_glDepthRangexOES(GLclampx zNear, GLclampx zFar) {
     // call function
     glContext->hooks->gl.glDepthRangexOES(zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogxOES(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogxOES);
 
     // copy argument pname
@@ -9803,15 +9496,14 @@ void GLTrace_glFogxOES(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glFogxOES(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFogxvOES(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFogxvOES);
 
     // copy argument pname
@@ -9829,15 +9521,14 @@ void GLTrace_glFogxvOES(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glFogxvOES(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFrustumxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFrustumxOES);
 
     // copy argument left
@@ -9879,15 +9570,14 @@ void GLTrace_glFrustumxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed 
     // call function
     glContext->hooks->gl.glFrustumxOES(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetClipPlanexOES(GLenum pname, GLfixed eqn[4]) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetClipPlanexOES);
 
     // copy argument pname
@@ -9905,15 +9595,14 @@ void GLTrace_glGetClipPlanexOES(GLenum pname, GLfixed eqn[4]) {
     // call function
     glContext->hooks->gl.glGetClipPlanexOES(pname, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetFixedvOES(GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFixedvOES);
 
     // copy argument pname
@@ -9931,15 +9620,14 @@ void GLTrace_glGetFixedvOES(GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetFixedvOES(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetLightxvOES(GLenum light, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetLightxvOES);
 
     // copy argument light
@@ -9963,15 +9651,14 @@ void GLTrace_glGetLightxvOES(GLenum light, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetLightxvOES(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetMaterialxvOES(GLenum face, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetMaterialxvOES);
 
     // copy argument face
@@ -9995,15 +9682,14 @@ void GLTrace_glGetMaterialxvOES(GLenum face, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetMaterialxvOES(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexEnvxvOES(GLenum env, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexEnvxvOES);
 
     // copy argument env
@@ -10027,15 +9713,14 @@ void GLTrace_glGetTexEnvxvOES(GLenum env, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetTexEnvxvOES(env, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexParameterxvOES(GLenum target, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexParameterxvOES);
 
     // copy argument target
@@ -10059,15 +9744,14 @@ void GLTrace_glGetTexParameterxvOES(GLenum target, GLenum pname, GLfixed *params
     // call function
     glContext->hooks->gl.glGetTexParameterxvOES(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelxOES(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelxOES);
 
     // copy argument pname
@@ -10085,15 +9769,14 @@ void GLTrace_glLightModelxOES(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glLightModelxOES(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightModelxvOES(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightModelxvOES);
 
     // copy argument pname
@@ -10111,15 +9794,14 @@ void GLTrace_glLightModelxvOES(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glLightModelxvOES(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightxOES(GLenum light, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightxOES);
 
     // copy argument light
@@ -10143,15 +9825,14 @@ void GLTrace_glLightxOES(GLenum light, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glLightxOES(light, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLightxvOES(GLenum light, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLightxvOES);
 
     // copy argument light
@@ -10175,15 +9856,14 @@ void GLTrace_glLightxvOES(GLenum light, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glLightxvOES(light, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLineWidthxOES(GLfixed width) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLineWidthxOES);
 
     // copy argument width
@@ -10195,15 +9875,14 @@ void GLTrace_glLineWidthxOES(GLfixed width) {
     // call function
     glContext->hooks->gl.glLineWidthxOES(width);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLoadMatrixxOES(const GLfixed *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLoadMatrixxOES);
 
     // copy argument m
@@ -10215,15 +9894,14 @@ void GLTrace_glLoadMatrixxOES(const GLfixed *m) {
     // call function
     glContext->hooks->gl.glLoadMatrixxOES(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialxOES(GLenum face, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialxOES);
 
     // copy argument face
@@ -10247,15 +9925,14 @@ void GLTrace_glMaterialxOES(GLenum face, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glMaterialxOES(face, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMaterialxvOES(GLenum face, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMaterialxvOES);
 
     // copy argument face
@@ -10279,15 +9956,14 @@ void GLTrace_glMaterialxvOES(GLenum face, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glMaterialxvOES(face, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultMatrixxOES(const GLfixed *m) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultMatrixxOES);
 
     // copy argument m
@@ -10299,15 +9975,14 @@ void GLTrace_glMultMatrixxOES(const GLfixed *m) {
     // call function
     glContext->hooks->gl.glMultMatrixxOES(m);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMultiTexCoord4xOES(GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMultiTexCoord4xOES);
 
     // copy argument target
@@ -10343,15 +10018,14 @@ void GLTrace_glMultiTexCoord4xOES(GLenum target, GLfixed s, GLfixed t, GLfixed r
     // call function
     glContext->hooks->gl.glMultiTexCoord4xOES(target, s, t, r, q);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glNormal3xOES(GLfixed nx, GLfixed ny, GLfixed nz) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glNormal3xOES);
 
     // copy argument nx
@@ -10375,15 +10049,14 @@ void GLTrace_glNormal3xOES(GLfixed nx, GLfixed ny, GLfixed nz) {
     // call function
     glContext->hooks->gl.glNormal3xOES(nx, ny, nz);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glOrthoxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glOrthoxOES);
 
     // copy argument left
@@ -10425,15 +10098,14 @@ void GLTrace_glOrthoxOES(GLfixed left, GLfixed right, GLfixed bottom, GLfixed to
     // call function
     glContext->hooks->gl.glOrthoxOES(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterxOES(GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterxOES);
 
     // copy argument pname
@@ -10451,15 +10123,14 @@ void GLTrace_glPointParameterxOES(GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glPointParameterxOES(pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointParameterxvOES(GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointParameterxvOES);
 
     // copy argument pname
@@ -10477,15 +10148,14 @@ void GLTrace_glPointParameterxvOES(GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glPointParameterxvOES(pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPointSizexOES(GLfixed size) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPointSizexOES);
 
     // copy argument size
@@ -10497,15 +10167,14 @@ void GLTrace_glPointSizexOES(GLfixed size) {
     // call function
     glContext->hooks->gl.glPointSizexOES(size);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glPolygonOffsetxOES(GLfixed factor, GLfixed units) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glPolygonOffsetxOES);
 
     // copy argument factor
@@ -10523,15 +10192,14 @@ void GLTrace_glPolygonOffsetxOES(GLfixed factor, GLfixed units) {
     // call function
     glContext->hooks->gl.glPolygonOffsetxOES(factor, units);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRotatexOES(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRotatexOES);
 
     // copy argument angle
@@ -10561,15 +10229,14 @@ void GLTrace_glRotatexOES(GLfixed angle, GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glRotatexOES(angle, x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glSampleCoveragexOES(GLclampx value, GLboolean invert) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glSampleCoveragexOES);
 
     // copy argument value
@@ -10587,15 +10254,14 @@ void GLTrace_glSampleCoveragexOES(GLclampx value, GLboolean invert) {
     // call function
     glContext->hooks->gl.glSampleCoveragexOES(value, invert);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glScalexOES(GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glScalexOES);
 
     // copy argument x
@@ -10619,15 +10285,14 @@ void GLTrace_glScalexOES(GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glScalexOES(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvxOES(GLenum target, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvxOES);
 
     // copy argument target
@@ -10651,15 +10316,14 @@ void GLTrace_glTexEnvxOES(GLenum target, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glTexEnvxOES(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexEnvxvOES(GLenum target, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexEnvxvOES);
 
     // copy argument target
@@ -10683,15 +10347,14 @@ void GLTrace_glTexEnvxvOES(GLenum target, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glTexEnvxvOES(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterxOES(GLenum target, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterxOES);
 
     // copy argument target
@@ -10715,15 +10378,14 @@ void GLTrace_glTexParameterxOES(GLenum target, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glTexParameterxOES(target, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexParameterxvOES(GLenum target, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexParameterxvOES);
 
     // copy argument target
@@ -10747,15 +10409,14 @@ void GLTrace_glTexParameterxvOES(GLenum target, GLenum pname, const GLfixed *par
     // call function
     glContext->hooks->gl.glTexParameterxvOES(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTranslatexOES(GLfixed x, GLfixed y, GLfixed z) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTranslatexOES);
 
     // copy argument x
@@ -10779,15 +10440,14 @@ void GLTrace_glTranslatexOES(GLfixed x, GLfixed y, GLfixed z) {
     // call function
     glContext->hooks->gl.glTranslatexOES(x, y, z);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glIsRenderbufferOES(GLuint renderbuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsRenderbufferOES);
 
     // copy argument renderbuffer
@@ -10805,8 +10465,8 @@ GLboolean GLTrace_glIsRenderbufferOES(GLuint renderbuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -10815,7 +10475,6 @@ void GLTrace_glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindRenderbufferOES);
 
     // copy argument target
@@ -10833,15 +10492,14 @@ void GLTrace_glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
     // call function
     glContext->hooks->gl.glBindRenderbufferOES(target, renderbuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteRenderbuffersOES(GLsizei n, const GLuint* renderbuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteRenderbuffersOES);
 
     // copy argument n
@@ -10859,15 +10517,14 @@ void GLTrace_glDeleteRenderbuffersOES(GLsizei n, const GLuint* renderbuffers) {
     // call function
     glContext->hooks->gl.glDeleteRenderbuffersOES(n, renderbuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenRenderbuffersOES(GLsizei n, GLuint* renderbuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenRenderbuffersOES);
 
     // copy argument n
@@ -10885,15 +10542,14 @@ void GLTrace_glGenRenderbuffersOES(GLsizei n, GLuint* renderbuffers) {
     // call function
     glContext->hooks->gl.glGenRenderbuffersOES(n, renderbuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glRenderbufferStorageOES);
 
     // copy argument target
@@ -10923,15 +10579,14 @@ void GLTrace_glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsi
     // call function
     glContext->hooks->gl.glRenderbufferStorageOES(target, internalformat, width, height);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetRenderbufferParameterivOES);
 
     // copy argument target
@@ -10955,15 +10610,14 @@ void GLTrace_glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint*
     // call function
     glContext->hooks->gl.glGetRenderbufferParameterivOES(target, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLboolean GLTrace_glIsFramebufferOES(GLuint framebuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glIsFramebufferOES);
 
     // copy argument framebuffer
@@ -10981,8 +10635,8 @@ GLboolean GLTrace_glIsFramebufferOES(GLuint framebuffer) {
     rt->set_type(GLMessage::DataType::BOOL);
     rt->add_boolvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -10991,7 +10645,6 @@ void GLTrace_glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glBindFramebufferOES);
 
     // copy argument target
@@ -11009,15 +10662,14 @@ void GLTrace_glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     // call function
     glContext->hooks->gl.glBindFramebufferOES(target, framebuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glDeleteFramebuffersOES(GLsizei n, const GLuint* framebuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDeleteFramebuffersOES);
 
     // copy argument n
@@ -11035,15 +10687,14 @@ void GLTrace_glDeleteFramebuffersOES(GLsizei n, const GLuint* framebuffers) {
     // call function
     glContext->hooks->gl.glDeleteFramebuffersOES(n, framebuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenFramebuffersOES(GLsizei n, GLuint* framebuffers) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenFramebuffersOES);
 
     // copy argument n
@@ -11061,15 +10712,14 @@ void GLTrace_glGenFramebuffersOES(GLsizei n, GLuint* framebuffers) {
     // call function
     glContext->hooks->gl.glGenFramebuffersOES(n, framebuffers);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLenum GLTrace_glCheckFramebufferStatusOES(GLenum target) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCheckFramebufferStatusOES);
 
     // copy argument target
@@ -11087,8 +10737,8 @@ GLenum GLTrace_glCheckFramebufferStatusOES(GLenum target) {
     rt->set_type(GLMessage::DataType::ENUM);
     rt->add_intvalue((int)retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -11097,7 +10747,6 @@ void GLTrace_glFramebufferRenderbufferOES(GLenum target, GLenum attachment, GLen
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferRenderbufferOES);
 
     // copy argument target
@@ -11127,15 +10776,14 @@ void GLTrace_glFramebufferRenderbufferOES(GLenum target, GLenum attachment, GLen
     // call function
     glContext->hooks->gl.glFramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFramebufferTexture2DOES);
 
     // copy argument target
@@ -11171,15 +10819,14 @@ void GLTrace_glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum 
     // call function
     glContext->hooks->gl.glFramebufferTexture2DOES(target, attachment, textarget, texture, level);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum attachment, GLenum pname, GLint* params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetFramebufferAttachmentParameterivOES);
 
     // copy argument target
@@ -11209,15 +10856,14 @@ void GLTrace_glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum atta
     // call function
     glContext->hooks->gl.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGenerateMipmapOES(GLenum target) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGenerateMipmapOES);
 
     // copy argument target
@@ -11229,15 +10875,14 @@ void GLTrace_glGenerateMipmapOES(GLenum target) {
     // call function
     glContext->hooks->gl.glGenerateMipmapOES(target);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glCurrentPaletteMatrixOES(GLuint matrixpaletteindex) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glCurrentPaletteMatrixOES);
 
     // copy argument matrixpaletteindex
@@ -11249,29 +10894,27 @@ void GLTrace_glCurrentPaletteMatrixOES(GLuint matrixpaletteindex) {
     // call function
     glContext->hooks->gl.glCurrentPaletteMatrixOES(matrixpaletteindex);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glLoadPaletteFromModelViewMatrixOES(void) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glLoadPaletteFromModelViewMatrixOES);
 
     // call function
     glContext->hooks->gl.glLoadPaletteFromModelViewMatrixOES();
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glMatrixIndexPointerOES(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glMatrixIndexPointerOES);
 
     // copy argument size
@@ -11301,15 +10944,14 @@ void GLTrace_glMatrixIndexPointerOES(GLint size, GLenum type, GLsizei stride, co
     // call function
     glContext->hooks->gl.glMatrixIndexPointerOES(size, type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glWeightPointerOES(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glWeightPointerOES);
 
     // copy argument size
@@ -11339,15 +10981,14 @@ void GLTrace_glWeightPointerOES(GLint size, GLenum type, GLsizei stride, const G
     // call function
     glContext->hooks->gl.glWeightPointerOES(size, type, stride, pointer);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 GLbitfield GLTrace_glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glQueryMatrixxOES);
 
     // copy argument mantissa
@@ -11371,8 +11012,8 @@ GLbitfield GLTrace_glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]) {
     rt->set_type(GLMessage::DataType::INT);
     rt->add_intvalue(retValue);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 
     return retValue;
 }
@@ -11381,7 +11022,6 @@ void GLTrace_glDepthRangefOES(GLclampf zNear, GLclampf zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glDepthRangefOES);
 
     // copy argument zNear
@@ -11399,15 +11039,14 @@ void GLTrace_glDepthRangefOES(GLclampf zNear, GLclampf zFar) {
     // call function
     glContext->hooks->gl.glDepthRangefOES(zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glFrustumfOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glFrustumfOES);
 
     // copy argument left
@@ -11449,15 +11088,14 @@ void GLTrace_glFrustumfOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
     // call function
     glContext->hooks->gl.glFrustumfOES(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glOrthofOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glOrthofOES);
 
     // copy argument left
@@ -11499,15 +11137,14 @@ void GLTrace_glOrthofOES(GLfloat left, GLfloat right, GLfloat bottom, GLfloat to
     // call function
     glContext->hooks->gl.glOrthofOES(left, right, bottom, top, zNear, zFar);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanefOES(GLenum plane, const GLfloat *equation) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanefOES);
 
     // copy argument plane
@@ -11525,15 +11162,14 @@ void GLTrace_glClipPlanefOES(GLenum plane, const GLfloat *equation) {
     // call function
     glContext->hooks->gl.glClipPlanefOES(plane, equation);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetClipPlanefOES(GLenum pname, GLfloat eqn[4]) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetClipPlanefOES);
 
     // copy argument pname
@@ -11551,15 +11187,14 @@ void GLTrace_glGetClipPlanefOES(GLenum pname, GLfloat eqn[4]) {
     // call function
     glContext->hooks->gl.glGetClipPlanefOES(pname, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClearDepthfOES(GLclampf depth) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClearDepthfOES);
 
     // copy argument depth
@@ -11571,15 +11206,14 @@ void GLTrace_glClearDepthfOES(GLclampf depth) {
     // call function
     glContext->hooks->gl.glClearDepthfOES(depth);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGenfOES(GLenum coord, GLenum pname, GLfloat param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGenfOES);
 
     // copy argument coord
@@ -11603,15 +11237,14 @@ void GLTrace_glTexGenfOES(GLenum coord, GLenum pname, GLfloat param) {
     // call function
     glContext->hooks->gl.glTexGenfOES(coord, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGenfvOES(GLenum coord, GLenum pname, const GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGenfvOES);
 
     // copy argument coord
@@ -11635,15 +11268,14 @@ void GLTrace_glTexGenfvOES(GLenum coord, GLenum pname, const GLfloat *params) {
     // call function
     glContext->hooks->gl.glTexGenfvOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGeniOES(GLenum coord, GLenum pname, GLint param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGeniOES);
 
     // copy argument coord
@@ -11667,15 +11299,14 @@ void GLTrace_glTexGeniOES(GLenum coord, GLenum pname, GLint param) {
     // call function
     glContext->hooks->gl.glTexGeniOES(coord, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGenivOES(GLenum coord, GLenum pname, const GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGenivOES);
 
     // copy argument coord
@@ -11699,15 +11330,14 @@ void GLTrace_glTexGenivOES(GLenum coord, GLenum pname, const GLint *params) {
     // call function
     glContext->hooks->gl.glTexGenivOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGenxOES(GLenum coord, GLenum pname, GLfixed param) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGenxOES);
 
     // copy argument coord
@@ -11731,15 +11361,14 @@ void GLTrace_glTexGenxOES(GLenum coord, GLenum pname, GLfixed param) {
     // call function
     glContext->hooks->gl.glTexGenxOES(coord, pname, param);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glTexGenxvOES(GLenum coord, GLenum pname, const GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glTexGenxvOES);
 
     // copy argument coord
@@ -11763,15 +11392,14 @@ void GLTrace_glTexGenxvOES(GLenum coord, GLenum pname, const GLfixed *params) {
     // call function
     glContext->hooks->gl.glTexGenxvOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexGenfvOES(GLenum coord, GLenum pname, GLfloat *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexGenfvOES);
 
     // copy argument coord
@@ -11795,15 +11423,14 @@ void GLTrace_glGetTexGenfvOES(GLenum coord, GLenum pname, GLfloat *params) {
     // call function
     glContext->hooks->gl.glGetTexGenfvOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexGenivOES(GLenum coord, GLenum pname, GLint *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexGenivOES);
 
     // copy argument coord
@@ -11827,15 +11454,14 @@ void GLTrace_glGetTexGenivOES(GLenum coord, GLenum pname, GLint *params) {
     // call function
     glContext->hooks->gl.glGetTexGenivOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glGetTexGenxvOES(GLenum coord, GLenum pname, GLfixed *params) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glGetTexGenxvOES);
 
     // copy argument coord
@@ -11859,15 +11485,14 @@ void GLTrace_glGetTexGenxvOES(GLenum coord, GLenum pname, GLfixed *params) {
     // call function
     glContext->hooks->gl.glGetTexGenxvOES(coord, pname, params);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanefIMG(GLenum p, const GLfloat *eqn) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanefIMG);
 
     // copy argument p
@@ -11885,15 +11510,14 @@ void GLTrace_glClipPlanefIMG(GLenum p, const GLfloat *eqn) {
     // call function
     glContext->hooks->gl.glClipPlanefIMG(p, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 void GLTrace_glClipPlanexIMG(GLenum p, const GLfixed *eqn) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_context_id(1);
     glmsg.set_function(GLMessage::glClipPlanexIMG);
 
     // copy argument p
@@ -11911,8 +11535,8 @@ void GLTrace_glClipPlanexIMG(GLenum p, const GLfixed *eqn) {
     // call function
     glContext->hooks->gl.glClipPlanexIMG(p, eqn);
 
-    fixupGLMessage(&glmsg);
-    traceGLMessage(&glmsg);
+    fixupGLMessage(glContext, &glmsg);
+    glContext->traceGLMessage(&glmsg);
 }
 
 

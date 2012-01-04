@@ -20,6 +20,8 @@
 namespace android {
 namespace gltrace {
 
+void GLTrace_eglCreateContext(int version, int contextId);
+void GLTrace_eglMakeCurrent(int contextId);
 void GLTrace_eglSwapBuffers(void *dpy, void *draw);
 
 };
