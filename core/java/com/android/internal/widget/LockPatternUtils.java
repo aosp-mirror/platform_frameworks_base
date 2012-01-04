@@ -427,14 +427,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Save a lock pattern.
-     * @param pattern The new pattern to save.
-     */
-    public void saveLockPattern(List<LockPatternView.Cell> pattern) {
-        this.saveLockPattern(pattern, false);
-    }
-
-    /**
      * Calls back SetupFaceLock to delete the temporary gallery file
      */
     public void deleteTempGallery() {
@@ -454,6 +446,14 @@ public class LockPatternUtils {
             intent.putExtra("deleteGallery", true);
             mContext.startActivity(intent);
         }
+    }
+
+    /**
+     * Save a lock pattern.
+     * @param pattern The new pattern to save.
+     */
+    public void saveLockPattern(List<LockPatternView.Cell> pattern) {
+        this.saveLockPattern(pattern, false);
     }
 
     /**
@@ -482,14 +482,16 @@ public class LockPatternUtils {
                 if (!isFallback) {
                     deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+                    dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING,
+                            pattern.size(), 0, 0, 0, 0, 0, 0);
                 } else {
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY,
                             DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                     finishBiometricWeak();
+                    dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
+                            0, 0, 0, 0, 0, 0, 0);
                 }
-                dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
-                        .size(), 0, 0, 0, 0, 0, 0);
             } else {
                 if (keyStore.isEmpty()) {
                     keyStore.reset();
@@ -600,40 +602,45 @@ public class LockPatternUtils {
                 if (!isFallback) {
                     deleteGallery();
                     setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
+                    if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                        int letters = 0;
+                        int uppercase = 0;
+                        int lowercase = 0;
+                        int numbers = 0;
+                        int symbols = 0;
+                        int nonletter = 0;
+                        for (int i = 0; i < password.length(); i++) {
+                            char c = password.charAt(i);
+                            if (c >= 'A' && c <= 'Z') {
+                                letters++;
+                                uppercase++;
+                            } else if (c >= 'a' && c <= 'z') {
+                                letters++;
+                                lowercase++;
+                            } else if (c >= '0' && c <= '9') {
+                                numbers++;
+                                nonletter++;
+                            } else {
+                                symbols++;
+                                nonletter++;
+                            }
+                        }
+                        dpm.setActivePasswordState(Math.max(quality, computedQuality),
+                                password.length(), letters, uppercase, lowercase,
+                                numbers, symbols, nonletter);
+                    } else {
+                        // The password is not anything.
+                        dpm.setActivePasswordState(
+                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                                0, 0, 0, 0, 0, 0, 0);
+                    }
                 } else {
+                    // Case where it's a fallback for biometric weak
                     setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK);
                     setLong(PASSWORD_TYPE_ALTERNATE_KEY, Math.max(quality, computedQuality));
                     finishBiometricWeak();
-                }
-                if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                    int letters = 0;
-                    int uppercase = 0;
-                    int lowercase = 0;
-                    int numbers = 0;
-                    int symbols = 0;
-                    int nonletter = 0;
-                    for (int i = 0; i < password.length(); i++) {
-                        char c = password.charAt(i);
-                        if (c >= 'A' && c <= 'Z') {
-                            letters++;
-                            uppercase++;
-                        } else if (c >= 'a' && c <= 'z') {
-                            letters++;
-                            lowercase++;
-                        } else if (c >= '0' && c <= '9') {
-                            numbers++;
-                            nonletter++;
-                        } else {
-                            symbols++;
-                            nonletter++;
-                        }
-                    }
-                    dpm.setActivePasswordState(Math.max(quality, computedQuality), password
-                            .length(), letters, uppercase, lowercase, numbers, symbols, nonletter);
-                } else {
-                    // The password is not anything.
-                    dpm.setActivePasswordState(
-                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0);
+                    dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK,
+                            0, 0, 0, 0, 0, 0, 0);
                 }
                 // Add the password to the password history. We assume all
                 // password
