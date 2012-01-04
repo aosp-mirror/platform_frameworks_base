@@ -96,6 +96,18 @@ typedef struct __attribute__((packed, aligned(4))) Camera_s {
     rs_allocation transformMatrix;
 } SgCamera;
 
+#define LIGHT_POINT 0
+#define LIGHT_DIRECTIONAL 1
+
+typedef struct __attribute__((packed, aligned(4))) Light_s {
+    float4 position;
+    float4 color;
+    float intensity;
+    int type;
+    rs_allocation name;
+    rs_allocation transformMatrix;
+} SgLight;
+
 typedef struct VShaderParams_s {
     rs_matrix4x4 model;
     rs_matrix4x4 viewProj;
@@ -132,6 +144,19 @@ static void printCameraInfo(SgCamera *cam) {
     rsDebug("Position: ", cam->position);
     rsDebug("Proj: ", &cam->proj);
     rsDebug("View: ", &cam->view);
+}
+
+static void printLightInfo(SgLight *light) {
+    rsDebug("***** Light information. ptr:", light);
+    printName(light->name);
+    const SgTransform *lTransform = (const SgTransform *)rsGetElementAt(light->transformMatrix, 0);
+    rsDebug("Transform name:", lTransform);
+    printName(lTransform->name);
+
+    rsDebug("Position: ", light->position);
+    rsDebug("Color : ", light->color);
+    rsDebug("Intensity: ", light->intensity);
+    rsDebug("Type: ", light->type);
 }
 
 static void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *pnt, float3 *vec) {

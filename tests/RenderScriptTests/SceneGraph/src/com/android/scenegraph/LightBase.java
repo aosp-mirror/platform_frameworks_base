@@ -20,21 +20,25 @@ import java.lang.Math;
 import java.util.ArrayList;
 
 import android.renderscript.Float3;
+import android.renderscript.Float4;
 import android.renderscript.Matrix4f;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.ProgramVertex;
+import android.renderscript.RenderScriptGL;
 import android.util.Log;
 
 /**
  * @hide
  */
-public class LightBase extends SceneGraphBase {
+public abstract class LightBase extends SceneGraphBase {
+    static final int RS_LIGHT_POINT = 0;
+    static final int RS_LIGHT_DIRECTIONAL = 1;
+
+    ScriptField_Light_s mField;
+    ScriptField_Light_s.Item mFieldData;
     Transform mTransform;
-    Float3 mColor;
+    Float4 mColor;
     float mIntensity;
     public LightBase() {
-        mColor = new Float3(0.0f, 0.0f, 0.0f);
+        mColor = new Float4(0.0f, 0.0f, 0.0f, 0.0f);
         mIntensity = 1.0f;
     }
 
@@ -42,12 +46,43 @@ public class LightBase extends SceneGraphBase {
         mTransform = t;
     }
 
+    public void setColor(float r, float g, float b) {
+        mColor.x = r;
+        mColor.y = g;
+        mColor.z = b;
+    }
+
     public void setColor(Float3 c) {
-        mColor = c;
+        mColor.x = c.x;
+        mColor.y = c.y;
+        mColor.z = c.z;
     }
 
     public void setIntensity(float i) {
         mIntensity = i;
+    }
+
+    abstract void initLocalData();
+
+    protected void updateBaseData(RenderScriptGL rs) {
+        if (mField == null) {
+            mField = new ScriptField_Light_s(rs, 1);
+            mFieldData = new ScriptField_Light_s.Item();
+        }
+
+        mFieldData.transformMatrix = mTransform.getRSData(rs).getAllocation();
+        mFieldData.name = getStringAsAllocation(rs, getName());
+        mFieldData.color = mColor;
+        mFieldData.intensity = mIntensity;
+    }
+
+    ScriptField_Light_s getRSData(RenderScriptGL rs) {
+        updateBaseData(rs);
+        initLocalData();
+
+        mField.set(mFieldData, 0, true);
+
+        return mField;
     }
 }
 

@@ -31,6 +31,10 @@ import android.util.Log;
 public class PointLight extends LightBase {
     public PointLight() {
     }
+
+     void initLocalData() {
+        mFieldData.type = RS_LIGHT_POINT;
+    }
 }
 
 

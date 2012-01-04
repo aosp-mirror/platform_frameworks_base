@@ -48,6 +48,7 @@ public class ColladaParser {
     HashMap<String, ArrayList<ShaderParam> > mEffectsParams;
     HashMap<String, Texture2D> mImages;
     HashMap<String, Texture2D> mSamplerImageMap;
+    HashMap<String, String> mMeshIdNameMap;
     Scene mScene;
 
     String mRootDir;
@@ -67,6 +68,7 @@ public class ColladaParser {
         mCameras = new HashMap<String, Camera>();
         mEffectsParams = new HashMap<String, ArrayList<ShaderParam> >();
         mImages = new HashMap<String, Texture2D>();
+        mMeshIdNameMap = new HashMap<String, String>();
     }
 
     public void init(InputStream is, String rootDir) {
@@ -142,6 +144,16 @@ public class ColladaParser {
             }
         }
 
+        // Look through the geometry list and build up a correlation between id's and names
+        nl = docEle.getElementsByTagName("geometry");
+        if (nl != null) {
+            for(int i = 0; i < nl.getLength(); i++) {
+                Element m = (Element)nl.item(i);
+                convertGeometries(m);
+            }
+        }
+
+
         nl = docEle.getElementsByTagName("visual_scene");
         if (nl != null) {
             for(int i = 0; i < nl.getLength(); i++) {
@@ -152,7 +164,11 @@ public class ColladaParser {
     }
 
     private void getRenderable(Element shape, Transform t) {
-        String geoURL = shape.getAttribute("url");
+        String geoURL = shape.getAttribute("url").substring(1);
+        String geoName = mMeshIdNameMap.get(geoURL);
+        if (geoName != null) {
+            geoURL = geoName;
+        }
         //RenderableGroup group = new RenderableGroup();
         //group.setName(geoURL.substring(1));
         //mScene.appendRenderable(group);
@@ -164,9 +180,9 @@ public class ColladaParser {
                 String materialName = materialRef.getAttribute("target");
 
                 Renderable d = new Renderable();
-                d.setMesh(geoURL.substring(1), meshIndexName);
+                d.setMesh(geoURL, meshIndexName);
                 d.setMaterialName(materialName);
-                d.setName(geoURL.substring(1));
+                d.setName(geoURL);
 
                 //Log.v(TAG, "Created drawable geo " + geoURL + " index " + meshIndexName + " material " + materialName);
 
@@ -261,33 +277,36 @@ public class ColladaParser {
         }
     }
 
+    // This will find the actual texture node, which is sometimes hidden behind a sampler
+    // and sometimes referenced directly
     Texture2D getTexture(String samplerName) {
+        String texName = samplerName;
+
+        // Check to see if the image file is hidden by a sampler surface link combo
         Element sampler = mDom.getElementById(samplerName);
-        if (sampler == null) {
-            return null;
-        }
-
-        NodeList nl = sampler.getElementsByTagName("source");
-        if (nl != null && nl.getLength() == 1) {
-            Element ref = (Element)nl.item(0);
-            String surfaceName = getString(ref);
-            if (surfaceName == null) {
-                return null;
-            }
-
-            Element surface = mDom.getElementById(surfaceName);
-            if (surface == null) {
-                return null;
-            }
-            nl = surface.getElementsByTagName("init_from");
+        if (sampler != null) {
+            NodeList nl = sampler.getElementsByTagName("source");
             if (nl != null && nl.getLength() == 1) {
-                ref = (Element)nl.item(0);
-                String texName = getString(ref);
-                //Log.v(TAG, "Extracted texture name " + texName);
-                return mImages.get(texName);
+                Element ref = (Element)nl.item(0);
+                String surfaceName = getString(ref);
+                if (surfaceName == null) {
+                    return null;
+                }
+
+                Element surface = mDom.getElementById(surfaceName);
+                if (surface == null) {
+                    return null;
+                }
+                nl = surface.getElementsByTagName("init_from");
+                if (nl != null && nl.getLength() == 1) {
+                    ref = (Element)nl.item(0);
+                    texName = getString(ref);
+                }
             }
         }
-        return null;
+
+        //Log.v(TAG, "Extracted texture name " + texName);
+        return mImages.get(texName);
     }
 
     void extractParams(Element fx, ArrayList<ShaderParam> params) {
@@ -339,6 +358,14 @@ public class ColladaParser {
             String url = ref.getAttribute("url");
             ArrayList<ShaderParam> params = mEffectsParams.get(url.substring(1));
             mEffectsParams.put(id, params);
+        }
+    }
+
+    private void convertGeometries(Element geo) {
+        String id = geo.getAttribute("id");
+        String name = geo.getAttribute("name");
+        if (!id.equals(name)) {
+            mMeshIdNameMap.put(id, name);
         }
     }
 
@@ -417,7 +444,7 @@ public class ColladaParser {
         }
 
         Float3 color = getFloat3(light, "color");
-        sceneLight.setColor(color);
+        sceneLight.setColor(color.x, color.y, color.z);
         sceneLight.setName(name);
         mScene.appendLight(sceneLight);
         mLights.put(id, sceneLight);
@@ -428,7 +455,14 @@ public class ColladaParser {
     private void convertCamera(Element camera) {
         String name = camera.getAttribute("name");
         String id = camera.getAttribute("id");
-        float fov = getFloat(camera, "yfov");
+        float fov = 30.0f;
+        if (getString(camera, "yfov") != null) {
+            fov = getFloat(camera, "yfov");
+        } else if(getString(camera, "xfov") != null) {
+            float aspect = getFloat(camera, "aspect_ratio");
+            fov = getFloat(camera, "xfov") / aspect;
+        }
+
         float near = getFloat(camera, "znear");
         float far = getFloat(camera, "zfar");
 
@@ -470,7 +504,7 @@ public class ColladaParser {
     private String getString(Element elem, String name) {
         String text = null;
         NodeList nl = elem.getElementsByTagName(name);
-        if (nl != null) {
+        if (nl != null && nl.getLength() != 0) {
             text = ((Element)nl.item(0)).getFirstChild().getNodeValue();
         }
         return text;

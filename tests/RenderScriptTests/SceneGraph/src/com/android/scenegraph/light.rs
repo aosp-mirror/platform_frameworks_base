@@ -16,14 +16,18 @@
 
 #pragma rs java_package_name(com.android.scenegraph)
 
-// The sole purpose of this script is to have various structs exposed
-// so that java reflected classes are generated
+//#define DEBUG_LIGHT
 #include "transform_def.rsh"
-SgTransform *exportPtr;
-SgRenderState *sExport;
-SgRenderable *drExport;
-SgRenderPass *pExport;
-SgCamera *exportPtrCam;
-SgLight *exportPtrLight;
-FBlurOffsets *blurExport;
-VertexShaderInputs *iExport;
+
+void root(const rs_allocation *v_in, rs_allocation *v_out) {
+
+    SgLight *light = (SgLight *)rsGetElementAt(*v_in, 0);
+    const SgTransform *lTransform = (const SgTransform *)rsGetElementAt(light->transformMatrix, 0);
+
+    float4 zero = {0.0f, 0.0f, 0.0f, 1.0f};
+    light->position = rsMatrixMultiply(&lTransform->globalMat, zero);
+
+#ifdef DEBUG_LIGHT
+    printLightInfo(light);
+#endif //DEBUG_CAMERA
+}
