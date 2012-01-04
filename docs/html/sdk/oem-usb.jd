@@ -88,7 +88,7 @@ support tab to select your products/device.  Different regions will have differe
 </tr>
 
 <tr><td>Huawei</td>	<td><a
-href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&amp;flay=software&amp;directoryId=20&amp;treeId=0</a></td>
+href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=index">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=index</a></td>
 </tr>
 
 <tr><td>KT Tech</td>	<td><a
@@ -122,7 +122,13 @@ href="http://k-tai.sharp.co.jp/support/">http://k-tai.sharp.co.jp/support/</a></
 </tr><tr><td>SK Telesys</td>	<td><a
 href="http://www.sk-w.com/service/wDownload/wDownload.jsp">http://www.sk-w.com/service/wDownload/wDownload.jsp</a></td></tr><tr>
 <td>Sony Ericsson</td>	<td><a
-href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&lc=en">http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&amp;lc=en</a></td></tr><tr>
+href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&lc=en">http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&amp;lc=en</a></td></tr>
+
+<tr><td>Teleepoch</td>	<td><a
+href="http://www.teleepoch.com/android.html">http://www.teleepoch.com/android.html</a></td>
+</tr>
+
+<tr>
 <td>ZTE</td>	<td><a
 href="http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442">http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442</a></td></tr>
 </table>
