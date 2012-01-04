@@ -173,6 +173,7 @@ void MediaScannerClient::convertValues(uint32_t encoding)
             const char* source = mValues->getEntry(i);
             int targetLength = len * 3 + 1;
             char* buffer = new char[targetLength];
+            // don't normally check for NULL, but in this case targetLength may be large
             if (!buffer)
                 break;
             char* target = buffer;

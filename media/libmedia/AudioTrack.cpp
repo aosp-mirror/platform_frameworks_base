@@ -238,10 +238,6 @@ status_t AudioTrack::set(
 
     if (cbf != 0) {
         mAudioTrackThread = new AudioTrackThread(*this, threadCanCallJava);
-        if (mAudioTrackThread == 0) {
-          ALOGE("Could not create callback thread");
-          return NO_INIT;
-        }
     }
 
     mStatus = NO_ERROR;

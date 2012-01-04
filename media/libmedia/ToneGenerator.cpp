@@ -1017,10 +1017,6 @@ bool ToneGenerator::initAudioTrack() {
 
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack = new AudioTrack();
-    if (mpAudioTrack == 0) {
-        ALOGE("AudioTrack allocation failed");
-        goto initAudioTrack_exit;
-    }
     ALOGV("Create Track: %p\n", mpAudioTrack);
 
     mpAudioTrack->set(mStreamType,
@@ -1353,9 +1349,6 @@ bool ToneGenerator::prepareWave() {
                         new ToneGenerator::WaveGenerator((unsigned short)mSamplingRate,
                                 frequency,
                                 TONEGEN_GAIN/lNumWaves);
-                if (lpWaveGen == 0) {
-                    goto prepareWave_exit;
-                }
                 mWaveGens.add(frequency, lpWaveGen);
             }
             frequency = mpNewToneDesc->segments[segmentIdx].waveFreq[++freqIdx];
@@ -1375,12 +1368,6 @@ bool ToneGenerator::prepareWave() {
     }
 
     return true;
-
-prepareWave_exit:
-
-    clearWaveGens();
-
-    return false;
 }
 
 

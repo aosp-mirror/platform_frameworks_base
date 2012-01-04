@@ -115,10 +115,6 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
 
     if (cbk != NULL) {
         mCaptureThread = new CaptureThread(*this, rate, ((flags & CAPTURE_CALL_JAVA) != 0));
-        if (mCaptureThread == 0) {
-            ALOGE("Could not create callback thread");
-            return NO_INIT;
-        }
     }
     ALOGV("setCaptureCallBack() rate: %d thread %p flags 0x%08x",
             rate, mCaptureThread.get(), mCaptureFlags);

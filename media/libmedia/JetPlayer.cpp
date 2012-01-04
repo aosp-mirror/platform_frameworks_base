@@ -168,10 +168,6 @@ int JetPlayer::render() {
     // allocate render buffer
     mAudioBuffer = 
         new EAS_PCM[pLibConfig->mixBufferSize * pLibConfig->numChannels * MIX_NUM_BUFFERS];
-    if (!mAudioBuffer) {
-        ALOGE("JetPlayer::render(): mAudioBuffer allocate failed");
-        goto threadExit;
-    }
 
     // signal main thread that we started
     {
