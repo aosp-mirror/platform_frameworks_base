@@ -91,6 +91,8 @@ public:
 
     static void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c);
 
+    size_t      getUnreleasedFrames(int name);
+
 private:
 
     enum {
@@ -167,6 +169,7 @@ private:
         bool        doesResample() const;
         void        resetResampler();
         void        adjustVolumeRamp(bool aux);
+        size_t      getUnreleasedFrames();
     };
 
     // pad to 32-bytes to fill cache line
