@@ -28,6 +28,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -182,9 +183,14 @@ public class AccessibilityServiceInfo implements Parcelable {
     private boolean mCanRetrieveWindowContent;
 
     /**
-     * Description of the accessibility service.
+     * Resource id of the description of the accessibility service.
      */
-    private String mDescription;
+    private int mDescriptionResId;
+
+    /**
+     * Non localized description of the accessibility service.
+     */
+    private String mNonLocalizedDescription;
 
     /**
      * Creates a new instance.
@@ -256,8 +262,15 @@ public class AccessibilityServiceInfo implements Parcelable {
             mCanRetrieveWindowContent = asAttributes.getBoolean(
                     com.android.internal.R.styleable.AccessibilityService_canRetrieveWindowContent,
                     false);
-            mDescription = asAttributes.getString(
+            TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
+            if (peekedValue != null) {
+                mDescriptionResId = peekedValue.resourceId;
+                CharSequence nonLocalizedDescription = peekedValue.coerceToString();
+                if (nonLocalizedDescription != null) {
+                    mNonLocalizedDescription = nonLocalizedDescription.toString().trim();
+                }
+            }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -331,15 +344,38 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Description of the accessibility service.
+     * Gets the non-localized description of the accessibility service.
      * <p>
      *    <strong>Statically set from
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
      * @return The description.
+     *
+     * @deprecated Use {@link #loadDescription(PackageManager)}.
      */
     public String getDescription() {
-        return mDescription;
+        return mNonLocalizedDescription;
+    }
+
+    /**
+     * The localized description of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The localized description.
+     */
+    public String loadDescription(PackageManager packageManager) {
+        if (mDescriptionResId == 0) {
+            return mNonLocalizedDescription;
+        }
+        ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
+        CharSequence description = packageManager.getText(serviceInfo.packageName,
+                mDescriptionResId, serviceInfo.applicationInfo);
+        if (description != null) {
+            return description.toString().trim();
+        }
+        return null;
     }
 
     /**
@@ -359,7 +395,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeParcelable(mResolveInfo, 0);
         parcel.writeString(mSettingsActivityName);
         parcel.writeInt(mCanRetrieveWindowContent ? 1 : 0);
-        parcel.writeString(mDescription);
+        parcel.writeInt(mDescriptionResId);
+        parcel.writeString(mNonLocalizedDescription);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -372,7 +409,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mResolveInfo = parcel.readParcelable(null);
         mSettingsActivityName = parcel.readString();
         mCanRetrieveWindowContent = (parcel.readInt() == 1);
-        mDescription = parcel.readString();
+        mDescriptionResId = parcel.readInt();
+        mNonLocalizedDescription = parcel.readString();
     }
 
     @Override
