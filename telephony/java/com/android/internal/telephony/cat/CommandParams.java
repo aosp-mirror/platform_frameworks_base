@@ -166,4 +166,29 @@ class GetInputParams extends CommandParams {
     }
 }
 
+/*
+ * BIP (Bearer Independent Protocol) is the mechanism for SIM card applications
+ * to access data connection through the mobile device.
+ *
+ * SIM utilizes proactive commands (OPEN CHANNEL, CLOSE CHANNEL, SEND DATA and
+ * RECEIVE DATA to control/read/write data for BIP. Refer to ETSI TS 102 223 for
+ * the details of proactive commands procedures and their structures.
+ */
+class BIPClientParams extends CommandParams {
+    TextMessage textMsg;
+    boolean bHasAlphaId;
 
+    BIPClientParams(CommandDetails cmdDet, TextMessage textMsg, boolean has_alpha_id) {
+        super(cmdDet);
+        this.textMsg = textMsg;
+        this.bHasAlphaId = has_alpha_id;
+    }
+
+    boolean setIcon(Bitmap icon) {
+        if (icon != null && textMsg != null) {
+            textMsg.icon = icon;
+            return true;
+        }
+        return false;
+    }
+}
