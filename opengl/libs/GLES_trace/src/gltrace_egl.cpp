@@ -31,7 +31,8 @@ void GLTrace_eglSwapBuffers(void *dpy, void *draw) {
     glmessage.set_context_id(1);
     glmessage.set_function(GLMessage::eglSwapBuffers);
 
-    fixup_addFBContents(&glmessage);
+    // read FB0 since that is what is displayed on the screen
+    fixup_addFBContents(&glmessage, FB0);
     traceGLMessage(&glmessage);
 }
 
