@@ -13,6 +13,8 @@ Type* PRESENTER_LISTENER_BASE_TYPE = new Type("android.support.place.connector",
         "EventListener.Listener", Type::BUILT_IN, false, false, false);
 Type* RPC_BROKER_TYPE = new Type("android.support.place.connector", "Broker",
         Type::BUILT_IN, false, false, false);
+Type* PLACE_INFO_TYPE = new Type("android.support.place.connector", "PlaceInfo",
+        Type::BUILT_IN, false, false, false);
 // TODO: Just use Endpoint, so this works for all endpoints.
 Type* RPC_CONNECTOR_TYPE = new Type("android.support.place.connector", "Connector",
         Type::BUILT_IN, false, false, false);
@@ -458,15 +460,17 @@ EndpointBaseClass::generate_ctor()
 {
     Variable* container = new Variable(ANDROID_CONTEXT_TYPE, "context");
     Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
+	Variable* place = new Variable(PLACE_INFO_TYPE, "placeInfo");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
         ctor->parameters.push_back(container);
         ctor->parameters.push_back(broker);
+        ctor->parameters.push_back(place);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 2, container, broker));
+    ctor->statements->Add(new MethodCall("super", 3, container, broker, place));
 }
 
 // =================================================
