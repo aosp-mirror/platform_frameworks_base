@@ -71,7 +71,7 @@ void UDPPusher::start() {
 bool UDPPusher::onPush() {
     uint32_t length;
     if (fread(&length, 1, sizeof(length), mFile) < sizeof(length)) {
-        LOGI("No more data to push.");
+        ALOGI("No more data to push.");
         return false;
     }
 
@@ -93,7 +93,7 @@ bool UDPPusher::onPush() {
 
     uint32_t timeMs;
     if (fread(&timeMs, 1, sizeof(timeMs), mFile) < sizeof(timeMs)) {
-        LOGI("No more data to push.");
+        ALOGI("No more data to push.");
         return false;
     }
 
@@ -113,7 +113,7 @@ void UDPPusher::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatPush:
         {
             if (!onPush() && !(ntohs(mRemoteAddr.sin_port) & 1)) {
-                LOGI("emulating BYE packet");
+                ALOGI("emulating BYE packet");
 
                 sp<ABuffer> buffer = new ABuffer(8);
                 uint8_t *data = buffer->data();

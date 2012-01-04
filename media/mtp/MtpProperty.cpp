@@ -320,18 +320,18 @@ void MtpProperty::print() {
     MtpString buffer;
     bool deviceProp = isDeviceProperty();
     if (deviceProp)
-        LOGI("    %s (%04X)", MtpDebug::getDevicePropCodeName(mCode), mCode);
+        ALOGI("    %s (%04X)", MtpDebug::getDevicePropCodeName(mCode), mCode);
     else
-        LOGI("    %s (%04X)", MtpDebug::getObjectPropCodeName(mCode), mCode);
-    LOGI("    type %04X", mType);
-    LOGI("    writeable %s", (mWriteable ? "true" : "false"));
+        ALOGI("    %s (%04X)", MtpDebug::getObjectPropCodeName(mCode), mCode);
+    ALOGI("    type %04X", mType);
+    ALOGI("    writeable %s", (mWriteable ? "true" : "false"));
     buffer = "    default value: ";
     print(mDefaultValue, buffer);
-    LOGI("%s", (const char *)buffer);
+    ALOGI("%s", (const char *)buffer);
     if (deviceProp) {
         buffer = "    current value: ";
         print(mCurrentValue, buffer);
-        LOGI("%s", (const char *)buffer);
+        ALOGI("%s", (const char *)buffer);
     }
     switch (mFormFlag) {
         case kFormNone:
@@ -344,7 +344,7 @@ void MtpProperty::print() {
             buffer += ", ";
             print(mStepSize, buffer);
             buffer += ")";
-            LOGI("%s", (const char *)buffer);
+            ALOGI("%s", (const char *)buffer);
             break;
         case kFormEnum:
             buffer = "    Enum { ";
@@ -353,13 +353,13 @@ void MtpProperty::print() {
                 buffer += " ";
             }
             buffer += "}";
-            LOGI("%s", (const char *)buffer);
+            ALOGI("%s", (const char *)buffer);
             break;
         case kFormDateTime:
-            LOGI("    DateTime\n");
+            ALOGI("    DateTime\n");
             break;
         default:
-            LOGI("    form %d\n", mFormFlag);
+            ALOGI("    form %d\n", mFormFlag);
             break;
     }
 }

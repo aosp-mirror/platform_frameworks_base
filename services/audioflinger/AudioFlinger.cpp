@@ -184,13 +184,13 @@ void AudioFlinger::onFirstRef()
         if (rc)
             continue;
 
-        LOGI("Loaded %s audio interface from %s (%s)", audio_interfaces[i],
+        ALOGI("Loaded %s audio interface from %s (%s)", audio_interfaces[i],
              mod->name, mod->id);
         mAudioHwDevs.push(dev);
 
         if (!mPrimaryHardwareDev) {
             mPrimaryHardwareDev = dev;
-            LOGI("Using '%s' (%s.%s) as the primary audio interface",
+            ALOGI("Using '%s' (%s.%s) as the primary audio interface",
                  mod->name, mod->id, audio_interfaces[i]);
         }
     }
@@ -1468,7 +1468,7 @@ status_t AudioFlinger::PlaybackThread::readyToRun()
 {
     status_t status = initCheck();
     if (status == NO_ERROR) {
-        LOGI("AudioFlinger's thread %p ready to run", this);
+        ALOGI("AudioFlinger's thread %p ready to run", this);
     } else {
         LOGE("No working audio driver found.");
     }
@@ -1896,7 +1896,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                 double minimum = stats.minimum();
                 double maximum = stats.maximum();
                 cpu.resetStatistics();
-                LOGI("CPU usage over past %.1f secs (%u mixer loops at %.1f mean ms per loop):\n  us per mix loop: mean=%.0f stddev=%.0f min=%.0f max=%.0f\n  %% of wall: mean=%.1f stddev=%.1f min=%.1f max=%.1f",
+                ALOGI("CPU usage over past %.1f secs (%u mixer loops at %.1f mean ms per loop):\n  us per mix loop: mean=%.0f stddev=%.0f min=%.0f max=%.0f\n  %% of wall: mean=%.1f stddev=%.1f min=%.1f max=%.1f",
                         elapsed * .000000001, n, perLoop * .000001,
                         mean * .001,
                         stddev * .001,

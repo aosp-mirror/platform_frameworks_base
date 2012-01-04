@@ -117,14 +117,14 @@ AssetManager::AssetManager(CacheMode cacheMode)
       mCacheMode(cacheMode), mCacheValid(false)
 {
     int count = android_atomic_inc(&gCount)+1;
-    //LOGI("Creating AssetManager %p #%d\n", this, count);
+    //ALOGI("Creating AssetManager %p #%d\n", this, count);
     memset(mConfig, 0, sizeof(ResTable_config));
 }
 
 AssetManager::~AssetManager(void)
 {
     int count = android_atomic_dec(&gCount);
-    //LOGI("Destroying AssetManager in %p #%d\n", this, count);
+    //ALOGI("Destroying AssetManager in %p #%d\n", this, count);
 
     delete mConfig;
     delete mResources;
@@ -1780,7 +1780,7 @@ AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
     : mPath(path), mZipFile(NULL), mModWhen(modWhen),
       mResourceTableAsset(NULL), mResourceTable(NULL)
 {
-    //LOGI("Creating SharedZip %p %s\n", this, (const char*)mPath);
+    //ALOGI("Creating SharedZip %p %s\n", this, (const char*)mPath);
     mZipFile = new ZipFileRO;
     ALOGV("+++ opening zip '%s'\n", mPath.string());
     if (mZipFile->open(mPath.string()) != NO_ERROR) {
@@ -1858,7 +1858,7 @@ bool AssetManager::SharedZip::isUpToDate()
 
 AssetManager::SharedZip::~SharedZip()
 {
-    //LOGI("Destroying SharedZip %p %s\n", this, (const char*)mPath);
+    //ALOGI("Destroying SharedZip %p %s\n", this, (const char*)mPath);
     if (mResourceTable != NULL) {
         delete mResourceTable;
     }

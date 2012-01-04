@@ -57,8 +57,8 @@ protected:
     virtual status_t writeLines(const struct iovec& vec, size_t N)
     {
         //android_writevLog(&vec, N);       <-- this is now a no-op
-        if (N != 1) LOGI("WARNING: writeLines N=%d\n", N);
-        LOGI("%.*s", vec.iov_len, (const char*) vec.iov_base);
+        if (N != 1) ALOGI("WARNING: writeLines N=%d\n", N);
+        ALOGI("%.*s", vec.iov_len, (const char*) vec.iov_base);
         return NO_ERROR;
     }
 };

@@ -209,7 +209,7 @@ bool EventThread::threadLoop() {
 }
 
 status_t EventThread::readyToRun() {
-    LOGI("EventThread ready to run.");
+    ALOGI("EventThread ready to run.");
     return NO_ERROR;
 }
 

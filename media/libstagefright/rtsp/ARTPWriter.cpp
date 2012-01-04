@@ -269,7 +269,7 @@ void ARTPWriter::onRead(const sp<AMessage> &msg) {
     status_t err = mSource->read(&mediaBuf);
 
     if (err != OK) {
-        LOGI("reached EOS.");
+        ALOGI("reached EOS.");
 
         Mutex::Autolock autoLock(mLock);
         mFlags |= kFlagEOS;
@@ -520,7 +520,7 @@ void ARTPWriter::dumpSessionDesc() {
         sdp.append("a=fmtp:" PT_STR " octed-align\r\n");
     }
 
-    LOGI("%s", sdp.c_str());
+    ALOGI("%s", sdp.c_str());
 }
 
 void ARTPWriter::makeH264SPropParamSets(MediaBuffer *buffer) {

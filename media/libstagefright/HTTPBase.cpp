@@ -115,7 +115,7 @@ status_t HTTPBase::setBandwidthStatCollectFreq(int32_t freqMs) {
         return BAD_VALUE;
     }
 
-    LOGI("frequency set to %d ms", freqMs);
+    ALOGI("frequency set to %d ms", freqMs);
     mBandWidthCollectFreqMs = freqMs;
     return OK;
 }

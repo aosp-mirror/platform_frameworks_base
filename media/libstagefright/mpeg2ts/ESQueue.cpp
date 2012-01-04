@@ -144,7 +144,7 @@ status_t ElementaryStreamQueue::appendData(
                 }
 
                 if (startOffset > 0) {
-                    LOGI("found something resembling an H.264/MPEG syncword at "
+                    ALOGI("found something resembling an H.264/MPEG syncword at "
                          "offset %ld",
                          startOffset);
                 }
@@ -177,7 +177,7 @@ status_t ElementaryStreamQueue::appendData(
                 }
 
                 if (startOffset > 0) {
-                    LOGI("found something resembling an H.264/MPEG syncword at "
+                    ALOGI("found something resembling an H.264/MPEG syncword at "
                          "offset %ld",
                          startOffset);
                 }
@@ -210,7 +210,7 @@ status_t ElementaryStreamQueue::appendData(
                 }
 
                 if (startOffset > 0) {
-                    LOGI("found something resembling an AAC syncword at offset %ld",
+                    ALOGI("found something resembling an AAC syncword at offset %ld",
                          startOffset);
                 }
 
@@ -237,7 +237,7 @@ status_t ElementaryStreamQueue::appendData(
                 }
 
                 if (startOffset > 0) {
-                    LOGI("found something resembling an MPEG audio "
+                    ALOGI("found something resembling an MPEG audio "
                          "syncword at offset %ld",
                          startOffset);
                 }
@@ -280,7 +280,7 @@ status_t ElementaryStreamQueue::appendData(
 
 #if 0
     if (mMode == AAC) {
-        LOGI("size = %d, timeUs = %.2f secs", size, timeUs / 1E6);
+        ALOGI("size = %d, timeUs = %.2f secs", size, timeUs / 1E6);
         hexdump(data, size);
     }
 #endif
@@ -337,7 +337,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
             CHECK(mFormat->findInt32(kKeySampleRate, &sampleRate));
             CHECK(mFormat->findInt32(kKeyChannelCount, &numChannels));
 
-            LOGI("found AAC codec config (%d Hz, %d channels)",
+            ALOGI("found AAC codec config (%d Hz, %d channels)",
                  sampleRate, numChannels);
         } else {
             // profile_ObjectType, sampling_frequency_index, private_bits,
@@ -714,7 +714,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitMPEGVideo() {
                 mFormat->setInt32(kKeyWidth, width);
                 mFormat->setInt32(kKeyHeight, height);
 
-                LOGI("found MPEG2 video codec config (%d x %d)", width, height);
+                ALOGI("found MPEG2 video codec config (%d x %d)", width, height);
 
                 sp<ABuffer> csd = new ABuffer(offset);
                 memcpy(csd->data(), data, offset);
@@ -880,7 +880,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitMPEG4Video() {
                     mFormat->setInt32(kKeyWidth, width);
                     mFormat->setInt32(kKeyHeight, height);
 
-                    LOGI("found MPEG4 video codec config (%d x %d)",
+                    ALOGI("found MPEG4 video codec config (%d x %d)",
                          width, height);
 
                     sp<ABuffer> csd = new ABuffer(offset);

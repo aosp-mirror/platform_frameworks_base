@@ -200,7 +200,7 @@ status_t ZipEntry::addPadding(int padding)
     if (padding <= 0)
         return INVALID_OPERATION;
 
-    //LOGI("HEY: adding %d pad bytes to existing %d in %s\n",
+    //ALOGI("HEY: adding %d pad bytes to existing %d in %s\n",
     //    padding, mLFH.mExtraFieldLength, mCDE.mFileName);
 
     if (mLFH.mExtraFieldLength > 0) {
