@@ -78,8 +78,10 @@ void GLTrace_eglSwapBuffers(void *dpy, void *draw) {
     glmessage.set_context_id(glContext->getId());
     glmessage.set_function(GLMessage::eglSwapBuffers);
 
-    // read FB0 since that is what is displayed on the screen
-    fixup_addFBContents(glContext, &glmessage, FB0);
+    if (glContext->getGlobalTraceState()->shouldCollectFbOnEglSwap()) {
+        // read FB0 since that is what is displayed on the screen
+        fixup_addFBContents(glContext, &glmessage, FB0);
+    }
 
     // set start time and duration
     glmessage.set_start_time(systemTime());
