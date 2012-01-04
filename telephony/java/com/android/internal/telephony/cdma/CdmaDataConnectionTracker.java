@@ -41,6 +41,7 @@ import com.android.internal.telephony.DataConnectionAc;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.RetryManager;
+import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.util.AsyncChannel;
 
@@ -506,7 +507,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         return retry;
     }
 
-    private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
+    private void reconnectAfterFail(FailCause lastFailCauseCode, String reason, int retryOverride) {
         if (mState == State.FAILED) {
             /**
              * For now With CDMA we never try to reconnect on
@@ -514,9 +515,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
              * at the last time until the state is changed.
              * TODO: Make this configurable?
              */
-            int nextReconnectDelay = mDataConnections.get(0).getRetryTimer();
+            int nextReconnectDelay = retryOverride;
+            if (nextReconnectDelay < 0) {
+                nextReconnectDelay = mDataConnections.get(0).getRetryTimer();
+                mDataConnections.get(0).increaseRetryCount();
+            }
             startAlarmForReconnect(nextReconnectDelay, reason);
-            mDataConnections.get(0).increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 log("NOT Posting Data Connection Unavailable notification "
@@ -674,7 +678,17 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 notifyNoData(cause);
                 return;
             }
-            startDelayedRetry(cause, reason);
+
+            int retryOverride = -1;
+            if (ar.exception instanceof DataConnection.CallSetupException) {
+                retryOverride =
+                    ((DataConnection.CallSetupException)ar.exception).getRetryOverride();
+            }
+            if (retryOverride == RILConstants.MAX_INT) {
+                if (DBG) log("No retry is suggested.");
+            } else {
+                startDelayedRetry(cause, reason, retryOverride);
+            }
         }
     }
 
@@ -907,9 +921,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    private void startDelayedRetry(FailCause cause, String reason) {
+    private void startDelayedRetry(FailCause cause, String reason, int retryOverride) {
         notifyNoData(cause);
-        reconnectAfterFail(cause, reason);
+        reconnectAfterFail(cause, reason, retryOverride);
     }
 
     @Override
