@@ -82,19 +82,33 @@ void GLTraceContext::resizeFBMemory(unsigned minSize) {
 
 /** obtain a pointer to the compressed framebuffer image */
 void GLTraceContext::getCompressedFB(void **fb, unsigned *fbsize, unsigned *fbwidth, 
-                            unsigned *fbheight) {
+                            unsigned *fbheight, FBBinding fbToRead) {
     int viewport[4] = {};
     hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
     unsigned fbContentsSize = viewport[2] * viewport[3] * 4;
 
     resizeFBMemory(fbContentsSize);
 
-    //TODO: On eglSwapBuffer, read FB0. For glDraw calls, read currently
-    //      bound FB.
-    //hooks->gl.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &bound_fb);
-    //hooks->gl.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // switch current framebuffer binding if necessary
+    GLint currentFb = -1;
+    bool fbSwitched = false;
+    if (fbToRead != CURRENTLY_BOUND_FB) {
+        hooks->gl.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFb);
+
+        if (currentFb != 0) {
+            hooks->gl.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            fbSwitched = true;
+        }
+    }
+
     hooks->gl.glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
                                         GL_RGBA, GL_UNSIGNED_BYTE, fbcontents);
+
+    // switch back to previously bound buffer if necessary
+    if (fbSwitched) {
+        hooks->gl.glBindFramebuffer(GL_FRAMEBUFFER, currentFb);
+    }
+
     *fbsize = lzf_compress(fbcontents, fbContentsSize, fbcompressed, fbContentsSize);
     *fb = fbcompressed;
     *fbwidth = viewport[2];

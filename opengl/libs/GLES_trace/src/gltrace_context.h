@@ -24,6 +24,8 @@ namespace gltrace {
 
 using ::android::gl_hooks_t;
 
+enum FBBinding {CURRENTLY_BOUND_FB, FB0};
+
 class GLTraceContext {
     void *fbcontents;           /* memory area to read framebuffer contents */
     void *fbcompressed;         /* destination for lzf compressed framebuffer */
@@ -34,7 +36,9 @@ public:
     gl_hooks_t *hooks;
 
     GLTraceContext();
-    void getCompressedFB(void **fb, unsigned *fbsize, unsigned *fbwidth, unsigned *fbheight);
+    void getCompressedFB(void **fb, unsigned *fbsize,
+                            unsigned *fbwidth, unsigned *fbheight,
+                            FBBinding fbToRead);
 };
 
 GLTraceContext *getGLTraceContext();

@@ -96,10 +96,10 @@ void fixup_glGetString(GLMessage *glmsg) {
 }
 
 /* Add the contents of the framebuffer to the protobuf message */
-void fixup_addFBContents(GLMessage *glmsg) {
+void fixup_addFBContents(GLMessage *glmsg, FBBinding fbToRead) {
     void *fbcontents;
     unsigned fbsize, fbwidth, fbheight;
-    getGLTraceContext()->getCompressedFB(&fbcontents, &fbsize, &fbwidth, &fbheight);
+    getGLTraceContext()->getCompressedFB(&fbcontents, &fbsize, &fbwidth, &fbheight, fbToRead);
 
     GLMessage_FrameBuffer *fb = glmsg->mutable_fb();
     fb->set_width(fbwidth);
@@ -299,7 +299,7 @@ void fixupGLMessage(GLMessage *glmsg) {
     case GLMessage::glDrawElements:
         /* void glDrawArrays(GLenum mode, GLint first, GLsizei count) */
         /* void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) */
-        fixup_addFBContents(glmsg);
+        fixup_addFBContents(glmsg, CURRENTLY_BOUND_FB);
         break;
     default:
         break;
