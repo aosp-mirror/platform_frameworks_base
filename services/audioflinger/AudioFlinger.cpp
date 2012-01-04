@@ -2239,7 +2239,15 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
             if (t->sampleRate() == (int)mSampleRate) {
                 minFrames = mFrameCount;
             } else {
-                minFrames = (mFrameCount * t->sampleRate()) / mSampleRate + 1;
+                // +1 for rounding and +1 for additional sample needed for interpolation
+                minFrames = (mFrameCount * t->sampleRate()) / mSampleRate + 1 + 1;
+                // add frames already consumed but not yet released by the resampler
+                // because cblk->framesReady() will  include these frames
+                minFrames += mAudioMixer->getUnreleasedFrames(track->name());
+                // the minimum track buffer size is normally twice the number of frames necessary
+                // to fill one buffer and the resampler should not leave more than one buffer worth
+                // of unreleased frames after each pass, but just in case...
+                LOG_ASSERT(minFrames <= cblk->frameCount);
             }
         }
         if ((track->framesReady() >= minFrames) && track->isReady() &&

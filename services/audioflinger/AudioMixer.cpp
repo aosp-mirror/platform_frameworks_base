@@ -340,6 +340,23 @@ void AudioMixer::track_t::adjustVolumeRamp(bool aux)
     }
 }
 
+size_t AudioMixer::track_t::getUnreleasedFrames()
+{
+    if (resampler != NULL) {
+        return resampler->getUnreleasedFrames();
+    }
+    return 0;
+}
+
+size_t AudioMixer::getUnreleasedFrames(int name)
+{
+    name -= TRACK0;
+    if (uint32_t(name) < MAX_NUM_TRACKS) {
+        track_t& track(mState.tracks[name]);
+        return track.getUnreleasedFrames();
+    }
+    return 0;
+}
 
 status_t AudioMixer::setBufferProvider(AudioBufferProvider* buffer)
 {
