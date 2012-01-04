@@ -496,7 +496,7 @@ status_t Sample::doLoad()
 {
     uint32_t sampleRate;
     int numChannels;
-    int format;
+    audio_format_t format;
     sp<IMemory> p;
     ALOGV("Start decode");
     if (mUrl) {

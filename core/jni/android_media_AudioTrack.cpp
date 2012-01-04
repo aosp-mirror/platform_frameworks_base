@@ -240,7 +240,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // compute the frame count
     int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
-    int format = audioFormat == javaAudioTrackFields.PCM16 ? 
+    audio_format_t format = audioFormat == javaAudioTrackFields.PCM16 ?
             AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
     int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
     

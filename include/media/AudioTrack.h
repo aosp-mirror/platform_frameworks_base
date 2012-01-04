@@ -69,7 +69,8 @@ public:
             MUTE    = 0x00000001
         };
         uint32_t    flags;
-        int         format;
+        audio_format_t format; // but AUDIO_FORMAT_PCM_8_BIT -> AUDIO_FORMAT_PCM_16_BIT
+        // accessed directly by WebKit ANP callback
         int         channelCount; // will be removed in the future, do not use
         size_t      frameCount;
         size_t      size;
@@ -143,7 +144,7 @@ public:
 
                         AudioTrack( int streamType,
                                     uint32_t sampleRate  = 0,
-                                    int format           = 0,
+                                    audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask      = 0,
                                     int frameCount       = 0,
                                     uint32_t flags       = 0,
@@ -163,7 +164,7 @@ public:
 
                         AudioTrack( int streamType,
                                     uint32_t sampleRate = 0,
-                                    int format          = 0,
+                                    audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask     = 0,
                                     const sp<IMemory>& sharedBuffer = 0,
                                     uint32_t flags      = 0,
@@ -187,7 +188,7 @@ public:
      * */
             status_t    set(int streamType      =-1,
                             uint32_t sampleRate = 0,
-                            int format          = 0,
+                            audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             int channelMask     = 0,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
@@ -215,7 +216,7 @@ public:
     /* getters, see constructor */
 
             int         streamType() const;
-            int         format() const;
+            audio_format_t format() const;
             int         channelCount() const;
             uint32_t    frameCount() const;
             int         frameSize() const;
@@ -434,7 +435,7 @@ private:
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
             status_t createTrack_l(int streamType,
                                  uint32_t sampleRate,
-                                 uint32_t format,
+                                 audio_format_t format,
                                  uint32_t channelMask,
                                  int frameCount,
                                  uint32_t flags,
@@ -455,7 +456,7 @@ private:
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
-    uint32_t                mFormat;
+    audio_format_t          mFormat;
     uint8_t                 mStreamType;
     uint8_t                 mChannelCount;
     uint8_t                 mMuted;

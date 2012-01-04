@@ -78,7 +78,7 @@ public:
         return interface_cast<IMediaRecorder>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+    virtual sp<IMemory> decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -86,11 +86,11 @@ public:
         remote()->transact(DECODE_URL, data, &reply);
         *pSampleRate = uint32_t(reply.readInt32());
         *pNumChannels = reply.readInt32();
-        *pFormat = reply.readInt32();
+        *pFormat = (audio_format_t) reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
-    virtual sp<IMemory> decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+    virtual sp<IMemory> decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
@@ -100,7 +100,7 @@ public:
         remote()->transact(DECODE_FD, data, &reply);
         *pSampleRate = uint32_t(reply.readInt32());
         *pNumChannels = reply.readInt32();
-        *pFormat = reply.readInt32();
+        *pFormat = (audio_format_t) reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
@@ -148,11 +148,11 @@ status_t BnMediaPlayerService::onTransact(
             const char* url = data.readCString();
             uint32_t sampleRate;
             int numChannels;
-            int format;
+            audio_format_t format;
             sp<IMemory> player = decode(url, &sampleRate, &numChannels, &format);
             reply->writeInt32(sampleRate);
             reply->writeInt32(numChannels);
-            reply->writeInt32(format);
+            reply->writeInt32((int32_t) format);
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;
@@ -163,11 +163,11 @@ status_t BnMediaPlayerService::onTransact(
             int64_t length = data.readInt64();
             uint32_t sampleRate;
             int numChannels;
-            int format;
+            audio_format_t format;
             sp<IMemory> player = decode(fd, offset, length, &sampleRate, &numChannels, &format);
             reply->writeInt32(sampleRate);
             reply->writeInt32(numChannels);
-            reply->writeInt32(format);
+            reply->writeInt32((int32_t) format);
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;

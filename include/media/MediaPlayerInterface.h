@@ -85,7 +85,7 @@ public:
         // audio data.
         virtual status_t    open(
                 uint32_t sampleRate, int channelCount,
-                int format=AUDIO_FORMAT_PCM_16_BIT,
+                audio_format_t format=AUDIO_FORMAT_PCM_16_BIT,
                 int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 AudioCallback cb = NULL,
                 void *cookie = NULL) = 0;

@@ -83,7 +83,7 @@ class MediaPlayerService : public BnMediaPlayerService
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount,
-                int format, int bufferCount,
+                audio_format_t format, int bufferCount,
                 AudioCallback cb, void *cookie);
 
         virtual void            start();
@@ -139,7 +139,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual int             getSessionId();
 
         virtual status_t        open(
-                uint32_t sampleRate, int channelCount, int format,
+                uint32_t sampleRate, int channelCount, audio_format_t format,
                 int bufferCount = 1,
                 AudioCallback cb = NULL, void *cookie = NULL);
 
@@ -152,7 +152,7 @@ class MediaPlayerService : public BnMediaPlayerService
                 void            setAudioStreamType(int streamType) {}
                 void            setVolume(float left, float right) {}
                 uint32_t        sampleRate() const { return mSampleRate; }
-                uint32_t        format() const { return (uint32_t)mFormat; }
+                audio_format_t  format() const { return mFormat; }
                 size_t          size() const { return mSize; }
                 status_t        wait();
 
@@ -170,7 +170,7 @@ class MediaPlayerService : public BnMediaPlayerService
         sp<MemoryHeapBase>  mHeap;
         float               mMsecsPerFrame;
         uint16_t            mChannelCount;
-        uint16_t            mFormat;
+        audio_format_t      mFormat;
         ssize_t             mFrameCount;
         uint32_t            mSampleRate;
         uint32_t            mSize;
@@ -190,8 +190,8 @@ public:
 
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int audioSessionId);
 
-    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
-    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
+    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
+    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
     virtual sp<IOMX>            getOMX();
 
     virtual status_t            dump(int fd, const Vector<String16>& args);
