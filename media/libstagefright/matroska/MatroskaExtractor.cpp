@@ -563,7 +563,7 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
 
 #if 0
     const mkvparser::SegmentInfo *info = mSegment->GetInfo();
-    LOGI("muxing app: %s, writing app: %s",
+    ALOGI("muxing app: %s, writing app: %s",
          info->GetMuxingAppAsUTF8(),
          info->GetWritingAppAsUTF8());
 #endif

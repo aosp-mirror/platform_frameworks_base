@@ -120,7 +120,7 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
     delete[] buffer;
     buffer = NULL;
 
-    LOGI("Found VBRI header.");
+    ALOGI("Found VBRI header.");
 
     return seeker;
 }

@@ -215,7 +215,7 @@ static int do_accept(JNIEnv* env, jobject object, int ag_fd,
     get_bdaddr_as_string(&raddr.rc_bdaddr, addr);
     env->SetObjectField(object, out_address, env->NewStringUTF(addr));
 
-    LOGI("Successful accept() on AG socket %d: new socket %d, address %s, RFCOMM channel %d",
+    ALOGI("Successful accept() on AG socket %d: new socket %d, address %s, RFCOMM channel %d",
          ag_fd,
          nsk,
          addr,
@@ -240,7 +240,7 @@ static inline int on_accept_set_fields(JNIEnv* env, jobject object,
                          out_fd, out_address, out_channel);
     }
     else {
-        LOGI("fd = %d, FD_ISSET() = %d",
+        ALOGI("fd = %d, FD_ISSET() = %d",
              ag_fd,
              FD_ISSET(ag_fd, &rset));
         if (ag_fd >= 0 && !FD_ISSET(ag_fd, &rset)) {
@@ -265,7 +265,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
     native_data_t *nat = get_native_data(env, object);
 #if USE_ACCEPT_DIRECTLY
     if (nat->hf_ag_rfcomm_channel > 0) {
-        LOGI("Setting HF AG server socket to RFCOMM port %d!",
+        ALOGI("Setting HF AG server socket to RFCOMM port %d!",
              nat->hf_ag_rfcomm_channel);
         struct timeval tv;
         int len = sizeof(tv);
@@ -277,7 +277,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
                  errno);
             return JNI_FALSE;
         }
-        LOGI("Current HF AG server socket RCVTIMEO is (%d(s), %d(us))!",
+        ALOGI("Current HF AG server socket RCVTIMEO is (%d(s), %d(us))!",
              (int)tv.tv_sec, (int)tv.tv_usec);
         if (timeout_ms >= 0) {
             tv.tv_sec = timeout_ms / 1000;
@@ -290,7 +290,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
                      errno);
                 return JNI_FALSE;
             }
-            LOGI("Changed HF AG server socket RCVTIMEO to (%d(s), %d(us))!",
+            ALOGI("Changed HF AG server socket RCVTIMEO to (%d(s), %d(us))!",
                  (int)tv.tv_sec, (int)tv.tv_usec);
         }
 
@@ -310,13 +310,13 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
     FD_ZERO(&rset);
     int cnt = 0;
     if (nat->hf_ag_rfcomm_channel > 0) {
-        LOGI("Setting HF AG server socket to RFCOMM port %d!",
+        ALOGI("Setting HF AG server socket to RFCOMM port %d!",
              nat->hf_ag_rfcomm_channel);
         cnt++;
         FD_SET(nat->hf_ag_rfcomm_sock, &rset);
     }
     if (nat->hs_ag_rfcomm_channel > 0) {
-        LOGI("Setting HS AG server socket to RFCOMM port %d!",
+        ALOGI("Setting HS AG server socket to RFCOMM port %d!",
              nat->hs_ag_rfcomm_channel);
         cnt++;
         FD_SET(nat->hs_ag_rfcomm_sock, &rset);
@@ -339,12 +339,12 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
                    (timeout_ms < 0 ? NULL : &to));
     if (timeout_ms > 0) {
         jint remaining = to.tv_sec*1000 + to.tv_usec/1000;
-        LOGI("Remaining time %ldms", (long)remaining);
+        ALOGI("Remaining time %ldms", (long)remaining);
         env->SetIntField(object, field_mTimeoutRemainingMs,
                          remaining);
     }
 
-    LOGI("listening select() returned %d", n);
+    ALOGI("listening select() returned %d", n);
 
     if (n <= 0) {
         if (n < 0)  {
@@ -372,7 +372,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
     struct pollfd fds[2];
     int cnt = 0;
     if (nat->hf_ag_rfcomm_channel > 0) {
-//        LOGI("Setting HF AG server socket %d to RFCOMM port %d!",
+//        ALOGI("Setting HF AG server socket %d to RFCOMM port %d!",
 //             nat->hf_ag_rfcomm_sock,
 //             nat->hf_ag_rfcomm_channel);
         fds[cnt].fd = nat->hf_ag_rfcomm_sock;
@@ -380,7 +380,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         cnt++;
     }
     if (nat->hs_ag_rfcomm_channel > 0) {
-//        LOGI("Setting HS AG server socket %d to RFCOMM port %d!",
+//        ALOGI("Setting HS AG server socket %d to RFCOMM port %d!",
 //             nat->hs_ag_rfcomm_sock,
 //             nat->hs_ag_rfcomm_channel);
         fds[cnt].fd = nat->hs_ag_rfcomm_sock;
@@ -400,18 +400,18 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         }
         else {
             env->SetIntField(object, field_mTimeoutRemainingMs, 0);
-//            LOGI("listening poll() on RFCOMM socket timed out");
+//            ALOGI("listening poll() on RFCOMM socket timed out");
         }
         return JNI_FALSE;
     }
 
-    //LOGI("listening poll() on RFCOMM socket returned %d", n);
+    //ALOGI("listening poll() on RFCOMM socket returned %d", n);
     int err = 0;
     for (cnt = 0; cnt < (int)(sizeof(fds)/sizeof(fds[0])); cnt++) {
-        //LOGI("Poll on fd %d revent = %d.", fds[cnt].fd, fds[cnt].revents);
+        //ALOGI("Poll on fd %d revent = %d.", fds[cnt].fd, fds[cnt].revents);
         if (fds[cnt].fd == nat->hf_ag_rfcomm_sock) {
             if (fds[cnt].revents & (POLLIN | POLLPRI | POLLOUT)) {
-                LOGI("Accepting HF connection.\n");
+                ALOGI("Accepting HF connection.\n");
                 err += do_accept(env, object, fds[cnt].fd,
                                field_mConnectingHandsfreeSocketFd,
                                field_mConnectingHandsfreeAddress,
@@ -421,7 +421,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         }
         else if (fds[cnt].fd == nat->hs_ag_rfcomm_sock) {
             if (fds[cnt].revents & (POLLIN | POLLPRI | POLLOUT)) {
-                LOGI("Accepting HS connection.\n");
+                ALOGI("Accepting HS connection.\n");
                 err += do_accept(env, object, fds[cnt].fd,
                                field_mConnectingHeadsetSocketFd,
                                field_mConnectingHeadsetAddress,
@@ -432,7 +432,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
     } /* for */
 
     if (n != 0) {
-        LOGI("Bogus poll(): %d fake pollfd entrie(s)!", n);
+        ALOGI("Bogus poll(): %d fake pollfd entrie(s)!", n);
         return JNI_FALSE;
     }
 

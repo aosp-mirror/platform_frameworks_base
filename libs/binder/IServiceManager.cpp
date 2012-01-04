@@ -78,7 +78,7 @@ bool checkPermission(const String16& permission, pid_t pid, uid_t uid)
             bool res = pc->checkPermission(permission, pid, uid);
             if (res) {
                 if (startTime != 0) {
-                    LOGI("Check passed after %d seconds for %s from uid=%d pid=%d",
+                    ALOGI("Check passed after %d seconds for %s from uid=%d pid=%d",
                             (int)((uptimeMillis()-startTime)/1000),
                             String8(permission).string(), uid, pid);
                 }
@@ -106,7 +106,7 @@ bool checkPermission(const String16& permission, pid_t pid, uid_t uid)
             // Wait for the permission controller to come back...
             if (startTime == 0) {
                 startTime = uptimeMillis();
-                LOGI("Waiting to check permission %s from uid=%d pid=%d",
+                ALOGI("Waiting to check permission %s from uid=%d pid=%d",
                         String8(permission).string(), uid, pid);
             }
             sleep(1);
@@ -136,7 +136,7 @@ public:
         for (n = 0; n < 5; n++){
             sp<IBinder> svc = checkService(name);
             if (svc != NULL) return svc;
-            LOGI("Waiting for service %s...\n", String8(name).string());
+            ALOGI("Waiting for service %s...\n", String8(name).string());
             sleep(1);
         }
         return NULL;

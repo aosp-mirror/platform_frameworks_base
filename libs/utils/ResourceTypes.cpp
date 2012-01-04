@@ -1164,7 +1164,7 @@ ResXMLTree::ResXMLTree()
     : ResXMLParser(*this)
     , mError(NO_INIT), mOwnedData(NULL)
 {
-    //LOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
+    //ALOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
     restart();
 }
 
@@ -1172,13 +1172,13 @@ ResXMLTree::ResXMLTree(const void* data, size_t size, bool copyData)
     : ResXMLParser(*this)
     , mError(NO_INIT), mOwnedData(NULL)
 {
-    //LOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
+    //ALOGI("Creating ResXMLTree %p #%d\n", this, android_atomic_inc(&gCount)+1);
     setTo(data, size, copyData);
 }
 
 ResXMLTree::~ResXMLTree()
 {
-    //LOGI("Destroying ResXMLTree in %p #%d\n", this, android_atomic_dec(&gCount)-1);
+    //ALOGI("Destroying ResXMLTree in %p #%d\n", this, android_atomic_dec(&gCount)-1);
     uninit();
 }
 
@@ -1631,7 +1631,7 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
 
     mTable.unlock();
 
-    //LOGI("Applying style 0x%08x (force=%d)  theme %p...\n", resID, force, this);
+    //ALOGI("Applying style 0x%08x (force=%d)  theme %p...\n", resID, force, this);
     //dumpToLog();
     
     return NO_ERROR;
@@ -1639,7 +1639,7 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
 
 status_t ResTable::Theme::setTo(const Theme& other)
 {
-    //LOGI("Setting theme %p from theme %p...\n", this, &other);
+    //ALOGI("Setting theme %p from theme %p...\n", this, &other);
     //dumpToLog();
     //other.dumpToLog();
     
@@ -1670,7 +1670,7 @@ status_t ResTable::Theme::setTo(const Theme& other)
         }
     }
 
-    //LOGI("Final theme:");
+    //ALOGI("Final theme:");
     //dumpToLog();
     
     return NO_ERROR;
@@ -1752,21 +1752,21 @@ ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
 
 void ResTable::Theme::dumpToLog() const
 {
-    LOGI("Theme %p:\n", this);
+    ALOGI("Theme %p:\n", this);
     for (size_t i=0; i<Res_MAXPACKAGE; i++) {
         package_info* pi = mPackages[i];
         if (pi == NULL) continue;
         
-        LOGI("  Package #0x%02x:\n", (int)(i+1));
+        ALOGI("  Package #0x%02x:\n", (int)(i+1));
         for (size_t j=0; j<pi->numTypes; j++) {
             type_info& ti = pi->types[j];
             if (ti.numEntries == 0) continue;
             
-            LOGI("    Type #0x%02x:\n", (int)(j+1));
+            ALOGI("    Type #0x%02x:\n", (int)(j+1));
             for (size_t k=0; k<ti.numEntries; k++) {
                 theme_entry& te = ti.entries[k];
                 if (te.value.dataType == Res_value::TYPE_NULL) continue;
-                LOGI("      0x%08x: t=0x%x, d=0x%08x (block=%d)\n",
+                ALOGI("      0x%08x: t=0x%x, d=0x%08x (block=%d)\n",
                      (int)Res_MAKEID(i, j, k),
                      te.value.dataType, (int)te.value.data, (int)te.stringBlock);
             }
@@ -1779,7 +1779,7 @@ ResTable::ResTable()
 {
     memset(&mParams, 0, sizeof(mParams));
     memset(mPackageMap, 0, sizeof(mPackageMap));
-    //LOGI("Creating ResTable %p\n", this);
+    //ALOGI("Creating ResTable %p\n", this);
 }
 
 ResTable::ResTable(const void* data, size_t size, void* cookie, bool copyData)
@@ -1789,12 +1789,12 @@ ResTable::ResTable(const void* data, size_t size, void* cookie, bool copyData)
     memset(mPackageMap, 0, sizeof(mPackageMap));
     add(data, size, cookie, copyData);
     LOG_FATAL_IF(mError != NO_ERROR, "Error parsing resource table");
-    //LOGI("Creating ResTable %p\n", this);
+    //ALOGI("Creating ResTable %p\n", this);
 }
 
 ResTable::~ResTable()
 {
-    //LOGI("Destroying ResTable in %p\n", this);
+    //ALOGI("Destroying ResTable in %p\n", this);
     uninit();
 }
 
@@ -1881,7 +1881,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
 
     header->header = (const ResTable_header*)data;
     header->size = dtohl(header->header->header.size);
-    //LOGI("Got size 0x%x, again size 0x%x, raw size 0x%x\n", header->size,
+    //ALOGI("Got size 0x%x, again size 0x%x, raw size 0x%x\n", header->size,
     //     dtohl(header->header->header.size), header->header->header.size);
     LOAD_TABLE_NOISY(LOGV("Loading ResTable @%p:\n", header->header));
     LOAD_TABLE_NOISY(printHexData(2, header->header, header->size < 256 ? header->size : 256,
@@ -2350,7 +2350,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
                         *outTypeSpecFlags = set->typeSpecFlags;
                     }
                     *outBag = (bag_entry*)(set+1);
-                    //LOGI("Found existing bag for: %p\n", (void*)resID);
+                    //ALOGI("Found existing bag for: %p\n", (void*)resID);
                     return set->numAttrs;
                 }
                 LOGW("Attempt to retrieve bag 0x%08x which is invalid or in a cycle.",
@@ -4273,7 +4273,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             TABLE_GETENTRY(
                 ResTable_config thisConfig;
                 thisConfig.copyFromDtoH(type->config);
-                LOGI("Adding config to type %d: imsi:%d/%d lang:%c%c cnt:%c%c "
+                ALOGI("Adding config to type %d: imsi:%d/%d lang:%c%c cnt:%c%c "
                      "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d "
                      "swdp:%d wdp:%d hdp:%d\n",
                       type->id,

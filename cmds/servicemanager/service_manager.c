@@ -11,7 +11,7 @@
 #include "binder.h"
 
 #if 0
-#define LOGI(x...) fprintf(stderr, "svcmgr: " x)
+#define ALOGI(x...) fprintf(stderr, "svcmgr: " x)
 #define LOGE(x...) fprintf(stderr, "svcmgr: " x)
 #else
 #define LOG_TAG "ServiceManager"
@@ -115,7 +115,7 @@ struct svcinfo *find_svc(uint16_t *s16, unsigned len)
 void svcinfo_death(struct binder_state *bs, void *ptr)
 {
     struct svcinfo *si = ptr;
-    LOGI("service '%s' died\n", str8(si->name));
+    ALOGI("service '%s' died\n", str8(si->name));
     if (si->ptr) {
         binder_release(bs, si->ptr);
         si->ptr = 0;
@@ -133,7 +133,7 @@ void *do_find_service(struct binder_state *bs, uint16_t *s, unsigned len)
     struct svcinfo *si;
     si = find_svc(s, len);
 
-//    LOGI("check_service('%s') ptr = %p\n", str8(s), si ? si->ptr : 0);
+//    ALOGI("check_service('%s') ptr = %p\n", str8(s), si ? si->ptr : 0);
     if (si && si->ptr) {
         return si->ptr;
     } else {
@@ -146,7 +146,7 @@ int do_add_service(struct binder_state *bs,
                    void *ptr, unsigned uid)
 {
     struct svcinfo *si;
-//    LOGI("add_service('%s',%p) uid=%d\n", str8(s), ptr, uid);
+//    ALOGI("add_service('%s',%p) uid=%d\n", str8(s), ptr, uid);
 
     if (!ptr || (len == 0) || (len > 127))
         return -1;
@@ -198,7 +198,7 @@ int svcmgr_handler(struct binder_state *bs,
     void *ptr;
     uint32_t strict_policy;
 
-//    LOGI("target=%p code=%d pid=%d uid=%d\n",
+//    ALOGI("target=%p code=%d pid=%d uid=%d\n",
 //         txn->target, txn->code, txn->sender_pid, txn->sender_euid);
 
     if (txn->target != svcmgr_handle)

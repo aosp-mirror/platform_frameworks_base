@@ -14,13 +14,13 @@
 
 static void printGLString(const char *name, GLenum s) {
     const char *v = (const char *) glGetString(s);
-    LOGI("GL %s = %s\n", name, v);
+    ALOGI("GL %s = %s\n", name, v);
 }
 
 static void checkGlError(const char* op) {
     for (GLint error = glGetError(); error; error
             = glGetError()) {
-        LOGI("after %s() glError (0x%x)\n", op, error);
+        ALOGI("after %s() glError (0x%x)\n", op, error);
     }
 }
 
@@ -107,7 +107,7 @@ bool setupGraphics(int w, int h) {
     printGLString("Renderer", GL_RENDERER);
     printGLString("Extensions", GL_EXTENSIONS);
 
-    LOGI("setupGraphics(%d, %d)", w, h);
+    ALOGI("setupGraphics(%d, %d)", w, h);
     gProgram = createProgram(gVertexShader, gFragmentShader);
     if (!gProgram) {
         LOGE("Could not create program.");
@@ -115,7 +115,7 @@ bool setupGraphics(int w, int h) {
     }
     gvPositionHandle = glGetAttribLocation(gProgram, "vPosition");
     checkGlError("glGetAttribLocation");
-    LOGI("glGetAttribLocation(\"vPosition\") = %d\n",
+    ALOGI("glGetAttribLocation(\"vPosition\") = %d\n",
             gvPositionHandle);
 
     glViewport(0, 0, w, h);

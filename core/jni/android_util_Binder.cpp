@@ -476,7 +476,7 @@ public:
 protected:
     virtual ~JavaDeathRecipient()
     {
-        //LOGI("Removing death ref: recipient=%p\n", mObject);
+        //ALOGI("Removing death ref: recipient=%p\n", mObject);
         android_atomic_dec(&gNumDeathRefs);
         JNIEnv* env = javavm_to_jnienv(mVM);
         if (mObject != NULL) {
@@ -1635,7 +1635,7 @@ static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jobject clazz, jo
     int fd = jniGetFDFromFileDescriptor(env, object);
     if (fd >= 0) {
         jniSetFileDescriptorOfFD(env, object, -1);
-        //LOGI("Closing ParcelFileDescriptor %d\n", fd);
+        //ALOGI("Closing ParcelFileDescriptor %d\n", fd);
         close(fd);
     }
 }
@@ -1658,7 +1658,7 @@ static void android_os_Parcel_freeBuffer(JNIEnv* env, jobject clazz)
     if (own) {
         Parcel* parcel = parcelForJavaObject(env, clazz);
         if (parcel != NULL) {
-            //LOGI("Parcel.freeBuffer() called for C++ Parcel %p\n", parcel);
+            //ALOGI("Parcel.freeBuffer() called for C++ Parcel %p\n", parcel);
             parcel->freeData();
         }
     }
@@ -1669,17 +1669,17 @@ static void android_os_Parcel_init(JNIEnv* env, jobject clazz, jint parcelInt)
     Parcel* parcel = (Parcel*)parcelInt;
     int own = 0;
     if (!parcel) {
-        //LOGI("Initializing obj %p: creating new Parcel\n", clazz);
+        //ALOGI("Initializing obj %p: creating new Parcel\n", clazz);
         own = 1;
         parcel = new Parcel;
     } else {
-        //LOGI("Initializing obj %p: given existing Parcel %p\n", clazz, parcel);
+        //ALOGI("Initializing obj %p: given existing Parcel %p\n", clazz, parcel);
     }
     if (parcel == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
-    //LOGI("Initializing obj %p from C++ Parcel %p, own=%d\n", clazz, parcel, own);
+    //ALOGI("Initializing obj %p from C++ Parcel %p, own=%d\n", clazz, parcel, own);
     env->SetIntField(clazz, gParcelOffsets.mOwnObject, own);
     env->SetIntField(clazz, gParcelOffsets.mObject, (int)parcel);
 }
@@ -1690,11 +1690,11 @@ static void android_os_Parcel_destroy(JNIEnv* env, jobject clazz)
     if (own) {
         Parcel* parcel = parcelForJavaObject(env, clazz);
         env->SetIntField(clazz, gParcelOffsets.mObject, 0);
-        //LOGI("Destroying obj %p: deleting C++ Parcel %p\n", clazz, parcel);
+        //ALOGI("Destroying obj %p: deleting C++ Parcel %p\n", clazz, parcel);
         delete parcel;
     } else {
         env->SetIntField(clazz, gParcelOffsets.mObject, 0);
-        //LOGI("Destroying obj %p: leaving C++ Parcel %p\n", clazz);
+        //ALOGI("Destroying obj %p: leaving C++ Parcel %p\n", clazz);
     }
 }
 

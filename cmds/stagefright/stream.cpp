@@ -90,7 +90,7 @@ void MyStreamSource::onBufferAvailable(size_t index) {
 
 #if 0
     if (mNumPacketsSent >= 20000) {
-        LOGI("signalling discontinuity now");
+        ALOGI("signalling discontinuity now");
 
         off64_t offset = 0;
         CHECK((offset % 188) == 0);

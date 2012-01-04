@@ -199,7 +199,7 @@ void MPEG2TSExtractor::init() {
         }
     }
 
-    LOGI("haveAudio=%d, haveVideo=%d", haveAudio, haveVideo);
+    ALOGI("haveAudio=%d, haveVideo=%d", haveAudio, haveVideo);
 }
 
 status_t MPEG2TSExtractor::feedMore() {

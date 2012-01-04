@@ -103,7 +103,7 @@ AudioPolicyService::AudioPolicyService()
     forced_val = strtol(value, NULL, 0);
     mpAudioPolicy->set_can_mute_enforced_audible(mpAudioPolicy, !forced_val);
 
-    LOGI("Loaded audio policy from %s (%s)", module->name, module->id);
+    ALOGI("Loaded audio policy from %s (%s)", module->name, module->id);
 
     // load audio pre processing modules
     if (access(AUDIO_EFFECT_VENDOR_CONFIG_FILE, R_OK) == 0) {

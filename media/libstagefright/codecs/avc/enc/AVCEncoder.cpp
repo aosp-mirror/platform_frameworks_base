@@ -178,7 +178,7 @@ AVCEncoder::AVCEncoder(
       mInputFrameData(NULL),
       mGroup(NULL) {
 
-    LOGI("Construct software AVCEncoder");
+    ALOGI("Construct software AVCEncoder");
 
     mHandle = new tagAVCHandle;
     memset(mHandle, 0, sizeof(tagAVCHandle));
