@@ -489,7 +489,7 @@ MediaPlayerService::Client::Client(
     mUID = uid;
 
 #if CALLBACK_ANTAGONIZER
-    LOGD("create Antagonizer");
+    ALOGD("create Antagonizer");
     mAntagonizer = new Antagonizer(notify, this);
 #endif
 }
@@ -523,7 +523,7 @@ void MediaPlayerService::Client::disconnect()
     if (p != 0) {
         p->setNotifyCallback(0, 0);
 #if CALLBACK_ANTAGONIZER
-        LOGD("kill Antagonizer");
+        ALOGD("kill Antagonizer");
         mAntagonizer->kill();
 #endif
         p->reset();
@@ -925,7 +925,7 @@ status_t MediaPlayerService::Client::prepareAsync()
     if (p == 0) return UNKNOWN_ERROR;
     status_t ret = p->prepareAsync();
 #if CALLBACK_ANTAGONIZER
-    LOGD("start Antagonizer");
+    ALOGD("start Antagonizer");
     if (ret == NO_ERROR) mAntagonizer->start();
 #endif
     return ret;
@@ -1131,7 +1131,7 @@ void Antagonizer::kill()
 
 int Antagonizer::callbackThread(void* user)
 {
-    LOGD("Antagonizer started");
+    ALOGD("Antagonizer started");
     Antagonizer* p = reinterpret_cast<Antagonizer*>(user);
     while (!p->mExit) {
         if (p->mActive) {
@@ -1142,7 +1142,7 @@ int Antagonizer::callbackThread(void* user)
     }
     Mutex::Autolock _l(p->mLock);
     p->mCondition.signal();
-    LOGD("Antagonizer stopped");
+    ALOGD("Antagonizer stopped");
     return 0;
 }
 #endif
@@ -1160,7 +1160,7 @@ sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, i
     // If the application wants to decode those, it should open a
     // filedescriptor for them and use that.
     if (url != NULL && strncmp(url, "http://", 7) != 0) {
-        LOGD("Can't decode %s by path, use filedescriptor instead", url);
+        ALOGD("Can't decode %s by path, use filedescriptor instead", url);
         return mem;
     }
 
@@ -1347,7 +1347,7 @@ status_t MediaPlayerService::AudioOutput::open(
 
     // Check argument "bufferCount" against the mininum buffer count
     if (bufferCount < mMinBufferCount) {
-        LOGD("bufferCount (%d) is too small and increased to %d", bufferCount, mMinBufferCount);
+        ALOGD("bufferCount (%d) is too small and increased to %d", bufferCount, mMinBufferCount);
         bufferCount = mMinBufferCount;
 
     }

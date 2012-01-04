@@ -72,7 +72,7 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
             {
                 char* manufacturerName = usb_device_get_manufacturer_name(device);
                 char* productName = usb_device_get_product_name(device);
-                LOGD("Found camera: \"%s\" \"%s\"\n", manufacturerName, productName);
+                ALOGD("Found camera: \"%s\" \"%s\"\n", manufacturerName, productName);
                 free(manufacturerName);
                 free(productName);
             } else if (interface->bInterfaceClass == 0xFF &&
@@ -90,7 +90,7 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                 // Looks like an android style MTP device
                 char* manufacturerName = usb_device_get_manufacturer_name(device);
                 char* productName = usb_device_get_product_name(device);
-                LOGD("Found MTP device: \"%s\" \"%s\"\n", manufacturerName, productName);
+                ALOGD("Found MTP device: \"%s\" \"%s\"\n", manufacturerName, productName);
                 free(manufacturerName);
                 free(productName);
             }
@@ -666,7 +666,7 @@ fail:
 
 // reads the object's data and writes it to the specified file path
 bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int group, int perm) {
-    LOGD("readObject: %s", destPath);
+    ALOGD("readObject: %s", destPath);
     int fd = ::open(destPath, O_RDWR | O_CREAT | O_TRUNC);
     if (fd < 0) {
         LOGE("open failed for %s", destPath);
@@ -790,7 +790,7 @@ bool MtpDevice::readData() {
     ALOGV("readData returned %d\n", ret);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         if (mData.getContainerType() == MTP_CONTAINER_TYPE_RESPONSE) {
-            LOGD("got response packet instead of data packet");
+            ALOGD("got response packet instead of data packet");
             // we got a response packet rather than data
             // copy it to mResponse
             mResponse.copyFrom(mData);
@@ -827,7 +827,7 @@ MtpResponseCode MtpDevice::readResponse() {
         mResponse.dump();
         return mResponse.getResponseCode();
     } else {
-        LOGD("readResponse failed\n");
+        ALOGD("readResponse failed\n");
         return -1;
     }
 }

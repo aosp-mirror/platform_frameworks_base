@@ -65,7 +65,7 @@ status_t VirtualKeyMap::load(const String8& filename, VirtualKeyMap** outMap) {
             status = parser.parse();
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            LOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
+            ALOGD("Parsed key character map file '%s' %d lines in %0.3fms.",
                     tokenizer->getFilename().string(), tokenizer->getLineNumber(),
                     elapsedTime / 1000000.0);
 #endif
@@ -93,7 +93,7 @@ VirtualKeyMap::Parser::~Parser() {
 status_t VirtualKeyMap::Parser::parse() {
     while (!mTokenizer->isEof()) {
 #if DEBUG_PARSER
-        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+        ALOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
                 mTokenizer->peekRemainderOfLine().string());
 #endif
 
@@ -122,7 +122,7 @@ status_t VirtualKeyMap::Parser::parse() {
                 }
 
 #if DEBUG_PARSER
-                LOGD("Parsed virtual key: scanCode=%d, centerX=%d, centerY=%d, "
+                ALOGD("Parsed virtual key: scanCode=%d, centerX=%d, centerY=%d, "
                         "width=%d, height=%d",
                         defn.scanCode, defn.centerX, defn.centerY, defn.width, defn.height);
 #endif

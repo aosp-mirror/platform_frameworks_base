@@ -163,9 +163,9 @@ void Tokenizer::dump() const
 {
     const run_t* ranges = mRanges.array();
     const size_t c = mRanges.size();
-    LOGD("Tokenizer (%p, size = %u)\n", this, c);
+    ALOGD("Tokenizer (%p, size = %u)\n", this, c);
     for (size_t i=0 ; i<c ; i++) {
-        LOGD("%u: (%u, %u)\n", i, ranges[i].first, ranges[i].length);
+        ALOGD("%u: (%u, %u)\n", i, ranges[i].first, ranges[i].length);
     }
 }
 

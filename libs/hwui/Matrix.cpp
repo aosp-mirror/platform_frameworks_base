@@ -374,12 +374,12 @@ void Matrix4::mapRect(Rect& r) const {
 }
 
 void Matrix4::dump() const {
-    LOGD("Matrix4[simple=%d", mSimpleMatrix);
-    LOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
-    LOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[9], data[kTranslateY]);
-    LOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);
-    LOGD("  %f %f %f %f", data[kPerspective0], data[kPerspective1], data[11], data[kPerspective2]);
-    LOGD("]");
+    ALOGD("Matrix4[simple=%d", mSimpleMatrix);
+    ALOGD("  %f %f %f %f", data[kScaleX], data[kSkewX], data[8], data[kTranslateX]);
+    ALOGD("  %f %f %f %f", data[kSkewY], data[kScaleY], data[9], data[kTranslateY]);
+    ALOGD("  %f %f %f %f", data[2], data[6], data[kScaleZ], data[kTranslateZ]);
+    ALOGD("  %f %f %f %f", data[kPerspective0], data[kPerspective1], data[11], data[kPerspective2]);
+    ALOGD("]");
 }
 
 }; // namespace uirenderer

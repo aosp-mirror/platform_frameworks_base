@@ -439,51 +439,51 @@ unsigned int SC_umodsi3(unsigned int a, unsigned int b) {
 }
 
 static void SC_debugF(const char *s, float f) {
-    LOGD("%s %f, 0x%08x", s, f, *((int *) (&f)));
+    ALOGD("%s %f, 0x%08x", s, f, *((int *) (&f)));
 }
 static void SC_debugFv2(const char *s, float f1, float f2) {
-    LOGD("%s {%f, %f}", s, f1, f2);
+    ALOGD("%s {%f, %f}", s, f1, f2);
 }
 static void SC_debugFv3(const char *s, float f1, float f2, float f3) {
-    LOGD("%s {%f, %f, %f}", s, f1, f2, f3);
+    ALOGD("%s {%f, %f, %f}", s, f1, f2, f3);
 }
 static void SC_debugFv4(const char *s, float f1, float f2, float f3, float f4) {
-    LOGD("%s {%f, %f, %f, %f}", s, f1, f2, f3, f4);
+    ALOGD("%s {%f, %f, %f, %f}", s, f1, f2, f3, f4);
 }
 static void SC_debugD(const char *s, double d) {
-    LOGD("%s %f, 0x%08llx", s, d, *((long long *) (&d)));
+    ALOGD("%s %f, 0x%08llx", s, d, *((long long *) (&d)));
 }
 static void SC_debugFM4v4(const char *s, const float *f) {
-    LOGD("%s {%f, %f, %f, %f", s, f[0], f[4], f[8], f[12]);
-    LOGD("%s  %f, %f, %f, %f", s, f[1], f[5], f[9], f[13]);
-    LOGD("%s  %f, %f, %f, %f", s, f[2], f[6], f[10], f[14]);
-    LOGD("%s  %f, %f, %f, %f}", s, f[3], f[7], f[11], f[15]);
+    ALOGD("%s {%f, %f, %f, %f", s, f[0], f[4], f[8], f[12]);
+    ALOGD("%s  %f, %f, %f, %f", s, f[1], f[5], f[9], f[13]);
+    ALOGD("%s  %f, %f, %f, %f", s, f[2], f[6], f[10], f[14]);
+    ALOGD("%s  %f, %f, %f, %f}", s, f[3], f[7], f[11], f[15]);
 }
 static void SC_debugFM3v3(const char *s, const float *f) {
-    LOGD("%s {%f, %f, %f", s, f[0], f[3], f[6]);
-    LOGD("%s  %f, %f, %f", s, f[1], f[4], f[7]);
-    LOGD("%s  %f, %f, %f}",s, f[2], f[5], f[8]);
+    ALOGD("%s {%f, %f, %f", s, f[0], f[3], f[6]);
+    ALOGD("%s  %f, %f, %f", s, f[1], f[4], f[7]);
+    ALOGD("%s  %f, %f, %f}",s, f[2], f[5], f[8]);
 }
 static void SC_debugFM2v2(const char *s, const float *f) {
-    LOGD("%s {%f, %f", s, f[0], f[2]);
-    LOGD("%s  %f, %f}",s, f[1], f[3]);
+    ALOGD("%s {%f, %f", s, f[0], f[2]);
+    ALOGD("%s  %f, %f}",s, f[1], f[3]);
 }
 
 static void SC_debugI32(const char *s, int32_t i) {
-    LOGD("%s %i  0x%x", s, i, i);
+    ALOGD("%s %i  0x%x", s, i, i);
 }
 static void SC_debugU32(const char *s, uint32_t i) {
-    LOGD("%s %u  0x%x", s, i, i);
+    ALOGD("%s %u  0x%x", s, i, i);
 }
 static void SC_debugLL64(const char *s, long long ll) {
-    LOGD("%s %lld  0x%llx", s, ll, ll);
+    ALOGD("%s %lld  0x%llx", s, ll, ll);
 }
 static void SC_debugULL64(const char *s, unsigned long long ll) {
-    LOGD("%s %llu  0x%llx", s, ll, ll);
+    ALOGD("%s %llu  0x%llx", s, ll, ll);
 }
 
 static void SC_debugP(const char *s, const void *p) {
-    LOGD("%s %p", s, p);
+    ALOGD("%s %p", s, p);
 }
 
 

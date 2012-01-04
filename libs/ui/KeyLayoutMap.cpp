@@ -67,7 +67,7 @@ status_t KeyLayoutMap::load(const String8& filename, KeyLayoutMap** outMap) {
             status = parser.parse();
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            LOGD("Parsed key layout map file '%s' %d lines in %0.3fms.",
+            ALOGD("Parsed key layout map file '%s' %d lines in %0.3fms.",
                     tokenizer->getFilename().string(), tokenizer->getLineNumber(),
                     elapsedTime / 1000000.0);
 #endif
@@ -86,7 +86,7 @@ status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flag
     ssize_t index = mKeys.indexOfKey(scanCode);
     if (index < 0) {
 #if DEBUG_MAPPING
-        LOGD("mapKey: scanCode=%d ~ Failed.", scanCode);
+        ALOGD("mapKey: scanCode=%d ~ Failed.", scanCode);
 #endif
         *keyCode = AKEYCODE_UNKNOWN;
         *flags = 0;
@@ -98,7 +98,7 @@ status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flag
     *flags = k.flags;
 
 #if DEBUG_MAPPING
-    LOGD("mapKey: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
+    ALOGD("mapKey: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
 #endif
     return NO_ERROR;
 }
@@ -117,7 +117,7 @@ status_t KeyLayoutMap::mapAxis(int32_t scanCode, AxisInfo* outAxisInfo) const {
     ssize_t index = mAxes.indexOfKey(scanCode);
     if (index < 0) {
 #if DEBUG_MAPPING
-        LOGD("mapAxis: scanCode=%d ~ Failed.", scanCode);
+        ALOGD("mapAxis: scanCode=%d ~ Failed.", scanCode);
 #endif
         return NAME_NOT_FOUND;
     }
@@ -125,7 +125,7 @@ status_t KeyLayoutMap::mapAxis(int32_t scanCode, AxisInfo* outAxisInfo) const {
     *outAxisInfo = mAxes.valueAt(index);
 
 #if DEBUG_MAPPING
-    LOGD("mapAxis: scanCode=%d ~ Result mode=%d, axis=%d, highAxis=%d, "
+    ALOGD("mapAxis: scanCode=%d ~ Result mode=%d, axis=%d, highAxis=%d, "
             "splitValue=%d, flatOverride=%d.",
             scanCode,
             outAxisInfo->mode, outAxisInfo->axis, outAxisInfo->highAxis,
@@ -147,7 +147,7 @@ KeyLayoutMap::Parser::~Parser() {
 status_t KeyLayoutMap::Parser::parse() {
     while (!mTokenizer->isEof()) {
 #if DEBUG_PARSER
-        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+        ALOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
                 mTokenizer->peekRemainderOfLine().string());
 #endif
 
@@ -228,7 +228,7 @@ status_t KeyLayoutMap::Parser::parseKey() {
     }
 
 #if DEBUG_PARSER
-    LOGD("Parsed key: scanCode=%d, keyCode=%d, flags=0x%08x.", scanCode, keyCode, flags);
+    ALOGD("Parsed key: scanCode=%d, keyCode=%d, flags=0x%08x.", scanCode, keyCode, flags);
 #endif
     Key key;
     key.keyCode = keyCode;
@@ -328,7 +328,7 @@ status_t KeyLayoutMap::Parser::parseAxis() {
     }
 
 #if DEBUG_PARSER
-    LOGD("Parsed axis: scanCode=%d, mode=%d, axis=%d, highAxis=%d, "
+    ALOGD("Parsed axis: scanCode=%d, mode=%d, axis=%d, highAxis=%d, "
             "splitValue=%d, flatOverride=%d.",
             scanCode,
             axisInfo.mode, axisInfo.axis, axisInfo.highAxis,

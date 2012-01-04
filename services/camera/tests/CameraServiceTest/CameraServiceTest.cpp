@@ -46,7 +46,7 @@ using namespace android;
     do { \
         printf(__VA_ARGS__); \
         printf("\n"); \
-        LOGD(__VA_ARGS__); \
+        ALOGD(__VA_ARGS__); \
     } while(0)
 
 void assert_fail(const char *file, int line, const char *func, const char *expr) {
@@ -797,7 +797,7 @@ public:
         int w, h;
         const char *s = param.get(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES);
         while (getNextSize(&s, &w, &h)) {
-            LOGD("checking picture size %dx%d", w, h);
+            ALOGD("checking picture size %dx%d", w, h);
             checkOnePicture(w, h);
         }
     }
@@ -811,7 +811,7 @@ public:
 
         // Try all flag combinations.
         for (int v = 0; v < 8; v++) {
-            LOGD("TestPreviewCallbackFlag: flag=%d", v);
+            ALOGD("TestPreviewCallbackFlag: flag=%d", v);
             usleep(100000); // sleep a while to clear the in-flight callbacks.
             cc->clearStat();
             c->setPreviewCallbackFlag(v);
@@ -875,7 +875,7 @@ public:
         int w, h;
         const char *s = param.get(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES);
         while (getNextSize(&s, &w, &h)) {
-            LOGD("checking preview size %dx%d", w, h);
+            ALOGD("checking preview size %dx%d", w, h);
             checkOnePicture(w, h);
         }
     }

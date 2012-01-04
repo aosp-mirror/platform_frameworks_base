@@ -132,7 +132,7 @@ status_t MemoryHeapBase::mapfd(int fd, size_t size, uint32_t offset)
             close(fd);
             return -errno;
         }
-        //LOGD("mmap(fd=%d, base=%p, size=%lu)", fd, base, size);
+        //ALOGD("mmap(fd=%d, base=%p, size=%lu)", fd, base, size);
         mBase = base;
         mNeedUnmap = true;
     } else  {
@@ -155,7 +155,7 @@ void MemoryHeapBase::dispose()
     int fd = android_atomic_or(-1, &mFD);
     if (fd >= 0) {
         if (mNeedUnmap) {
-            //LOGD("munmap(fd=%d, base=%p, size=%lu)", fd, mBase, mSize);
+            //ALOGD("munmap(fd=%d, base=%p, size=%lu)", fd, mBase, mSize);
             munmap(mBase, mSize);
         }
         mBase = 0;

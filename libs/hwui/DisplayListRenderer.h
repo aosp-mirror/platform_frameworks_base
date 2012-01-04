@@ -43,7 +43,7 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_DISPLAY_LIST
-    #define DISPLAY_LIST_LOGD(...) LOGD(__VA_ARGS__)
+    #define DISPLAY_LIST_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define DISPLAY_LIST_LOGD(...)
 #endif

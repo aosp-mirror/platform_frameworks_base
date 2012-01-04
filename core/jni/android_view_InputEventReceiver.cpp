@@ -74,13 +74,13 @@ NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
         mReceiverObjGlobal(env->NewGlobalRef(receiverObj)),
         mInputConsumer(inputChannel), mLooper(looper), mEventInProgress(false) {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ Initializing input event receiver.", getInputChannelName());
+    ALOGD("channel '%s' ~ Initializing input event receiver.", getInputChannelName());
 #endif
 }
 
 NativeInputEventReceiver::~NativeInputEventReceiver() {
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ Disposing input event receiver.", getInputChannelName());
+    ALOGD("channel '%s' ~ Disposing input event receiver.", getInputChannelName());
 #endif
 
     mLooper->removeFd(mInputConsumer.getChannel()->getReceivePipeFd());
@@ -108,7 +108,7 @@ status_t NativeInputEventReceiver::initialize() {
 status_t NativeInputEventReceiver::finishInputEvent(bool handled) {
     if (mEventInProgress) {
 #if DEBUG_DISPATCH_CYCLE
-        LOGD("channel '%s' ~ Finished input event.", getInputChannelName());
+        ALOGD("channel '%s' ~ Finished input event.", getInputChannelName());
 #endif
         mEventInProgress = false;
 
@@ -166,7 +166,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     switch (inputEvent->getType()) {
     case AINPUT_EVENT_TYPE_KEY:
 #if DEBUG_DISPATCH_CYCLE
-        LOGD("channel '%s' ~ Received key event.",
+        ALOGD("channel '%s' ~ Received key event.",
                 r->getInputChannelName());
 #endif
         inputEventObj = android_view_KeyEvent_fromNative(env,
@@ -175,7 +175,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
 
     case AINPUT_EVENT_TYPE_MOTION:
 #if DEBUG_DISPATCH_CYCLE
-        LOGD("channel '%s' ~ Received motion event.",
+        ALOGD("channel '%s' ~ Received motion event.",
                 r->getInputChannelName());
 #endif
         inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
@@ -197,12 +197,12 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     r->mEventInProgress = true;
 
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ Invoking input handler.", r->getInputChannelName());
+    ALOGD("channel '%s' ~ Invoking input handler.", r->getInputChannelName());
 #endif
     env->CallVoidMethod(r->mReceiverObjGlobal,
             gInputEventReceiverClassInfo.dispatchInputEvent, inputEventObj);
 #if DEBUG_DISPATCH_CYCLE
-    LOGD("channel '%s' ~ Returned from input handler.", r->getInputChannelName());
+    ALOGD("channel '%s' ~ Returned from input handler.", r->getInputChannelName());
 #endif
 
     if (env->ExceptionCheck()) {

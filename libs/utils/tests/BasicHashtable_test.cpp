@@ -156,7 +156,7 @@ template <> void getKeyValue(const ComplexEntry& entry, int* key, int* value) {
 
 template <typename TKey, typename TValue>
 static void dump(BasicHashtable<TKey, key_value_pair_t<TKey, TValue> >& h) {
-    LOGD("hashtable %p, size=%u, capacity=%u, bucketCount=%u",
+    ALOGD("hashtable %p, size=%u, capacity=%u, bucketCount=%u",
             &h, h.size(), h.capacity(), h.bucketCount());
     for (size_t i = 0; i < h.bucketCount(); i++) {
         bool collision, present;
@@ -165,11 +165,11 @@ static void dump(BasicHashtable<TKey, key_value_pair_t<TKey, TValue> >& h) {
         if (present) {
             int key, value;
             getKeyValue(h.entryAt(i), &key, &value);
-            LOGD("  [%3u] = collision=%d, present=%d, hash=0x%08x, key=%3d, value=%3d, "
+            ALOGD("  [%3u] = collision=%d, present=%d, hash=0x%08x, key=%3d, value=%3d, "
                     "hash_type(key)=0x%08x",
                     i, collision, present, hash, key, value, hash_type(key));
         } else {
-            LOGD("  [%3u] = collision=%d, present=%d",
+            ALOGD("  [%3u] = collision=%d, present=%d",
                     i, collision, present);
         }
     }

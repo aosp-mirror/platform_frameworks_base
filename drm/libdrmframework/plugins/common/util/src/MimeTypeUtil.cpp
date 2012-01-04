@@ -24,7 +24,7 @@ namespace android {
 
 #ifdef DRM_OMA_FL_ENGINE_DEBUG
 #define LOG_NDEBUG 0
-#define LOG_DEBUG(...) LOGD(__VA_ARGS__)
+#define LOG_DEBUG(...) ALOGD(__VA_ARGS__)
 #else
 #define LOG_DEBUG(...)
 #endif

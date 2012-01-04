@@ -118,13 +118,13 @@ void Player::ping(const Parcel& request, Parcel *reply)
 
 extern "C" android::MediaPlayerBase* newPlayer()
 {
-    LOGD("New invoke test player");
+    ALOGD("New invoke test player");
     return new Player();
 }
 
 extern "C" android::status_t deletePlayer(android::MediaPlayerBase *player)
 {
-    LOGD("Delete invoke test player");
+    ALOGD("Delete invoke test player");
     delete player;
     return OK;
 }

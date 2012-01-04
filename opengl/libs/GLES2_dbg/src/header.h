@@ -48,9 +48,9 @@ using namespace com::android;
 #endif
 
 #undef assert
-#define assert(expr) if (!(expr)) { LOGD("\n*\n*\n* assert: %s at %s \n*\n*", #expr, __location__); int * x = 0; *x = 5; }
-//#undef LOGD
-//#define LOGD(...)
+#define assert(expr) if (!(expr)) { ALOGD("\n*\n*\n* assert: %s at %s \n*\n*", #expr, __location__); int * x = 0; *x = 5; }
+//#undef ALOGD
+//#define ALOGD(...)
 
 namespace android
 {

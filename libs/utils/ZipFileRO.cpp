@@ -269,7 +269,7 @@ bool ZipFileRO::mapCentralDirectory(void)
         }
     }
     if (i < 0) {
-        LOGD("Zip: EOCD not found, %s is not zip\n", mFileName);
+        ALOGD("Zip: EOCD not found, %s is not zip\n", mFileName);
         free(scanBuf);
         return false;
     }

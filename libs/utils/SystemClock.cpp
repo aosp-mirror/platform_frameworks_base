@@ -64,7 +64,7 @@ int setCurrentTimeMillis(int64_t millis)
     tv.tv_sec = (time_t) (millis / 1000LL);
     tv.tv_usec = (suseconds_t) ((millis % 1000LL) * 1000LL);
 
-    LOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
+    ALOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
 
 #ifdef HAVE_ANDROID_OS
     fd = open("/dev/alarm", O_RDWR);

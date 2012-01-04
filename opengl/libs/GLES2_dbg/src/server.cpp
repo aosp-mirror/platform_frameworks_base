@@ -34,7 +34,7 @@ int timeMode = SYSTEM_TIME_THREAD;
 
 static void Die(const char * msg)
 {
-    LOGD("\n*\n*\n* GLESv2_dbg: Die: %s \n*\n*", msg);
+    ALOGD("\n*\n*\n* GLESv2_dbg: Die: %s \n*\n*", msg);
     StopDebugServer();
     exit(1);
 }
@@ -44,11 +44,11 @@ void StartDebugServer(const unsigned short port, const bool forceUseFile,
 {
     MAX_FILE_SIZE = maxFileSize;
 
-    LOGD("GLESv2_dbg: StartDebugServer");
+    ALOGD("GLESv2_dbg: StartDebugServer");
     if (serverSock >= 0 || file)
         return;
 
-    LOGD("GLESv2_dbg: StartDebugServer create socket");
+    ALOGD("GLESv2_dbg: StartDebugServer create socket");
     struct sockaddr_in server = {}, client = {};
 
     /* Create the TCP socket */
@@ -75,7 +75,7 @@ void StartDebugServer(const unsigned short port, const bool forceUseFile,
         Die("Failed to listen on server socket");
     }
 
-    LOGD("server started on %d \n", server.sin_port);
+    ALOGD("server started on %d \n", server.sin_port);
 
 
     /* Wait for client connection */
@@ -85,13 +85,13 @@ void StartDebugServer(const unsigned short port, const bool forceUseFile,
         Die("Failed to accept client connection");
     }
 
-    LOGD("Client connected: %s\n", inet_ntoa(client.sin_addr));
+    ALOGD("Client connected: %s\n", inet_ntoa(client.sin_addr));
 //    fcntl(clientSock, F_SETFL, O_NONBLOCK);
 }
 
 void StopDebugServer()
 {
-    LOGD("GLESv2_dbg: StopDebugServer");
+    ALOGD("GLESv2_dbg: StopDebugServer");
     if (clientSock > 0) {
         close(clientSock);
         clientSock = -1;
@@ -115,7 +115,7 @@ void Receive(glesv2debugger::Message & cmd)
     if (received < 0)
         Die("Failed to receive response length");
     else if (4 != received) {
-        LOGD("received %dB: %.8X", received, len);
+        ALOGD("received %dB: %.8X", received, len);
         Die("Received length mismatch, expected 4");
     }
     static void * buffer = NULL;
@@ -150,7 +150,7 @@ bool TryReceive(glesv2debugger::Message & cmd)
 
     bool received = false;
     if (FD_ISSET(clientSock, &readSet)) {
-        LOGD("TryReceive: avaiable for read");
+        ALOGD("TryReceive: avaiable for read");
         Receive(cmd);
         return true;
     }
@@ -190,14 +190,14 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     int sent = -1;
     sent = send(clientSock, &len, sizeof(len), 0);
     if (sent != sizeof(len)) {
-        LOGD("actual sent=%d expected=%d clientSock=%d", sent, sizeof(len), clientSock);
+        ALOGD("actual sent=%d expected=%d clientSock=%d", sent, sizeof(len), clientSock);
         Die("Failed to send message length");
     }
     nsecs_t c0 = systemTime(timeMode);
     sent = send(clientSock, str.data(), str.length(), 0);
     float t = (float)ns2ms(systemTime(timeMode) - c0);
     if (sent != str.length()) {
-        LOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
+        ALOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
         Die("Failed to send message");
     }
     // TODO: factor Receive & TryReceive out and into MessageLoop, or add control argument.
@@ -210,9 +210,9 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     if (!msg.expect_response()) {
         if (TryReceive(cmd)) {
             if (glesv2debugger::Message_Function_SETPROP == cmd.function())
-                LOGD("Send: TryReceived SETPROP");
+                ALOGD("Send: TryReceived SETPROP");
             else
-                LOGD("Send: TryReceived %u", cmd.function());
+                ALOGD("Send: TryReceived %u", cmd.function());
         }
     } else
         Receive(cmd);
@@ -223,19 +223,19 @@ void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd)
 {
     switch (cmd.prop()) {
     case glesv2debugger::Message_Prop_CaptureDraw:
-        LOGD("SetProp Message_Prop_CaptureDraw %d", cmd.arg0());
+        ALOGD("SetProp Message_Prop_CaptureDraw %d", cmd.arg0());
         dbg->captureDraw = cmd.arg0();
         break;
     case glesv2debugger::Message_Prop_TimeMode:
-        LOGD("SetProp Message_Prop_TimeMode %d", cmd.arg0());
+        ALOGD("SetProp Message_Prop_TimeMode %d", cmd.arg0());
         timeMode = cmd.arg0();
         break;
     case glesv2debugger::Message_Prop_ExpectResponse:
-        LOGD("SetProp Message_Prop_ExpectResponse %d=%d", cmd.arg0(), cmd.arg1());
+        ALOGD("SetProp Message_Prop_ExpectResponse %d=%d", cmd.arg0(), cmd.arg1());
         dbg->expectResponse.Bit((glesv2debugger::Message_Function)cmd.arg0(), cmd.arg1());
         break;
     case glesv2debugger::Message_Prop_CaptureSwap:
-        LOGD("SetProp CaptureSwap %d", cmd.arg0());
+        ALOGD("SetProp CaptureSwap %d", cmd.arg0());
         dbg->captureSwap = cmd.arg0();
         break;
     default:
@@ -269,7 +269,7 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
         case glesv2debugger::Message_Function_CONTINUE:
             ret = functionCall(&dbg->hooks->gl, msg);
             while (GLenum error = dbg->hooks->gl.glGetError())
-                LOGD("Function=%u glGetError() = 0x%.4X", function, error);
+                ALOGD("Function=%u glGetError() = 0x%.4X", function, error);
             if (!msg.has_time()) // some has output data copy, so time inside call
                 msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
             msg.set_context_id(reinterpret_cast<int>(dbg));

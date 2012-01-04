@@ -85,7 +85,7 @@ void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) 
         mSize -= texture->bitmapSize;
 
         if (mDebugEnabled) {
-            LOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
+            ALOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
         }
 
         glDeleteTextures(1, &texture->id);
@@ -142,7 +142,7 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
 
         if (size < mMaxSize) {
             if (mDebugEnabled) {
-                LOGD("Shadow texture created, size = %d", texture->bitmapSize);
+                ALOGD("Shadow texture created, size = %d", texture->bitmapSize);
             }
 
             entry.copyTextLocally();
