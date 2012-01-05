@@ -207,10 +207,10 @@ resources.</p>
 <h2 id="AlternativeResources">Providing Alternative Resources</h2>
 
 
-<div class="figure" style="width:421px">
-<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
 <p class="img-caption">
-<strong>Figure 1.</strong> Two different devices, one using alternative resources.</p>
+<strong>Figure 1.</strong> Two different devices, each using different layout resources.</p>
 </div>
 
 <p>Almost every application should provide alternative resources to support specific device
@@ -1021,8 +1021,8 @@ drawables from {@code drawable-en-port}.</p>
 logic:</p>
 
 
-<div class="figure" style="width:280px">
-<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="590" />
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
 <p class="img-caption"><strong>Figure 2.</strong> Flowchart of how Android finds the
 best-matching resource.</p>
 </div>

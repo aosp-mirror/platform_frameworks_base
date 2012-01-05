@@ -33,7 +33,7 @@ parent.link=activities.html
     </li>
     <li><a href="#Lifecycle">Handling the Fragment Lifecycle</a>
       <ol>
-        <li><a href="#CoordinadingWithActivity">Coordinating with the activity lifecycle</a></li>
+        <li><a href="#CoordinatingWithActivity">Coordinating with the activity lifecycle</a></li>
       </ol>
     </li>
     <li><a href="#Example">Example</a></li>
@@ -143,7 +143,7 @@ href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets an
 
 <h2 id="Creating">Creating a Fragment</h2>
 
-<div class="figure" style="width:314px">
+<div class="figure" style="width:327px">
 <img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
 <p class="img-caption"><strong>Figure 2.</strong> The lifecycle of a fragment (while its
 activity is running).</p>
@@ -657,7 +657,7 @@ href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guides.
 
 <h2 id="Lifecycle">Handling the Fragment Lifecycle</h2>
 
-<div class="figure" style="width:403px">
+<div class="figure" style="width:350px">
 <img src="{@docRoot}images/activity_fragment_lifecycle.png" alt=""/>
 <p class="img-caption"><strong>Figure 3.</strong> The activity lifecycle's affect on the fragment
 lifecycle.</p>
