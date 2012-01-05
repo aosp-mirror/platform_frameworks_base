@@ -80,7 +80,7 @@ public class PerformanceTest extends
     private static final String URL_POSTFIX = "/index.html?skip=true";
     private static final int MAX_ITERATIONS = 4;
     private static final String TEST_DIRS[] = {
-        "intl1"//, "alexa_us", "android", "dom", "intl2", "moz", "moz2"
+        "alexa25_2011"//, "alexa_us", "android", "dom", "intl2", "moz", "moz2"
     };
 
     public PerformanceTest() {
