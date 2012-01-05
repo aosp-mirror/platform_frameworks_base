@@ -7,9 +7,9 @@ page.title=Publishing on Android Market
 <h2>Quickview</h2>
 
 <ul>
-<li>You can publish your application using a hosted service such as Android Market or through a web server.</li>
-<li>Before you publish, make sure you have prepared your application properly.</li>
-<li>Android Market makes it easy for users of Android-powered devices to see and download your application.</li>
+<li>Learn how to publish and update apps on Android Market.</li>
+<li>Find out how to create links to apps that are published on Android Market.</li>
+<li>Learn about Android Market features.</li>
 </ul>
 
 
@@ -17,97 +17,201 @@ page.title=Publishing on Android Market
 
 <ol>
 <li><a href="#overview">About Android Market</a>
+<li><A href="#marketpublish">Publishing Apps on Android Market</a></li>
 <li><a href="#marketupgrade">Publishing Updates on Android Market</a></li>
 <li><a href="#marketLicensing">Using Android Market Licensing Service</a></li>
+<li><a href="#marketinappbilling">Using Android Market In-app Billing</a></li>
 <li><a href="#marketintent">Linking to Your Apps on Android Market</a>
   <ol>
     <li><a href="#OpeningDetails">Opening an app's details page</a></li>
     <li><a href="#PerformingSearch">Performing a search</a></li>
     <li><a href="#BuildaButton">Build an Android Market button</a></li>
     <li><a href="#UriSummary">Summary of URI formats</a></li>
-  </ol>  
+  </ol>
 </li>
 </ol>
 
 <h2>See also</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a></li>
-<li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a></li>
+<li><a href="{@docRoot}guide/publishing/publishing_overview.html">Publishing Overview</a></li>
+<li><a href="{@docRoot}guide/publishing/preparing.html">Preparing for Release</a></li>
 </ol>
 
 <div id="qv-extra">
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
   <div id="qv-sub-rule">
     <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0 5px;">
-    <h2 style="color:#669999;">Interested in publishing your app on Android Market?</h2>
-    <p><a href="http://market.android.com/publish">Go to Android Market</a> to
-create a developer account and upload your application. For more information about the
-required assets, listing details, and options, see <a
-href="http://market.android.com/support/bin/answer.py?answer=113469">Uploading
-applications</a>.</p>
+    <h2 style="color:#669999;">Already know about Android Market and want to get started?</h2>
+    <p>Go to <a href="http://market.android.com/publish">Android Market</a>, create a developer
+account, and upload your application. For more information about required assets, listing details,
+and publishing options, see <a
+href="http://market.android.com/support/bin/answer.py?answer=113469">Upload
+Applications</a>.</p>
   </div>
 </div>
 
 </div>
 </div>
 
-<p>If you've followed the steps outlined in <a
-href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a>, the result of the process
-is a compiled {@code .apk} file that is signed with your private release key. Your application is
-now ready to be published publicly so users can install it.</p>
+<p>One of the most effective ways to get your application into users' hands is to
+publish it on an application marketplace like Android Market. Publishing on Android Market is a
+straightforward process that you can do in just a few simple steps&mdash;register, configure,
+upload, and publish. Registration takes only a few minutes and needs to be done only once.
+The configuration and publishing steps can all be done through the Android Market Developer Console
+after you register as an Android Market developer.</p>
 
-<p>You can publish your application and allow users to install it any way you choose, including
-from your own web server. This document provides information about publishing your Android
-application with Android Market.</p>
+<p>To start publishing on Android Market, first read this topic and then go to the <a
+href="https://market.android.com/publish/signup">Android Market publisher site</a> and register as
+an Android Market developer.</p>
 
 
 <h2 id="overview">About Android Market</h2>
 
-<p>Android Market is a service that makes it easy for users to find and download Android
-applications to their Android-powered devices, either from the Android Market application on their
-device or from the Android Market web site (<a
-href="http://market.android.com">market.android.com</a>). As a developer, you can use Android Market
-to distribute your applications to users on all types of Android-powered devices, all around the
-world.</p>
+<p>Android Market is a robust publishing platform that helps you publicize, sell, and distribute
+your Android applications to users around the world. When you release your applications through
+Android Market you have access to a suite of developer tools that let you analyze your sales,
+identify market trends, and control who your applications are being distributed to. You also have
+access to several revenue-enhancing features, such as <a
+href="{@docRoot}guide/market/billing/index.html">in-app billing</a> and
+<a href="{@docRoot}guide/publishing/licensing.html">application licensing</a>.</p>
 
-<p>To publish your application on Android Market, you first need to register
-with the service using a Google account and agree to the terms of service.
-Once you are registered, you can upload your application to the service whenever
-you want, update it as many times as you want, and then publish it when you are ready.
-Once published, users can see your application, download it, and rate it. </p>
+<p>Before you can publish applications on Android Market, you need to <a
+href="http://market.android.com/publish">register</a> as an Android Market developer. During the
+registration process you will need to create a developer profile, pay a registration fee, and agree
+to the <a href="http://www.android.com/us/developer-distribution-agreement.html">Android Market
+Developer Distribution Agreement</a>. After you register you can access the Android Market Developer
+Console, where you can upload applications, configure publishing options, and monitor publishing
+data. If you want to sell your applications or use the in-app billing feature, you will also need
+to set up a Google Checkout merchant account. For more information about the registration process,
+see <a href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113468">
+Developer Registration</a>.</p>
 
-<p>To register as an Android Market developer and get started with publishing,
-visit the Android Market publisher site: </p>
+<h2 id="marketpublish">Publishing Apps on Android Market</h2>
 
-<p style="margin-left:3em;"><a
-href="http://market.android.com/publish">http://market.android.com/publish</a>
+<p>Publishing your application on Android Market is a simple process that involves three basic
+tasks (see figure 1):</p>
+
+<ul>
+  <li>Creating various graphical assets that
+accompany your app on Android Market.</li>
+  <li>Using the Android Market <a
+href="http://market.android.com/publish">Developer Console</a> to configure publishing options,
+specify listing details, and upload your app and graphical assets to Android Market.</li>
+  <li>Reviewing your publishing settings and changing the release
+status of your app from Unpublished to Published.</li>
+</ul>
+
+<img src="{@docRoot}images/publishing/publishing_android_market.png"
+     alt="Shows the three steps that are required to publish on Android Market"
+     height="168"
+     id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> To publish apps on Android Market you must first <a
+href="{@docRoot}guide/publishing/preparing.html">prepare your app for release</a> and then perform
+three simple tasks.
 </p>
 
-<p>If you plan to publish your application on Android Market, you must make sure
-that it meets the requirements listed below, which are enforced by the Market
-server when you upload the application.</p>
+<p class="caution"><strong>Important:</strong> You must <a
+href="{@docRoot}guide/publishing/preparing.html">prepare your application for release</a> before you
+can publish it on Android Market. When you prepare your application for release you configure it for
+release and build it in release mode. Building in release mode signs your application's {@code .apk}
+file with your private release key. You cannot publish an application on Android Market unless it is
+signed with your own private release key.</p>
 
-<div class="special">
-<p>Requirements enforced by the Android Market server:</p>
-<ol>
-<li>Your application must be signed with a cryptographic private key whose
-validity period ends after <span style="color:red">22 October 2033</span>. </li>
-<li>Your application must define both an <code>android:versionCode</code> and an
-<code>android:versionName</code> attribute in the
+<h3>Preparing promotional materials</h3>
+
+<p>To fully leverage the marketing and publicity capabilities of Android Market, you need to create
+several graphical assets that accompany your app on Android Market, such as screenshots, videos,
+promotional graphics, and promotional text. At a minimum you must provide two screenshots of your
+application and a high resolution application icon. The screenshots are displayed on the details
+page for your application in Android Market, and the high resolution application icon is displayed
+in various locations throughout Android Market. The high resolution icon does not replace the
+launcher icon for your application, rather, it serves as a supplemental icon and should look
+the same as your launcher icon. Promotional video,
+graphics, and text are optional, although we strongly recommended that you prepare these for your
+app. For more information about the graphic assets that accompany your application, see <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1078870">Graphic
+Assets for your Application</a>.</p>
+
+<h3>Configuring options and uploading assets</h3>
+
+<p>Android Market lets you target your application to a worldwide pool of users and devices. To
+reach these users you can use the Android Market Developer Console to configure various publishing
+options and listing details for your app. For example, you can choose the <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138294&topic=
+2365624&ctx=topic">countries</a> you want to reach, the listing languages you want to use, and the
 <a
-href="{@docRoot}guide/topics/manifest/manifest-element.html"><code>&lt;manifest&gt;</code></a>
-element of its manifest file. The server uses the <code>android:versionCode</code> as
-the basis for identifying the application internally and handling updates, and
-it displays the <code>android:versionName</code> to users as the application's
-version.</li>
-<li>Your application must define both an <code>android:icon</code> and an
-<code>android:label</code> attribute in the <a
-href="{@docRoot}guide/topics/manifest/application-element.html"><code>&lt;application&gt;</code></a>
-element of its manifest file.</li>
-</ol>
-</div>
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=138412&topic=
+15867&ctx=topic">price</a> you want to charge in each country. You can also configure listing
+details such as the application type, <a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113475&topic=
+2365760&ctx=topic">category</a>, and <a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=188189&topic=
+2364761&ctx=topic">content rating</a>. In addition, if you want to sell items within your app using
+the in-app billing feature, you can use the Developer Console to <a
+href="http://grendel.sea.corp.google.com:48014/guide/market/billing/billing_admin.html#billing-list
+- setup">create a product list</a> and control which items are available for purchase in your
+app.</p>
 
+<p>When you are finished setting publishing options and listing details, you can upload your assets
+and your application to Android Market. You can also upload your application as a draft
+(unpublished) application, which lets you do final testing before you publish it for final
+release.</p>
+
+<p>To learn more about Android Market publishing settings, see the following resources:</p>
+
+<ul>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=113469&topic=
+236562&ctx=topic">Upload Applications</a>&mdash;provides a summary of the publishing settings
+you can configure for an app.</li>
+  <li><a
+href="http://support.google.com/androidmarket/developer/bin/topic.py?hl=en&topic=15867">Selling
+Your Apps</a>&mdash;provides guidance about pricing, supported currencies, tax rates, and many
+other topics related to selling apps.</li>
+  <li><a
+href="https://support.google.com/androidmarket/developer/bin/answer.py?hl=en&answer=1169947&topic=
+15867&ctx=topic">Selling Apps in Multiple Currencies</a>&mdash;provides a description of how
+pricing, payouts, and exchange rates work.</li>
+</ul>
+
+<h3>Publishing your application</h3>
+
+<p>When you are satisfied that your publishing settings are correctly configured and your uploaded
+application is ready to be released to the public, you can simply click <strong>Publish</strong> in
+the Developer Console to make your app available for download
+around the world. Keep in mind, it can take several hours for your app to appear on Android
+Market after you click <strong>Publish</strong> in the Developer Console.</p>
+
+<h3>Controlling Distribution to Devices</h3>
+
+<p>If your application targets different device configurations, you can control which Android-powered
+devices have access to your application on Android Market by
+using Android Market filters. Filtering compares device configurations that you declare in your
+app's manifest file to the configuration defined by a device. For example, if you declare the camera
+filter in your manifest, only those devices that have a camera will see your app on Android
+Market. Filters must be configured in your application's manifest file when you are <a
+href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Android Market). For more information, see <a
+href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.</p>
+
+<p>You can also use the multiple APK feature to distribute different {@code .apk} files under the same
+application listing and the same package name; however, you should use this option only as a last
+resort. Android applications usually run on most compatible devices with a single APK, by supplying
+alternative resources for different configurations (for example, different layouts for different screen
+sizes) and the Android system selects the appropriate resources for the device at runtime. In a
+few cases, however, a single APK is unable to support all device configurations, because alternative
+resources make the APK file too big (greater than 50MB) or other technical challenges prevent a
+single APK from working on all devices. Although we encourage you to develop and publish a single
+APK that supports as many device configurations as possible, doing so is sometimes
+not possible. To help you publish your application for as many devices as possible, Android Market
+allows you to publish multiple APKs under the same application listing. Android Market then supplies
+each APK to the appropriate devices based on configuration support you've declared in the manifest
+file of each APK. To use this feature, you need to build your separate {@code .apk} files when you are <a
+href="{@docRoot}guide/publishing/preparing.html">preparing your app for release</a> (that is, before
+you upload your app to Android Market). For more information, see <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
 
 <h2 id="marketupgrade">Publishing Updates on Android Market</h2>
 
@@ -128,6 +232,9 @@ certificate do <em>not</em> match those of the existing version, Market will
 consider it a new application, publish it as such, and will not offer it to existing users as an
 update.</p>
 
+<p>If you plan to publish your application on Android Market, you must make sure
+  that it meets the requirements listed below, which are enforced by the Market
+  server when you upload the application.</p>
 
 <h2 id="marketLicensing">Using Android Market Licensing Service</h2>
 
@@ -136,7 +243,7 @@ policies for paid applications that you publish through Android Market. With
 Android Market Licensing, your applications can query Android Market at runtime
 to obtain the licensing status for the current user, then allow or disallow
 further use of the application as appropriate. Using the service, you can apply a flexible
-licensing policy on an application-by-application basis&mdash;each 
+licensing policy on an application-by-application basis&mdash;each
 application can enforce its licensing status in the way most appropriate
 for it. </p>
 
@@ -149,7 +256,31 @@ higher.</p>
 use it in your application, read <a
 href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a>.</p>
 
+<h2 id="marketinappbilling">Using Android Market In-app Billing</h2>
 
+<p><a href="{@docRoot}guide/market/billing/billing_overview.html">Android Market In-app Billing</a>
+is an Android Market service that lets you sell digital content in your applications. You can use
+the service to sell a wide range of content, including downloadable  content such as media files or
+photos, and virtual content such as game levels or potions.</p>
+
+<p>When you use Android Market's in-app billing service to sell an item, Android Market handles all
+billing details so your application never has to directly process any financial transactions.
+Android Market uses the same checkout service that is used for application purchases, so your users
+experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for
+in-app purchases is the same as the transaction fee for application purchases (30%).</p>
+
+<p>Any application that you publish through Android Market can implement in-app billing. No special
+account or registration is required other than an Android Market publisher account and a Google
+Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add
+in-app billing to any application that uses a minimum API level of 4 or higher.</p>
+
+<p>To help you integrate in-app billing into your application, the Android SDK provides a <a
+href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>
+that demonstrates a simple implementation of in-app billing. The sample application contains
+examples of billing-related classes you can use to implement in-app billing in your application. It
+also contains examples of the database, user interface, and business logic you might use to
+implement in-app billing. For more information about the in-app billing feature, see the
+<a href="{@docRoot}guide/market/billing/index.html">In-app Billing documentation</a>.</p>
 
 <h2 id="marketintent">Linking to Your Apps on Android Market</h2>
 
@@ -337,7 +468,7 @@ the button images from the <a href="http://www.android.com/branding.html">Androi
 Guidelines</a>.</p>
 
 <style type="text/css">
-  
+
 form.button-form {
   margin-top:2em;
 }
@@ -539,7 +670,7 @@ the web and in the Android application), as discussed in the previous sections.<
 
 <tr>
 <td>Display the details screen for a specific application</td>
-<td><code>http://market.android.com/details?id=&lt;package_name&gt;</code> 
+<td><code>http://market.android.com/details?id=&lt;package_name&gt;</code>
 <td><code>market://details?id=&lt;package_name&gt;</code></td>
 </tr>
 
