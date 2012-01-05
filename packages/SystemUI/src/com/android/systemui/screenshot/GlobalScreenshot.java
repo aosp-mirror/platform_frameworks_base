@@ -358,7 +358,15 @@ class GlobalScreenshot {
             dims[0] = Math.abs(dims[0]);
             dims[1] = Math.abs(dims[1]);
         }
+
+        // Take the screenshot
         mScreenBitmap = Surface.screenshot((int) dims[0], (int) dims[1]);
+        if (mScreenBitmap == null) {
+            notifyScreenshotError(mContext, mNotificationManager);
+            finisher.run();
+            return;
+        }
+
         if (requiresRotation) {
             // Rotate the screenshot to the current orientation
             Bitmap ss = Bitmap.createBitmap(mDisplayMetrics.widthPixels,
@@ -370,13 +378,6 @@ class GlobalScreenshot {
             c.drawBitmap(mScreenBitmap, 0, 0, null);
             c.setBitmap(null);
             mScreenBitmap = ss;
-        }
-
-        // If we couldn't take the screenshot, notify the user
-        if (mScreenBitmap == null) {
-            notifyScreenshotError(mContext, mNotificationManager);
-            finisher.run();
-            return;
         }
 
         // Optimizations
