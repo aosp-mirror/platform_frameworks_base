@@ -541,7 +541,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         if (TextLayout::prepareRtlTextRun(text, start, count, contextCount, shaped)) {
             renderer->drawText((const char*) shaped, count << 1, count, x, y, paint);
         } else {
-            LOGW("drawTextRun error");
+            ALOGW("drawTextRun error");
         }
     } else {
         renderer->drawText((const char*) (text + start), count << 1, count, x, y, paint);

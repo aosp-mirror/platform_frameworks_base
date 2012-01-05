@@ -173,7 +173,7 @@ void JNICameraContext::notify(int32_t msgType, int32_t ext1, int32_t ext2)
     // VM pointer will be NULL if object is released
     Mutex::Autolock _l(mLock);
     if (mCameraJObjectWeak == NULL) {
-        LOGW("callback on dead camera object");
+        ALOGW("callback on dead camera object");
         return;
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -279,7 +279,7 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr,
     Mutex::Autolock _l(mLock);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (mCameraJObjectWeak == NULL) {
-        LOGW("callback on dead camera object");
+        ALOGW("callback on dead camera object");
         return;
     }
 

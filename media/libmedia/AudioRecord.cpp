@@ -532,7 +532,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
-                    LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
+                    ALOGW(   "obtainBuffer timed out (is the CPU pegged?) "
                             "user=%08x, server=%08x", cblk->user, cblk->server);
                     cblk->lock.unlock();
                     result = mAudioRecord->start();
@@ -543,7 +543,7 @@ create_new_record:
                         result = AudioRecord::restoreRecord_l(cblk);
                     }
                     if (result != NO_ERROR) {
-                        LOGW("obtainBuffer create Track error %d", result);
+                        ALOGW("obtainBuffer create Track error %d", result);
                         cblk->lock.unlock();
                         return result;
                     }
@@ -761,7 +761,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
     status_t result;
 
     if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
-        LOGW("dead IAudioRecord, creating a new one");
+        ALOGW("dead IAudioRecord, creating a new one");
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
         cblk->cv.broadcast();
@@ -784,13 +784,13 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         cblk->cv.broadcast();
     } else {
         if (!(cblk->flags & CBLK_RESTORED_MSK)) {
-            LOGW("dead IAudioRecord, waiting for a new one to be created");
+            ALOGW("dead IAudioRecord, waiting for a new one to be created");
             mLock.unlock();
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(RESTORE_TIMEOUT_MS));
             cblk->lock.unlock();
             mLock.lock();
         } else {
-            LOGW("dead IAudioRecord, already restored");
+            ALOGW("dead IAudioRecord, already restored");
             result = NO_ERROR;
             cblk->lock.unlock();
         }
@@ -807,7 +807,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
     }
     cblk->lock.lock();
 
-    LOGW_IF(result != NO_ERROR, "restoreRecord_l() error %d", result);
+    ALOGW_IF(result != NO_ERROR, "restoreRecord_l() error %d", result);
 
     return result;
 }

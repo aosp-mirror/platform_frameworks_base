@@ -133,7 +133,7 @@ void egl_cache_t::setBlob(const void* key, EGLsizeiANDROID keySize,
     Mutex::Autolock lock(mMutex);
 
     if (keySize < 0 || valueSize < 0) {
-        LOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
+        ALOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
         return;
     }
 
@@ -172,7 +172,7 @@ EGLsizeiANDROID egl_cache_t::getBlob(const void* key, EGLsizeiANDROID keySize,
     Mutex::Autolock lock(mMutex);
 
     if (keySize < 0 || valueSize < 0) {
-        LOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
+        ALOGW("EGL_ANDROID_blob_cache set: negative sizes are not allowed");
         return 0;
     }
 

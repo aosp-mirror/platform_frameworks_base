@@ -83,7 +83,7 @@ int create_pkg_path(char path[PKG_PATH_MAX],
     if (persona != 0) {
         int ret = snprintf(dst, dst_size, "%d/", persona);
         if (ret < 0 || (size_t) ret != uid_len + 1) {
-            LOGW("Error appending UID to APK path");
+            ALOGW("Error appending UID to APK path");
             return -1;
         }
     }
@@ -326,7 +326,7 @@ int get_path_from_env(dir_rec_t* rec, const char* var) {
     const char* path = getenv(var);
     int ret = get_path_from_string(rec, path);
     if (ret < 0) {
-        LOGW("Problem finding value for environment variable %s\n", var);
+        ALOGW("Problem finding value for environment variable %s\n", var);
     }
     return ret;
 }

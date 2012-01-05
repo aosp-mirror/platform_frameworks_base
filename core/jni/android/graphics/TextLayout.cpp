@@ -228,7 +228,7 @@ bool TextLayout::prepareRtlTextRun(const jchar* context, jsize start, jsize& cou
     if (U_SUCCESS(status)) {
         return true;
     } else {
-        LOGW("drawTextRun error %d\n", status);
+        ALOGW("drawTextRun error %d\n", status);
     }
     return false;
 }

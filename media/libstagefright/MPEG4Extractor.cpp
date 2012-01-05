@@ -1518,7 +1518,7 @@ status_t MPEG4Extractor::parseTrackHeader(
     } else if (a00 == -kFixedOne && a01 == 0 && a10 == 0 && a11 == -kFixedOne) {
         rotationDegrees = 180;
     } else {
-        LOGW("We only support 0,90,180,270 degree rotation matrices");
+        ALOGW("We only support 0,90,180,270 degree rotation matrices");
         rotationDegrees = 0;
     }
 
@@ -2421,7 +2421,7 @@ bool SniffMPEG4(
     }
 
     if (LegacySniffMPEG4(source, mimeType, confidence)) {
-        LOGW("Identified supported mpeg4 through LegacySniffMPEG4.");
+        ALOGW("Identified supported mpeg4 through LegacySniffMPEG4.");
         return true;
     }
 

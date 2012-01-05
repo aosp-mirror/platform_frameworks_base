@@ -112,14 +112,14 @@ static void effectCallback(int event, void* user, void *info) {
             callbackInfo->audioEffect_class);
 
     if (!user || !env) {
-        LOGW("effectCallback error user %p, env %p", user, env);
+        ALOGW("effectCallback error user %p, env %p", user, env);
         return;
     }
 
     switch (event) {
     case AudioEffect::EVENT_CONTROL_STATUS_CHANGED:
         if (info == 0) {
-            LOGW("EVENT_CONTROL_STATUS_CHANGED info == NULL");
+            ALOGW("EVENT_CONTROL_STATUS_CHANGED info == NULL");
             goto effectCallback_Exit;
         }
         param = *(bool *)info;
@@ -128,7 +128,7 @@ static void effectCallback(int event, void* user, void *info) {
         break;
     case AudioEffect::EVENT_ENABLE_STATUS_CHANGED:
         if (info == 0) {
-            LOGW("EVENT_ENABLE_STATUS_CHANGED info == NULL");
+            ALOGW("EVENT_ENABLE_STATUS_CHANGED info == NULL");
             goto effectCallback_Exit;
         }
         param = *(bool *)info;
@@ -137,7 +137,7 @@ static void effectCallback(int event, void* user, void *info) {
         break;
     case AudioEffect::EVENT_PARAMETER_CHANGED:
         if (info == 0) {
-            LOGW("EVENT_PARAMETER_CHANGED info == NULL");
+            ALOGW("EVENT_PARAMETER_CHANGED info == NULL");
             goto effectCallback_Exit;
         }
         p = (effect_param_t *)info;
@@ -159,7 +159,7 @@ static void effectCallback(int event, void* user, void *info) {
         ALOGV("EVENT_PARAMETER_CHANGED");
        break;
     case AudioEffect::EVENT_ERROR:
-        LOGW("EVENT_ERROR");
+        ALOGW("EVENT_ERROR");
         break;
     }
 

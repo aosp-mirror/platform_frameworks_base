@@ -517,14 +517,14 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     /* dup() the descriptor so we don't close the original with fclose() */
     int fd = dup(origFd);
     if (fd < 0) {
-        LOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
+        ALOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
         jniThrowRuntimeException(env, "dup() failed");
         return;
     }
 
     FILE* fp = fdopen(fd, "w");
     if (fp == NULL) {
-        LOGW("fdopen(%d) failed: %s\n", fd, strerror(errno));
+        ALOGW("fdopen(%d) failed: %s\n", fd, strerror(errno));
         close(fd);
         jniThrowRuntimeException(env, "fdopen() failed");
         return;

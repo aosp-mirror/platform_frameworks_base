@@ -91,7 +91,7 @@ int SoundPoolThread::run() {
             doLoadSample(msg.mData);
             break;
         default:
-            LOGW("run: Unrecognized message %d\n",
+            ALOGW("run: Unrecognized message %d\n",
                     msg.mMessageType);
             break;
         }

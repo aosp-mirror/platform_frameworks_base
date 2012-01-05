@@ -503,7 +503,7 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     const uint32_t height = uint32_t(pathHeight + offset * 2.0 + 0.5);
 
     if (width > mMaxTextureSize || height > mMaxTextureSize) {
-        LOGW("Shape %s too large to be rendered into a texture", mName);
+        ALOGW("Shape %s too large to be rendered into a texture", mName);
         return NULL;
     }
 

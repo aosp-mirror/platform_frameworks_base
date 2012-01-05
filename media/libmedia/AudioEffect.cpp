@@ -101,7 +101,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     ALOGV("set %p mUserData: %p uuid: %p timeLow %08x", this, user, type, type ? type->timeLow : 0);
 
     if (mIEffect != 0) {
-        LOGW("Effect already in use");
+        ALOGW("Effect already in use");
         return INVALID_OPERATION;
     }
 
@@ -112,7 +112,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     }
 
     if (type == NULL && uuid == NULL) {
-        LOGW("Must specify at least type or uuid");
+        ALOGW("Must specify at least type or uuid");
         return BAD_VALUE;
     }
 
@@ -340,7 +340,7 @@ status_t AudioEffect::getParameter(effect_param_t *param)
 
 void AudioEffect::binderDied()
 {
-    LOGW("IEffect died");
+    ALOGW("IEffect died");
     mStatus = NO_INIT;
     if (mCbf) {
         status_t status = DEAD_OBJECT;

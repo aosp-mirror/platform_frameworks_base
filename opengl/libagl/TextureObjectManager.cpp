@@ -195,7 +195,7 @@ status_t EGLTextureObject::reallocate(
                 return NO_MEMORY;
         }
 
-        LOGW_IF(level-1 >= mNumExtraLod,
+        ALOGW_IF(level-1 >= mNumExtraLod,
                 "specifying mipmap level %d, but # of level is %d",
                 level, mNumExtraLod+1);
 

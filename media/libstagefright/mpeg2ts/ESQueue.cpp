@@ -408,7 +408,7 @@ sp<ABuffer> ElementaryStreamQueue::dequeueAccessUnitAAC() {
     if (timeUs >= 0) {
         accessUnit->meta()->setInt64("timeUs", timeUs);
     } else {
-        LOGW("no time for AAC access unit");
+        ALOGW("no time for AAC access unit");
     }
 
     return accessUnit;

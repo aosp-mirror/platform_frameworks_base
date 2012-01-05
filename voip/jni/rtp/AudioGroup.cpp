@@ -907,7 +907,7 @@ bool AudioGroup::DeviceThread::threadLoop()
         }
 
         if (chances <= 0) {
-            LOGW("device loop timeout");
+            ALOGW("device loop timeout");
             while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
         }
 

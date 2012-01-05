@@ -184,14 +184,14 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
 
     GLuint fbo = Caches::getInstance().fboCache.get();
     if (!fbo) {
-        LOGW("Could not obtain an FBO");
+        ALOGW("Could not obtain an FBO");
         return NULL;
     }
 
     glActiveTexture(GL_TEXTURE0);
     Layer* layer = Caches::getInstance().layerCache.get(width, height);
     if (!layer) {
-        LOGW("Could not obtain a layer");
+        ALOGW("Could not obtain a layer");
         return NULL;
     }
 
@@ -338,7 +338,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 
         GLuint fbo = caches.fboCache.get();
         if (!fbo) {
-            LOGW("Could not obtain an FBO");
+            ALOGW("Could not obtain an FBO");
             return false;
         }
 

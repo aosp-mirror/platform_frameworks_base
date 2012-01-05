@@ -742,7 +742,7 @@ void OMXNodeInstance::removeActiveBuffer(
     }
 
     if (!found) {
-        LOGW("Attempt to remove an active buffer we know nothing about...");
+        ALOGW("Attempt to remove an active buffer we know nothing about...");
     }
 }
 
