@@ -50,14 +50,9 @@ RsdMeshObj::~RsdMeshObj() {
 }
 
 bool RsdMeshObj::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
-    // Do not create attribs for padding
-    if (elem->getFieldName(fieldIdx)[0] == '#') {
-        return false;
-    }
-
     // Only GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FIXED, GL_FLOAT are accepted.
     // Filter rs types accordingly
-    RsDataType dt = elem->getField(fieldIdx)->getComponent().getType();
+    RsDataType dt = elem->mHal.state.fields[fieldIdx]->mHal.state.dataType;
     if (dt != RS_TYPE_FLOAT_32 && dt != RS_TYPE_UNSIGNED_8 &&
         dt != RS_TYPE_UNSIGNED_16 && dt != RS_TYPE_SIGNED_8 &&
         dt != RS_TYPE_SIGNED_16) {
@@ -65,7 +60,7 @@ bool RsdMeshObj::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
     }
 
     // Now make sure they are not arrays
-    uint32_t arraySize = elem->getFieldArraySize(fieldIdx);
+    uint32_t arraySize = elem->mHal.state.fieldArraySizes[fieldIdx];
     if (arraySize != 1) {
         return false;
     }
@@ -81,7 +76,7 @@ bool RsdMeshObj::init() {
     mAttribCount = 0;
     for (uint32_t ct=0; ct < mRSMesh->mHal.state.vertexBuffersCount; ct++) {
         const Element *elem = mRSMesh->mHal.state.vertexBuffers[ct]->getType()->getElement();
-        for (uint32_t ct=0; ct < elem->getFieldCount(); ct++) {
+        for (uint32_t ct=0; ct < elem->mHal.state.fieldsCount; ct++) {
             if (isValidGLComponent(elem, ct)) {
                 mAttribCount ++;
             }
@@ -104,21 +99,21 @@ bool RsdMeshObj::init() {
     uint32_t userNum = 0;
     for (uint32_t ct=0; ct < mRSMesh->mHal.state.vertexBuffersCount; ct++) {
         const Element *elem = mRSMesh->mHal.state.vertexBuffers[ct]->getType()->getElement();
-        uint32_t stride = elem->getSizeBytes();
-        for (uint32_t fieldI=0; fieldI < elem->getFieldCount(); fieldI++) {
-            const Component &c = elem->getField(fieldI)->getComponent();
+        uint32_t stride = elem->mHal.state.elementSizeBytes;
+        for (uint32_t fieldI=0; fieldI < elem->mHal.state.fieldsCount; fieldI++) {
+            const Element *f = elem->mHal.state.fields[fieldI];
 
             if (!isValidGLComponent(elem, fieldI)) {
                 continue;
             }
 
-            mAttribs[userNum].size = c.getVectorSize();
-            mAttribs[userNum].offset = elem->getFieldOffsetBytes(fieldI);
-            mAttribs[userNum].type = rsdTypeToGLType(c.getType());
-            mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
+            mAttribs[userNum].size = f->mHal.state.vectorSize;
+            mAttribs[userNum].offset = elem->mHal.state.fieldOffsetBytes[fieldI];
+            mAttribs[userNum].type = rsdTypeToGLType(f->mHal.state.dataType);
+            mAttribs[userNum].normalized = f->mHal.state.dataType != RS_TYPE_FLOAT_32;
             mAttribs[userNum].stride = stride;
             String8 tmp(RS_SHADER_ATTR);
-            tmp.append(elem->getFieldName(fieldI));
+            tmp.append(elem->mHal.state.fieldNames[fieldI]);
             mAttribs[userNum].name.setTo(tmp.string());
 
             // Remember which allocation this attribute came from
