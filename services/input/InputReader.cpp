@@ -349,9 +349,9 @@ void InputReader::addDeviceLocked(nsecs_t when, int32_t deviceId) {
     device->reset(when);
 
     if (device->isIgnored()) {
-        LOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId, name.string());
+        ALOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId, name.string());
     } else {
-        LOGI("Device added: id=%d, name='%s', sources=0x%08x", deviceId, name.string(),
+        ALOGI("Device added: id=%d, name='%s', sources=0x%08x", deviceId, name.string(),
                 device->getSources());
     }
 
@@ -377,10 +377,10 @@ void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
     }
 
     if (device->isIgnored()) {
-        LOGI("Device removed: id=%d, name='%s' (ignored non-input device)",
+        ALOGI("Device removed: id=%d, name='%s' (ignored non-input device)",
                 device->getId(), device->getName().string());
     } else {
-        LOGI("Device removed: id=%d, name='%s', sources=0x%08x",
+        ALOGI("Device removed: id=%d, name='%s', sources=0x%08x",
                 device->getId(), device->getName().string(), device->getSources());
     }
 
@@ -485,7 +485,7 @@ void InputReader::refreshConfigurationLocked(uint32_t changes) {
     mEventHub->setExcludedDevices(mConfig.excludedDeviceNames);
 
     if (changes) {
-        LOGI("Reconfiguring input devices.  changes=0x%08x", changes);
+        ALOGI("Reconfiguring input devices.  changes=0x%08x", changes);
         nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
 
         if (changes & InputReaderConfiguration::CHANGE_MUST_REOPEN) {
@@ -547,7 +547,7 @@ void InputReader::disableVirtualKeysUntilLocked(nsecs_t time) {
 bool InputReader::shouldDropVirtualKeyLocked(nsecs_t now,
         InputDevice* device, int32_t keyCode, int32_t scanCode) {
     if (now < mDisableVirtualKeysTimeout) {
-        LOGI("Dropping virtual key from device %s because virtual keys are "
+        ALOGI("Dropping virtual key from device %s because virtual keys are "
                 "temporarily disabled for the next %0.3fms.  keyCode=%d, scanCode=%d",
                 device->getName().string(),
                 (mDisableVirtualKeysTimeout - now) * 0.000001,
@@ -956,7 +956,7 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
 #endif
             }
         } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_DROPPED) {
-            LOGI("Detected input event buffer overrun for device %s.", mName.string());
+            ALOGI("Detected input event buffer overrun for device %s.", mName.string());
             mDropUntilNextSync = true;
             reset(rawEvent->when);
         } else {
@@ -1905,7 +1905,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             mKeyDowns.removeAt(size_t(keyDownIndex));
         } else {
             // key was not actually down
-            LOGI("Dropping key up from device %s because the key was not down.  "
+            ALOGI("Dropping key up from device %s because the key was not down.  "
                     "keyCode=%d, scanCode=%d",
                     getDeviceName().string(), keyCode, scanCode);
             return;
@@ -2666,7 +2666,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
                 mParameters.associatedDisplayIsExternal,
                 &mAssociatedDisplayWidth, &mAssociatedDisplayHeight,
                 &mAssociatedDisplayOrientation)) {
-            LOGI(INDENT "Touch device '%s' could not query the properties of its associated "
+            ALOGI(INDENT "Touch device '%s' could not query the properties of its associated "
                     "display %d.  The device will be inoperable until the display size "
                     "becomes available.",
                     getDeviceName().string(), mParameters.associatedDisplayId);
@@ -2712,7 +2712,7 @@ void TouchInputMapper::configureSurface(nsecs_t when, bool* outResetNeeded) {
 
     bool sizeChanged = mSurfaceWidth != width || mSurfaceHeight != height;
     if (sizeChanged || deviceModeChanged) {
-        LOGI("Device reconfigured: id=%d, name='%s', surface size is now %dx%d, mode is %d",
+        ALOGI("Device reconfigured: id=%d, name='%s', surface size is now %dx%d, mode is %d",
                 getDeviceId(), getDeviceName().string(), width, height, mDeviceMode);
 
         mSurfaceWidth = width;
@@ -5822,7 +5822,7 @@ void JoystickInputMapper::configure(nsecs_t when,
         // If there are too many axes, start dropping them.
         // Prefer to keep explicitly mapped axes.
         if (mAxes.size() > PointerCoords::MAX_AXES) {
-            LOGI("Joystick '%s' has %d axes but the framework only supports a maximum of %d.",
+            ALOGI("Joystick '%s' has %d axes but the framework only supports a maximum of %d.",
                     getDeviceName().string(), mAxes.size(), PointerCoords::MAX_AXES);
             pruneAxes(true);
             pruneAxes(false);
@@ -5843,7 +5843,7 @@ void JoystickInputMapper::configure(nsecs_t when,
                     axis.axisInfo.axis = nextGenericAxisId;
                     nextGenericAxisId += 1;
                 } else {
-                    LOGI("Ignoring joystick '%s' axis %d because all of the generic axis ids "
+                    ALOGI("Ignoring joystick '%s' axis %d because all of the generic axis ids "
                             "have already been assigned to other axes.",
                             getDeviceName().string(), mAxes.keyAt(i));
                     mAxes.removeItemsAt(i--);
@@ -5873,7 +5873,7 @@ void JoystickInputMapper::pruneAxes(bool ignoreExplicitlyMappedAxes) {
         if (ignoreExplicitlyMappedAxes && mAxes.valueAt(i).explicitlyMapped) {
             continue;
         }
-        LOGI("Discarding joystick '%s' axis %d because there are too many axes.",
+        ALOGI("Discarding joystick '%s' axis %d because there are too many axes.",
                 getDeviceName().string(), mAxes.keyAt(i));
         mAxes.removeItemsAt(i);
     }

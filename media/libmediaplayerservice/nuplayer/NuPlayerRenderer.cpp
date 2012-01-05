@@ -228,7 +228,7 @@ bool NuPlayer::Renderer::onDrainAudioQueue() {
 
 #if 0
     if (numFramesAvailableToWrite == mAudioSink->frameCount()) {
-        LOGI("audio sink underrun");
+        ALOGI("audio sink underrun");
     } else {
         ALOGV("audio queue has %d frames left to play",
              mAudioSink->frameCount() - numFramesAvailableToWrite);
@@ -270,7 +270,7 @@ bool NuPlayer::Renderer::onDrainAudioQueue() {
                     + numFramesPendingPlayout
                         * mAudioSink->msecsPerFrame()) * 1000ll;
 
-            // LOGI("realTimeOffsetUs = %lld us", realTimeOffsetUs);
+            // ALOGI("realTimeOffsetUs = %lld us", realTimeOffsetUs);
 
             mAnchorTimeRealUs =
                 ALooper::GetNowUs() + realTimeOffsetUs;

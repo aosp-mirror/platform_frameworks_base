@@ -689,7 +689,7 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
 
                 bool timeChange = (type & ATSParser::DISCONTINUITY_TIME) != 0;
 
-                LOGI("%s discontinuity (formatChange=%d, time=%d)",
+                ALOGI("%s discontinuity (formatChange=%d, time=%d)",
                      audio ? "audio" : "video", formatChange, timeChange);
 
                 if (audio) {
@@ -705,7 +705,7 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
                         int64_t resumeAtMediaTimeUs;
                         if (extra->findInt64(
                                     "resume-at-mediatimeUs", &resumeAtMediaTimeUs)) {
-                            LOGI("suppressing rendering of %s until %lld us",
+                            ALOGI("suppressing rendering of %s until %lld us",
                                     audio ? "audio" : "video", resumeAtMediaTimeUs);
 
                             if (audio) {
@@ -838,7 +838,7 @@ void NuPlayer::notifyListener(int msg, int ext1, int ext2) {
 
 void NuPlayer::flushDecoder(bool audio, bool needShutdown) {
     if ((audio && mAudioDecoder == NULL) || (!audio && mVideoDecoder == NULL)) {
-        LOGI("flushDecoder %s without decoder present",
+        ALOGI("flushDecoder %s without decoder present",
              audio ? "audio" : "video");
     }
 

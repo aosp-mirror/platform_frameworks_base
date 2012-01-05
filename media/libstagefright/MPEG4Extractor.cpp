@@ -1500,9 +1500,9 @@ status_t MPEG4Extractor::parseTrackHeader(
     int32_t dy = U32_AT(&buffer[matrixOffset + 20]);
 
 #if 0
-    LOGI("x' = %.2f * x + %.2f * y + %.2f",
+    ALOGI("x' = %.2f * x + %.2f * y + %.2f",
          a00 / 65536.0f, a01 / 65536.0f, dx / 65536.0f);
-    LOGI("y' = %.2f * x + %.2f * y + %.2f",
+    ALOGI("y' = %.2f * x + %.2f * y + %.2f",
          a10 / 65536.0f, a11 / 65536.0f, dy / 65536.0f);
 #endif
 
@@ -2036,7 +2036,7 @@ status_t MPEG4Source::read(
         CHECK_EQ(OK, mSampleTable->getMetaDataForSample(
                     syncSampleIndex, NULL, NULL, &syncSampleTime));
 
-        LOGI("seek to time %lld us => sample at time %lld us, "
+        ALOGI("seek to time %lld us => sample at time %lld us, "
              "sync sample at time %lld us",
              seekTimeUs,
              sampleTime * 1000000ll / mTimescale,
