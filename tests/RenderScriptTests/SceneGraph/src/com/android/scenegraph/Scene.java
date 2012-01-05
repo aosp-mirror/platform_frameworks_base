@@ -253,6 +253,18 @@ public class Scene extends SceneGraphBase {
         }
         cameraData.copyFrom(cameraAllocs);
         sceneManager.mRenderLoop.set_gCameras(cameraData);
+
+        if (mLights.size() != 0) {
+            Allocation lightData = Allocation.createSized(rs,
+                                                          Element.ALLOCATION(rs),
+                                                          mCameras.size());
+            Allocation[] lightAllocs = new Allocation[mLights.size()];
+            for (int i = 0; i < mLights.size(); i ++) {
+                lightAllocs[i] = mLights.get(i).getRSData(rs).getAllocation();
+            }
+            lightData.copyFrom(lightAllocs);
+            sceneManager.mRenderLoop.set_gLights(lightData);
+        }
     }
 }
 

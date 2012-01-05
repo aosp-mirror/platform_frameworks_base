@@ -21,9 +21,11 @@
 
 rs_script gTransformScript;
 rs_script gCameraScript;
+rs_script gLightScript;
 
 SgTransform *gRootNode;
 rs_allocation gCameras;
+rs_allocation gLights;
 rs_allocation gRenderableObjects;
 
 rs_allocation gRenderPasses;
@@ -180,6 +182,12 @@ static void prepareCameras() {
     // now compute all the camera matrices
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
     rsForEach(gCameraScript, gCameras, nullAlloc, &aspect, sizeof(aspect));
+}
+
+static void prepareLights() {
+    if (rsIsObject(gLights)) {
+        rsForEach(gLightScript, gLights, nullAlloc);
+    }
 }
 
 static void drawSorted() {
