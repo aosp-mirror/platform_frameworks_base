@@ -779,15 +779,8 @@ public:
         // TODO: need to suppress this code after the GL renderer is modified for not
         // copying the paint
 
-        // Save old text encoding
-        SkPaint::TextEncoding oldEncoding = paint->getTextEncoding();
-        // Define Glyph encoding
-        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-
+        // Beware: this needs Glyph encoding (already done on the Paint constructor)
         canvas->drawText(glyphArray + index * 2, count * 2, x, y, *paint);
-
-        // Get back old encoding
-        paint->setTextEncoding(oldEncoding);
     }
 
     static void drawTextRun___CIIIIFFIPaint(

@@ -54,8 +54,8 @@ static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
 static void defaultSettingsForAndroid(SkPaint* paint) {
-    // utf16 is required for java
-    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+    // GlyphID encoding is required because we are using Harfbuzz shaping
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 }
 
 class SkPaintGlue {
