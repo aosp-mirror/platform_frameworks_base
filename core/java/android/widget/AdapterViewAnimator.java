@@ -555,6 +555,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             mCurrentWindowStart = newWindowStart;
             mCurrentWindowEnd = newWindowEnd;
             mCurrentWindowStartUnbounded = newWindowStartUnbounded;
+            if (mRemoteViewsAdapter != null) {
+                mRemoteViewsAdapter.setVisibleRangeHint(mCurrentWindowStart, mCurrentWindowEnd);
+            }
         }
         requestLayout();
         invalidate();
