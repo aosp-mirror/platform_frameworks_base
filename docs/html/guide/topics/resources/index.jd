@@ -28,18 +28,18 @@ to provide compatibility with different configurations, you must organize resour
 project's {@code res/} directory, using various sub-directories that group resources by type and
 configuration.</p>
 
-<div class="figure" style="width:421px">
-<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="137" alt="" />
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
 <p class="img-caption">
-<strong>Figure 1.</strong> Two different devices, both using default
-resources.</p>
+<strong>Figure 1.</strong> Two different devices, each using the default layout
+(the app provides no alternative layouts).</p>
 </div>
 
-<div class="figure" style="width:421px">
-<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="137" alt="" />
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
 <p class="img-caption">
-<strong>Figure 2.</strong> Two different devices, one using alternative
-resources.</p>
+<strong>Figure 2.</strong> Two different devices, each using a different layout provided
+for different screen sizes.</p>
 </div>
 
 <p>For any type of resource, you can specify <em>default</em> and multiple
@@ -54,18 +54,16 @@ append an appropriate configuration qualifier to the directory name.</li>
 </ul>
 
 <p>For example, while your default UI
-layout is saved in the {@code res/layout/} directory, you might specify a different UI layout to
+layout is saved in the {@code res/layout/} directory, you might specify a different layout to
 be used when the screen is in landscape orientation, by saving it in the {@code res/layout-land/}
 directory. Android automatically applies the appropriate resources by matching the
 device's current configuration to your resource directory names.</p>
 
-<p>Figure 1 demonstrates how a collection of default resources from an application are applied
-to two different devices when there are no alternative resources available. Figure 2 shows
-the same application with a set of alternative resources that qualify for one of the device
-configurations, thus, the two devices uses different resources.</p>
+<p>Figure 1 illustrates how the system applies the same layout for
+two different devices when there are no alternative resources available. Figure 2 shows
+the same application when it adds an alternative layout resource for larger screens.</p>
 
-<p>The information above is just an introduction to how application resources work on Android.
-The following documents provide a complete guide to how you can organize your application resources,
+<p>The following documents provide a complete guide to how you can organize your application resources,
 specify alternative resources, access them in your application, and more:</p>
 
 <dl>
