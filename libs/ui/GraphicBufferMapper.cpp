@@ -50,7 +50,7 @@ status_t GraphicBufferMapper::registerBuffer(buffer_handle_t handle)
 
     err = mAllocMod->registerBuffer(mAllocMod, handle);
 
-    LOGW_IF(err, "registerBuffer(%p) failed %d (%s)",
+    ALOGW_IF(err, "registerBuffer(%p) failed %d (%s)",
             handle, err, strerror(-err));
     return err;
 }
@@ -61,7 +61,7 @@ status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
 
     err = mAllocMod->unregisterBuffer(mAllocMod, handle);
 
-    LOGW_IF(err, "unregisterBuffer(%p) failed %d (%s)",
+    ALOGW_IF(err, "unregisterBuffer(%p) failed %d (%s)",
             handle, err, strerror(-err));
     return err;
 }
@@ -75,7 +75,7 @@ status_t GraphicBufferMapper::lock(buffer_handle_t handle,
             bounds.left, bounds.top, bounds.width(), bounds.height(),
             vaddr);
 
-    LOGW_IF(err, "lock(...) failed %d (%s)", err, strerror(-err));
+    ALOGW_IF(err, "lock(...) failed %d (%s)", err, strerror(-err));
     return err;
 }
 
@@ -85,7 +85,7 @@ status_t GraphicBufferMapper::unlock(buffer_handle_t handle)
 
     err = mAllocMod->unlock(mAllocMod, handle);
 
-    LOGW_IF(err, "unlock(...) failed %d (%s)", err, strerror(-err));
+    ALOGW_IF(err, "unlock(...) failed %d (%s)", err, strerror(-err));
     return err;
 }
 

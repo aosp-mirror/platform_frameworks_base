@@ -625,7 +625,7 @@ status_t AVIExtractor::parseStreamHeader(off64_t offset, size_t size) {
         }
 
         if (mime == NULL) {
-            LOGW("Unsupported video format '%c%c%c%c'",
+            ALOGW("Unsupported video format '%c%c%c%c'",
                  (char)(handler >> 24),
                  (char)((handler >> 16) & 0xff),
                  (char)((handler >> 8) & 0xff),
@@ -705,7 +705,7 @@ status_t AVIExtractor::parseStreamFormat(off64_t offset, size_t size) {
         if (format == 0x55) {
             track->mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
         } else {
-            LOGW("Unsupported audio format = 0x%04x", format);
+            ALOGW("Unsupported audio format = 0x%04x", format);
         }
 
         uint32_t numChannels = U16LE_AT(&data[2]);

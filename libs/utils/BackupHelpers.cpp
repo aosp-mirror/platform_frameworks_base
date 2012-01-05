@@ -100,7 +100,7 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
     bytesRead += amt;
 
     if (header.magic0 != MAGIC0 || header.magic1 != MAGIC1) {
-        LOGW("read_snapshot_file header.magic0=0x%08x magic1=0x%08x", header.magic0, header.magic1);
+        ALOGW("read_snapshot_file header.magic0=0x%08x magic1=0x%08x", header.magic0, header.magic1);
         return 1;
     }
 
@@ -110,7 +110,7 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
 
         amt = read(fd, &file, sizeof(FileState));
         if (amt != sizeof(FileState)) {
-            LOGW("read_snapshot_file FileState truncated/error with read at %d bytes\n", bytesRead);
+            ALOGW("read_snapshot_file FileState truncated/error with read at %d bytes\n", bytesRead);
             return 1;
         }
         bytesRead += amt;
@@ -129,13 +129,13 @@ read_snapshot_file(int fd, KeyedVector<String8,FileState>* snapshot)
             free(filename);
         }
         if (amt != nameBufSize) {
-            LOGW("read_snapshot_file filename truncated/error with read at %d bytes\n", bytesRead);
+            ALOGW("read_snapshot_file filename truncated/error with read at %d bytes\n", bytesRead);
             return 1;
         }
     }
 
     if (header.totalSize != bytesRead) {
-        LOGW("read_snapshot_file length mismatch: header.totalSize=%d bytesRead=%d\n",
+        ALOGW("read_snapshot_file length mismatch: header.totalSize=%d bytesRead=%d\n",
                 header.totalSize, bytesRead);
         return 1;
     }
@@ -166,7 +166,7 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 
     amt = write(fd, &header, sizeof(header));
     if (amt != sizeof(header)) {
-        LOGW("write_snapshot_file error writing header %s", strerror(errno));
+        ALOGW("write_snapshot_file error writing header %s", strerror(errno));
         return errno;
     }
 
@@ -178,14 +178,14 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 
             amt = write(fd, &r.s, sizeof(FileState));
             if (amt != sizeof(FileState)) {
-                LOGW("write_snapshot_file error writing header %s", strerror(errno));
+                ALOGW("write_snapshot_file error writing header %s", strerror(errno));
                 return 1;
             }
 
             // filename is not NULL terminated, but it is padded
             amt = write(fd, name.string(), nameLen);
             if (amt != nameLen) {
-                LOGW("write_snapshot_file error writing filename %s", strerror(errno));
+                ALOGW("write_snapshot_file error writing filename %s", strerror(errno));
                 return 1;
             }
             int paddingLen = ROUND_UP[nameLen % 4];
@@ -193,7 +193,7 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
                 int padding = 0xabababab;
                 amt = write(fd, &padding, paddingLen);
                 if (amt != paddingLen) {
-                    LOGW("write_snapshot_file error writing %d bytes of filename padding %s",
+                    ALOGW("write_snapshot_file error writing %d bytes of filename padding %s",
                             paddingLen, strerror(errno));
                     return 1;
                 }
@@ -591,7 +591,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     } else if (S_ISREG(s.st_mode)) {
         type = '0';     // tar magic: '0' == normal file
     } else {
-        LOGW("Error: unknown file mode 0%o [%s]", s.st_mode, filepath.string());
+        ALOGW("Error: unknown file mode 0%o [%s]", s.st_mode, filepath.string());
         goto cleanup;
     }
     buf[156] = type;
@@ -759,7 +759,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     file_metadata_v1 metadata;
     amt = in->ReadEntityData(&metadata, sizeof(metadata));
     if (amt != sizeof(metadata)) {
-        LOGW("Could not read metadata for %s -- %ld / %s", filename.string(),
+        ALOGW("Could not read metadata for %s -- %ld / %s", filename.string(),
                 (long)amt, strerror(errno));
         return EIO;
     }
@@ -768,7 +768,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     if (metadata.version > CURRENT_METADATA_VERSION) {
         if (!m_loggedUnknownMetadata) {
             m_loggedUnknownMetadata = true;
-            LOGW("Restoring file with unsupported metadata version %d (currently %d)",
+            ALOGW("Restoring file with unsupported metadata version %d (currently %d)",
                     metadata.version, CURRENT_METADATA_VERSION);
         }
     }
@@ -778,7 +778,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     crc = crc32(0L, Z_NULL, 0);
     fd = open(filename.string(), O_CREAT|O_RDWR|O_TRUNC, mode);
     if (fd == -1) {
-        LOGW("Could not open file %s -- %s", filename.string(), strerror(errno));
+        ALOGW("Could not open file %s -- %s", filename.string(), strerror(errno));
         return errno;
     }
     
@@ -786,7 +786,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
         err = write(fd, buf, amt);
         if (err != amt) {
             close(fd);
-            LOGW("Error '%s' writing '%s'", strerror(errno), filename.string());
+            ALOGW("Error '%s' writing '%s'", strerror(errno), filename.string());
             return errno;
         }
         crc = crc32(crc, (Bytef*)buf, amt);
@@ -797,7 +797,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     // Record for the snapshot
     err = stat(filename.string(), &st);
     if (err != 0) {
-        LOGW("Error stating file that we just created %s", filename.string());
+        ALOGW("Error stating file that we just created %s", filename.string());
         return errno;
     }
 

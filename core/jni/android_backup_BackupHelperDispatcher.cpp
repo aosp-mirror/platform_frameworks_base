@@ -58,7 +58,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     int remainingHeader = flattenedHeader.headerSize - sizeof(flattenedHeader.headerSize);
 
     if (flattenedHeader.headerSize < (int)sizeof(chunk_header_v1)) {
-        LOGW("Skipping unknown header: %d bytes", flattenedHeader.headerSize);
+        ALOGW("Skipping unknown header: %d bytes", flattenedHeader.headerSize);
         if (remainingHeader > 0) {
             lseek(fd, remainingHeader, SEEK_CUR);
             // >0 means skip this chunk
@@ -69,13 +69,13 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     amt = read(fd, &flattenedHeader.version,
             sizeof(chunk_header_v1)-sizeof(flattenedHeader.headerSize));
     if (amt <= 0) {
-        LOGW("Failed reading chunk header");
+        ALOGW("Failed reading chunk header");
         return -1;
     }
     remainingHeader -= sizeof(chunk_header_v1)-sizeof(flattenedHeader.headerSize);
 
     if (flattenedHeader.version != VERSION_1_HEADER) {
-        LOGW("Skipping unknown header version: 0x%08x, %d bytes", flattenedHeader.version,
+        ALOGW("Skipping unknown header version: 0x%08x, %d bytes", flattenedHeader.version,
                 flattenedHeader.headerSize);
         if (remainingHeader > 0) {
             lseek(fd, remainingHeader, SEEK_CUR);
@@ -94,14 +94,14 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 
     if (flattenedHeader.dataSize < 0 || flattenedHeader.nameLength < 0 ||
             remainingHeader < flattenedHeader.nameLength) {
-        LOGW("Malformed V1 header remainingHeader=%d dataSize=%d nameLength=%d", remainingHeader,
+        ALOGW("Malformed V1 header remainingHeader=%d dataSize=%d nameLength=%d", remainingHeader,
                 flattenedHeader.dataSize, flattenedHeader.nameLength);
         return -1;
     }
 
     buf = keyPrefix.lockBuffer(flattenedHeader.nameLength);
     if (buf == NULL) {
-        LOGW("unable to allocate %d bytes", flattenedHeader.nameLength);
+        ALOGW("unable to allocate %d bytes", flattenedHeader.nameLength);
         return -1;
     }
 

@@ -93,7 +93,7 @@ uint32_t LayerScreenshot::doTransaction(uint32_t flags)
             // we're going from hidden to visible
             status_t err = captureLocked();
             if (err != NO_ERROR) {
-                LOGW("createScreenshotSurface failed (%s)", strerror(-err));
+                ALOGW("createScreenshotSurface failed (%s)", strerror(-err));
             }
         }
     } else if (curr.flags & ISurfaceComposer::eLayerHidden) {

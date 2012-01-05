@@ -504,7 +504,7 @@ bool Parcel::enforceInterface(const String16& interface,
     if (str == interface) {
         return true;
     } else {
-        LOGW("**** enforceInterface() expected '%s' but read '%s'\n",
+        ALOGW("**** enforceInterface() expected '%s' but read '%s'\n",
                 String8(interface).string(), String8(str).string());
         return false;
     }
@@ -1216,7 +1216,7 @@ const flat_binder_object* Parcel::readObject(bool nullMetaData) const
                 return obj;
             }
         }
-        LOGW("Attempt to read object from Parcel %p at offset %d that is not in the object list",
+        ALOGW("Attempt to read object from Parcel %p at offset %d that is not in the object list",
              this, DPOS);
     }
     return NULL;

@@ -264,7 +264,7 @@ struct MyHandler : public AHandler {
         if (!GetAttribute(transport.c_str(),
                           "source",
                           &source)) {
-            LOGW("Missing 'source' field in Transport response. Using "
+            ALOGW("Missing 'source' field in Transport response. Using "
                  "RTSP endpoint address.");
 
             struct hostent *ent = gethostbyname(mSessionHost.c_str());
@@ -300,7 +300,7 @@ struct MyHandler : public AHandler {
         }
 
         if (rtpPort & 1) {
-            LOGW("Server picked an odd RTP port, it should've picked an "
+            ALOGW("Server picked an odd RTP port, it should've picked an "
                  "even one, we'll let it pass for now, but this may break "
                  "in the future.");
         }
@@ -450,7 +450,7 @@ struct MyHandler : public AHandler {
                                 // it with the absolute session URL to get
                                 // something usable...
 
-                                LOGW("Server specified a non-absolute base URL"
+                                ALOGW("Server specified a non-absolute base URL"
                                      ", combining it with the session URL to "
                                      "get something usable...");
 
@@ -468,7 +468,7 @@ struct MyHandler : public AHandler {
                                 // The first "track" is merely session meta
                                 // data.
 
-                                LOGW("Session doesn't contain any playable "
+                                ALOGW("Session doesn't contain any playable "
                                      "tracks. Aborting.");
                                 result = ERROR_UNSUPPORTED;
                             } else {
@@ -527,12 +527,12 @@ struct MyHandler : public AHandler {
                                 strtoul(timeoutStr.c_str(), &end, 10);
 
                             if (end == timeoutStr.c_str() || *end != '\0') {
-                                LOGW("server specified malformed timeout '%s'",
+                                ALOGW("server specified malformed timeout '%s'",
                                      timeoutStr.c_str());
 
                                 mKeepAliveTimeoutUs = kDefaultKeepAliveTimeoutUs;
                             } else if (timeoutSecs < 15) {
-                                LOGW("server specified too short a timeout "
+                                ALOGW("server specified too short a timeout "
                                      "(%lu secs), using default.",
                                      timeoutSecs);
 
@@ -884,7 +884,7 @@ struct MyHandler : public AHandler {
             case 'seek':
             {
                 if (!mSeekable) {
-                    LOGW("This is a live stream, ignoring seek request.");
+                    ALOGW("This is a live stream, ignoring seek request.");
 
                     sp<AMessage> msg = mNotify->dup();
                     msg->setInt32("what", kWhatSeekDone);
@@ -1017,7 +1017,7 @@ struct MyHandler : public AHandler {
             {
                 if (!mReceivedFirstRTCPPacket) {
                     if (mReceivedFirstRTPPacket && !mTryFakeRTCP) {
-                        LOGW("We received RTP packets but no RTCP packets, "
+                        ALOGW("We received RTP packets but no RTCP packets, "
                              "using fake timestamps.");
 
                         mTryFakeRTCP = true;
@@ -1026,7 +1026,7 @@ struct MyHandler : public AHandler {
 
                         fakeTimestamps();
                     } else if (!mReceivedFirstRTPPacket && !mTryTCPInterleaving) {
-                        LOGW("Never received any data, switching transports.");
+                        ALOGW("Never received any data, switching transports.");
 
                         mTryTCPInterleaving = true;
 
@@ -1034,7 +1034,7 @@ struct MyHandler : public AHandler {
                         msg->setInt32("reconnect", true);
                         msg->post();
                     } else {
-                        LOGW("Never received any data, disconnecting.");
+                        ALOGW("Never received any data, disconnecting.");
                         (new AMessage('abor', id()))->post();
                     }
                 }
@@ -1233,7 +1233,7 @@ private:
             new APacketSource(mSessionDesc, index);
 
         if (source->initCheck() != OK) {
-            LOGW("Unsupported format. Ignoring track #%d.", index);
+            ALOGW("Unsupported format. Ignoring track #%d.", index);
 
             sp<AMessage> reply = new AMessage('setu', id());
             reply->setSize("index", index);

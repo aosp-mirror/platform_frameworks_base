@@ -345,7 +345,7 @@ status_t PointerCoords::writeToParcel(Parcel* parcel) const {
 #endif
 
 void PointerCoords::tooManyAxes(int axis) {
-    LOGW("Could not set value for axis %d because the PointerCoords structure is full and "
+    ALOGW("Could not set value for axis %d because the PointerCoords structure is full and "
             "cannot contain more than %d axis values.", axis, int(MAX_AXES));
 }
 

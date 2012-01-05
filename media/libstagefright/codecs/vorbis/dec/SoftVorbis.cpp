@@ -353,7 +353,7 @@ void SoftVorbis::onQueueFilled(OMX_U32 portIndex) {
 
         int err = vorbis_dsp_synthesis(mState, &pack, 1);
         if (err != 0) {
-            LOGW("vorbis_dsp_synthesis returned %d", err);
+            ALOGW("vorbis_dsp_synthesis returned %d", err);
         } else {
             numFrames = vorbis_dsp_pcmout(
                     mState, (int16_t *)outHeader->pBuffer,

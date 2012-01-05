@@ -125,7 +125,7 @@ AMRWBEncoder::~AMRWBEncoder() {
 
 status_t AMRWBEncoder::start(MetaData *params) {
     if (mStarted) {
-        LOGW("Call start() when encoder already started");
+        ALOGW("Call start() when encoder already started");
         return OK;
     }
 
@@ -150,7 +150,7 @@ status_t AMRWBEncoder::start(MetaData *params) {
 
 status_t AMRWBEncoder::stop() {
     if (!mStarted) {
-        LOGW("Call stop() when encoder has not started");
+        ALOGW("Call stop() when encoder has not started");
         return OK;
     }
 

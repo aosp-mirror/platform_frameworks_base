@@ -84,7 +84,7 @@ NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
 status_t NativeDisplayEventReceiver::initialize() {
     status_t result = mReceiver.initCheck();
     if (result) {
-        LOGW("Failed to initialize display event receiver, status=%d", result);
+        ALOGW("Failed to initialize display event receiver, status=%d", result);
         return result;
     }
 
@@ -103,13 +103,13 @@ status_t NativeDisplayEventReceiver::scheduleVsync() {
         }
 
         if (n < 0) {
-            LOGW("Failed to drain events from display event receiver, status=%d", status_t(n));
+            ALOGW("Failed to drain events from display event receiver, status=%d", status_t(n));
             return status_t(n);
         }
 
         status_t status = mReceiver.requestNextVsync();
         if (status) {
-            LOGW("Failed to request next vsync, status=%d", status);
+            ALOGW("Failed to request next vsync, status=%d", status);
             return status;
         }
 
@@ -138,7 +138,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
-        LOGW("Received spurious callback for unhandled poll event.  "
+        ALOGW("Received spurious callback for unhandled poll event.  "
                 "events=0x%x", events);
         return 1; // keep the callback
     }

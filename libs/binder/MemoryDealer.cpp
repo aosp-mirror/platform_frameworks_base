@@ -210,7 +210,7 @@ Allocation::~Allocation()
 #ifdef MADV_REMOVE
             if (size) {
                 int err = madvise(start_ptr, size, MADV_REMOVE);
-                LOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
+                ALOGW_IF(err, "madvise(%p, %u, MADV_REMOVE) returned %s",
                         start_ptr, size, err<0 ? strerror(errno) : "Ok");
             }
 #endif

@@ -124,7 +124,7 @@ using namespace android;
     assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
 
     if ((long) zstream.total_out != uncompressedLen) {
-        LOGW("Size mismatch on inflated file (%ld vs %ld)\n",
+        ALOGW("Size mismatch on inflated file (%ld vs %ld)\n",
             zstream.total_out, uncompressedLen);
         goto z_bail;
     }
@@ -236,7 +236,7 @@ bail:
     assert(zerr == Z_STREAM_END);       /* other errors should've been caught */
 
     if ((long) zstream.total_out != uncompressedLen) {
-        LOGW("Size mismatch on inflated file (%ld vs %ld)\n",
+        ALOGW("Size mismatch on inflated file (%ld vs %ld)\n",
             zstream.total_out, uncompressedLen);
         goto z_bail;
     }

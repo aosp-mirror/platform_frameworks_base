@@ -107,20 +107,20 @@ static status_t validate_chunk(const ResChunk_header* chunk,
                 if ((ssize_t)size <= (dataEnd-((const uint8_t*)chunk))) {
                     return NO_ERROR;
                 }
-                LOGW("%s data size %p extends beyond resource end %p.",
+                ALOGW("%s data size %p extends beyond resource end %p.",
                      name, (void*)size,
                      (void*)(dataEnd-((const uint8_t*)chunk)));
                 return BAD_TYPE;
             }
-            LOGW("%s size 0x%x or headerSize 0x%x is not on an integer boundary.",
+            ALOGW("%s size 0x%x or headerSize 0x%x is not on an integer boundary.",
                  name, (int)size, (int)headerSize);
             return BAD_TYPE;
         }
-        LOGW("%s size %p is smaller than header size %p.",
+        ALOGW("%s size %p is smaller than header size %p.",
              name, (void*)size, (void*)(int)headerSize);
         return BAD_TYPE;
     }
-    LOGW("%s header size %p is too small.",
+    ALOGW("%s header size %p is too small.",
          name, (void*)(int)headerSize);
     return BAD_TYPE;
 }
@@ -221,11 +221,11 @@ static void deserializeInternal(const void* inData, Res_png_9patch* outData) {
 static bool assertIdmapHeader(const uint32_t* map, size_t sizeBytes)
 {
     if (sizeBytes < ResTable::IDMAP_HEADER_SIZE_BYTES) {
-        LOGW("idmap assertion failed: size=%d bytes\n", sizeBytes);
+        ALOGW("idmap assertion failed: size=%d bytes\n", sizeBytes);
         return false;
     }
     if (*map != htodl(IDMAP_MAGIC)) { // htodl: map data expected to be in correct endianess
-        LOGW("idmap assertion failed: invalid magic found (is 0x%08x, expected 0x%08x)\n",
+        ALOGW("idmap assertion failed: invalid magic found (is 0x%08x, expected 0x%08x)\n",
              *map, htodl(IDMAP_MAGIC));
         return false;
     }
@@ -246,11 +246,11 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
     const uint32_t typeCount = *map;
 
     if (type > typeCount) {
-        LOGW("Resource ID map: type=%d exceeds number of types=%d\n", type, typeCount);
+        ALOGW("Resource ID map: type=%d exceeds number of types=%d\n", type, typeCount);
         return UNKNOWN_ERROR;
     }
     if (typeCount > size) {
-        LOGW("Resource ID map: number of types=%d exceeds size of map=%d\n", typeCount, size);
+        ALOGW("Resource ID map: number of types=%d exceeds size of map=%d\n", typeCount, size);
         return UNKNOWN_ERROR;
     }
     const uint32_t typeOffset = map[type];
@@ -259,7 +259,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
         return NO_ERROR;
     }
     if (typeOffset + 1 > size) {
-        LOGW("Resource ID map: type offset=%d exceeds reasonable value, size of map=%d\n",
+        ALOGW("Resource ID map: type offset=%d exceeds reasonable value, size of map=%d\n",
              typeOffset, size);
         return UNKNOWN_ERROR;
     }
@@ -271,7 +271,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
     }
     const uint32_t index = typeOffset + 2 + entry - entryOffset;
     if (index > size) {
-        LOGW("Resource ID map: entry index=%d exceeds size of map=%d\n", index, size);
+        ALOGW("Resource ID map: entry index=%d exceeds size of map=%d\n", index, size);
         *outValue = 0;
         return NO_ERROR;
     }
@@ -358,7 +358,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
 
     if (mHeader->header.headerSize > mHeader->header.size
             || mHeader->header.size > size) {
-        LOGW("Bad string block: header size %d or total size %d is larger than data size %d\n",
+        ALOGW("Bad string block: header size %d or total size %d is larger than data size %d\n",
                 (int)mHeader->header.headerSize, (int)mHeader->header.size, (int)size);
         return (mError=BAD_TYPE);
     }
@@ -370,7 +370,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         if ((mHeader->stringCount*sizeof(uint32_t) < mHeader->stringCount)  // uint32 overflow?
             || (mHeader->header.headerSize+(mHeader->stringCount*sizeof(uint32_t)))
                 > size) {
-            LOGW("Bad string block: entry of %d items extends past data size %d\n",
+            ALOGW("Bad string block: entry of %d items extends past data size %d\n",
                     (int)(mHeader->header.headerSize+(mHeader->stringCount*sizeof(uint32_t))),
                     (int)size);
             return (mError=BAD_TYPE);
@@ -388,7 +388,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         mStrings = (const void*)
             (((const uint8_t*)data)+mHeader->stringsStart);
         if (mHeader->stringsStart >= (mHeader->header.size-sizeof(uint16_t))) {
-            LOGW("Bad string block: string pool starts at %d, after total size %d\n",
+            ALOGW("Bad string block: string pool starts at %d, after total size %d\n",
                     (int)mHeader->stringsStart, (int)mHeader->header.size);
             return (mError=BAD_TYPE);
         }
@@ -398,13 +398,13 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         } else {
             // check invariant: styles starts before end of data
             if (mHeader->stylesStart >= (mHeader->header.size-sizeof(uint16_t))) {
-                LOGW("Bad style block: style block starts at %d past data size of %d\n",
+                ALOGW("Bad style block: style block starts at %d past data size of %d\n",
                     (int)mHeader->stylesStart, (int)mHeader->header.size);
                 return (mError=BAD_TYPE);
             }
             // check invariant: styles follow the strings
             if (mHeader->stylesStart <= mHeader->stringsStart) {
-                LOGW("Bad style block: style block starts at %d, before strings at %d\n",
+                ALOGW("Bad style block: style block starts at %d, before strings at %d\n",
                     (int)mHeader->stylesStart, (int)mHeader->stringsStart);
                 return (mError=BAD_TYPE);
             }
@@ -414,7 +414,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
 
         // check invariant: stringCount > 0 requires a string pool to exist
         if (mStringPoolSize == 0) {
-            LOGW("Bad string block: stringCount is %d but pool size is 0\n", (int)mHeader->stringCount);
+            ALOGW("Bad string block: stringCount is %d but pool size is 0\n", (int)mHeader->stringCount);
             return (mError=BAD_TYPE);
         }
 
@@ -437,7 +437,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
                 ((uint8_t*)mStrings)[mStringPoolSize-1] != 0) ||
                 (!mHeader->flags&ResStringPool_header::UTF8_FLAG &&
                 ((char16_t*)mStrings)[mStringPoolSize-1] != 0)) {
-            LOGW("Bad string block: last string is not 0-terminated\n");
+            ALOGW("Bad string block: last string is not 0-terminated\n");
             return (mError=BAD_TYPE);
         }
     } else {
@@ -449,12 +449,12 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         mEntryStyles = mEntries + mHeader->stringCount;
         // invariant: integer overflow in calculating mEntryStyles
         if (mEntryStyles < mEntries) {
-            LOGW("Bad string block: integer overflow finding styles\n");
+            ALOGW("Bad string block: integer overflow finding styles\n");
             return (mError=BAD_TYPE);
         }
 
         if (((const uint8_t*)mEntryStyles-(const uint8_t*)mHeader) > (int)size) {
-            LOGW("Bad string block: entry of %d styles extends past data size %d\n",
+            ALOGW("Bad string block: entry of %d styles extends past data size %d\n",
                     (int)((const uint8_t*)mEntryStyles-(const uint8_t*)mHeader),
                     (int)size);
             return (mError=BAD_TYPE);
@@ -462,7 +462,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         mStyles = (const uint32_t*)
             (((const uint8_t*)data)+mHeader->stylesStart);
         if (mHeader->stylesStart >= mHeader->header.size) {
-            LOGW("Bad string block: style pool starts %d, after total size %d\n",
+            ALOGW("Bad string block: style pool starts %d, after total size %d\n",
                     (int)mHeader->stylesStart, (int)mHeader->header.size);
             return (mError=BAD_TYPE);
         }
@@ -487,7 +487,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         };
         if (memcmp(&mStyles[mStylePoolSize-(sizeof(endSpan)/sizeof(uint32_t))],
                    &endSpan, sizeof(endSpan)) != 0) {
-            LOGW("Bad string block: last style is not 0xFFFFFFFF-terminated\n");
+            ALOGW("Bad string block: last style is not 0xFFFFFFFF-terminated\n");
             return (mError=BAD_TYPE);
         }
     } else {
@@ -581,7 +581,7 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                 if ((uint32_t)(str+*u16len-strings) < mStringPoolSize) {
                     return str;
                 } else {
-                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                    ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
                             (int)idx, (int)(str+*u16len-strings), (int)mStringPoolSize);
                 }
             } else {
@@ -601,7 +601,7 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 
                     ssize_t actualLen = utf8_to_utf16_length(u8str, u8len);
                     if (actualLen < 0 || (size_t)actualLen != *u16len) {
-                        LOGW("Bad string block: string #%lld decoded length is not correct "
+                        ALOGW("Bad string block: string #%lld decoded length is not correct "
                                 "%lld vs %llu\n",
                                 (long long)idx, (long long)actualLen, (long long)*u16len);
                         return NULL;
@@ -609,7 +609,7 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 
                     char16_t *u16str = (char16_t *)calloc(*u16len+1, sizeof(char16_t));
                     if (!u16str) {
-                        LOGW("No memory when trying to allocate decode cache for string #%d\n",
+                        ALOGW("No memory when trying to allocate decode cache for string #%d\n",
                                 (int)idx);
                         return NULL;
                     }
@@ -618,13 +618,13 @@ const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                     mCache[idx] = u16str;
                     return u16str;
                 } else {
-                    LOGW("Bad string block: string #%lld extends to %lld, past end at %lld\n",
+                    ALOGW("Bad string block: string #%lld extends to %lld, past end at %lld\n",
                             (long long)idx, (long long)(u8str+u8len-strings),
                             (long long)mStringPoolSize);
                 }
             }
         } else {
-            LOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
+            ALOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
                     (int)idx, (int)(off*sizeof(uint16_t)),
                     (int)(mStringPoolSize*sizeof(uint16_t)));
         }
@@ -646,12 +646,12 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
                 if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
                     return (const char*)str;
                 } else {
-                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                    ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
                             (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
                 }
             }
         } else {
-            LOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
+            ALOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
                     (int)idx, (int)(off*sizeof(uint16_t)),
                     (int)(mStringPoolSize*sizeof(uint16_t)));
         }
@@ -671,7 +671,7 @@ const ResStringPool_span* ResStringPool::styleAt(size_t idx) const
         if (off < mStylePoolSize) {
             return (const ResStringPool_span*)(mStyles+off);
         } else {
-            LOGW("Bad string block: style #%d entry is at %d, past end at %d\n",
+            ALOGW("Bad string block: style #%d entry is at %d, past end at %d\n",
                     (int)idx, (int)(off*sizeof(uint32_t)),
                     (int)(mStylePoolSize*sizeof(uint32_t)));
         }
@@ -1087,7 +1087,7 @@ ResXMLParser::event_code_t ResXMLParser::nextNode()
     do {
         const ResXMLTree_node* next = (const ResXMLTree_node*)
             (((const uint8_t*)mCurNode) + dtohl(mCurNode->header.size));
-        //LOGW("Next node: prev=%p, next=%p\n", mCurNode, next);
+        //ALOGW("Next node: prev=%p, next=%p\n", mCurNode, next);
         
         if (((const uint8_t*)next) >= mTree.mDataEnd) {
             mCurNode = NULL;
@@ -1120,14 +1120,14 @@ ResXMLParser::event_code_t ResXMLParser::nextNode()
                 minExtSize = sizeof(ResXMLTree_cdataExt);
                 break;
             default:
-                LOGW("Unknown XML block: header type %d in node at %d\n",
+                ALOGW("Unknown XML block: header type %d in node at %d\n",
                      (int)dtohs(next->header.type),
                      (int)(((const uint8_t*)next)-((const uint8_t*)mTree.mHeader)));
                 continue;
         }
         
         if ((totalSize-headerSize) < minExtSize) {
-            LOGW("Bad XML block: header type 0x%x in node at 0x%x has size %d, need %d\n",
+            ALOGW("Bad XML block: header type 0x%x in node at 0x%x has size %d, need %d\n",
                  (int)dtohs(next->header.type),
                  (int)(((const uint8_t*)next)-((const uint8_t*)mTree.mHeader)),
                  (int)(totalSize-headerSize), (int)minExtSize);
@@ -1199,7 +1199,7 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     mHeader = (const ResXMLTree_header*)data;
     mSize = dtohl(mHeader->header.size);
     if (dtohs(mHeader->header.headerSize) > mSize || mSize > size) {
-        LOGW("Bad XML block: header size %d or total size %d is larger than data size %d\n",
+        ALOGW("Bad XML block: header size %d or total size %d is larger than data size %d\n",
              (int)dtohs(mHeader->header.headerSize),
              (int)dtohl(mHeader->header.size), (int)size);
         mError = BAD_TYPE;
@@ -1259,7 +1259,7 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     }
 
     if (mRootNode == NULL) {
-        LOGW("Bad XML block: no root element node found\n");
+        ALOGW("Bad XML block: no root element node found\n");
         mError = BAD_TYPE;
         goto done;
     }
@@ -1313,12 +1313,12 @@ status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const
             if ((dtohs(attrExt->attributeStart)+attrSize) <= (size-headerSize)) {
                 return NO_ERROR;
             }
-            LOGW("Bad XML block: node attributes use 0x%x bytes, only have 0x%x bytes\n",
+            ALOGW("Bad XML block: node attributes use 0x%x bytes, only have 0x%x bytes\n",
                     (unsigned int)(dtohs(attrExt->attributeStart)+attrSize),
                     (unsigned int)(size-headerSize));
         }
         else {
-            LOGW("Bad XML start block: node header size 0x%x, size 0x%x\n",
+            ALOGW("Bad XML start block: node header size 0x%x, size 0x%x\n",
                 (unsigned int)headerSize, (unsigned int)size);
         }
         return BAD_TYPE;
@@ -1342,21 +1342,21 @@ status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const
                         <= (size-headerSize)) {
                     return NO_ERROR;
                 }
-                LOGW("Bad XML block: node attributes use 0x%x bytes, only have 0x%x bytes\n",
+                ALOGW("Bad XML block: node attributes use 0x%x bytes, only have 0x%x bytes\n",
                         ((int)dtohs(node->attributeSize))*dtohs(node->attributeCount),
                         (int)(size-headerSize));
                 return BAD_TYPE;
             }
-            LOGW("Bad XML block: node at 0x%x extends beyond data end 0x%x\n",
+            ALOGW("Bad XML block: node at 0x%x extends beyond data end 0x%x\n",
                     (int)(((const uint8_t*)node)-((const uint8_t*)mHeader)), (int)mSize);
             return BAD_TYPE;
         }
-        LOGW("Bad XML block: node at 0x%x header size 0x%x smaller than total size 0x%x\n",
+        ALOGW("Bad XML block: node at 0x%x header size 0x%x smaller than total size 0x%x\n",
                 (int)(((const uint8_t*)node)-((const uint8_t*)mHeader)),
                 (int)headerSize, (int)size);
         return BAD_TYPE;
     }
-    LOGW("Bad XML block: node at 0x%x header size 0x%x too small\n",
+    ALOGW("Bad XML block: node at 0x%x header size 0x%x too small\n",
             (int)(((const uint8_t*)node)-((const uint8_t*)mHeader)),
             (int)headerSize);
     return BAD_TYPE;
@@ -1712,7 +1712,7 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
                                 resID = te.value.data;
                                 continue;
                             }
-                            LOGW("Too many attribute references, stopped at: 0x%08x\n", resID);
+                            ALOGW("Too many attribute references, stopped at: 0x%08x\n", resID);
                             return BAD_INDEX;
                         } else if (type != Res_value::TYPE_NULL) {
                             *outValue = te.value;
@@ -1813,7 +1813,7 @@ status_t ResTable::add(Asset* asset, void* cookie, bool copyData, const void* id
 {
     const void* data = asset->getBuffer(true);
     if (data == NULL) {
-        LOGW("Unable to get buffer of resource asset file");
+        ALOGW("Unable to get buffer of resource asset file");
         return UNKNOWN_ERROR;
     }
     size_t size = (size_t)asset->getLength();
@@ -1888,13 +1888,13 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
                                   16, 16, 0, false, printToLogFunc));
     if (dtohs(header->header->header.headerSize) > header->size
             || header->size > size) {
-        LOGW("Bad resource table: header size 0x%x or total size 0x%x is larger than data size 0x%x\n",
+        ALOGW("Bad resource table: header size 0x%x or total size 0x%x is larger than data size 0x%x\n",
              (int)dtohs(header->header->header.headerSize),
              (int)header->size, (int)size);
         return (mError=BAD_TYPE);
     }
     if (((dtohs(header->header->header.headerSize)|header->size)&0x3) != 0) {
-        LOGW("Bad resource table: header size 0x%x or total size 0x%x is not on an integer boundary\n",
+        ALOGW("Bad resource table: header size 0x%x or total size 0x%x is not on an integer boundary\n",
              (int)dtohs(header->header->header.headerSize),
              (int)header->size);
         return (mError=BAD_TYPE);
@@ -1927,11 +1927,11 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
                     return (mError=err);
                 }
             } else {
-                LOGW("Multiple string chunks found in resource table.");
+                ALOGW("Multiple string chunks found in resource table.");
             }
         } else if (ctype == RES_TABLE_PACKAGE_TYPE) {
             if (curPackage >= dtohl(header->header->packageCount)) {
-                LOGW("More package chunks were found than the %d declared in the header.",
+                ALOGW("More package chunks were found than the %d declared in the header.",
                      dtohl(header->header->packageCount));
                 return (mError=BAD_TYPE);
             }
@@ -1949,7 +1949,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
             }
             curPackage++;
         } else {
-            LOGW("Unknown chunk type %p in table at %p.\n",
+            ALOGW("Unknown chunk type %p in table at %p.\n",
                  (void*)(int)(ctype),
                  (void*)(((const uint8_t*)chunk) - ((const uint8_t*)header->header)));
         }
@@ -1958,13 +1958,13 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
     }
 
     if (curPackage < dtohl(header->header->packageCount)) {
-        LOGW("Fewer package chunks (%d) were found than the %d declared in the header.",
+        ALOGW("Fewer package chunks (%d) were found than the %d declared in the header.",
              (int)curPackage, dtohl(header->header->packageCount));
         return (mError=BAD_TYPE);
     }
     mError = header->values.getError();
     if (mError != NO_ERROR) {
-        LOGW("No string values found in resource table!");
+        ALOGW("No string values found in resource table!");
     }
 
     TABLE_NOISY(LOGV("Returning from add with mError=%d\n", mError));
@@ -2011,20 +2011,20 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
 
     if (p < 0) {
         if (Res_GETPACKAGE(resID)+1 == 0) {
-            LOGW("No package identifier when getting name for resource number 0x%08x", resID);
+            ALOGW("No package identifier when getting name for resource number 0x%08x", resID);
         } else {
-            LOGW("No known package when getting name for resource number 0x%08x", resID);
+            ALOGW("No known package when getting name for resource number 0x%08x", resID);
         }
         return false;
     }
     if (t < 0) {
-        LOGW("No type identifier when getting name for resource number 0x%08x", resID);
+        ALOGW("No type identifier when getting name for resource number 0x%08x", resID);
         return false;
     }
 
     const PackageGroup* const grp = mPackageGroups[p];
     if (grp == NULL) {
-        LOGW("Bad identifier when getting name for resource number 0x%08x", resID);
+        ALOGW("Bad identifier when getting name for resource number 0x%08x", resID);
         return false;
     }
     if (grp->packages.size() > 0) {
@@ -2067,14 +2067,14 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 
     if (p < 0) {
         if (Res_GETPACKAGE(resID)+1 == 0) {
-            LOGW("No package identifier when getting value for resource number 0x%08x", resID);
+            ALOGW("No package identifier when getting value for resource number 0x%08x", resID);
         } else {
-            LOGW("No known package when getting value for resource number 0x%08x", resID);
+            ALOGW("No known package when getting value for resource number 0x%08x", resID);
         }
         return BAD_INDEX;
     }
     if (t < 0) {
-        LOGW("No type identifier when getting value for resource number 0x%08x", resID);
+        ALOGW("No type identifier when getting value for resource number 0x%08x", resID);
         return BAD_INDEX;
     }
 
@@ -2089,7 +2089,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     // recently added.
     const PackageGroup* const grp = mPackageGroups[p];
     if (grp == NULL) {
-        LOGW("Bad identifier when getting value for resource number 0x%08x", resID);
+        ALOGW("Bad identifier when getting value for resource number 0x%08x", resID);
         return BAD_INDEX;
     }
 
@@ -2141,7 +2141,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
             // overlay package did not specify a default.
             // Non-overlay packages are still required to provide a default.
             if (offset < 0 && ip == 0) {
-                LOGW("Failure getting entry for 0x%08x (t=%d e=%d) in package %zd (error %d)\n",
+                ALOGW("Failure getting entry for 0x%08x (t=%d e=%d) in package %zd (error %d)\n",
                         resID, T, E, ip, (int)offset);
                 rc = offset;
                 goto out;
@@ -2151,7 +2151,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 
         if ((dtohs(entry->flags)&entry->FLAG_COMPLEX) != 0) {
             if (!mayBeBag) {
-                LOGW("Requesting resource %p failed because it is complex\n",
+                ALOGW("Requesting resource %p failed because it is complex\n",
                      (void*)resID);
             }
             continue;
@@ -2161,7 +2161,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
               << HexDump(type, dtohl(type->header.size)) << endl);
 
         if ((size_t)offset > (dtohl(type->header.size)-sizeof(Res_value))) {
-            LOGW("ResTable_item at %d is beyond type chunk data %d",
+            ALOGW("ResTable_item at %d is beyond type chunk data %d",
                  (int)offset, dtohl(type->header.size));
             rc = BAD_TYPE;
             goto out;
@@ -2307,23 +2307,23 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
     const int e = Res_GETENTRY(resID);
 
     if (p < 0) {
-        LOGW("Invalid package identifier when getting bag for resource number 0x%08x", resID);
+        ALOGW("Invalid package identifier when getting bag for resource number 0x%08x", resID);
         return BAD_INDEX;
     }
     if (t < 0) {
-        LOGW("No type identifier when getting bag for resource number 0x%08x", resID);
+        ALOGW("No type identifier when getting bag for resource number 0x%08x", resID);
         return BAD_INDEX;
     }
 
     //printf("Get bag: id=0x%08x, p=%d, t=%d\n", resID, p, t);
     PackageGroup* const grp = mPackageGroups[p];
     if (grp == NULL) {
-        LOGW("Bad identifier when getting bag for resource number 0x%08x", resID);
+        ALOGW("Bad identifier when getting bag for resource number 0x%08x", resID);
         return false;
     }
 
     if (t >= (int)grp->typeCount) {
-        LOGW("Type identifier 0x%x is larger than type count 0x%x",
+        ALOGW("Type identifier 0x%x is larger than type count 0x%x",
              t+1, (int)grp->typeCount);
         return BAD_INDEX;
     }
@@ -2334,7 +2334,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 
     const size_t NENTRY = typeConfigs->entryCount;
     if (e >= (int)NENTRY) {
-        LOGW("Entry identifier 0x%x is larger than entry count 0x%x",
+        ALOGW("Entry identifier 0x%x is larger than entry count 0x%x",
              e, (int)typeConfigs->entryCount);
         return BAD_INDEX;
     }
@@ -2353,7 +2353,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
                     //ALOGI("Found existing bag for: %p\n", (void*)resID);
                     return set->numAttrs;
                 }
-                LOGW("Attempt to retrieve bag 0x%08x which is invalid or in a cycle.",
+                ALOGW("Attempt to retrieve bag 0x%08x which is invalid or in a cycle.",
                      resID);
                 return BAD_INDEX;
             }
@@ -2429,7 +2429,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         }
 
         if ((dtohs(entry->flags)&entry->FLAG_COMPLEX) == 0) {
-            LOGW("Skipping entry %p in package table %d because it is not complex!\n",
+            ALOGW("Skipping entry %p in package table %d because it is not complex!\n",
                  (void*)resID, (int)ip);
             continue;
         }
@@ -2505,7 +2505,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
             TABLE_NOISY(printf("Now at %p\n", (void*)curOff));
 
             if ((size_t)curOff > (dtohl(type->header.size)-sizeof(ResTable_map))) {
-                LOGW("ResTable_map at %d is beyond type chunk data %d",
+                ALOGW("ResTable_map at %d is beyond type chunk data %d",
                      (int)curOff, dtohl(type->header.size));
                 return BAD_TYPE;
             }
@@ -2676,7 +2676,7 @@ nope:
                 && name[6] == '_') {
                 int index = atoi(String8(name + 7, nameLen - 7).string());
                 if (Res_CHECKID(index)) {
-                    LOGW("Array resource index: %d is too large.",
+                    ALOGW("Array resource index: %d is too large.",
                          index);
                     return 0;
                 }
@@ -2792,12 +2792,12 @@ nope:
                 offset += typeOffset;
                 
                 if (offset > (dtohl(ty->header.size)-sizeof(ResTable_entry))) {
-                    LOGW("ResTable_entry at %d is beyond type chunk data %d",
+                    ALOGW("ResTable_entry at %d is beyond type chunk data %d",
                          offset, dtohl(ty->header.size));
                     return 0;
                 }
                 if ((offset&0x3) != 0) {
-                    LOGW("ResTable_entry at %d (pkg=%d type=%d ent=%d) is not on an integer boundary when looking for %s:%s/%s",
+                    ALOGW("ResTable_entry at %d (pkg=%d type=%d ent=%d) is not on an integer boundary when looking for %s:%s/%s",
                          (int)offset, (int)group->id, (int)ti+1, (int)i,
                          String8(package, packageLen).string(),
                          String8(type, typeLen).string(),
@@ -2808,7 +2808,7 @@ nope:
                 const ResTable_entry* const entry = (const ResTable_entry*)
                     (((const uint8_t*)ty) + offset);
                 if (dtohs(entry->size) < sizeof(*entry)) {
-                    LOGW("ResTable_entry size %d is too small", dtohs(entry->size));
+                    ALOGW("ResTable_entry size %d is too small", dtohs(entry->size));
                     return BAD_TYPE;
                 }
 
@@ -3935,7 +3935,7 @@ ssize_t ResTable::getEntry(
     }
 
     if ((size_t)entryIndex >= allTypes->entryCount) {
-        LOGW("getEntry failing because entryIndex %d is beyond type entryCount %d",
+        ALOGW("getEntry failing because entryIndex %d is beyond type entryCount %d",
             entryIndex, (int)allTypes->entryCount);
         return BAD_TYPE;
     }
@@ -4039,12 +4039,12 @@ ssize_t ResTable::getEntry(
           << ", offset=" << (void*)offset << endl);
 
     if (offset > (dtohl(type->header.size)-sizeof(ResTable_entry))) {
-        LOGW("ResTable_entry at 0x%x is beyond type chunk data 0x%x",
+        ALOGW("ResTable_entry at 0x%x is beyond type chunk data 0x%x",
              offset, dtohl(type->header.size));
         return BAD_TYPE;
     }
     if ((offset&0x3) != 0) {
-        LOGW("ResTable_entry at 0x%x is not on an integer boundary",
+        ALOGW("ResTable_entry at 0x%x is not on an integer boundary",
              offset);
         return BAD_TYPE;
     }
@@ -4052,7 +4052,7 @@ ssize_t ResTable::getEntry(
     const ResTable_entry* const entry = (const ResTable_entry*)
         (((const uint8_t*)type) + offset);
     if (dtohs(entry->size) < sizeof(*entry)) {
-        LOGW("ResTable_entry size 0x%x is too small", dtohs(entry->size));
+        ALOGW("ResTable_entry size 0x%x is too small", dtohs(entry->size));
         return BAD_TYPE;
     }
 
@@ -4077,22 +4077,22 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     const size_t pkgSize = dtohl(pkg->header.size);
 
     if (dtohl(pkg->typeStrings) >= pkgSize) {
-        LOGW("ResTable_package type strings at %p are past chunk size %p.",
+        ALOGW("ResTable_package type strings at %p are past chunk size %p.",
              (void*)dtohl(pkg->typeStrings), (void*)pkgSize);
         return (mError=BAD_TYPE);
     }
     if ((dtohl(pkg->typeStrings)&0x3) != 0) {
-        LOGW("ResTable_package type strings at %p is not on an integer boundary.",
+        ALOGW("ResTable_package type strings at %p is not on an integer boundary.",
              (void*)dtohl(pkg->typeStrings));
         return (mError=BAD_TYPE);
     }
     if (dtohl(pkg->keyStrings) >= pkgSize) {
-        LOGW("ResTable_package key strings at %p are past chunk size %p.",
+        ALOGW("ResTable_package key strings at %p are past chunk size %p.",
              (void*)dtohl(pkg->keyStrings), (void*)pkgSize);
         return (mError=BAD_TYPE);
     }
     if ((dtohl(pkg->keyStrings)&0x3) != 0) {
-        LOGW("ResTable_package key strings at %p is not on an integer boundary.",
+        ALOGW("ResTable_package key strings at %p is not on an integer boundary.",
              (void*)dtohl(pkg->keyStrings));
         return (mError=BAD_TYPE);
     }
@@ -4195,7 +4195,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             if ((dtohl(typeSpec->entryCount) > (INT32_MAX/sizeof(uint32_t))
                     || dtohs(typeSpec->header.headerSize)+(sizeof(uint32_t)*dtohl(typeSpec->entryCount))
                     > typeSpecSize)) {
-                LOGW("ResTable_typeSpec entry index to %p extends beyond chunk end %p.",
+                ALOGW("ResTable_typeSpec entry index to %p extends beyond chunk end %p.",
                      (void*)(dtohs(typeSpec->header.headerSize)
                              +(sizeof(uint32_t)*dtohl(typeSpec->entryCount))),
                      (void*)typeSpecSize);
@@ -4203,7 +4203,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             }
             
             if (typeSpec->id == 0) {
-                LOGW("ResTable_type has an id of 0.");
+                ALOGW("ResTable_type has an id of 0.");
                 return (mError=BAD_TYPE);
             }
             
@@ -4215,7 +4215,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 t = new Type(header, package, dtohl(typeSpec->entryCount));
                 package->types.editItemAt(typeSpec->id-1) = t;
             } else if (dtohl(typeSpec->entryCount) != t->entryCount) {
-                LOGW("ResTable_typeSpec entry count inconsistent: given %d, previously %d",
+                ALOGW("ResTable_typeSpec entry count inconsistent: given %d, previously %d",
                     (int)dtohl(typeSpec->entryCount), (int)t->entryCount);
                 return (mError=BAD_TYPE);
             }
@@ -4240,7 +4240,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                                     (void*)typeSize));
             if (dtohs(type->header.headerSize)+(sizeof(uint32_t)*dtohl(type->entryCount))
                 > typeSize) {
-                LOGW("ResTable_type entry index to %p extends beyond chunk end %p.",
+                ALOGW("ResTable_type entry index to %p extends beyond chunk end %p.",
                      (void*)(dtohs(type->header.headerSize)
                              +(sizeof(uint32_t)*dtohl(type->entryCount))),
                      (void*)typeSize);
@@ -4248,12 +4248,12 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             }
             if (dtohl(type->entryCount) != 0
                 && dtohl(type->entriesStart) > (typeSize-sizeof(ResTable_entry))) {
-                LOGW("ResTable_type entriesStart at %p extends beyond chunk end %p.",
+                ALOGW("ResTable_type entriesStart at %p extends beyond chunk end %p.",
                      (void*)dtohl(type->entriesStart), (void*)typeSize);
                 return (mError=BAD_TYPE);
             }
             if (type->id == 0) {
-                LOGW("ResTable_type has an id of 0.");
+                ALOGW("ResTable_type has an id of 0.");
                 return (mError=BAD_TYPE);
             }
             
@@ -4265,7 +4265,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 t = new Type(header, package, dtohl(type->entryCount));
                 package->types.editItemAt(type->id-1) = t;
             } else if (dtohl(type->entryCount) != t->entryCount) {
-                LOGW("ResTable_type entry count inconsistent: given %d, previously %d",
+                ALOGW("ResTable_type entry count inconsistent: given %d, previously %d",
                     (int)dtohl(type->entryCount), (int)t->entryCount);
                 return (mError=BAD_TYPE);
             }
@@ -4346,7 +4346,7 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
                 | (0x0000ffff & (entryIndex));
             resource_name resName;
             if (!this->getResourceName(resID, &resName)) {
-                LOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
+                ALOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
                 continue;
             }
 

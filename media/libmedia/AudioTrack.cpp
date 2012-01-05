@@ -883,7 +883,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                     // timing out when a loop has been set and we have already written upto loop end
                     // is a normal condition: no need to wake AudioFlinger up.
                     if (cblk->user < cblk->loopEnd) {
-                        LOGW(   "obtainBuffer timed out (is the CPU pegged?) %p "
+                        ALOGW(   "obtainBuffer timed out (is the CPU pegged?) %p "
                                 "user=%08x, server=%08x", this, cblk->user, cblk->server);
                         //unlock cblk mutex before calling mAudioTrack->start() (see issue #1617140)
                         cblk->lock.unlock();
@@ -895,7 +895,7 @@ create_new_track:
                             result = restoreTrack_l(cblk, false);
                         }
                         if (result != NO_ERROR) {
-                            LOGW("obtainBuffer create Track error %d", result);
+                            ALOGW("obtainBuffer create Track error %d", result);
                             cblk->lock.unlock();
                             return result;
                         }
@@ -918,7 +918,7 @@ create_new_track:
     // restart track if it was disabled by audioflinger due to previous underrun
     if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
-        LOGW("obtainBuffer() track %p disabled, restarting", this);
+        ALOGW("obtainBuffer() track %p disabled, restarting", this);
         mAudioTrack->start();
     }
 
@@ -1164,7 +1164,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
     status_t result;
 
     if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
-        LOGW("dead IAudioTrack, creating a new one from %s TID %d",
+        ALOGW("dead IAudioTrack, creating a new one from %s TID %d",
              fromStart ? "start()" : "obtainBuffer()", gettid());
 
         // signal old cblk condition so that other threads waiting for available buffers stop
@@ -1220,7 +1220,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
             }
             if (mActive) {
                 result = mAudioTrack->start();
-                LOGW_IF(result != NO_ERROR, "restoreTrack_l() start() failed status %d", result);
+                ALOGW_IF(result != NO_ERROR, "restoreTrack_l() start() failed status %d", result);
             }
             if (fromStart && result == NO_ERROR) {
                 mNewPosition = mCblk->server + mUpdatePeriod;
@@ -1228,7 +1228,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         }
         if (result != NO_ERROR) {
             android_atomic_and(~CBLK_RESTORING_ON, &cblk->flags);
-            LOGW_IF(result != NO_ERROR, "restoreTrack_l() failed status %d", result);
+            ALOGW_IF(result != NO_ERROR, "restoreTrack_l() failed status %d", result);
         }
         mRestoreStatus = result;
         // signal old cblk condition for other threads waiting for restore completion
@@ -1236,7 +1236,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         cblk->cv.broadcast();
     } else {
         if (!(cblk->flags & CBLK_RESTORED_MSK)) {
-            LOGW("dead IAudioTrack, waiting for a new one TID %d", gettid());
+            ALOGW("dead IAudioTrack, waiting for a new one TID %d", gettid());
             mLock.unlock();
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(RESTORE_TIMEOUT_MS));
             if (result == NO_ERROR) {
@@ -1245,7 +1245,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
             cblk->lock.unlock();
             mLock.lock();
         } else {
-            LOGW("dead IAudioTrack, already restored TID %d", gettid());
+            ALOGW("dead IAudioTrack, already restored TID %d", gettid());
             result = mRestoreStatus;
             cblk->lock.unlock();
         }
@@ -1259,7 +1259,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
     }
     cblk->lock.lock();
 
-    LOGW_IF(result != NO_ERROR, "restoreTrack_l() error %d TID %d", result, gettid());
+    ALOGW_IF(result != NO_ERROR, "restoreTrack_l() error %d TID %d", result, gettid());
 
     return result;
 }
@@ -1328,7 +1328,7 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
             bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
         }
     } else if (u > server) {
-        LOGW("stepServer occurred after track reset");
+        ALOGW("stepServer occurred after track reset");
         u = server;
     }
 
@@ -1349,7 +1349,7 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 bool audio_track_cblk_t::stepServer(uint32_t frameCount)
 {
     if (!tryLock()) {
-        LOGW("stepServer() could not lock cblk");
+        ALOGW("stepServer() could not lock cblk");
         return false;
     }
 
@@ -1367,13 +1367,13 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
         // stepServer() is called After the flush() has reset u & s and
         // we have s > u
         if (s > user) {
-            LOGW("stepServer occurred after track reset");
+            ALOGW("stepServer occurred after track reset");
             s = user;
         }
     }
 
     if (s >= loopEnd) {
-        LOGW_IF(s > loopEnd, "stepServer: s %u > loopEnd %u", s, loopEnd);
+        ALOGW_IF(s > loopEnd, "stepServer: s %u > loopEnd %u", s, loopEnd);
         s = loopStart;
         if (--loopCount == 0) {
             loopEnd = UINT_MAX;
@@ -1428,7 +1428,7 @@ uint32_t audio_track_cblk_t::framesReady()
         } else {
             // do not block on mutex shared with client on AudioFlinger side
             if (!tryLock()) {
-                LOGW("framesReady() could not lock cblk");
+                ALOGW("framesReady() could not lock cblk");
                 return 0;
             }
             uint32_t frames = UINT_MAX;

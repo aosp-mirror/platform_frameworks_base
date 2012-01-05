@@ -71,12 +71,12 @@ status_t InputManager::start() {
 status_t InputManager::stop() {
     status_t result = mReaderThread->requestExitAndWait();
     if (result) {
-        LOGW("Could not stop InputReader thread due to error %d.", result);
+        ALOGW("Could not stop InputReader thread due to error %d.", result);
     }
 
     result = mDispatcherThread->requestExitAndWait();
     if (result) {
-        LOGW("Could not stop InputDispatcher thread due to error %d.", result);
+        ALOGW("Could not stop InputDispatcher thread due to error %d.", result);
     }
 
     return OK;

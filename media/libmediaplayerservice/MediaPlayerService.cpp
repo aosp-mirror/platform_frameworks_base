@@ -794,7 +794,7 @@ void MediaPlayerService::Client::disconnectNativeWindow() {
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
-            LOGW("native_window_api_disconnect returned an error: %s (%d)",
+            ALOGW("native_window_api_disconnect returned an error: %s (%d)",
                     strerror(-err), err);
         }
     }
@@ -1772,7 +1772,7 @@ void MediaPlayerService::addBatteryData(uint32_t params)
 
     } else if (params & kBatteryDataAudioFlingerStop) {
         if (mBatteryAudio.refCount <= 0) {
-            LOGW("Battery track warning: refCount is <= 0");
+            ALOGW("Battery track warning: refCount is <= 0");
             return;
         }
 
@@ -1825,7 +1825,7 @@ void MediaPlayerService::addBatteryData(uint32_t params)
         }
     } else {
         if (info.refCount == 0) {
-            LOGW("Battery track warning: refCount is already 0");
+            ALOGW("Battery track warning: refCount is already 0");
             return;
         } else if (info.refCount < 0) {
             LOGE("Battery track error: refCount < 0");

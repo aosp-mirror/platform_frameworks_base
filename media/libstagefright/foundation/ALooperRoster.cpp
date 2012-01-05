@@ -82,7 +82,7 @@ status_t ALooperRoster::postMessage_l(
     ssize_t index = mHandlers.indexOfKey(msg->target());
 
     if (index < 0) {
-        LOGW("failed to post message. Target handler not registered.");
+        ALOGW("failed to post message. Target handler not registered.");
         return -ENOENT;
     }
 
@@ -91,7 +91,7 @@ status_t ALooperRoster::postMessage_l(
     sp<ALooper> looper = info.mLooper.promote();
 
     if (looper == NULL) {
-        LOGW("failed to post message. "
+        ALOGW("failed to post message. "
              "Target handler %d still registered, but object gone.",
              msg->target());
 
@@ -113,7 +113,7 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
         ssize_t index = mHandlers.indexOfKey(msg->target());
 
         if (index < 0) {
-            LOGW("failed to deliver message. Target handler not registered.");
+            ALOGW("failed to deliver message. Target handler not registered.");
             return;
         }
 
@@ -121,7 +121,7 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
         handler = info.mHandler.promote();
 
         if (handler == NULL) {
-            LOGW("failed to deliver message. "
+            ALOGW("failed to deliver message. "
                  "Target handler %d registered, but object gone.",
                  msg->target());
 
