@@ -630,7 +630,6 @@ public class AudioService extends IAudioService.Stub {
         float volume = AudioSystem.getMasterVolume();
         if (volume >= 0.0) {
             // get current master volume adjusted to 0 to 100
-            int oldVolume = getMasterVolume();
             if (direction == AudioManager.ADJUST_RAISE) {
                 volume += MASTER_VOLUME_INCREMENT;
                 if (volume > 1.0f) volume = 1.0f;
@@ -638,11 +637,7 @@ public class AudioService extends IAudioService.Stub {
                 volume -= MASTER_VOLUME_INCREMENT;
                 if (volume < 0.0f) volume = 0.0f;
             }
-            AudioSystem.setMasterVolume(volume);
-            // Post a persist master volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, 0, SENDMSG_REPLACE,
-                    Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
-            sendMasterVolumeUpdate(flags, oldVolume, getMasterVolume());
+            doSetMasterVolume(volume, flags);
         }
     }
 
