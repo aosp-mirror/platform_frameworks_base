@@ -12641,6 +12641,8 @@ package android.nfc {
     method public short getTnf();
     method public byte[] getType();
     method public deprecated byte[] toByteArray();
+    method public java.lang.String toMimeType();
+    method public android.net.Uri toUri();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final byte[] RTD_ALTERNATIVE_CARRIER;
