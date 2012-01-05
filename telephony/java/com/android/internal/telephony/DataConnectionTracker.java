@@ -212,8 +212,10 @@ public abstract class DataConnectionTracker extends Handler {
     // represents an invalid IP address
     protected static final String NULL_IP = "0.0.0.0";
 
-    // Default for the data stall alarm
-    protected static final int DATA_STALL_ALARM_DELAY_IN_MS_DEFAULT = 1000 * 60 * 6;
+    // Default for the data stall alarm while non-aggressive stall detection
+    protected static final int DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS_DEFAULT = 1000 * 60 * 6;
+    // Default for the data stall alarm for aggressive stall detection
+    protected static final int DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS_DEFAULT = 1000 * 60;
     // If attempt is less than this value we're doing first level recovery
     protected static final int DATA_STALL_NO_RECV_POLL_LIMIT = 1;
     // Tag for tracking stale alarms
@@ -323,10 +325,12 @@ public abstract class DataConnectionTracker extends Handler {
                 mIsScreenOn = true;
                 stopNetStatPoll();
                 startNetStatPoll();
+                restartDataStallAlarm();
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mIsScreenOn = false;
                 stopNetStatPoll();
                 startNetStatPoll();
+                restartDataStallAlarm();
             } else if (action.startsWith(getActionIntentReconnectAlarm())) {
                 log("Reconnect alarm. Previous state was " + mState);
                 onActionIntentReconnectAlarm(intent);
@@ -622,6 +626,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract String getActionIntentDataStallAlarm();
     protected abstract void startNetStatPoll();
     protected abstract void stopNetStatPoll();
+    protected abstract void restartDataStallAlarm();
     protected abstract void restartRadio();
     protected abstract void log(String s);
     protected abstract void loge(String s);
