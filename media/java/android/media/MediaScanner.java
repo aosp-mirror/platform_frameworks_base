@@ -396,6 +396,7 @@ public class MediaScanner
         setDefaultRingtoneFileNames();
 
         mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        //mClient.testGenreNameConverter();
     }
 
     private void setDefaultRingtoneFileNames() {
@@ -623,7 +624,35 @@ public class MediaScanner
                 mCompilation = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("isdrm")) {
                 mIsDrm = (parseSubstring(value, 0, 0) == 1);
+            } else {
+                //Log.v(TAG, "unknown tag: " + name + " (" + mProcessGenres + ")");
             }
+        }
+
+        private boolean convertGenreCode(String input, String expected) {
+            String output = getGenreName(input);
+            if (output.equals(expected)) {
+                return true;
+            } else {
+                Log.d(TAG, "'" + input + "' -> '" + output + "', expected '" + expected + "'");
+                return false;
+            }
+        }
+        private void testGenreNameConverter() {
+            convertGenreCode("2", "Country");
+            convertGenreCode("(2)", "Country");
+            convertGenreCode("(2", "(2");
+            convertGenreCode("2 Foo", "Country");
+            convertGenreCode("(2) Foo", "Country");
+            convertGenreCode("(2 Foo", "(2 Foo");
+            convertGenreCode("2Foo", "2Foo");
+            convertGenreCode("(2)Foo", "Country");
+            convertGenreCode("200 Foo", "Foo");
+            convertGenreCode("(200) Foo", "Foo");
+            convertGenreCode("200Foo", "200Foo");
+            convertGenreCode("(200)Foo", "Foo");
+            convertGenreCode("200)Foo", "200)Foo");
+            convertGenreCode("200) Foo", "200) Foo");
         }
 
         public String getGenreName(String genreTagValue) {
@@ -633,18 +662,23 @@ public class MediaScanner
             }
             final int length = genreTagValue.length();
 
-            if (length > 0 && genreTagValue.charAt(0) == '(') {
+            if (length > 0) {
+                boolean parenthesized = false;
                 StringBuffer number = new StringBuffer();
-                int i = 1;
-                for (; i < length - 1; ++i) {
+                int i = 0;
+                for (; i < length; ++i) {
                     char c = genreTagValue.charAt(i);
-                    if (Character.isDigit(c)) {
+                    if (i == 0 && c == '(') {
+                        parenthesized = true;
+                    } else if (Character.isDigit(c)) {
                         number.append(c);
                     } else {
                         break;
                     }
                 }
-                if (genreTagValue.charAt(i) == ')') {
+                char charAfterNumber = i < length ? genreTagValue.charAt(i) : ' ';
+                if ((parenthesized && charAfterNumber == ')')
+                        || !parenthesized && Character.isWhitespace(charAfterNumber)) {
                     try {
                         short genreIndex = Short.parseShort(number.toString());
                         if (genreIndex >= 0) {
@@ -655,7 +689,13 @@ public class MediaScanner
                             } else if (genreIndex < 0xFF && (i + 1) < length) {
                                 // genre is valid but unknown,
                                 // if there is a string after the value we take it
-                                return genreTagValue.substring(i + 1);
+                                if (parenthesized && charAfterNumber == ')') {
+                                    i++;
+                                }
+                                String ret = genreTagValue.substring(i).trim();
+                                if (ret.length() != 0) {
+                                    return ret;
+                                }
                             } else {
                                 // else return the number, without parentheses
                                 return number.toString();
