@@ -52,7 +52,7 @@ bool TextLayout::needsLayout(const jchar* text, jint len, jint bidiFlags) {
 // This will draw if canvas is not null, otherwise path must be non-null and it will create
 // a path representing the text that would have been drawn.
 void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
-                            jint bidiFlags, jfloat x, jfloat y,SkCanvas *canvas, SkPath *path) {
+                            jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
     sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     // Return advances from the cache. Compute them if needed
@@ -70,11 +70,8 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
     }
     SkScalar x_ = SkFloatToScalar(x);
     SkScalar y_ = SkFloatToScalar(y);
-    if (canvas) {
-        canvas->drawText(value->getGlyphs(), value->getGlyphsCount() * 2, x_, y_, *paint);
-    } else {
-        paint->getTextPath(value->getGlyphs(), value->getGlyphsCount() * 2, x_, y_, path);
-    }
+    // Beware: this needs Glyph encoding (already done on the Paint constructor)
+    paint->getTextPath(value->getGlyphs(), value->getGlyphsCount() * 2, x_, y_, path);
 }
 
 void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
@@ -113,7 +110,7 @@ void TextLayout::getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint 
 
 void TextLayout::getTextPath(SkPaint *paint, const jchar *text, jsize len,
                              jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
-    handleText(paint, text, len, bidiFlags, x, y, NULL, path);
+    handleText(paint, text, len, bidiFlags, x, y, path);
 }
 
 
@@ -143,16 +140,8 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
                 String8(text, count).string());
         return ;
     }
-
-    // Save old text encoding
-    SkPaint::TextEncoding oldEncoding = paint->getTextEncoding();
-    // Define Glyph encoding
-    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-
+    // Beware: this needs Glyph encoding (already done on the Paint constructor)
     canvas->drawTextOnPathHV(value->getGlyphs(), value->getGlyphsCount() * 2, *path, h_, v_, *paint);
-
-    // Get back old encoding
-    paint->setTextEncoding(oldEncoding);
 }
 
 void TextLayout::computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
