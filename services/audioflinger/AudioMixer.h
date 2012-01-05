@@ -88,6 +88,8 @@ public:
 
     uint32_t    trackNames() const { return mTrackNames; }
 
+    size_t      getUnreleasedFrames(int name);
+
 private:
 
     enum {
@@ -159,6 +161,7 @@ private:
         bool        doesResample() const;
         void        resetResampler();
         void        adjustVolumeRamp(bool aux);
+        size_t      getUnreleasedFrames();
     };
 
     // pad to 32-bytes to fill cache line
