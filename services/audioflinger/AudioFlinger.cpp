@@ -1012,7 +1012,7 @@ void AudioFlinger::ThreadBase::exit()
 
     ALOGV("ThreadBase::exit");
     {
-        AutoMutex lock(&mLock);
+        AutoMutex lock(mLock);
         mExiting = true;
         requestExit();
         mWaitWorkCV.signal();
@@ -4501,7 +4501,7 @@ status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrac
     sp <ThreadBase> strongMe = this;
     status_t status = NO_ERROR;
     {
-        AutoMutex lock(&mLock);
+        AutoMutex lock(mLock);
         if (mActiveTrack != 0) {
             if (recordTrack != mActiveTrack.get()) {
                 status = -EBUSY;
@@ -4553,7 +4553,7 @@ void AudioFlinger::RecordThread::stop(RecordThread::RecordTrack* recordTrack) {
     ALOGV("RecordThread::stop");
     sp <ThreadBase> strongMe = this;
     {
-        AutoMutex lock(&mLock);
+        AutoMutex lock(mLock);
         if (mActiveTrack != 0 && recordTrack == mActiveTrack.get()) {
             mActiveTrack->mState = TrackBase::PAUSING;
             // do not wait for mStartStopCond if exiting
