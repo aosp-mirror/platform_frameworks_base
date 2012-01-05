@@ -37,17 +37,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.webkit.DeviceMotionService;
-import android.webkit.DeviceMotionAndOrientationManager;
-import android.webkit.DeviceOrientationService;
-import android.webkit.JniUtil;
+
+import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.Assert;
 
 /**
  * @hide
@@ -382,6 +378,7 @@ public final class WebViewCore {
         mCallbackProxy.onExceededDatabaseQuota(url, databaseIdentifier,
                 currentQuota, estimatedSize, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
+                        @Override
                         public void updateQuota(long quota) {
                             nativeSetNewStorageLimit(quota);
                         }
@@ -396,6 +393,7 @@ public final class WebViewCore {
     protected void reachedMaxAppCacheSize(long spaceNeeded) {
         mCallbackProxy.onReachedMaxAppCacheSize(spaceNeeded, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
+                    @Override
                     public void updateQuota(long quota) {
                         nativeSetNewStorageLimit(quota);
                     }
@@ -404,6 +402,7 @@ public final class WebViewCore {
 
     protected void populateVisitedLinks() {
         ValueCallback callback = new ValueCallback<String[]>() {
+            @Override
             public void onReceiveValue(String[] value) {
                 sendMessage(EventHub.POPULATE_VISITED_LINKS, (Object)value);
             }
@@ -420,14 +419,15 @@ public final class WebViewCore {
     protected void geolocationPermissionsShowPrompt(String origin) {
         mCallbackProxy.onGeolocationPermissionsShowPrompt(origin,
                 new GeolocationPermissions.Callback() {
-          public void invoke(String origin, boolean allow, boolean remember) {
-            GeolocationPermissionsData data = new GeolocationPermissionsData();
-            data.mOrigin = origin;
-            data.mAllow = allow;
-            data.mRemember = remember;
-            // Marshall to WebCore thread.
-            sendMessage(EventHub.GEOLOCATION_PERMISSIONS_PROVIDE, data);
-          }
+            @Override
+            public void invoke(String origin, boolean allow, boolean remember) {
+                GeolocationPermissionsData data = new GeolocationPermissionsData();
+                data.mOrigin = origin;
+                data.mAllow = allow;
+                data.mRemember = remember;
+                // Marshall to WebCore thread.
+                sendMessage(EventHub.GEOLOCATION_PERMISSIONS_PROVIDE, data);
+            }
         });
     }
 
@@ -677,6 +677,7 @@ public final class WebViewCore {
         private static final int REDUCE_PRIORITY = 1;
         private static final int RESUME_PRIORITY = 2;
 
+        @Override
         public void run() {
             Looper.prepare();
             Assert.assertNull(sWebCoreHandler);

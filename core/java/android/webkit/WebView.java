@@ -27,7 +27,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
@@ -59,7 +58,6 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -126,7 +124,8 @@ import java.util.regex.Pattern;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
-import static javax.microedition.khronos.egl.EGL10.*;
+
+import static javax.microedition.khronos.egl.EGL10.EGL_DEFAULT_DISPLAY;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -333,6 +332,7 @@ public class WebView extends AbsoluteLayout
         ViewGroup.OnHierarchyChangeListener {
 
     private class InnerGlobalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
+        @Override
         public void onGlobalLayout() {
             if (isShown()) {
                 setGLRectViewport();
@@ -341,6 +341,7 @@ public class WebView extends AbsoluteLayout
     }
 
     private class InnerScrollChangedListener implements ViewTreeObserver.OnScrollChangedListener {
+        @Override
         public void onScrollChanged() {
             if (isShown()) {
                 setGLRectViewport();
@@ -1243,7 +1244,7 @@ public class WebView extends AbsoluteLayout
                 PackageManager pm = mContext.getPackageManager();
                 for (String name : sGoogleApps) {
                     try {
-                        PackageInfo pInfo = pm.getPackageInfo(name,
+                        pm.getPackageInfo(name,
                                 PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES);
                         installedPackages.add(name);
                     } catch (PackageManager.NameNotFoundException e) {
@@ -1415,23 +1416,27 @@ public class WebView extends AbsoluteLayout
                     .setMessage(com.android.internal.R.string.save_password_message)
                     .setPositiveButton(com.android.internal.R.string.save_password_notnow,
                     new DialogInterface.OnClickListener() {
+                        @Override
                         public void onClick(DialogInterface dialog, int which) {
                             resumeMsg.sendToTarget();
                         }
                     })
                     .setNeutralButton(com.android.internal.R.string.save_password_remember,
                     new DialogInterface.OnClickListener() {
+                        @Override
                         public void onClick(DialogInterface dialog, int which) {
                             remember.sendToTarget();
                         }
                     })
                     .setNegativeButton(com.android.internal.R.string.save_password_never,
                     new DialogInterface.OnClickListener() {
+                        @Override
                         public void onClick(DialogInterface dialog, int which) {
                             neverRemember.sendToTarget();
                         }
                     })
                     .setOnCancelListener(new OnCancelListener() {
+                        @Override
                         public void onCancel(DialogInterface dialog) {
                             resumeMsg.sendToTarget();
                         }
@@ -1517,6 +1522,7 @@ public class WebView extends AbsoluteLayout
      *
      * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public int getVisibleTitleHeight() {
         checkThread();
         return getVisibleTitleHeightImpl();
@@ -1855,6 +1861,7 @@ public class WebView extends AbsoluteLayout
         // contains valid data.
         final File temp = new File(dest.getPath() + ".writing");
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 FileOutputStream out = null;
                 try {
@@ -1924,6 +1931,7 @@ public class WebView extends AbsoluteLayout
             final FileInputStream in = new FileInputStream(src);
             final Bundle copy = new Bundle(b);
             new Thread(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         final Picture p = Picture.createFromStream(in);
@@ -1931,6 +1939,7 @@ public class WebView extends AbsoluteLayout
                             // Post a runnable on the main thread to update the
                             // history picture fields.
                             mPrivateHandler.post(new Runnable() {
+                                @Override
                                 public void run() {
                                     restoreHistoryPictureFields(p, copy);
                                 }
@@ -2659,8 +2668,8 @@ public class WebView extends AbsoluteLayout
                 int slop = viewToContentDimension(mNavSlop);
                 cursorBounds.inset(-slop, -slop);
                 if (cursorBounds.contains(contentX, contentY)) {
-                    contentX = (int) cursorBounds.centerX();
-                    contentY = (int) cursorBounds.centerY();
+                    contentX = cursorBounds.centerX();
+                    contentY = cursorBounds.centerY();
                 }
             }
         }
@@ -5055,6 +5064,7 @@ public class WebView extends AbsoluteLayout
             mWebSettings = getSettings();
         }
 
+        @Override
         public void run() {
             ArrayList<String> pastEntries = new ArrayList<String>();
 
@@ -5717,6 +5727,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView no longer needs to implement
      * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
      */
+    @Override
     // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onChildViewAdded(View parent, View child) {}
@@ -5725,6 +5736,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView no longer needs to implement
      * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
      */
+    @Override
     // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onChildViewRemoved(View p, View child) {}
@@ -5733,6 +5745,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated WebView should not have implemented
      * ViewTreeObserver.OnGlobalFocusChangeListener. This method does nothing now.
      */
+    @Override
     // Cannot add @hide as this can always be accessed via the interface.
     @Deprecated
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
@@ -6169,9 +6182,10 @@ public class WebView extends AbsoluteLayout
                         }
                         if (DEBUG_TOUCH_HIGHLIGHT) {
                             if (getSettings().getNavDump()) {
-                                mTouchHighlightX = (int) x + mScrollX;
-                                mTouchHighlightY = (int) y + mScrollY;
+                                mTouchHighlightX = x + mScrollX;
+                                mTouchHighlightY = y + mScrollY;
                                 mPrivateHandler.postDelayed(new Runnable() {
+                                    @Override
                                     public void run() {
                                         mTouchHighlightX = mTouchHighlightY = 0;
                                         invalidate();
@@ -6763,8 +6777,6 @@ public class WebView extends AbsoluteLayout
             int oldY = mScrollY;
             int rangeX = computeMaxScrollX();
             int rangeY = computeMaxScrollY();
-            int overscrollDistance = mOverscrollDistance;
-
             // Check for the original scrolling layer in case we change
             // directions.  mTouchMode might be TOUCH_DRAG_MODE if we have
             // reached the edge of a layer but mScrollingLayer will be non-zero
@@ -7477,8 +7489,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
         mDragFromTextInput = true;
-        event.offsetLocation((float) (mWebTextView.getLeft() - mScrollX),
-                (float) (mWebTextView.getTop() - mScrollY));
+        event.offsetLocation((mWebTextView.getLeft() - mScrollX),
+                (mWebTextView.getTop() - mScrollY));
         boolean result = onTouchEvent(event);
         mDragFromTextInput = false;
         return result;
@@ -9033,7 +9045,7 @@ public class WebView extends AbsoluteLayout
                 if (position < 0 || position >= getCount()) {
                     return null;
                 }
-                return (Container) getItem(position);
+                return getItem(position);
             }
 
             @Override
@@ -9132,6 +9144,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
+        @Override
         public void run() {
             final ListView listView = (ListView) LayoutInflater.from(mContext)
                     .inflate(com.android.internal.R.layout.select_dialog, null);
@@ -9142,6 +9155,7 @@ public class WebView extends AbsoluteLayout
 
             if (mMultiple) {
                 b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mWebViewCore.sendMessage(
                                 EventHub.LISTBOX_CHOICES,
@@ -9150,6 +9164,7 @@ public class WebView extends AbsoluteLayout
                     }});
                 b.setNegativeButton(android.R.string.cancel,
                         new DialogInterface.OnClickListener() {
+                    @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mWebViewCore.sendMessage(
                                 EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
@@ -9173,6 +9188,7 @@ public class WebView extends AbsoluteLayout
                 }
             } else {
                 listView.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
                     public void onItemClick(AdapterView<?> parent, View v,
                             int position, long id) {
                         // Rather than sending the message right away, send it
@@ -9193,6 +9209,7 @@ public class WebView extends AbsoluteLayout
                 }
             }
             mListBoxDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
                 public void onCancel(DialogInterface dialog) {
                     mWebViewCore.sendMessage(
                                 EventHub.SINGLE_LISTBOX_CHOICE, -2, 0);
