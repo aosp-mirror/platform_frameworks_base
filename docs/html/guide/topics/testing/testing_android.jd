@@ -318,7 +318,7 @@ parent.link=index.html
     A useful general test case class, especially if you are
     just starting out with Android testing, is {@link android.test.AndroidTestCase}. It extends
     both {@link junit.framework.TestCase} and {@link junit.framework.Assert}. It provides the
-    JUnit-standard <code>setUp()</code> and <code>tearDown()</code> methods, as well as well as
+    JUnit-standard <code>setUp()</code> and <code>tearDown()</code> methods, as well as
     all of JUnit's Assert methods. In addition, it provides methods for testing permissions, and a
     method that guards against memory leaks by clearing out certain class references.
 </p>
@@ -401,7 +401,7 @@ parent.link=index.html
     Mock objects isolate tests from a running system by stubbing out or overriding
     normal operations. For example, a {@link android.test.mock.MockContentResolver}
     replaces the normal resolver framework with its own local framework, which is isolated
-    from the rest of the system. MockContentResolver also also stubs out the
+    from the rest of the system. MockContentResolver also stubs out the
     {@link android.content.ContentResolver#notifyChange(Uri, ContentObserver, boolean)} method
     so that observer objects outside the test environment are not accidentally triggered.
 </p>
