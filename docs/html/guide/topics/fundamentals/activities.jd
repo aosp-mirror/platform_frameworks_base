@@ -19,9 +19,10 @@ page.title=Activities
   </li>
   <li><a href="#StartingAnActivity">Starting an Activity</a>
     <ol>
-      <li><a href="#StartingAnActivityForResult">Starting an Activity for a Result</a></li>
+      <li><a href="#StartingAnActivityForResult">Starting an activity for a result</a></li>
     </ol>
   </li>
+  <li><a href="#ShuttingDown">Shutting Down an Activity</a></li>
   <li><a href="#Lifecycle">Managing the Activity Lifecycle</a>
     <ol>
       <li><a href="#ImplementingLifecycleCallbacks">Implementing the lifecycle callbacks</a></li>
@@ -612,16 +613,8 @@ that
 when an activity is paused or stopped, the state of the activity is retained. This is true because
 the {@link android.app.Activity} object is still held in memory when it is paused or
 stopped&mdash;all information about its members and current state is still alive. Thus, any changes
-the user made within the activity are retained in memory, so that when the activity returns to the
+the user made within the activity are retained so that when the activity returns to the
 foreground (when it "resumes"), those changes are still there.</p>
-
-<div class="figure" style="width:615px">
-<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> The two ways in which an activity returns to user
-focus with its state intact: either the activity is stopped, then resumed and the activity state
-remains intact (left), or the activity is destroyed, then recreated and the activity must restore
-the previous activity state (right).</p>
-</div>
 
 <p>However, when the system destroys an activity in order to recover memory, the {@link
 android.app.Activity} object is destroyed, so the system cannot simply resume it with its state
@@ -630,26 +623,35 @@ navigates back to it. Yet, the user is unaware
 that the system destroyed the activity and recreated it and, thus, probably
 expects the activity to be exactly as it was. In this situation, you can ensure that
 important information about the activity state is preserved by implementing an additional
-callback method that allows you to save information about the state of your activity and then
-restore it when the the system recreates the activity.</p>
+callback method that allows you to save information about the state of your activity: {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
 
-<p>The callback method in which you can save information about the current state of your activity is
-{@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}. The system calls this method
-before making the activity vulnerable to being destroyed and passes it
-a {@link android.os.Bundle} object. The {@link android.os.Bundle} is where you can store 
+<p>The system calls {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+before making the activity vulnerable to destruction. The system passes this method
+a {@link android.os.Bundle} in which you can save 
 state information about the activity as name-value pairs, using methods such as {@link
-android.os.Bundle#putString putString()}. Then, if the system kills your activity's
-process and the user navigates back to your activity, the system passes the {@link
-android.os.Bundle} to {@link android.app.Activity#onCreate onCreate()} so you can restore the
-activity state you saved during {@link android.app.Activity#onSaveInstanceState
-onSaveInstanceState()}. If there is no state information to restore, then the {@link
-android.os.Bundle} passed to {@link android.app.Activity#onCreate onCreate()} is null.</p>
+android.os.Bundle#putString putString()} and {@link
+android.os.Bundle#putInt putInt()}. Then, if the system kills your application
+process and the user navigates back to your activity, the system recreates the activity and passes
+the {@link android.os.Bundle} to both {@link android.app.Activity#onCreate onCreate()} and {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Using either of these
+methods, you can extract your saved state from the {@link android.os.Bundle} and restore the
+activity state. If there is no state information to restore, then the {@link
+android.os.Bundle} passed to you is null (which is the case when the activity is created for
+the first time).</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The two ways in which an activity returns to user
+focus with its state intact: either the activity is destroyed, then recreated and the activity must restore
+the previously saved state, or the activity is stopped, then resumed and the activity state
+remains intact.</p>
 
 <p class="note"><strong>Note:</strong> There's no guarantee that {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()} will be called before your
 activity is destroyed, because there are cases in which it won't be necessary to save the state
 (such as when the user leaves your activity using the BACK key, because the user is explicitly
-closing the activity). If the method is called, it is always called before {@link
+closing the activity). If the system calls {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}, it does so before {@link
 android.app.Activity#onStop onStop()} and possibly before {@link android.app.Activity#onPause
 onPause()}.</p>
 
@@ -657,17 +659,17 @@ onPause()}.</p>
 android.app.Activity#onSaveInstanceState onSaveInstanceState()}, some of the activity state is
 restored by the {@link android.app.Activity} class's default implementation of {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()}. Specifically, the default
-implementation calls {@link
-android.view.View#onSaveInstanceState onSaveInstanceState()} for every {@link android.view.View}
-in the layout, which allows each view to provide information about itself
+implementation calls the corresponding {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} method for every {@link
+android.view.View} in the layout, which allows each view to provide information about itself
 that should be saved. Almost every widget in the Android framework implements this method as
 appropriate, such that any visible changes to the UI are automatically saved and restored when your
 activity is recreated. For example, the {@link android.widget.EditText} widget saves any text
 entered by the user and the {@link android.widget.CheckBox} widget saves whether it's checked or
 not. The only work required by you is to provide a unique ID (with the <a
 href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>
-attribute) for each widget you want to save its state. If a widget does not have an ID, then it
-cannot save its state.</p>
+attribute) for each widget you want to save its state. If a widget does not have an ID, then the
+system cannot save its state.</p>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
@@ -689,7 +691,9 @@ restored, by default).</p>
 android.app.Activity#onSaveInstanceState onSaveInstanceState()} helps save the state of the UI, if
 you override the method in order to save additional state information, you should always call the
 superclass implementation of {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
-before doing any work.</p>
+before doing any work. Likewise, you should also call the supercall implementation of {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} if you override it, so the
+default implementation can restore view states.</p>
 
 <p class="note"><strong>Note:</strong> Because {@link android.app.Activity#onSaveInstanceState
 onSaveInstanceState()} is not guaranteed
@@ -701,7 +705,7 @@ to a database) when the user leaves the activity.</p>
 <p>A good way to test your application's ability to restore its state is to simply rotate the
 device so that the screen orientation changes. When the screen orientation changes, the system
 destroys and recreates the activity in order to apply alternative resources that might be available
-for the new orientation. For this reason alone, it's very important that your activity
+for the new screen configuration. For this reason alone, it's very important that your activity
 completely restores its state when it is recreated, because users regularly rotate the screen while
 using applications.</p>
 
@@ -709,22 +713,25 @@ using applications.</p>
 <h3 id="ConfigurationChanges">Handling configuration changes</h3>
 
 <p>Some device configurations can change during runtime (such as screen orientation, keyboard
-availability, and language). When such a change occurs, Android restarts the running Activity
-({@link android.app.Activity#onDestroy} is called, followed immediately by {@link
-android.app.Activity#onCreate onCreate()}). The restart behavior is
+availability, and language). When such a change occurs, Android recreates the running activity
+(the system calls {@link android.app.Activity#onDestroy}, then immediately calls {@link
+android.app.Activity#onCreate onCreate()}). This behavior is
 designed to help your application adapt to new configurations by automatically reloading your
-application with alternative resources that you've provided. If you design your activity to
-properly handle this event, it will be more resilient to unexpected events in the activity
-lifecycle.</p>
+application with alternative resources that you've provided (such as different layouts for
+different screen orientations and sizes).</p>
 
-<p>The best way to handle a configuration change, such as a change in the screen orientation, is
-  to simply preserve the state of your application using {@link
+<p>If you properly design your activity to handle a restart due to a screen orientation change and
+restore the activity state as described above, your application will be more resilient to other
+unexpected events in the activity lifecycle.</p>
+
+<p>The best way to handle such a restart is
+  to save and restore the state of your activity using {@link
   android.app.Activity#onSaveInstanceState onSaveInstanceState()} and {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} (or {@link
 android.app.Activity#onCreate onCreate()}), as discussed in the previous section.</p>
 
-<p>For a detailed discussion about configuration changes that happen at runtime and how you should
-handle them, read <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling
+<p>For more information about configuration changes that happen at runtime and how you can handle
+them, read the guide to <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling
 Runtime Changes</a>.</p>
 
 
