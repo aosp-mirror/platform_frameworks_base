@@ -383,7 +383,7 @@ public final class WebViewCore {
                 currentQuota, estimatedSize, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
                         public void updateQuota(long quota) {
-                            nativeSetNewStorageLimit(quota);
+                            nativeSetNewStorageLimit(mNativeClass, quota);
                         }
                 });
     }
@@ -397,7 +397,7 @@ public final class WebViewCore {
         mCallbackProxy.onReachedMaxAppCacheSize(spaceNeeded, getUsedQuota(),
                 new WebStorage.QuotaUpdater() {
                     public void updateQuota(long quota) {
-                        nativeSetNewStorageLimit(quota);
+                        nativeSetNewStorageLimit(mNativeClass, quota);
                     }
                 });
     }
@@ -501,7 +501,7 @@ public final class WebViewCore {
      * Clear the picture set. To be called only on the WebCore thread.
      */
     /* package */ void clearContent() {
-        nativeClearContent();
+        nativeClearContent(mNativeClass);
     }
 
     //-------------------------------------------------------------------------
@@ -513,15 +513,16 @@ public final class WebViewCore {
     /**
      * Empty the picture set.
      */
-    private native void nativeClearContent();
+    private native void nativeClearContent(int nativeClass);
 
-    private native void nativeContentInvalidateAll();
+    private native void nativeContentInvalidateAll(int nativeClass);
 
     /**
      * Redraw a portion of the picture set. The Point wh returns the
      * width and height of the overall picture.
      */
-    private native int nativeRecordContent(Region invalRegion, Point wh);
+    private native int nativeRecordContent(int nativeClass, Region invalRegion,
+            Point wh);
 
     /**
      * Update the layers' content
@@ -533,25 +534,27 @@ public final class WebViewCore {
      */
     private native void nativeNotifyAnimationStarted(int nativeClass);
 
-    private native boolean nativeFocusBoundsChanged();
+    private native boolean nativeFocusBoundsChanged(int nativeClass);
 
     /**
      * Splits slow parts of the picture set. Called from the webkit thread after
      * WebView.nativeDraw() returns content to be split.
      */
-    private native void nativeSplitContent(int content);
+    private native void nativeSplitContent(int nativeClass, int content);
 
-    private native boolean nativeKey(int keyCode, int unichar,
-            int repeatCount, boolean isShift, boolean isAlt, boolean isSym,
-            boolean isDown);
+    private native boolean nativeKey(int nativeClass, int keyCode,
+            int unichar, int repeatCount, boolean isShift, boolean isAlt,
+            boolean isSym, boolean isDown);
 
-    private native void nativeClick(int framePtr, int nodePtr, boolean fake);
+    private native void nativeClick(int nativeClass, int framePtr, int nodePtr,
+            boolean fake);
 
-    private native void nativeSendListBoxChoices(boolean[] choices, int size);
+    private native void nativeSendListBoxChoices(int nativeClass,
+            boolean[] choices, int size);
 
-    private native void nativeSendListBoxChoice(int choice);
+    private native void nativeSendListBoxChoice(int nativeClass, int choice);
 
-    private native void nativeCloseIdleConnections();
+    private native void nativeCloseIdleConnections(int nativeClass);
 
     /*  Tell webkit what its width and height are, for the purposes
         of layout/line-breaking. These coordinates are in document space,
@@ -561,75 +564,84 @@ public final class WebViewCore {
         fixed size, textWrapWidth can be different from width with zooming.
         should this be called nativeSetViewPortSize?
     */
-    private native void nativeSetSize(int width, int height, int textWrapWidth,
-            float scale, int screenWidth, int screenHeight, int anchorX,
-            int anchorY, boolean ignoreHeight);
+    private native void nativeSetSize(int nativeClass, int width, int height,
+            int textWrapWidth, float scale, int screenWidth, int screenHeight,
+            int anchorX, int anchorY, boolean ignoreHeight);
 
-    private native int nativeGetContentMinPrefWidth();
+    private native int nativeGetContentMinPrefWidth(int nativeClass);
 
     // Start: functions that deal with text editing
     private native void nativeReplaceTextfieldText(
-            int oldStart, int oldEnd, String replace, int newStart, int newEnd,
-            int textGeneration);
+            int nativeClass, int oldStart, int oldEnd, String replace,
+            int newStart, int newEnd, int textGeneration);
 
-    private native void passToJs(int gen,
-            String currentText, int keyCode, int keyValue, boolean down,
-            boolean cap, boolean fn, boolean sym);
+    private native void passToJs(int nativeClass,
+            int gen, String currentText, int keyCode, int keyValue,
+            boolean down, boolean cap, boolean fn, boolean sym);
 
-    private native void nativeSetFocusControllerActive(boolean active);
+    private native void nativeSetFocusControllerActive(int nativeClass,
+            boolean active);
 
-    private native void nativeSaveDocumentState(int frame);
+    private native void nativeSaveDocumentState(int nativeClass, int frame);
 
-    private native void nativeMoveFocus(int framePtr, int nodePointer);
-    private native void nativeMoveMouse(int framePtr, int x, int y);
+    private native void nativeMoveFocus(int nativeClass, int framePtr,
+            int nodePointer);
+    private native void nativeMoveMouse(int nativeClass, int framePtr, int x,
+            int y);
 
-    private native void nativeMoveMouseIfLatest(int moveGeneration,
-            int framePtr, int x, int y);
+    private native void nativeMoveMouseIfLatest(int nativeClass,
+            int moveGeneration, int framePtr, int x, int y);
 
-    private native String nativeRetrieveHref(int x, int y);
-    private native String nativeRetrieveAnchorText(int x, int y);
-    private native String nativeRetrieveImageSource(int x, int y);
-    private native void nativeStopPaintingCaret();
-    private native void nativeTouchUp(int touchGeneration,
-            int framePtr, int nodePtr, int x, int y);
+    private native String nativeRetrieveHref(int nativeClass, int x, int y);
+    private native String nativeRetrieveAnchorText(int nativeClass,
+            int x, int y);
+    private native String nativeRetrieveImageSource(int nativeClass,
+            int x, int y);
+    private native void nativeStopPaintingCaret(int nativeClass);
+    private native void nativeTouchUp(int nativeClass,
+            int touchGeneration, int framePtr, int nodePtr, int x, int y);
 
-    private native boolean nativeHandleTouchEvent(int action, int[] idArray,
-            int[] xArray, int[] yArray, int count, int actionIndex, int metaState);
+    private native boolean nativeHandleTouchEvent(int nativeClass, int action,
+            int[] idArray, int[] xArray, int[] yArray, int count,
+            int actionIndex, int metaState);
 
-    private native void nativeUpdateFrameCache();
+    private native void nativeUpdateFrameCache(int nativeClass);
 
-    private native void nativeSetBackgroundColor(int color);
+    private native void nativeSetBackgroundColor(int nativeClass, int color);
 
-    private native void nativeDumpDomTree(boolean useFile);
+    private native void nativeDumpDomTree(int nativeClass, boolean useFile);
 
-    private native void nativeDumpRenderTree(boolean useFile);
+    private native void nativeDumpRenderTree(int nativeClass, boolean useFile);
 
-    private native void nativeDumpNavTree();
+    private native void nativeDumpNavTree(int nativeClass);
 
-    private native void nativeSetJsFlags(String flags);
+    private native void nativeSetJsFlags(int nativeClass, String flags);
 
     /**
      *  Delete text from start to end in the focused textfield. If there is no
      *  focus, or if start == end, silently fail.  If start and end are out of
      *  order, swap them.
-     *  @param  start   Beginning of selection to delete.
-     *  @param  end     End of selection to delete.
-     *  @param  textGeneration Text generation number when delete was pressed.
+     * @param  nativeClass Pointer to the C++ WebViewCore object mNativeClass
+     * @param  start   Beginning of selection to delete.
+     * @param  end     End of selection to delete.
+     * @param  textGeneration Text generation number when delete was pressed.
      */
-    private native void nativeDeleteSelection(int start, int end,
-            int textGeneration);
+    private native void nativeDeleteSelection(int nativeClass, int start,
+            int end, int textGeneration);
 
     /**
      *  Set the selection to (start, end) in the focused textfield. If start and
      *  end are out of order, swap them.
-     *  @param  start   Beginning of selection.
-     *  @param  end     End of selection.
+     * @param  nativeClass Pointer to the C++ WebViewCore object mNativeClass
+     * @param  start   Beginning of selection.
+     * @param  end     End of selection.
      */
-    private native void nativeSetSelection(int start, int end);
+    private native void nativeSetSelection(int nativeClass, int start, int end);
 
     // Register a scheme to be treated as local scheme so that it can access
     // local asset files for resources
-    private native void nativeRegisterURLSchemeAsLocal(String scheme);
+    private native void nativeRegisterURLSchemeAsLocal(int nativeClass,
+            String scheme);
 
     /*
      * Inform webcore that the user has decided whether to allow or deny new
@@ -637,34 +649,39 @@ public final class WebViewCore {
      * the main thread should wake up now.
      * @param limit Is the new quota for an origin or new app cache max size.
      */
-    private native void nativeSetNewStorageLimit(long limit);
+    private native void nativeSetNewStorageLimit(int nativeClass, long limit);
 
     /**
      * Provide WebCore with a Geolocation permission state for the specified
      * origin.
+     * @param nativeClass Pointer to the C++ WebViewCore object mNativeClass
      * @param origin The origin for which Geolocation permissions are provided.
      * @param allow Whether Geolocation permissions are allowed.
      * @param remember Whether this decision should be remembered beyond the
      *     life of the current page.
      */
-    private native void nativeGeolocationPermissionsProvide(String origin, boolean allow, boolean remember);
+    private native void nativeGeolocationPermissionsProvide(int nativeClass,
+            String origin, boolean allow, boolean remember);
 
     /**
      * Provide WebCore with the previously visted links from the history database
+     * @param nativeClass TODO
      */
-    private native void nativeProvideVisitedHistory(String[] history);
+    private native void nativeProvideVisitedHistory(int nativeClass,
+            String[] history);
 
     /**
      * Modifies the current selection.
      *
      * Note: Accessibility support.
-     *
+     * @param nativeClass Pointer to the C++ WebViewCore object mNativeClass
      * @param direction The direction in which to alter the selection.
      * @param granularity The granularity of the selection modification.
      *
      * @return The selection string.
      */
-    private native String nativeModifySelection(int direction, int granularity);
+    private native String nativeModifySelection(int nativeClass, int direction,
+            int granularity);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
@@ -1128,14 +1145,14 @@ public final class WebViewCore {
                             break;
 
                         case REVEAL_SELECTION:
-                            nativeRevealSelection();
+                            nativeRevealSelection(mNativeClass);
                             break;
 
                         case REQUEST_LABEL:
                             if (mWebView != null) {
                                 int nodePointer = msg.arg2;
-                                String label = nativeRequestLabel(msg.arg1,
-                                        nodePointer);
+                                String label = nativeRequestLabel(mNativeClass,
+                                        msg.arg1, nodePointer);
                                 if (label != null && label.length() > 0) {
                                     Message.obtain(mWebView.mPrivateHandler,
                                             WebView.RETURN_LABEL, nodePointer,
@@ -1145,7 +1162,7 @@ public final class WebViewCore {
                             break;
 
                         case UPDATE_FRAME_CACHE_IF_LOADING:
-                            nativeUpdateFrameCacheIfLoading();
+                            nativeUpdateFrameCacheIfLoading(mNativeClass);
                             break;
 
                         case SCROLL_TEXT_INPUT:
@@ -1155,7 +1172,7 @@ public final class WebViewCore {
                             } else {
                                 xPercent = ((Float) msg.obj).floatValue();
                             }
-                            nativeScrollFocusedTextInput(xPercent, msg.arg2);
+                            nativeScrollFocusedTextInput(mNativeClass, xPercent, msg.arg2);
                             break;
 
                         case LOAD_URL: {
@@ -1190,7 +1207,8 @@ public final class WebViewCore {
                                             !scheme.startsWith("ftp") &&
                                             !scheme.startsWith("about") &&
                                             !scheme.startsWith("javascript")) {
-                                        nativeRegisterURLSchemeAsLocal(scheme);
+                                        nativeRegisterURLSchemeAsLocal(mNativeClass,
+                                                scheme);
                                     }
                                 }
                             }
@@ -1199,7 +1217,7 @@ public final class WebViewCore {
                                     loadParams.mMimeType,
                                     loadParams.mEncoding,
                                     loadParams.mHistoryUrl);
-                            nativeContentInvalidateAll();
+                            nativeContentInvalidateAll(mNativeClass);
                             break;
 
                         case STOP_LOADING:
@@ -1228,11 +1246,11 @@ public final class WebViewCore {
                             break;
 
                         case FAKE_CLICK:
-                            nativeClick(msg.arg1, msg.arg2, true);
+                            nativeClick(mNativeClass, msg.arg1, msg.arg2, true);
                             break;
 
                         case CLICK:
-                            nativeClick(msg.arg1, msg.arg2, false);
+                            nativeClick(mNativeClass, msg.arg1, msg.arg2, false);
                             break;
 
                         case VIEW_SIZE_CHANGED: {
@@ -1243,14 +1261,14 @@ public final class WebViewCore {
                             // note: these are in document coordinates
                             // (inv-zoom)
                             Point pt = (Point) msg.obj;
-                            nativeSetScrollOffset(msg.arg1, msg.arg2 == 1,
-                                    pt.x, pt.y);
+                            nativeSetScrollOffset(mNativeClass, msg.arg1,
+                                    msg.arg2 == 1, pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
                             Rect r = (Rect) msg.obj;
-                            nativeSetGlobalBounds(r.left, r.top, r.width(),
-                                r.height());
+                            nativeSetGlobalBounds(mNativeClass, r.left, r.top,
+                                r.width(), r.height());
                             break;
 
                         case GO_BACK_FORWARD:
@@ -1279,7 +1297,7 @@ public final class WebViewCore {
                                 WebViewWorker.getHandler().sendEmptyMessage(
                                         WebViewWorker.MSG_PAUSE_CACHE_TRANSACTION);
                             } else {
-                                nativeCloseIdleConnections();
+                                nativeCloseIdleConnections(mNativeClass);
                             }
                             break;
 
@@ -1293,16 +1311,16 @@ public final class WebViewCore {
                             break;
 
                         case ON_PAUSE:
-                            nativePause();
+                            nativePause(mNativeClass);
                             break;
 
                         case ON_RESUME:
-                            nativeResume();
+                            nativeResume(mNativeClass);
                             break;
 
                         case FREE_MEMORY:
                             clearCache(false);
-                            nativeFreeMemory();
+                            nativeFreeMemory(mNativeClass);
                             break;
 
                         case SET_NETWORK_STATE:
@@ -1335,9 +1353,9 @@ public final class WebViewCore {
 
                         case REPLACE_TEXT:
                             ReplaceTextData rep = (ReplaceTextData) msg.obj;
-                            nativeReplaceTextfieldText(msg.arg1, msg.arg2,
-                                    rep.mReplace, rep.mNewStart, rep.mNewEnd,
-                                    rep.mTextGeneration);
+                            nativeReplaceTextfieldText(mNativeClass, msg.arg1,
+                                    msg.arg2, rep.mReplace, rep.mNewStart,
+                                    rep.mNewEnd, rep.mTextGeneration);
                             break;
 
                         case PASS_TO_JS: {
@@ -1346,19 +1364,19 @@ public final class WebViewCore {
                             int keyCode = evt.getKeyCode();
                             int keyValue = evt.getUnicodeChar();
                             int generation = msg.arg1;
-                            passToJs(generation,
+                            passToJs(mNativeClass,
+                                    generation,
                                     jsData.mCurrentText,
                                     keyCode,
                                     keyValue,
-                                    evt.isDown(),
-                                    evt.isShiftPressed(), evt.isAltPressed(),
-                                    evt.isSymPressed());
+                                    evt.isDown(), evt.isShiftPressed(),
+                                    evt.isAltPressed(), evt.isSymPressed());
                             break;
                         }
 
                         case SAVE_DOCUMENT_STATE: {
                             CursorData cDat = (CursorData) msg.obj;
-                            nativeSaveDocumentState(cDat.mFrame);
+                            nativeSaveDocumentState(mNativeClass, cDat.mFrame);
                             break;
                         }
 
@@ -1367,7 +1385,7 @@ public final class WebViewCore {
                                 // FIXME: This will not work for connections currently in use, as
                                 // they cache the certificate responses. See http://b/5324235.
                                 SslCertLookupTable.getInstance().clear();
-                                nativeCloseIdleConnections();
+                                nativeCloseIdleConnections(mNativeClass);
                             } else {
                                 Network.getInstance(mContext).clearUserSslPrefTable();
                             }
@@ -1376,10 +1394,12 @@ public final class WebViewCore {
                         case TOUCH_UP:
                             TouchUpData touchUpData = (TouchUpData) msg.obj;
                             if (touchUpData.mNativeLayer != 0) {
-                                nativeScrollLayer(touchUpData.mNativeLayer,
+                                nativeScrollLayer(mNativeClass,
+                                        touchUpData.mNativeLayer,
                                         touchUpData.mNativeLayerRect);
                             }
-                            nativeTouchUp(touchUpData.mMoveGeneration,
+                            nativeTouchUp(mNativeClass,
+                                    touchUpData.mMoveGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
                                     touchUpData.mX, touchUpData.mY);
                             break;
@@ -1394,11 +1414,13 @@ public final class WebViewCore {
                                 yArray[c] = ted.mPoints[c].y;
                             }
                             if (ted.mNativeLayer != 0) {
-                                nativeScrollLayer(ted.mNativeLayer,
-                                        ted.mNativeLayerRect);
+                                nativeScrollLayer(mNativeClass,
+                                        ted.mNativeLayer, ted.mNativeLayerRect);
                             }
-                            ted.mNativeResult = nativeHandleTouchEvent(ted.mAction, ted.mIds,
-                                    xArray, yArray, count, ted.mActionIndex, ted.mMetaState);
+                            ted.mNativeResult = nativeHandleTouchEvent(
+                                    mNativeClass, ted.mAction, ted.mIds, xArray,
+                                    yArray, count, ted.mActionIndex,
+                                    ted.mMetaState);
                             Message.obtain(
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID,
@@ -1409,7 +1431,7 @@ public final class WebViewCore {
                         }
 
                         case SET_ACTIVE:
-                            nativeSetFocusControllerActive(msg.arg1 == 1);
+                            nativeSetFocusControllerActive(mNativeClass, msg.arg1 == 1);
                             break;
 
                         case ADD_JS_INTERFACE:
@@ -1435,39 +1457,39 @@ public final class WebViewCore {
 
                         case SET_MOVE_FOCUS:
                             CursorData focusData = (CursorData) msg.obj;
-                            nativeMoveFocus(focusData.mFrame, focusData.mNode);
+                            nativeMoveFocus(mNativeClass, focusData.mFrame, focusData.mNode);
                             break;
 
                         case SET_MOVE_MOUSE:
                             CursorData cursorData = (CursorData) msg.obj;
-                            nativeMoveMouse(cursorData.mFrame,
-                                     cursorData.mX, cursorData.mY);
+                            nativeMoveMouse(mNativeClass,
+                                     cursorData.mFrame, cursorData.mX, cursorData.mY);
                             break;
 
                         case SET_MOVE_MOUSE_IF_LATEST:
                             CursorData cData = (CursorData) msg.obj;
-                            nativeMoveMouseIfLatest(cData.mMoveGeneration,
-                                    cData.mFrame,
-                                    cData.mX, cData.mY);
+                            nativeMoveMouseIfLatest(mNativeClass,
+                                    cData.mMoveGeneration,
+                                    cData.mFrame, cData.mX, cData.mY);
                             if (msg.arg1 == 1) {
-                                nativeStopPaintingCaret();
+                                nativeStopPaintingCaret(mNativeClass);
                             }
                             break;
 
                         case REQUEST_CURSOR_HREF: {
                             Message hrefMsg = (Message) msg.obj;
                             hrefMsg.getData().putString("url",
-                                    nativeRetrieveHref(msg.arg1, msg.arg2));
+                                    nativeRetrieveHref(mNativeClass, msg.arg1, msg.arg2));
                             hrefMsg.getData().putString("title",
-                                    nativeRetrieveAnchorText(msg.arg1, msg.arg2));
+                                    nativeRetrieveAnchorText(mNativeClass, msg.arg1, msg.arg2));
                             hrefMsg.getData().putString("src",
-                                    nativeRetrieveImageSource(msg.arg1, msg.arg2));
+                                    nativeRetrieveImageSource(mNativeClass, msg.arg1, msg.arg2));
                             hrefMsg.sendToTarget();
                             break;
                         }
 
                         case UPDATE_CACHE_AND_TEXT_ENTRY:
-                            nativeUpdateFrameCache();
+                            nativeUpdateFrameCache(mNativeClass);
                             // FIXME: this should provide a minimal rectangle
                             if (mWebView != null) {
                                 mWebView.postInvalidate();
@@ -1485,17 +1507,18 @@ public final class WebViewCore {
                         case DELETE_SELECTION:
                             TextSelectionData deleteSelectionData
                                     = (TextSelectionData) msg.obj;
-                            nativeDeleteSelection(deleteSelectionData.mStart,
-                                    deleteSelectionData.mEnd, msg.arg1);
+                            nativeDeleteSelection(mNativeClass,
+                                    deleteSelectionData.mStart, deleteSelectionData.mEnd, msg.arg1);
                             break;
 
                         case SET_SELECTION:
-                            nativeSetSelection(msg.arg1, msg.arg2);
+                            nativeSetSelection(mNativeClass, msg.arg1, msg.arg2);
                             break;
 
                         case MODIFY_SELECTION:
-                            String modifiedSelectionString = nativeModifySelection(msg.arg1,
-                                    msg.arg2);
+                            String modifiedSelectionString = 
+                                nativeModifySelection(mNativeClass, msg.arg1,
+                                        msg.arg2);
                             mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
                                     modifiedSelectionString).sendToTarget();
                             break;
@@ -1508,36 +1531,36 @@ public final class WebViewCore {
                             for (int c = 0; c < choicesSize; c++) {
                                 choicesArray[c] = choices.get(c);
                             }
-                            nativeSendListBoxChoices(choicesArray,
-                                    choicesSize);
+                            nativeSendListBoxChoices(mNativeClass,
+                                    choicesArray, choicesSize);
                             break;
 
                         case SINGLE_LISTBOX_CHOICE:
-                            nativeSendListBoxChoice(msg.arg1);
+                            nativeSendListBoxChoice(mNativeClass, msg.arg1);
                             break;
 
                         case SET_BACKGROUND_COLOR:
-                            nativeSetBackgroundColor(msg.arg1);
+                            nativeSetBackgroundColor(mNativeClass, msg.arg1);
                             break;
 
                         case DUMP_DOMTREE:
-                            nativeDumpDomTree(msg.arg1 == 1);
+                            nativeDumpDomTree(mNativeClass, msg.arg1 == 1);
                             break;
 
                         case DUMP_RENDERTREE:
-                            nativeDumpRenderTree(msg.arg1 == 1);
+                            nativeDumpRenderTree(mNativeClass, msg.arg1 == 1);
                             break;
 
                         case DUMP_NAVTREE:
-                            nativeDumpNavTree();
+                            nativeDumpNavTree(mNativeClass);
                             break;
 
                         case SET_JS_FLAGS:
-                            nativeSetJsFlags((String)msg.obj);
+                            nativeSetJsFlags(mNativeClass, (String)msg.obj);
                             break;
 
                         case CONTENT_INVALIDATE_ALL:
-                            nativeContentInvalidateAll();
+                            nativeContentInvalidateAll(mNativeClass);
                             break;
 
                         case SAVE_WEBARCHIVE:
@@ -1552,12 +1575,12 @@ public final class WebViewCore {
                         case GEOLOCATION_PERMISSIONS_PROVIDE:
                             GeolocationPermissionsData data =
                                     (GeolocationPermissionsData) msg.obj;
-                            nativeGeolocationPermissionsProvide(data.mOrigin,
-                                    data.mAllow, data.mRemember);
+                            nativeGeolocationPermissionsProvide(mNativeClass,
+                                    data.mOrigin, data.mAllow, data.mRemember);
                             break;
 
                         case SPLIT_PICTURE_SET:
-                            nativeSplitContent(msg.arg1);
+                            nativeSplitContent(mNativeClass, msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(
                                     WebView.REPLACE_BASE_CONTENT, msg.arg1, 0);
                             mSplitPictureIsScheduled = false;
@@ -1575,15 +1598,15 @@ public final class WebViewCore {
                             break;
 
                         case POPULATE_VISITED_LINKS:
-                            nativeProvideVisitedHistory((String[])msg.obj);
+                            nativeProvideVisitedHistory(mNativeClass, (String[])msg.obj);
                             break;
 
                         case VALID_NODE_BOUNDS: {
                             MotionUpData motionUpData = (MotionUpData) msg.obj;
                             if (!nativeValidNodeAndBounds(
-                                    motionUpData.mFrame, motionUpData.mNode,
-                                    motionUpData.mBounds)) {
-                                nativeUpdateFrameCache();
+                                    mNativeClass, motionUpData.mFrame,
+                                    motionUpData.mNode, motionUpData.mBounds)) {
+                                nativeUpdateFrameCache(mNativeClass);
                             }
                             Message message = mWebView.mPrivateHandler
                                     .obtainMessage(WebView.DO_MOTION_UP,
@@ -1594,11 +1617,11 @@ public final class WebViewCore {
                         }
 
                         case HIDE_FULLSCREEN:
-                            nativeFullScreenPluginHidden(msg.arg1);
+                            nativeFullScreenPluginHidden(mNativeClass, msg.arg1);
                             break;
 
                         case PLUGIN_SURFACE_READY:
-                            nativePluginSurfaceReady();
+                            nativePluginSurfaceReady(mNativeClass);
                             break;
 
                         case NOTIFY_ANIMATION_STARTED:
@@ -1617,11 +1640,11 @@ public final class WebViewCore {
                         case GET_TOUCH_HIGHLIGHT_RECTS:
                             TouchHighlightData d = (TouchHighlightData) msg.obj;
                             if (d.mNativeLayer != 0) {
-                                nativeScrollLayer(d.mNativeLayer,
-                                        d.mNativeLayerRect);
+                                nativeScrollLayer(mNativeClass,
+                                        d.mNativeLayer, d.mNativeLayerRect);
                             }
                             ArrayList<Rect> rects = nativeGetTouchHighlightRects
-                                    (d.mX, d.mY, d.mSlop);
+                                    (mNativeClass, d.mX, d.mY, d.mSlop);
                             mWebView.mPrivateHandler.obtainMessage(
                                     WebView.SET_TOUCH_HIGHLIGHT_RECTS, rects)
                                     .sendToTarget();
@@ -1632,7 +1655,7 @@ public final class WebViewCore {
                             break;
 
                         case AUTOFILL_FORM:
-                            nativeAutoFillForm(msg.arg1);
+                            nativeAutoFillForm(mNativeClass, msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(WebView.AUTOFILL_COMPLETE, null)
                                     .sendToTarget();
                             break;
@@ -1853,9 +1876,9 @@ public final class WebViewCore {
             unicodeChar = evt.getCharacters().codePointAt(0);
         }
 
-        if (!nativeKey(keyCode, unicodeChar, evt.getRepeatCount(), evt.isShiftPressed(),
-                evt.isAltPressed(), evt.isSymPressed(),
-                isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
+        if (!nativeKey(mNativeClass, keyCode, unicodeChar, evt.getRepeatCount(),
+                evt.isShiftPressed(), evt.isAltPressed(),
+                evt.isSymPressed(), isDown) && keyCode != KeyEvent.KEYCODE_ENTER) {
             if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                     && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
                 if (DebugFlags.WEB_VIEW_CORE) {
@@ -1901,9 +1924,9 @@ public final class WebViewCore {
             float ratio = (heightWidthRatio > 0) ? heightWidthRatio : (float) h / w;
             height = Math.round(ratio * width);
         }
-        nativeSetSize(width, height, textwrapWidth, scale, w,
-                data.mActualViewHeight > 0 ? data.mActualViewHeight : h,
-                data.mAnchorX, data.mAnchorY, data.mIgnoreHeight);
+        int screenHeight = data.mActualViewHeight > 0 ? data.mActualViewHeight : h;
+        nativeSetSize(mNativeClass, width, height, textwrapWidth, scale,
+                w, screenHeight, data.mAnchorX, data.mAnchorY, data.mIgnoreHeight);
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
         mCurrentViewWidth = w;
@@ -2039,7 +2062,8 @@ public final class WebViewCore {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
-        draw.mBaseLayer = nativeRecordContent(draw.mInvalRegion, draw.mContentSize);
+        draw.mBaseLayer = nativeRecordContent(mNativeClass, draw.mInvalRegion,
+                draw.mContentSize);
         if (draw.mBaseLayer == 0) {
             if (mWebView != null && !mWebView.isPaused()) {
                 if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort, resending draw message");
@@ -2055,14 +2079,14 @@ public final class WebViewCore {
 
     private void webkitDraw(DrawData draw) {
         if (mWebView != null) {
-            draw.mFocusSizeChanged = nativeFocusBoundsChanged();
+            draw.mFocusSizeChanged = nativeFocusBoundsChanged(mNativeClass);
             draw.mViewSize = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
                         mViewportWidth == -1 ? WebView.DEFAULT_VIEWPORT_WIDTH
                                 : (mViewportWidth == 0 ? mCurrentViewWidth
                                         : mViewportWidth),
-                        nativeGetContentMinPrefWidth());
+                        nativeGetContentMinPrefWidth(mNativeClass));
             }
             if (mInitialViewState != null) {
                 draw.mViewState = mInitialViewState;
@@ -2113,7 +2137,7 @@ public final class WebViewCore {
                     Log.w(LOGTAG, "Cannot pauseUpdatePicture, core destroyed or not initialized!");
                     return;
                 }
-                core.nativeSetIsPaused(true);
+                core.nativeSetIsPaused(core.mNativeClass, true);
                 core.mDrawIsPaused = true;
             }
         }
@@ -2131,7 +2155,7 @@ public final class WebViewCore {
                     Log.w(LOGTAG, "Cannot resumeUpdatePicture, core destroyed!");
                     return;
                 }
-                core.nativeSetIsPaused(false);
+                core.nativeSetIsPaused(core.mNativeClass, false);
                 core.mDrawIsPaused = false;
                 // always redraw on resume to reenable gif animations
                 core.mDrawIsScheduled = false;
@@ -2255,7 +2279,7 @@ public final class WebViewCore {
         return mWebView;
     }
 
-    private native void setViewportSettingsFromNative();
+    private native void setViewportSettingsFromNative(int nativeClass);
 
     // called by JNI
     private void didFirstLayout(boolean standardLoad) {
@@ -2300,7 +2324,7 @@ public final class WebViewCore {
             return;
         }
         // set the viewport settings from WebKit
-        setViewportSettingsFromNative();
+        setViewportSettingsFromNative(mNativeClass);
 
         // clamp initial scale
         if (mViewportInitialScale > 0) {
@@ -2614,18 +2638,22 @@ public final class WebViewCore {
                 WebView.FIND_AGAIN).sendToTarget();
     }
 
-    private native void nativeUpdateFrameCacheIfLoading();
-    private native void nativeRevealSelection();
-    private native String nativeRequestLabel(int framePtr, int nodePtr);
+    private native void nativeUpdateFrameCacheIfLoading(int nativeClass);
+    private native void nativeRevealSelection(int nativeClass);
+    private native String nativeRequestLabel(int nativeClass, int framePtr,
+            int nodePtr);
     /**
      * Scroll the focused textfield to (xPercent, y) in document space
      */
-    private native void nativeScrollFocusedTextInput(float xPercent, int y);
+    private native void nativeScrollFocusedTextInput(int nativeClass,
+            float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int gen, boolean sendScrollEvent, int dx, int dy);
+    private native void nativeSetScrollOffset(int nativeClass, int gen,
+            boolean sendScrollEvent, int dx, int dy);
 
-    private native void nativeSetGlobalBounds(int x, int y, int w, int h);
+    private native void nativeSetGlobalBounds(int nativeClass, int x, int y,
+            int w, int h);
 
     // called by JNI
     private void requestListBox(String[] array, int[] enabledArray,
@@ -2860,18 +2888,18 @@ public final class WebViewCore {
         return mDeviceOrientationService;
     }
 
-    private native void nativeSetIsPaused(boolean isPaused);
-    private native void nativePause();
-    private native void nativeResume();
-    private native void nativeFreeMemory();
-    private native void nativeFullScreenPluginHidden(int npp);
-    private native void nativePluginSurfaceReady();
-    private native boolean nativeValidNodeAndBounds(int frame, int node,
-            Rect bounds);
+    private native void nativeSetIsPaused(int nativeClass, boolean isPaused);
+    private native void nativePause(int nativeClass);
+    private native void nativeResume(int nativeClass);
+    private native void nativeFreeMemory(int nativeClass);
+    private native void nativeFullScreenPluginHidden(int nativeClass, int npp);
+    private native void nativePluginSurfaceReady(int nativeClass);
+    private native boolean nativeValidNodeAndBounds(int nativeClass, int frame,
+            int node, Rect bounds);
 
-    private native ArrayList<Rect> nativeGetTouchHighlightRects(int x, int y,
-            int slop);
+    private native ArrayList<Rect> nativeGetTouchHighlightRects(int nativeClass,
+            int x, int y, int slop);
 
-    private native void nativeAutoFillForm(int queryId);
-    private native void nativeScrollLayer(int layer, Rect rect);
+    private native void nativeAutoFillForm(int nativeClass, int queryId);
+    private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
 }
