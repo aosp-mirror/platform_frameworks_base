@@ -2020,6 +2020,39 @@ final class Settings {
         return false;
     }
 
+    static final void printFlags(PrintWriter pw, int val, Object[] spec) {
+        pw.print("[ ");
+        for (int i=0; i<spec.length; i+=2) {
+            int mask = (Integer)spec[i];
+            if ((val & mask) != 0) {
+                pw.print(spec[i+1]);
+                pw.print(" ");
+            }
+        }
+        pw.print("]");
+    }
+
+    static final Object[] FLAG_DUMP_SPEC = new Object[] {
+        ApplicationInfo.FLAG_SYSTEM, "SYSTEM",
+        ApplicationInfo.FLAG_DEBUGGABLE, "DEBUGGABLE",
+        ApplicationInfo.FLAG_HAS_CODE, "HAS_CODE",
+        ApplicationInfo.FLAG_PERSISTENT, "PERSISTENT",
+        ApplicationInfo.FLAG_FACTORY_TEST, "FACTORY_TEST",
+        ApplicationInfo.FLAG_ALLOW_TASK_REPARENTING, "ALLOW_TASK_REPARENTING",
+        ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA, "ALLOW_CLEAR_USER_DATA",
+        ApplicationInfo.FLAG_UPDATED_SYSTEM_APP, "UPDATED_SYSTEM_APP",
+        ApplicationInfo.FLAG_TEST_ONLY, "TEST_ONLY",
+        ApplicationInfo.FLAG_VM_SAFE_MODE, "VM_SAFE_MODE",
+        ApplicationInfo.FLAG_ALLOW_BACKUP, "ALLOW_BACKUP",
+        ApplicationInfo.FLAG_KILL_AFTER_RESTORE, "KILL_AFTER_RESTORE",
+        ApplicationInfo.FLAG_RESTORE_ANY_VERSION, "RESTORE_ANY_VERSION",
+        ApplicationInfo.FLAG_EXTERNAL_STORAGE, "EXTERNAL_STORAGE",
+        ApplicationInfo.FLAG_LARGE_HEAP, "LARGE_HEAP",
+        ApplicationInfo.FLAG_STOPPED, "STOPPED",
+        ApplicationInfo.FLAG_FORWARD_LOCK, "FORWARD_LOCK",
+        ApplicationInfo.FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
+    };
+
     void dumpPackagesLPr(PrintWriter pw, String packageName, DumpState dumpState) {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
@@ -2060,6 +2093,7 @@ final class Settings {
             pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
             pw.print("    versionCode="); pw.println(ps.versionCode);
             if (ps.pkg != null) {
+                pw.print("    flags="); printFlags(pw, ps.pkg.applicationInfo.flags, FLAG_DUMP_SPEC); pw.println();
                 pw.print("    versionName="); pw.println(ps.pkg.mVersionName);
                 pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                 pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
