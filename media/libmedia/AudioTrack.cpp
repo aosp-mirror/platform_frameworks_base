@@ -38,12 +38,10 @@
 #include <utils/Atomic.h>
 
 #include <cutils/bitops.h>
+#include <cutils/compiler.h>
 
 #include <system/audio.h>
 #include <system/audio_policy.h>
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -856,12 +854,12 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         goto start_loop_here;
         while (framesAvail == 0) {
             active = mActive;
-            if (UNLIKELY(!active)) {
+            if (CC_UNLIKELY(!active)) {
                 ALOGV("Not active and NO_MORE_BUFFERS");
                 cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
             }
-            if (UNLIKELY(!waitCount)) {
+            if (CC_UNLIKELY(!waitCount)) {
                 cblk->lock.unlock();
                 return WOULD_BLOCK;
             }
@@ -879,7 +877,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (cblk->flags & CBLK_INVALID_MSK) {
                 goto create_new_track;
             }
-            if (__builtin_expect(result!=NO_ERROR, false)) {
+            if (CC_UNLIKELY(result != NO_ERROR)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     // timing out when a loop has been set and we have already written upto loop end

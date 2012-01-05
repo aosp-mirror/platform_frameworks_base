@@ -28,6 +28,7 @@
 #include <utils/Log.h>
 
 #include <cutils/bitops.h>
+#include <cutils/compiler.h>
 
 #include <system/audio.h>
 
@@ -506,13 +507,13 @@ void AudioMixer::track__genericResample(track_t* t, int32_t* out, size_t outFram
         t->resampler->setVolume(UNITY_GAIN, UNITY_GAIN);
         memset(temp, 0, outFrameCount * MAX_NUM_CHANNELS * sizeof(int32_t));
         t->resampler->resample(temp, outFrameCount, t->bufferProvider);
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc)) {
             volumeRampStereo(t, out, outFrameCount, temp, aux);
         } else {
             volumeStereo(t, out, outFrameCount, temp, aux);
         }
     } else {
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1])) {
             t->resampler->setVolume(UNITY_GAIN, UNITY_GAIN);
             memset(temp, 0, outFrameCount * MAX_NUM_CHANNELS * sizeof(int32_t));
             t->resampler->resample(temp, outFrameCount, t->bufferProvider);
@@ -543,7 +544,7 @@ void AudioMixer::volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, i
     //       (vl + vlInc*frameCount)/65536.0f, frameCount);
 
     // ramp volume
-    if UNLIKELY(aux != NULL) {
+    if (CC_UNLIKELY(aux != NULL)) {
         int32_t va = t->prevAuxLevel;
         const int32_t vaInc = t->auxInc;
         int32_t l;
@@ -578,7 +579,7 @@ void AudioMixer::volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32
     const int16_t vl = t->volume[0];
     const int16_t vr = t->volume[1];
 
-    if UNLIKELY(aux != NULL) {
+    if (CC_UNLIKELY(aux != NULL)) {
         const int16_t va = (int16_t)t->auxLevel;
         do {
             int16_t l = (int16_t)(*temp++ >> 12);
@@ -605,11 +606,11 @@ void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount
 {
     int16_t const *in = static_cast<int16_t const *>(t->in);
 
-    if UNLIKELY(aux != NULL) {
+    if (CC_UNLIKELY(aux != NULL)) {
         int32_t l;
         int32_t r;
         // ramp gain
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc)) {
             int32_t vl = t->prevVolume[0];
             int32_t vr = t->prevVolume[1];
             int32_t va = t->prevAuxLevel;
@@ -654,7 +655,7 @@ void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount
         }
     } else {
         // ramp gain
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1])) {
             int32_t vl = t->prevVolume[0];
             int32_t vr = t->prevVolume[1];
             const int32_t vlInc = t->volumeInc[0];
@@ -695,9 +696,9 @@ void AudioMixer::track__16BitsMono(track_t* t, int32_t* out, size_t frameCount, 
 {
     int16_t const *in = static_cast<int16_t const *>(t->in);
 
-    if UNLIKELY(aux != NULL) {
+    if (CC_UNLIKELY(aux != NULL)) {
         // ramp gain
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1]|t->auxInc)) {
             int32_t vl = t->prevVolume[0];
             int32_t vr = t->prevVolume[1];
             int32_t va = t->prevAuxLevel;
@@ -740,7 +741,7 @@ void AudioMixer::track__16BitsMono(track_t* t, int32_t* out, size_t frameCount, 
         }
     } else {
         // ramp gain
-        if UNLIKELY(t->volumeInc[0]|t->volumeInc[1]) {
+        if (CC_UNLIKELY(t->volumeInc[0]|t->volumeInc[1])) {
             int32_t vl = t->prevVolume[0];
             int32_t vr = t->prevVolume[1];
             const int32_t vlInc = t->volumeInc[0];
@@ -793,7 +794,7 @@ void AudioMixer::process__nop(state_t* state)
             i = 31 - __builtin_clz(e2);
             e2 &= ~(1<<i);
             track_t& t2 = state->tracks[i];
-            if UNLIKELY(t2.mainBuffer != t1.mainBuffer) {
+            if (CC_UNLIKELY(t2.mainBuffer != t1.mainBuffer)) {
                 e1 &= ~(1<<i);
             }
         }
@@ -851,7 +852,7 @@ void AudioMixer::process__genericNoResampling(state_t* state)
             j = 31 - __builtin_clz(e2);
             e2 &= ~(1<<j);
             track_t& t2 = state->tracks[j];
-            if UNLIKELY(t2.mainBuffer != t1.mainBuffer) {
+            if (CC_UNLIKELY(t2.mainBuffer != t1.mainBuffer)) {
                 e1 &= ~(1<<j);
             }
         }
@@ -868,7 +869,7 @@ void AudioMixer::process__genericNoResampling(state_t* state)
                 track_t& t = state->tracks[i];
                 size_t outFrames = BLOCKSIZE;
                 int32_t *aux = NULL;
-                if UNLIKELY((t.needs & NEEDS_AUX__MASK) == NEEDS_AUX_ENABLED) {
+                if (CC_UNLIKELY((t.needs & NEEDS_AUX__MASK) == NEEDS_AUX_ENABLED)) {
                     aux = t.auxBuffer + numFrames;
                 }
                 while (outFrames) {
@@ -877,7 +878,7 @@ void AudioMixer::process__genericNoResampling(state_t* state)
                         (t.hook)(&t, outTemp + (BLOCKSIZE-outFrames)*MAX_NUM_CHANNELS, inFrames, state->resampleTemp, aux);
                         t.frameCount -= inFrames;
                         outFrames -= inFrames;
-                        if UNLIKELY(aux != NULL) {
+                        if (CC_UNLIKELY(aux != NULL)) {
                             aux += inFrames;
                         }
                     }
@@ -932,7 +933,7 @@ void AudioMixer::process__genericResampling(state_t* state)
             j = 31 - __builtin_clz(e2);
             e2 &= ~(1<<j);
             track_t& t2 = state->tracks[j];
-            if UNLIKELY(t2.mainBuffer != t1.mainBuffer) {
+            if (CC_UNLIKELY(t2.mainBuffer != t1.mainBuffer)) {
                 e1 &= ~(1<<j);
             }
         }
@@ -944,7 +945,7 @@ void AudioMixer::process__genericResampling(state_t* state)
             e1 &= ~(1<<i);
             track_t& t = state->tracks[i];
             int32_t *aux = NULL;
-            if UNLIKELY((t.needs & NEEDS_AUX__MASK) == NEEDS_AUX_ENABLED) {
+            if (CC_UNLIKELY((t.needs & NEEDS_AUX__MASK) == NEEDS_AUX_ENABLED)) {
                 aux = t.auxBuffer;
             }
 
@@ -965,7 +966,7 @@ void AudioMixer::process__genericResampling(state_t* state)
                     // been enabled for mixing.
                     if (t.in == NULL) break;
 
-                    if UNLIKELY(aux != NULL) {
+                    if (CC_UNLIKELY(aux != NULL)) {
                         aux += outFrames;
                     }
                     (t.hook)(&t, outTemp + outFrames*MAX_NUM_CHANNELS, t.buffer.frameCount, state->resampleTemp, aux);
@@ -1007,7 +1008,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
         }
         size_t outFrames = b.frameCount;
 
-        if (UNLIKELY(uint32_t(vl) > UNITY_GAIN || uint32_t(vr) > UNITY_GAIN)) {
+        if (CC_UNLIKELY(uint32_t(vl) > UNITY_GAIN || uint32_t(vr) > UNITY_GAIN)) {
             // volume is boosted, so we might need to clamp even though
             // we process only one track.
             do {

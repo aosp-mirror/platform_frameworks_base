@@ -404,14 +404,14 @@ bool SurfaceFlinger::threadLoop()
     waitForEvent();
 
     // check for transactions
-    if (UNLIKELY(mConsoleSignals)) {
+    if (CC_UNLIKELY(mConsoleSignals)) {
         handleConsoleEvents();
     }
 
     // if we're in a global transaction, don't do anything.
     const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
     uint32_t transactionFlags = peekTransactionFlags(mask);
-    if (UNLIKELY(transactionFlags)) {
+    if (CC_UNLIKELY(transactionFlags)) {
         handleTransaction(transactionFlags);
     }
 
@@ -423,13 +423,13 @@ bool SurfaceFlinger::threadLoop()
         return true;
     }
 
-    if (UNLIKELY(mHwWorkListDirty)) {
+    if (CC_UNLIKELY(mHwWorkListDirty)) {
         // build the h/w work list
         handleWorkList();
     }
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    if (LIKELY(hw.canDraw())) {
+    if (CC_LIKELY(hw.canDraw())) {
         // repaint the framebuffer (if needed)
 
         const int index = hw.getCurrentBufferIndex();
@@ -629,7 +629,7 @@ void SurfaceFlinger::computeVisibleRegions(
 
 
         // handle hidden surfaces by setting the visible region to empty
-        if (LIKELY(!(s.flags & ISurfaceComposer::eLayerHidden) && s.alpha)) {
+        if (CC_LIKELY(!(s.flags & ISurfaceComposer::eLayerHidden) && s.alpha)) {
             const bool translucent = !layer->isOpaque();
             const Rect bounds(layer->visibleBounds());
             visibleRegion.set(bounds);
@@ -814,7 +814,7 @@ void SurfaceFlinger::handleRepaint()
     // compute the invalid region
     mSwapRegion.orSelf(mDirtyRegion);
 
-    if (UNLIKELY(mDebugRegion)) {
+    if (CC_UNLIKELY(mDebugRegion)) {
         debugFlashRegions();
     }
 
@@ -968,7 +968,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
     HWComposer& hwc(hw.getHwComposer());
 
     const size_t fbLayerCount = hwc.getLayerCount(HWC_FRAMEBUFFER);
-    if (UNLIKELY(fbLayerCount && !mWormholeRegion.isEmpty())) {
+    if (CC_UNLIKELY(fbLayerCount && !mWormholeRegion.isEmpty())) {
         // should never happen unless the window manager has a bug
         // draw something...
         drawWormhole();
@@ -1053,7 +1053,7 @@ void SurfaceFlinger::drawWormhole() const
     const int32_t width = hw.getWidth();
     const int32_t height = hw.getHeight();
 
-    if (LIKELY(!mDebugBackground)) {
+    if (CC_LIKELY(!mDebugBackground)) {
         glClearColor(0,0,0,0);
         Region::const_iterator it = region.begin();
         Region::const_iterator const end = region.end();
@@ -1257,7 +1257,7 @@ void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
 int SurfaceFlinger::setOrientation(DisplayID dpy,
         int orientation, uint32_t flags)
 {
-    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
+    if (CC_UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
 
     Mutex::Autolock _l(mStateLock);
@@ -1356,7 +1356,7 @@ sp<Layer> SurfaceFlinger::createNormalSurface(
 
     sp<Layer> layer = new Layer(this, display, client);
     status_t err = layer->setBuffers(w, h, format, flags);
-    if (LIKELY(err != NO_ERROR)) {
+    if (CC_LIKELY(err != NO_ERROR)) {
         LOGE("createNormalSurfaceLocked() failed (%s)", strerror(-err));
         layer.clear();
     }
@@ -1676,7 +1676,7 @@ status_t SurfaceFlinger::onTransact(
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
         CHECK_INTERFACE(ISurfaceComposer, data, reply);
-        if (UNLIKELY(!PermissionCache::checkCallingPermission(sHardwareTest))) {
+        if (CC_UNLIKELY(!PermissionCache::checkCallingPermission(sHardwareTest))) {
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
             const int uid = ipc->getCallingUid();
@@ -2261,7 +2261,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     status_t result = PERMISSION_DENIED;
 
     // only one display supported for now
-    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
+    if (CC_UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
 
     if (!GLExtensions::getInstance().haveFramebufferObject())
@@ -2383,7 +2383,7 @@ status_t SurfaceFlinger::captureScreen(DisplayID dpy,
         uint32_t minLayerZ, uint32_t maxLayerZ)
 {
     // only one display supported for now
-    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
+    if (CC_UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
 
     if (!GLExtensions::getInstance().haveFramebufferObject())
@@ -2511,7 +2511,7 @@ status_t Client::onTransact(
      const int pid = ipc->getCallingPid();
      const int uid = ipc->getCallingUid();
      const int self_pid = getpid();
-     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
+     if (CC_UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
          // we're called from a different process, do the real check
          if (!PermissionCache::checkCallingPermission(sAccessSurfaceFlinger))
          {

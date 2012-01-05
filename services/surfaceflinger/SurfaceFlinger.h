@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <cutils/compiler.h>
+
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
@@ -52,9 +54,6 @@ class Layer;
 class LayerDim;
 class LayerScreenshot;
 struct surface_flinger_cblk_t;
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 // ---------------------------------------------------------------------------
 

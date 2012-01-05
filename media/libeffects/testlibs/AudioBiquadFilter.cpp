@@ -17,11 +17,9 @@
 
 #include <string.h>
 #include <assert.h>
+#include <cutils/compiler.h>
 
 #include "AudioBiquadFilter.h"
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
 namespace android {
 
@@ -55,7 +53,7 @@ void AudioBiquadFilter::clear() {
 void AudioBiquadFilter::setCoefs(const audio_coef_t coefs[NUM_COEFS], bool immediate) {
     memcpy(mTargetCoefs, coefs, sizeof(mTargetCoefs));
     if (mState & STATE_ENABLED_MASK) {
-        if (UNLIKELY(immediate)) {
+        if (CC_UNLIKELY(immediate)) {
             memcpy(mCoefs, coefs, sizeof(mCoefs));
             setState(STATE_NORMAL);
         } else {
@@ -70,7 +68,7 @@ void AudioBiquadFilter::process(const audio_sample_t in[], audio_sample_t out[],
 }
 
 void AudioBiquadFilter::enable(bool immediate) {
-    if (UNLIKELY(immediate)) {
+    if (CC_UNLIKELY(immediate)) {
         memcpy(mCoefs, mTargetCoefs, sizeof(mCoefs));
         setState(STATE_NORMAL);
     } else {
@@ -79,7 +77,7 @@ void AudioBiquadFilter::enable(bool immediate) {
 }
 
 void AudioBiquadFilter::disable(bool immediate) {
-    if (UNLIKELY(immediate)) {
+    if (CC_UNLIKELY(immediate)) {
         memcpy(mCoefs, IDENTITY_COEFS, sizeof(mCoefs));
         setState(STATE_BYPASS);
     } else {
@@ -142,7 +140,7 @@ void AudioBiquadFilter::process_bypass(const audio_sample_t * in,
                                        audio_sample_t * out,
                                        int frameCount) {
     // The common case is in-place processing, because this is what the EQ does.
-    if (UNLIKELY(in != out)) {
+    if (CC_UNLIKELY(in != out)) {
         memcpy(out, in, frameCount * mNumChannels * sizeof(audio_sample_t));
     }
 }

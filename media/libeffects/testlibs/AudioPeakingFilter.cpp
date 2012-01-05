@@ -21,9 +21,7 @@
 
 #include <new>
 #include <assert.h>
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
+#include <cutils/compiler.h>
 
 namespace android {
 // Format of the coefficient table:
@@ -66,12 +64,12 @@ void AudioPeakingFilter::reset() {
 
 void AudioPeakingFilter::setFrequency(uint32_t millihertz) {
     mNominalFrequency = millihertz;
-    if (UNLIKELY(millihertz > mNiquistFreq / 2)) {
+    if (CC_UNLIKELY(millihertz > mNiquistFreq / 2)) {
         millihertz = mNiquistFreq / 2;
     }
     uint32_t normFreq = static_cast<uint32_t>(
             (static_cast<uint64_t>(millihertz) * mFrequencyFactor) >> 10);
-    if (LIKELY(normFreq > (1 << 23))) {
+    if (CC_LIKELY(normFreq > (1 << 23))) {
         mFrequency = (Effects_log2(normFreq) - ((32-9) << 15)) << (FREQ_PRECISION_BITS - 15);
     } else {
         mFrequency = 0;
@@ -107,11 +105,11 @@ void AudioPeakingFilter::getBandRange(uint32_t & low, uint32_t & high) const {
     int32_t halfBW = (((mBandwidth + 1) / 2) << 15) / 1200;
 
     low = static_cast<uint32_t>((static_cast<uint64_t>(mNominalFrequency) * Effects_exp2(-halfBW + (16 << 15))) >> 16);
-    if (UNLIKELY(halfBW >= (16 << 15))) {
+    if (CC_UNLIKELY(halfBW >= (16 << 15))) {
         high = mNiquistFreq;
     } else {
         high = static_cast<uint32_t>((static_cast<uint64_t>(mNominalFrequency) * Effects_exp2(halfBW + (16 << 15))) >> 16);
-        if (UNLIKELY(high > mNiquistFreq)) {
+        if (CC_UNLIKELY(high > mNiquistFreq)) {
             high = mNiquistFreq;
         }
     }

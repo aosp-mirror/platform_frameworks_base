@@ -28,11 +28,6 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
-
-// ----------------------------------------------------------------------------
-
 class AudioMixer
 {
 public:

@@ -42,9 +42,6 @@
 #define AID_GRAPHICS 1003
 #endif
 
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
-
 // ---------------------------------------------------------------------------
 
 namespace android {
