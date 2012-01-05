@@ -62,6 +62,7 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize) {
         rsAssert(mNormalized == true);
         break;
     default:
+        rsAssert(mKind != RS_KIND_INVALID);
         break;
     }
 
@@ -166,6 +167,9 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize) {
 
     case RS_TYPE_BOOLEAN:
         mTypeBits = 8;
+        break;
+    default:
+        rsAssert(mType != RS_TYPE_INVALID);
         break;
     }
 

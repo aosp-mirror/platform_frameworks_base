@@ -191,6 +191,7 @@ void RsdMeshObj::updateGLPrimitives() {
             case RS_PRIMITIVE_TRIANGLE:       mGLPrimitives[i] = GL_TRIANGLES; break;
             case RS_PRIMITIVE_TRIANGLE_STRIP: mGLPrimitives[i] = GL_TRIANGLE_STRIP; break;
             case RS_PRIMITIVE_TRIANGLE_FAN:   mGLPrimitives[i] = GL_TRIANGLE_FAN; break;
+            default: LOGE("Invalid mesh primitive"); break;
         }
     }
 }

@@ -153,6 +153,8 @@ enum RsDataType {
     RS_TYPE_PROGRAM_VERTEX,
     RS_TYPE_PROGRAM_RASTER,
     RS_TYPE_PROGRAM_STORE,
+
+    RS_TYPE_INVALID = 10000,
 };
 
 enum RsDataKind {
@@ -164,6 +166,8 @@ enum RsDataKind {
     RS_KIND_PIXEL_RGB,
     RS_KIND_PIXEL_RGBA,
     RS_KIND_PIXEL_DEPTH,
+
+    RS_KIND_INVALID = 100,
 };
 
 enum RsSamplerParam {
@@ -182,6 +186,8 @@ enum RsSamplerValue {
     RS_SAMPLER_WRAP,
     RS_SAMPLER_CLAMP,
     RS_SAMPLER_LINEAR_MIP_NEAREST,
+
+    RS_SAMPLER_INVALID = 100,
 };
 
 enum RsTextureTarget {
@@ -222,7 +228,8 @@ enum RsBlendSrcFunc {
     RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA,   // 5
     RS_BLEND_SRC_DST_ALPHA,             // 6
     RS_BLEND_SRC_ONE_MINUS_DST_ALPHA,   // 7
-    RS_BLEND_SRC_SRC_ALPHA_SATURATE     // 8
+    RS_BLEND_SRC_SRC_ALPHA_SATURATE,    // 8
+    RS_BLEND_SRC_INVALID = 100,
 };
 
 enum RsBlendDstFunc {
@@ -233,7 +240,9 @@ enum RsBlendDstFunc {
     RS_BLEND_DST_SRC_ALPHA,             // 4
     RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,   // 5
     RS_BLEND_DST_DST_ALPHA,             // 6
-    RS_BLEND_DST_ONE_MINUS_DST_ALPHA    // 7
+    RS_BLEND_DST_ONE_MINUS_DST_ALPHA,   // 7
+
+    RS_BLEND_DST_INVALID = 100,
 };
 
 enum RsTexEnvMode {
@@ -256,7 +265,9 @@ enum RsPrimitive {
     RS_PRIMITIVE_LINE_STRIP,
     RS_PRIMITIVE_TRIANGLE,
     RS_PRIMITIVE_TRIANGLE_STRIP,
-    RS_PRIMITIVE_TRIANGLE_FAN
+    RS_PRIMITIVE_TRIANGLE_FAN,
+
+    RS_PRIMITIVE_INVALID = 100,
 };
 
 enum RsPathPrimitive {
@@ -315,7 +326,8 @@ enum RsA3DClassID {
 enum RsCullMode {
     RS_CULL_BACK,
     RS_CULL_FRONT,
-    RS_CULL_NONE
+    RS_CULL_NONE,
+    RS_CULL_INVALID = 100,
 };
 
 typedef struct {

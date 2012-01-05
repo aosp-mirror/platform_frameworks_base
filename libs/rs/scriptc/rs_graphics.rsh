@@ -31,7 +31,9 @@ typedef enum {
     RS_DEPTH_FUNC_GREATER,
     RS_DEPTH_FUNC_GEQUAL,
     RS_DEPTH_FUNC_EQUAL,
-    RS_DEPTH_FUNC_NOTEQUAL
+    RS_DEPTH_FUNC_NOTEQUAL,
+
+    RS_DEPTH_FUNC_INVALID = 100,
 } rs_depth_func;
 
 typedef enum {
@@ -43,7 +45,9 @@ typedef enum {
     RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA,   // 5
     RS_BLEND_SRC_DST_ALPHA,             // 6
     RS_BLEND_SRC_ONE_MINUS_DST_ALPHA,   // 7
-    RS_BLEND_SRC_SRC_ALPHA_SATURATE     // 8
+    RS_BLEND_SRC_SRC_ALPHA_SATURATE,    // 8
+
+    RS_BLEND_SRC_INVALID = 100,
 } rs_blend_src_func;
 
 typedef enum {
@@ -54,13 +58,17 @@ typedef enum {
     RS_BLEND_DST_SRC_ALPHA,             // 4
     RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,   // 5
     RS_BLEND_DST_DST_ALPHA,             // 6
-    RS_BLEND_DST_ONE_MINUS_DST_ALPHA    // 7
+    RS_BLEND_DST_ONE_MINUS_DST_ALPHA,   // 7
+
+    RS_BLEND_DST_INVALID = 100,
 } rs_blend_dst_func;
 
 typedef enum {
     RS_CULL_BACK,
     RS_CULL_FRONT,
-    RS_CULL_NONE
+    RS_CULL_NONE,
+
+    RS_CULL_INVALID = 100,
 } rs_cull_mode;
 
 typedef enum {
@@ -70,6 +78,8 @@ typedef enum {
     RS_SAMPLER_WRAP,
     RS_SAMPLER_CLAMP,
     RS_SAMPLER_LINEAR_MIP_NEAREST,
+
+    RS_SAMPLER_INVALID = 100,
 } rs_sampler_value;
 
 #if (defined(RS_VERSION) && (RS_VERSION >= 14))
