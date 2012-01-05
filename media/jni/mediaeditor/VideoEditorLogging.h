@@ -29,7 +29,7 @@
 #define VIDEOEDIT_LOG_ALLOCATION                        __android_log_print
 #define VIDEOEDIT_LOG_API                               __android_log_print
 #define VIDEOEDIT_LOG_FUNCTION                          __android_log_print
-#define VIDEOEDIT_LOG_RESULT(x,y, ...)                     LOGI(y, __VA_ARGS__ )
+#define VIDEOEDIT_LOG_RESULT(x,y, ...)                     ALOGI(y, __VA_ARGS__ )
 #define VIDEOEDIT_LOG_SETTING                           __android_log_print
 #define VIDEOEDIT_LOG_EDIT_SETTINGS(m_settings)         videoEditClasses_logEditSettings\
                                                (m_settings, VIDEOEDIT_LOG_INDENTATION)

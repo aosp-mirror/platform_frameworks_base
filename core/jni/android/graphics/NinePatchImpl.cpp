@@ -297,7 +297,7 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                     }
                     SkIRect idst;
                     dst.round(&idst);
-                    //LOGI("Adding trans rect: (%d,%d)-(%d,%d)\n",
+                    //ALOGI("Adding trans rect: (%d,%d)-(%d,%d)\n",
                     //     idst.fLeft, idst.fTop, idst.fRight, idst.fBottom);
                     (*outRegion)->op(idst, SkRegion::kUnion_Op);
                 }

@@ -287,22 +287,22 @@ void DisplayHardware::init(uint32_t dpy)
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, mMaxViewportDims);
 
-    LOGI("EGL informations:");
-    LOGI("# of configs : %d", numConfigs);
-    LOGI("vendor    : %s", extensions.getEglVendor());
-    LOGI("version   : %s", extensions.getEglVersion());
-    LOGI("extensions: %s", extensions.getEglExtension());
-    LOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
-    LOGI("EGLSurface: %d-%d-%d-%d, config=%p", r, g, b, a, config);
+    ALOGI("EGL informations:");
+    ALOGI("# of configs : %d", numConfigs);
+    ALOGI("vendor    : %s", extensions.getEglVendor());
+    ALOGI("version   : %s", extensions.getEglVersion());
+    ALOGI("extensions: %s", extensions.getEglExtension());
+    ALOGI("Client API: %s", eglQueryString(display, EGL_CLIENT_APIS)?:"Not Supported");
+    ALOGI("EGLSurface: %d-%d-%d-%d, config=%p", r, g, b, a, config);
 
-    LOGI("OpenGL informations:");
-    LOGI("vendor    : %s", extensions.getVendor());
-    LOGI("renderer  : %s", extensions.getRenderer());
-    LOGI("version   : %s", extensions.getVersion());
-    LOGI("extensions: %s", extensions.getExtension());
-    LOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
-    LOGI("GL_MAX_VIEWPORT_DIMS = %d x %d", mMaxViewportDims[0], mMaxViewportDims[1]);
-    LOGI("flags = %08x", mFlags);
+    ALOGI("OpenGL informations:");
+    ALOGI("vendor    : %s", extensions.getVendor());
+    ALOGI("renderer  : %s", extensions.getRenderer());
+    ALOGI("version   : %s", extensions.getVersion());
+    ALOGI("extensions: %s", extensions.getExtension());
+    ALOGI("GL_MAX_TEXTURE_SIZE = %d", mMaxTextureSize);
+    ALOGI("GL_MAX_VIEWPORT_DIMS = %d x %d", mMaxViewportDims[0], mMaxViewportDims[1]);
+    ALOGI("flags = %08x", mFlags);
 
     // Unbind the context from this thread
     eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

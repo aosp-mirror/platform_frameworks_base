@@ -155,7 +155,7 @@ struct MyHandler : public AHandler {
             mSessionURL.append(StringPrintf("%u", port));
             mSessionURL.append(path);
 
-            LOGI("rewritten session url: '%s'", mSessionURL.c_str());
+            ALOGI("rewritten session url: '%s'", mSessionURL.c_str());
         }
 
         mSessionHost = host;
@@ -283,7 +283,7 @@ struct MyHandler : public AHandler {
         if (!GetAttribute(transport.c_str(),
                                  "server_port",
                                  &server_port)) {
-            LOGI("Missing 'server_port' field in Transport response.");
+            ALOGI("Missing 'server_port' field in Transport response.");
             return false;
         }
 
@@ -354,7 +354,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("connection request completed with result %d (%s)",
+                ALOGI("connection request completed with result %d (%s)",
                      result, strerror(-result));
 
                 if (result == OK) {
@@ -392,7 +392,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("DESCRIBE completed with result %d (%s)",
+                ALOGI("DESCRIBE completed with result %d (%s)",
                      result, strerror(-result));
 
                 if (result == OK) {
@@ -499,7 +499,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("SETUP(%d) completed with result %d (%s)",
+                ALOGI("SETUP(%d) completed with result %d (%s)",
                      index, result, strerror(-result));
 
                 if (result == OK) {
@@ -540,7 +540,7 @@ struct MyHandler : public AHandler {
                             } else {
                                 mKeepAliveTimeoutUs = timeoutSecs * 1000000ll;
 
-                                LOGI("server specified timeout of %lu secs.",
+                                ALOGI("server specified timeout of %lu secs.",
                                      timeoutSecs);
                             }
                         }
@@ -625,7 +625,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("PLAY completed with result %d (%s)",
+                ALOGI("PLAY completed with result %d (%s)",
                      result, strerror(-result));
 
                 if (result == OK) {
@@ -682,7 +682,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("OPTIONS completed with result %d (%s)",
+                ALOGI("OPTIONS completed with result %d (%s)",
                      result, strerror(-result));
 
                 int32_t generation;
@@ -759,7 +759,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("TEARDOWN completed with result %d (%s)",
+                ALOGI("TEARDOWN completed with result %d (%s)",
                      result, strerror(-result));
 
                 sp<AMessage> reply = new AMessage('disc', id());
@@ -793,11 +793,11 @@ struct MyHandler : public AHandler {
 
                 if (mNumAccessUnitsReceived == 0) {
 #if 1
-                    LOGI("stream ended? aborting.");
+                    ALOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
                     break;
 #else
-                    LOGI("haven't seen an AU in a looong time.");
+                    ALOGI("haven't seen an AU in a looong time.");
 #endif
                 }
 
@@ -848,7 +848,7 @@ struct MyHandler : public AHandler {
 
                 int32_t eos;
                 if (msg->findInt32("eos", &eos)) {
-                    LOGI("received BYE on track index %d", trackIndex);
+                    ALOGI("received BYE on track index %d", trackIndex);
 #if 0
                     track->mPacketSource->signalEOS(ERROR_END_OF_STREAM);
 #endif
@@ -961,7 +961,7 @@ struct MyHandler : public AHandler {
                 int32_t result;
                 CHECK(msg->findInt32("result", &result));
 
-                LOGI("PLAY completed with result %d (%s)",
+                ALOGI("PLAY completed with result %d (%s)",
                      result, strerror(-result));
 
                 mCheckPending = false;
@@ -983,7 +983,7 @@ struct MyHandler : public AHandler {
 
                         ALOGV("rtp-info: %s", response->mHeaders.valueAt(i).c_str());
 
-                        LOGI("seek completed.");
+                        ALOGI("seek completed.");
                     }
                 }
 
@@ -1101,7 +1101,7 @@ struct MyHandler : public AHandler {
         if (!ASessionDescription::parseNTPRange(val.c_str(), &npt1, &npt2)) {
             // This is a live stream and therefore not seekable.
 
-            LOGI("This is a live stream");
+            ALOGI("This is a live stream");
             return;
         }
 

@@ -796,7 +796,7 @@ int main(int argc, char* argv[]) {
                 } else {
                     send_code(sock, response);
                 }
-                LOGI("uid: %d action: %c -> %d state: %d -> %d retry: %d",
+                ALOGI("uid: %d action: %c -> %d state: %d -> %d retry: %d",
                      cred.uid,
                      request, response,
                      old_state, keyStore.getState(),

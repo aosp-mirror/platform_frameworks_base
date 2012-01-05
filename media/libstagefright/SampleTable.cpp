@@ -347,7 +347,7 @@ status_t SampleTable::setTimeToSampleParams(
 
 status_t SampleTable::setCompositionTimeToSampleParams(
         off64_t data_offset, size_t data_size) {
-    LOGI("There are reordered frames present.");
+    ALOGI("There are reordered frames present.");
 
     if (mCompositionTimeDeltaEntries != NULL || data_size < 8) {
         return ERROR_MALFORMED;

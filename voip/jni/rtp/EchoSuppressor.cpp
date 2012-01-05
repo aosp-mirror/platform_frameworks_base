@@ -177,7 +177,7 @@ void EchoSuppressor::run(int16_t *playbacked, int16_t *recorded)
             }
         }
     }
-    //LOGI("corr^2 %.5f, var %8.0f %8.0f, latency %d", corr2, varX, varY,
+    //ALOGI("corr^2 %.5f, var %8.0f %8.0f, latency %d", corr2, varX, varY,
     //        latency * mScale);
 
     // Do echo suppression.
