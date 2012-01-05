@@ -72,7 +72,7 @@ order in which each activity is opened.</p>
 suppose you have a two-pane layout using fragments, one of which is a list view (fragment A) and the
 other being a layout to display an item from the list (fragment B). When the user selects an item
 from the list, fragment B is replaced by a new fragment (fragment C). In this case, it might be
-desireable for the user to navigate back to reveal fragment B, using the BACK key.</p>
+desireable for the user to navigate back to reveal fragment B, using the BACK button.</p>
 <p>In order to add fragment B to the back stack so that this is possible, you must call {@link
 android.app.FragmentTransaction#addToBackStack addToBackStack()} before you {@link
 android.app.FragmentTransaction#commit()} the transaction that replaces fragment B with fragment
@@ -93,17 +93,17 @@ is created and the "main" activity for that application opens as the root activi
 <p>When the current activity starts another, the new activity is pushed on the top of the stack and
 takes focus. The previous activity remains in the stack, but is stopped. When an activity
 stops, the system retains the current state of its user interface. When the user presses the BACK
-key, the current activity is popped from the top of the stack (the activity is destroyed) and the
+button, the current activity is popped from the top of the stack (the activity is destroyed) and the
 previous activity resumes (the previous state of its UI is restored). Activities in the stack are
 never rearranged, only pushed and popped from the stack&mdash;pushed onto the stack when started by
-the current activity and popped off when the user leaves it using the BACK key. As such, the back
+the current activity and popped off when the user leaves it using the BACK button. As such, the back
 stack operates as a "last in, first out" object structure. Figure 1 visualizes
 this behavior with a timeline showing the progress between activities along with the current back
 stack at each point in time.</p>
 
 <img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
 <p class="img-caption"><strong>Figure 1.</strong> A representation of how each new activity in a
-task adds an item to the back stack. When the user presses the BACK key, the current activity is
+task adds an item to the back stack. When the user presses the BACK button, the current activity is
 destroyed and the previous activity resumes.</p>
 
 
@@ -111,22 +111,22 @@ destroyed and the previous activity resumes.</p>
 previous one, until the user returns to the Home screen (or to whichever activity was running when
 the task began). When all activities are removed from the stack, the task no longer exists.</p>
 
-<div class="figure" style="width:369px">
+<div class="figure" style="width:287px">
 <img src="{@docRoot}images/fundamentals/diagram_multitasking.png" alt="" /> <p
-class="img-caption"><strong>Figure 2.</strong> Two tasks: Task A is in the background, waiting
-to be resumed, while Task B receives user interaction in the foreground.</p>
+class="img-caption"><strong>Figure 2.</strong> Two tasks: Task B receives user interaction
+in the foreground, while Task A is in the background, waiting to be resumed.</p>
 </div>
-<div class="figure" style="width:178px">
+<div class="figure" style="width:215px">
   <img src="{@docRoot}images/fundamentals/diagram_multiple_instances.png" alt="" /> <p
 class="img-caption"><strong>Figure 3.</strong> A single activity is instantiated multiple times.</p>
 </div>
 
 <p>A task is a cohesive unit that can move to the "background" when users begin a new task or go
-to the Home screen, via the HOME key. While in the background, all the activities in the task are
+to the Home screen, via the HOME button. While in the background, all the activities in the task are
 stopped, but the back stack for the task remains intact&mdash;the task has simply lost focus while
 another task takes place, as shown in figure 2. A task can then return to the "foreground" so users
 can pick up where they left off. Suppose, for example, that the current task (Task A) has three
-activities in its stack&mdash;two under the current activity. The user presses the HOME key, then
+activities in its stack&mdash;two under the current activity. The user presses the HOME button, then
 starts a new application from the application launcher. When the Home screen appears, Task A goes
 into the background. When the new application starts, the system starts a task for that application
 (Task B) with its own stack of activities. After interacting with
@@ -135,7 +135,7 @@ started Task A. Now, Task A comes to the
 foreground&mdash;all three activities in its stack are intact and the activity at the top of the
 stack resumes. At
 this point, the user can also switch back to Task B by going Home and selecting the application icon
-that started that task (or by touching and holding the HOME key to reveal recent tasks and selecting
+that started that task (or by touching and holding the HOME button to reveal recent tasks and selecting
 one). This is an example of multitasking on Android.</p>
 
 <p class="note"><strong>Note:</strong> Multiple tasks can be held in the background at once.
@@ -148,7 +148,7 @@ users to start a particular activity from more than one activity, a new instance
 that activity is created and popped onto the stack (rather than bringing any previous instance of
 the activity to the top). As such, one activity in your application might be instantiated multiple
 times (even from different tasks), as shown in figure 3. As such, if the user navigates backward
-using the BACK key, each instance of the activity is revealed in the order they were opened (each
+using the BACK button, each instance of the activity is revealed in the order they were opened (each
 with their own UI state). However, you can modify this behavior if you do not want an activity to be
 instantiated more than once. How to do so is discussed in the later section about <a
 href="#ManagingTasks">Managing Tasks</a>.</p>
@@ -159,13 +159,13 @@ href="#ManagingTasks">Managing Tasks</a>.</p>
 <ul>
   <li>When Activity A starts Activity B, Activity A is stopped, but the system retains its state
 (such as scroll position and text entered into forms).
-If the user presses the BACK key while in Activity B, Activity A resumes with its state
+If the user presses the BACK button while in Activity B, Activity A resumes with its state
 restored.</li>
-  <li>When the user leaves a task by pressing the HOME key, the current activity is stopped and
+  <li>When the user leaves a task by pressing the HOME button, the current activity is stopped and
 its task goes into the background. The system retains the state of every activity in the task. If
 the user later resumes the task by selecting the launcher icon that began the task, the task comes
 to the foreground and resumes the activity at the top of the stack.</li>
-  <li>If the user presses the BACK key, the current activity is popped from the stack and
+  <li>If the user presses the BACK button, the current activity is popped from the stack and
 destroyed. The previous activity in the stack is resumed. When an activity is destroyed, the system
 <em>does not</em> retain the activity's state.</li>
   <li>Activities can be instantiated multiple times, even from other tasks.</li>
@@ -247,7 +247,7 @@ flags to define how activities are associated with tasks and how the behave in t
 <p class="caution"><strong>Caution:</strong> Most applications should not interrupt the default
 behavior for activities and tasks. If you determine that it's necessary for your activity to modify
 the default behaviors, use caution and be sure to test the usability of the activity during
-launch and when navigating back to it from other activities and tasks with the BACK key. Be sure 
+launch and when navigating back to it from other activities and tasks with the BACK button. Be sure 
 to test for navigation behaviors that might conflict with the user's expected behavior.</p>
 
 
@@ -311,8 +311,8 @@ android.app.Activity#onNewIntent onNewIntent()}, because it's at the top of the 
 stack remains A-B-C-D. However, if an intent arrives for an activity of type B, then a new
 instance of B is added to the stack, even if its launch mode is {@code "singleTop"}.</p>
   <p class="note"><strong>Note:</strong> When a new instance of an activity is created,
-the user can press the BACK key to return to the previous activity. But when an existing instance of
-an activity handles a new intent, the user cannot press the BACK key to return to the state of
+the user can press the BACK button to return to the previous activity. But when an existing instance of
+an activity handles a new intent, the user cannot press the BACK button to return to the state of
 the activity before the new intent arrived in {@link android.app.Activity#onNewIntent
 onNewIntent()}.</p>
 </dd>
@@ -324,7 +324,7 @@ intent to the existing instance through a call to its {@link
 android.app.Activity#onNewIntent onNewIntent()} method, rather than creating a new instance. Only
 one instance of the activity can exist at a time.
   <p class="note"><strong>Note:</strong> Although the activity starts in a new task, the
-BACK key still returns the user to the previous activity.</p></dd>
+BACK button still returns the user to the previous activity.</p></dd>
 <dt>{@code "singleInstance"}.</dt>
   <dd>Same as {@code "singleTask"}, except that the system doesn't launch any other activities into
 the task holding the instance. The activity is always the single and only member of its task;
@@ -342,19 +342,17 @@ already has a task running in the background, that task is brought forward to ha
 intent.</p>
 
 <p>Regardless of whether an activity starts in a new task or in the same task as the activity that
-started it, the BACK key always takes the user to the previous activity. However, if you
-start an activity from your task (Task A) that specifies the {@code singleTask} launch mode, then
-that activity might have an instance in the background that belongs to a task with its own back
-stack (Task B). In this
-case, when Task B is brought forward to handle a new intent, the BACK key first navigates
-backward through the activities in Task B before returning to
-the top-most activity in Task A. Figure 4 visualizes this type of scenario.</p>
+started it, the BACK button always takes the user to the previous activity. However, if you
+start an activity that specifies the {@code singleTask} launch mode, then if an instance of
+that activity exists in a background task, that whole task is brought to the foreground. At this
+point, the back stack now includes all activities from the task brought forward, at the top of the
+stack. Figure 4 illustrates this type of scenario.</p>
 
 <img src="{@docRoot}images/fundamentals/diagram_backstack_singletask_multiactivity.png" alt="" />
 <p class="img-caption"><strong>Figure 4.</strong> A representation of how an activity with
 launch mode "singleTask" is added to the back stack. If the activity is already a part of a
-background task with its own back stack (Task B), then the entire back stack also comes
-forward, on top of the current task (Task A).</p>
+background task with its own back stack, then the entire back stack also comes
+forward, on top of the current task.</p>
 
 <p>For more information about using launch modes in the manifest file, see the
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
@@ -447,7 +445,7 @@ flag, the system looks for a different task to house the new activity. Often, it
 However, it doesn't have to be.  If there's already an existing task with the same affinity as the
 new activity, the activity is launched into that task.  If not, it begins a new task.</p>
 
-<p>If this flag causes an activity to begin a new task and the user presses the HOME key to leave
+<p>If this flag causes an activity to begin a new task and the user presses the HOME button to leave
 it, there must be some way for the user to navigate back to the task. Some entities (such as the
 notification manager) always start activities in an external task, never as part of their own, so
 they always put {@code FLAG_ACTIVITY_NEW_TASK} in the intents they pass to {@link
@@ -549,9 +547,9 @@ android.content.Intent#ACTION_MAIN}
 and a {@link android.content.Intent#CATEGORY_LAUNCHER}
 filter. Imagine, for example, what could happen if the filter is missing: An intent launches a
 {@code "singleTask"} activity, initiating a new task, and the user spends some time working in
-that task.  The user then presses the HOME key. The task is now sent to the background and not
-visible. Because it is not represented in the application launcher, the user has no way to return to
-the task.
+that task.  The user then presses the HOME button. The task is now sent to the background and is
+not visible. Now the user has no way to return to the task, because it is not represented in the
+application launcher.
 </p>
 
 <p>For those cases where you don't want the user to be able to return to an activity, set the
