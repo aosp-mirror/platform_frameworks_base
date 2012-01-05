@@ -104,8 +104,10 @@ public class ThumbnailUtils {
         }
 
         if (bitmap == null) {
+            FileInputStream stream = null;
             try {
-                FileDescriptor fd = new FileInputStream(filePath).getFD();
+                stream = new FileInputStream(filePath);
+                FileDescriptor fd = stream.getFD();
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 1;
                 options.inJustDecodeBounds = true;
@@ -125,7 +127,16 @@ public class ThumbnailUtils {
                 Log.e(TAG, "", ex);
             } catch (OutOfMemoryError oom) {
                 Log.e(TAG, "Unable to decode file " + filePath + ". OutOfMemoryError.", oom);
+            } finally {
+                try {
+                    if (stream != null) {
+                        stream.close();
+                    }
+                } catch (IOException ex) {
+                    Log.e(TAG, "", ex);
+                }
             }
+
         }
 
         if (kind == Images.Thumbnails.MICRO_KIND) {
