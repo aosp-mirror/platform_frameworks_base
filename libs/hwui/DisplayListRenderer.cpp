@@ -1210,10 +1210,8 @@ void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
     //       see if it matters.
     //       If we make a copy, then drawTextDecorations() should *not* make
     //       its own copy as it does right now.
+    // Beware: this needs Glyph encoding (already done on the Paint constructor)
     paint->setAntiAlias(true);
-#if RENDER_TEXT_AS_GLYPHS
-    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-#endif
     addPaint(paint);
     addFloat(length < 0.0f ? paint->measureText(text, bytesCount) : length);
 }
