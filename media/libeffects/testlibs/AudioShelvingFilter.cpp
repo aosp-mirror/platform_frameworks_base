@@ -21,9 +21,7 @@
 
 #include <new>
 #include <assert.h>
-
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
+#include <cutils/compiler.h>
 
 namespace android {
 // Format of the coefficient tables:
@@ -71,13 +69,13 @@ void AudioShelvingFilter::reset() {
 
 void AudioShelvingFilter::setFrequency(uint32_t millihertz) {
     mNominalFrequency = millihertz;
-    if (UNLIKELY(millihertz > mNiquistFreq / 2)) {
+    if (CC_UNLIKELY(millihertz > mNiquistFreq / 2)) {
         millihertz = mNiquistFreq / 2;
     }
     uint32_t normFreq = static_cast<uint32_t>(
             (static_cast<uint64_t>(millihertz) * mFrequencyFactor) >> 10);
     uint32_t log2minFreq = (mType == kLowShelf ? (32-10) : (32-2));
-    if (LIKELY(normFreq > (1U << log2minFreq))) {
+    if (CC_LIKELY(normFreq > (1U << log2minFreq))) {
         mFrequency = (Effects_log2(normFreq) - (log2minFreq << 15)) << (FREQ_PRECISION_BITS - 15);
     } else {
         mFrequency = 0;

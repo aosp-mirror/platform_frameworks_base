@@ -55,12 +55,6 @@ class AudioResampler;
 
 // ----------------------------------------------------------------------------
 
-#define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
-#define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
-
-
-// ----------------------------------------------------------------------------
-
 static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 
 class AudioFlinger :

@@ -240,7 +240,7 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     for (size_t i=0 ; i<4 ; i++)
         mVertices[i][1] = hw_h - mVertices[i][1];
 
-    if (UNLIKELY(transformed)) {
+    if (CC_UNLIKELY(transformed)) {
         // NOTE: here we could also punt if we have too many rectangles
         // in the transparent region
         if (tr.preserveRects()) {
@@ -416,7 +416,7 @@ void LayerBase::drawWithOpenGL(const Region& clip) const
     const State& s(drawingState());
 
     GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
-    if (UNLIKELY(s.alpha < 0xFF)) {
+    if (CC_UNLIKELY(s.alpha < 0xFF)) {
         const GLfloat alpha = s.alpha * (1.0f/255.0f);
         if (mPremultipliedAlpha) {
             glColor4f(alpha, alpha, alpha, alpha);

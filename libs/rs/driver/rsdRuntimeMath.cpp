@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <cutils/compiler.h>
+
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix4x4.h"
@@ -306,7 +308,7 @@ static int32_t SC_AtomicSub(volatile int32_t *ptr, int32_t value) {
     do {
         prev = *ptr;
         status = android_atomic_release_cas(prev, prev - value, ptr);
-    } while (__builtin_expect(status != 0, 0));
+    } while (CC_UNLIKELY(status != 0));
     return prev;
 }
 
@@ -323,7 +325,7 @@ static int32_t SC_AtomicXor(volatile int32_t *ptr, int32_t value) {
     do {
         prev = *ptr;
         status = android_atomic_release_cas(prev, prev ^ value, ptr);
-    } while (__builtin_expect(status != 0, 0));
+    } while (CC_UNLIKELY(status != 0));
     return prev;
 }
 
@@ -333,7 +335,7 @@ static int32_t SC_AtomicMin(volatile int32_t *ptr, int32_t value) {
         prev = *ptr;
         int32_t n = rsMin(value, prev);
         status = android_atomic_release_cas(prev, n, ptr);
-    } while (__builtin_expect(status != 0, 0));
+    } while (CC_UNLIKELY(status != 0));
     return prev;
 }
 
@@ -343,7 +345,7 @@ static int32_t SC_AtomicMax(volatile int32_t *ptr, int32_t value) {
         prev = *ptr;
         int32_t n = rsMax(value, prev);
         status = android_atomic_release_cas(prev, n, ptr);
-    } while (__builtin_expect(status != 0, 0));
+    } while (CC_UNLIKELY(status != 0));
     return prev;
 }
 
