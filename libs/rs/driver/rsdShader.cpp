@@ -493,11 +493,7 @@ void RsdShader::initAttribAndUniformArray() {
     mAttribCount = 0;
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.inputElementsCount; ct++) {
         const Element *elem = mRSProgram->mHal.state.inputElements[ct];
-        for (uint32_t field=0; field < elem->mHal.state.fieldsCount; field++) {
-            if (elem->getFieldName(field)[0] != '#') {
-                mAttribCount ++;
-            }
-        }
+        mAttribCount += elem->mHal.state.fieldsCount;
     }
 
     mUniformCount = 0;

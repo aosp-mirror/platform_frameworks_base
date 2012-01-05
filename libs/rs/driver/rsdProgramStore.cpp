@@ -111,7 +111,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->blendSrc = GL_SRC_ALPHA_SATURATE;
         break;
     default:
-        LOGE("Unknown blend src mode.");
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Unknown blend src mode.");
         goto error;
     }
 
@@ -141,7 +141,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->blendDst = GL_ONE_MINUS_DST_ALPHA;
         break;
     default:
-        LOGE("Unknown blend dst mode.");
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Unknown blend dst mode.");
         goto error;
     }
 

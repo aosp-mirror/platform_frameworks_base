@@ -37,15 +37,16 @@ public:
             const android::renderscript::Mesh *);
     ~RsdMeshObj();
 
-    void renderPrimitiveRange(const android::renderscript::Context *, uint32_t primIndex, uint32_t start, uint32_t len) const;
+    void renderPrimitiveRange(const android::renderscript::Context *,
+                              uint32_t primIndex, uint32_t start, uint32_t len) const;
 
-    bool init();
+    bool init(const android::renderscript::Context *rsc);
 
 protected:
     const android::renderscript::Mesh *mRSMesh;
 
     uint32_t *mGLPrimitives;
-    void updateGLPrimitives();
+    void updateGLPrimitives(const android::renderscript::Context *rsc);
 
     bool isValidGLComponent(const android::renderscript::Element *elem, uint32_t fieldIdx);
     // Attribues that allow us to map to GL
