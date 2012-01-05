@@ -271,7 +271,8 @@
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
-          <span class="en">RenderScript</span></a>
+          <span class="en">Renderscript</span></a>
+          <span class="new">updated</span>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
@@ -361,7 +362,7 @@
         </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/wireless/wifip2p.html">
-            <span class="en">WiFi Direct</span></a> <span class="new">new!</span>
+            <span class="en">Wi-Fi Direct</span></a> <span class="new">new!</span>
           </li>
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
