@@ -713,8 +713,7 @@ final class Settings {
             mBackupStoppedPackagesFilename.delete();
             FileUtils.setPermissions(mStoppedPackagesFilename.toString(),
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP
-                    |FileUtils.S_IROTH,
+                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
             // Done, all is good!
@@ -951,8 +950,7 @@ final class Settings {
             mBackupSettingsFilename.delete();
             FileUtils.setPermissions(mSettingsFilename.toString(),
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP
-                    |FileUtils.S_IROTH,
+                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
             // Write package list file now, use a JournaledFile.
@@ -1007,8 +1005,7 @@ final class Settings {
 
             FileUtils.setPermissions(mPackageListFilename.toString(),
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP
-                    |FileUtils.S_IROTH,
+                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
             writeStoppedLPr();
