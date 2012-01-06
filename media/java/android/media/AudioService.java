@@ -415,13 +415,7 @@ public class AudioService extends IAudioService.Stub {
 
         mUseMasterVolume = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_useMasterVolume);
-        if (mUseMasterVolume) {
-            float volume = Settings.System.getFloat(mContentResolver,
-                    Settings.System.VOLUME_MASTER, -1.0f);
-            if (volume >= 0.0f) {
-                AudioSystem.setMasterVolume(volume);
-            }
-        }
+        restoreMasterVolume();
     }
 
     private void createAudioSystemThread() {
@@ -917,6 +911,16 @@ public class AudioService extends IAudioService.Stub {
         if (persist) {
             sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE,
                     SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
+        }
+    }
+
+    private void restoreMasterVolume() {
+        if (mUseMasterVolume) {
+            float volume = Settings.System.getFloat(mContentResolver,
+                    Settings.System.VOLUME_MASTER, -1.0f);
+            if (volume >= 0.0f) {
+                AudioSystem.setMasterVolume(volume);
+            }
         }
     }
 
@@ -2523,6 +2527,9 @@ public class AudioService extends IAudioService.Stub {
 
                     // Restore ringer mode
                     setRingerModeInt(getRingerMode(), false);
+
+                    // Restore master volume
+                    restoreMasterVolume();
 
                     // indicate the end of reconfiguration phase to audio HAL
                     AudioSystem.setParameters("restarting=false");
