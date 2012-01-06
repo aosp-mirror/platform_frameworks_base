@@ -76,6 +76,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected final String LOG_TAG = "GSM";
+    private static final boolean RADIO_TESTS = false;
 
     /**
      * Handles changes to the APN db.
@@ -1405,7 +1406,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         sent = mDataStallTxRxSum.txPkts - preTxRxSum.txPkts;
         received = mDataStallTxRxSum.rxPkts - preTxRxSum.rxPkts;
 
-        if (VDBG) {
+        if (RADIO_TESTS) {
             if (SystemProperties.getBoolean("radio.test.data.stall", false)) {
                 log("updateDataStallInfo: radio.test.data.stall true received = 0;");
                 received = 0;
@@ -1891,6 +1892,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void onDataSetupComplete(AsyncResult ar) {
 
+        DataConnection.FailCause cause = DataConnection.FailCause.UNKNOWN;
+        boolean handleError = false;
         ApnContext apnContext = null;
 
         if(ar.userObj instanceof ApnContext){
@@ -1901,52 +1904,73 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         if (isDataSetupCompleteOk(ar)) {
             DataConnectionAc dcac = apnContext.getDataConnectionAc();
+
+            if (RADIO_TESTS) {
+                // Note: To change radio.test.onDSC.null.dcac from command line you need to
+                // adb root and adb remount and from the command line you can only change the
+                // value to 1 once. To change it a second time you can reboot or execute
+                // adb shell stop and then adb shell start. The command line to set the value is:
+                //   adb shell sqlite3 /data/data/com.android.providers.settings/databases/settings.db "insert into system (name,value) values ('radio.test.onDSC.null.dcac', '1');"
+                ContentResolver cr = mPhone.getContext().getContentResolver();
+                String radioTestProperty = "radio.test.onDSC.null.dcac";
+                if (Settings.System.getInt(cr, radioTestProperty, 0) == 1) {
+                    log("onDataSetupComplete: " + radioTestProperty +
+                            " is true, set dcac to null and reset property to false");
+                    dcac = null;
+                    Settings.System.putInt(cr, radioTestProperty, 0);
+                    log("onDataSetupComplete: " + radioTestProperty + "=" +
+                            Settings.System.getInt(mPhone.getContext().getContentResolver(),
+                                    radioTestProperty, -1));
+                }
+            }
             if (dcac == null) {
-                throw new RuntimeException("onDataSetupCompete: No dcac");
-            }
-            DataConnection dc = apnContext.getDataConnection();
+                log("onDataSetupComplete: no connection to DC, handle as error");
+                cause = DataConnection.FailCause.CONNECTION_TO_DATACONNECTIONAC_BROKEN;
+                handleError = true;
+            } else {
+                DataConnection dc = apnContext.getDataConnection();
 
-            if (DBG) {
-                // TODO We may use apnContext.getApnSetting() directly
-                // instead of getWaitingApns().get(0)
-                String apnStr = "<unknown>";
-                if (apnContext.getWaitingApns() != null
-                        && !apnContext.getWaitingApns().isEmpty()){
-                    apnStr = apnContext.getWaitingApns().get(0).apn;
+                if (DBG) {
+                    // TODO We may use apnContext.getApnSetting() directly
+                    // instead of getWaitingApns().get(0)
+                    String apnStr = "<unknown>";
+                    if (apnContext.getWaitingApns() != null
+                            && !apnContext.getWaitingApns().isEmpty()){
+                        apnStr = apnContext.getWaitingApns().get(0).apn;
+                    }
+                    log("onDataSetupComplete: success apn=" + apnStr);
                 }
-                log("onDataSetupComplete: success apn=" + apnStr);
-            }
-            ApnSetting apn = apnContext.getApnSetting();
-            if (apn.proxy != null && apn.proxy.length() != 0) {
-                try {
-                    String port = apn.port;
-                    if (TextUtils.isEmpty(port)) port = "8080";
-                    ProxyProperties proxy = new ProxyProperties(apn.proxy,
-                            Integer.parseInt(port), null);
-                    dcac.setLinkPropertiesHttpProxySync(proxy);
-                } catch (NumberFormatException e) {
-                    loge("onDataSetupComplete: NumberFormatException making ProxyProperties (" +
-                            apn.port + "): " + e);
-                }
-            }
-
-            // everything is setup
-            if(TextUtils.equals(apnContext.getApnType(),Phone.APN_TYPE_DEFAULT)) {
-                SystemProperties.set("gsm.defaultpdpcontext.active", "true");
-                if (canSetPreferApn && mPreferredApn == null) {
-                    if (DBG) log("onDataSetupComplete: PREFERED APN is null");
-                    mPreferredApn = apnContext.getApnSetting();
-                    if (mPreferredApn != null) {
-                        setPreferredApn(mPreferredApn.id);
+                ApnSetting apn = apnContext.getApnSetting();
+                if (apn.proxy != null && apn.proxy.length() != 0) {
+                    try {
+                        String port = apn.port;
+                        if (TextUtils.isEmpty(port)) port = "8080";
+                        ProxyProperties proxy = new ProxyProperties(apn.proxy,
+                                Integer.parseInt(port), null);
+                        dcac.setLinkPropertiesHttpProxySync(proxy);
+                    } catch (NumberFormatException e) {
+                        loge("onDataSetupComplete: NumberFormatException making ProxyProperties (" +
+                                apn.port + "): " + e);
                     }
                 }
-            } else {
-                SystemProperties.set("gsm.defaultpdpcontext.active", "false");
+
+                // everything is setup
+                if(TextUtils.equals(apnContext.getApnType(),Phone.APN_TYPE_DEFAULT)) {
+                    SystemProperties.set("gsm.defaultpdpcontext.active", "true");
+                    if (canSetPreferApn && mPreferredApn == null) {
+                        if (DBG) log("onDataSetupComplete: PREFERED APN is null");
+                        mPreferredApn = apnContext.getApnSetting();
+                        if (mPreferredApn != null) {
+                            setPreferredApn(mPreferredApn.id);
+                        }
+                    }
+                } else {
+                    SystemProperties.set("gsm.defaultpdpcontext.active", "false");
+                }
+                notifyDefaultData(apnContext);
             }
-            notifyDefaultData(apnContext);
         } else {
             String apnString;
-            DataConnection.FailCause cause;
 
             cause = (DataConnection.FailCause) (ar.result);
             if (DBG) {
@@ -1974,7 +1998,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         apnContext.getWaitingApns().size(),
                         apnContext.getWaitingApnsPermFailCount()));
             }
+            handleError = true;
+        }
 
+        if (handleError) {
             // See if there are more APN's to try
             if (apnContext.getWaitingApns().isEmpty()) {
                 if (apnContext.getWaitingApnsPermFailCount() == 0) {
@@ -1986,9 +2013,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
                     apnContext.setDataConnection(null);
                     apnContext.setDataConnectionAc(null);
-                    if (DBG) {
-                        log("onDataSetupComplete: permanent error apn=%s" + apnString );
-                    }
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
                     // check to see if retry should be overridden for this failure.

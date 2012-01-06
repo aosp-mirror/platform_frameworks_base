@@ -134,7 +134,8 @@ public abstract class DataConnection extends StateMachine {
         // specified here
         UNKNOWN(0x10000),
         RADIO_NOT_AVAILABLE(0x10001),
-        UNACCEPTABLE_NETWORK_PARAMETER(0x10002);
+        UNACCEPTABLE_NETWORK_PARAMETER(0x10002),
+        CONNECTION_TO_DATACONNECTIONAC_BROKEN(0x10003);
 
         private final int mErrorCode;
         private static final HashMap<Integer, FailCause> sErrorCodeToFailCauseMap;
