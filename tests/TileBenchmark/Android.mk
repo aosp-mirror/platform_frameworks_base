@@ -21,12 +21,8 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := TileBenchmark
 
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_JAVA_LIBRARIES := android.test.runner
+
 include $(BUILD_PACKAGE)
-
-##################################################
-include $(CLEAR_VARS)
-
-include $(BUILD_MULTI_PREBUILT)
-
-# Use the folloing include to make our test apk.
-include $(call all-makefiles-under,$(LOCAL_PATH))
