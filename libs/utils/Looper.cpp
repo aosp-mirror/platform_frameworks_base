@@ -520,12 +520,12 @@ int Looper::addFd(int fd, int ident, int events, ALooper_callbackFunc callback, 
 
     if (! callback) {
         if (! mAllowNonCallbacks) {
-            LOGE("Invalid attempt to set NULL callback but not allowed for this looper.");
+            ALOGE("Invalid attempt to set NULL callback but not allowed for this looper.");
             return -1;
         }
 
         if (ident < 0) {
-            LOGE("Invalid attempt to set NULL callback with ident <= 0.");
+            ALOGE("Invalid attempt to set NULL callback with ident <= 0.");
             return -1;
         }
     }
@@ -553,14 +553,14 @@ int Looper::addFd(int fd, int ident, int events, ALooper_callbackFunc callback, 
         if (requestIndex < 0) {
             int epollResult = epoll_ctl(mEpollFd, EPOLL_CTL_ADD, fd, & eventItem);
             if (epollResult < 0) {
-                LOGE("Error adding epoll events for fd %d, errno=%d", fd, errno);
+                ALOGE("Error adding epoll events for fd %d, errno=%d", fd, errno);
                 return -1;
             }
             mRequests.add(fd, request);
         } else {
             int epollResult = epoll_ctl(mEpollFd, EPOLL_CTL_MOD, fd, & eventItem);
             if (epollResult < 0) {
-                LOGE("Error modifying epoll events for fd %d, errno=%d", fd, errno);
+                ALOGE("Error modifying epoll events for fd %d, errno=%d", fd, errno);
                 return -1;
             }
             mRequests.replaceValueAt(requestIndex, request);
@@ -611,7 +611,7 @@ int Looper::removeFd(int fd) {
 
         int epollResult = epoll_ctl(mEpollFd, EPOLL_CTL_DEL, fd, NULL);
         if (epollResult < 0) {
-            LOGE("Error removing epoll events for fd %d, errno=%d", fd, errno);
+            ALOGE("Error removing epoll events for fd %d, errno=%d", fd, errno);
             return -1;
         }
 

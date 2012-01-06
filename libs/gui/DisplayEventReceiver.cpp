@@ -81,7 +81,7 @@ status_t DisplayEventReceiver::requestNextVsync() {
 ssize_t DisplayEventReceiver::getEvents(DisplayEventReceiver::Event* events,
         size_t count) {
     ssize_t size = mDataChannel->read(events, sizeof(events[0])*count);
-    LOGE_IF(size<0,
+    ALOGE_IF(size<0,
             "DisplayEventReceiver::getEvents error (%s)",
             strerror(-size));
     if (size >= 0) {

@@ -63,7 +63,7 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
             event->getSource(),
             NULL);
     if (env->ExceptionCheck()) {
-        LOGE("An exception occurred while obtaining a key event.");
+        ALOGE("An exception occurred while obtaining a key event.");
         LOGE_EX(env);
         env->ExceptionClear();
         return NULL;

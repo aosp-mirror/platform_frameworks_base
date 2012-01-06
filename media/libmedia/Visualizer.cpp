@@ -61,7 +61,7 @@ status_t Visualizer::setEnabled(bool enabled)
         if (enabled) {
             if (t->exitPending()) {
                 if (t->requestExitAndWait() == WOULD_BLOCK) {
-                    LOGE("Visualizer::enable() called from thread");
+                    ALOGE("Visualizer::enable() called from thread");
                     return INVALID_OPERATION;
                 }
             }
@@ -116,7 +116,7 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
     if (cbk != NULL) {
         mCaptureThread = new CaptureThread(*this, rate, ((flags & CAPTURE_CALL_JAVA) != 0));
         if (mCaptureThread == 0) {
-            LOGE("Could not create callback thread");
+            ALOGE("Could not create callback thread");
             return NO_INIT;
         }
     }

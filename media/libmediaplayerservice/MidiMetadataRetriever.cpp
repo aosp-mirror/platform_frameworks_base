@@ -63,7 +63,7 @@ const char* MidiMetadataRetriever::extractMetadata(int keyCode)
     ALOGV("extractMetdata: key(%d)", keyCode);
     Mutex::Autolock lock(mLock);
     if (mMidiPlayer == 0 || mMidiPlayer->initCheck() != NO_ERROR) {
-        LOGE("Midi player is not initialized yet");
+        ALOGE("Midi player is not initialized yet");
         return NULL;
     }
     switch (keyCode) {
@@ -72,7 +72,7 @@ const char* MidiMetadataRetriever::extractMetadata(int keyCode)
             if (mMetadataValues[0][0] == '\0') {
                 int duration = -1;
                 if (mMidiPlayer->getDuration(&duration) != NO_ERROR) {
-                    LOGE("failed to get duration");
+                    ALOGE("failed to get duration");
                     return NULL;
                 }
                 snprintf(mMetadataValues[0], MAX_METADATA_STRING_LENGTH, "%d", duration);
@@ -82,7 +82,7 @@ const char* MidiMetadataRetriever::extractMetadata(int keyCode)
             return mMetadataValues[0];
         }
     default:
-        LOGE("Unsupported key code (%d)", keyCode);
+        ALOGE("Unsupported key code (%d)", keyCode);
         return NULL;
     }
     return NULL;

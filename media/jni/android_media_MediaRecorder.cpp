@@ -77,7 +77,7 @@ JNIMediaRecorderListener::JNIMediaRecorderListener(JNIEnv* env, jobject thiz, jo
     // that posts events to the application thread.
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaRecorder");
+        ALOGE("Can't find android/media/MediaRecorder");
         jniThrowException(env, "java/lang/Exception", NULL);
         return;
     }
@@ -229,7 +229,7 @@ android_media_MediaRecorder_setParameter(JNIEnv *env, jobject thiz, jstring para
     ALOGV("setParameter()");
     if (params == NULL)
     {
-        LOGE("Invalid or empty params string.  This parameter will be ignored.");
+        ALOGE("Invalid or empty params string.  This parameter will be ignored.");
         return;
     }
 
@@ -238,7 +238,7 @@ android_media_MediaRecorder_setParameter(JNIEnv *env, jobject thiz, jstring para
     const char* params8 = env->GetStringUTFChars(params, NULL);
     if (params8 == NULL)
     {
-        LOGE("Failed to covert jstring to String8.  This parameter will be ignored.");
+        ALOGE("Failed to covert jstring to String8.  This parameter will be ignored.");
         return;
     }
 
@@ -323,7 +323,7 @@ android_media_MediaRecorder_prepare(JNIEnv *env, jobject thiz)
         // The application may misbehave and
         // the preview surface becomes unavailable
         if (native_surface.get() == 0) {
-            LOGE("Application lost the surface");
+            ALOGE("Application lost the surface");
             jniThrowException(env, "java/io/IOException", "invalid preview surface");
             return;
         }

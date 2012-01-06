@@ -98,11 +98,11 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
         default:
             // TODO:
             // support for TEST_PLAYER
-            LOGE("player type %d is not supported",  playerType);
+            ALOGE("player type %d is not supported",  playerType);
             break;
     }
     if (p == NULL) {
-        LOGE("failed to create a retriever object");
+        ALOGE("failed to create a retriever object");
     }
     return p;
 }
@@ -131,7 +131,7 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
     struct stat sb;
     int ret = fstat(fd, &sb);
     if (ret != 0) {
-        LOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
+        ALOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
         return BAD_VALUE;
     }
     ALOGV("st_dev  = %llu", sb.st_dev);
@@ -141,7 +141,7 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
     ALOGV("st_size = %llu", sb.st_size);
 
     if (offset >= sb.st_size) {
-        LOGE("offset (%lld) bigger than file size (%llu)", offset, sb.st_size);
+        ALOGE("offset (%lld) bigger than file size (%llu)", offset, sb.st_size);
         ::close(fd);
         return BAD_VALUE;
     }
@@ -169,24 +169,24 @@ sp<IMemory> MetadataRetrieverClient::getFrameAtTime(int64_t timeUs, int option)
     Mutex::Autolock lock(mLock);
     mThumbnail.clear();
     if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
+        ALOGE("retriever is not initialized");
         return NULL;
     }
     VideoFrame *frame = mRetriever->getFrameAtTime(timeUs, option);
     if (frame == NULL) {
-        LOGE("failed to capture a video frame");
+        ALOGE("failed to capture a video frame");
         return NULL;
     }
     size_t size = sizeof(VideoFrame) + frame->mSize;
     sp<MemoryHeapBase> heap = new MemoryHeapBase(size, 0, "MetadataRetrieverClient");
     if (heap == NULL) {
-        LOGE("failed to create MemoryDealer");
+        ALOGE("failed to create MemoryDealer");
         delete frame;
         return NULL;
     }
     mThumbnail = new MemoryBase(heap, 0, size);
     if (mThumbnail == NULL) {
-        LOGE("not enough memory for VideoFrame size=%u", size);
+        ALOGE("not enough memory for VideoFrame size=%u", size);
         delete frame;
         return NULL;
     }
@@ -210,24 +210,24 @@ sp<IMemory> MetadataRetrieverClient::extractAlbumArt()
     Mutex::Autolock lock(mLock);
     mAlbumArt.clear();
     if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
+        ALOGE("retriever is not initialized");
         return NULL;
     }
     MediaAlbumArt *albumArt = mRetriever->extractAlbumArt();
     if (albumArt == NULL) {
-        LOGE("failed to extract an album art");
+        ALOGE("failed to extract an album art");
         return NULL;
     }
     size_t size = sizeof(MediaAlbumArt) + albumArt->mSize;
     sp<MemoryHeapBase> heap = new MemoryHeapBase(size, 0, "MetadataRetrieverClient");
     if (heap == NULL) {
-        LOGE("failed to create MemoryDealer object");
+        ALOGE("failed to create MemoryDealer object");
         delete albumArt;
         return NULL;
     }
     mAlbumArt = new MemoryBase(heap, 0, size);
     if (mAlbumArt == NULL) {
-        LOGE("not enough memory for MediaAlbumArt size=%u", size);
+        ALOGE("not enough memory for MediaAlbumArt size=%u", size);
         delete albumArt;
         return NULL;
     }
@@ -244,7 +244,7 @@ const char* MetadataRetrieverClient::extractMetadata(int keyCode)
     ALOGV("extractMetadata");
     Mutex::Autolock lock(mLock);
     if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
+        ALOGE("retriever is not initialized");
         return NULL;
     }
     return mRetriever->extractMetadata(keyCode);

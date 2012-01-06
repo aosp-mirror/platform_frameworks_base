@@ -54,7 +54,7 @@ size_t YUVImage::bufferSize(YUVFormat yuvFormat, int32_t width, int32_t height) 
         // Y takes numberOfPixels bytes and U/V take numberOfPixels/4 bytes each.
         numberOfBytes = (size_t)(numberOfPixels + (numberOfPixels >> 1));
     } else {
-        LOGE("Format not supported");
+        ALOGE("Format not supported");
     }
     return numberOfBytes;
 }
@@ -74,7 +74,7 @@ bool YUVImage::initializeYUVPointers() {
         mVdata = mYdata + numberOfPixels;
         mUdata = mVdata + 1;
     } else {
-        LOGE("Format not supported");
+        ALOGE("Format not supported");
         return false;
     }
     return true;
@@ -98,7 +98,7 @@ bool YUVImage::getOffsets(int32_t x, int32_t y,
         *uOffset = 2*uvOffset;
         *vOffset = 2*uvOffset;
     } else {
-        LOGE("Format not supported");
+        ALOGE("Format not supported");
         return false;
     }
 
@@ -122,7 +122,7 @@ bool YUVImage::getOffsetIncrementsPerDataRow(
         *uDataOffsetIncrement = 2*uvDataOffsetIncrement;
         *vDataOffsetIncrement = 2*uvDataOffsetIncrement;
     } else {
-        LOGE("Format not supported");
+        ALOGE("Format not supported");
         return false;
     }
 

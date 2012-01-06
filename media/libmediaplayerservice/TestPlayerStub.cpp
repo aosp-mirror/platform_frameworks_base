@@ -134,7 +134,7 @@ status_t TestPlayerStub::setDataSource(
     // None of the entry points should be NULL.
     mHandle = ::dlopen(mFilename, RTLD_NOW | RTLD_GLOBAL);
     if (!mHandle) {
-        LOGE("dlopen failed: %s", ::dlerror());
+        ALOGE("dlopen failed: %s", ::dlerror());
         resetInternal();
         return UNKNOWN_ERROR;
     }
@@ -147,7 +147,7 @@ status_t TestPlayerStub::setDataSource(
     if (err || mNewPlayer == NULL) {
         // if err is NULL the string <null> is inserted in the logs =>
         // mNewPlayer was NULL.
-        LOGE("dlsym for newPlayer failed %s", err);
+        ALOGE("dlsym for newPlayer failed %s", err);
         resetInternal();
         return UNKNOWN_ERROR;
     }
@@ -156,7 +156,7 @@ status_t TestPlayerStub::setDataSource(
                                                           "deletePlayer"));
     err = ::dlerror();
     if (err || mDeletePlayer == NULL) {
-        LOGE("dlsym for deletePlayer failed %s", err);
+        ALOGE("dlsym for deletePlayer failed %s", err);
         resetInternal();
         return UNKNOWN_ERROR;
     }

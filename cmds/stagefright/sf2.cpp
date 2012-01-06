@@ -454,7 +454,7 @@ private:
 
                 if (sizeNeeded > sizeLeft) {
                     if (outBuffer->size() == 0) {
-                        LOGE("Unable to fit even a single input buffer of size %d.",
+                        ALOGE("Unable to fit even a single input buffer of size %d.",
                              sizeNeeded);
                     }
                     CHECK_GT(outBuffer->size(), 0u);

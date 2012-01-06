@@ -51,11 +51,11 @@ status_t VirtualKeyMap::load(const String8& filename, VirtualKeyMap** outMap) {
     Tokenizer* tokenizer;
     status_t status = Tokenizer::open(filename, &tokenizer);
     if (status) {
-        LOGE("Error %d opening virtual key map file %s.", status, filename.string());
+        ALOGE("Error %d opening virtual key map file %s.", status, filename.string());
     } else {
         VirtualKeyMap* map = new VirtualKeyMap();
         if (!map) {
-            LOGE("Error allocating virtual key map.");
+            ALOGE("Error allocating virtual key map.");
             status = NO_MEMORY;
         } else {
 #if DEBUG_PARSER_PERFORMANCE
@@ -104,7 +104,7 @@ status_t VirtualKeyMap::Parser::parse() {
             do {
                 String8 token = mTokenizer->nextToken(WHITESPACE_OR_FIELD_DELIMITER);
                 if (token != "0x01") {
-                    LOGE("%s: Unknown virtual key type, expected 0x01.",
+                    ALOGE("%s: Unknown virtual key type, expected 0x01.",
                           mTokenizer->getLocation().string());
                     return BAD_VALUE;
                 }
@@ -116,7 +116,7 @@ status_t VirtualKeyMap::Parser::parse() {
                         && parseNextIntField(&defn.width)
                         && parseNextIntField(&defn.height);
                 if (!success) {
-                    LOGE("%s: Expected 5 colon-delimited integers in virtual key definition.",
+                    ALOGE("%s: Expected 5 colon-delimited integers in virtual key definition.",
                           mTokenizer->getLocation().string());
                     return BAD_VALUE;
                 }
@@ -130,7 +130,7 @@ status_t VirtualKeyMap::Parser::parse() {
             } while (consumeFieldDelimiterAndSkipWhitespace());
 
             if (!mTokenizer->isEol()) {
-                LOGE("%s: Expected end of line, got '%s'.",
+                ALOGE("%s: Expected end of line, got '%s'.",
                         mTokenizer->getLocation().string(),
                         mTokenizer->peekRemainderOfLine().string());
                 return BAD_VALUE;
@@ -162,7 +162,7 @@ bool VirtualKeyMap::Parser::parseNextIntField(int32_t* outValue) {
     char* end;
     *outValue = strtol(token.string(), &end, 0);
     if (token.isEmpty() || *end != '\0') {
-        LOGE("Expected an integer, got '%s'.", token.string());
+        ALOGE("Expected an integer, got '%s'.", token.string());
         return false;
     }
     return true;

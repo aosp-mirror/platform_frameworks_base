@@ -208,7 +208,7 @@ jbyteArray JNICameraContext::getCallbackBuffer(
         if (obj != NULL) {
             jsize bufferLength = env->GetArrayLength(obj);
             if ((int)bufferLength < (int)bufferSize) {
-                LOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
+                ALOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
                     bufferSize, bufferLength);
                 env->DeleteLocalRef(obj);
                 return NULL;
@@ -254,13 +254,13 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
             }
 
             if (obj == NULL) {
-                LOGE("Couldn't allocate byte array for JPEG data");
+                ALOGE("Couldn't allocate byte array for JPEG data");
                 env->ExceptionClear();
             } else {
                 env->SetByteArrayRegion(obj, 0, size, data);
             }
         } else {
-            LOGE("image heap is NULL");
+            ALOGE("image heap is NULL");
         }
     }
 
@@ -331,7 +331,7 @@ void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_m
     obj = (jobjectArray) env->NewObjectArray(metadata->number_of_faces,
                                              mFaceClass, NULL);
     if (obj == NULL) {
-        LOGE("Couldn't allocate face metadata array");
+        ALOGE("Couldn't allocate face metadata array");
         return;
     }
 
@@ -419,7 +419,7 @@ void JNICameraContext::addCallbackBuffer(
             }
         }
     } else {
-       LOGE("Null byte array!");
+       ALOGE("Null byte array!");
     }
 }
 
@@ -899,13 +899,13 @@ static int find_fields(JNIEnv *env, field *fields, int count)
         field *f = &fields[i];
         jclass clazz = env->FindClass(f->class_name);
         if (clazz == NULL) {
-            LOGE("Can't find %s", f->class_name);
+            ALOGE("Can't find %s", f->class_name);
             return -1;
         }
 
         jfieldID field = env->GetFieldID(clazz, f->field_name, f->field_type);
         if (field == NULL) {
-            LOGE("Can't find %s.%s", f->class_name, f->field_name);
+            ALOGE("Can't find %s.%s", f->class_name, f->field_name);
             return -1;
         }
 
@@ -940,21 +940,21 @@ int register_android_hardware_Camera(JNIEnv *env)
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
-        LOGE("Can't find android/hardware/Camera.postEventFromNative");
+        ALOGE("Can't find android/hardware/Camera.postEventFromNative");
         return -1;
     }
 
     clazz = env->FindClass("android/graphics/Rect");
     fields.rect_constructor = env->GetMethodID(clazz, "<init>", "()V");
     if (fields.rect_constructor == NULL) {
-        LOGE("Can't find android/graphics/Rect.Rect()");
+        ALOGE("Can't find android/graphics/Rect.Rect()");
         return -1;
     }
 
     clazz = env->FindClass("android/hardware/Camera$Face");
     fields.face_constructor = env->GetMethodID(clazz, "<init>", "()V");
     if (fields.face_constructor == NULL) {
-        LOGE("Can't find android/hardware/Camera$Face.Face()");
+        ALOGE("Can't find android/hardware/Camera$Face.Face()");
         return -1;
     }
 

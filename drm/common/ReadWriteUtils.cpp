@@ -85,7 +85,7 @@ void ReadWriteUtils::writeToFile(const String8& filePath, const String8& data) {
         int size = data.size();
         if (FAILURE != ftruncate(fd, size)) {
             if (size != write(fd, data.string(), size)) {
-                LOGE("Failed to write the data to: %s", filePath.string());
+                ALOGE("Failed to write the data to: %s", filePath.string());
             }
         }
         fclose(file);
@@ -101,7 +101,7 @@ void ReadWriteUtils::appendToFile(const String8& filePath, const String8& data) 
 
         int size = data.size();
         if (size != write(fd, data.string(), size)) {
-            LOGE("Failed to write the data to: %s", filePath.string());
+            ALOGE("Failed to write the data to: %s", filePath.string());
         }
         fclose(file);
     }

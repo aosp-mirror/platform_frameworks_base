@@ -288,27 +288,27 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     jclass clazz;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        LOGE("ERROR: GetEnv failed\n");
+        ALOGE("ERROR: GetEnv failed\n");
         goto bail;
     }
     assert(env != NULL);
 
     clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
-        LOGE("Can't find %s", kClassPathName);
+        ALOGE("Can't find %s", kClassPathName);
         goto bail;
     }
 
     fields.mNativeContext = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.mNativeContext == NULL) {
-        LOGE("Can't find SoundPool.mNativeContext");
+        ALOGE("Can't find SoundPool.mNativeContext");
         goto bail;
     }
 
     fields.mPostEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.mPostEvent == NULL) {
-        LOGE("Can't find android/media/SoundPool.postEventFromNative");
+        ALOGE("Can't find android/media/SoundPool.postEventFromNative");
         goto bail;
     }
 

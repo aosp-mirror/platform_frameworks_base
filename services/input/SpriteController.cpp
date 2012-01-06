@@ -160,7 +160,7 @@ void SpriteController::doUpdateSprites() {
 
                 status_t status = update.state.surfaceControl->setSize(desiredWidth, desiredHeight);
                 if (status) {
-                    LOGE("Error %d resizing sprite surface from %dx%d to %dx%d",
+                    ALOGE("Error %d resizing sprite surface from %dx%d to %dx%d",
                             status, update.state.surfaceWidth, update.state.surfaceHeight,
                             desiredWidth, desiredHeight);
                 } else {
@@ -172,7 +172,7 @@ void SpriteController::doUpdateSprites() {
                     if (update.state.surfaceVisible) {
                         status = update.state.surfaceControl->hide();
                         if (status) {
-                            LOGE("Error %d hiding sprite surface after resize.", status);
+                            ALOGE("Error %d hiding sprite surface after resize.", status);
                         } else {
                             update.state.surfaceVisible = false;
                         }
@@ -200,7 +200,7 @@ void SpriteController::doUpdateSprites() {
             Surface::SurfaceInfo surfaceInfo;
             status_t status = surface->lock(&surfaceInfo);
             if (status) {
-                LOGE("Error %d locking sprite surface before drawing.", status);
+                ALOGE("Error %d locking sprite surface before drawing.", status);
             } else {
                 SkBitmap surfaceBitmap;
                 ssize_t bpr = surfaceInfo.s * bytesPerPixel(surfaceInfo.format);
@@ -228,7 +228,7 @@ void SpriteController::doUpdateSprites() {
 
                 status = surface->unlockAndPost();
                 if (status) {
-                    LOGE("Error %d unlocking and posting sprite surface after drawing.", status);
+                    ALOGE("Error %d unlocking and posting sprite surface after drawing.", status);
                 } else {
                     update.state.surfaceDrawn = true;
                     update.surfaceChanged = surfaceChanged = true;
@@ -260,7 +260,7 @@ void SpriteController::doUpdateSprites() {
                     && (becomingVisible || (update.state.dirty & DIRTY_ALPHA))) {
                 status = update.state.surfaceControl->setAlpha(update.state.alpha);
                 if (status) {
-                    LOGE("Error %d setting sprite surface alpha.", status);
+                    ALOGE("Error %d setting sprite surface alpha.", status);
                 }
             }
 
@@ -271,7 +271,7 @@ void SpriteController::doUpdateSprites() {
                         update.state.positionX - update.state.icon.hotSpotX,
                         update.state.positionY - update.state.icon.hotSpotY);
                 if (status) {
-                    LOGE("Error %d setting sprite surface position.", status);
+                    ALOGE("Error %d setting sprite surface position.", status);
                 }
             }
 
@@ -284,7 +284,7 @@ void SpriteController::doUpdateSprites() {
                         update.state.transformationMatrix.dsdy,
                         update.state.transformationMatrix.dtdy);
                 if (status) {
-                    LOGE("Error %d setting sprite surface transformation matrix.", status);
+                    ALOGE("Error %d setting sprite surface transformation matrix.", status);
                 }
             }
 
@@ -293,14 +293,14 @@ void SpriteController::doUpdateSprites() {
                     && (becomingVisible || (update.state.dirty & DIRTY_LAYER))) {
                 status = update.state.surfaceControl->setLayer(surfaceLayer);
                 if (status) {
-                    LOGE("Error %d setting sprite surface layer.", status);
+                    ALOGE("Error %d setting sprite surface layer.", status);
                 }
             }
 
             if (becomingVisible) {
                 status = update.state.surfaceControl->show(surfaceLayer);
                 if (status) {
-                    LOGE("Error %d showing sprite surface.", status);
+                    ALOGE("Error %d showing sprite surface.", status);
                 } else {
                     update.state.surfaceVisible = true;
                     update.surfaceChanged = surfaceChanged = true;
@@ -308,7 +308,7 @@ void SpriteController::doUpdateSprites() {
             } else if (becomingHidden) {
                 status = update.state.surfaceControl->hide();
                 if (status) {
-                    LOGE("Error %d hiding sprite surface.", status);
+                    ALOGE("Error %d hiding sprite surface.", status);
                 } else {
                     update.state.surfaceVisible = false;
                     update.surfaceChanged = surfaceChanged = true;
@@ -372,7 +372,7 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
             String8("Sprite"), 0, width, height, PIXEL_FORMAT_RGBA_8888);
     if (surfaceControl == NULL || !surfaceControl->isValid()
             || !surfaceControl->getSurface()->isValid()) {
-        LOGE("Error creating sprite surface.");
+        ALOGE("Error creating sprite surface.");
         return NULL;
     }
     return surfaceControl;

@@ -107,14 +107,14 @@ static void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 }
 
 static void DumpDebug(RsdHal *dc) {
-    LOGE(" EGL ver %i %i", dc->gl.egl.majorVersion, dc->gl.egl.minorVersion);
-    LOGE(" EGL context %p  surface %p,  Display=%p", dc->gl.egl.context, dc->gl.egl.surface,
+    ALOGE(" EGL ver %i %i", dc->gl.egl.majorVersion, dc->gl.egl.minorVersion);
+    ALOGE(" EGL context %p  surface %p,  Display=%p", dc->gl.egl.context, dc->gl.egl.surface,
          dc->gl.egl.display);
-    LOGE(" GL vendor: %s", dc->gl.gl.vendor);
-    LOGE(" GL renderer: %s", dc->gl.gl.renderer);
-    LOGE(" GL Version: %s", dc->gl.gl.version);
-    LOGE(" GL Extensions: %s", dc->gl.gl.extensions);
-    LOGE(" GL int Versions %i %i", dc->gl.gl.majorVersion, dc->gl.gl.minorVersion);
+    ALOGE(" GL vendor: %s", dc->gl.gl.vendor);
+    ALOGE(" GL renderer: %s", dc->gl.gl.renderer);
+    ALOGE(" GL Version: %s", dc->gl.gl.version);
+    ALOGE(" GL Extensions: %s", dc->gl.gl.extensions);
+    ALOGE(" GL int Versions %i %i", dc->gl.gl.majorVersion, dc->gl.gl.minorVersion);
 
     ALOGV("MAX Textures %i, %i  %i", dc->gl.gl.maxVertexTextureUnits,
          dc->gl.gl.maxFragmentTextureImageUnits, dc->gl.gl.maxTextureImageUnits);
@@ -223,7 +223,7 @@ bool rsdGLInit(const Context *rsc) {
                 configAttribs, configs, numConfigs, &n);
         if (!ret || !n) {
             checkEglError("eglChooseConfig", ret);
-            LOGE("%p, couldn't find an EGLConfig matching the screen format\n", rsc);
+            ALOGE("%p, couldn't find an EGLConfig matching the screen format\n", rsc);
         }
 
         // The first config is guaranteed to over-satisfy the constraints
@@ -268,7 +268,7 @@ bool rsdGLInit(const Context *rsc) {
                                           EGL_NO_CONTEXT, context_attribs2);
     checkEglError("eglCreateContext");
     if (dc->gl.egl.context == EGL_NO_CONTEXT) {
-        LOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", rsc);
+        ALOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", rsc);
         rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
     }
@@ -281,7 +281,7 @@ bool rsdGLInit(const Context *rsc) {
                                                         pbuffer_attribs);
     checkEglError("eglCreatePbufferSurface");
     if (dc->gl.egl.surfaceDefault == EGL_NO_SURFACE) {
-        LOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
+        ALOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
         rsdGLShutdown(rsc);
         rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
@@ -291,7 +291,7 @@ bool rsdGLInit(const Context *rsc) {
     ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surfaceDefault,
                          dc->gl.egl.surfaceDefault, dc->gl.egl.context);
     if (ret == EGL_FALSE) {
-        LOGE("eglMakeCurrent returned EGL_FALSE");
+        ALOGE("eglMakeCurrent returned EGL_FALSE");
         checkEglError("eglMakeCurrent", ret);
         rsdGLShutdown(rsc);
         rsc->setWatchdogGL(NULL, 0, NULL);
@@ -320,7 +320,7 @@ bool rsdGLInit(const Context *rsc) {
     }
 
     if (!verptr) {
-        LOGE("Error, OpenGL ES Lite not supported");
+        ALOGE("Error, OpenGL ES Lite not supported");
         rsdGLShutdown(rsc);
         rsc->setWatchdogGL(NULL, 0, NULL);
         return false;
@@ -402,7 +402,7 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
                                                     dc->gl.wndSurface, NULL);
         checkEglError("eglCreateWindowSurface");
         if (dc->gl.egl.surface == EGL_NO_SURFACE) {
-            LOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
+            ALOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
         }
 
         rsc->setWatchdogGL("eglMakeCurrent", __LINE__, __FILE__);
@@ -439,7 +439,7 @@ void rsdGLCheckError(const android::renderscript::Context *rsc,
             }
         }
 
-        LOGE("%p, %s", rsc, buf);
+        ALOGE("%p, %s", rsc, buf);
     }
 
 }

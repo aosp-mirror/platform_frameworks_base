@@ -1461,7 +1461,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
         entry = pZip->findEntryByIndex(i);
         if (pZip->getEntryFileName(entry, nameBuf, sizeof(nameBuf)) != 0) {
             // TODO: fix this if we expect to have long names
-            LOGE("ARGH: name too long?\n");
+            ALOGE("ARGH: name too long?\n");
             continue;
         }
         //printf("Comparing %s in %s?\n", nameBuf, dirName.string());

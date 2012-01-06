@@ -135,7 +135,7 @@ bool RsdShaderCache::link(const Context *rsc) {
     }
 
     //ALOGV("RsdShaderCache miss");
-    //LOGE("e0 %x", glGetError());
+    //ALOGE("e0 %x", glGetError());
     ProgramEntry *e = new ProgramEntry(vtx->getAttribCount(),
                                        vtx->getUniformCount(),
                                        frag->getUniformCount());
@@ -147,7 +147,7 @@ bool RsdShaderCache::link(const Context *rsc) {
     if (e->program) {
         GLuint pgm = e->program;
         glAttachShader(pgm, vtx->getShaderID());
-        //LOGE("e1 %x", glGetError());
+        //ALOGE("e1 %x", glGetError());
         glAttachShader(pgm, frag->getShaderID());
 
         glBindAttribLocation(pgm, 0, "ATTRIB_position");
@@ -155,9 +155,9 @@ bool RsdShaderCache::link(const Context *rsc) {
         glBindAttribLocation(pgm, 2, "ATTRIB_normal");
         glBindAttribLocation(pgm, 3, "ATTRIB_texture0");
 
-        //LOGE("e2 %x", glGetError());
+        //ALOGE("e2 %x", glGetError());
         glLinkProgram(pgm);
-        //LOGE("e3 %x", glGetError());
+        //ALOGE("e3 %x", glGetError());
         GLint linkStatus = GL_FALSE;
         glGetProgramiv(pgm, GL_LINK_STATUS, &linkStatus);
         if (linkStatus != GL_TRUE) {
@@ -167,7 +167,7 @@ bool RsdShaderCache::link(const Context *rsc) {
                 char* buf = (char*) malloc(bufLength);
                 if (buf) {
                     glGetProgramInfoLog(pgm, bufLength, NULL, buf);
-                    LOGE("Could not link program:\n%s\n", buf);
+                    ALOGE("Could not link program:\n%s\n", buf);
                     free(buf);
                 }
             }
@@ -205,7 +205,7 @@ bool RsdShaderCache::link(const Context *rsc) {
                     glGetActiveUniform(pgm, ct, maxNameLength, &uniformList[ct]->writtenLength,
                                        &uniformList[ct]->arraySize, &uniformList[ct]->type,
                                        uniformList[ct]->name);
-                    //LOGE("GL UNI idx=%u, arraySize=%u, name=%s", ct,
+                    //ALOGE("GL UNI idx=%u, arraySize=%u, name=%s", ct,
                     //     uniformList[ct]->arraySize, uniformList[ct]->name);
                 }
             }

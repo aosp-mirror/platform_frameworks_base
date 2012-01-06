@@ -1062,7 +1062,7 @@ int register_android_opengl_classes(JNIEnv* env)
         result = AndroidRuntime::registerNativeMethods(env,
                 cri->classPath, cri->methods, cri->methodCount);
         if (result < 0) {
-            LOGE("Failed to register %s: %d", cri->classPath, result);
+            ALOGE("Failed to register %s: %d", cri->classPath, result);
             break;
         }
     }

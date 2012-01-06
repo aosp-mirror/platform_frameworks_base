@@ -131,7 +131,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     sp<NativeDisplayEventReceiver> r = static_cast<NativeDisplayEventReceiver*>(data);
 
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-        LOGE("Display event receiver pipe was closed or an error occurred.  "
+        ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
         r->mFdCallbackRegistered = false;
         return 0; // remove the callback
@@ -177,7 +177,7 @@ int NativeDisplayEventReceiver::handleReceiveCallback(int receiveFd, int events,
     ALOGV("receiver %p ~ Returned from vsync handler.", this);
 
     if (env->ExceptionCheck()) {
-        LOGE("An exception occurred while dispatching a vsync event.");
+        ALOGE("An exception occurred while dispatching a vsync event.");
         LOGE_EX(env);
         env->ExceptionClear();
     }

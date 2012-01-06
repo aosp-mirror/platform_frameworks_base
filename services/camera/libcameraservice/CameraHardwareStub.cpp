@@ -57,7 +57,7 @@ void CameraHardwareStub::initDefaultParameters()
     p.setPictureFormat(CameraParameters::PIXEL_FORMAT_JPEG);
 
     if (setParameters(p) != NO_ERROR) {
-        LOGE("Failed to set default parameters?!");
+        ALOGE("Failed to set default parameters?!");
     }
 }
 
@@ -340,20 +340,20 @@ status_t CameraHardwareStub::setParameters(const CameraParameters& params)
 
     if (strcmp(params.getPreviewFormat(),
         CameraParameters::PIXEL_FORMAT_YUV420SP) != 0) {
-        LOGE("Only yuv420sp preview is supported");
+        ALOGE("Only yuv420sp preview is supported");
         return -1;
     }
 
     if (strcmp(params.getPictureFormat(),
         CameraParameters::PIXEL_FORMAT_JPEG) != 0) {
-        LOGE("Only jpeg still pictures are supported");
+        ALOGE("Only jpeg still pictures are supported");
         return -1;
     }
 
     int w, h;
     params.getPictureSize(&w, &h);
     if (w != kCannedJpegWidth && h != kCannedJpegHeight) {
-        LOGE("Still picture size must be size of canned JPEG (%dx%d)",
+        ALOGE("Still picture size must be size of canned JPEG (%dx%d)",
              kCannedJpegWidth, kCannedJpegHeight);
         return -1;
     }

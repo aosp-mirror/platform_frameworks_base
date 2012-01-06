@@ -79,7 +79,7 @@ SubRegionMemory::SubRegionMemory(const sp<MemoryHeapPmem>& heap,
         int our_fd = heap->heapID();
         struct pmem_region sub = { offset, size };
         int err = ioctl(our_fd, PMEM_MAP, &sub);
-        LOGE_IF(err<0, "PMEM_MAP failed (%s), "
+        ALOGE_IF(err<0, "PMEM_MAP failed (%s), "
                 "mFD=%d, sub.offset=%lu, sub.size=%lu",
                 strerror(errno), our_fd, sub.offset, sub.len);
 }
@@ -115,7 +115,7 @@ void SubRegionMemory::revoke()
         sub.offset = mOffset;
         sub.len = mSize;
         int err = ioctl(our_fd, PMEM_UNMAP, &sub);
-        LOGE_IF(err<0, "PMEM_UNMAP failed (%s), "
+        ALOGE_IF(err<0, "PMEM_UNMAP failed (%s), "
                 "mFD=%d, sub.offset=%lu, sub.size=%lu",
                 strerror(errno), our_fd, sub.offset, sub.len);
         mSize = 0;
@@ -133,11 +133,11 @@ MemoryHeapPmem::MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap,
 #ifdef HAVE_ANDROID_OS
     if (device) {
         int fd = open(device, O_RDWR | (flags & NO_CACHING ? O_SYNC : 0));
-        LOGE_IF(fd<0, "couldn't open %s (%s)", device, strerror(errno));
+        ALOGE_IF(fd<0, "couldn't open %s (%s)", device, strerror(errno));
         if (fd >= 0) {
             int err = ioctl(fd, PMEM_CONNECT, pmemHeap->heapID());
             if (err < 0) {
-                LOGE("PMEM_CONNECT failed (%s), mFD=%d, sub-fd=%d",
+                ALOGE("PMEM_CONNECT failed (%s), mFD=%d, sub-fd=%d",
                         strerror(errno), fd, pmemHeap->heapID());
                 close(fd);
             } else {
@@ -194,7 +194,7 @@ status_t MemoryHeapPmem::slap()
     int our_fd = getHeapID();
     struct pmem_region sub = { 0, size };
     int err = ioctl(our_fd, PMEM_MAP, &sub);
-    LOGE_IF(err<0, "PMEM_MAP failed (%s), "
+    ALOGE_IF(err<0, "PMEM_MAP failed (%s), "
             "mFD=%d, sub.offset=%lu, sub.size=%lu",
             strerror(errno), our_fd, sub.offset, sub.len);
     return -errno;
@@ -212,7 +212,7 @@ status_t MemoryHeapPmem::unslap()
     int our_fd = getHeapID();
     struct pmem_region sub = { 0, size };
     int err = ioctl(our_fd, PMEM_UNMAP, &sub);
-    LOGE_IF(err<0, "PMEM_UNMAP failed (%s), "
+    ALOGE_IF(err<0, "PMEM_UNMAP failed (%s), "
             "mFD=%d, sub.offset=%lu, sub.size=%lu",
             strerror(errno), our_fd, sub.offset, sub.len);
     return -errno;

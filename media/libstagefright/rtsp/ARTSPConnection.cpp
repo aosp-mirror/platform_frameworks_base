@@ -55,7 +55,7 @@ ARTSPConnection::ARTSPConnection(bool uidValid, uid_t uid)
 
 ARTSPConnection::~ARTSPConnection() {
     if (mSocket >= 0) {
-        LOGE("Connection is still open, closing the socket.");
+        ALOGE("Connection is still open, closing the socket.");
         if (mUIDValid) {
             HTTPBase::UnRegisterSocketUserTag(mSocket);
         }
@@ -235,7 +235,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
         // right here, since we currently have no way of asking the user
         // for this information.
 
-        LOGE("Malformed rtsp url %s", url.c_str());
+        ALOGE("Malformed rtsp url %s", url.c_str());
 
         reply->setInt32("result", ERROR_MALFORMED);
         reply->post();
@@ -250,7 +250,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
     struct hostent *ent = gethostbyname(host.c_str());
     if (ent == NULL) {
-        LOGE("Unknown host %s", host.c_str());
+        ALOGE("Unknown host %s", host.c_str());
 
         reply->setInt32("result", -ENOENT);
         reply->post();
@@ -376,7 +376,7 @@ void ARTSPConnection::onCompleteConnection(const sp<AMessage> &msg) {
     CHECK_EQ(optionLen, (socklen_t)sizeof(err));
 
     if (err != 0) {
-        LOGE("err = %d (%s)", err, strerror(err));
+        ALOGE("err = %d (%s)", err, strerror(err));
 
         reply->setInt32("result", -err);
 
@@ -446,12 +446,12 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
 
             if (n == 0) {
                 // Server closed the connection.
-                LOGE("Server unexpectedly closed the connection.");
+                ALOGE("Server unexpectedly closed the connection.");
 
                 reply->setInt32("result", ERROR_IO);
                 reply->post();
             } else {
-                LOGE("Error sending rtsp request. (%s)", strerror(errno));
+                ALOGE("Error sending rtsp request. (%s)", strerror(errno));
                 reply->setInt32("result", -errno);
                 reply->post();
             }
@@ -536,10 +536,10 @@ status_t ARTSPConnection::receive(void *data, size_t size) {
 
             if (n == 0) {
                 // Server closed the connection.
-                LOGE("Server unexpectedly closed the connection.");
+                ALOGE("Server unexpectedly closed the connection.");
                 return ERROR_IO;
             } else {
-                LOGE("Error reading rtsp response. (%s)", strerror(errno));
+                ALOGE("Error reading rtsp response. (%s)", strerror(errno));
                 return -errno;
             }
         }
@@ -793,9 +793,9 @@ bool ARTSPConnection::handleServerRequest(const sp<ARTSPResponse> &request) {
         if (n <= 0) {
             if (n == 0) {
                 // Server closed the connection.
-                LOGE("Server unexpectedly closed the connection.");
+                ALOGE("Server unexpectedly closed the connection.");
             } else {
-                LOGE("Error sending rtsp response (%s).", strerror(errno));
+                ALOGE("Error sending rtsp response (%s).", strerror(errno));
             }
 
             performDisconnect();

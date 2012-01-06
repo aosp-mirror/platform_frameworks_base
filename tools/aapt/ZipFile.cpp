@@ -780,7 +780,7 @@ status_t ZipFile::compressFpToFp(FILE* dstFp, FILE* srcFp,
     if (zerr != Z_OK) {
         result = UNKNOWN_ERROR;
         if (zerr == Z_VERSION_ERROR) {
-            LOGE("Installed zlib is not compatible with linked version (%s)\n",
+            ALOGE("Installed zlib is not compatible with linked version (%s)\n",
                 ZLIB_VERSION);
         } else {
             ALOGD("Call to deflateInit2 failed (zerr=%d)\n", zerr);
@@ -1019,7 +1019,7 @@ status_t ZipFile::crunchArchive(void)
                         pEntry->getLFHOffset(), span);
             if (result != NO_ERROR) {
                 /* this is why you use a temp file */
-                LOGE("error during crunch - archive is toast\n");
+                ALOGE("error during crunch - archive is toast\n");
                 return result;
             }
 

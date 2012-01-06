@@ -128,7 +128,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     sp<NativeInputEventReceiver> r = static_cast<NativeInputEventReceiver*>(data);
 
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-        LOGE("channel '%s' ~ Publisher closed input channel or an error occurred.  "
+        ALOGE("channel '%s' ~ Publisher closed input channel or an error occurred.  "
                 "events=0x%x", r->getInputChannelName(), events);
         return 0; // remove the callback
     }
@@ -141,7 +141,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
 
     status_t status = r->mInputConsumer.receiveDispatchSignal();
     if (status) {
-        LOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
+        ALOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
                 r->getInputChannelName(), status);
         return 0; // remove the callback
     }
@@ -206,7 +206,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
 #endif
 
     if (env->ExceptionCheck()) {
-        LOGE("channel '%s' ~ An exception occurred while dispatching an event.",
+        ALOGE("channel '%s' ~ An exception occurred while dispatching an event.",
                 r->getInputChannelName());
         LOGE_EX(env);
         env->ExceptionClear();
