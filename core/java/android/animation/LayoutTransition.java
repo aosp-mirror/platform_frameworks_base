@@ -321,13 +321,13 @@ public class LayoutTransition {
     public long getStartDelay(int transitionType) {
         switch (transitionType) {
             case CHANGE_APPEARING:
-                return mChangingAppearingDuration;
+                return mChangingAppearingDelay;
             case CHANGE_DISAPPEARING:
-                return mChangingDisappearingDuration;
+                return mChangingDisappearingDelay;
             case APPEARING:
-                return mAppearingDuration;
+                return mAppearingDelay;
             case DISAPPEARING:
-                return mDisappearingDuration;
+                return mDisappearingDelay;
         }
         // shouldn't reach here
         return 0;
