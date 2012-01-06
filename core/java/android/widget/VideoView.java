@@ -380,7 +380,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 }
 
                 new AlertDialog.Builder(mContext)
-                        .setTitle(com.android.internal.R.string.VideoView_error_title)
                         .setMessage(messageId)
                         .setPositiveButton(com.android.internal.R.string.VideoView_error_button,
                                 new DialogInterface.OnClickListener() {
