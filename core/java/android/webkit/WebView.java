@@ -952,8 +952,7 @@ public class WebView extends AbsoluteLayout
         public void onNewPicture(WebView view, Picture picture);
     }
 
-    // FIXME: Want to make this public, but need to change the API file.
-    public /*static*/ class HitTestResult {
+    public static class HitTestResult {
         /**
          * Default HitTestResult, where the target is unknown
          */

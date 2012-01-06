@@ -25433,7 +25433,7 @@ package android.webkit {
     field public static final java.lang.String SCHEME_TEL = "tel:";
   }
 
-  public class WebView.HitTestResult {
+  public static class WebView.HitTestResult {
     method public java.lang.String getExtra();
     method public int getType();
     field public static final deprecated int ANCHOR_TYPE = 1; // 0x1
