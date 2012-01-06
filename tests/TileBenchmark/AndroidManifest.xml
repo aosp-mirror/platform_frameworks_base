@@ -18,5 +18,9 @@
                   android:label="@string/playback_activity"
                   android:theme="@android:style/Theme.Holo.NoActionBar">
         </activity>
+        <uses-library android:name="android.test.runner" />
     </application>
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+                     android:targetPackage="com.test.tilebenchmark"
+                     android:label="Tests for WebView Tiles."/>
 </manifest>
