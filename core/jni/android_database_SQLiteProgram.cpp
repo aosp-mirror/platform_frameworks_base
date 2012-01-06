@@ -176,7 +176,7 @@ int register_android_database_SQLiteProgram(JNIEnv * env)
 
     clazz = env->FindClass("android/database/sqlite/SQLiteProgram");
     if (clazz == NULL) {
-        LOGE("Can't find android/database/sqlite/SQLiteProgram");
+        ALOGE("Can't find android/database/sqlite/SQLiteProgram");
         return -1;
     }
 
@@ -184,7 +184,7 @@ int register_android_database_SQLiteProgram(JNIEnv * env)
     gStatementField = env->GetFieldID(clazz, "nStatement", "I");
 
     if (gHandleField == NULL || gStatementField == NULL) {
-        LOGE("Error locating fields");
+        ALOGE("Error locating fields");
         return -1;
     }
 

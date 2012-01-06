@@ -267,7 +267,7 @@ int register_android_util_EventLog(JNIEnv* env) {
     for (int i = 0; i < NELEM(gClasses); ++i) {
         jclass clazz = env->FindClass(gClasses[i].name);
         if (clazz == NULL) {
-            LOGE("Can't find class: %s\n", gClasses[i].name);
+            ALOGE("Can't find class: %s\n", gClasses[i].name);
             return -1;
         }
         *gClasses[i].clazz = (jclass) env->NewGlobalRef(clazz);
@@ -277,7 +277,7 @@ int register_android_util_EventLog(JNIEnv* env) {
         *gFields[i].id = env->GetFieldID(
                 *gFields[i].c, gFields[i].name, gFields[i].ft);
         if (*gFields[i].id == NULL) {
-            LOGE("Can't find field: %s\n", gFields[i].name);
+            ALOGE("Can't find field: %s\n", gFields[i].name);
             return -1;
         }
     }
@@ -286,7 +286,7 @@ int register_android_util_EventLog(JNIEnv* env) {
         *gMethods[i].id = env->GetMethodID(
                 *gMethods[i].c, gMethods[i].name, gMethods[i].mt);
         if (*gMethods[i].id == NULL) {
-            LOGE("Can't find method: %s\n", gMethods[i].name);
+            ALOGE("Can't find method: %s\n", gMethods[i].name);
             return -1;
         }
     }

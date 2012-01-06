@@ -445,7 +445,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
             def.format.video.eColorFormat);
 
     if (err != 0) {
-        LOGE("native_window_set_buffers_geometry failed: %s (%d)",
+        ALOGE("native_window_set_buffers_geometry failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -464,7 +464,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
             usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
 
     if (err != 0) {
-        LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
+        ALOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
         return err;
     }
 
@@ -474,7 +474,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
             &minUndequeuedBufs);
 
     if (err != 0) {
-        LOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
+        ALOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -489,7 +489,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
                 mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
 
         if (err != OK) {
-            LOGE("[%s] setting nBufferCountActual to %lu failed: %d",
+            ALOGE("[%s] setting nBufferCountActual to %lu failed: %d",
                     mComponentName.c_str(), newBufferCount, err);
             return err;
         }
@@ -499,7 +499,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
             mNativeWindow.get(), def.nBufferCountActual);
 
     if (err != 0) {
-        LOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err),
+        ALOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err),
                 -err);
         return err;
     }
@@ -513,7 +513,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         ANativeWindowBuffer *buf;
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
         if (err != 0) {
-            LOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
+            ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
             break;
         }
 
@@ -528,7 +528,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         err = mOMX->useGraphicBuffer(mNode, kPortIndexOutput, graphicBuffer,
                 &bufferId);
         if (err != 0) {
-            LOGE("registering GraphicBuffer %lu with OMX IL component failed: "
+            ALOGE("registering GraphicBuffer %lu with OMX IL component failed: "
                  "%d", i, err);
             break;
         }
@@ -581,7 +581,7 @@ status_t ACodec::cancelBufferToNativeWindow(BufferInfo *info) {
 ACodec::BufferInfo *ACodec::dequeueBufferFromNativeWindow() {
     ANativeWindowBuffer *buf;
     if (mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf) != 0) {
-        LOGE("dequeueBuffer failed.");
+        ALOGE("dequeueBuffer failed.");
         return NULL;
     }
 
@@ -1367,7 +1367,7 @@ bool ACodec::BaseState::onOMXEvent(
         return false;
     }
 
-    LOGE("[%s] ERROR(0x%08lx)", mCodec->mComponentName.c_str(), data1);
+    ALOGE("[%s] ERROR(0x%08lx)", mCodec->mComponentName.c_str(), data1);
 
     mCodec->signalError((OMX_ERRORTYPE)data1);
 
@@ -1826,7 +1826,7 @@ void ACodec::UninitializedState::onSetup(
     }
 
     if (node == NULL) {
-        LOGE("Unable to instantiate a decoder for type '%s'.", mime.c_str());
+        ALOGE("Unable to instantiate a decoder for type '%s'.", mime.c_str());
 
         mCodec->signalError(OMX_ErrorComponentNotFound);
         return;
@@ -1874,7 +1874,7 @@ void ACodec::LoadedToIdleState::stateEntered() {
 
     status_t err;
     if ((err = allocateBuffers()) != OK) {
-        LOGE("Failed to allocate buffers after transitioning to IDLE state "
+        ALOGE("Failed to allocate buffers after transitioning to IDLE state "
              "(error 0x%08x)",
              err);
 
@@ -2198,7 +2198,7 @@ bool ACodec::OutputPortSettingsChangedState::onOMXEvent(
                 status_t err;
                 if ((err = mCodec->allocateBuffersOnPort(
                                 kPortIndexOutput)) != OK) {
-                    LOGE("Failed to allocate output port buffers after "
+                    ALOGE("Failed to allocate output port buffers after "
                          "port reconfiguration (error 0x%08x)",
                          err);
 

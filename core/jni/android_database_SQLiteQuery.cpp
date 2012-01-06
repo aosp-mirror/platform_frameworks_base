@@ -47,7 +47,7 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
         // Bind the offset parameter, telling the program which row to start with
         int err = sqlite3_bind_int(statement, offsetParam, startPos);
         if (err != SQLITE_OK) {
-            LOGE("Unable to bind offset position, offsetParam = %d", offsetParam);
+            ALOGE("Unable to bind offset position, offsetParam = %d", offsetParam);
             throw_sqlite3_exception(env, database);
             return 0;
         }
@@ -63,7 +63,7 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
     int numColumns = sqlite3_column_count(statement);
     status_t status = window->setNumColumns(numColumns);
     if (status) {
-        LOGE("Failed to change column count from %d to %d", window->getNumColumns(), numColumns);
+        ALOGE("Failed to change column count from %d to %d", window->getNumColumns(), numColumns);
         jniThrowException(env, "java/lang/IllegalStateException", "numColumns mismatch");
         return 0;
     }
@@ -165,7 +165,7 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
                     LOG_WINDOW("%d,%d is NULL", startPos + addedRows, i);
                 } else {
                     // Unknown data
-                    LOGE("Unknown column type when filling database window");
+                    ALOGE("Unknown column type when filling database window");
                     throw_sqlite3_exception(env, "Unknown column type when filling window");
                     gotException = true;
                     break;
@@ -186,7 +186,7 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
             // The table is locked, retry
             LOG_WINDOW("Database locked, retrying");
             if (retryCount > 50) {
-                LOGE("Bailing on database busy retry");
+                ALOGE("Bailing on database busy retry");
                 throw_sqlite3_exception(env, database, "retrycount exceeded");
                 gotException = true;
             } else {
@@ -207,7 +207,7 @@ static jint nativeFillWindow(JNIEnv* env, jclass clazz, jint databasePtr,
 
     // Report the total number of rows on request.
     if (startPos > totalRows) {
-        LOGE("startPos %d > actual rows %d", startPos, totalRows);
+        ALOGE("startPos %d > actual rows %d", startPos, totalRows);
     }
     return countAllRows ? totalRows : 0;
 }

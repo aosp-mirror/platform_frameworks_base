@@ -139,7 +139,7 @@ void release_object(const sp<ProcessState>& proc,
         }
     }
 
-    LOGE("Invalid object type 0x%08lx", obj.type);
+    ALOGE("Invalid object type 0x%08lx", obj.type);
 }
 
 inline static status_t finish_flatten_binder(
@@ -159,7 +159,7 @@ status_t flatten_binder(const sp<ProcessState>& proc,
         if (!local) {
             BpBinder *proxy = binder->remoteBinder();
             if (proxy == NULL) {
-                LOGE("null proxy");
+                ALOGE("null proxy");
             }
             const int32_t handle = proxy ? proxy->handle() : 0;
             obj.type = BINDER_TYPE_HANDLE;
@@ -192,7 +192,7 @@ status_t flatten_binder(const sp<ProcessState>& proc,
             if (!local) {
                 BpBinder *proxy = real->remoteBinder();
                 if (proxy == NULL) {
-                    LOGE("null proxy");
+                    ALOGE("null proxy");
                 }
                 const int32_t handle = proxy ? proxy->handle() : 0;
                 obj.type = BINDER_TYPE_WEAK_HANDLE;
@@ -213,7 +213,7 @@ status_t flatten_binder(const sp<ProcessState>& proc,
         // The OpenBinder implementation uses a dynamic_cast<> here,
         // but we can't do that with the different reference counting
         // implementation we are using.
-        LOGE("Unable to unflatten Binder weak reference!");
+        ALOGE("Unable to unflatten Binder weak reference!");
         obj.type = BINDER_TYPE_BINDER;
         obj.binder = NULL;
         obj.cookie = NULL;
@@ -1010,7 +1010,7 @@ String16 Parcel::readString16() const
     size_t len;
     const char16_t* str = readString16Inplace(&len);
     if (str) return String16(str, len);
-    LOGE("Reading a NULL string not supported here.");
+    ALOGE("Reading a NULL string not supported here.");
     return String16();
 }
 
@@ -1503,7 +1503,7 @@ status_t Parcel::continueWrite(size_t desired)
         
         if(!(mDataCapacity == 0 && mObjects == NULL
              && mObjectsCapacity == 0)) {
-            LOGE("continueWrite: %d/%p/%d/%d", mDataCapacity, mObjects, mObjectsCapacity, desired);
+            ALOGE("continueWrite: %d/%p/%d/%d", mDataCapacity, mObjects, mObjectsCapacity, desired);
         }
         
         mData = data;

@@ -56,14 +56,14 @@ jfieldID get_field(JNIEnv *env,
                    const char *member,
                    const char *mtype);
 
-// LOGE and free a D-Bus error
+// ALOGE and free a D-Bus error
 // Using #define so that __FUNCTION__ resolves usefully
 #define LOG_AND_FREE_DBUS_ERROR_WITH_MSG(err, msg) \
-    {   LOGE("%s: D-Bus error in %s: %s (%s)", __FUNCTION__, \
+    {   ALOGE("%s: D-Bus error in %s: %s (%s)", __FUNCTION__, \
         dbus_message_get_member((msg)), (err)->name, (err)->message); \
          dbus_error_free((err)); }
 #define LOG_AND_FREE_DBUS_ERROR(err) \
-    {   LOGE("%s: D-Bus error: %s (%s)", __FUNCTION__, \
+    {   ALOGE("%s: D-Bus error: %s (%s)", __FUNCTION__, \
         (err)->name, (err)->message); \
         dbus_error_free((err)); }
 

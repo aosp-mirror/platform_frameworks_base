@@ -86,14 +86,14 @@ static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
     ALOGV("android_media_ToneGenerator_native_setup jobject: %x\n", (int)thiz);
 
     if (lpToneGen == NULL) {
-        LOGE("ToneGenerator creation failed \n");
+        ALOGE("ToneGenerator creation failed \n");
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
     ALOGV("ToneGenerator lpToneGen: %x\n", (unsigned int)lpToneGen);
 
     if (!lpToneGen->isInited()) {
-        LOGE("ToneGenerator init failed \n");
+        ALOGE("ToneGenerator init failed \n");
         jniThrowRuntimeException(env, "Init failed");
         return;
     }
@@ -133,13 +133,13 @@ int register_android_media_ToneGenerator(JNIEnv *env) {
 
     clazz = env->FindClass("android/media/ToneGenerator");
     if (clazz == NULL) {
-        LOGE("Can't find %s", "android/media/ToneGenerator");
+        ALOGE("Can't find %s", "android/media/ToneGenerator");
         return -1;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        LOGE("Can't find ToneGenerator.mNativeContext");
+        ALOGE("Can't find ToneGenerator.mNativeContext");
         return -1;
     }
     ALOGV("register_android_media_ToneGenerator ToneGenerator fields.context: %x", (unsigned int)fields.context);

@@ -418,7 +418,7 @@ int MtpDataPacket::readData(struct usb_request *request, void* buffer, int lengt
 // Queue a read request.  Call readDataWait to wait for result
 int MtpDataPacket::readDataAsync(struct usb_request *req) {
     if (usb_request_queue(req)) {
-        LOGE("usb_endpoint_queue failed, errno: %d", errno);
+        ALOGE("usb_endpoint_queue failed, errno: %d", errno);
         return -1;
     }
     return 0;

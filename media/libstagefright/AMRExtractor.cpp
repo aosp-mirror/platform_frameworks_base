@@ -85,7 +85,7 @@ static size_t getFrameSize(bool isWide, unsigned FT) {
     };
 
     if (FT > 15 || (isWide && FT > 9 && FT < 14) || (!isWide && FT > 11 && FT < 15)) {
-        LOGE("illegal AMR frame type %d", FT);
+        ALOGE("illegal AMR frame type %d", FT);
         return 0;
     }
 
@@ -285,7 +285,7 @@ status_t AMRSource::read(
     if (header & 0x83) {
         // Padding bits must be 0.
 
-        LOGE("padding bits must be 0, header is 0x%02x", header);
+        ALOGE("padding bits must be 0, header is 0x%02x", header);
 
         return ERROR_MALFORMED;
     }

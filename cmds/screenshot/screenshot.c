@@ -26,20 +26,20 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
 
     fb = fileno(fb_in);
     if(fb < 0) {
-        LOGE("failed to open framebuffer\n");
+        ALOGE("failed to open framebuffer\n");
         return;
     }
     fb_in = fdopen(fb, "r");
 
     if(ioctl(fb, FBIOGET_VSCREENINFO, &vinfo) < 0) {
-        LOGE("failed to get framebuffer info\n");
+        ALOGE("failed to get framebuffer info\n");
         return;
     }
     fcntl(fb, F_SETFD, FD_CLOEXEC);
 
     png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (png == NULL) {
-        LOGE("failed png_create_write_struct\n");
+        ALOGE("failed png_create_write_struct\n");
         fclose(fb_in);
         return;
     }
@@ -47,13 +47,13 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
     png_init_io(png, fb_out);
     info = png_create_info_struct(png);
     if (info == NULL) {
-        LOGE("failed png_create_info_struct\n");
+        ALOGE("failed png_create_info_struct\n");
         png_destroy_write_struct(&png, NULL);
         fclose(fb_in);
         return;
     }
     if (setjmp(png_jmpbuf(png))) {
-        LOGE("failed png setjmp\n");
+        ALOGE("failed png setjmp\n");
         png_destroy_write_struct(&png, NULL);
         fclose(fb_in);
         return;
@@ -68,7 +68,7 @@ void take_screenshot(FILE *fb_in, FILE *fb_out) {
 
     rowlen=vinfo.xres * bytespp;
     if (rowlen > sizeof(imgbuf)) {
-        LOGE("crazy rowlen: %d\n", rowlen);
+        ALOGE("crazy rowlen: %d\n", rowlen);
         png_destroy_write_struct(&png, NULL);
         fclose(fb_in);
         return;

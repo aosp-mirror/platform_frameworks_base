@@ -203,7 +203,7 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
     
     int32_t res = mConsumer.receiveDispatchSignal();
     if (res != android::OK) {
-        LOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
+        ALOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
                 mConsumer.getChannel()->getName().string(), res);
         return -1;
     }
@@ -548,7 +548,7 @@ void android_NativeActivity_hideSoftInput(
 
 static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
    if (env->ExceptionCheck()) {
-       LOGE("An exception was thrown by callback '%s'.", methodName);
+       ALOGE("An exception was thrown by callback '%s'.", methodName);
        LOGE_EX(env);
        env->ExceptionClear();
        return true;
@@ -585,7 +585,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                     checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
                     code->env->DeleteLocalRef(inputEventObj);
                 } else {
-                    LOGE("Failed to obtain key event for dispatchUnhandledKeyEvent.");
+                    ALOGE("Failed to obtain key event for dispatchUnhandledKeyEvent.");
                     handled = false;
                 }
                 code->nativeInputQueue->finishEvent(keyEvent, handled, true);
@@ -600,7 +600,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                     checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
                     code->env->DeleteLocalRef(inputEventObj);
                 } else {
-                    LOGE("Failed to obtain key event for preDispatchKeyEvent.");
+                    ALOGE("Failed to obtain key event for preDispatchKeyEvent.");
                 }
             }
         } break;

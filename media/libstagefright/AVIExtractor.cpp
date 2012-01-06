@@ -1080,7 +1080,7 @@ status_t AVIExtractor::addH264CodecSpecificData(size_t trackIndex) {
     sp<MetaData> meta = MakeAVCCodecSpecificData(buffer);
 
     if (meta == NULL) {
-        LOGE("Unable to extract AVC codec specific data");
+        ALOGE("Unable to extract AVC codec specific data");
         return ERROR_MALFORMED;
     }
 

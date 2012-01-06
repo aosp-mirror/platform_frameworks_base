@@ -39,7 +39,7 @@ bool ConvertKeyValueArraysToKeyedVector(
     }
 
     if (failed) {
-        LOGE("keys and values arrays have different length");
+        ALOGE("keys and values arrays have different length");
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return false;
     }

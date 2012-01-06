@@ -312,7 +312,7 @@ void NativeInputManager::dump(String8& dump) {
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
+        ALOGE("An exception was thrown by callback '%s'.", methodName);
         LOGE_EX(env);
         env->ExceptionClear();
         return true;
@@ -736,7 +736,7 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
     }
 
     if (!inputEventObj) {
-        LOGE("Failed to obtain input event object for filterInputEvent.");
+        ALOGE("Failed to obtain input event object for filterInputEvent.");
         return true; // dispatch the event normally
     }
 
@@ -774,7 +774,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
         } else {
-            LOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
+            ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
             wmActions = 0;
         }
 
@@ -879,7 +879,7 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
                 }
             }
         } else {
-            LOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
+            ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
         }
         env->DeleteLocalRef(inputWindowHandleObj);
     }
@@ -917,7 +917,7 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
                 env->DeleteLocalRef(fallbackKeyEventObj);
             }
         } else {
-            LOGE("Failed to obtain key event object for dispatchUnhandledKey.");
+            ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
         }
         env->DeleteLocalRef(inputWindowHandleObj);
     }
@@ -958,7 +958,7 @@ static sp<NativeInputManager> gNativeInputManager;
 
 static bool checkInputManagerUnitialized(JNIEnv* env) {
     if (gNativeInputManager == NULL) {
-        LOGE("Input manager not initialized.");
+        ALOGE("Input manager not initialized.");
         jniThrowRuntimeException(env, "Input manager not initialized.");
         return true;
     }
@@ -971,7 +971,7 @@ static void android_server_InputManager_nativeInit(JNIEnv* env, jclass clazz,
         sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
         gNativeInputManager = new NativeInputManager(contextObj, callbacksObj, looper);
     } else {
-        LOGE("Input manager already initialized.");
+        ALOGE("Input manager already initialized.");
         jniThrowRuntimeException(env, "Input manager already initialized.");
     }
 }

@@ -327,7 +327,7 @@ FLAC__StreamDecoderWriteStatus FLACParser::writeCallback(
         mWriteCompleted = true;
         return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
     } else {
-        LOGE("FLACParser::writeCallback unexpected");
+        ALOGE("FLACParser::writeCallback unexpected");
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 }
@@ -340,7 +340,7 @@ void FLACParser::metadataCallback(const FLAC__StreamMetadata *metadata)
             mStreamInfo = metadata->data.stream_info;
             mStreamInfoValid = true;
         } else {
-            LOGE("FLACParser::metadataCallback unexpected STREAMINFO");
+            ALOGE("FLACParser::metadataCallback unexpected STREAMINFO");
         }
         break;
     case FLAC__METADATA_TYPE_VORBIS_COMMENT:
@@ -373,7 +373,7 @@ void FLACParser::metadataCallback(const FLAC__StreamMetadata *metadata)
 
 void FLACParser::errorCallback(FLAC__StreamDecoderErrorStatus status)
 {
-    LOGE("FLACParser::errorCallback status=%d", status);
+    ALOGE("FLACParser::errorCallback status=%d", status);
     mErrorStatus = status;
 }
 
@@ -477,7 +477,7 @@ status_t FLACParser::init()
         // The new should succeed, since probably all it does is a malloc
         // that always succeeds in Android.  But to avoid dependence on the
         // libFLAC internals, we check and log here.
-        LOGE("new failed");
+        ALOGE("new failed");
         return NO_INIT;
     }
     FLAC__stream_decoder_set_md5_checking(mDecoder, false);
@@ -497,12 +497,12 @@ status_t FLACParser::init()
     if (initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
         // A failure here probably indicates a programming error and so is
         // unlikely to happen. But we check and log here similarly to above.
-        LOGE("init_stream failed %d", initStatus);
+        ALOGE("init_stream failed %d", initStatus);
         return NO_INIT;
     }
     // parse all metadata
     if (!FLAC__stream_decoder_process_until_end_of_metadata(mDecoder)) {
-        LOGE("end_of_metadata failed");
+        ALOGE("end_of_metadata failed");
         return NO_INIT;
     }
     if (mStreamInfoValid) {
@@ -512,7 +512,7 @@ status_t FLACParser::init()
         case 2:
             break;
         default:
-            LOGE("unsupported channel count %u", getChannels());
+            ALOGE("unsupported channel count %u", getChannels());
             return NO_INIT;
         }
         // check bit depth
@@ -522,7 +522,7 @@ status_t FLACParser::init()
         case 24:
             break;
         default:
-            LOGE("unsupported bits per sample %u", getBitsPerSample());
+            ALOGE("unsupported bits per sample %u", getBitsPerSample());
             return NO_INIT;
         }
         // check sample rate
@@ -539,7 +539,7 @@ status_t FLACParser::init()
             break;
         default:
             // 96000 would require a proper downsampler in AudioFlinger
-            LOGE("unsupported sample rate %u", getSampleRate());
+            ALOGE("unsupported sample rate %u", getSampleRate());
             return NO_INIT;
         }
         // configure the appropriate copy function, defaulting to trespass
@@ -572,7 +572,7 @@ status_t FLACParser::init()
                     (getTotalSamples() * 1000000LL) / getSampleRate());
         }
     } else {
-        LOGE("missing STREAMINFO");
+        ALOGE("missing STREAMINFO");
         return NO_INIT;
     }
     if (mFileMetadata != 0) {
@@ -603,13 +603,13 @@ MediaBuffer *FLACParser::readBuffer(bool doSeek, FLAC__uint64 sample)
     if (doSeek) {
         // We implement the seek callback, so this works without explicit flush
         if (!FLAC__stream_decoder_seek_absolute(mDecoder, sample)) {
-            LOGE("FLACParser::readBuffer seek to sample %llu failed", sample);
+            ALOGE("FLACParser::readBuffer seek to sample %llu failed", sample);
             return NULL;
         }
         ALOGV("FLACParser::readBuffer seek to sample %llu succeeded", sample);
     } else {
         if (!FLAC__stream_decoder_process_single(mDecoder)) {
-            LOGE("FLACParser::readBuffer process_single failed");
+            ALOGE("FLACParser::readBuffer process_single failed");
             return NULL;
         }
     }
@@ -620,13 +620,13 @@ MediaBuffer *FLACParser::readBuffer(bool doSeek, FLAC__uint64 sample)
     // verify that block header keeps the promises made by STREAMINFO
     unsigned blocksize = mWriteHeader.blocksize;
     if (blocksize == 0 || blocksize > getMaxBlockSize()) {
-        LOGE("FLACParser::readBuffer write invalid blocksize %u", blocksize);
+        ALOGE("FLACParser::readBuffer write invalid blocksize %u", blocksize);
         return NULL;
     }
     if (mWriteHeader.sample_rate != getSampleRate() ||
         mWriteHeader.channels != getChannels() ||
         mWriteHeader.bits_per_sample != getBitsPerSample()) {
-        LOGE("FLACParser::readBuffer write changed parameters mid-stream");
+        ALOGE("FLACParser::readBuffer write changed parameters mid-stream");
     }
     // acquire a media buffer
     CHECK(mGroup != NULL);

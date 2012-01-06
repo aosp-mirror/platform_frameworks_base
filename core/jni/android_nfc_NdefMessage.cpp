@@ -55,7 +55,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
             (uint32_t)raw_msg_size, NULL, NULL, &num_of_records);
 
     if (status) {
-        LOGE("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x", status);
+        ALOGE("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x", status);
         goto end;
     }
     TRACE("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x, with %d records", status, num_of_records);
@@ -74,7 +74,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
             (uint32_t)raw_msg_size, records, is_chunked, &num_of_records);
 
     if (status) {
-        LOGE("phFriNfc_NdefRecord_GetRecords() returned 0x%04x", status);
+        ALOGE("phFriNfc_NdefRecord_GetRecords() returned 0x%04x", status);
         goto end;
     }
     TRACE("phFriNfc_NdefRecord_GetRecords() returned 0x%04x, with %d records", status, num_of_records);
@@ -97,7 +97,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         status = phFriNfc_NdefRecord_Parse(&record, records[i]);
 
         if (status) {
-            LOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+            ALOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
             goto end;
         }
         TRACE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
@@ -111,7 +111,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
                 (uint64_t)record.PayloadLength;
         if (indicatedMsgLength >
                 (uint64_t)raw_msg_size) {
-            LOGE("phFri_NdefRecord_Parse: invalid length field");
+            ALOGE("phFri_NdefRecord_Parse: invalid length field");
             goto end;
         }
 

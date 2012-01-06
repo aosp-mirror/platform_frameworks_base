@@ -70,7 +70,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->depthFunc = GL_NOTEQUAL;
         break;
     default:
-        LOGE("Unknown depth function.");
+        ALOGE("Unknown depth function.");
         goto error;
     }
 
@@ -111,7 +111,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->blendSrc = GL_SRC_ALPHA_SATURATE;
         break;
     default:
-        LOGE("Unknown blend src mode.");
+        ALOGE("Unknown blend src mode.");
         goto error;
     }
 
@@ -141,7 +141,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->blendDst = GL_ONE_MINUS_DST_ALPHA;
         break;
     default:
-        LOGE("Unknown blend dst mode.");
+        ALOGE("Unknown blend dst mode.");
         goto error;
     }
 

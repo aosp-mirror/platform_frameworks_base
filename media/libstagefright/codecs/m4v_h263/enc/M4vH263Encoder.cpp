@@ -43,7 +43,7 @@ static status_t ConvertOmxProfileLevel(
         switch (omxProfile) {
             case OMX_VIDEO_H263ProfileBaseline:
                 if (omxLevel > OMX_VIDEO_H263Level45) {
-                    LOGE("Unsupported level (%d) for H263", omxLevel);
+                    ALOGE("Unsupported level (%d) for H263", omxLevel);
                     return BAD_VALUE;
                 } else {
                     ALOGW("PV does not support level configuration for H263");
@@ -52,7 +52,7 @@ static status_t ConvertOmxProfileLevel(
                 }
                 break;
             default:
-                LOGE("Unsupported profile (%d) for H263", omxProfile);
+                ALOGE("Unsupported profile (%d) for H263", omxProfile);
                 return BAD_VALUE;
         }
     } else {  // MPEG4
@@ -72,7 +72,7 @@ static status_t ConvertOmxProfileLevel(
                         profileLevel = SIMPLE_PROFILE_LEVEL3;
                         break;
                     default:
-                        LOGE("Unsupported level (%d) for MPEG4 simple profile",
+                        ALOGE("Unsupported level (%d) for MPEG4 simple profile",
                             omxLevel);
                         return BAD_VALUE;
                 }
@@ -89,7 +89,7 @@ static status_t ConvertOmxProfileLevel(
                         profileLevel = SIMPLE_SCALABLE_PROFILE_LEVEL2;
                         break;
                     default:
-                        LOGE("Unsupported level (%d) for MPEG4 simple "
+                        ALOGE("Unsupported level (%d) for MPEG4 simple "
                              "scalable profile", omxLevel);
                         return BAD_VALUE;
                 }
@@ -103,7 +103,7 @@ static status_t ConvertOmxProfileLevel(
                         profileLevel = CORE_PROFILE_LEVEL2;
                         break;
                     default:
-                        LOGE("Unsupported level (%d) for MPEG4 core "
+                        ALOGE("Unsupported level (%d) for MPEG4 core "
                              "profile", omxLevel);
                         return BAD_VALUE;
                 }
@@ -120,13 +120,13 @@ static status_t ConvertOmxProfileLevel(
                         profileLevel = CORE_SCALABLE_PROFILE_LEVEL3;
                         break;
                     default:
-                        LOGE("Unsupported level (%d) for MPEG4 core "
+                        ALOGE("Unsupported level (%d) for MPEG4 core "
                              "scalable profile", omxLevel);
                         return BAD_VALUE;
                 }
                 break;
             default:
-                LOGE("Unsupported MPEG4 profile (%d)", omxProfile);
+                ALOGE("Unsupported MPEG4 profile (%d)", omxProfile);
                 return BAD_VALUE;
         }
     }
@@ -207,7 +207,7 @@ status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
     CHECK(meta->findInt32(kKeyColorFormat, &mVideoColorFormat));
     if (mVideoColorFormat != OMX_COLOR_FormatYUV420Planar) {
         if (mVideoColorFormat != OMX_COLOR_FormatYUV420SemiPlanar) {
-            LOGE("Color format %d is not supported", mVideoColorFormat);
+            ALOGE("Color format %d is not supported", mVideoColorFormat);
             return BAD_VALUE;
         }
         // Allocate spare buffer only when color conversion is needed.
@@ -219,7 +219,7 @@ status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
 
     // XXX: Remove this restriction
     if (mVideoWidth % 16 != 0 || mVideoHeight % 16 != 0) {
-        LOGE("Video frame size %dx%d must be a multiple of 16",
+        ALOGE("Video frame size %dx%d must be a multiple of 16",
             mVideoWidth, mVideoHeight);
         return BAD_VALUE;
     }
@@ -227,7 +227,7 @@ status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
     mEncParams = new tagvideoEncOptions;
     memset(mEncParams, 0, sizeof(tagvideoEncOptions));
     if (!PVGetDefaultEncOption(mEncParams, 0)) {
-        LOGE("Failed to get default encoding parameters");
+        ALOGE("Failed to get default encoding parameters");
         return BAD_VALUE;
     }
 
@@ -319,7 +319,7 @@ status_t M4vH263Encoder::start(MetaData *params) {
     }
 
     if (!PVInitVideoEncoder(mHandle, mEncParams)) {
-        LOGE("Failed to initialize the encoder");
+        ALOGE("Failed to initialize the encoder");
         return UNKNOWN_ERROR;
     }
 
@@ -386,7 +386,7 @@ status_t M4vH263Encoder::read(
     // Output codec specific data
     if (mNumInputFrames < 0) {
         if (!PVGetVolHeader(mHandle, outPtr, &dataLength, 0)) {
-            LOGE("Failed to get VOL header");
+            ALOGE("Failed to get VOL header");
             return UNKNOWN_ERROR;
         }
         ALOGV("Output VOL header: %d bytes", dataLength);
@@ -401,7 +401,7 @@ status_t M4vH263Encoder::read(
     status_t err = mSource->read(&mInputBuffer, options);
     if (OK != err) {
         if (err != ERROR_END_OF_STREAM) {
-            LOGE("Failed to read from data source");
+            ALOGE("Failed to read from data source");
         }
         outputBuffer->release();
         return err;
@@ -460,7 +460,7 @@ status_t M4vH263Encoder::read(
     if (!PVEncodeVideoFrame(mHandle, &vin, &vout,
             &modTimeMs, outPtr, &dataLength, &nLayer) ||
         !PVGetHintTrack(mHandle, &hintTrack)) {
-        LOGE("Failed to encode frame or get hink track at frame %lld",
+        ALOGE("Failed to encode frame or get hink track at frame %lld",
             mNumInputFrames);
         outputBuffer->release();
         mInputBuffer->release();

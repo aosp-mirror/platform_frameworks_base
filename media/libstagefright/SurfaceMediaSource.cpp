@@ -110,7 +110,7 @@ status_t SurfaceMediaSource::setBufferCountServer(int bufferCount) {
 status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
     ALOGV("SurfaceMediaSource::setBufferCount");
     if (bufferCount > NUM_BUFFER_SLOTS) {
-        LOGE("setBufferCount: bufferCount is larger than the number of buffer slots");
+        ALOGE("setBufferCount: bufferCount is larger than the number of buffer slots");
         return BAD_VALUE;
     }
 
@@ -118,7 +118,7 @@ status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
     // Error out if the user has dequeued buffers
     for (int i = 0 ; i < mBufferCount ; i++) {
         if (mSlots[i].mBufferState == BufferSlot::DEQUEUED) {
-            LOGE("setBufferCount: client owns some buffers");
+            ALOGE("setBufferCount: client owns some buffers");
             return INVALID_OPERATION;
         }
     }
@@ -153,7 +153,7 @@ status_t SurfaceMediaSource::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
     ALOGV("SurfaceMediaSource::requestBuffer");
     Mutex::Autolock lock(mMutex);
     if (slot < 0 || mBufferCount <= slot) {
-        LOGE("requestBuffer: slot index out of range [0, %d]: %d",
+        ALOGE("requestBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, slot);
         return BAD_VALUE;
     }
@@ -181,7 +181,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     // we might declare mHeight and mWidth and check against those here.
     if ((w != 0) || (h != 0)) {
         if ((w != mDefaultWidth) || (h != mDefaultHeight)) {
-            LOGE("dequeuebuffer: invalid buffer size! Req: %dx%d, Found: %dx%d",
+            ALOGE("dequeuebuffer: invalid buffer size! Req: %dx%d, Found: %dx%d",
                     mDefaultWidth, mDefaultHeight, w, h);
             return BAD_VALUE;
         }
@@ -282,7 +282,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             // than allowed.
             const int avail = mBufferCount - (dequeuedCount+1);
             if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
-                LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
+                ALOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
                         MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
                         dequeuedCount);
                 return -EBUSY;
@@ -344,7 +344,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                     mGraphicBufferAlloc->createGraphicBuffer(
                                     w, h, format, usage, &error));
             if (graphicBuffer == 0) {
-                LOGE("dequeueBuffer: SurfaceComposer::createGraphicBuffer failed");
+                ALOGE("dequeueBuffer: SurfaceComposer::createGraphicBuffer failed");
                 return error;
             }
             if (updateFormat) {
@@ -361,13 +361,13 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
 status_t SurfaceMediaSource::setSynchronousMode(bool enabled) {
     Mutex::Autolock lock(mMutex);
     if (mStopped) {
-        LOGE("setSynchronousMode: SurfaceMediaSource has been stopped!");
+        ALOGE("setSynchronousMode: SurfaceMediaSource has been stopped!");
         return NO_INIT;
     }
 
     if (!enabled) {
         // Async mode is not allowed
-        LOGE("SurfaceMediaSource can be used only synchronous mode!");
+        ALOGE("SurfaceMediaSource can be used only synchronous mode!");
         return INVALID_OPERATION;
     }
 
@@ -388,7 +388,7 @@ status_t SurfaceMediaSource::connect(int api,
     Mutex::Autolock lock(mMutex);
 
     if (mStopped) {
-        LOGE("Connect: SurfaceMediaSource has been stopped!");
+        ALOGE("Connect: SurfaceMediaSource has been stopped!");
         return NO_INIT;
     }
 
@@ -429,7 +429,7 @@ status_t SurfaceMediaSource::disconnect(int api) {
     Mutex::Autolock lock(mMutex);
 
     if (mStopped) {
-        LOGE("disconnect: SurfaceMediaSoource is already stopped!");
+        ALOGE("disconnect: SurfaceMediaSoource is already stopped!");
         return NO_INIT;
     }
 
@@ -465,15 +465,15 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
     *outTransform = 0;
 
     if (bufIndex < 0 || bufIndex >= mBufferCount) {
-        LOGE("queueBuffer: slot index out of range [0, %d]: %d",
+        ALOGE("queueBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, bufIndex);
         return -EINVAL;
     } else if (mSlots[bufIndex].mBufferState != BufferSlot::DEQUEUED) {
-        LOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
+        ALOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
                 bufIndex, mSlots[bufIndex].mBufferState);
         return -EINVAL;
     } else if (!mSlots[bufIndex].mRequestBufferCalled) {
-        LOGE("queueBuffer: slot %d was enqueued without requesting a "
+        ALOGE("queueBuffer: slot %d was enqueued without requesting a "
                 "buffer", bufIndex);
         return -EINVAL;
     }
@@ -559,11 +559,11 @@ void SurfaceMediaSource::cancelBuffer(int bufIndex) {
     ALOGV("SurfaceMediaSource::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     if (bufIndex < 0 || bufIndex >= mBufferCount) {
-        LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
+        ALOGE("cancelBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, bufIndex);
         return;
     } else if (mSlots[bufIndex].mBufferState != BufferSlot::DEQUEUED) {
-        LOGE("cancelBuffer: slot %d is not owned by the client (state=%d)",
+        ALOGE("cancelBuffer: slot %d is not owned by the client (state=%d)",
                 bufIndex, mSlots[bufIndex].mBufferState);
         return;
     }
@@ -812,7 +812,7 @@ void SurfaceMediaSource::passMetadataBufferLocked(MediaBuffer **buffer) {
         new MediaBuffer(4 + sizeof(buffer_handle_t));
     char *data = (char *)tempBuffer->data();
     if (data == NULL) {
-        LOGE("Cannot allocate memory for metadata buffer!");
+        ALOGE("Cannot allocate memory for metadata buffer!");
         return;
     }
     OMX_U32 type = kMetadataBufferTypeGrallocSource;

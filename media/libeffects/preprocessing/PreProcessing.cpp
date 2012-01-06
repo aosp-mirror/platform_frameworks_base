@@ -616,7 +616,7 @@ int Effect_SetState(preproc_effect_t *effect, uint32_t state)
         case PREPROC_EFFECT_STATE_CREATED:
         case PREPROC_EFFECT_STATE_ACTIVE:
         case PREPROC_EFFECT_STATE_CONFIG:
-            LOGE("Effect_SetState invalid transition");
+            ALOGE("Effect_SetState invalid transition");
             status = -ENOSYS;
             break;
         default:
@@ -626,7 +626,7 @@ int Effect_SetState(preproc_effect_t *effect, uint32_t state)
     case PREPROC_EFFECT_STATE_CONFIG:
         switch(effect->state) {
         case PREPROC_EFFECT_STATE_INIT:
-            LOGE("Effect_SetState invalid transition");
+            ALOGE("Effect_SetState invalid transition");
             status = -ENOSYS;
             break;
         case PREPROC_EFFECT_STATE_ACTIVE:
@@ -645,7 +645,7 @@ int Effect_SetState(preproc_effect_t *effect, uint32_t state)
         case PREPROC_EFFECT_STATE_INIT:
         case PREPROC_EFFECT_STATE_CREATED:
         case PREPROC_EFFECT_STATE_ACTIVE:
-            LOGE("Effect_SetState invalid transition");
+            ALOGE("Effect_SetState invalid transition");
             status = -ENOSYS;
             break;
         case PREPROC_EFFECT_STATE_CONFIG:

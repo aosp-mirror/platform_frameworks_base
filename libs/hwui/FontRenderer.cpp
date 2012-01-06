@@ -126,7 +126,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
             if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
-                LOGE("Skipping invalid index");
+                ALOGE("Skipping invalid index");
                 continue;
             }
             uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
@@ -168,7 +168,7 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
 void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, Rect *bounds) {
     if (bounds == NULL) {
-        LOGE("No return rectangle provided to measure text");
+        ALOGE("No return rectangle provided to measure text");
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
@@ -401,7 +401,7 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
             initTextTexture(true);
         }
         if (glyph.fHeight + 2 > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
-            LOGE("Font size to large to fit in cache. width, height = %i, %i",
+            ALOGE("Font size to large to fit in cache. width, height = %i, %i",
                     (int) glyph.fWidth, (int) glyph.fHeight);
             return false;
         }
@@ -433,7 +433,7 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
 
         // if we still don't fit, something is wrong and we shouldn't draw
         if (!bitmapFit) {
-            LOGE("Bitmap doesn't fit in cache. width, height = %i, %i",
+            ALOGE("Bitmap doesn't fit in cache. width, height = %i, %i",
                     (int) glyph.fWidth, (int) glyph.fHeight);
             return false;
         }
@@ -758,12 +758,12 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
     checkInit();
 
     if (!mCurrentFont) {
-        LOGE("No font set");
+        ALOGE("No font set");
         return false;
     }
 
     if (mPositionAttrSlot < 0 || mTexcoordAttrSlot < 0) {
-        LOGE("Font renderer unable to draw, attribute slots undefined");
+        ALOGE("Font renderer unable to draw, attribute slots undefined");
         return false;
     }
 
