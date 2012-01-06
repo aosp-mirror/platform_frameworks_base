@@ -799,7 +799,7 @@ private:
         status_t    dumpTracks(int fd, const Vector<String16>& args);
 
         SortedVector< sp<Track> >       mTracks;
-        // mStreamTypes[] uses 1 additionnal stream type internally for the OutputTrack used by DuplicatingThread
+        // mStreamTypes[] uses 1 additional stream type internally for the OutputTrack used by DuplicatingThread
         stream_type_t                   mStreamTypes[AUDIO_STREAM_CNT + 1];
         AudioStreamOut*                 mOutput;
         float                           mMasterVolume;
