@@ -3238,7 +3238,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
         }
    } else {
        mCblk = (audio_track_cblk_t *)(new uint8_t[size]);
-       if (mCblk) { // construct the shared structure in-place.
+           // construct the shared structure in-place.
            new(mCblk) audio_track_cblk_t();
            // clear all buffers
            mCblk->frameCount = frameCount;
@@ -3251,7 +3251,6 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
            // written to buffer (other flags are cleared)
            mCblk->flags = CBLK_UNDERRUN_ON;
            mBufferEnd = (uint8_t *)mBuffer + bufferSize;
-       }
    }
 }
 
