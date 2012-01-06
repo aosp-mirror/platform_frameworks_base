@@ -41,7 +41,6 @@
 #include <utils/StopWatch.h>
 
 #include <ui/GraphicBufferAllocator.h>
-#include <ui/GraphicLog.h>
 #include <ui/PixelFormat.h>
 
 #include <pixelflinger/pixelflinger.h>
@@ -431,21 +430,10 @@ bool SurfaceFlinger::threadLoop()
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (CC_LIKELY(hw.canDraw())) {
         // repaint the framebuffer (if needed)
-
-        const int index = hw.getCurrentBufferIndex();
-        GraphicLog& logger(GraphicLog::getInstance());
-
-        logger.log(GraphicLog::SF_REPAINT, index);
         handleRepaint();
-
         // inform the h/w that we're done compositing
-        logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
-
-        logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
         postFramebuffer();
-
-        logger.log(GraphicLog::SF_REPAINT_DONE, index);
     } else {
         // pretend we did the post
         hw.compositionComplete();
@@ -1097,23 +1085,6 @@ void SurfaceFlinger::drawWormhole() const
     }
 }
 
-void SurfaceFlinger::debugShowFPS() const
-{
-    static int mFrameCount;
-    static int mLastFrameCount = 0;
-    static nsecs_t mLastFpsTime = 0;
-    static float mFps = 0;
-    mFrameCount++;
-    nsecs_t now = systemTime();
-    nsecs_t diff = now - mLastFpsTime;
-    if (diff > ms2ns(250)) {
-        mFps =  ((mFrameCount - mLastFrameCount) * float(s2ns(1))) / diff;
-        mLastFpsTime = now;
-        mLastFrameCount = mFrameCount;
-    }
-    // XXX: mFPS has the value we want
- }
-
 status_t SurfaceFlinger::addLayer(const sp<LayerBase>& layer)
 {
     Mutex::Autolock _l(mStateLock);
@@ -1705,11 +1676,6 @@ status_t SurfaceFlinger::onTransact(
             }
             case 1005:{ // force transaction
                 setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
-                return NO_ERROR;
-            }
-            case 1006:{ // enable/disable GraphicLog
-                int enabled = data.readInt32();
-                GraphicLog::getInstance().setEnabled(enabled);
                 return NO_ERROR;
             }
             case 1008:  // toggle use of hw composer
