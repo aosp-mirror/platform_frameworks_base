@@ -145,7 +145,7 @@ private:
         mutable AudioBufferProvider::Buffer buffer;
 
         hook_t      hook;
-        void const* in;             // current location in buffer
+        const void* in;             // current location in buffer
 
         AudioResampler*     resampler;
         uint32_t            sampleRate;

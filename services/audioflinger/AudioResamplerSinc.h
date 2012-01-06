@@ -44,22 +44,22 @@ private:
 
     template<int CHANNELS>
     inline void filterCoefficient(
-            int32_t& l, int32_t& r, uint32_t phase, int16_t const *samples);
+            int32_t& l, int32_t& r, uint32_t phase, const int16_t *samples);
 
     template<int CHANNELS>
     inline void interpolate(
             int32_t& l, int32_t& r,
-            int32_t const* coefs, int16_t lerp, int16_t const* samples);
+            const int32_t* coefs, int16_t lerp, const int16_t* samples);
 
     template<int CHANNELS>
     inline void read(int16_t*& impulse, uint32_t& phaseFraction,
-            int16_t const* in, size_t inputIndex);
+            const int16_t* in, size_t inputIndex);
 
     int16_t *mState;
     int16_t *mImpulse;
     int16_t *mRingFull;
 
-    int32_t const * mFirCoefs;
+    const int32_t * mFirCoefs;
     static const int32_t mFirCoefsDown[];
     static const int32_t mFirCoefsUp[];
 

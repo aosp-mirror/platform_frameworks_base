@@ -604,7 +604,7 @@ void AudioMixer::volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32
 
 void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux)
 {
-    int16_t const *in = static_cast<int16_t const *>(t->in);
+    const int16_t *in = static_cast<const int16_t *>(t->in);
 
     if (CC_UNLIKELY(aux != NULL)) {
         int32_t l;
@@ -643,7 +643,7 @@ void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount
             const uint32_t vrl = t->volumeRL;
             const int16_t va = (int16_t)t->auxLevel;
             do {
-                uint32_t rl = *reinterpret_cast<uint32_t const *>(in);
+                uint32_t rl = *reinterpret_cast<const uint32_t *>(in);
                 int16_t a = (int16_t)(((int32_t)in[0] + in[1]) >> 1);
                 in += 2;
                 out[0] = mulAddRL(1, rl, vrl, out[0]);
@@ -681,7 +681,7 @@ void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount
         else {
             const uint32_t vrl = t->volumeRL;
             do {
-                uint32_t rl = *reinterpret_cast<uint32_t const *>(in);
+                uint32_t rl = *reinterpret_cast<const uint32_t *>(in);
                 in += 2;
                 out[0] = mulAddRL(1, rl, vrl, out[0]);
                 out[1] = mulAddRL(0, rl, vrl, out[1]);
@@ -694,7 +694,7 @@ void AudioMixer::track__16BitsStereo(track_t* t, int32_t* out, size_t frameCount
 
 void AudioMixer::track__16BitsMono(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux)
 {
-    int16_t const *in = static_cast<int16_t const *>(t->in);
+    const int16_t *in = static_cast<int16_t const *>(t->in);
 
     if (CC_UNLIKELY(aux != NULL)) {
         // ramp gain
@@ -916,6 +916,7 @@ void AudioMixer::process__genericNoResampling(state_t* state)
 // generic code with resampling
 void AudioMixer::process__genericResampling(state_t* state)
 {
+    // this const just means that local variable outTemp doesn't change
     int32_t* const outTemp = state->outputTemp;
     const size_t size = sizeof(int32_t) * MAX_NUM_CHANNELS * state->frameCount;
 
@@ -996,7 +997,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
     while (numFrames) {
         b.frameCount = numFrames;
         t.bufferProvider->getNextBuffer(&b);
-        int16_t const *in = b.i16;
+        const int16_t *in = b.i16;
 
         // in == NULL can happen if the track was flushed just after having
         // been enabled for mixing.
@@ -1012,7 +1013,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
             // volume is boosted, so we might need to clamp even though
             // we process only one track.
             do {
-                uint32_t rl = *reinterpret_cast<uint32_t const *>(in);
+                uint32_t rl = *reinterpret_cast<const uint32_t *>(in);
                 in += 2;
                 int32_t l = mulRL(1, rl, vrl) >> 12;
                 int32_t r = mulRL(0, rl, vrl) >> 12;
@@ -1023,7 +1024,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
             } while (--outFrames);
         } else {
             do {
-                uint32_t rl = *reinterpret_cast<uint32_t const *>(in);
+                uint32_t rl = *reinterpret_cast<const uint32_t *>(in);
                 in += 2;
                 int32_t l = mulRL(1, rl, vrl) >> 12;
                 int32_t r = mulRL(0, rl, vrl) >> 12;
@@ -1053,12 +1054,12 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
     const track_t& t1 = state->tracks[i];
     AudioBufferProvider::Buffer& b1(t1.buffer);
 
-    int16_t const *in0;
+    const int16_t *in0;
     const int16_t vl0 = t0.volume[0];
     const int16_t vr0 = t0.volume[1];
     size_t frameCount0 = 0;
 
-    int16_t const *in1;
+    const int16_t *in1;
     const int16_t vl1 = t1.volume[0];
     const int16_t vr1 = t1.volume[1];
     size_t frameCount1 = 0;
@@ -1066,7 +1067,7 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
     //FIXME: only works if two tracks use same buffer
     int32_t* out = t0.mainBuffer;
     size_t numFrames = state->frameCount;
-    int16_t const *buff = NULL;
+    const int16_t *buff = NULL;
 
 
     while (numFrames) {
