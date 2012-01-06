@@ -314,7 +314,7 @@ void AudioMixer::track_t::resetResampler()
 inline
 void AudioMixer::track_t::adjustVolumeRamp(bool aux)
 {
-    for (int i=0 ; i<MAX_NUM_CHANNELS ; i++) {
+    for (uint32_t i=0 ; i<MAX_NUM_CHANNELS ; i++) {
         if (((volumeInc[i]>0) && (((prevVolume[i]+volumeInc[i])>>16) >= volume[i])) ||
             ((volumeInc[i]<0) && (((prevVolume[i]+volumeInc[i])>>16) <= volume[i]))) {
             volumeInc[i] = 0;
