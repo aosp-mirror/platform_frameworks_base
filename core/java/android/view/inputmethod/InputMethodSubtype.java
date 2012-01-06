@@ -31,17 +31,15 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * This class is used to specify meta information of a subtype contained in an input method.
- * Subtype can describe locale (e.g. en_US, fr_FR...) and mode (e.g. voice, keyboard...), and is
- * used for IME switch and settings. The input method subtype allows the system to bring up the
- * specified subtype of the designated input method directly.
+ * This class is used to specify meta information of a subtype contained in an input method editor
+ * (IME). Subtype can describe locale (e.g. en_US, fr_FR...) and mode (e.g. voice, keyboard...),
+ * and is used for IME switch and settings. The input method subtype allows the system to bring up
+ * the specified subtype of the designated IME directly.
  *
- * <p>It should be defined in an XML resource file of the input method
- * with the <code>&lt;subtype></code> element.
- * For more information, see the guide to
+ * <p>It should be defined in an XML resource file of the input method with the
+ * <code>&lt;subtype&gt;</code> element. For more information, see the guide to
  * <a href="{@docRoot}resources/articles/creating-input-method.html">
  * Creating an Input Method</a>.</p>
- *
  */
 public final class InputMethodSubtype implements Parcelable {
     private static final String TAG = InputMethodSubtype.class.getSimpleName();
@@ -59,13 +57,24 @@ public final class InputMethodSubtype implements Parcelable {
     private HashMap<String, String> mExtraValueHashMapCache;
 
     /**
-     * Constructor
-     * @param nameId The name of the subtype
-     * @param iconId The icon of the subtype
+     * Constructor.
+     * @param nameId Resource ID of the subtype name string. The string resource may have exactly
+     * one %s in it. If there is, the %s part will be replaced with the locale's display name by
+     * the formatter. Please refer to {@link #getDisplayName} for details.
+     * @param iconId Resource ID of the subtype icon drawable.
      * @param locale The locale supported by the subtype
      * @param mode The mode supported by the subtype
-     * @param extraValue The extra value of the subtype
-     * @param isAuxiliary true when this subtype is one shot subtype.
+     * @param extraValue The extra value of the subtype. This string is free-form, but the API
+     * supplies tools to deal with a key-value comma-separated list; see
+     * {@link #containsExtraValueKey} and {@link #getExtraValueOf}.
+     * @param isAuxiliary true when this subtype is auxiliary, false otherwise. An auxiliary
+     * subtype will not be shown in the list of enabled IMEs for choosing the current IME in
+     * the Settings even when this subtype is enabled. Please note that this subtype will still
+     * be shown in the list of IMEs in the IME switcher to allow the user to tentatively switch
+     * to this subtype while an IME is shown. The framework will never switch the current IME to
+     * this subtype by {@link android.view.inputmethod.InputMethodManager#switchToLastInputMethod}.
+     * The intent of having this flag is to allow for IMEs that are invoked in a one-shot way as
+     * auxiliary input mode, and return to the previous IME once it is finished (e.g. voice input).
      * @hide
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
@@ -74,16 +83,28 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     /**
-     * Constructor
-     * @param nameId The name of the subtype
-     * @param iconId The icon of the subtype
+     * Constructor.
+     * @param nameId Resource ID of the subtype name string. The string resource may have exactly
+     * one %s in it. If there is, the %s part will be replaced with the locale's display name by
+     * the formatter. Please refer to {@link #getDisplayName} for details.
+     * @param iconId Resource ID of the subtype icon drawable.
      * @param locale The locale supported by the subtype
      * @param mode The mode supported by the subtype
-     * @param extraValue The extra value of the subtype
-     * @param isAuxiliary true when this subtype is one shot subtype.
-     * @param overridesImplicitlyEnabledSubtype true when this subtype should be selected by default
-     * if no other subtypes are selected explicitly. Note that a subtype with this parameter being
-     * true will not be shown in the subtypes list.
+     * @param extraValue The extra value of the subtype. This string is free-form, but the API
+     * supplies tools to deal with a key-value comma-separated list; see
+     * {@link #containsExtraValueKey} and {@link #getExtraValueOf}.
+     * @param isAuxiliary true when this subtype is auxiliary, false otherwise. An auxiliary
+     * subtype will not be shown in the list of enabled IMEs for choosing the current IME in
+     * the Settings even when this subtype is enabled. Please note that this subtype will still
+     * be shown in the list of IMEs in the IME switcher to allow the user to tentatively switch
+     * to this subtype while an IME is shown. The framework will never switch the current IME to
+     * this subtype by {@link android.view.inputmethod.InputMethodManager#switchToLastInputMethod}.
+     * The intent of having this flag is to allow for IMEs that are invoked in a one-shot way as
+     * auxiliary input mode, and return to the previous IME once it is finished (e.g. voice input).
+     * @param overridesImplicitlyEnabledSubtype true when this subtype should be enabled by default
+     * if no other subtypes in the IME are enabled explicitly. Note that a subtype with this
+     * parameter being true will not be shown in the list of subtypes in each IME's subtype enabler.
+     * Having an "automatic" subtype is an example use of this flag.
      */
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
@@ -115,52 +136,60 @@ public final class InputMethodSubtype implements Parcelable {
     }
 
     /**
-     * @return the name of the subtype
+     * @return Resource ID of the subtype name string.
      */
     public int getNameResId() {
         return mSubtypeNameResId;
     }
 
     /**
-     * @return the icon of the subtype
+     * @return Resource ID of the subtype icon drawable.
      */
     public int getIconResId() {
         return mSubtypeIconResId;
     }
 
     /**
-     * @return the locale of the subtype
+     * @return The locale of the subtype. This method returns the "locale" string parameter passed
+     * to the constructor.
      */
     public String getLocale() {
         return mSubtypeLocale;
     }
 
     /**
-     * @return the mode of the subtype
+     * @return The mode of the subtype.
      */
     public String getMode() {
         return mSubtypeMode;
     }
 
     /**
-     * @return the extra value of the subtype
+     * @return The extra value of the subtype.
      */
     public String getExtraValue() {
         return mSubtypeExtraValue;
     }
 
     /**
-     * @return true if this subtype is one shot subtype. One shot subtype will not be shown in the
-     * ime switch list when this subtype is implicitly enabled. The framework will never
-     * switch the current ime to this subtype by switchToLastInputMethod in InputMethodManager.
+     * @return true if this subtype is auxiliary, false otherwise. An auxiliary subtype will not be
+     * shown in the list of enabled IMEs for choosing the current IME in the Settings even when this
+     * subtype is enabled. Please note that this subtype will still be shown in the list of IMEs in
+     * the IME switcher to allow the user to tentatively switch to this subtype while an IME is
+     * shown. The framework will never switch the current IME to this subtype by
+     * {@link android.view.inputmethod.InputMethodManager#switchToLastInputMethod}.
+     * The intent of having this flag is to allow for IMEs that are invoked in a one-shot way as
+     * auxiliary input mode, and return to the previous IME once it is finished (e.g. voice input).
      */
     public boolean isAuxiliary() {
         return mIsAuxiliary;
     }
 
     /**
-     * @return true when this subtype is selected by default if no other subtypes are selected
-     * explicitly. Note that a subtype that returns true will not be shown in the subtypes list.
+     * @return true when this subtype will be enabled by default if no other subtypes in the IME
+     * are enabled explicitly, false otherwise. Note that a subtype with this method returning true
+     * will not be shown in the list of subtypes in each IME's subtype enabler. Having an
+     * "automatic" subtype is an example use of this flag.
      */
     public boolean overridesImplicitlyEnabledSubtype() {
         return mOverridesImplicitlyEnabledSubtype;
@@ -171,10 +200,10 @@ public final class InputMethodSubtype implements Parcelable {
      * @param packageName The package name of the IME
      * @param appInfo The application info of the IME
      * @return a display name for this subtype. The string resource of the label (mSubtypeNameResId)
-     * can have only one %s in it. If there is, the %s part will be replaced with the locale's
-     * display name by the formatter. If there is not, this method simply returns the string
-     * specified by mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the
-     * framework to generate an appropriate display name.
+     * may have exactly one %s in it. If there is, the %s part will be replaced with the locale's
+     * display name by the formatter. If there is not, this method returns the string specified by
+     * mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the framework to
+     * generate an appropriate display name.
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
@@ -215,8 +244,8 @@ public final class InputMethodSubtype implements Parcelable {
     /**
      * The string of ExtraValue in subtype should be defined as follows:
      * example: key0,key1=value1,key2,key3,key4=value4
-     * @param key the key of extra value
-     * @return the subtype contains specified the extra value
+     * @param key The key of extra value
+     * @return The subtype contains specified the extra value
      */
     public boolean containsExtraValueKey(String key) {
         return getExtraValueHashMap().containsKey(key);
@@ -225,8 +254,8 @@ public final class InputMethodSubtype implements Parcelable {
     /**
      * The string of ExtraValue in subtype should be defined as follows:
      * example: key0,key1=value1,key2,key3,key4=value4
-     * @param key the key of extra value
-     * @return the value of the specified key
+     * @param key The key of extra value
+     * @return The value of the specified key
      */
     public String getExtraValueOf(String key) {
         return getExtraValueHashMap().get(key);
