@@ -785,7 +785,7 @@ int main(int argc, char* argv[]) {
         socklen_t size = sizeof(cred);
         int credResult = getsockopt(sock, SOL_SOCKET, SO_PEERCRED, &cred, &size);
         if (credResult != 0) {
-            LOGW("getsockopt: %s", strerror(errno));
+            ALOGW("getsockopt: %s", strerror(errno));
         } else {
             int8_t request;
             if (recv_code(sock, &request)) {

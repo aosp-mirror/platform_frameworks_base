@@ -327,14 +327,14 @@ off64_t Asset::handleSeek(off64_t offset, int whence, off64_t curPosn, off64_t m
         newOffset = maxPosn + offset;
         break;
     default:
-        LOGW("unexpected whence %d\n", whence);
+        ALOGW("unexpected whence %d\n", whence);
         // this was happening due to an off64_t size mismatch
         assert(false);
         return (off64_t) -1;
     }
 
     if (newOffset < 0 || newOffset > maxPosn) {
-        LOGW("seek out of range: want %ld, end=%ld\n",
+        ALOGW("seek out of range: want %ld, end=%ld\n",
             (long) newOffset, (long) maxPosn);
         return (off64_t) -1;
     }
@@ -855,7 +855,7 @@ const void* _CompressedAsset::getBuffer(bool wordAligned)
      */
     buf = new unsigned char[mUncompressedLen];
     if (buf == NULL) {
-        LOGW("alloc %ld bytes failed\n", (long) mUncompressedLen);
+        ALOGW("alloc %ld bytes failed\n", (long) mUncompressedLen);
         goto bail;
     }
 

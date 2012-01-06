@@ -151,7 +151,7 @@ bool AssetManager::addAssetPath(const String8& path, void** cookie)
         ap.path = path;
         ap.type = ::getFileType(path.string());
         if (ap.type != kFileTypeDirectory && ap.type != kFileTypeRegular) {
-            LOGW("Asset path %s is neither a directory nor file (type=%d).",
+            ALOGW("Asset path %s is neither a directory nor file (type=%d).",
                  path.string(), (int)ap.type);
             return false;
         }
@@ -200,7 +200,7 @@ bool AssetManager::addAssetPath(const String8& path, void** cookie)
             if (addOverlay) {
                 mAssetPaths.add(oap);
             } else {
-                LOGW("failed to add overlay package %s\n", overlayPath.string());
+                ALOGW("failed to add overlay package %s\n", overlayPath.string());
             }
         }
     }
@@ -216,17 +216,17 @@ bool AssetManager::isIdmapStaleLocked(const String8& originalPath, const String8
         if (errno == ENOENT) {
             return true; // non-existing idmap is always stale
         } else {
-            LOGW("failed to stat file %s: %s\n", idmapPath.string(), strerror(errno));
+            ALOGW("failed to stat file %s: %s\n", idmapPath.string(), strerror(errno));
             return false;
         }
     }
     if (st.st_size < ResTable::IDMAP_HEADER_SIZE_BYTES) {
-        LOGW("file %s has unexpectedly small size=%zd\n", idmapPath.string(), (size_t)st.st_size);
+        ALOGW("file %s has unexpectedly small size=%zd\n", idmapPath.string(), (size_t)st.st_size);
         return false;
     }
     int fd = TEMP_FAILURE_RETRY(::open(idmapPath.string(), O_RDONLY));
     if (fd == -1) {
-        LOGW("failed to open file %s: %s\n", idmapPath.string(), strerror(errno));
+        ALOGW("failed to open file %s: %s\n", idmapPath.string(), strerror(errno));
         return false;
     }
     char buf[ResTable::IDMAP_HEADER_SIZE_BYTES];
@@ -300,24 +300,24 @@ bool AssetManager::createIdmapFileLocked(const String8& originalPath, const Stri
         ap.path = *paths[i];
         Asset* ass = openNonAssetInPathLocked("resources.arsc", Asset::ACCESS_BUFFER, ap);
         if (ass == NULL) {
-            LOGW("failed to find resources.arsc in %s\n", ap.path.string());
+            ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
             goto error;
         }
         tables[i].add(ass, (void*)1, false);
     }
 
     if (!getZipEntryCrcLocked(originalPath, "resources.arsc", &originalCrc)) {
-        LOGW("failed to retrieve crc for resources.arsc in %s\n", originalPath.string());
+        ALOGW("failed to retrieve crc for resources.arsc in %s\n", originalPath.string());
         goto error;
     }
     if (!getZipEntryCrcLocked(overlayPath, "resources.arsc", &overlayCrc)) {
-        LOGW("failed to retrieve crc for resources.arsc in %s\n", overlayPath.string());
+        ALOGW("failed to retrieve crc for resources.arsc in %s\n", overlayPath.string());
         goto error;
     }
 
     if (tables[0].createIdmap(tables[1], originalCrc, overlayCrc,
                               (void**)&data, &size) != NO_ERROR) {
-        LOGW("failed to generate idmap data for file %s\n", idmapPath.string());
+        ALOGW("failed to generate idmap data for file %s\n", idmapPath.string());
         goto error;
     }
 
@@ -326,13 +326,13 @@ bool AssetManager::createIdmapFileLocked(const String8& originalPath, const Stri
     // installd).
     fd = TEMP_FAILURE_RETRY(::open(idmapPath.string(), O_WRONLY | O_CREAT | O_TRUNC, 0644));
     if (fd == -1) {
-        LOGW("failed to write idmap file %s (open: %s)\n", idmapPath.string(), strerror(errno));
+        ALOGW("failed to write idmap file %s (open: %s)\n", idmapPath.string(), strerror(errno));
         goto error_free;
     }
     for (;;) {
         ssize_t written = TEMP_FAILURE_RETRY(write(fd, data + offset, size));
         if (written < 0) {
-            LOGW("failed to write idmap file %s (write: %s)\n", idmapPath.string(),
+            ALOGW("failed to write idmap file %s (write: %s)\n", idmapPath.string(),
                  strerror(errno));
             goto error_close;
         }
@@ -686,7 +686,7 @@ const ResTable* AssetManager::getResTable(bool required) const
         }
     }
 
-    if (required && !rt) LOGW("Unable to find resources file resources.arsc");
+    if (required && !rt) ALOGW("Unable to find resources file resources.arsc");
     if (!rt) {
         mResources = rt = new ResTable();
     }
@@ -727,7 +727,7 @@ Asset* AssetManager::openIdmapLocked(const struct asset_path& ap) const
         if (ass) {
             ALOGV("loading idmap %s\n", ap.idmap.string());
         } else {
-            LOGW("failed to load idmap %s\n", ap.idmap.string());
+            ALOGW("failed to load idmap %s\n", ap.idmap.string());
         }
     }
     return ass;
@@ -1074,13 +1074,13 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
     if (!pZipFile->getEntryInfo(entry, &method, &uncompressedLen, NULL, NULL,
             NULL, NULL))
     {
-        LOGW("getEntryInfo failed\n");
+        ALOGW("getEntryInfo failed\n");
         return NULL;
     }
 
     FileMap* dataMap = pZipFile->createEntryFileMap(entry);
     if (dataMap == NULL) {
-        LOGW("create map from entry failed\n");
+        ALOGW("create map from entry failed\n");
         return NULL;
     }
 
@@ -1096,7 +1096,7 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
     }
     if (pAsset == NULL) {
         /* unexpected */
-        LOGW("create from segment failed\n");
+        ALOGW("create from segment failed\n");
     }
 
     return pAsset;
@@ -1427,7 +1427,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
 
     pZip = mZipSet.getZip(ap.path);
     if (pZip == NULL) {
-        LOGW("Failure opening zip %s\n", ap.path.string());
+        ALOGW("Failure opening zip %s\n", ap.path.string());
         return false;
     }
 

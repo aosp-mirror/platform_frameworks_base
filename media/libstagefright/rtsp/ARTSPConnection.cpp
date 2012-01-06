@@ -615,7 +615,7 @@ bool ARTSPConnection::receiveRTSPReponse() {
             notify->setObject("buffer", buffer);
             notify->post();
         } else {
-            LOGW("received binary data, but no one cares.");
+            ALOGW("received binary data, but no one cares.");
         }
 
         return true;

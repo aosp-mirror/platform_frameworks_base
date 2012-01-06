@@ -87,7 +87,7 @@ bool checkPermission(const String16& permission, pid_t pid, uid_t uid)
             
             // Is this a permission failure, or did the controller go away?
             if (pc->asBinder()->isBinderAlive()) {
-                LOGW("Permission failure: %s from uid=%d pid=%d",
+                ALOGW("Permission failure: %s from uid=%d pid=%d",
                         String8(permission).string(), uid, pid);
                 return false;
             }

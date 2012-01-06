@@ -162,7 +162,7 @@ status_t ESDS::parseESDescriptor(size_t offset, size_t size) {
             offset -= 2;
             size += 2;
 
-            LOGW("Found malformed 'esds' atom, ignoring missing OCR_ES_Id.");
+            ALOGW("Found malformed 'esds' atom, ignoring missing OCR_ES_Id.");
         }
     }
 

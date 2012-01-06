@@ -99,7 +99,7 @@ jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* ev
 status_t android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
     env->CallVoidMethod(eventObj, gMotionEventClassInfo.recycle);
     if (env->ExceptionCheck()) {
-        LOGW("An exception occurred while recycling a motion event.");
+        ALOGW("An exception occurred while recycling a motion event.");
         LOGW_EX(env);
         env->ExceptionClear();
         return UNKNOWN_ERROR;

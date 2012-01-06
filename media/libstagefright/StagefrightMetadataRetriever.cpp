@@ -127,7 +127,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
 
     status_t err = decoder->start();
     if (err != OK) {
-        LOGW("OMXCodec::start returned error %d (0x%08x)\n", err, err);
+        ALOGW("OMXCodec::start returned error %d (0x%08x)\n", err, err);
         return NULL;
     }
 

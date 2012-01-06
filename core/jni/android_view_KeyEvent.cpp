@@ -93,7 +93,7 @@ status_t android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
 status_t android_view_KeyEvent_recycle(JNIEnv* env, jobject eventObj) {
     env->CallVoidMethod(eventObj, gKeyEventClassInfo.recycle);
     if (env->ExceptionCheck()) {
-        LOGW("An exception occurred while recycling a key event.");
+        ALOGW("An exception occurred while recycling a key event.");
         LOGW_EX(env);
         env->ExceptionClear();
         return UNKNOWN_ERROR;

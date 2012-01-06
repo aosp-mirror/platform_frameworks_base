@@ -43,7 +43,7 @@ const sp<IMediaPlayerService>& MediaMetadataRetriever::getService()
             if (binder != 0) {
                 break;
             }
-            LOGW("MediaPlayerService not published, waiting...");
+            ALOGW("MediaPlayerService not published, waiting...");
             usleep(500000); // 0.5 s
         } while(true);
         if (sDeathNotifier == NULL) {
@@ -160,7 +160,7 @@ sp<IMemory> MediaMetadataRetriever::extractAlbumArt()
 void MediaMetadataRetriever::DeathNotifier::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock lock(MediaMetadataRetriever::sServiceLock);
     MediaMetadataRetriever::sService.clear();
-    LOGW("MediaMetadataRetriever server died!");
+    ALOGW("MediaMetadataRetriever server died!");
 }
 
 MediaMetadataRetriever::DeathNotifier::~DeathNotifier()

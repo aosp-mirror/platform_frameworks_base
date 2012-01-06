@@ -620,7 +620,7 @@ MediaProfiles::getInstance()
             const char *defaultXmlFile = "/etc/media_profiles.xml";
             FILE *fp = fopen(defaultXmlFile, "r");
             if (fp == NULL) {
-                LOGW("could not find media config xml file");
+                ALOGW("could not find media config xml file");
                 sInstance = createDefaultInstance();
             } else {
                 fclose(fp);  // close the file first.

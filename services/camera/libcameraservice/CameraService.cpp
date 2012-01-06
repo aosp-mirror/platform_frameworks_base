@@ -176,7 +176,7 @@ sp<ICamera> CameraService::connect(
                     callingPid);
                 return client;
             } else {
-                LOGW("CameraService::connect X (pid %d) rejected (existing client).",
+                ALOGW("CameraService::connect X (pid %d) rejected (existing client).",
                     callingPid);
                 return NULL;
             }
@@ -185,7 +185,7 @@ sp<ICamera> CameraService::connect(
     }
 
     if (mBusy[cameraId]) {
-        LOGW("CameraService::connect X (pid %d) rejected"
+        ALOGW("CameraService::connect X (pid %d) rejected"
              " (camera %d is still busy).", callingPid, cameraId);
         return NULL;
     }
@@ -390,7 +390,7 @@ status_t CameraService::Client::checkPid() const {
     int callingPid = getCallingPid();
     if (callingPid == mClientPid) return NO_ERROR;
 
-    LOGW("attempt to use a locked camera from a different process"
+    ALOGW("attempt to use a locked camera from a different process"
          " (old pid %d, new pid %d)", mClientPid, callingPid);
     return EBUSY;
 }
@@ -448,7 +448,7 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client) {
     Mutex::Autolock lock(mLock);
 
     if (mClientPid != 0 && checkPid() != NO_ERROR) {
-        LOGW("Tried to connect to a locked camera (old pid %d, new pid %d)",
+        ALOGW("Tried to connect to a locked camera (old pid %d, new pid %d)",
                 mClientPid, callingPid);
         return EBUSY;
     }
@@ -471,7 +471,7 @@ static void disconnectWindow(const sp<ANativeWindow>& window) {
         status_t result = native_window_api_disconnect(window.get(),
                 NATIVE_WINDOW_API_CAMERA);
         if (result != NO_ERROR) {
-            LOGW("native_window_api_disconnect failed: %s (%d)", strerror(-result),
+            ALOGW("native_window_api_disconnect failed: %s (%d)", strerror(-result),
                     result);
         }
     }
@@ -483,7 +483,7 @@ void CameraService::Client::disconnect() {
     Mutex::Autolock lock(mLock);
 
     if (checkPid() != NO_ERROR) {
-        LOGW("different client - don't disconnect");
+        ALOGW("different client - don't disconnect");
         return;
     }
 
@@ -917,7 +917,7 @@ bool CameraService::Client::lockIfMessageWanted(int32_t msgType) {
         }
         usleep(CHECK_MESSAGE_INTERVAL * 1000);
     }
-    LOGW("lockIfMessageWanted(%d): dropped unwanted message", msgType);
+    ALOGW("lockIfMessageWanted(%d): dropped unwanted message", msgType);
     return false;
 }
 

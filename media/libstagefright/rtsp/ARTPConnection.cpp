@@ -294,7 +294,7 @@ void ARTPConnection::onPollStreams() {
             if (err == -ECONNRESET) {
                 // socket failure, this stream is dead, Jim.
 
-                LOGW("failed to receive RTP/RTCP datagram.");
+                ALOGW("failed to receive RTP/RTCP datagram.");
                 it = mStreams.erase(it);
                 continue;
             }
@@ -347,7 +347,7 @@ void ARTPConnection::onPollStreams() {
                 } while (n < 0 && errno == EINTR);
 
                 if (n <= 0) {
-                    LOGW("failed to send RTCP receiver report (%s).",
+                    ALOGW("failed to send RTCP receiver report (%s).",
                          n == 0 ? "connection gone" : strerror(errno));
 
                     it = mStreams.erase(it);
@@ -561,7 +561,7 @@ status_t ARTPConnection::parseRTCP(StreamInfo *s, const sp<ABuffer> &buffer) {
 
             default:
             {
-                LOGW("Unknown RTCP packet type %u of size %d",
+                ALOGW("Unknown RTCP packet type %u of size %d",
                      (unsigned)data[1], headerLength);
                 break;
             }
