@@ -649,7 +649,7 @@ status_t CameraSource::stop() {
         if (NO_ERROR !=
             mFrameCompleteCondition.waitRelative(mLock,
                     mTimeBetweenFrameCaptureUs * 1000LL + CAMERA_SOURCE_TIMEOUT_NS)) {
-            LOGW("Timed out waiting for outstanding frames being encoded: %d",
+            ALOGW("Timed out waiting for outstanding frames being encoded: %d",
                 mFramesBeingEncoded.size());
         }
     }
@@ -666,7 +666,7 @@ status_t CameraSource::stop() {
     }
 
     if (mNumGlitches > 0) {
-        LOGW("%d long delays between neighboring video frames", mNumGlitches);
+        ALOGW("%d long delays between neighboring video frames", mNumGlitches);
     }
 
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
@@ -744,10 +744,10 @@ status_t CameraSource::read(
                     mTimeBetweenFrameCaptureUs * 1000LL + CAMERA_SOURCE_TIMEOUT_NS)) {
                 if (mCameraRecordingProxy != 0 &&
                     !mCameraRecordingProxy->asBinder()->isBinderAlive()) {
-                    LOGW("camera recording proxy is gone");
+                    ALOGW("camera recording proxy is gone");
                     return ERROR_END_OF_STREAM;
                 }
-                LOGW("Timed out waiting for incoming camera video frames: %lld us",
+                ALOGW("Timed out waiting for incoming camera video frames: %lld us",
                     mLastFrameTimestampUs);
             }
         }

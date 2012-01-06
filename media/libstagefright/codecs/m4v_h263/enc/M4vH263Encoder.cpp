@@ -46,7 +46,7 @@ static status_t ConvertOmxProfileLevel(
                     LOGE("Unsupported level (%d) for H263", omxLevel);
                     return BAD_VALUE;
                 } else {
-                    LOGW("PV does not support level configuration for H263");
+                    ALOGW("PV does not support level configuration for H263");
                     profileLevel = CORE_PROFILE_LEVEL2;
                     break;
                 }
@@ -314,7 +314,7 @@ status_t M4vH263Encoder::start(MetaData *params) {
     }
 
     if (mStarted) {
-        LOGW("Call start() when encoder already started");
+        ALOGW("Call start() when encoder already started");
         return OK;
     }
 
@@ -341,7 +341,7 @@ status_t M4vH263Encoder::start(MetaData *params) {
 status_t M4vH263Encoder::stop() {
     ALOGV("stop");
     if (!mStarted) {
-        LOGW("Call stop() when encoder has not started");
+        ALOGW("Call stop() when encoder has not started");
         return OK;
     }
 

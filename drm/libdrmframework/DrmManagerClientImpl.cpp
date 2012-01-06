@@ -54,7 +54,7 @@ const sp<IDrmManagerService>& DrmManagerClientImpl::getDrmManagerService() {
             if (binder != 0) {
                 break;
             }
-            LOGW("DrmManagerService not published, waiting...");
+            ALOGW("DrmManagerService not published, waiting...");
             struct timespec reqt;
             reqt.tv_sec  = 0;
             reqt.tv_nsec = 500000000; //0.5 sec
@@ -342,6 +342,6 @@ DrmManagerClientImpl::DeathNotifier::~DeathNotifier() {
 void DrmManagerClientImpl::DeathNotifier::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock lock(sMutex);
     DrmManagerClientImpl::sDrmManagerService.clear();
-    LOGW("DrmManager server died!");
+    ALOGW("DrmManager server died!");
 }
 

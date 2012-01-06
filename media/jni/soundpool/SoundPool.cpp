@@ -52,7 +52,7 @@ SoundPool::SoundPool(int maxChannels, int streamType, int srcQuality)
     else if (mMaxChannels > 32) {
         mMaxChannels = 32;
     }
-    LOGW_IF(maxChannels != mMaxChannels, "App requested %d channels", maxChannels);
+    ALOGW_IF(maxChannels != mMaxChannels, "App requested %d channels", maxChannels);
 
     mQuit = false;
     mDecodeThread = 0;
@@ -255,7 +255,7 @@ int SoundPool::play(int sampleID, float leftVolume, float rightVolume,
     // is sample ready?
     sample = findSample(sampleID);
     if ((sample == 0) || (sample->state() != Sample::READY)) {
-        LOGW("  sample %d not READY", sampleID);
+        ALOGW("  sample %d not READY", sampleID);
         return 0;
     }
 

@@ -95,7 +95,7 @@ NativeInputEventReceiver::~NativeInputEventReceiver() {
 status_t NativeInputEventReceiver::initialize() {
     status_t result = mInputConsumer.initialize();
     if (result) {
-        LOGW("Failed to initialize input consumer for input channel '%s', status=%d",
+        ALOGW("Failed to initialize input consumer for input channel '%s', status=%d",
                 getInputChannelName(), result);
         return result;
     }
@@ -114,12 +114,12 @@ status_t NativeInputEventReceiver::finishInputEvent(bool handled) {
 
         status_t status = mInputConsumer.sendFinishedSignal(handled);
         if (status) {
-            LOGW("Failed to send finished signal on channel '%s'.  status=%d",
+            ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
                     getInputChannelName(), status);
         }
         return status;
     } else {
-        LOGW("Ignoring attempt to finish input event while no event is in progress.");
+        ALOGW("Ignoring attempt to finish input event while no event is in progress.");
         return OK;
     }
 }
@@ -134,7 +134,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
-        LOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
+        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
                 "events=0x%x", r->getInputChannelName(), events);
         return 1;
     }
@@ -147,7 +147,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     }
 
     if (r->mEventInProgress) {
-        LOGW("channel '%s' ~ Publisher sent spurious dispatch signal.",
+        ALOGW("channel '%s' ~ Publisher sent spurious dispatch signal.",
                 r->getInputChannelName());
         return 1;
     }
@@ -155,7 +155,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     InputEvent* inputEvent;
     status = r->mInputConsumer.consume(&r->mInputEventFactory, &inputEvent);
     if (status) {
-        LOGW("channel '%s' ~ Failed to consume input event.  status=%d",
+        ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                 r->getInputChannelName(), status);
         r->mInputConsumer.sendFinishedSignal(false);
         return 1;
@@ -188,7 +188,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     }
 
     if (!inputEventObj) {
-        LOGW("channel '%s' ~ Failed to obtain event object.",
+        ALOGW("channel '%s' ~ Failed to obtain event object.",
                 r->getInputChannelName());
         r->mInputConsumer.sendFinishedSignal(false);
         return 1;

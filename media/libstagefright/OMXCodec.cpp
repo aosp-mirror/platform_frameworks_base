@@ -484,7 +484,7 @@ sp<MediaSource> OMXCodec::Create(
                 // For OMX.SEC.* decoders we can enable a special mode that
                 // gives the client access to the framebuffer contents.
 
-                LOGW("Component '%s' does not give the client access to "
+                ALOGW("Component '%s' does not give the client access to "
                      "the framebuffer contents. Skipping.",
                      componentName);
 
@@ -1093,7 +1093,7 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
     if (err != OK) {
-        LOGW("Error correction param query is not supported");
+        ALOGW("Error correction param query is not supported");
         return OK;  // Optional feature. Ignore this failure
     }
 
@@ -1107,7 +1107,7 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
     if (err != OK) {
-        LOGW("Error correction param configuration is not supported");
+        ALOGW("Error correction param configuration is not supported");
     }
 
     // Optional feature. Ignore the failure.
@@ -1579,7 +1579,7 @@ void OMXCodec::setComponentRole(
                 &roleParams, sizeof(roleParams));
 
         if (err != OK) {
-            LOGW("Failed to set standard component role '%s'.", role);
+            ALOGW("Failed to set standard component role '%s'.", role);
         }
     }
 }
@@ -1863,7 +1863,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     OMX_U32 usage = 0;
     err = mOMX->getGraphicBufferUsage(mNode, kPortIndexOutput, &usage);
     if (err != 0) {
-        LOGW("querying usage flags from OMX IL component failed: %d", err);
+        ALOGW("querying usage flags from OMX IL component failed: %d", err);
         // XXX: Currently this error is logged, but not fatal.
         usage = 0;
     }
@@ -2214,7 +2214,7 @@ int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
 
 void OMXCodec::on_message(const omx_message &msg) {
     if (mState == ERROR) {
-        LOGW("Dropping OMX message - we're in ERROR state.");
+        ALOGW("Dropping OMX message - we're in ERROR state.");
         return;
     }
 
@@ -2242,7 +2242,7 @@ void OMXCodec::on_message(const omx_message &msg) {
 
             CHECK(i < buffers->size());
             if ((*buffers)[i].mStatus != OWNED_BY_COMPONENT) {
-                LOGW("We already own input buffer %p, yet received "
+                ALOGW("We already own input buffer %p, yet received "
                      "an EMPTY_BUFFER_DONE.", buffer);
             }
 
@@ -2302,7 +2302,7 @@ void OMXCodec::on_message(const omx_message &msg) {
             BufferInfo *info = &buffers->editItemAt(i);
 
             if (info->mStatus != OWNED_BY_COMPONENT) {
-                LOGW("We already own output buffer %p, yet received "
+                ALOGW("We already own output buffer %p, yet received "
                      "a FILL_BUFFER_DONE.", buffer);
             }
 
@@ -3556,7 +3556,7 @@ void OMXCodec::setAMRFormat(bool isWAMR, int32_t bitRate) {
 
 status_t OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate) {
     if (numChannels > 2)
-        LOGW("Number of channels: (%d) \n", numChannels);
+        ALOGW("Number of channels: (%d) \n", numChannels);
 
     if (mIsEncoder) {
         //////////////// input port ////////////////////

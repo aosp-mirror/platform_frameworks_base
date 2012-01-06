@@ -65,7 +65,7 @@
 #define ST_LOGV(x, ...) ALOGV("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGD(x, ...) ALOGD("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGI(x, ...) ALOGI("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGW(x, ...) LOGW("[%s] "x, mName.string(), ##__VA_ARGS__)
+#define ST_LOGW(x, ...) ALOGW("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGE(x, ...) LOGE("[%s] "x, mName.string(), ##__VA_ARGS__)
 
 namespace android {
@@ -352,7 +352,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 }
 
                 // if buffer is FREE it CANNOT be current
-                LOGW_IF((state == BufferSlot::FREE) && (mCurrentTexture==i),
+                ALOGW_IF((state == BufferSlot::FREE) && (mCurrentTexture==i),
                         "dequeueBuffer: buffer %d is both FREE and current!",
                         i);
 
@@ -992,7 +992,7 @@ void SurfaceTexture::freeBufferLocked(int i) {
 }
 
 void SurfaceTexture::freeAllBuffersLocked() {
-    LOGW_IF(!mQueue.isEmpty(),
+    ALOGW_IF(!mQueue.isEmpty(),
             "freeAllBuffersLocked called but mQueue is not empty");
     mCurrentTexture = INVALID_BUFFER_SLOT;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
@@ -1001,7 +1001,7 @@ void SurfaceTexture::freeAllBuffersLocked() {
 }
 
 void SurfaceTexture::freeAllBuffersExceptHeadLocked() {
-    LOGW_IF(!mQueue.isEmpty(),
+    ALOGW_IF(!mQueue.isEmpty(),
             "freeAllBuffersExceptCurrentLocked called but mQueue is not empty");
     int head = -1;
     if (!mQueue.empty()) {

@@ -443,7 +443,7 @@ status_t MPEG4Writer::start(MetaData *param) {
         // If file size is set to be larger than the 32 bit file
         // size limit, treat it as an error.
         if (mMaxFileSizeLimitBytes > kMax32BitFileSize) {
-            LOGW("32-bit file size limit (%lld bytes) too big. "
+            ALOGW("32-bit file size limit (%lld bytes) too big. "
                  "It is changed to %lld bytes",
                 mMaxFileSizeLimitBytes, kMax32BitFileSize);
             mMaxFileSizeLimitBytes = kMax32BitFileSize;
@@ -1173,7 +1173,7 @@ void MPEG4Writer::Track::addOneSttsTableEntry(
         size_t sampleCount, int32_t duration) {
 
     if (duration == 0) {
-        LOGW("0-duration samples found: %d", sampleCount);
+        ALOGW("0-duration samples found: %d", sampleCount);
     }
     SttsTableEntry sttsEntry(sampleCount, duration);
     mSttsTableEntries.push_back(sttsEntry);

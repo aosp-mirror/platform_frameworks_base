@@ -870,7 +870,7 @@ status_t Thread::requestExitAndWait()
 {
     Mutex::Autolock _l(mLock);
     if (mThread == getThreadId()) {
-        LOGW(
+        ALOGW(
         "Thread (this=%p): don't call waitForExit() from this "
         "Thread object's thread. It's a guaranteed deadlock!",
         this);
@@ -894,7 +894,7 @@ status_t Thread::join()
 {
     Mutex::Autolock _l(mLock);
     if (mThread == getThreadId()) {
-        LOGW(
+        ALOGW(
         "Thread (this=%p): don't call join() from this "
         "Thread object's thread. It's a guaranteed deadlock!",
         this);

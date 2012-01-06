@@ -423,7 +423,7 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
                         isRTL = (paraDir == 1);
                         useSingleRun = true;
                     } else if (!U_SUCCESS(status) || rc < 1) {
-                        LOGW("Need to force to single run -- string = '%s',"
+                        ALOGW("Need to force to single run -- string = '%s',"
                                 " status = %d, rc = %d",
                                 String8(chars + start, count).string(), status, int(rc));
                         isRTL = (paraDir == 1);
@@ -438,7 +438,7 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
                             if (startRun == -1 || lengthRun == -1) {
                                 // Something went wrong when getting the visual run, need to clear
                                 // already computed data before doing a single run pass
-                                LOGW("Visual run is not valid");
+                                ALOGW("Visual run is not valid");
                                 outGlyphs->clear();
                                 outAdvances->clear();
                                 *outTotalAdvance = 0;
@@ -475,13 +475,13 @@ void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
                         }
                     }
                 } else {
-                    LOGW("Cannot set Para");
+                    ALOGW("Cannot set Para");
                     useSingleRun = true;
                     isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
                 }
                 ubidi_close(bidi);
             } else {
-                LOGW("Cannot ubidi_open()");
+                ALOGW("Cannot ubidi_open()");
                 useSingleRun = true;
                 isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
             }

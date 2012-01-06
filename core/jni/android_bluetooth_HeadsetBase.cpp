@@ -126,7 +126,7 @@ again:
     }
 
     if (pfd.revents & (POLLHUP | POLLERR | POLLNVAL)) {
-        LOGW("RFCOMM poll() returned  success (%d), "
+        ALOGW("RFCOMM poll() returned  success (%d), "
              "but with an unexpected revents bitmask: %#x\n", ret, pfd.revents);
         errno = EIO;
         *err = errno;

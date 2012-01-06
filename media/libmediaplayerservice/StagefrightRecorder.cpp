@@ -382,7 +382,7 @@ status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
 
     // This is meant for backward compatibility for MediaRecorder.java
     if (timeUs <= 0) {
-        LOGW("Max file duration is not positive: %lld us. Disabling duration limit.", timeUs);
+        ALOGW("Max file duration is not positive: %lld us. Disabling duration limit.", timeUs);
         timeUs = 0; // Disable the duration limit for zero or negative values.
     } else if (timeUs <= 100000LL) {  // XXX: 100 milli-seconds
         LOGE("Max file duration is too short: %lld us", timeUs);
@@ -390,7 +390,7 @@ status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
     }
 
     if (timeUs <= 15 * 1000000LL) {
-        LOGW("Target duration (%lld us) too short to be respected", timeUs);
+        ALOGW("Target duration (%lld us) too short to be respected", timeUs);
     }
     mMaxFileDurationUs = timeUs;
     return OK;
@@ -401,7 +401,7 @@ status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
 
     // This is meant for backward compatibility for MediaRecorder.java
     if (bytes <= 0) {
-        LOGW("Max file size is not positive: %lld bytes. "
+        ALOGW("Max file size is not positive: %lld bytes. "
              "Disabling file size limit.", bytes);
         bytes = 0; // Disable the file size limit for zero or negative values.
     } else if (bytes <= 1024) {  // XXX: 1 kB
@@ -410,7 +410,7 @@ status_t StagefrightRecorder::setParamMaxFileSizeBytes(int64_t bytes) {
     }
 
     if (bytes <= 100 * 1024) {
-        LOGW("Target file size (%lld bytes) is too small to be respected", bytes);
+        ALOGW("Target file size (%lld bytes) is too small to be respected", bytes);
     }
 
     mMaxFileSizeBytes = bytes;
@@ -1022,11 +1022,11 @@ void StagefrightRecorder::clipVideoFrameRate() {
     int maxFrameRate = mEncoderProfiles->getVideoEncoderParamByName(
                         "enc.vid.fps.max", mVideoEncoder);
     if (mFrameRate < minFrameRate && mFrameRate != -1) {
-        LOGW("Intended video encoding frame rate (%d fps) is too small"
+        ALOGW("Intended video encoding frame rate (%d fps) is too small"
              " and will be set to (%d fps)", mFrameRate, minFrameRate);
         mFrameRate = minFrameRate;
     } else if (mFrameRate > maxFrameRate) {
-        LOGW("Intended video encoding frame rate (%d fps) is too large"
+        ALOGW("Intended video encoding frame rate (%d fps) is too large"
              " and will be set to (%d fps)", mFrameRate, maxFrameRate);
         mFrameRate = maxFrameRate;
     }
@@ -1039,11 +1039,11 @@ void StagefrightRecorder::clipVideoBitRate() {
     int maxBitRate = mEncoderProfiles->getVideoEncoderParamByName(
                         "enc.vid.bps.max", mVideoEncoder);
     if (mVideoBitRate < minBitRate) {
-        LOGW("Intended video encoding bit rate (%d bps) is too small"
+        ALOGW("Intended video encoding bit rate (%d bps) is too small"
              " and will be set to (%d bps)", mVideoBitRate, minBitRate);
         mVideoBitRate = minBitRate;
     } else if (mVideoBitRate > maxBitRate) {
-        LOGW("Intended video encoding bit rate (%d bps) is too large"
+        ALOGW("Intended video encoding bit rate (%d bps) is too large"
              " and will be set to (%d bps)", mVideoBitRate, maxBitRate);
         mVideoBitRate = maxBitRate;
     }
@@ -1056,11 +1056,11 @@ void StagefrightRecorder::clipVideoFrameWidth() {
     int maxFrameWidth = mEncoderProfiles->getVideoEncoderParamByName(
                         "enc.vid.width.max", mVideoEncoder);
     if (mVideoWidth < minFrameWidth) {
-        LOGW("Intended video encoding frame width (%d) is too small"
+        ALOGW("Intended video encoding frame width (%d) is too small"
              " and will be set to (%d)", mVideoWidth, minFrameWidth);
         mVideoWidth = minFrameWidth;
     } else if (mVideoWidth > maxFrameWidth) {
-        LOGW("Intended video encoding frame width (%d) is too large"
+        ALOGW("Intended video encoding frame width (%d) is too large"
              " and will be set to (%d)", mVideoWidth, maxFrameWidth);
         mVideoWidth = maxFrameWidth;
     }
@@ -1151,7 +1151,7 @@ void StagefrightRecorder::clipAudioBitRate() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.bps.min", mAudioEncoder);
     if (mAudioBitRate < minAudioBitRate) {
-        LOGW("Intended audio encoding bit rate (%d) is too small"
+        ALOGW("Intended audio encoding bit rate (%d) is too small"
             " and will be set to (%d)", mAudioBitRate, minAudioBitRate);
         mAudioBitRate = minAudioBitRate;
     }
@@ -1160,7 +1160,7 @@ void StagefrightRecorder::clipAudioBitRate() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.bps.max", mAudioEncoder);
     if (mAudioBitRate > maxAudioBitRate) {
-        LOGW("Intended audio encoding bit rate (%d) is too large"
+        ALOGW("Intended audio encoding bit rate (%d) is too large"
             " and will be set to (%d)", mAudioBitRate, maxAudioBitRate);
         mAudioBitRate = maxAudioBitRate;
     }
@@ -1173,7 +1173,7 @@ void StagefrightRecorder::clipAudioSampleRate() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.hz.min", mAudioEncoder);
     if (mSampleRate < minSampleRate) {
-        LOGW("Intended audio sample rate (%d) is too small"
+        ALOGW("Intended audio sample rate (%d) is too small"
             " and will be set to (%d)", mSampleRate, minSampleRate);
         mSampleRate = minSampleRate;
     }
@@ -1182,7 +1182,7 @@ void StagefrightRecorder::clipAudioSampleRate() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.hz.max", mAudioEncoder);
     if (mSampleRate > maxSampleRate) {
-        LOGW("Intended audio sample rate (%d) is too large"
+        ALOGW("Intended audio sample rate (%d) is too large"
             " and will be set to (%d)", mSampleRate, maxSampleRate);
         mSampleRate = maxSampleRate;
     }
@@ -1195,7 +1195,7 @@ void StagefrightRecorder::clipNumberOfAudioChannels() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.ch.min", mAudioEncoder);
     if (mAudioChannels < minChannels) {
-        LOGW("Intended number of audio channels (%d) is too small"
+        ALOGW("Intended number of audio channels (%d) is too small"
             " and will be set to (%d)", mAudioChannels, minChannels);
         mAudioChannels = minChannels;
     }
@@ -1204,7 +1204,7 @@ void StagefrightRecorder::clipNumberOfAudioChannels() {
             mEncoderProfiles->getAudioEncoderParamByName(
                 "enc.aud.ch.max", mAudioEncoder);
     if (mAudioChannels > maxChannels) {
-        LOGW("Intended number of audio channels (%d) is too large"
+        ALOGW("Intended number of audio channels (%d) is too large"
             " and will be set to (%d)", mAudioChannels, maxChannels);
         mAudioChannels = maxChannels;
     }
@@ -1217,11 +1217,11 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     int maxFrameHeight = mEncoderProfiles->getVideoEncoderParamByName(
                         "enc.vid.height.max", mVideoEncoder);
     if (mVideoHeight < minFrameHeight) {
-        LOGW("Intended video encoding frame height (%d) is too small"
+        ALOGW("Intended video encoding frame height (%d) is too small"
              " and will be set to (%d)", mVideoHeight, minFrameHeight);
         mVideoHeight = minFrameHeight;
     } else if (mVideoHeight > maxFrameHeight) {
-        LOGW("Intended video encoding frame height (%d) is too large"
+        ALOGW("Intended video encoding frame height (%d) is too large"
              " and will be set to (%d)", mVideoHeight, maxFrameHeight);
         mVideoHeight = maxFrameHeight;
     }
@@ -1406,7 +1406,7 @@ status_t StagefrightRecorder::setupVideoEncoder(
             true /* createEncoder */, cameraSource,
             NULL, encoder_flags);
     if (encoder == NULL) {
-        LOGW("Failed to create the encoder");
+        ALOGW("Failed to create the encoder");
         // When the encoder fails to be created, we need
         // release the camera source due to the camera's lock
         // and unlock mechanism.

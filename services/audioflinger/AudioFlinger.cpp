@@ -122,7 +122,7 @@ static void addBatteryData(uint32_t params) {
         defaultServiceManager()->getService(String16("media.player"));
     sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
     if (service.get() == NULL) {
-        LOGW("Cannot connect to the MediaPlayerService for battery tracking");
+        ALOGW("Cannot connect to the MediaPlayerService for battery tracking");
         return;
     }
 
@@ -484,7 +484,7 @@ uint32_t AudioFlinger::sampleRate(int output) const
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
-        LOGW("sampleRate() unknown thread %d", output);
+        ALOGW("sampleRate() unknown thread %d", output);
         return 0;
     }
     return thread->sampleRate();
@@ -495,7 +495,7 @@ int AudioFlinger::channelCount(int output) const
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
-        LOGW("channelCount() unknown thread %d", output);
+        ALOGW("channelCount() unknown thread %d", output);
         return 0;
     }
     return thread->channelCount();
@@ -506,7 +506,7 @@ uint32_t AudioFlinger::format(int output) const
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
-        LOGW("format() unknown thread %d", output);
+        ALOGW("format() unknown thread %d", output);
         return 0;
     }
     return thread->format();
@@ -517,7 +517,7 @@ size_t AudioFlinger::frameCount(int output) const
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
-        LOGW("frameCount() unknown thread %d", output);
+        ALOGW("frameCount() unknown thread %d", output);
         return 0;
     }
     return thread->frameCount();
@@ -528,7 +528,7 @@ uint32_t AudioFlinger::latency(int output) const
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
-        LOGW("latency() unknown thread %d", output);
+        ALOGW("latency() unknown thread %d", output);
         return 0;
     }
     return thread->latency();
@@ -576,7 +576,7 @@ status_t AudioFlinger::setMode(int mode)
         return PERMISSION_DENIED;
     }
     if ((mode < 0) || (mode >= AUDIO_MODE_CNT)) {
-        LOGW("Illegal value: setMode(%d)", mode);
+        ALOGW("Illegal value: setMode(%d)", mode);
         return BAD_VALUE;
     }
 
@@ -1180,7 +1180,7 @@ void AudioFlinger::ThreadBase::acquireWakeLock_l()
         sp<IBinder> binder =
             defaultServiceManager()->checkService(String16("power"));
         if (binder == 0) {
-            LOGW("Thread %s cannot connect to the power manager service", mName);
+            ALOGW("Thread %s cannot connect to the power manager service", mName);
         } else {
             mPowerManager = interface_cast<IPowerManager>(binder);
             binder->linkToDeath(mDeathRecipient);
@@ -1228,7 +1228,7 @@ void AudioFlinger::ThreadBase::PMDeathRecipient::binderDied(const wp<IBinder>& w
     if (thread != 0) {
         thread->clearPowerManager();
     }
-    LOGW("power manager service died !!!");
+    ALOGW("power manager service died !!!");
 }
 
 void AudioFlinger::ThreadBase::setEffectSuspended(
@@ -1561,7 +1561,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         // invalidate track immediately if the stream type was moved to another thread since
         // createTrack() was called by the client process.
         if (!mStreamTypes[streamType].valid) {
-            LOGW("createTrack_l() on thread %p: invalidating track on stream %d",
+            ALOGW("createTrack_l() on thread %p: invalidating track on stream %d",
                  this, streamType);
             android_atomic_or(CBLK_INVALID_ON, &track->mCblk->flags);
         }
@@ -2038,7 +2038,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             if (!mStandby && delta > maxPeriod) {
                 mNumDelayedWrites++;
                 if ((now - lastWarning) > kWarningThrottleNs) {
-                    LOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
+                    ALOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
                             ns2ms(delta), mNumDelayedWrites, this);
                     lastWarning = now;
                 }
@@ -2147,7 +2147,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 if (chain != 0) {
                     tracksWithEffect++;
                 } else {
-                    LOGW("prepareTracks_l(): track %d attached to effect but no chain found on session %d",
+                    ALOGW("prepareTracks_l(): track %d attached to effect but no chain found on session %d",
                             name, track->sessionId());
                 }
             }
@@ -3164,7 +3164,7 @@ bool AudioFlinger::DuplicatingThread::outputsReady(SortedVector< sp<OutputTrack>
     for (size_t i = 0; i < outputTracks.size(); i++) {
         sp <ThreadBase> thread = outputTracks[i]->thread().promote();
         if (thread == 0) {
-            LOGW("DuplicatingThread::outputsReady() could not promote thread on output track %p", outputTracks[i].get());
+            ALOGW("DuplicatingThread::outputsReady() could not promote thread on output track %p", outputTracks[i].get());
             return false;
         }
         PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
@@ -3795,7 +3795,7 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
                 mCblk, mBuffer, mCblk->buffers,
                 mCblk->frameCount, mCblk->sampleRate, mChannelMask, mBufferEnd);
     } else {
-        LOGW("Error creating output track on thread %p", playbackThread);
+        ALOGW("Error creating output track on thread %p", playbackThread);
     }
 }
 
@@ -3850,7 +3850,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
                     memset(pInBuffer->raw, 0, startFrames * channelCount * sizeof(int16_t));
                     mBufferQueue.add(pInBuffer);
                 } else {
-                    LOGW ("OutputTrack::write() %p no more buffers in queue", this);
+                    ALOGW ("OutputTrack::write() %p no more buffers in queue", this);
                 }
             }
         }
@@ -3917,7 +3917,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
                 mBufferQueue.add(pInBuffer);
                 ALOGV("OutputTrack::write() %p thread %p adding overflow buffer %d", this, mThread.unsafe_get(), mBufferQueue.size());
             } else {
-                LOGW("OutputTrack::write() %p thread %p no more overflow buffers", mThread.unsafe_get(), this);
+                ALOGW("OutputTrack::write() %p thread %p no more overflow buffers", mThread.unsafe_get(), this);
             }
         }
     }
@@ -4260,7 +4260,7 @@ void AudioFlinger::RecordThread::onFirstRef()
 status_t AudioFlinger::RecordThread::readyToRun()
 {
     status_t status = initCheck();
-    LOGW_IF(status != NO_ERROR,"RecordThread %p could not initialize", this);
+    ALOGW_IF(status != NO_ERROR,"RecordThread %p could not initialize", this);
     return status;
 }
 
@@ -4426,7 +4426,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                 if (!mActiveTrack->setOverflow()) {
                     nsecs_t now = systemTime();
                     if ((now - lastWarning) > kWarningThrottleNs) {
-                        LOGW("RecordThread: buffer overflow");
+                        ALOGW("RecordThread: buffer overflow");
                         lastWarning = now;
                     }
                 }
@@ -4967,7 +4967,7 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
     MixerThread *thread2 = checkMixerThread_l(output2);
 
     if (thread1 == NULL || thread2 == NULL) {
-        LOGW("openDuplicateOutput() wrong output mixer type for output %d or %d", output1, output2);
+        ALOGW("openDuplicateOutput() wrong output mixer type for output %d or %d", output1, output2);
         return 0;
     }
 
@@ -5163,7 +5163,7 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
     Mutex::Autolock _l(mLock);
     MixerThread *dstThread = checkMixerThread_l(output);
     if (dstThread == NULL) {
-        LOGW("setStreamOutput() bad output id %d", output);
+        ALOGW("setStreamOutput() bad output id %d", output);
         return BAD_VALUE;
     }
 
@@ -5232,7 +5232,7 @@ void AudioFlinger::releaseAudioSessionId(int audioSession)
             return;
         }
     }
-    LOGW("session id %d not found for pid %d", audioSession, caller);
+    ALOGW("session id %d not found for pid %d", audioSession, caller);
 }
 
 void AudioFlinger::purgeStaleEffects_l() {
@@ -5443,14 +5443,14 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             // if uuid is specified, request effect descriptor
             lStatus = EffectGetDescriptor(&pDesc->uuid, &desc);
             if (lStatus < 0) {
-                LOGW("createEffect() error %d from EffectGetDescriptor", lStatus);
+                ALOGW("createEffect() error %d from EffectGetDescriptor", lStatus);
                 goto Exit;
             }
         } else {
             // if uuid is not specified, look for an available implementation
             // of the required type in effect factory
             if (EffectIsNullUuid(&pDesc->type)) {
-                LOGW("createEffect() no effect type");
+                ALOGW("createEffect() no effect type");
                 lStatus = BAD_VALUE;
                 goto Exit;
             }
@@ -5461,13 +5461,13 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
 
             lStatus = EffectQueryNumberEffects(&numEffects);
             if (lStatus < 0) {
-                LOGW("createEffect() error %d from EffectQueryNumberEffects", lStatus);
+                ALOGW("createEffect() error %d from EffectQueryNumberEffects", lStatus);
                 goto Exit;
             }
             for (uint32_t i = 0; i < numEffects; i++) {
                 lStatus = EffectQueryEffect(i, &desc);
                 if (lStatus < 0) {
-                    LOGW("createEffect() error %d from EffectQueryEffect", lStatus);
+                    ALOGW("createEffect() error %d from EffectQueryEffect", lStatus);
                     continue;
                 }
                 if (memcmp(&desc.type, &pDesc->type, sizeof(effect_uuid_t)) == 0) {
@@ -5484,7 +5484,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             }
             if (!found) {
                 lStatus = BAD_VALUE;
-                LOGW("createEffect() effect not found");
+                ALOGW("createEffect() effect not found");
                 goto Exit;
             }
             // For same effect type, chose auxiliary version over insert version if
@@ -5581,17 +5581,17 @@ status_t AudioFlinger::moveEffects(int sessionId, int srcOutput, int dstOutput)
             sessionId, srcOutput, dstOutput);
     Mutex::Autolock _l(mLock);
     if (srcOutput == dstOutput) {
-        LOGW("moveEffects() same dst and src outputs %d", dstOutput);
+        ALOGW("moveEffects() same dst and src outputs %d", dstOutput);
         return NO_ERROR;
     }
     PlaybackThread *srcThread = checkPlaybackThread_l(srcOutput);
     if (srcThread == NULL) {
-        LOGW("moveEffects() bad srcOutput %d", srcOutput);
+        ALOGW("moveEffects() bad srcOutput %d", srcOutput);
         return BAD_VALUE;
     }
     PlaybackThread *dstThread = checkPlaybackThread_l(dstOutput);
     if (dstThread == NULL) {
-        LOGW("moveEffects() bad dstOutput %d", dstOutput);
+        ALOGW("moveEffects() bad dstOutput %d", dstOutput);
         return BAD_VALUE;
     }
 
@@ -5613,7 +5613,7 @@ status_t AudioFlinger::moveEffectChain_l(int sessionId,
 
     sp<EffectChain> chain = srcThread->getEffectChain_l(sessionId);
     if (chain == 0) {
-        LOGW("moveEffectChain_l() effect chain for session %d not on source thread %p",
+        ALOGW("moveEffectChain_l() effect chain for session %d not on source thread %p",
                 sessionId, srcThread);
         return INVALID_OPERATION;
     }
@@ -5643,7 +5643,7 @@ status_t AudioFlinger::moveEffectChain_l(int sessionId,
         if (dstChain == 0) {
             dstChain = effect->chain().promote();
             if (dstChain == 0) {
-                LOGW("moveEffectChain_l() cannot get chain from effect %p", effect.get());
+                ALOGW("moveEffectChain_l() cannot get chain from effect %p", effect.get());
                 srcThread->addEffect_l(effect);
                 return NO_INIT;
             }
@@ -5685,14 +5685,14 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::ThreadBase::createEffect_l(
 
     lStatus = initCheck();
     if (lStatus != NO_ERROR) {
-        LOGW("createEffect_l() Audio driver not initialized.");
+        ALOGW("createEffect_l() Audio driver not initialized.");
         goto Exit;
     }
 
     // Do not allow effects with session ID 0 on direct output or duplicating threads
     // TODO: add rule for hw accelerated effects on direct outputs with non PCM format
     if (sessionId == AUDIO_SESSION_OUTPUT_MIX && mType != MIXER) {
-        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
+        ALOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
                 desc->name, sessionId);
         lStatus = BAD_VALUE;
         goto Exit;
@@ -5702,7 +5702,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::ThreadBase::createEffect_l(
             (desc->flags & EFFECT_FLAG_TYPE_MASK) != EFFECT_FLAG_TYPE_PRE_PROC) ||
             (mType != RECORD &&
                     (desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC)) {
-        LOGW("createEffect_l() effect %s (flags %08x) created on wrong thread type %d",
+        ALOGW("createEffect_l() effect %s (flags %08x) created on wrong thread type %d",
                 desc->name, desc->flags, mType);
         lStatus = BAD_VALUE;
         goto Exit;
@@ -5811,7 +5811,7 @@ status_t AudioFlinger::ThreadBase::addEffect_l(const sp<EffectModule>& effect)
     ALOGV("addEffect_l() %p chain %p effect %p", this, chain.get(), effect.get());
 
     if (chain->getEffectFromId_l(effect->id()) != 0) {
-        LOGW("addEffect_l() %p effect %s already present in chain %p",
+        ALOGW("addEffect_l() %p effect %s already present in chain %p",
                 this, effect->desc().name, chain.get());
         return BAD_VALUE;
     }
@@ -5844,7 +5844,7 @@ void AudioFlinger::ThreadBase::removeEffect_l(const sp<EffectModule>& effect) {
             removeEffectChain_l(chain);
         }
     } else {
-        LOGW("removeEffect_l() %p cannot promote chain for effect %p", this, effect.get());
+        ALOGW("removeEffect_l() %p cannot promote chain for effect %p", this, effect.get());
     }
 }
 
@@ -6066,7 +6066,7 @@ status_t AudioFlinger::RecordThread::addEffectChain_l(const sp<EffectChain>& cha
 size_t AudioFlinger::RecordThread::removeEffectChain_l(const sp<EffectChain>& chain)
 {
     ALOGV("removeEffectChain_l() %p from thread %p", chain.get(), this);
-    LOGW_IF(mEffectChains.size() != 1,
+    ALOGW_IF(mEffectChains.size() != 1,
             "removeEffectChain_l() %p invalid chain size %d on thread %p",
             chain.get(), mEffectChains.size(), this);
     if (mEffectChains.size() == 1) {
@@ -6963,12 +6963,12 @@ status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
             int *p = (int *)(mBuffer + mCblk->serverIndex);
             int size = *p++;
             if (((uint8_t *)p + size) > mBuffer + mCblk->clientIndex) {
-                LOGW("command(): invalid parameter block size");
+                ALOGW("command(): invalid parameter block size");
                 break;
             }
             effect_param_t *param = (effect_param_t *)p;
             if (param->psize == 0 || param->vsize == 0) {
-                LOGW("command(): null parameter or value size");
+                ALOGW("command(): null parameter or value size");
                 mCblk->serverIndex += size;
                 continue;
             }
@@ -7144,7 +7144,7 @@ void AudioFlinger::EffectChain::process_l()
 {
     sp<ThreadBase> thread = mThread.promote();
     if (thread == 0) {
-        LOGW("process_l(): cannot promote mixer thread");
+        ALOGW("process_l(): cannot promote mixer thread");
         return;
     }
     bool isGlobalSession = (mSessionId == AUDIO_SESSION_OUTPUT_MIX) ||
@@ -7240,7 +7240,7 @@ status_t AudioFlinger::EffectChain::addEffect_l(const sp<EffectModule>& effect)
                 // check invalid effect chaining combinations
                 if (insertPref == EFFECT_FLAG_INSERT_EXCLUSIVE ||
                     iPref == EFFECT_FLAG_INSERT_EXCLUSIVE) {
-                    LOGW("addEffect_l() could not insert effect %s: exclusive conflict with %s", desc.name, d.name);
+                    ALOGW("addEffect_l() could not insert effect %s: exclusive conflict with %s", desc.name, d.name);
                     return INVALID_OPERATION;
                 }
                 // remember position of first insert effect and by default
@@ -7476,7 +7476,7 @@ void AudioFlinger::EffectChain::setEffectSuspended_l(
         }
         desc = mSuspendedEffects.valueAt(index);
         if (desc->mRefCount <= 0) {
-            LOGW("setEffectSuspended_l() restore refcount should not be 0 %d", desc->mRefCount);
+            ALOGW("setEffectSuspended_l() restore refcount should not be 0 %d", desc->mRefCount);
             desc->mRefCount = 1;
         }
         if (--desc->mRefCount == 0) {
@@ -7523,7 +7523,7 @@ void AudioFlinger::EffectChain::setEffectSuspendedAll_l(bool suspend)
         }
         desc = mSuspendedEffects.valueAt(index);
         if (desc->mRefCount <= 0) {
-            LOGW("setEffectSuspendedAll_l() restore refcount should not be 0 %d", desc->mRefCount);
+            ALOGW("setEffectSuspendedAll_l() restore refcount should not be 0 %d", desc->mRefCount);
             desc->mRefCount = 1;
         }
         if (--desc->mRefCount == 0) {
@@ -7603,7 +7603,7 @@ void AudioFlinger::EffectChain::checkSuspendOnEffectEnabled(const sp<EffectModul
             setEffectSuspended_l(&effect->desc().type, enabled);
             index = mSuspendedEffects.indexOfKey(effect->desc().type.timeLow);
             if (index < 0) {
-                LOGW("checkSuspendOnEffectEnabled() Fx should be suspended here!");
+                ALOGW("checkSuspendOnEffectEnabled() Fx should be suspended here!");
                 return;
             }
         }
