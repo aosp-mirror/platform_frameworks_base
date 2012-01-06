@@ -97,16 +97,6 @@ void CameraService::onFirstRef()
             setCameraFree(i);
         }
     }
-
-    // Read the system property to determine if we have to use the
-    // AUDIO_STREAM_ENFORCED_AUDIBLE type.
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.camera.sound.forced", value, "0");
-    if (strcmp(value, "0") != 0) {
-        mAudioStreamType = AUDIO_STREAM_ENFORCED_AUDIBLE;
-    } else {
-        mAudioStreamType = AUDIO_STREAM_MUSIC;
-    }
 }
 
 CameraService::~CameraService() {
@@ -295,7 +285,7 @@ void CameraService::setCameraFree(int cameraId) {
 MediaPlayer* CameraService::newMediaPlayer(const char *file) {
     MediaPlayer* mp = new MediaPlayer();
     if (mp->setDataSource(file, NULL) == NO_ERROR) {
-        mp->setAudioStreamType(mAudioStreamType);
+        mp->setAudioStreamType(AUDIO_STREAM_ENFORCED_AUDIBLE);
         mp->prepare();
     } else {
         LOGE("Failed to load CameraService sounds: %s", file);
