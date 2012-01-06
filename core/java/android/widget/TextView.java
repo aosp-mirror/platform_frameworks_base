@@ -11378,6 +11378,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case TEXT_DIRECTION_RTL:
                 mTextDir = TextDirectionHeuristics.RTL;
                 break;
+            case TEXT_DIRECTION_LOCALE:
+                mTextDir = TextDirectionHeuristics.LOCALE;
+                break;
         }
     }
 
