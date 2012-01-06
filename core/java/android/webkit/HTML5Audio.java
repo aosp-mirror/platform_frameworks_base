@@ -311,7 +311,11 @@ class HTML5Audio extends Handler
     }
 
     private float getMaxTimeSeekable() {
-        return mMediaPlayer.getDuration() / 1000.0f;
+        if (mState >= PREPARED) {
+            return mMediaPlayer.getDuration() / 1000.0f;
+        } else {
+            return 0;
+        }
     }
 
     private native void nativeOnBuffering(int percent, int nativePointer);
