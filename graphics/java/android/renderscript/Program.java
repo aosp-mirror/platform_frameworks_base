@@ -77,6 +77,40 @@ public class Program extends BaseObj {
     }
 
     /**
+     * @hide
+     */
+    public int getConstantCount() {
+        return mConstants != null ? mConstants.length : 0;
+    }
+
+    /**
+     * @hide
+     */
+    public Type getConstant(int slot) {
+        if (slot < 0 || slot >= mConstants.length) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+        return mConstants[slot];
+    }
+
+    /**
+     * @hide
+     */
+    public int getTextureCount() {
+        return mTextureCount;
+    }
+
+    /**
+     * @hide
+     */
+    public TextureType getTextureType(int slot) {
+        if ((slot < 0) || (slot >= mTextureCount)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+        return mTextures[slot];
+    }
+
+    /**
      * Binds a constant buffer to be used as uniform inputs to the
      * program
      *

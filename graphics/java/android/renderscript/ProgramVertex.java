@@ -55,6 +55,23 @@ public class ProgramVertex extends Program {
     }
 
     /**
+     * @hide
+     */
+    public int getInputCount() {
+        return mInputs != null ? mInputs.length : 0;
+    }
+
+    /**
+     * @hide
+     */
+    public Element getInput(int slot) {
+        if (slot < 0 || slot >= mInputs.length) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+        return mInputs[slot];
+    }
+
+    /**
     * Builder class for creating ProgramVertex objects.
     * The builder starts empty and the user must minimally provide
     * the GLSL shader code, and the varying inputs. Constant, or
