@@ -46,7 +46,7 @@ void rsdProgramRasterSetActive(const Context *rsc, const ProgramRaster *pr) {
             RSD_CALL_GL(glDisable, GL_CULL_FACE);
             break;
         default:
-            LOGE("Invalid cull type");
+            rsc->setError(RS_ERROR_FATAL_DRIVER, "Invalid cull type");
             break;
     }
 

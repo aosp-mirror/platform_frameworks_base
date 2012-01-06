@@ -29,5 +29,5 @@ void root(const rs_allocation *v_in, rs_allocation *v_out) {
 
 #ifdef DEBUG_LIGHT
     printLightInfo(light);
-#endif //DEBUG_CAMERA
+#endif //DEBUG_LIGHT
 }

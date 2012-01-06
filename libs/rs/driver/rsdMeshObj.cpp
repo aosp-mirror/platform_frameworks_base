@@ -68,9 +68,9 @@ bool RsdMeshObj::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
     return true;
 }
 
-bool RsdMeshObj::init() {
+bool RsdMeshObj::init(const Context *rsc) {
 
-    updateGLPrimitives();
+    updateGLPrimitives(rsc);
 
     // Count the number of gl attrs to initialize
     mAttribCount = 0;
@@ -128,7 +128,7 @@ bool RsdMeshObj::init() {
 void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
                                       uint32_t start, uint32_t len) const {
     if (len < 1 || primIndex >= mRSMesh->mHal.state.primitivesCount || mAttribCount == 0) {
-        LOGE("Invalid mesh or parameters");
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Invalid mesh or parameters");
         return;
     }
 
@@ -181,7 +181,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex,
     rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange");
 }
 
-void RsdMeshObj::updateGLPrimitives() {
+void RsdMeshObj::updateGLPrimitives(const Context *rsc) {
     mGLPrimitives = new uint32_t[mRSMesh->mHal.state.primitivesCount];
     for (uint32_t i = 0; i < mRSMesh->mHal.state.primitivesCount; i ++) {
         switch (mRSMesh->mHal.state.primitives[i]) {
@@ -191,7 +191,7 @@ void RsdMeshObj::updateGLPrimitives() {
             case RS_PRIMITIVE_TRIANGLE:       mGLPrimitives[i] = GL_TRIANGLES; break;
             case RS_PRIMITIVE_TRIANGLE_STRIP: mGLPrimitives[i] = GL_TRIANGLE_STRIP; break;
             case RS_PRIMITIVE_TRIANGLE_FAN:   mGLPrimitives[i] = GL_TRIANGLE_FAN; break;
-            default: LOGE("Invalid mesh primitive"); break;
+            default: rsc->setError(RS_ERROR_FATAL_DRIVER, "Invalid mesh primitive"); break;
         }
     }
 }

@@ -35,7 +35,7 @@ bool rsdMeshInit(const Context *rsc, const Mesh *m) {
     }
     drv = new RsdMeshObj(rsc, m);
     m->mHal.drv = drv;
-    return drv->init();
+    return drv->init(rsc);
 }
 
 void rsdMeshDraw(const Context *rsc, const Mesh *m, uint32_t primIndex, uint32_t start, uint32_t len) {
