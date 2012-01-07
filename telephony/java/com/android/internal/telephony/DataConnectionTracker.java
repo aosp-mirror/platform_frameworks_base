@@ -559,14 +559,23 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     protected ApnSetting fetchDunApn() {
+        if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)) {
+            log("fetchDunApn: net.tethering.noprovisioning=true ret: null");
+            return null;
+        }
         Context c = mPhone.getContext();
         String apnData = Settings.Secure.getString(c.getContentResolver(),
                 Settings.Secure.TETHER_DUN_APN);
         ApnSetting dunSetting = ApnSetting.fromString(apnData);
-        if (dunSetting != null) return dunSetting;
+        if (dunSetting != null) {
+            if (VDBG) log("fetchDunApn: secure TETHER_DUN_APN dunSetting=" + dunSetting);
+            return dunSetting;
+        }
 
         apnData = c.getResources().getString(R.string.config_tether_apndata);
-        return ApnSetting.fromString(apnData);
+        dunSetting = ApnSetting.fromString(apnData);
+        if (VDBG) log("fetchDunApn: config_tether_apndata dunSetting=" + dunSetting);
+        return dunSetting;
     }
 
     public String[] getActiveApnTypes() {
