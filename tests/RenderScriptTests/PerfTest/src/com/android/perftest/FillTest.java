@@ -35,18 +35,22 @@ public class FillTest implements RsBenchBaseTest{
     // Custom shaders
     private ProgramFragment mProgFragmentMultitex;
     private ProgramFragment mProgFragmentSingletex;
+    private ProgramFragment mProgFragmentSingletexModulate;
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
     int mBenchmarkDimX;
     int mBenchmarkDimY;
 
     private ScriptC_fill_test mFillScript;
     ScriptField_TestScripts_s.Item[] mTests;
+    ScriptField_FillTestFragData_s mFragData;
 
     private final String[] mNames = {
         "Fill screen 10x singletexture",
         "Fill screen 10x 3tex multitexture",
         "Fill screen 10x blended singletexture",
-        "Fill screen 10x blended 3tex multitexture"
+        "Fill screen 10x blended 3tex multitexture",
+        "Fill screen 3x modulate blended singletexture",
+        "Fill screen 1x modulate blended singletexture",
     };
 
     public FillTest() {
@@ -88,6 +92,8 @@ public class FillTest implements RsBenchBaseTest{
         addTest(index++, 0 /*testId*/, 0 /*blend*/, 10 /*quadCount*/);
         addTest(index++, 1 /*testId*/, 1 /*blend*/, 10 /*quadCount*/);
         addTest(index++, 0 /*testId*/, 1 /*blend*/, 10 /*quadCount*/);
+        addTest(index++, 2 /*testId*/, 1 /*blend*/, 3 /*quadCount*/);
+        addTest(index++, 2 /*testId*/, 1 /*blend*/, 1 /*quadCount*/);
 
         return true;
     }
@@ -112,6 +118,14 @@ public class FillTest implements RsBenchBaseTest{
         pfbCustom.setShader(mRes, R.raw.singletexf);
         pfbCustom.addTexture(Program.TextureType.TEXTURE_2D);
         mProgFragmentSingletex = pfbCustom.create();
+
+        pfbCustom = new ProgramFragment.Builder(mRS);
+        pfbCustom.setShader(mRes, R.raw.singletexfm);
+        pfbCustom.addTexture(Program.TextureType.TEXTURE_2D);
+        mFragData = new ScriptField_FillTestFragData_s(mRS, 1);
+        pfbCustom.addConstant(mFragData.getType());
+        mProgFragmentSingletexModulate = pfbCustom.create();
+        mProgFragmentSingletexModulate.bindConstants(mFragData.getAllocation(), 0);
     }
 
     private Allocation loadTextureARGB(int id) {
@@ -140,6 +154,7 @@ public class FillTest implements RsBenchBaseTest{
         mFillScript.set_gProgVertex(progVertex);
 
         mFillScript.set_gProgFragmentTexture(mProgFragmentSingletex);
+        mFillScript.set_gProgFragmentTextureModulate(mProgFragmentSingletexModulate);
         mFillScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
         mFillScript.set_gProgStoreBlendNone(ProgramStore.BLEND_NONE_DEPTH_NONE(mRS));
         mFillScript.set_gProgStoreBlendAlpha(ProgramStore.BLEND_ALPHA_DEPTH_NONE(mRS));
@@ -150,5 +165,7 @@ public class FillTest implements RsBenchBaseTest{
         mFillScript.set_gTexOpaque(loadTextureRGB(R.drawable.data));
         mFillScript.set_gTexTransparent(loadTextureARGB(R.drawable.leaf));
         mFillScript.set_gTexChecker(loadTextureRGB(R.drawable.checker));
+
+        mFillScript.bind_gFragData(mFragData);
     }
 }

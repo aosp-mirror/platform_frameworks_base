@@ -21,6 +21,7 @@
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentTexture;
+rs_program_fragment gProgFragmentTextureModulate;
 rs_program_fragment gProgFragmentMultitex;
 
 rs_program_store gProgStoreBlendNone;
@@ -41,6 +42,11 @@ typedef struct FillTestData_s {
 } FillTestData;
 FillTestData *gData;
 
+typedef struct FillTestFragData_s {
+    float4 modulate;
+} FillTestFragData;
+FillTestFragData *gFragData;
+
 static float gDt = 0.0f;
 
 void init() {
@@ -58,7 +64,7 @@ static void bindProgramVertexOrtho() {
     rsgProgramVertexLoadProjectionMatrix(&proj);
 }
 
-static void displaySingletexFill(bool blend, int quadCount) {
+static void displaySingletexFill(bool blend, int quadCount, bool modulate) {
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
@@ -70,9 +76,21 @@ static void displaySingletexFill(bool blend, int quadCount) {
     } else {
         rsgBindProgramStore(gProgStoreBlendAlpha);
     }
-    rsgBindProgramFragment(gProgFragmentTexture);
-    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
-    rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
+    if (modulate) {
+        rsgBindProgramFragment(gProgFragmentTextureModulate);
+        rsgBindSampler(gProgFragmentTextureModulate, 0, gLinearClamp);
+        rsgBindTexture(gProgFragmentTextureModulate, 0, gTexOpaque);
+
+        gFragData->modulate.r = 0.8f;
+        gFragData->modulate.g = 0.7f;
+        gFragData->modulate.b = 0.8f;
+        gFragData->modulate.a = 0.5f;
+        rsgAllocationSyncAll(rsGetAllocation(gFragData));
+    } else {
+        rsgBindProgramFragment(gProgFragmentTexture);
+        rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+        rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
+    }
 
     for (int i = 0; i < quadCount; i ++) {
         float startX = 5 * i, startY = 5 * i;
@@ -128,7 +146,10 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
             displayMultitextureSample(gData->blend == 1 ? true : false, gData->quadCount);
             break;
         case 1:
-            displaySingletexFill(gData->blend == 1 ? true : false, gData->quadCount);
+            displaySingletexFill(gData->blend == 1 ? true : false, gData->quadCount, false);
+            break;
+        case 2:
+            displaySingletexFill(gData->blend == 1 ? true : false, gData->quadCount, true);
             break;
         default:
             rsDebug("Wrong test number", 0);
