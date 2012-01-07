@@ -142,7 +142,7 @@ public class WebSettings {
     }
 
     // TODO: Keep this up to date
-    private static final String PREVIOUS_VERSION = "3.1";
+    private static final String PREVIOUS_VERSION = "4.0.3";
 
     // WebView associated with this WebSettings.
     private WebView mWebView;
