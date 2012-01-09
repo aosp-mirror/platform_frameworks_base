@@ -730,7 +730,7 @@ private:
 
                     void        suspend() { mSuspended++; }
                     void        restore() { if (mSuspended) mSuspended--; }
-                    bool        isSuspended() { return (mSuspended != 0); }
+                    bool        isSuspended() const { return (mSuspended != 0); }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged_l(int event, int param = 0);
         virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
@@ -1115,7 +1115,7 @@ private:
         status_t         start();
         status_t         stop();
         void             setSuspended(bool suspended);
-        bool             suspended();
+        bool             suspended() const;
 
         sp<EffectHandle> controlHandle();
 
@@ -1138,7 +1138,7 @@ private:
         status_t start_l();
         status_t stop_l();
 
-        Mutex               mLock;      // mutex for process, commands and handles list protection
+mutable Mutex               mLock;      // mutex for process, commands and handles list protection
         wp<ThreadBase>      mThread;    // parent thread
         wp<EffectChain>     mChain;     // parent effect chain
         int                 mId;        // this instance unique ID
