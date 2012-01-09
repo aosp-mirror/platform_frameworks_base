@@ -254,7 +254,7 @@ private:
         Vector< sp<AudioEffect> >mEffects;
     };
 
-    static const char *kInputSourceNames[AUDIO_SOURCE_CNT -1];
+    static const char * const kInputSourceNames[AUDIO_SOURCE_CNT -1];
 
     void setPreProcessorEnabled(InputDesc *inputDesc, bool enabled);
     status_t loadPreProcessorConfig(const char *path);

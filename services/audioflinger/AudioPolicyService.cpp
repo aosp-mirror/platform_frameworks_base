@@ -43,8 +43,8 @@
 
 namespace android {
 
-static const char *kDeadlockedString = "AudioPolicyService may be deadlocked\n";
-static const char *kCmdDeadlockedString = "AudioPolicyService command thread may be deadlocked\n";
+static const char kDeadlockedString[] = "AudioPolicyService may be deadlocked\n";
+static const char kCmdDeadlockedString[] = "AudioPolicyService command thread may be deadlocked\n";
 
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
@@ -1069,7 +1069,7 @@ int AudioPolicyService::setVoiceVolume(float volume, int delayMs)
 // Audio pre-processing configuration
 // ----------------------------------------------------------------------------
 
-const char *AudioPolicyService::kInputSourceNames[AUDIO_SOURCE_CNT -1] = {
+/*static*/ const char * const AudioPolicyService::kInputSourceNames[AUDIO_SOURCE_CNT -1] = {
     MIC_SRC_TAG,
     VOICE_UL_SRC_TAG,
     VOICE_DL_SRC_TAG,
