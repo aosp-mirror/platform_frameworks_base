@@ -43,6 +43,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -4420,22 +4421,24 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Set the data this intent is operating on.  This method automatically
-     * clears any type that was previously set by {@link #setType}.
+     * clears any type that was previously set by {@link #setType} or
+     * {@link #setTypeAndNormalize}.
      *
-     * <p><em>Note: scheme and host name matching in the Android framework is
-     * case-sensitive, unlike the formal RFC.  As a result,
-     * you should always ensure that you write your Uri with these elements
-     * using lower case letters, and normalize any Uris you receive from
-     * outside of Android to ensure the scheme and host is lower case.</em></p>
+     * <p><em>Note: scheme matching in the Android framework is
+     * case-sensitive, unlike the formal RFC. As a result,
+     * you should always write your Uri with a lower case scheme,
+     * or use {@link Uri#normalize} or
+     * {@link #setDataAndNormalize}
+     * to ensure that the scheme is converted to lower case.</em>
      *
-     * @param data The URI of the data this intent is now targeting.
+     * @param data The Uri of the data this intent is now targeting.
      *
      * @return Returns the same Intent object, for chaining multiple calls
      * into a single statement.
      *
      * @see #getData
-     * @see #setType
-     * @see #setDataAndType
+     * @see #setDataAndNormalize
+     * @see android.net.Intent#normalize
      */
     public Intent setData(Uri data) {
         mData = data;
@@ -4444,16 +4447,45 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Set an explicit MIME data type.  This is used to create intents that
-     * only specify a type and not data, for example to indicate the type of
-     * data to return.  This method automatically clears any data that was
-     * previously set by {@link #setData}.
+     * Normalize and set the data this intent is operating on.
+     *
+     * <p>This method automatically clears any type that was
+     * previously set (for example, by {@link #setType}).
+     *
+     * <p>The data Uri is normalized using
+     * {@link android.net.Uri#normalize} before it is set,
+     * so really this is just a convenience method for
+     * <pre>
+     * setData(data.normalize())
+     * </pre>
+     *
+     * @param data The Uri of the data this intent is now targeting.
+     *
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     *
+     * @see #getData
+     * @see #setType
+     * @see android.net.Uri#normalize
+     */
+    public Intent setDataAndNormalize(Uri data) {
+        return setData(data.normalize());
+    }
+
+    /**
+     * Set an explicit MIME data type.
+     *
+     * <p>This is used to create intents that only specify a type and not data,
+     * for example to indicate the type of data to return.
+     *
+     * <p>This method automatically clears any data that was
+     * previously set (for example by {@link #setData}).
      *
      * <p><em>Note: MIME type matching in the Android framework is
      * case-sensitive, unlike formal RFC MIME types.  As a result,
      * you should always write your MIME types with lower case letters,
-     * and any MIME types you receive from outside of Android should be
-     * converted to lower case before supplying them here.</em></p>
+     * or use {@link #normalizeMimeType} or {@link #setTypeAndNormalize}
+     * to ensure that it is converted to lower case.</em>
      *
      * @param type The MIME type of the data being handled by this intent.
      *
@@ -4461,8 +4493,9 @@ public class Intent implements Parcelable, Cloneable {
      * into a single statement.
      *
      * @see #getType
-     * @see #setData
+     * @see #setTypeAndNormalize
      * @see #setDataAndType
+     * @see #normalizeMimeType
      */
     public Intent setType(String type) {
         mData = null;
@@ -4471,31 +4504,92 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * (Usually optional) Set the data for the intent along with an explicit
-     * MIME data type.  This method should very rarely be used -- it allows you
-     * to override the MIME type that would ordinarily be inferred from the
-     * data with your own type given here.
+     * Normalize and set an explicit MIME data type.
      *
-     * <p><em>Note: MIME type, Uri scheme, and host name matching in the
-     * Android framework is case-sensitive, unlike the formal RFC definitions.
-     * As a result, you should always write these elements with lower case letters,
-     * and normalize any MIME types or Uris you receive from
-     * outside of Android to ensure these elements are lower case before
-     * supplying them here.</em></p>
+     * <p>This is used to create intents that only specify a type and not data,
+     * for example to indicate the type of data to return.
      *
-     * @param data The URI of the data this intent is now targeting.
+     * <p>This method automatically clears any data that was
+     * previously set (for example by {@link #setData}).
+     *
+     * <p>The MIME type is normalized using
+     * {@link #normalizeMimeType} before it is set,
+     * so really this is just a convenience method for
+     * <pre>
+     * setType(Intent.normalizeMimeType(type))
+     * </pre>
+     *
      * @param type The MIME type of the data being handled by this intent.
      *
      * @return Returns the same Intent object, for chaining multiple calls
      * into a single statement.
      *
+     * @see #getType
      * @see #setData
+     * @see #normalizeMimeType
+     */
+    public Intent setTypeAndNormalize(String type) {
+        return setType(normalizeMimeType(type));
+    }
+
+    /**
+     * (Usually optional) Set the data for the intent along with an explicit
+     * MIME data type.  This method should very rarely be used -- it allows you
+     * to override the MIME type that would ordinarily be inferred from the
+     * data with your own type given here.
+     *
+     * <p><em>Note: MIME type and Uri scheme matching in the
+     * Android framework is case-sensitive, unlike the formal RFC definitions.
+     * As a result, you should always write these elements with lower case letters,
+     * or use {@link #normalizeMimeType} or {@link android.net.Uri#normalize} or
+     * {@link #setDataAndTypeAndNormalize}
+     * to ensure that they are converted to lower case.</em>
+     *
+     * @param data The Uri of the data this intent is now targeting.
+     * @param type The MIME type of the data being handled by this intent.
+     *
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     *
      * @see #setType
+     * @see #setData
+     * @see #normalizeMimeType
+     * @see android.net.Uri#normalize
+     * @see #setDataAndTypeAndNormalize
      */
     public Intent setDataAndType(Uri data, String type) {
         mData = data;
         mType = type;
         return this;
+    }
+
+    /**
+     * (Usually optional) Normalize and set both the data Uri and an explicit
+     * MIME data type.  This method should very rarely be used -- it allows you
+     * to override the MIME type that would ordinarily be inferred from the
+     * data with your own type given here.
+     *
+     * <p>The data Uri and the MIME type are normalize using
+     * {@link android.net.Uri#normalize} and {@link #normalizeMimeType}
+     * before they are set, so really this is just a convenience method for
+     * <pre>
+     * setDataAndType(data.normalize(), Intent.normalizeMimeType(type))
+     * </pre>
+     *
+     * @param data The Uri of the data this intent is now targeting.
+     * @param type The MIME type of the data being handled by this intent.
+     *
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     *
+     * @see #setType
+     * @see #setData
+     * @see #setDataAndType
+     * @see #normalizeMimeType
+     * @see android.net.Uri#normalize
+     */
+    public Intent setDataAndTypeAndNormalize(Uri data, String type) {
+        return setDataAndType(data.normalize(), normalizeMimeType(type));
     }
 
     /**
@@ -5566,7 +5660,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <ul>
      * <li> action, as set by {@link #setAction}.
-     * <li> data URI and MIME type, as set by {@link #setData(Uri)},
+     * <li> data Uri and MIME type, as set by {@link #setData(Uri)},
      * {@link #setType(String)}, or {@link #setDataAndType(Uri, String)}.
      * <li> categories, as set by {@link #addCategory}.
      * <li> package, as set by {@link #setPackage}.
@@ -6228,5 +6322,39 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         return intent;
+    }
+
+    /**
+     * Normalize a MIME data type.
+     *
+     * <p>A normalized MIME type has white-space trimmed,
+     * content-type parameters removed, and is lower-case.
+     * This aligns the type with Android best practices for
+     * intent filtering.
+     *
+     * <p>For example, "text/plain; charset=utf-8" becomes "text/plain".
+     * "text/x-vCard" becomes "text/x-vcard".
+     *
+     * <p>All MIME types received from outside Android (such as user input,
+     * or external sources like Bluetooth, NFC, or the Internet) should
+     * be normalized before they are used to create an Intent.
+     *
+     * @param type MIME data type to normalize
+     * @return normalized MIME data type, or null if the input was null
+     * @see {@link #setType}
+     * @see {@link #setTypeAndNormalize}
+     */
+    public static String normalizeMimeType(String type) {
+        if (type == null) {
+            return null;
+        }
+
+        type = type.trim().toLowerCase(Locale.US);
+
+        final int semicolonIndex = type.indexOf(';');
+        if (semicolonIndex != -1) {
+            type = type.substring(0, semicolonIndex);
+        }
+        return type;
     }
 }
