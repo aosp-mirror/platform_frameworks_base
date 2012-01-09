@@ -284,7 +284,7 @@ template<int CHANNELS>
 **/
 void AudioResamplerSinc::read(
         int16_t*& impulse, uint32_t& phaseFraction,
-        int16_t const* in, size_t inputIndex)
+        const int16_t* in, size_t inputIndex)
 {
     const uint32_t phaseIndex = phaseFraction >> kNumPhaseBits;
     impulse += CHANNELS;
@@ -302,7 +302,7 @@ void AudioResamplerSinc::read(
 
 template<int CHANNELS>
 void AudioResamplerSinc::filterCoefficient(
-        int32_t& l, int32_t& r, uint32_t phase, int16_t const *samples)
+        int32_t& l, int32_t& r, uint32_t phase, const int16_t *samples)
 {
     // compute the index of the coefficient on the positive side and
     // negative side
@@ -317,9 +317,9 @@ void AudioResamplerSinc::filterCoefficient(
 
     l = 0;
     r = 0;
-    int32_t const* coefs = mFirCoefs;
-    int16_t const *sP = samples;
-    int16_t const *sN = samples+CHANNELS;
+    const int32_t* coefs = mFirCoefs;
+    const int16_t *sP = samples;
+    const int16_t *sN = samples+CHANNELS;
     for (unsigned int i=0 ; i<halfNumCoefs/4 ; i++) {
         interpolate<CHANNELS>(l, r, coefs+indexP, lerpP, sP);
         interpolate<CHANNELS>(l, r, coefs+indexN, lerpN, sN);
@@ -339,13 +339,13 @@ void AudioResamplerSinc::filterCoefficient(
 template<int CHANNELS>
 void AudioResamplerSinc::interpolate(
         int32_t& l, int32_t& r,
-        int32_t const* coefs, int16_t lerp, int16_t const* samples)
+        const int32_t* coefs, int16_t lerp, const int16_t* samples)
 {
     int32_t c0 = coefs[0];
     int32_t c1 = coefs[1];
     int32_t sinc = mulAdd(lerp, (c1-c0)<<1, c0);
     if (CHANNELS == 2) {
-        uint32_t rl = *reinterpret_cast<uint32_t const*>(samples);
+        uint32_t rl = *reinterpret_cast<const uint32_t*>(samples);
         l = mulAddRL(1, rl, sinc, l);
         r = mulAddRL(0, rl, sinc, r);
     } else {
