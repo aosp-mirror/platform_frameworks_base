@@ -63,7 +63,7 @@ class AudioFlinger :
 {
     friend class BinderService<AudioFlinger>;
 public:
-    static char const* getServiceName() { return "media.audio_flinger"; }
+    static const char* getServiceName() { return "media.audio_flinger"; }
 
     virtual     status_t    dump(int fd, const Vector<String16>& args);
 
