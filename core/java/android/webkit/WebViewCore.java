@@ -166,6 +166,10 @@ public final class WebViewCore {
                            "creation.");
                     Log.e(LOGTAG, Log.getStackTraceString(e));
                 }
+
+                // Start the singleton watchdog which will monitor the WebCore thread
+                // to verify it's still processing messages.
+                WebCoreThreadWatchdog.start(context, sWebCoreHandler);
             }
         }
         // Create an EventHub to handle messages before and after the thread is
@@ -755,6 +759,13 @@ public final class WebViewCore {
                                 }
                                 BrowserFrame.sJavaBridge.updateProxy((ProxyProperties)msg.obj);
                                 break;
+
+                            case EventHub.HEARTBEAT:
+                                // Ping back the watchdog to let it know we're still processing
+                                // messages.
+                                Message m = (Message)msg.obj;
+                                m.sendToTarget();
+                                break;
                         }
                     }
                 };
@@ -1078,6 +1089,8 @@ public final class WebViewCore {
 
         static final int NOTIFY_ANIMATION_STARTED = 196;
 
+        static final int HEARTBEAT = 197;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1156,6 +1169,7 @@ public final class WebViewCore {
                                 mSettings.onDestroyed();
                                 mNativeClass = 0;
                                 mWebView = null;
+                                WebCoreThreadWatchdog.quit();
                             }
                             break;
 

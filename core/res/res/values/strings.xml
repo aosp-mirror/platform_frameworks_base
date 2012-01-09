@@ -2568,6 +2568,8 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
+    <!-- Text of the alert that is displayed when a web page is not responding. [CHAR-LIMIT=NONE] -->
+    <string name="webpage_unresponsive">The page has become unresponsive.\n\nDo you want to close it?</string>
     <!-- [CHAR LIMIT=25] Title of the alert when application launches on top of another. -->
     <string name="launch_warning_title">App redirected</string>
     <!-- [CHAR LIMIT=50] Title of the alert when application launches on top of another. -->
