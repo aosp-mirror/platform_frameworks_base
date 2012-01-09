@@ -376,7 +376,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
 
     // Now we have an event to dispatch.
     // All events are eventually dequeued and processed this way, even if we intend to drop them.
-    LOG_ASSERT(mPendingEvent != NULL);
+    ALOG_ASSERT(mPendingEvent != NULL);
     bool done = false;
     DropReason dropReason = DROP_REASON_NOT_DROPPED;
     if (!(mPendingEvent->policyFlags & POLICY_FLAG_PASS_TO_USER)) {
@@ -445,7 +445,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
     }
 
     default:
-        LOG_ASSERT(false);
+        ALOG_ASSERT(false);
         break;
     }
 
@@ -582,7 +582,7 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
         reason = "inbound event was dropped because it is stale";
         break;
     default:
-        LOG_ASSERT(false);
+        ALOG_ASSERT(false);
         return;
     }
 
@@ -1017,7 +1017,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
             toString(resumeWithAppendedMotionSample));
 #endif
 
-    LOG_ASSERT(eventEntry->dispatchInProgress); // should already have been set to true
+    ALOG_ASSERT(eventEntry->dispatchInProgress); // should already have been set to true
 
     pokeUserActivityLocked(eventEntry);
 
@@ -1878,7 +1878,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
     // Make sure we are never called for streaming when splitting across multiple windows.
     bool isSplit = inputTarget->flags & InputTarget::FLAG_SPLIT;
-    LOG_ASSERT(! (resumeWithAppendedMotionSample && isSplit));
+    ALOG_ASSERT(! (resumeWithAppendedMotionSample && isSplit));
 
     // Skip this event if the connection status is not normal.
     // We don't want to enqueue additional outbound events if the connection is broken.
@@ -1892,7 +1892,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
     // Split a motion event if needed.
     if (isSplit) {
-        LOG_ASSERT(eventEntry->type == EventEntry::TYPE_MOTION);
+        ALOG_ASSERT(eventEntry->type == EventEntry::TYPE_MOTION);
 
         MotionEntry* originalMotionEntry = static_cast<MotionEntry*>(eventEntry);
         if (inputTarget->pointerIds.count() != originalMotionEntry->pointerCount) {
@@ -2135,11 +2135,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             connection->getInputChannelName());
 #endif
 
-    LOG_ASSERT(connection->status == Connection::STATUS_NORMAL);
-    LOG_ASSERT(! connection->outboundQueue.isEmpty());
+    ALOG_ASSERT(connection->status == Connection::STATUS_NORMAL);
+    ALOG_ASSERT(! connection->outboundQueue.isEmpty());
 
     DispatchEntry* dispatchEntry = connection->outboundQueue.head;
-    LOG_ASSERT(! dispatchEntry->inProgress);
+    ALOG_ASSERT(! dispatchEntry->inProgress);
 
     // Mark the dispatch entry as in progress.
     dispatchEntry->inProgress = true;
@@ -2271,7 +2271,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     }
 
     default: {
-        LOG_ASSERT(false);
+        ALOG_ASSERT(false);
     }
     }
 
@@ -2518,7 +2518,7 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
 
 InputDispatcher::MotionEntry*
 InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds) {
-    LOG_ASSERT(pointerIds.value != 0);
+    ALOG_ASSERT(pointerIds.value != 0);
 
     uint32_t splitPointerIndexMap[MAX_POINTERS];
     PointerProperties splitPointerProperties[MAX_POINTERS];
@@ -3936,7 +3936,7 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
                 return true; // skip next cycle
             }
 
-            LOG_ASSERT(connection->outboundQueue.head == dispatchEntry);
+            ALOG_ASSERT(connection->outboundQueue.head == dispatchEntry);
 
             // Latch the fallback keycode for this key on an initial down.
             // The fallback keycode cannot change at any other point in the lifecycle.
@@ -3949,7 +3949,7 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
                 connection->inputState.setFallbackKey(originalKeyCode, fallbackKeyCode);
             }
 
-            LOG_ASSERT(fallbackKeyCode != -1);
+            ALOG_ASSERT(fallbackKeyCode != -1);
 
             // Cancel the fallback key if the policy decides not to send it anymore.
             // We will continue to dispatch the key to the policy but we will no
@@ -4101,7 +4101,7 @@ void InputDispatcher::InjectionState::release() {
     if (refCount == 0) {
         delete this;
     } else {
-        LOG_ASSERT(refCount > 0);
+        ALOG_ASSERT(refCount > 0);
     }
 }
 
@@ -4122,7 +4122,7 @@ void InputDispatcher::EventEntry::release() {
     if (refCount == 0) {
         delete this;
     } else {
-        LOG_ASSERT(refCount > 0);
+        ALOG_ASSERT(refCount > 0);
     }
 }
 
