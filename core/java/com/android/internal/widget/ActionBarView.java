@@ -300,6 +300,7 @@ public class ActionBarView extends AbsActionBarView {
         mProgressView = new ProgressBar(mContext, null, 0, mProgressStyle);
         mProgressView.setId(R.id.progress_horizontal);
         mProgressView.setMax(10000);
+        mProgressView.setVisibility(GONE);
         addView(mProgressView);
     }
 
@@ -307,6 +308,7 @@ public class ActionBarView extends AbsActionBarView {
         mIndeterminateProgressView = new ProgressBar(mContext, null, 0,
                 mIndeterminateProgressStyle);
         mIndeterminateProgressView.setId(R.id.progress_circular);
+        mIndeterminateProgressView.setVisibility(GONE);
         addView(mIndeterminateProgressView);
     }
 
