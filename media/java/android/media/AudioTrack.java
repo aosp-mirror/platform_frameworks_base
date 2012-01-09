@@ -195,8 +195,8 @@ public class AudioTrack
      * The type of the audio stream to play. See
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC},
-     *   {@link AudioManager#STREAM_ALARM}, {@link AudioManager#STREAM_NOTIFICATION},
-     *   {@link AudioManager#STREAM_DTMF}, and {@link AudioManager#STREAM_BLUETOOTH_SCO}.
+     *   {@link AudioManager#STREAM_ALARM}, {@link AudioManager#STREAM_NOTIFICATION}, and
+     *   {@link AudioManager#STREAM_DTMF}.
      */
     private int mStreamType = AudioManager.STREAM_MUSIC;
     /**
@@ -511,8 +511,7 @@ public class AudioTrack
      * Compare the result against {@link AudioManager#STREAM_VOICE_CALL},
      * {@link AudioManager#STREAM_SYSTEM}, {@link AudioManager#STREAM_RING},
      * {@link AudioManager#STREAM_MUSIC}, {@link AudioManager#STREAM_ALARM},
-     * {@link AudioManager#STREAM_NOTIFICATION}, {@link AudioManager#STREAM_DTMF},
-     * or {@link AudioManager#STREAM_BLUETOOTH_SCO}.
+     * {@link AudioManager#STREAM_NOTIFICATION}, or {@link AudioManager#STREAM_DTMF}.
      */
     public int getStreamType() {
         return mStreamType;
