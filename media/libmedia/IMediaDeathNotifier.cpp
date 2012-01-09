@@ -54,7 +54,7 @@ IMediaDeathNotifier::getMediaPlayerService()
     binder->linkToDeath(sDeathNotifier);
     sMediaPlayerService = interface_cast<IMediaPlayerService>(binder);
     }
-    LOGE_IF(sMediaPlayerService == 0, "no media player service!?");
+    ALOGE_IF(sMediaPlayerService == 0, "no media player service!?");
     return sMediaPlayerService;
 }
 

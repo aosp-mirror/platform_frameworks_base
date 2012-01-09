@@ -153,13 +153,13 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (offset < 0 || length < 0 || fd < 0) {
         if (offset < 0) {
-            LOGE("negative offset (%lld)", offset);
+            ALOGE("negative offset (%lld)", offset);
         }
         if (length < 0) {
-            LOGE("negative length (%lld)", length);
+            ALOGE("negative length (%lld)", length);
         }
         if (fd < 0) {
-            LOGE("invalid file descriptor");
+            ALOGE("invalid file descriptor");
         }
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
@@ -238,7 +238,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         videoFrame = static_cast<VideoFrame *>(frameMemory->pointer());
     }
     if (videoFrame == NULL) {
-        LOGE("getFrameAtTime: videoFrame is a NULL pointer");
+        ALOGE("getFrameAtTime: videoFrame is a NULL pointer");
         return NULL;
     }
 
@@ -322,7 +322,7 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
         mediaAlbumArt = static_cast<MediaAlbumArt *>(albumArtMemory->pointer());
     }
     if (mediaAlbumArt == NULL) {
-        LOGE("getEmbeddedPicture: Call to getEmbeddedPicture failed.");
+        ALOGE("getEmbeddedPicture: Call to getEmbeddedPicture failed.");
         return NULL;
     }
 
@@ -330,7 +330,7 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
     char* data = (char*) mediaAlbumArt + sizeof(MediaAlbumArt);
     jbyteArray array = env->NewByteArray(len);
     if (!array) {  // OutOfMemoryError exception has already been thrown.
-        LOGE("getEmbeddedPicture: OutOfMemoryError is thrown.");
+        ALOGE("getEmbeddedPicture: OutOfMemoryError is thrown.");
     } else {
         jbyte* bytes = env->GetByteArrayElements(array, NULL);
         if (bytes != NULL) {

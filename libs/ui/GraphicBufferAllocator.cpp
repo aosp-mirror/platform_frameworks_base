@@ -38,7 +38,7 @@ GraphicBufferAllocator::GraphicBufferAllocator()
 {
     hw_module_t const* module;
     int err = hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module);
-    LOGE_IF(err, "FATAL: can't find the %s module", GRALLOC_HARDWARE_MODULE_ID);
+    ALOGE_IF(err, "FATAL: can't find the %s module", GRALLOC_HARDWARE_MODULE_ID);
     if (err == 0) {
         gralloc_open(module, &mAllocDev);
     }

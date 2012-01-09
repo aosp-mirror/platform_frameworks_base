@@ -64,7 +64,7 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
             reinterpret_cast<const UChar*>(text), 0, len, len, bidiFlags);
 #endif
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(text, len).string());
         return ;
     }
@@ -88,7 +88,7 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
             reinterpret_cast<const UChar*>(chars), start, count, contextCount, dirFlags);
 #endif
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(chars + start, count).string());
         return ;
     }
@@ -136,7 +136,7 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
             reinterpret_cast<const UChar*>(text), 0, count, count, bidiFlags);
 #endif
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(text, count).string());
         return ;
     }

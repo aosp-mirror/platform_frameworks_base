@@ -53,7 +53,7 @@ MemoryHeapBase::MemoryHeapBase(size_t size, uint32_t flags, char const * name)
     const size_t pagesize = getpagesize();
     size = ((size + pagesize-1) & ~(pagesize-1));
     int fd = ashmem_create_region(name == NULL ? "MemoryHeapBase" : name, size);
-    LOGE_IF(fd<0, "error creating ashmem region: %s", strerror(errno));
+    ALOGE_IF(fd<0, "error creating ashmem region: %s", strerror(errno));
     if (fd >= 0) {
         if (mapfd(fd, size) == NO_ERROR) {
             if (flags & READ_ONLY) {
@@ -72,7 +72,7 @@ MemoryHeapBase::MemoryHeapBase(const char* device, size_t size, uint32_t flags)
         open_flags |= O_SYNC;
 
     int fd = open(device, open_flags);
-    LOGE_IF(fd<0, "error opening %s: %s", device, strerror(errno));
+    ALOGE_IF(fd<0, "error opening %s: %s", device, strerror(errno));
     if (fd >= 0) {
         const size_t pagesize = getpagesize();
         size = ((size + pagesize-1) & ~(pagesize-1));
@@ -127,7 +127,7 @@ status_t MemoryHeapBase::mapfd(int fd, size_t size, uint32_t offset)
         void* base = (uint8_t*)mmap(0, size,
                 PROT_READ|PROT_WRITE, MAP_SHARED, fd, offset);
         if (base == MAP_FAILED) {
-            LOGE("mmap(fd=%d, size=%u) failed (%s)",
+            ALOGE("mmap(fd=%d, size=%u) failed (%s)",
                     fd, uint32_t(size), strerror(errno));
             close(fd);
             return -errno;

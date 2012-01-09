@@ -383,7 +383,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
                 finishFlushIfPossible();
             } else if (what == ACodec::kWhatError) {
-                LOGE("Received error from %s decoder, aborting playback.",
+                ALOGE("Received error from %s decoder, aborting playback.",
                      audio ? "audio" : "video");
 
                 mRenderer->queueEOS(audio, UNKNOWN_ERROR);
@@ -417,7 +417,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 if (finalResult == ERROR_END_OF_STREAM) {
                     ALOGV("reached %s EOS", audio ? "audio" : "video");
                 } else {
-                    LOGE("%s track encountered an error (%d)",
+                    ALOGE("%s track encountered an error (%d)",
                          audio ? "audio" : "video", finalResult);
 
                     notifyListener(

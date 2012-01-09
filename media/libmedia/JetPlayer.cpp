@@ -68,21 +68,21 @@ int JetPlayer::init()
     if (pLibConfig == NULL)
         pLibConfig = EAS_Config();
     if (pLibConfig == NULL) {
-        LOGE("JetPlayer::init(): EAS library configuration could not be retrieved, aborting.");
+        ALOGE("JetPlayer::init(): EAS library configuration could not be retrieved, aborting.");
         return EAS_FAILURE;
     }
 
     // init the EAS library
     result = EAS_Init(&mEasData);
     if( result != EAS_SUCCESS) {
-        LOGE("JetPlayer::init(): Error initializing Sonivox EAS library, aborting.");
+        ALOGE("JetPlayer::init(): Error initializing Sonivox EAS library, aborting.");
         mState = EAS_STATE_ERROR;
         return result;
     }
     // init the JET library with the default app event controller range
     result = JET_Init(mEasData, NULL, sizeof(S_JET_CONFIG));
     if( result != EAS_SUCCESS) {
-        LOGE("JetPlayer::init(): Error initializing JET library, aborting.");
+        ALOGE("JetPlayer::init(): Error initializing JET library, aborting.");
         mState = EAS_STATE_ERROR;
         return result;
     }
@@ -109,7 +109,7 @@ int JetPlayer::init()
         ALOGV("JetPlayer::init(): render thread(%d) successfully started.", mTid);
         mState = EAS_STATE_READY;
     } else {
-        LOGE("JetPlayer::init(): failed to start render thread.");
+        ALOGE("JetPlayer::init(): failed to start render thread.");
         mState = EAS_STATE_ERROR;
         return EAS_FAILURE;
     }
@@ -169,7 +169,7 @@ int JetPlayer::render() {
     mAudioBuffer = 
         new EAS_PCM[pLibConfig->mixBufferSize * pLibConfig->numChannels * MIX_NUM_BUFFERS];
     if (!mAudioBuffer) {
-        LOGE("JetPlayer::render(): mAudioBuffer allocate failed");
+        ALOGE("JetPlayer::render(): mAudioBuffer allocate failed");
         goto threadExit;
     }
 
@@ -210,7 +210,7 @@ int JetPlayer::render() {
         for (int i = 0; i < MIX_NUM_BUFFERS; i++) {
             result = EAS_Render(mEasData, p, pLibConfig->mixBufferSize, &count);
             if (result != EAS_SUCCESS) {
-                LOGE("JetPlayer::render(): EAS_Render returned error %ld", result);
+                ALOGE("JetPlayer::render(): EAS_Render returned error %ld", result);
             }
             p += count * pLibConfig->numChannels;
             num_output += count * pLibConfig->numChannels * sizeof(EAS_PCM);
@@ -229,14 +229,14 @@ int JetPlayer::render() {
 
         // check audio output track
         if (mAudioTrack == NULL) {
-            LOGE("JetPlayer::render(): output AudioTrack was not created");
+            ALOGE("JetPlayer::render(): output AudioTrack was not created");
             goto threadExit;
         }
 
         // Write data to the audio hardware
         //ALOGV("JetPlayer::render(): writing to audio output");
         if ((temp = mAudioTrack->write(mAudioBuffer, num_output)) < 0) {
-            LOGE("JetPlayer::render(): Error in writing:%d",temp);
+            ALOGE("JetPlayer::render(): Error in writing:%d",temp);
             return temp;
         }
 
@@ -469,7 +469,7 @@ int JetPlayer::clearQueue()
 //-------------------------------------------------------------------------------------------------
 void JetPlayer::dump()
 {
-    LOGE("JetPlayer dump: JET file=%s", mEasJetFileLoc->path);
+    ALOGE("JetPlayer dump: JET file=%s", mEasJetFileLoc->path);
 }
 
 void JetPlayer::dumpJetStatus(S_JET_STATUS* pJetStatus)
@@ -479,7 +479,7 @@ void JetPlayer::dumpJetStatus(S_JET_STATUS* pJetStatus)
                 pJetStatus->currentUserID, pJetStatus->segmentRepeatCount,
                 pJetStatus->numQueuedSegments, pJetStatus->paused);
     else
-        LOGE(">> JET player status is NULL");
+        ALOGE(">> JET player status is NULL");
 }
 
 

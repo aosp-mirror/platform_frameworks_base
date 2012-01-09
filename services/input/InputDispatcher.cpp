@@ -121,7 +121,7 @@ static bool isValidKeyAction(int32_t action) {
 
 static bool validateKeyEvent(int32_t action) {
     if (! isValidKeyAction(action)) {
-        LOGE("Key event has invalid action code 0x%x", action);
+        ALOGE("Key event has invalid action code 0x%x", action);
         return false;
     }
     return true;
@@ -152,11 +152,11 @@ static bool isValidMotionAction(int32_t action, size_t pointerCount) {
 static bool validateMotionEvent(int32_t action, size_t pointerCount,
         const PointerProperties* pointerProperties) {
     if (! isValidMotionAction(action, pointerCount)) {
-        LOGE("Motion event has invalid action code 0x%x", action);
+        ALOGE("Motion event has invalid action code 0x%x", action);
         return false;
     }
     if (pointerCount < 1 || pointerCount > MAX_POINTERS) {
-        LOGE("Motion event has invalid pointer count %d; value must be between 1 and %d.",
+        ALOGE("Motion event has invalid pointer count %d; value must be between 1 and %d.",
                 pointerCount, MAX_POINTERS);
         return false;
     }
@@ -164,12 +164,12 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     for (size_t i = 0; i < pointerCount; i++) {
         int32_t id = pointerProperties[i].id;
         if (id < 0 || id > MAX_POINTER_ID) {
-            LOGE("Motion event has invalid pointer id %d; value must be between 0 and %d",
+            ALOGE("Motion event has invalid pointer id %d; value must be between 0 and %d",
                     id, MAX_POINTER_ID);
             return false;
         }
         if (pointerIdBits.hasBit(id)) {
-            LOGE("Motion event has duplicate pointer id %d", id);
+            ALOGE("Motion event has duplicate pointer id %d", id);
             return false;
         }
         pointerIdBits.markBit(id);
@@ -2160,7 +2160,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                 keyEntry->eventTime);
 
         if (status) {
-            LOGE("channel '%s' ~ Could not publish key event, "
+            ALOGE("channel '%s' ~ Could not publish key event, "
                     "status=%d", connection->getInputChannelName(), status);
             abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
             return;
@@ -2223,7 +2223,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                 usingCoords);
 
         if (status) {
-            LOGE("channel '%s' ~ Could not publish motion event, "
+            ALOGE("channel '%s' ~ Could not publish motion event, "
                     "status=%d", connection->getInputChannelName(), status);
             abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
             return;
@@ -2255,7 +2255,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                     break;
                 }
                 if (status != OK) {
-                    LOGE("channel '%s' ~ Could not append motion sample "
+                    ALOGE("channel '%s' ~ Could not append motion sample "
                             "for a reason other than out of memory, status=%d",
                             connection->getInputChannelName(), status);
                     abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
@@ -2278,7 +2278,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     // Send the dispatch signal.
     status = connection->inputPublisher.sendDispatchSignal();
     if (status) {
-        LOGE("channel '%s' ~ Could not send dispatch signal, status=%d",
+        ALOGE("channel '%s' ~ Could not send dispatch signal, status=%d",
                 connection->getInputChannelName(), status);
         abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
         return;
@@ -2313,7 +2313,7 @@ void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
     // while waiting for the next dispatch cycle to begin.
     status_t status = connection->inputPublisher.reset();
     if (status) {
-        LOGE("channel '%s' ~ Could not reset publisher, status=%d",
+        ALOGE("channel '%s' ~ Could not reset publisher, status=%d",
                 connection->getInputChannelName(), status);
         abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
         return;
@@ -2400,7 +2400,7 @@ int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data
 
         ssize_t connectionIndex = d->mConnectionsByReceiveFd.indexOfKey(receiveFd);
         if (connectionIndex < 0) {
-            LOGE("Received spurious receive callback for unknown input channel.  "
+            ALOGE("Received spurious receive callback for unknown input channel.  "
                     "fd=%d, events=0x%x", receiveFd, events);
             return 0; // remove the callback
         }
@@ -2423,7 +2423,7 @@ int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data
                 return 1;
             }
 
-            LOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
+            ALOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
                     connection->getInputChannelName(), status);
             notify = true;
         } else {
@@ -3643,7 +3643,7 @@ status_t InputDispatcher::registerInputChannel(const sp<InputChannel>& inputChan
         sp<Connection> connection = new Connection(inputChannel, inputWindowHandle, monitor);
         status_t status = connection->initialize();
         if (status) {
-            LOGE("Failed to initialize input publisher for input channel '%s', status=%d",
+            ALOGE("Failed to initialize input publisher for input channel '%s', status=%d",
                     inputChannel->getName().string(), status);
             return status;
         }
@@ -3762,7 +3762,7 @@ void InputDispatcher::onDispatchCycleFinishedLocked(
 
 void InputDispatcher::onDispatchCycleBrokenLocked(
         nsecs_t currentTime, const sp<Connection>& connection) {
-    LOGE("channel '%s' ~ Channel is unrecoverably broken and will be disposed!",
+    ALOGE("channel '%s' ~ Channel is unrecoverably broken and will be disposed!",
             connection->getInputChannelName());
 
     CommandEntry* commandEntry = postCommandLocked(

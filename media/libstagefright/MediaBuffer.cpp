@@ -135,7 +135,7 @@ size_t MediaBuffer::range_length() const {
 
 void MediaBuffer::set_range(size_t offset, size_t length) {
     if ((mGraphicBuffer == NULL) && (offset + length > mSize)) {
-        LOGE("offset = %d, length = %d, mSize = %d", offset, length, mSize);
+        ALOGE("offset = %d, length = %d, mSize = %d", offset, length, mSize);
     }
     CHECK((mGraphicBuffer != NULL) || (offset + length <= mSize));
 

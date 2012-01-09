@@ -53,7 +53,7 @@ void checkGLErrors()
         GLenum error = glGetError();
         if (error == GL_NO_ERROR)
             break;
-        LOGE("GL error 0x%04x", int(error));
+        ALOGE("GL error 0x%04x", int(error));
     } while(true);
 }
 
@@ -62,7 +62,7 @@ void checkEGLErrors(const char* token)
 {
     EGLint error = eglGetError();
     if (error && error != EGL_SUCCESS) {
-        LOGE("%s: EGL error 0x%04x (%s)",
+        ALOGE("%s: EGL error 0x%04x (%s)",
                 token, int(error), EGLUtils::strerror(error));
     }
 }
@@ -130,7 +130,7 @@ void DisplayHardware::init(uint32_t dpy)
     mNativeWindow = new FramebufferNativeWindow();
     framebuffer_device_t const * fbDev = mNativeWindow->getDevice();
     if (!fbDev) {
-        LOGE("Display subsystem failed to initialize. check logs. exiting...");
+        ALOGE("Display subsystem failed to initialize. check logs. exiting...");
         exit(0);
     }
 
@@ -188,7 +188,7 @@ void DisplayHardware::init(uint32_t dpy)
 
     EGLConfig config = NULL;
     err = selectConfigForPixelFormat(display, attribs, format, &config);
-    LOGE_IF(err, "couldn't find an EGLConfig matching the screen format");
+    ALOGE_IF(err, "couldn't find an EGLConfig matching the screen format");
     
     EGLint r,g,b,a;
     eglGetConfigAttrib(display, config, EGL_RED_SIZE,   &r);
@@ -270,7 +270,7 @@ void DisplayHardware::init(uint32_t dpy)
 
     result = eglMakeCurrent(display, surface, surface, context);
     if (!result) {
-        LOGE("Couldn't create a working GLES context. check logs. exiting...");
+        ALOGE("Couldn't create a working GLES context. check logs. exiting...");
         exit(0);
     }
 

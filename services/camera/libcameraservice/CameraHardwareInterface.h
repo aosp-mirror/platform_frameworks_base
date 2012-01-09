@@ -92,7 +92,7 @@ public:
         if(mDevice) {
             int rc = mDevice->common.close(&mDevice->common);
             if (rc != OK)
-                LOGE("Could not close camera %s: %d", mName.string(), rc);
+                ALOGE("Could not close camera %s: %d", mName.string(), rc);
         }
     }
 
@@ -102,7 +102,7 @@ public:
         int rc = module->methods->open(module, mName.string(),
                                        (hw_device_t **)&mDevice);
         if (rc != OK) {
-            LOGE("Could not open camera %s: %d", mName.string(), rc);
+            ALOGE("Could not open camera %s: %d", mName.string(), rc);
             return rc;
         }
         initHalPreviewWindow();
@@ -460,7 +460,7 @@ private:
                 static_cast<CameraHardwareInterface *>(user);
         sp<CameraHeapMemory> mem(static_cast<CameraHeapMemory *>(data->handle));
         if (index >= mem->mNumBufs) {
-            LOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
+            ALOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
                  index, mem->mNumBufs);
             return;
         }
@@ -479,7 +479,7 @@ private:
         // MemoryHeapBase.
         sp<CameraHeapMemory> mem(static_cast<CameraHeapMemory *>(data->handle));
         if (index >= mem->mNumBufs) {
-            LOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
+            ALOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
                  index, mem->mNumBufs);
             return;
         }

@@ -205,7 +205,7 @@ bool GenerationCache<K, V>::removeOldest() {
             removeAt(index);
             return true;
         }
-        LOGE("GenerationCache: removeOldest failed to find the item in the cache "
+        ALOGE("GenerationCache: removeOldest failed to find the item in the cache "
                 "with the given key, but we know it must be in there.  "
                 "Is the key comparator kaput?");
     }

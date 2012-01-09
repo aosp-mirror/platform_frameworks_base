@@ -194,8 +194,8 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
 
     if ((tagstr == NULL) || (msgstr == NULL)) {
         env->ExceptionClear();      /* assume exception (OOM?) was thrown */
-        LOGE("Unable to call Log.e()\n");
-        LOGE("%s", msg);
+        ALOGE("Unable to call Log.e()\n");
+        ALOGE("%s", msg);
         goto bail;
     }
 
@@ -221,7 +221,7 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         env->Throw(excep);
         vm->DetachCurrentThread();
         sleep(60);
-        LOGE("Forcefully exiting");
+        ALOGE("Forcefully exiting");
         exit(1);
         *((int *) 1) = 1;
     }
@@ -699,7 +699,7 @@ static void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             jniThrowException(env, "java/lang/RuntimeException", "Unknown transaction code");
             break;
         case FAILED_TRANSACTION:
-            LOGE("!!! FAILED BINDER TRANSACTION !!!");
+            ALOGE("!!! FAILED BINDER TRANSACTION !!!");
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
             // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
@@ -715,7 +715,7 @@ static void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
                     "Not allowed to write file descriptors here");
             break;
         default:
-            LOGE("Unknown binder error code. 0x%x", err);
+            ALOGE("Unknown binder error code. 0x%x", err);
             String8 msg;
             msg.appendFormat("Unknown binder error code. 0x%x", err);
             // RemoteException is a checked exception, only throw from certain methods.

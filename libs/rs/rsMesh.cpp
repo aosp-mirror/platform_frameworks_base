@@ -107,7 +107,7 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
     // First make sure we are reading the correct object
     RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
     if (classID != RS_A3D_CLASS_ID_MESH) {
-        LOGE("mesh loading skipped due to invalid class id");
+        ALOGE("mesh loading skipped due to invalid class id");
         return NULL;
     }
 
@@ -178,7 +178,7 @@ void Mesh::render(Context *rsc) const {
 
 void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
     if (primIndex >= mHal.state.primitivesCount) {
-        LOGE("Invalid primitive index");
+        ALOGE("Invalid primitive index");
         return;
     }
 
@@ -192,7 +192,7 @@ void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
 
 void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start, uint32_t len) const {
     if (len < 1 || primIndex >= mHal.state.primitivesCount) {
-        LOGE("Invalid mesh or parameters");
+        ALOGE("Invalid mesh or parameters");
         return;
     }
 
@@ -241,7 +241,7 @@ void Mesh::computeBBox() {
     mBBoxMin[0] = mBBoxMin[1] = mBBoxMin[2] = 1e6;
     mBBoxMax[0] = mBBoxMax[1] = mBBoxMax[2] = -1e6;
     if (!posPtr) {
-        LOGE("Unable to compute bounding box");
+        ALOGE("Unable to compute bounding box");
         mBBoxMin[0] = mBBoxMin[1] = mBBoxMin[2] = 0.0f;
         mBBoxMax[0] = mBBoxMax[1] = mBBoxMax[2] = 0.0f;
         return;

@@ -235,7 +235,7 @@ void printApiCpp(FILE *f) {
                 }
             }
 
-            //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
+            //fprintf(f, "    ALOGE(\"add command %s\\n\");\n", api->name);
             if (hasInlineDataPointers(api)) {
                 fprintf(f, "    RS_CMD_%s *cmd = NULL;\n", api->name);
                 fprintf(f, "    if (dataSize < 1024) {;\n");
@@ -441,7 +441,7 @@ void printPlaybackCpp(FILE *f) {
 
         fprintf(f, "void rsp_%s(Context *con, const void *vp, size_t cmdSizeBytes) {\n", api->name);
 
-        //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
+        //fprintf(f, "    ALOGE(\"play command %s\\n\");\n", api->name);
         fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
 
         fprintf(f, "    ");
@@ -469,7 +469,7 @@ void printPlaybackCpp(FILE *f) {
 
         fprintf(f, "void rspr_%s(Context *con, Fifo *f, uint8_t *scratch, size_t scratchSize) {\n", api->name);
 
-        //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
+        //fprintf(f, "    ALOGE(\"play command %s\\n\");\n", api->name);
         fprintf(f, "    RS_CMD_%s cmd;\n", api->name);
         fprintf(f, "    f->read(&cmd, sizeof(cmd));\n");
 

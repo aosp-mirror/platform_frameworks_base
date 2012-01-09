@@ -899,7 +899,7 @@ static void extractAlbumArt(
     uint8_t *flac = DecodeBase64((const char *)data, size, &flacSize);
 
     if (flac == NULL) {
-        LOGE("malformed base64 encoded data.");
+        ALOGE("malformed base64 encoded data.");
         return;
     }
 

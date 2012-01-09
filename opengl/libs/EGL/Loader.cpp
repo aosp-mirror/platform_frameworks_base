@@ -278,7 +278,7 @@ void *Loader::load_driver(const char* kind, const char *tag,
     void* dso = dlopen(driver_absolute_path, RTLD_NOW | RTLD_LOCAL);
     if (dso == 0) {
         const char* err = dlerror();
-        LOGE("load_driver(%s): %s", driver_absolute_path, err?err:"unknown");
+        ALOGE("load_driver(%s): %s", driver_absolute_path, err?err:"unknown");
         return 0;
     }
 
@@ -287,7 +287,7 @@ void *Loader::load_driver(const char* kind, const char *tag,
     if (mask & EGL) {
         getProcAddress = (getProcAddressType)dlsym(dso, "eglGetProcAddress");
 
-        LOGE_IF(!getProcAddress, 
+        ALOGE_IF(!getProcAddress, 
                 "can't find eglGetProcAddress() in %s", driver_absolute_path);
 
         egl_t* egl = &cnx->egl;

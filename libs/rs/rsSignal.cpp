@@ -32,13 +32,13 @@ Signal::~Signal() {
 bool Signal::init() {
     int status = pthread_mutex_init(&mMutex, NULL);
     if (status) {
-        LOGE("LocklessFifo mutex init failure");
+        ALOGE("LocklessFifo mutex init failure");
         return false;
     }
 
     status = pthread_cond_init(&mCondition, NULL);
     if (status) {
-        LOGE("LocklessFifo condition init failure");
+        ALOGE("LocklessFifo condition init failure");
         pthread_mutex_destroy(&mMutex);
         return false;
     }
@@ -51,7 +51,7 @@ void Signal::set() {
 
     status = pthread_mutex_lock(&mMutex);
     if (status) {
-        LOGE("LocklessCommandFifo: error %i locking for set condition.", status);
+        ALOGE("LocklessCommandFifo: error %i locking for set condition.", status);
         return;
     }
 
@@ -59,12 +59,12 @@ void Signal::set() {
 
     status = pthread_cond_signal(&mCondition);
     if (status) {
-        LOGE("LocklessCommandFifo: error %i on set condition.", status);
+        ALOGE("LocklessCommandFifo: error %i on set condition.", status);
     }
 
     status = pthread_mutex_unlock(&mMutex);
     if (status) {
-        LOGE("LocklessCommandFifo: error %i unlocking for set condition.", status);
+        ALOGE("LocklessCommandFifo: error %i unlocking for set condition.", status);
     }
 }
 
@@ -74,7 +74,7 @@ bool Signal::wait(uint64_t timeout) {
 
     status = pthread_mutex_lock(&mMutex);
     if (status) {
-        LOGE("LocklessCommandFifo: error %i locking for condition.", status);
+        ALOGE("LocklessCommandFifo: error %i locking for condition.", status);
         return false;
     }
 
@@ -96,13 +96,13 @@ bool Signal::wait(uint64_t timeout) {
         ret = true;
     } else {
         if (status != ETIMEDOUT) {
-            LOGE("LocklessCommandFifo: error %i waiting for condition.", status);
+            ALOGE("LocklessCommandFifo: error %i waiting for condition.", status);
         }
     }
 
     status = pthread_mutex_unlock(&mMutex);
     if (status) {
-        LOGE("LocklessCommandFifo: error %i unlocking for condition.", status);
+        ALOGE("LocklessCommandFifo: error %i unlocking for condition.", status);
     }
 
     return ret;

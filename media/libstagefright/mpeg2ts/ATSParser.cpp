@@ -697,7 +697,7 @@ status_t ATSParser::Stream::parsePES(ABitReader *br) {
                 PES_packet_length - 3 - PES_header_data_length;
 
             if (br->numBitsLeft() < dataLength * 8) {
-                LOGE("PES packet does not carry enough data to contain "
+                ALOGE("PES packet does not carry enough data to contain "
                      "payload. (numBitsLeft = %d, required = %d)",
                      br->numBitsLeft(), dataLength * 8);
 

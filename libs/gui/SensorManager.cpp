@@ -137,7 +137,7 @@ sp<SensorEventQueue> SensorManager::createEventQueue()
                 mSensorServer->createSensorEventConnection();
         if (connection == NULL) {
             // SensorService just died.
-            LOGE("createEventQueue: connection is NULL. SensorService died.");
+            ALOGE("createEventQueue: connection is NULL. SensorService died.");
             continue;
         }
         queue = new SensorEventQueue(connection);
