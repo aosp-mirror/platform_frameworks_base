@@ -1048,7 +1048,7 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * Loads samples into the soundpool.
-     * This method must be called at when sound effects are enabled
+     * This method must be called at first when sound effects are enabled
      */
     public boolean loadSoundEffects() {
         int status;
