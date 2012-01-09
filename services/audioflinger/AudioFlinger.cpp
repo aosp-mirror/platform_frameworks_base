@@ -6708,7 +6708,8 @@ void AudioFlinger::EffectModule::setSuspended(bool suspended)
     Mutex::Autolock _l(mLock);
     mSuspended = suspended;
 }
-bool AudioFlinger::EffectModule::suspended()
+
+bool AudioFlinger::EffectModule::suspended() const
 {
     Mutex::Autolock _l(mLock);
     return mSuspended;
