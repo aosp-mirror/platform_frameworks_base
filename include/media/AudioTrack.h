@@ -445,6 +445,7 @@ private:
             status_t setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCount);
             audio_io_handle_t getOutput_l();
             status_t restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart);
+            bool stopped_l() const { return !mActive; }
 
     sp<IAudioTrack>         mAudioTrack;
     sp<IMemory>             mCblkMemory;
@@ -464,7 +465,7 @@ private:
     status_t                mStatus;
     uint32_t                mLatency;
 
-    volatile int32_t        mActive;
+    bool                    mActive;                // protected by mLock
 
     callback_t              mCbf;
     void*                   mUserData;
@@ -481,7 +482,7 @@ private:
     uint32_t                mFlags;
     int                     mSessionId;
     int                     mAuxEffectId;
-    Mutex                   mLock;
+    mutable Mutex           mLock;
     status_t                mRestoreStatus;
     int                     mPreviousPriority;          // before start()
     int                     mPreviousSchedulingGroup;
