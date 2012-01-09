@@ -252,7 +252,7 @@ status_t AudioTrack::set(
     mChannelCount = channelCount;
     mSharedBuffer = sharedBuffer;
     mMuted = false;
-    mActive = 0;
+    mActive = false;
     mCbf = cbf;
     mUserData = user;
     mLoopCount = 0;
@@ -338,9 +338,9 @@ void AudioTrack::start()
     sp <IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
 
-    if (mActive == 0) {
+    if (!mActive) {
         mFlushed = false;
-        mActive = 1;
+        mActive = true;
         mNewPosition = cblk->server + mUpdatePeriod;
         cblk->lock.lock();
         cblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
@@ -369,7 +369,7 @@ void AudioTrack::start()
         cblk->lock.unlock();
         if (status != NO_ERROR) {
             ALOGV("start() failed");
-            mActive = 0;
+            mActive = false;
             if (t != 0) {
                 t->requestExit();
             } else {
@@ -394,8 +394,8 @@ void AudioTrack::stop()
     }
 
     AutoMutex lock(mLock);
-    if (mActive == 1) {
-        mActive = 0;
+    if (mActive) {
+        mActive = false;
         mCblk->cv.signal();
         mAudioTrack->stop();
         // Cancel loops (If we are in the middle of a loop, playback
@@ -424,7 +424,8 @@ void AudioTrack::stop()
 
 bool AudioTrack::stopped() const
 {
-    return !mActive;
+    AutoMutex lock(mLock);
+    return stopped_l();
 }
 
 void AudioTrack::flush()
@@ -456,8 +457,8 @@ void AudioTrack::pause()
 {
     ALOGV("pause");
     AutoMutex lock(mLock);
-    if (mActive == 1) {
-        mActive = 0;
+    if (mActive) {
+        mActive = false;
         mAudioTrack->pause();
     }
 }
@@ -647,9 +648,10 @@ status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod)
 status_t AudioTrack::setPosition(uint32_t position)
 {
     AutoMutex lock(mLock);
-    Mutex::Autolock _l(mCblk->lock);
 
-    if (!stopped()) return INVALID_OPERATION;
+    if (!stopped_l()) return INVALID_OPERATION;
+
+    Mutex::Autolock _l(mCblk->lock);
 
     if (position > mCblk->user) return BAD_VALUE;
 
@@ -672,7 +674,7 @@ status_t AudioTrack::reload()
 {
     AutoMutex lock(mLock);
 
-    if (!stopped()) return INVALID_OPERATION;
+    if (!stopped_l()) return INVALID_OPERATION;
 
     flush_l();
 
@@ -832,7 +834,7 @@ status_t AudioTrack::createTrack_l(
 status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     AutoMutex lock(mLock);
-    int active;
+    bool active;
     status_t result = NO_ERROR;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
@@ -868,7 +870,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                 result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
                 cblk->lock.unlock();
                 mLock.lock();
-                if (mActive == 0) {
+                if (!mActive) {
                     return status_t(STOPPED);
                 }
                 cblk->lock.lock();
@@ -1035,10 +1037,11 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     sp <IAudioTrack> audioTrack = mAudioTrack;
     sp <IMemory> iMem = mCblkMemory;
     audio_track_cblk_t* cblk = mCblk;
+    bool active = mActive;
     mLock.unlock();
 
     // Manage underrun callback
-    if (mActive && (cblk->framesAvailable() == cblk->frameCount)) {
+    if (active && (cblk->framesAvailable() == cblk->frameCount)) {
         ALOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
         if (!(android_atomic_or(CBLK_UNDERRUN_ON, &cblk->flags) & CBLK_UNDERRUN_MSK)) {
             mCbf(EVENT_UNDERRUN, mUserData, 0);
