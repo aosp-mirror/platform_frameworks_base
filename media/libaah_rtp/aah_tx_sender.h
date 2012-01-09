@@ -108,11 +108,13 @@ class AAH_TXSender : public virtual RefBase {
                         const Endpoint& endpoint);
     void trimRetryBuffers();
     void sendHeartbeats();
+    bool shouldSendHeartbeats_l();
 
     sp<ALooper> mLooper;
     sp<AHandlerReflector<AAH_TXSender> > mReflector;
 
     int mSocket;
+    nsecs_t mLastSentPacketTime;
 
     DefaultKeyedVector<Endpoint, EndpointState*> mEndpointMap;
     Mutex mEndpointLock;
@@ -120,6 +122,7 @@ class AAH_TXSender : public virtual RefBase {
     static const int kRetryTrimIntervalUs;
     static const int kHeartbeatIntervalUs;
     static const int kRetryBufferCapacity;
+    static const nsecs_t kHeartbeatTimeout;
 
     class RetryReceiver : public Thread {
       private:

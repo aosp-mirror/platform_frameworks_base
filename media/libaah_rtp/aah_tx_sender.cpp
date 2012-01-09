@@ -38,13 +38,16 @@ const char* AAH_TXSender::kSendPacketTRTPPacket = "trtp";
 const int AAH_TXSender::kRetryTrimIntervalUs = 100000;
 const int AAH_TXSender::kHeartbeatIntervalUs = 1000000;
 const int AAH_TXSender::kRetryBufferCapacity = 100;
+const nsecs_t AAH_TXSender::kHeartbeatTimeout = 600ull * 1000000000ull;
 
 Mutex AAH_TXSender::sLock;
 wp<AAH_TXSender> AAH_TXSender::sInstance;
 uint32_t AAH_TXSender::sNextEpoch;
 bool AAH_TXSender::sNextEpochValid = false;
 
-AAH_TXSender::AAH_TXSender() : mSocket(-1) { }
+AAH_TXSender::AAH_TXSender() : mSocket(-1) {
+    mLastSentPacketTime = systemTime();
+}
 
 sp<AAH_TXSender> AAH_TXSender::GetInstance() {
     Mutex::Autolock autoLock(sLock);
@@ -215,6 +218,7 @@ void AAH_TXSender::onSendPacket(const sp<AMessage>& msg) {
 
     Mutex::Autolock lock(mEndpointLock);
     doSendPacket_l(packet, Endpoint(ipAddr, port));
+    mLastSentPacketTime = systemTime();
 }
 
 void AAH_TXSender::doSendPacket_l(const sp<TRTPPacket>& packet,
@@ -296,18 +300,20 @@ void AAH_TXSender::trimRetryBuffers() {
 void AAH_TXSender::sendHeartbeats() {
     Mutex::Autolock lock(mEndpointLock);
 
-    for (size_t i = 0; i < mEndpointMap.size(); i++) {
-        EndpointState* eps = mEndpointMap.editValueAt(i);
-        const Endpoint& ep = mEndpointMap.keyAt(i);
+    if (shouldSendHeartbeats_l()) {
+        for (size_t i = 0; i < mEndpointMap.size(); i++) {
+            EndpointState* eps = mEndpointMap.editValueAt(i);
+            const Endpoint& ep = mEndpointMap.keyAt(i);
 
-        sp<TRTPControlPacket> packet = new TRTPControlPacket();
-        packet->setCommandID(TRTPControlPacket::kCommandNop);
+            sp<TRTPControlPacket> packet = new TRTPControlPacket();
+            packet->setCommandID(TRTPControlPacket::kCommandNop);
 
-        packet->setExpireTime(systemTime() +
-                              AAH_TXPlayer::kAAHRetryKeepAroundTimeNs);
-        packet->pack();
+            packet->setExpireTime(systemTime() +
+                                  AAH_TXPlayer::kAAHRetryKeepAroundTimeNs);
+            packet->pack();
 
-        doSendPacket_l(packet, ep);
+            doSendPacket_l(packet, ep);
+        }
     }
 
     // schedule the next heartbeat
@@ -316,6 +322,11 @@ void AAH_TXSender::sendHeartbeats() {
                                                      handlerID());
         heartbeatMessage->post(kHeartbeatIntervalUs);
     }
+}
+
+bool AAH_TXSender::shouldSendHeartbeats_l() {
+    // assert(holding endpoint lock)
+    return (systemTime() < (mLastSentPacketTime + kHeartbeatTimeout));
 }
 
 // Receiver
