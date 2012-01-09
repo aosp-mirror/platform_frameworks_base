@@ -710,17 +710,13 @@ private:
 
         virtual     uint32_t    latency() const;
 
-        virtual     status_t    setMasterVolume(float value);
-        virtual     status_t    setMasterMute(bool muted);
+                    void        setMasterVolume(float value);
+                    void        setMasterMute(bool muted);
 
-        virtual     float       masterVolume() const { return mMasterVolume; }
-        virtual     bool        masterMute() const { return mMasterMute; }
+                    void        setStreamVolume(audio_stream_type_t stream, float value);
+                    void        setStreamMute(audio_stream_type_t stream, bool muted);
 
-        virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value);
-        virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted);
-
-        virtual     float       streamVolume(audio_stream_type_t stream) const;
-        virtual     bool        streamMute(audio_stream_type_t stream) const;
+                    float       streamVolume(audio_stream_type_t stream) const;
 
                     sp<Track>   createTrack_l(
                                     const sp<AudioFlinger::Client>& client,
@@ -776,6 +772,7 @@ private:
         int                             mBytesWritten;
     private:
         bool                            mMasterMute;
+                    void        setMasterMute_l(bool muted) { mMasterMute = muted; }
     protected:
         SortedVector< wp<Track> >       mActiveTracks;
 
@@ -899,7 +896,11 @@ private:
               PlaybackThread *checkPlaybackThread_l(audio_io_handle_t output) const;
               MixerThread *checkMixerThread_l(audio_io_handle_t output) const;
               RecordThread *checkRecordThread_l(audio_io_handle_t input) const;
-              float streamVolumeInternal(audio_stream_type_t stream) const
+              // no range check, AudioFlinger::mLock held
+              bool streamMute_l(audio_stream_type_t stream) const
+                                { return mStreamTypes[stream].mute; }
+              // no range check, doesn't check per-thread stream volume, AudioFlinger::mLock held
+              float streamVolume_l(audio_stream_type_t stream) const
                                 { return mStreamTypes[stream].volume; }
               void audioConfigChanged_l(int event, audio_io_handle_t ioHandle, void *param2);
 
