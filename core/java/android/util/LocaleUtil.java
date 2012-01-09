@@ -39,8 +39,6 @@ public class LocaleUtil {
      */
     public static final int TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE = 1;
 
-    private static final char UNDERSCORE_CHAR = '_';
-
     private static String ARAB_SCRIPT_SUBTAG = "Arab";
     private static String HEBR_SCRIPT_SUBTAG = "Hebr";
 

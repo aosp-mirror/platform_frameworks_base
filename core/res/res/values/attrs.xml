@@ -2066,6 +2066,8 @@
             <enum name="ltr" value="4" />
             <!-- The paragraph direction is right to left. -->
             <enum name="rtl" value="5" />
+            <!-- The paragraph direction is coming from the system Locale. -->
+            <enum name="locale" value="6" />
         </attr>
     </declare-styleable>
 
