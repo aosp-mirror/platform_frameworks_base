@@ -2626,7 +2626,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Text direction is using "first strong algorithm". The first strong directional character
      * determines the paragraph direction. If there is no strong directional character, the
-     * paragraph direction is the view's resolved ayout direction.
+     * paragraph direction is the view's resolved layout direction.
      *
      * @hide
      */
@@ -2656,6 +2656,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     public static final int TEXT_DIRECTION_RTL = 4;
 
     /**
+     * Text direction is coming from the system Locale.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_LOCALE = 5;
+
+    /**
      * Default text direction is inherited
      *
      * @hide
@@ -2672,13 +2679,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
     })
     private int mTextDirection = DEFAULT_TEXT_DIRECTION;
 
     /**
      * The resolved text direction.  This needs resolution if the value is
-     * TEXT_DIRECTION_INHERIT.  The resolution matches mTextDirection if that is
+     * TEXT_DIRECTION_INHERIT.  The resolution matches mTextDirection if it is
      * not TEXT_DIRECTION_INHERIT, otherwise resolution proceeds up the parent
      * chain of the view.
      *
@@ -2689,7 +2697,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
     })
     private int mResolvedTextDirection = TEXT_DIRECTION_INHERIT;
 
@@ -13791,6 +13800,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
+     * {@link #TEXT_DIRECTION_LOCALE},
      *
      * @hide
      */
@@ -13808,6 +13818,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
+     * {@link #TEXT_DIRECTION_LOCALE},
      *
      * @hide
      */
@@ -13828,6 +13839,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
+     * {@link #TEXT_DIRECTION_LOCALE},
      *
      * @hide
      */
