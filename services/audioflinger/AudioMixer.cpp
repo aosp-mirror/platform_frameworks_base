@@ -95,16 +95,11 @@ AudioMixer::~AudioMixer()
 
 int AudioMixer::getTrackName()
 {
-    uint32_t names = mTrackNames;
-    uint32_t mask = 1;
-    int n = 0;
-    while (names & mask) {
-        mask <<= 1;
-        n++;
-    }
-    if (mask) {
+    uint32_t names = ~mTrackNames;
+    if (names != 0) {
+        int n = __builtin_ctz(names);
         ALOGV("add track (%d)", n);
-        mTrackNames |= mask;
+        mTrackNames |= 1 << n;
         return TRACK0 + n;
     }
     return -1;
