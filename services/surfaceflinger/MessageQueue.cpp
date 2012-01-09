@@ -70,12 +70,12 @@ void MessageQueue::waitMessage() {
                 continue;
 
             case ALOOPER_POLL_ERROR:
-                LOGE("ALOOPER_POLL_ERROR");
+                ALOGE("ALOOPER_POLL_ERROR");
                 continue;
 
             default:
                 // should not happen
-                LOGE("Looper::pollOnce() returned unknown status %d", ret);
+                ALOGE("Looper::pollOnce() returned unknown status %d", ret);
                 continue;
         }
     } while (true);

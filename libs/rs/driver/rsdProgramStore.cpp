@@ -70,7 +70,7 @@ bool rsdProgramStoreInit(const Context *rsc, const ProgramStore *ps) {
         drv->depthFunc = GL_NOTEQUAL;
         break;
     default:
-        LOGE("Unknown depth function.");
+        ALOGE("Unknown depth function.");
         goto error;
     }
 

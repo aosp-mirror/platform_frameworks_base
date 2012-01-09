@@ -327,7 +327,7 @@ status_t MPEG4Writer::Track::dump(
 status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
     Mutex::Autolock l(mLock);
     if (mStarted) {
-        LOGE("Attempt to add source AFTER recording is started");
+        ALOGE("Attempt to add source AFTER recording is started");
         return UNKNOWN_ERROR;
     }
     Track *track = new Track(this, source, mTracks.size());
@@ -1525,7 +1525,7 @@ status_t MPEG4Writer::Track::pause() {
 status_t MPEG4Writer::Track::stop() {
     ALOGD("Stopping %s track", mIsAudio? "Audio": "Video");
     if (!mStarted) {
-        LOGE("Stop() called but track is not started");
+        ALOGE("Stop() called but track is not started");
         return ERROR_END_OF_STREAM;
     }
 
@@ -1596,14 +1596,14 @@ const uint8_t *MPEG4Writer::Track::parseParamSet(
     const uint8_t *nextStartCode = findNextStartCode(data, length);
     *paramSetLen = nextStartCode - data;
     if (*paramSetLen == 0) {
-        LOGE("Param set is malformed, since its length is 0");
+        ALOGE("Param set is malformed, since its length is 0");
         return NULL;
     }
 
     AVCParamSet paramSet(*paramSetLen, data);
     if (type == kNalUnitTypeSeqParamSet) {
         if (*paramSetLen < 4) {
-            LOGE("Seq parameter set malformed");
+            ALOGE("Seq parameter set malformed");
             return NULL;
         }
         if (mSeqParamSets.empty()) {
@@ -1614,7 +1614,7 @@ const uint8_t *MPEG4Writer::Track::parseParamSet(
             if (mProfileIdc != data[1] ||
                 mProfileCompatible != data[2] ||
                 mLevelIdc != data[3]) {
-                LOGE("Inconsistent profile/level found in seq parameter sets");
+                ALOGE("Inconsistent profile/level found in seq parameter sets");
                 return NULL;
             }
         }
@@ -1632,7 +1632,7 @@ status_t MPEG4Writer::Track::copyAVCCodecSpecificData(
     // 2 bytes for each of the parameter set length field
     // plus the 7 bytes for the header
     if (size < 4 + 7) {
-        LOGE("Codec specific data length too short: %d", size);
+        ALOGE("Codec specific data length too short: %d", size);
         return ERROR_MALFORMED;
     }
 
@@ -1661,7 +1661,7 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
         getNalUnitType(*(tmp + 4), &type);
         if (type == kNalUnitTypeSeqParamSet) {
             if (gotPps) {
-                LOGE("SPS must come before PPS");
+                ALOGE("SPS must come before PPS");
                 return ERROR_MALFORMED;
             }
             if (!gotSps) {
@@ -1670,7 +1670,7 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
             nextStartCode = parseParamSet(tmp + 4, bytesLeft - 4, type, &paramSetLen);
         } else if (type == kNalUnitTypePicParamSet) {
             if (!gotSps) {
-                LOGE("SPS must come before PPS");
+                ALOGE("SPS must come before PPS");
                 return ERROR_MALFORMED;
             }
             if (!gotPps) {
@@ -1678,7 +1678,7 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
             }
             nextStartCode = parseParamSet(tmp + 4, bytesLeft - 4, type, &paramSetLen);
         } else {
-            LOGE("Only SPS and PPS Nal units are expected");
+            ALOGE("Only SPS and PPS Nal units are expected");
             return ERROR_MALFORMED;
         }
 
@@ -1696,12 +1696,12 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
         // Check on the number of seq parameter sets
         size_t nSeqParamSets = mSeqParamSets.size();
         if (nSeqParamSets == 0) {
-            LOGE("Cound not find sequence parameter set");
+            ALOGE("Cound not find sequence parameter set");
             return ERROR_MALFORMED;
         }
 
         if (nSeqParamSets > 0x1F) {
-            LOGE("Too many seq parameter sets (%d) found", nSeqParamSets);
+            ALOGE("Too many seq parameter sets (%d) found", nSeqParamSets);
             return ERROR_MALFORMED;
         }
     }
@@ -1710,11 +1710,11 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
         // Check on the number of pic parameter sets
         size_t nPicParamSets = mPicParamSets.size();
         if (nPicParamSets == 0) {
-            LOGE("Cound not find picture parameter set");
+            ALOGE("Cound not find picture parameter set");
             return ERROR_MALFORMED;
         }
         if (nPicParamSets > 0xFF) {
-            LOGE("Too many pic parameter sets (%d) found", nPicParamSets);
+            ALOGE("Too many pic parameter sets (%d) found", nPicParamSets);
             return ERROR_MALFORMED;
         }
     }
@@ -1727,7 +1727,7 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
         // These profiles requires additional parameter set extensions
         if (mProfileIdc == 100 || mProfileIdc == 110 ||
             mProfileIdc == 122 || mProfileIdc == 144) {
-            LOGE("Sorry, no support for profile_idc: %d!", mProfileIdc);
+            ALOGE("Sorry, no support for profile_idc: %d!", mProfileIdc);
             return BAD_VALUE;
         }
     }
@@ -1739,12 +1739,12 @@ status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
         const uint8_t *data, size_t size) {
 
     if (mCodecSpecificData != NULL) {
-        LOGE("Already have codec specific data");
+        ALOGE("Already have codec specific data");
         return ERROR_MALFORMED;
     }
 
     if (size < 4) {
-        LOGE("Codec specific data length too short: %d", size);
+        ALOGE("Codec specific data length too short: %d", size);
         return ERROR_MALFORMED;
     }
 
@@ -2160,12 +2160,12 @@ status_t MPEG4Writer::Track::threadEntry() {
 
 bool MPEG4Writer::Track::isTrackMalFormed() const {
     if (mSampleSizes.empty()) {                      // no samples written
-        LOGE("The number of recorded samples is 0");
+        ALOGE("The number of recorded samples is 0");
         return true;
     }
 
     if (!mIsAudio && mNumStssTableEntries == 0) {  // no sync frames for video
-        LOGE("There are no sync frames for video track");
+        ALOGE("There are no sync frames for video track");
         return true;
     }
 
@@ -2308,13 +2308,13 @@ status_t MPEG4Writer::Track::checkCodecSpecificData() const {
         !strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         if (!mCodecSpecificData ||
             mCodecSpecificDataSize <= 0) {
-            LOGE("Missing codec specific data");
+            ALOGE("Missing codec specific data");
             return ERROR_MALFORMED;
         }
     } else {
         if (mCodecSpecificData ||
             mCodecSpecificDataSize > 0) {
-            LOGE("Unexepected codec specific data found");
+            ALOGE("Unexepected codec specific data found");
             return ERROR_MALFORMED;
         }
     }
@@ -2378,7 +2378,7 @@ void MPEG4Writer::Track::writeVideoFourCCBox() {
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         mOwner->beginBox("avc1");
     } else {
-        LOGE("Unknown mime type '%s'.", mime);
+        ALOGE("Unknown mime type '%s'.", mime);
         CHECK(!"should not be here, unknown mime type.");
     }
 
@@ -2432,7 +2432,7 @@ void MPEG4Writer::Track::writeAudioFourCCBox() {
     } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
         fourcc = "mp4a";
     } else {
-        LOGE("Unknown mime type '%s'.", mime);
+        ALOGE("Unknown mime type '%s'.", mime);
         CHECK(!"should not be here, unknown mime type.");
     }
 

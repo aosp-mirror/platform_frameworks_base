@@ -76,7 +76,7 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
     const uint32_t eSize = mHal.state.type->getElementSizeBytes();
 
     if ((count * eSize) != sizeBytes) {
-        LOGE("Allocation::subData called with mismatched size expected %i, got %i",
+        ALOGE("Allocation::subData called with mismatched size expected %i, got %i",
              (count * eSize), sizeBytes);
         mHal.state.type->dumpLOGV("type info");
         return;
@@ -91,10 +91,10 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
     const uint32_t eSize = mHal.state.elementSizeBytes;
     const uint32_t lineSize = eSize * w;
 
-    //LOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
+    //ALOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
 
     if ((lineSize * h) != sizeBytes) {
-        LOGE("Allocation size mismatch, expected %i, got %i", (lineSize * h), sizeBytes);
+        ALOGE("Allocation size mismatch, expected %i, got %i", (lineSize * h), sizeBytes);
         rsAssert(!"Allocation::subData called with mismatched size");
         return;
     }
@@ -113,20 +113,20 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
     uint32_t eSize = mHal.state.elementSizeBytes;
 
     if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
-        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        ALOGE("Error Allocation::subElementData component %i out of range.", cIdx);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
         return;
     }
 
     if (x >= mHal.state.dimensionX) {
-        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        ALOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
     if (sizeBytes != e->getSizeBytes()) {
-        LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
+        ALOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
     }
@@ -140,19 +140,19 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
     uint32_t eSize = mHal.state.elementSizeBytes;
 
     if (x >= mHal.state.dimensionX) {
-        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        ALOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
     if (y >= mHal.state.dimensionY) {
-        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        ALOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
     if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
-        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        ALOGE("Error Allocation::subElementData component %i out of range.", cIdx);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
         return;
     }
@@ -160,7 +160,7 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
 
     if (sizeBytes != e->getSizeBytes()) {
-        LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
+        ALOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
     }
@@ -300,7 +300,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
     // First make sure we are reading the correct object
     RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
     if (classID != RS_A3D_CLASS_ID_ALLOCATION) {
-        LOGE("allocation loading skipped due to invalid class id\n");
+        ALOGE("allocation loading skipped due to invalid class id\n");
         return NULL;
     }
 
@@ -322,7 +322,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
     uint32_t packedSize = alloc->getPackedSize();
     if (dataSize != type->getSizeBytes() &&
         dataSize != packedSize) {
-        LOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
+        ALOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
         ObjectBase::checkDelete(alloc);
         ObjectBase::checkDelete(type);
         return NULL;
@@ -410,7 +410,7 @@ void Allocation::resize1D(Context *rsc, uint32_t dimX) {
 }
 
 void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
-    LOGE("not implemented");
+    ALOGE("not implemented");
 }
 
 /////////////////
@@ -588,7 +588,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, RsType vtype,
     RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages, 0);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
-        LOGE("Memory allocation failure");
+        ALOGE("Memory allocation failure");
         return NULL;
     }
 
@@ -612,7 +612,7 @@ RsAllocation rsi_AllocationCubeCreateFromBitmap(Context *rsc, RsType vtype,
     RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages, 0);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
-        LOGE("Memory allocation failure");
+        ALOGE("Memory allocation failure");
         return NULL;
     }
 

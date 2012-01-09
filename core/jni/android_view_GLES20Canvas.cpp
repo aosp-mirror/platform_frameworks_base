@@ -491,7 +491,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 #if USE_TEXT_LAYOUT_CACHE
     value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, flags);
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(text, count).string());
         return;
     }
@@ -513,7 +513,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 #if USE_TEXT_LAYOUT_CACHE
     value = TextLayoutCache::getInstance().getValue(paint, text, start, count, contextCount, flags);
     if (value == NULL) {
-        LOGE("Cannot get TextLayoutCache value for text = '%s'",
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
                 String8(text + start, count).string());
         return;
     }

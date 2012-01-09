@@ -84,7 +84,7 @@ void GLTrace_start() {
 
     int clientSocket = gltrace::acceptClientConnection(port);
     if (clientSocket < 0) {
-        LOGE("Error creating GLTrace server socket. Quitting application.");
+        ALOGE("Error creating GLTrace server socket. Quitting application.");
         exit(-1);
     }
 

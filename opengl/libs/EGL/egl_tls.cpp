@@ -73,7 +73,7 @@ void egl_tls_t::setErrorEtcImpl(
     egl_tls_t* tls = getTLS();
     if (tls->error != error) {
         if (!quiet) {
-            LOGE("%s:%d error %x (%s)",
+            ALOGE("%s:%d error %x (%s)",
                     caller, line, error, egl_strerror(error));
             char value[PROPERTY_VALUE_MAX];
             property_get("debug.egl.callstack", value, "0");

@@ -71,7 +71,7 @@ static jint nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint cursor
     CursorWindow* window;
     status_t status = CursorWindow::create(name, cursorWindowSize, &window);
     if (status || !window) {
-        LOGE("Could not allocate CursorWindow '%s' of size %d due to error %d.",
+        ALOGE("Could not allocate CursorWindow '%s' of size %d due to error %d.",
                 name.string(), cursorWindowSize, status);
         return 0;
     }
@@ -86,7 +86,7 @@ static jint nativeCreateFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj)
     CursorWindow* window;
     status_t status = CursorWindow::createFromParcel(parcel, &window);
     if (status || !window) {
-        LOGE("Could not create CursorWindow from Parcel due to error %d.", status);
+        ALOGE("Could not create CursorWindow from Parcel due to error %d.", status);
         return 0;
     }
 

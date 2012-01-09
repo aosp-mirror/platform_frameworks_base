@@ -148,27 +148,27 @@ public:
         err = data.writeInterfaceToken(
                 ISurfaceComposer::getInterfaceDescriptor());
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
+            ALOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
                     "interface descriptor: %s (%d)", strerror(-err), -err);
             return false;
         }
         err = data.writeStrongBinder(surfaceTexture->asBinder());
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
+            ALOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
                     "strong binder to parcel: %s (%d)", strerror(-err), -err);
             return false;
         }
         err = remote()->transact(BnSurfaceComposer::AUTHENTICATE_SURFACE, data,
                 &reply);
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
+            ALOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
                     "performing transaction: %s (%d)", strerror(-err), -err);
             return false;
         }
         int32_t result = 0;
         err = reply.readInt32(&result);
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
+            ALOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
                     "retrieving result: %s (%d)", strerror(-err), -err);
             return false;
         }
@@ -188,7 +188,7 @@ public:
                 BnSurfaceComposer::CREATE_DISPLAY_EVENT_CONNECTION,
                 data, &reply);
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::createDisplayEventConnection: error performing "
+            ALOGE("ISurfaceComposer::createDisplayEventConnection: error performing "
                     "transaction: %s (%d)", strerror(-err), -err);
             return result;
         }

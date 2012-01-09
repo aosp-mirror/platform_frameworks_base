@@ -54,12 +54,12 @@ status_t AudioRecord::getMinFrameCount(
     size_t size = 0;
     if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &size)
             != NO_ERROR) {
-        LOGE("AudioSystem could not query the input buffer size.");
+        ALOGE("AudioSystem could not query the input buffer size.");
         return NO_INIT;
     }
 
     if (size == 0) {
-        LOGE("Unsupported configuration: sampleRate %d, format %d, channelCount %d",
+        ALOGE("Unsupported configuration: sampleRate %d, format %d, channelCount %d",
             sampleRate, format, channelCount);
         return BAD_VALUE;
     }
@@ -153,7 +153,7 @@ status_t AudioRecord::set(
     }
     // validate parameters
     if (!audio_is_valid_format(format)) {
-        LOGE("Invalid format");
+        ALOGE("Invalid format");
         return BAD_VALUE;
     }
 
@@ -177,7 +177,7 @@ status_t AudioRecord::set(
                                                     (audio_in_acoustics_t)flags,
                                                     mSessionId);
     if (input == 0) {
-        LOGE("Could not get audio input for record source %d", inputSource);
+        ALOGE("Could not get audio input for record source %d", inputSource);
         return BAD_VALUE;
     }
 
@@ -292,7 +292,7 @@ status_t AudioRecord::start()
     if (t != 0) {
         if (t->exitPending()) {
             if (t->requestExitAndWait() == WOULD_BLOCK) {
-                LOGE("AudioRecord::start called from thread");
+                ALOGE("AudioRecord::start called from thread");
                 return WOULD_BLOCK;
             }
         }
@@ -472,12 +472,12 @@ status_t AudioRecord::openRecord_l(
                                                        &status);
 
     if (record == 0) {
-        LOGE("AudioFlinger could not create record track, status: %d", status);
+        ALOGE("AudioFlinger could not create record track, status: %d", status);
         return status;
     }
     sp<IMemory> cblk = record->getCblk();
     if (cblk == 0) {
-        LOGE("Could not get control block");
+        ALOGE("Could not get control block");
         return NO_INIT;
     }
     mAudioRecord.clear();
@@ -626,7 +626,7 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 
     if (ssize_t(userSize) < 0) {
         // sanity-check. user is most-likely passing an error code.
-        LOGE("AudioRecord::read(buffer=%p, size=%u (%d)",
+        ALOGE("AudioRecord::read(buffer=%p, size=%u (%d)",
                 buffer, userSize, userSize);
         return BAD_VALUE;
     }
@@ -709,7 +709,7 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
         status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {
-                LOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
+                ALOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
                 return false;
             }
             break;

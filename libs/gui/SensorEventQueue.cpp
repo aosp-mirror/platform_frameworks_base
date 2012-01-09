@@ -70,12 +70,12 @@ ssize_t SensorEventQueue::write(ASensorEvent const* events, size_t numEvents)
 ssize_t SensorEventQueue::read(ASensorEvent* events, size_t numEvents)
 {
     ssize_t size = mSensorChannel->read(events, numEvents*sizeof(events[0]));
-    LOGE_IF(size<0 && size!=-EAGAIN,
+    ALOGE_IF(size<0 && size!=-EAGAIN,
             "SensorChannel::read error (%s)", strerror(-size));
     if (size >= 0) {
         if (size % sizeof(events[0])) {
             // partial read!!! should never happen.
-            LOGE("SensorEventQueue partial read (event-size=%u, read=%d)",
+            ALOGE("SensorEventQueue partial read (event-size=%u, read=%d)",
                     sizeof(events[0]), int(size));
             return -EINVAL;
         }
@@ -104,7 +104,7 @@ status_t SensorEventQueue::waitForEvent() const
     do {
         result = looper->pollOnce(-1);
         if (result == ALOOPER_EVENT_ERROR) {
-            LOGE("SensorEventQueue::waitForEvent error (errno=%d)", errno);
+            ALOGE("SensorEventQueue::waitForEvent error (errno=%d)", errno);
             result = -EPIPE; // unknown error, so we make up one
             break;
         }

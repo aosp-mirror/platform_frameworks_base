@@ -657,7 +657,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         ALOGW("could not get event (errno=%d)", errno);
                     }
                 } else if ((readSize % sizeof(struct input_event)) != 0) {
-                    LOGE("could not get event (wrong size: %d)", readSize);
+                    ALOGE("could not get event (wrong size: %d)", readSize);
                 } else {
                     int32_t deviceId = device->id == mBuiltInKeyboardId ? 0 : device->id;
 
@@ -810,7 +810,7 @@ void EventHub::wake() {
 void EventHub::scanDevicesLocked() {
     status_t res = scanDirLocked(DEVICE_PATH);
     if(res < 0) {
-        LOGE("scan dir failed for %s\n", DEVICE_PATH);
+        ALOGE("scan dir failed for %s\n", DEVICE_PATH);
     }
 }
 
@@ -847,7 +847,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     int fd = open(devicePath, O_RDWR);
     if(fd < 0) {
-        LOGE("could not open %s, %s\n", devicePath, strerror(errno));
+        ALOGE("could not open %s, %s\n", devicePath, strerror(errno));
         return -1;
     }
 
@@ -874,7 +874,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     // Get device driver version.
     int driverVersion;
     if(ioctl(fd, EVIOCGVERSION, &driverVersion)) {
-        LOGE("could not get driver version for %s, %s\n", devicePath, strerror(errno));
+        ALOGE("could not get driver version for %s, %s\n", devicePath, strerror(errno));
         close(fd);
         return -1;
     }
@@ -882,7 +882,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     // Get device identifier.
     struct input_id inputId;
     if(ioctl(fd, EVIOCGID, &inputId)) {
-        LOGE("could not get device input id for %s, %s\n", devicePath, strerror(errno));
+        ALOGE("could not get device input id for %s, %s\n", devicePath, strerror(errno));
         close(fd);
         return -1;
     }
@@ -909,7 +909,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     // Make file descriptor non-blocking for use with poll().
     if (fcntl(fd, F_SETFL, O_NONBLOCK)) {
-        LOGE("Error %d making device file descriptor non-blocking.", errno);
+        ALOGE("Error %d making device file descriptor non-blocking.", errno);
         close(fd);
         return -1;
     }
@@ -1072,7 +1072,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     eventItem.events = EPOLLIN;
     eventItem.data.u32 = deviceId;
     if (epoll_ctl(mEpollFd, EPOLL_CTL_ADD, fd, &eventItem)) {
-        LOGE("Could not add device fd to epoll instance.  errno=%d", errno);
+        ALOGE("Could not add device fd to epoll instance.  errno=%d", errno);
         delete device;
         return -1;
     }
@@ -1103,7 +1103,7 @@ void EventHub::loadConfigurationLocked(Device* device) {
         status_t status = PropertyMap::load(device->configurationFile,
                 &device->configuration);
         if (status) {
-            LOGE("Error loading input device configuration file for device '%s'.  "
+            ALOGE("Error loading input device configuration file for device '%s'.  "
                     "Using default configuration.",
                     device->identifier.name.string());
         }

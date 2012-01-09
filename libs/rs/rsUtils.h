@@ -40,7 +40,7 @@ namespace android {
 namespace renderscript {
 
 #if 1
-#define rsAssert(v) do {if(!(v)) LOGE("rsAssert failed: %s, in %s at %i", #v, __FILE__, __LINE__);} while (0)
+#define rsAssert(v) do {if(!(v)) ALOGE("rsAssert failed: %s, in %s at %i", #v, __FILE__, __LINE__);} while (0)
 #else
 #define rsAssert(v) while (0)
 #endif

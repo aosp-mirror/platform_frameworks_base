@@ -731,7 +731,7 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaS
     const char *fileName = "/sdcard/outputSurfEncMSource.mp4";
     int fd = open(fileName, O_RDWR | O_CREAT, 0744);
     if (fd < 0) {
-        LOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
+        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
     }
     CHECK(fd >= 0);
 
@@ -861,7 +861,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
     const char *fileName = "/sdcard/outputSurfEncMSourceGL.mp4";
     int fd = open(fileName, O_RDWR | O_CREAT, 0744);
     if (fd < 0) {
-        LOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
+        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
     }
     CHECK(fd >= 0);
 
@@ -904,7 +904,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
     const char *fileName = "/sdcard/outputSurfEncMSourceGLDiff.mp4";
     int fd = open(fileName, O_RDWR | O_CREAT, 0744);
     if (fd < 0) {
-        LOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
+        ALOGE("ERROR: Could not open the the file %s, fd = %d !!", fileName, fd);
     }
     CHECK(fd >= 0);
 

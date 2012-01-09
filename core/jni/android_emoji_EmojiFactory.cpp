@@ -60,7 +60,7 @@ FAIL:
     error_str = "unknown reason";
   }
 
-  LOGE("%s: %s", error_msg, error_str);
+  ALOGE("%s: %s", error_msg, error_str);
   if (m_handle != NULL) {
     dlclose(m_handle);
     m_handle = NULL;
@@ -109,7 +109,7 @@ static jobject create_java_EmojiFactory(
   jobject obj = env->NewObject(gEmojiFactory_class, gEmojiFactory_constructorMethodID,
       static_cast<jint>(reinterpret_cast<uintptr_t>(factory)), name);
   if (env->ExceptionCheck() != 0) {
-    LOGE("*** Uncaught exception returned from Java call!\n");
+    ALOGE("*** Uncaught exception returned from Java call!\n");
     env->ExceptionDescribe();
   }
   return obj;
@@ -172,14 +172,14 @@ static jobject android_emoji_EmojiFactory_getBitmapFromAndroidPua(
 
   SkBitmap *bitmap = new SkBitmap;
   if (!SkImageDecoder::DecodeMemory(bytes, size, bitmap)) {
-    LOGE("SkImageDecoder::DecodeMemory() failed.");
+    ALOGE("SkImageDecoder::DecodeMemory() failed.");
     return NULL;
   }
 
   jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
       static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)), NULL, false, NULL, -1);
   if (env->ExceptionCheck() != 0) {
-    LOGE("*** Uncaught exception returned from Java call!\n");
+    ALOGE("*** Uncaught exception returned from Java call!\n");
     env->ExceptionDescribe();
   }
   return obj;

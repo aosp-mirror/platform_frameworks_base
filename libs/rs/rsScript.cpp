@@ -41,9 +41,9 @@ Script::~Script() {
 }
 
 void Script::setSlot(uint32_t slot, Allocation *a) {
-    //LOGE("setSlot %i %p", slot, a);
+    //ALOGE("setSlot %i %p", slot, a);
     if (slot >= mHal.info.exportedVariableCount) {
-        LOGE("Script::setSlot unable to set allocation, invalid slot index");
+        ALOGE("Script::setSlot unable to set allocation, invalid slot index");
         return;
     }
 
@@ -56,21 +56,21 @@ void Script::setSlot(uint32_t slot, Allocation *a) {
 }
 
 void Script::setVar(uint32_t slot, const void *val, size_t len) {
-    //LOGE("setVar %i %p %i", slot, val, len);
+    //ALOGE("setVar %i %p %i", slot, val, len);
     if (slot >= mHal.info.exportedVariableCount) {
-        LOGE("Script::setVar unable to set allocation, invalid slot index");
+        ALOGE("Script::setVar unable to set allocation, invalid slot index");
         return;
     }
     mRSC->mHal.funcs.script.setGlobalVar(mRSC, this, slot, (void *)val, len);
 }
 
 void Script::setVarObj(uint32_t slot, ObjectBase *val) {
-    //LOGE("setVarObj %i %p", slot, val);
+    //ALOGE("setVarObj %i %p", slot, val);
     if (slot >= mHal.info.exportedVariableCount) {
-        LOGE("Script::setVarObj unable to set allocation, invalid slot index");
+        ALOGE("Script::setVarObj unable to set allocation, invalid slot index");
         return;
     }
-    //LOGE("setvarobj  %i %p", slot, val);
+    //ALOGE("setvarobj  %i %p", slot, val);
     mRSC->mHal.funcs.script.setGlobalObj(mRSC, this, slot, val);
 }
 
@@ -87,7 +87,7 @@ void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint3
     Script *s = static_cast<Script *>(vs);
     Allocation *a = static_cast<Allocation *>(va);
     s->setSlot(slot, a);
-    //LOGE("rsi_ScriptBindAllocation %i  %p  %p", slot, a, a->getPtr());
+    //ALOGE("rsi_ScriptBindAllocation %i  %p  %p", slot, a, a->getPtr());
 }
 
 void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, size_t length) {
@@ -96,7 +96,7 @@ void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, si
     // freeing/duplicating the actual string for the environment.
     char *tz = (char *) malloc(length + 1);
     if (!tz) {
-        LOGE("Couldn't allocate memory for timezone buffer");
+        ALOGE("Couldn't allocate memory for timezone buffer");
         return;
     }
     strncpy(tz, timeZone, length);
@@ -104,7 +104,7 @@ void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, si
     if (setenv("TZ", tz, 1) == 0) {
         tzset();
     } else {
-        LOGE("Error setting timezone");
+        ALOGE("Error setting timezone");
     }
     free(tz);
 }

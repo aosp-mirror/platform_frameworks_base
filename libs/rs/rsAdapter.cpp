@@ -140,7 +140,7 @@ void * Adapter2D::getElement(uint32_t x, uint32_t y) const {
     rsAssert(mAllocation->getPtr());
     rsAssert(mAllocation->getType());
     if (mFace != 0 && !mAllocation->getType()->getDimFaces()) {
-        LOGE("Adapter wants cubemap face, but allocation has none");
+        ALOGE("Adapter wants cubemap face, but allocation has none");
         return NULL;
     }
 

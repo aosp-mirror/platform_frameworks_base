@@ -101,7 +101,7 @@ ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
    } else {
         off64_t result = lseek64(mFd, offset + mOffset, SEEK_SET);
         if (result == -1) {
-            LOGE("seek to %lld failed", offset + mOffset);
+            ALOGE("seek to %lld failed", offset + mOffset);
             return UNKNOWN_ERROR;
         }
 

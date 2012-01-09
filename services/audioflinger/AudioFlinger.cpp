@@ -105,14 +105,14 @@ static const uint32_t kMaxThreadSleepTimeShift = 2;
 static bool recordingAllowed() {
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.RECORD_AUDIO"));
-    if (!ok) LOGE("Request requires android.permission.RECORD_AUDIO");
+    if (!ok) ALOGE("Request requires android.permission.RECORD_AUDIO");
     return ok;
 }
 
 static bool settingsAllowed() {
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
-    if (!ok) LOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
+    if (!ok) ALOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
     return ok;
 }
 
@@ -139,7 +139,7 @@ static int load_audio_interface(const char *if_name, const hw_module_t **mod,
         goto out;
 
     rc = audio_hw_device_open(*mod, dev);
-    LOGE_IF(rc, "couldn't open audio hw device in %s.%s (%s)",
+    ALOGE_IF(rc, "couldn't open audio hw device in %s.%s (%s)",
             AUDIO_HARDWARE_MODULE_ID, if_name, strerror(-rc));
     if (rc)
         goto out;
@@ -199,7 +199,7 @@ void AudioFlinger::onFirstRef()
     mHardwareStatus = AUDIO_HW_INIT;
 
     if (!mPrimaryHardwareDev || mAudioHwDevs.size() == 0) {
-        LOGE("Primary audio interface not found");
+        ALOGE("Primary audio interface not found");
         return;
     }
 
@@ -400,7 +400,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     int lSessionId;
 
     if (streamType >= AUDIO_STREAM_CNT) {
-        LOGE("createTrack() invalid stream type %d", streamType);
+        ALOGE("createTrack() invalid stream type %d", streamType);
         lStatus = BAD_VALUE;
         goto Exit;
     }
@@ -410,7 +410,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
         PlaybackThread *thread = checkPlaybackThread_l(output);
         PlaybackThread *effectThread = NULL;
         if (thread == NULL) {
-            LOGE("unknown output thread");
+            ALOGE("unknown output thread");
             lStatus = BAD_VALUE;
             goto Exit;
         }
@@ -432,7 +432,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
                     // prevent same audio session on different output threads
                     uint32_t sessions = t->hasAudioSession(*sessionId);
                     if (sessions & PlaybackThread::TRACK_SESSION) {
-                        LOGE("createTrack() session ID %d already in use", *sessionId);
+                        ALOGE("createTrack() session ID %d already in use", *sessionId);
                         lStatus = BAD_VALUE;
                         goto Exit;
                     }
@@ -663,7 +663,7 @@ status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
     }
 
     if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT) {
-        LOGE("setStreamVolume() invalid stream %d", stream);
+        ALOGE("setStreamVolume() invalid stream %d", stream);
         return BAD_VALUE;
     }
 
@@ -698,7 +698,7 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
 
     if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT ||
         uint32_t(stream) == AUDIO_STREAM_ENFORCED_AUDIBLE) {
-        LOGE("setStreamMute() invalid stream %d", stream);
+        ALOGE("setStreamMute() invalid stream %d", stream);
         return BAD_VALUE;
     }
 
@@ -1471,7 +1471,7 @@ status_t AudioFlinger::PlaybackThread::readyToRun()
     if (status == NO_ERROR) {
         ALOGI("AudioFlinger's thread %p ready to run", this);
     } else {
-        LOGE("No working audio driver found.");
+        ALOGE("No working audio driver found.");
     }
     return status;
 }
@@ -1499,7 +1499,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
     if (mType == DIRECT) {
         if ((format & AUDIO_FORMAT_MAIN_MASK) == AUDIO_FORMAT_PCM) {
             if (sampleRate != mSampleRate || format != mFormat || channelMask != mChannelMask) {
-                LOGE("createTrack_l() Bad parameter: sampleRate %d format %d, channelMask 0x%08x \""
+                ALOGE("createTrack_l() Bad parameter: sampleRate %d format %d, channelMask 0x%08x \""
                         "for output %p with format %d",
                         sampleRate, format, channelMask, mOutput, mFormat);
                 lStatus = BAD_VALUE;
@@ -1509,7 +1509,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
     } else {
         // Resampler implementation limits input sampling rate to 2 x output sampling rate.
         if (sampleRate > mSampleRate*2) {
-            LOGE("Sample rate out of range: %d mSampleRate %d", sampleRate, mSampleRate);
+            ALOGE("Sample rate out of range: %d mSampleRate %d", sampleRate, mSampleRate);
             lStatus = BAD_VALUE;
             goto Exit;
         }
@@ -1517,7 +1517,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
 
     lStatus = initCheck();
     if (lStatus != NO_ERROR) {
-        LOGE("Audio driver not initialized.");
+        ALOGE("Audio driver not initialized.");
         goto Exit;
     }
 
@@ -1534,7 +1534,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
             if (t != 0) {
                 uint32_t actual = AudioSystem::getStrategyForStream((audio_stream_type_t)t->type());
                 if (sessionId == t->sessionId() && strategy != actual) {
-                    LOGE("createTrack_l() mismatched strategy; expected %u but found %u",
+                    ALOGE("createTrack_l() mismatched strategy; expected %u but found %u",
                             strategy, actual);
                     lStatus = BAD_VALUE;
                     goto Exit;
@@ -1847,7 +1847,7 @@ AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, Aud
 
     // FIXME - Current mixer implementation only supports stereo output
     if (mChannelCount == 1) {
-        LOGE("Invalid audio hardware channel count");
+        ALOGE("Invalid audio hardware channel count");
     }
 }
 
@@ -3238,7 +3238,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
                 mBufferEnd = (uint8_t *)mBuffer + bufferSize;
             }
         } else {
-            LOGE("not enough memory for AudioTrack size=%u", size);
+            ALOGE("not enough memory for AudioTrack size=%u", size);
             client->heap()->dump("AudioTrack");
             return;
         }
@@ -3332,7 +3332,7 @@ void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t f
     // Check validity of returned pointer in case the track control block would have been corrupted.
     if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd ||
         ((unsigned long)bufferStart & (unsigned long)(cblk->frameSize - 1))) {
-        LOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
+        ALOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
                 server %d, serverBase %d, user %d, userBase %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
                 cblk->server, cblk->serverBase, cblk->user, cblk->userBase);
@@ -3368,7 +3368,7 @@ AudioFlinger::PlaybackThread::Track::Track(
         }
         ALOGV("Track constructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
         if (mName < 0) {
-            LOGE("no more track names available");
+            ALOGE("no more track names available");
         }
         mVolume[0] = 1.0f;
         mVolume[1] = 1.0f;
@@ -4380,7 +4380,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                                 mRsmpInIndex = 0;
                             }
                             if (mBytesRead < 0) {
-                                LOGE("Error reading audio input");
+                                ALOGE("Error reading audio input");
                                 if (mActiveTrack->mState == TrackBase::ACTIVE) {
                                     // Force input into standby so that it tries to
                                     // recover at next read attempt
@@ -4470,7 +4470,7 @@ sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createR
 
     lStatus = initCheck();
     if (lStatus != NO_ERROR) {
-        LOGE("Audio driver not initialized.");
+        ALOGE("Audio driver not initialized.");
         goto Exit;
     }
 
@@ -4626,7 +4626,7 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
     if (framesReady == 0) {
         mBytesRead = mInput->stream->read(mInput->stream, mRsmpInBuffer, mInputBytes);
         if (mBytesRead < 0) {
-            LOGE("RecordThread::getNextBuffer() Error reading audio input");
+            ALOGE("RecordThread::getNextBuffer() Error reading audio input");
             if (mActiveTrack->mState == TrackBase::ACTIVE) {
                 // Force input into standby so that it tries to
                 // recover at next read attempt
@@ -5545,7 +5545,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         if (thread == NULL) {
             thread = checkPlaybackThread_l(io);
             if (thread == NULL) {
-                LOGE("createEffect() unknown output thread");
+                ALOGE("createEffect() unknown output thread");
                 lStatus = BAD_VALUE;
                 goto Exit;
             }
@@ -6828,7 +6828,7 @@ AudioFlinger::EffectHandle::EffectHandle(const sp<EffectModule>& effect,
             mBuffer = (uint8_t *)mCblk + bufOffset;
          }
     } else {
-        LOGE("not enough memory for Effect size=%u", EFFECT_PARAM_BUFFER_SIZE + sizeof(effect_param_cblk_t));
+        ALOGE("not enough memory for Effect size=%u", EFFECT_PARAM_BUFFER_SIZE + sizeof(effect_param_cblk_t));
         return;
     }
 }

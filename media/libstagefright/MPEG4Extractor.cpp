@@ -1250,7 +1250,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             char buffer[23];
             if (chunk_data_size != 7 &&
                 chunk_data_size != 23) {
-                LOGE("Incorrect D263 box size %lld", chunk_data_size);
+                ALOGE("Incorrect D263 box size %lld", chunk_data_size);
                 return ERROR_MALFORMED;
             }
 
@@ -1751,7 +1751,7 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
         // The media subtype is MP3 audio
         // Our software MP3 audio decoder may not be able to handle
         // packetized MP3 audio; for now, lets just return ERROR_UNSUPPORTED
-        LOGE("MP3 track in MP4/3GPP file is not supported");
+        ALOGE("MP3 track in MP4/3GPP file is not supported");
         return ERROR_UNSUPPORTED;
     }
 
@@ -2123,7 +2123,7 @@ status_t MPEG4Source::read(
 
         size_t nal_size = parseNALSize(src);
         if (mBuffer->range_length() < mNALLengthSize + nal_size) {
-            LOGE("incomplete NAL unit.");
+            ALOGE("incomplete NAL unit.");
 
             mBuffer->release();
             mBuffer = NULL;
@@ -2187,7 +2187,7 @@ status_t MPEG4Source::read(
                 }
 
                 if (isMalFormed) {
-                    LOGE("Video is malformed");
+                    ALOGE("Video is malformed");
                     mBuffer->release();
                     mBuffer = NULL;
                     return ERROR_MALFORMED;

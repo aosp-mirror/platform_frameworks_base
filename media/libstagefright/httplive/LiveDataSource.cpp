@@ -59,7 +59,7 @@ ssize_t LiveDataSource::readAtNonBlocking(
     Mutex::Autolock autoLock(mLock);
 
     if (offset != mOffset) {
-        LOGE("Attempt at reading non-sequentially from LiveDataSource.");
+        ALOGE("Attempt at reading non-sequentially from LiveDataSource.");
         return -EPIPE;
     }
 
@@ -89,7 +89,7 @@ ssize_t LiveDataSource::readAt(off64_t offset, void *data, size_t size) {
 
 ssize_t LiveDataSource::readAt_l(off64_t offset, void *data, size_t size) {
     if (offset != mOffset) {
-        LOGE("Attempt at reading non-sequentially from LiveDataSource.");
+        ALOGE("Attempt at reading non-sequentially from LiveDataSource.");
         return -EPIPE;
     }
 

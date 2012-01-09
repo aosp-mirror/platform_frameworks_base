@@ -72,7 +72,7 @@ void ScriptC::setupScript(Context *rsc) {
 }
 
 const Allocation *ScriptC::ptrToAllocation(const void *ptr) const {
-    //LOGE("ptr to alloc %p", ptr);
+    //ALOGE("ptr to alloc %p", ptr);
     if (!ptr) {
         return NULL;
     }
@@ -83,7 +83,7 @@ const Allocation *ScriptC::ptrToAllocation(const void *ptr) const {
             return mSlots[ct].get();
         }
     }
-    LOGE("ScriptC::ptrToAllocation, failed to find %p", ptr);
+    ALOGE("ScriptC::ptrToAllocation, failed to find %p", ptr);
     return NULL;
 }
 
@@ -181,7 +181,7 @@ static void* symbolLookup(void* pContext, char const* name) {
         s->mHal.info.isThreadable &= sym->threadable;
         return sym->mPtr;
     }
-    LOGE("ScriptC sym lookup failed for %s", name);
+    ALOGE("ScriptC sym lookup failed for %s", name);
     return NULL;
 }
 */
@@ -197,12 +197,12 @@ bool ScriptC::runCompiler(Context *rsc,
                           const uint8_t *bitcode,
                           size_t bitcodeLen) {
 
-    //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
+    //ALOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
 #ifndef ANDROID_RS_SERIALIZE
     uint32_t sdkVersion = 0;
     bcinfo::BitcodeWrapper bcWrapper((const char *)bitcode, bitcodeLen);
     if (!bcWrapper.unwrap()) {
-        LOGE("Bitcode is not in proper container format (raw or wrapper)");
+        ALOGE("Bitcode is not in proper container format (raw or wrapper)");
         return false;
     }
 
@@ -223,7 +223,7 @@ bool ScriptC::runCompiler(Context *rsc,
     BT = new bcinfo::BitcodeTranslator((const char *)bitcode, bitcodeLen,
                                        sdkVersion);
     if (!BT->translate()) {
-        LOGE("Failed to translate bitcode from version: %u", sdkVersion);
+        ALOGE("Failed to translate bitcode from version: %u", sdkVersion);
         delete BT;
         BT = NULL;
         return false;
@@ -247,12 +247,12 @@ bool ScriptC::runCompiler(Context *rsc,
     for (size_t i=0; i < mHal.info.exportedPragmaCount; ++i) {
         const char * key = mHal.info.exportedPragmaKeyList[i];
         const char * value = mHal.info.exportedPragmaValueList[i];
-        //LOGE("pragma %s %s", keys[i], values[i]);
+        //ALOGE("pragma %s %s", keys[i], values[i]);
         if (!strcmp(key, "version")) {
             if (!strcmp(value, "1")) {
                 continue;
             }
-            LOGE("Invalid version pragma value: %s\n", value);
+            ALOGE("Invalid version pragma value: %s\n", value);
             return false;
         }
 
@@ -264,7 +264,7 @@ bool ScriptC::runCompiler(Context *rsc,
                 mEnviroment.mVertex.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateVertex", value);
+            ALOGE("Unrecognized value %s passed to stateVertex", value);
             return false;
         }
 
@@ -276,7 +276,7 @@ bool ScriptC::runCompiler(Context *rsc,
                 mEnviroment.mRaster.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateRaster", value);
+            ALOGE("Unrecognized value %s passed to stateRaster", value);
             return false;
         }
 
@@ -288,7 +288,7 @@ bool ScriptC::runCompiler(Context *rsc,
                 mEnviroment.mFragment.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateFragment", value);
+            ALOGE("Unrecognized value %s passed to stateFragment", value);
             return false;
         }
 
@@ -300,7 +300,7 @@ bool ScriptC::runCompiler(Context *rsc,
                 mEnviroment.mFragmentStore.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateStore", value);
+            ALOGE("Unrecognized value %s passed to stateStore", value);
             return false;
         }
     }

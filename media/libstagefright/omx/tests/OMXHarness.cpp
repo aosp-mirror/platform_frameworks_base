@@ -174,7 +174,7 @@ status_t Harness::getPortDefinition(
 
 #define EXPECT(condition, info) \
     if (!(condition)) {         \
-        LOGE(info); printf("\n  * " info "\n"); return UNKNOWN_ERROR; \
+        ALOGE(info); printf("\n  * " info "\n"); return UNKNOWN_ERROR; \
     }
 
 #define EXPECT_SUCCESS(err, info) \

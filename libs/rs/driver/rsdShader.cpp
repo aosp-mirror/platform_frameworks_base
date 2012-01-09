@@ -186,7 +186,7 @@ bool RsdShader::loadShader(const Context *rsc) {
                 char* buf = (char*) malloc(infoLen);
                 if (buf) {
                     RSD_CALL_GL(glGetShaderInfoLog, mShaderID, infoLen, NULL, buf);
-                    LOGE("Could not compile shader \n%s\n", buf);
+                    ALOGE("Could not compile shader \n%s\n", buf);
                     free(buf);
                 }
                 RSD_CALL_GL(glDeleteShader, mShaderID);
@@ -279,9 +279,9 @@ void RsdShader::logUniform(const Element *field, const float *fd, uint32_t array
                 rsAssert(0);
             }
         }
-        LOGE("Element size %u data=%p", elementSize, fd);
+        ALOGE("Element size %u data=%p", elementSize, fd);
         fd += elementSize;
-        LOGE("New data=%p", fd);
+        ALOGE("New data=%p", fd);
     }
 }
 
@@ -396,7 +396,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
     uint32_t numTexturesToBind = mRSProgram->mHal.state.texturesCount;
     uint32_t numTexturesAvailable = dc->gl.gl.maxFragmentTextureImageUnits;
     if (numTexturesToBind >= numTexturesAvailable) {
-        LOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
+        ALOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
              mRSProgram->mHal.state.texturesCount, (uint32_t)this, numTexturesAvailable);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind more textuers than available");
         numTexturesToBind = numTexturesAvailable;
@@ -414,7 +414,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
 
         DrvAllocation *drvTex = (DrvAllocation *)mRSProgram->mHal.state.textures[ct]->mHal.drv;
         if (drvTex->glTarget != GL_TEXTURE_2D && drvTex->glTarget != GL_TEXTURE_CUBE_MAP) {
-            LOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
+            ALOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
         }
         RSD_CALL_GL(glBindTexture, drvTex->glTarget, drvTex->textureID);
@@ -442,7 +442,7 @@ void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool 
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.constantsCount; ct++) {
         Allocation *alloc = mRSProgram->mHal.state.constants[ct];
         if (!alloc) {
-            LOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set",
+            ALOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set",
                  (uint32_t)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "No constant allocation bound");
             continue;

@@ -115,7 +115,7 @@ status_t MediaPlayer::attachNewPlayer(const sp<IMediaPlayer>& player)
 
         if ( !( (mCurrentState & MEDIA_PLAYER_IDLE) ||
                 (mCurrentState == MEDIA_PLAYER_STATE_ERROR ) ) ) {
-            LOGE("attachNewPlayer called in state %d", mCurrentState);
+            ALOGE("attachNewPlayer called in state %d", mCurrentState);
             return INVALID_OPERATION;
         }
 
@@ -126,7 +126,7 @@ status_t MediaPlayer::attachNewPlayer(const sp<IMediaPlayer>& player)
             mCurrentState = MEDIA_PLAYER_INITIALIZED;
             err = NO_ERROR;
         } else {
-            LOGE("Unable to to create media player");
+            ALOGE("Unable to to create media player");
         }
     }
 
@@ -195,7 +195,7 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
          ALOGV("invoke %d", request.dataSize());
          return  mPlayer->invoke(request, reply);
     }
-    LOGE("invoke failed: wrong state %X", mCurrentState);
+    ALOGE("invoke failed: wrong state %X", mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -236,7 +236,7 @@ status_t MediaPlayer::prepareAsync_l()
         mCurrentState = MEDIA_PLAYER_PREPARING;
         return mPlayer->prepareAsync();
     }
-    LOGE("prepareAsync called in state %d", mCurrentState);
+    ALOGE("prepareAsync called in state %d", mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -298,7 +298,7 @@ status_t MediaPlayer::start()
         }
         return ret;
     }
-    LOGE("start called in state %d", mCurrentState);
+    ALOGE("start called in state %d", mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -317,7 +317,7 @@ status_t MediaPlayer::stop()
         }
         return ret;
     }
-    LOGE("stop called in state %d", mCurrentState);
+    ALOGE("stop called in state %d", mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -336,7 +336,7 @@ status_t MediaPlayer::pause()
         }
         return ret;
     }
-    LOGE("pause called in state %d", mCurrentState);
+    ALOGE("pause called in state %d", mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -348,7 +348,7 @@ bool MediaPlayer::isPlaying()
         mPlayer->isPlaying(&temp);
         ALOGV("isPlaying: %d", temp);
         if ((mCurrentState & MEDIA_PLAYER_STARTED) && ! temp) {
-            LOGE("internal/external state mismatch corrected");
+            ALOGE("internal/external state mismatch corrected");
             mCurrentState = MEDIA_PLAYER_PAUSED;
         }
         return temp;
@@ -402,7 +402,7 @@ status_t MediaPlayer::getDuration_l(int *msec)
             *msec = mDuration;
         return ret;
     }
-    LOGE("Attempt to call getDuration without a valid mediaplayer");
+    ALOGE("Attempt to call getDuration without a valid mediaplayer");
     return INVALID_OPERATION;
 }
 
@@ -435,7 +435,7 @@ status_t MediaPlayer::seekTo_l(int msec)
             return NO_ERROR;
         }
     }
-    LOGE("Attempt to perform seekTo in wrong state: mPlayer=%p, mCurrentState=%u", mPlayer.get(), mCurrentState);
+    ALOGE("Attempt to perform seekTo in wrong state: mPlayer=%p, mCurrentState=%u", mPlayer.get(), mCurrentState);
     return INVALID_OPERATION;
 }
 
@@ -457,7 +457,7 @@ status_t MediaPlayer::reset_l()
     if (mPlayer != 0) {
         status_t ret = mPlayer->reset();
         if (ret != NO_ERROR) {
-            LOGE("reset() failed with return code (%d)", ret);
+            ALOGE("reset() failed with return code (%d)", ret);
             mCurrentState = MEDIA_PLAYER_STATE_ERROR;
         } else {
             mCurrentState = MEDIA_PLAYER_IDLE;
@@ -486,7 +486,7 @@ status_t MediaPlayer::setAudioStreamType(int type)
     if (mCurrentState & ( MEDIA_PLAYER_PREPARED | MEDIA_PLAYER_STARTED |
                 MEDIA_PLAYER_PAUSED | MEDIA_PLAYER_PLAYBACK_COMPLETE ) ) {
         // Can't change the stream type after prepare
-        LOGE("setAudioStream called in state %d", mCurrentState);
+        ALOGE("setAudioStream called in state %d", mCurrentState);
         return INVALID_OPERATION;
     }
     // cache
@@ -532,7 +532,7 @@ status_t MediaPlayer::setAudioSessionId(int sessionId)
     ALOGV("MediaPlayer::setAudioSessionId(%d)", sessionId);
     Mutex::Autolock _l(mLock);
     if (!(mCurrentState & MEDIA_PLAYER_IDLE)) {
-        LOGE("setAudioSessionId called in state %d", mCurrentState);
+        ALOGE("setAudioSessionId called in state %d", mCurrentState);
         return INVALID_OPERATION;
     }
     if (sessionId < 0) {
@@ -570,7 +570,7 @@ status_t MediaPlayer::attachAuxEffect(int effectId)
     if (mPlayer == 0 ||
         (mCurrentState & MEDIA_PLAYER_IDLE) ||
         (mCurrentState == MEDIA_PLAYER_STATE_ERROR )) {
-        LOGE("attachAuxEffect called in state %d", mCurrentState);
+        ALOGE("attachAuxEffect called in state %d", mCurrentState);
         return INVALID_OPERATION;
     }
 
@@ -641,7 +641,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
     case MEDIA_PLAYBACK_COMPLETE:
         ALOGV("playback complete");
         if (mCurrentState == MEDIA_PLAYER_IDLE) {
-            LOGE("playback complete in idle state");
+            ALOGE("playback complete in idle state");
         }
         if (!mLoop) {
             mCurrentState = MEDIA_PLAYER_PLAYBACK_COMPLETE;
@@ -651,7 +651,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
         // Always log errors.
         // ext1: Media framework error code.
         // ext2: Implementation dependant error code.
-        LOGE("error (%d, %d)", ext1, ext2);
+        ALOGE("error (%d, %d)", ext1, ext2);
         mCurrentState = MEDIA_PLAYER_STATE_ERROR;
         if (mPrepareSync)
         {
@@ -717,7 +717,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
     if (service != 0) {
         p = service->decode(url, pSampleRate, pNumChannels, pFormat);
     } else {
-        LOGE("Unable to locate media service");
+        ALOGE("Unable to locate media service");
     }
     return p;
 
@@ -737,7 +737,7 @@ void MediaPlayer::died()
     if (service != 0) {
         p = service->decode(fd, offset, length, pSampleRate, pNumChannels, pFormat);
     } else {
-        LOGE("Unable to locate media service");
+        ALOGE("Unable to locate media service");
     }
     return p;
 

@@ -46,7 +46,7 @@ static jint android_debug_JNITest_part1(JNIEnv* env, jobject object,
     part2id = env->GetMethodID(clazz,
                 "part2", "(DILjava/lang/String;)I");
     if (part2id == NULL) {
-        LOGE("JNI test: unable to find part2\n");
+        ALOGE("JNI test: unable to find part2\n");
         return -1;
     }
 

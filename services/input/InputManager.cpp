@@ -53,13 +53,13 @@ void InputManager::initialize() {
 status_t InputManager::start() {
     status_t result = mDispatcherThread->run("InputDispatcher", PRIORITY_URGENT_DISPLAY);
     if (result) {
-        LOGE("Could not start InputDispatcher thread due to error %d.", result);
+        ALOGE("Could not start InputDispatcher thread due to error %d.", result);
         return result;
     }
 
     result = mReaderThread->run("InputReader", PRIORITY_URGENT_DISPLAY);
     if (result) {
-        LOGE("Could not start InputReader thread due to error %d.", result);
+        ALOGE("Could not start InputReader thread due to error %d.", result);
 
         mDispatcherThread->requestExit();
         return result;

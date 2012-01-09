@@ -51,7 +51,7 @@ unsigned getBytesPerTexel(const GLenum format, const GLenum type) {
     case GL_UNSIGNED_BYTE:
         break;
     default:
-        LOGE("GetBytesPerPixel: unknown type %x", type);
+        ALOGE("GetBytesPerPixel: unknown type %x", type);
     }
 
     switch (format) {
@@ -66,7 +66,7 @@ unsigned getBytesPerTexel(const GLenum format, const GLenum type) {
     case 0x80E1: // GL_BGRA_EXT
         return 4;
     default:
-        LOGE("GetBytesPerPixel: unknown format %x", format);
+        ALOGE("GetBytesPerPixel: unknown format %x", format);
     }
 
     return 1;   // in doubt...
@@ -139,7 +139,7 @@ void fixup_glTexImage2D(GLMessage *glmsg) {
     if (data != NULL) {
         arg_data->add_rawbytes(data, bytesPerTexel * width * height);
     } else {
-        LOGE("fixup_glTexImage2D: image data is NULL.\n");
+        ALOGE("fixup_glTexImage2D: image data is NULL.\n");
         arg_data->set_type(GLMessage::DataType::VOID);
         // FIXME:
         // This will create the texture, but it will be uninitialized. 

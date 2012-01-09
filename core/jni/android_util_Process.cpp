@@ -227,7 +227,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         t_pid = atoi(de->d_name);
 
         if (!t_pid) {
-            LOGE("Error getting pid for '%s'\n", de->d_name);
+            ALOGE("Error getting pid for '%s'\n", de->d_name);
             continue;
         }
 
@@ -274,7 +274,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
         if (pid == androidGetTid()) {
             void* bgOk = pthread_getspecific(gBgKey);
             if (bgOk == ((void*)0xbaad)) {
-                LOGE("Thread marked fg-only put self in background!");
+                ALOGE("Thread marked fg-only put self in background!");
                 jniThrowException(env, "java/lang/SecurityException", "May not put this thread into background");
                 return;
             }

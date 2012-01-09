@@ -101,7 +101,7 @@ void egl_cache_t::initialize(egl_display_t *display) {
                             cnx->egl.eglGetProcAddress(
                                     "eglSetBlobCacheFuncsANDROID"));
                 if (eglSetBlobCacheFuncsANDROID == NULL) {
-                    LOGE("EGL_ANDROID_blob_cache advertised by display %d, "
+                    ALOGE("EGL_ANDROID_blob_cache advertised by display %d, "
                             "but unable to get eglSetBlobCacheFuncsANDROID", i);
                     continue;
                 }
@@ -110,7 +110,7 @@ void egl_cache_t::initialize(egl_display_t *display) {
                         android::setBlob, android::getBlob);
                 EGLint err = cnx->egl.eglGetError();
                 if (err != EGL_SUCCESS) {
-                    LOGE("eglSetBlobCacheFuncsANDROID resulted in an error: "
+                    ALOGE("eglSetBlobCacheFuncsANDROID resulted in an error: "
                             "%#x", err);
                 }
             }
@@ -226,7 +226,7 @@ void egl_cache_t::saveBlobCacheLocked() {
                 // The file exists, delete it and try again.
                 if (unlink(fname) == -1) {
                     // No point in retrying if the unlink failed.
-                    LOGE("error unlinking cache file %s: %s (%d)", fname,
+                    ALOGE("error unlinking cache file %s: %s (%d)", fname,
                             strerror(errno), errno);
                     return;
                 }
@@ -234,7 +234,7 @@ void egl_cache_t::saveBlobCacheLocked() {
                 fd = open(fname, O_CREAT | O_EXCL | O_RDWR, 0);
             }
             if (fd == -1) {
-                LOGE("error creating cache file %s: %s (%d)", fname,
+                ALOGE("error creating cache file %s: %s (%d)", fname,
                         strerror(errno), errno);
                 return;
             }
@@ -242,7 +242,7 @@ void egl_cache_t::saveBlobCacheLocked() {
 
         size_t fileSize = headerSize + cacheSize;
         if (ftruncate(fd, fileSize) == -1) {
-            LOGE("error setting cache file size: %s (%d)", strerror(errno),
+            ALOGE("error setting cache file size: %s (%d)", strerror(errno),
                     errno);
             close(fd);
             unlink(fname);
@@ -252,7 +252,7 @@ void egl_cache_t::saveBlobCacheLocked() {
         uint8_t* buf = reinterpret_cast<uint8_t*>(mmap(NULL, fileSize,
                 PROT_WRITE, MAP_SHARED, fd, 0));
         if (buf == MAP_FAILED) {
-            LOGE("error mmaping cache file: %s (%d)", strerror(errno),
+            ALOGE("error mmaping cache file: %s (%d)", strerror(errno),
                     errno);
             close(fd);
             unlink(fname);
@@ -262,7 +262,7 @@ void egl_cache_t::saveBlobCacheLocked() {
         status_t err = mBlobCache->flatten(buf + headerSize, cacheSize, NULL,
                 0);
         if (err != OK) {
-            LOGE("error writing cache contents: %s (%d)", strerror(-err),
+            ALOGE("error writing cache contents: %s (%d)", strerror(-err),
                     -err);
             munmap(buf, fileSize);
             close(fd);
@@ -288,7 +288,7 @@ void egl_cache_t::loadBlobCacheLocked() {
         int fd = open(mFilename.string(), O_RDONLY, 0);
         if (fd == -1) {
             if (errno != ENOENT) {
-                LOGE("error opening cache file %s: %s (%d)", mFilename.string(),
+                ALOGE("error opening cache file %s: %s (%d)", mFilename.string(),
                         strerror(errno), errno);
             }
             return;
@@ -296,7 +296,7 @@ void egl_cache_t::loadBlobCacheLocked() {
 
         struct stat statBuf;
         if (fstat(fd, &statBuf) == -1) {
-            LOGE("error stat'ing cache file: %s (%d)", strerror(errno), errno);
+            ALOGE("error stat'ing cache file: %s (%d)", strerror(errno), errno);
             close(fd);
             return;
         }
@@ -304,7 +304,7 @@ void egl_cache_t::loadBlobCacheLocked() {
         // Sanity check the size before trying to mmap it.
         size_t fileSize = statBuf.st_size;
         if (fileSize > maxTotalSize * 2) {
-            LOGE("cache file is too large: %#llx", statBuf.st_size);
+            ALOGE("cache file is too large: %#llx", statBuf.st_size);
             close(fd);
             return;
         }
@@ -312,7 +312,7 @@ void egl_cache_t::loadBlobCacheLocked() {
         uint8_t* buf = reinterpret_cast<uint8_t*>(mmap(NULL, fileSize,
                 PROT_READ, MAP_PRIVATE, fd, 0));
         if (buf == MAP_FAILED) {
-            LOGE("error mmaping cache file: %s (%d)", strerror(errno),
+            ALOGE("error mmaping cache file: %s (%d)", strerror(errno),
                     errno);
             close(fd);
             return;
@@ -321,13 +321,13 @@ void egl_cache_t::loadBlobCacheLocked() {
         // Check the file magic and CRC
         size_t cacheSize = fileSize - headerSize;
         if (memcmp(buf, cacheFileMagic, 4) != 0) {
-            LOGE("cache file has bad mojo");
+            ALOGE("cache file has bad mojo");
             close(fd);
             return;
         }
         uint32_t* crc = reinterpret_cast<uint32_t*>(buf + 4);
         if (crc32c(buf + headerSize, cacheSize) != *crc) {
-            LOGE("cache file failed CRC check");
+            ALOGE("cache file failed CRC check");
             close(fd);
             return;
         }
@@ -335,7 +335,7 @@ void egl_cache_t::loadBlobCacheLocked() {
         status_t err = mBlobCache->unflatten(buf + headerSize, cacheSize, NULL,
                 0);
         if (err != OK) {
-            LOGE("error reading cache contents: %s (%d)", strerror(-err),
+            ALOGE("error reading cache contents: %s (%d)", strerror(-err),
                     -err);
             munmap(buf, fileSize);
             close(fd);

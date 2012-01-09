@@ -87,13 +87,13 @@ public:
     bool initialize() {
         sp<IServiceManager> sm = defaultServiceManager();
         if (sm == NULL) {
-            LOGE("Couldn't get default ServiceManager\n");
+            ALOGE("Couldn't get default ServiceManager\n");
             return false;
         }
 
         mMountService = interface_cast<IMountService>(sm->getService(String16("mount")));
         if (mMountService == NULL) {
-            LOGE("Couldn't get connection to MountService\n");
+            ALOGE("Couldn't get connection to MountService\n");
             return false;
         }
 

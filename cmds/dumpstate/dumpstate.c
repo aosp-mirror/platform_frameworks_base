@@ -329,22 +329,22 @@ int main(int argc, char *argv[]) {
 
     if (getuid() == 0) {
         if (prctl(PR_SET_KEEPCAPS, 1) < 0) {
-            LOGE("prctl(PR_SET_KEEPCAPS) failed: %s\n", strerror(errno));
+            ALOGE("prctl(PR_SET_KEEPCAPS) failed: %s\n", strerror(errno));
             return -1;
         }
 
         /* switch to non-root user and group */
         gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT, AID_INET };
         if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
-            LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
+            ALOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
             return -1;
         }
         if (setgid(AID_SHELL) != 0) {
-            LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
+            ALOGE("Unable to setgid, aborting: %s\n", strerror(errno));
             return -1;
         }
         if (setuid(AID_SHELL) != 0) {
-            LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
+            ALOGE("Unable to setuid, aborting: %s\n", strerror(errno));
             return -1;
         }
 
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
         capdata[1].inheritable = 0;
 
         if (capset(&capheader, &capdata[0]) < 0) {
-            LOGE("capset failed: %s\n", strerror(errno));
+            ALOGE("capset failed: %s\n", strerror(errno));
             return -1;
         }
     }

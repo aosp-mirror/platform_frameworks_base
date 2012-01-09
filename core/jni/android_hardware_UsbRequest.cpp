@@ -46,7 +46,7 @@ android_hardware_UsbRequest_init(JNIEnv *env, jobject thiz, jobject java_device,
 
     struct usb_device* device = get_device_from_object(env, java_device);
     if (!device) {
-        LOGE("device null in native_init");
+        ALOGE("device null in native_init");
         return false;
     }
 
@@ -82,7 +82,7 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
-        LOGE("request is closed in native_queue");
+        ALOGE("request is closed in native_queue");
         return false;
     }
 
@@ -119,7 +119,7 @@ android_hardware_UsbRequest_dequeue_array(JNIEnv *env, jobject thiz,
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
-        LOGE("request is closed in native_dequeue");
+        ALOGE("request is closed in native_dequeue");
         return;
     }
 
@@ -138,7 +138,7 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
-        LOGE("request is closed in native_queue");
+        ALOGE("request is closed in native_queue");
         return false;
     }
 
@@ -168,7 +168,7 @@ android_hardware_UsbRequest_dequeue_direct(JNIEnv *env, jobject thiz)
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
-        LOGE("request is closed in native_dequeue");
+        ALOGE("request is closed in native_dequeue");
         return;
     }
     // all we need to do is delete our global ref
@@ -180,7 +180,7 @@ android_hardware_UsbRequest_cancel(JNIEnv *env, jobject thiz)
 {
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
-        LOGE("request is closed in native_cancel");
+        ALOGE("request is closed in native_cancel");
         return false;
     }
     return (usb_request_cancel(request) == 0);
@@ -202,12 +202,12 @@ int register_android_hardware_UsbRequest(JNIEnv *env)
 {
     jclass clazz = env->FindClass("android/hardware/usb/UsbRequest");
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/usb/UsbRequest");
+        ALOGE("Can't find android/hardware/usb/UsbRequest");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (field_context == NULL) {
-        LOGE("Can't find UsbRequest.mNativeContext");
+        ALOGE("Can't find UsbRequest.mNativeContext");
         return -1;
     }
 

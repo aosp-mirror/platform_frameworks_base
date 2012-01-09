@@ -219,7 +219,7 @@ int binder_parse(struct binder_state *bs, struct binder_io *bio,
         case BR_TRANSACTION: {
             struct binder_txn *txn = (void *) ptr;
             if ((end - ptr) * sizeof(uint32_t) < sizeof(struct binder_txn)) {
-                LOGE("parse: txn too small!\n");
+                ALOGE("parse: txn too small!\n");
                 return -1;
             }
             binder_dump_txn(txn);
@@ -240,7 +240,7 @@ int binder_parse(struct binder_state *bs, struct binder_io *bio,
         case BR_REPLY: {
             struct binder_txn *txn = (void*) ptr;
             if ((end - ptr) * sizeof(uint32_t) < sizeof(struct binder_txn)) {
-                LOGE("parse: reply too small!\n");
+                ALOGE("parse: reply too small!\n");
                 return -1;
             }
             binder_dump_txn(txn);
@@ -266,7 +266,7 @@ int binder_parse(struct binder_state *bs, struct binder_io *bio,
             r = -1;
             break;
         default:
-            LOGE("parse: OOPS %d\n", cmd);
+            ALOGE("parse: OOPS %d\n", cmd);
             return -1;
         }
     }
@@ -375,17 +375,17 @@ void binder_loop(struct binder_state *bs, binder_handler func)
         res = ioctl(bs->fd, BINDER_WRITE_READ, &bwr);
 
         if (res < 0) {
-            LOGE("binder_loop: ioctl failed (%s)\n", strerror(errno));
+            ALOGE("binder_loop: ioctl failed (%s)\n", strerror(errno));
             break;
         }
 
         res = binder_parse(bs, 0, readbuf, bwr.read_consumed, func);
         if (res == 0) {
-            LOGE("binder_loop: unexpected reply?!\n");
+            ALOGE("binder_loop: unexpected reply?!\n");
             break;
         }
         if (res < 0) {
-            LOGE("binder_loop: io error %d %s\n", res, strerror(errno));
+            ALOGE("binder_loop: io error %d %s\n", res, strerror(errno));
             break;
         }
     }

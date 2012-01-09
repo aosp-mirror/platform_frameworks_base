@@ -31,7 +31,7 @@ namespace gltrace {
 int acceptClientConnection(int serverPort) {
     int serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (serverSocket < 0) {
-        LOGE("Error (%d) while creating socket. Check if app has network permissions.",
+        ALOGE("Error (%d) while creating socket. Check if app has network permissions.",
                                                                             serverSocket);
         return -1;
     }
@@ -45,13 +45,13 @@ int acceptClientConnection(int serverPort) {
     socklen_t sockaddr_len = sizeof(sockaddr_in);
     if (bind(serverSocket, (struct sockaddr *) &server, sizeof(server)) < 0) {
         close(serverSocket);
-        LOGE("Failed to bind the server socket");
+        ALOGE("Failed to bind the server socket");
         return -1;
     }
 
     if (listen(serverSocket, 1) < 0) {
         close(serverSocket);
-        LOGE("Failed to listen on server socket");
+        ALOGE("Failed to listen on server socket");
         return -1;
     }
 
@@ -60,7 +60,7 @@ int acceptClientConnection(int serverPort) {
     int clientSocket = accept(serverSocket, (struct sockaddr *)&client, &sockaddr_len);
     if (clientSocket < 0) {
         close(serverSocket);
-        LOGE("Failed to accept client connection");
+        ALOGE("Failed to accept client connection");
         return -1;
     }
 

@@ -223,10 +223,10 @@ void SoftMP3::onQueueFilled(OMX_U32 portIndex) {
 
             if (decoderErr != NO_ENOUGH_MAIN_DATA_ERROR ||
                     mConfig->outputFrameSize == 0) {
-                LOGE("mp3 decoder returned error %d", decoderErr);
+                ALOGE("mp3 decoder returned error %d", decoderErr);
 
                 if (mConfig->outputFrameSize == 0) {
-                    LOGE("Output frame size is 0");
+                    ALOGE("Output frame size is 0");
                 }
 
                 notify(OMX_EventError, OMX_ErrorUndefined, decoderErr, NULL);

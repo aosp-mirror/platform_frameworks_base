@@ -40,7 +40,7 @@ BitTube::BitTube()
         fcntl(mSendFd, F_SETFL, O_NONBLOCK);
     } else {
         mReceiveFd = -errno;
-        LOGE("BitTube: pipe creation failed (%s)", strerror(-mReceiveFd));
+        ALOGE("BitTube: pipe creation failed (%s)", strerror(-mReceiveFd));
     }
 }
 
@@ -52,7 +52,7 @@ BitTube::BitTube(const Parcel& data)
         fcntl(mReceiveFd, F_SETFL, O_NONBLOCK);
     } else {
         mReceiveFd = -errno;
-        LOGE("BitTube(Parcel): can't dup filedescriptor (%s)",
+        ALOGE("BitTube(Parcel): can't dup filedescriptor (%s)",
                 strerror(-mReceiveFd));
     }
 }
