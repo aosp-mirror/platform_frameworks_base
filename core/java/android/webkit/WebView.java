@@ -56,6 +56,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
@@ -82,6 +83,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -349,6 +351,43 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * InputConnection used for ContentEditable. This captures the 'delete'
+     * commands and sends delete key presses.
+     */
+    private class WebViewInputConnection extends BaseInputConnection {
+        public WebViewInputConnection() {
+            super(WebView.this, false);
+        }
+
+        private void sendKeyPress(int keyCode) {
+            long eventTime = SystemClock.uptimeMillis();
+            sendKeyEvent(new KeyEvent(eventTime, eventTime,
+                    KeyEvent.ACTION_DOWN, keyCode, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD));
+            sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+                    KeyEvent.ACTION_UP, keyCode, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD));
+        }
+
+        @Override
+        public boolean deleteSurroundingText(int leftLength, int rightLength) {
+            // Look for one-character delete and send it as a key press.
+            if (leftLength == 1 && rightLength == 0) {
+                sendKeyPress(KeyEvent.KEYCODE_DEL);
+            } else if (leftLength == 0 && rightLength == 1){
+                sendKeyPress(KeyEvent.KEYCODE_FORWARD_DEL);
+            } else if (mWebViewCore != null) {
+                mWebViewCore.sendMessage(EventHub.DELETE_SURROUNDING_TEXT,
+                        leftLength, rightLength);
+            }
+            return super.deleteSurroundingText(leftLength, rightLength);
+        }
+    }
+
+
     // The listener to capture global layout change event.
     private InnerGlobalLayoutListener mGlobalLayoutListener = null;
 
@@ -373,6 +412,8 @@ public class WebView extends AbsoluteLayout
     private final Rect mViewRectViewport = new Rect();
     private final RectF mVisibleContentRect = new RectF();
     private boolean mGLViewportEmpty = false;
+    WebViewInputConnection mInputConnection = new WebViewInputConnection();
+
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -4865,10 +4906,16 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
+    public boolean onCheckIsTextEditor() {
+        return true;
+    }
+
+    @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-      InputConnection connection = super.onCreateInputConnection(outAttrs);
-      outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_FULLSCREEN;
-      return connection;
+        outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+                | EditorInfo.TYPE_CLASS_TEXT
+                | EditorInfo.TYPE_TEXT_VARIATION_NORMAL;
+        return mInputConnection;
     }
 
     /**
