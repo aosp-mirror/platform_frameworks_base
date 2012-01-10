@@ -20,6 +20,7 @@ import android.annotation.Widget;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -796,6 +797,8 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_SELECTION                   = 138;
     static final int UPDATE_ZOOM_DENSITY                = 139;
     static final int EXIT_FULLSCREEN_VIDEO              = 140;
+
+    static final int COPY_TO_CLIPBOARD                  = 141;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -4520,6 +4523,11 @@ public class WebView extends AbsoluteLayout
         final boolean isSelecting = selectText();
         if (isSelecting) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        } else if (focusCandidateIsEditableText()) {
+            mSelectCallback = new SelectActionModeCallback();
+            mSelectCallback.setWebView(this);
+            mSelectCallback.setTextSelected(false);
+            startActionMode(mSelectCallback);
         }
         return isSelecting;
     }
@@ -5729,9 +5737,46 @@ public class WebView extends AbsoluteLayout
             ClipboardManager cm = (ClipboardManager)getContext()
                     .getSystemService(Context.CLIPBOARD_SERVICE);
             cm.setText(selection);
+            int[] handles = new int[4];
+            nativeGetSelectionHandles(mNativeClass, handles);
+            mWebViewCore.sendMessage(EventHub.COPY_TEXT, handles);
         }
         invalidate(); // remove selection region and pointer
         return copiedSomething;
+    }
+
+    /**
+     * Cut the selected text into the clipboard
+     *
+     * @hide This is an implementation detail
+     */
+    public void cutSelection() {
+        copySelection();
+        int[] handles = new int[4];
+        nativeGetSelectionHandles(mNativeClass, handles);
+        mWebViewCore.sendMessage(EventHub.DELETE_TEXT, handles);
+    }
+
+    /**
+     * Paste text from the clipboard to the cursor position.
+     *
+     * @hide This is an implementation detail
+     */
+    public void pasteFromClipboard() {
+        ClipboardManager cm = (ClipboardManager)getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = cm.getPrimaryClip();
+        if (clipData != null) {
+            ClipData.Item clipItem = clipData.getItemAt(0);
+            CharSequence pasteText = clipItem.getText();
+            if (pasteText != null) {
+                int[] handles = new int[4];
+                nativeGetSelectionHandles(mNativeClass, handles);
+                mWebViewCore.sendMessage(EventHub.DELETE_TEXT, handles);
+                mWebViewCore.sendMessage(EventHub.INSERT_TEXT,
+                        pasteText.toString());
+            }
+        }
     }
 
     /**
@@ -8914,6 +8959,10 @@ public class WebView extends AbsoluteLayout
                     nativeSelectAt(msg.arg1, msg.arg2);
                     break;
 
+                case COPY_TO_CLIPBOARD:
+                    copyToClipboard((String) msg.obj);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -9592,6 +9641,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Copy text into the clipboard. This is called indirectly from
+     * WebViewCore.
+     * @param text The text to put into the clipboard.
+     */
+    private void copyToClipboard(String text) {
+        ClipboardManager cm = (ClipboardManager)getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(getTitle(), text);
+        cm.setPrimaryClip(clip);
+    }
+
+    /**
      *  Update our cache with updatedText.
      *  @param updatedText  The new text to put in our cache.
      *  @hide
@@ -9677,6 +9738,23 @@ public class WebView extends AbsoluteLayout
         return nativeTileProfilingGetFloat(frame, tile, key);
     }
 
+    /**
+     * Checks the focused content for an editable text field. This can be
+     * text input or ContentEditable.
+     * @return true if the focused item is an editable text field.
+     */
+    boolean focusCandidateIsEditableText() {
+        boolean isEditable = false;
+        // TODO: reverse sDisableNavcache so that its name is positive
+        boolean isNavcacheEnabled = !sDisableNavcache;
+        if (isNavcacheEnabled) {
+            isEditable = nativeFocusCandidateIsEditableText(mNativeClass);
+        } else if (mFocusedNode != null) {
+            isEditable = mFocusedNode.mEditable;
+        }
+        return isEditable;
+    }
+
     private native int nativeCacheHitFramePointer();
     private native boolean  nativeCacheHitIsPlugin();
     private native Rect nativeCacheHitNodeBounds();
@@ -9722,6 +9800,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean  nativeFocusCandidateIsPassword();
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextInput();
+    private native boolean nativeFocusCandidateIsEditableText(int nativeClass);
     /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native boolean  nativeFocusCandidateIsAutoComplete();
     /* package */ native boolean  nativeFocusCandidateIsSpellcheck();
