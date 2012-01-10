@@ -19,6 +19,7 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import android.renderscript.RenderScriptGL;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
@@ -29,8 +30,42 @@ import android.util.Log;
 /**
  * @hide
  */
-public class ShaderParam extends SceneGraphBase {
+public abstract class ShaderParam extends SceneGraphBase {
+    static final int FLOAT4_DATA = 0;
+    static final int FLOAT4_CAMERA_POS = 1;
+    static final int FLOAT4_CAMERA_DIR = 2;
+    static final int FLOAT4_LIGHT_COLOR = 3;
+    static final int FLOAT4_LIGHT_POS = 4;
+    static final int FLOAT4_LIGHT_DIR = 5;
+
+    static final int TRANSFORM_DATA = 100;
+    static final int TRANSFORM_VIEW = 101;
+    static final int TRANSFORM_PROJ = 102;
+    static final int TRANSFORM_VIEW_PROJ = 103;
+    static final int TRANSFORM_MODEL = 104;
+    static final int TRANSFORM_MODEL_VIEW = 105;
+    static final int TRANSFORM_MODEL_VIEW_PROJ = 106;
+
+    static final int TEXTURE = 200;
+
+    static final String cameraPos        = "cameraPos";
+    static final String cameraDir        = "cameraDir";
+
+    static final String lightColor       = "lightColor";
+    static final String lightPos         = "lightPos";
+    static final String lightDir         = "lightDir";
+
+    static final String view             = "view";
+    static final String proj             = "proj";
+    static final String viewProj         = "viewProj";
+    static final String model            = "model";
+    static final String modelView        = "modelView";
+    static final String modelViewProj    = "modelViewProj";
+
+    ScriptField_ShaderParam_s.Item mRsFieldItem;
+
     String mParamName;
+    int mOffset;
 
     public ShaderParam(String name) {
         mParamName = name;
@@ -38,6 +73,22 @@ public class ShaderParam extends SceneGraphBase {
 
     public String getParamName() {
         return mParamName;
+    }
+
+    void setOffset(int offset) {
+        mOffset = offset;
+    }
+
+    abstract void initLocalData(RenderScriptGL rs);
+
+    public ScriptField_ShaderParam_s.Item getRSData(RenderScriptGL rs) {
+        if (mRsFieldItem != null) {
+            return mRsFieldItem;
+        }
+
+        mRsFieldItem = new ScriptField_ShaderParam_s.Item();
+        initLocalData(rs);
+        return mRsFieldItem;
     }
 }
 

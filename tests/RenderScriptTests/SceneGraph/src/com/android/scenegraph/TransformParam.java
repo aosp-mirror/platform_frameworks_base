@@ -19,7 +19,7 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
-import android.graphics.Camera;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
@@ -32,11 +32,9 @@ import android.util.Log;
  */
 public class TransformParam extends ShaderParam {
 
-    public static final int TRANSFORM = 0;
-    public static final int TRANSFORM_VIEW = 1;
-    public static final int TRANSFORM_VIEW_PROJ = 2;
     Transform mTransform;
     Camera mCamera;
+    LightBase mLight;
 
     public TransformParam(String name) {
         super(name);
@@ -48,6 +46,36 @@ public class TransformParam extends ShaderParam {
 
     public void setCamera(Camera c) {
         mCamera = c;
+    }
+
+    int getTypeFromName() {
+        int paramType = TRANSFORM_DATA;
+        if (mParamName.equalsIgnoreCase(view)) {
+            paramType = TRANSFORM_VIEW;
+        } else if(mParamName.equalsIgnoreCase(proj)) {
+            paramType = TRANSFORM_PROJ;
+        } else if(mParamName.equalsIgnoreCase(viewProj)) {
+            paramType = TRANSFORM_VIEW_PROJ;
+        } else if(mParamName.equalsIgnoreCase(model)) {
+            paramType = TRANSFORM_MODEL;
+        } else if(mParamName.equalsIgnoreCase(modelView)) {
+            paramType = TRANSFORM_MODEL_VIEW;
+        } else if(mParamName.equalsIgnoreCase(modelViewProj)) {
+            paramType = TRANSFORM_MODEL_VIEW_PROJ;
+        }
+        return paramType;
+    }
+
+    void initLocalData(RenderScriptGL rs) {
+        mRsFieldItem.type = getTypeFromName();
+        mRsFieldItem.bufferOffset = mOffset;
+        mRsFieldItem.transform = mTransform.getRSData(rs).getAllocation();
+        if (mCamera != null) {
+            mRsFieldItem.camera = mCamera.getRSData(rs).getAllocation();
+        }
+        if (mLight != null) {
+            mRsFieldItem.light = mLight.getRSData(rs).getAllocation();
+        }
     }
 }
 

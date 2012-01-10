@@ -38,6 +38,11 @@ void root(const rs_allocation *v_in, rs_allocation *v_out, const float *usrData)
 
     rsMatrixLoad(&cam->viewProj, &cam->proj);
     rsMatrixMultiply(&cam->viewProj, &cam->view);
+
+    rsExtractFrustumPlanes(&cam->viewProj,
+                           &cam->frustumPlanes[0], &cam->frustumPlanes[1],
+                           &cam->frustumPlanes[2], &cam->frustumPlanes[3],
+                           &cam->frustumPlanes[3], &cam->frustumPlanes[4]);
 #ifdef DEBUG_CAMERA
     printCameraInfo(cam);
 #endif //DEBUG_CAMERA

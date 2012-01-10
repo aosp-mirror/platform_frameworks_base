@@ -25,5 +25,6 @@ SgRenderable *drExport;
 SgRenderPass *pExport;
 SgCamera *exportPtrCam;
 SgLight *exportPtrLight;
+SgShaderParam *spExport;
 FBlurOffsets *blurExport;
 VertexShaderInputs *iExport;
