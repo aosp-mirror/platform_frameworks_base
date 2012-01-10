@@ -56,10 +56,10 @@ void rsrBindConstant(Context *rsc, Script *sc, ProgramFragment *pf, uint32_t slo
     pf->bindAllocation(rsc, a, slot);
 }
 
-void rsrBindConstant(Context *rsc, Script *sc, ProgramVertex *pf, uint32_t slot, Allocation *a) {
+void rsrBindConstant(Context *rsc, Script *sc, ProgramVertex *pv, uint32_t slot, Allocation *a) {
     CHECK_OBJ_OR_NULL(a);
-    CHECK_OBJ(pf);
-    pf->bindAllocation(rsc, a, slot);
+    CHECK_OBJ(pv);
+    pv->bindAllocation(rsc, a, slot);
 }
 
 void rsrBindSampler(Context *rsc, Script *sc, ProgramFragment *pf, uint32_t slot, Sampler *s) {

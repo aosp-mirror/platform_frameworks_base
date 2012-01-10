@@ -1,4 +1,4 @@
-// Copyright (C) 2011 The Android Open Source Project
+// Copyright (C) 2011-2012 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,9 +35,6 @@ rs_allocation gRenderPasses;
 rs_allocation gTGrid;
 rs_program_store gPFSBackground;
 
-VShaderParams *vConst;
-FShaderParams *fConst;
-
 uint32_t *gFrontToBack;
 static uint32_t gFrontToBackCount = 0;
 uint32_t *gBackToFront;
@@ -46,113 +43,6 @@ static uint32_t gBackToFrontCount = 0;
 static SgCamera *gActiveCamera = NULL;
 
 static rs_allocation nullAlloc;
-
-static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
-    switch (vecSize) {
-    case 1:
-        *ptr = input->x;
-        break;
-    case 2:
-        *ptr++ = input->x;
-        *ptr = input->y;
-        break;
-    case 3:
-        *ptr++ = input->x;
-        *ptr++ = input->y;
-        *ptr = input->z;
-        break;
-    case 4:
-        *((float4*)ptr) = *input;
-        break;
-    }
-}
-
-static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
-    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
-    const SgTransform *pTransform = NULL;
-    if (rsIsObject(p->transform)) {
-        pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
-    }
-
-    rsDebug("data ptr: ", (void*)dataPtr);
-    rsDebug("p type: ", p->type);
-
-    switch(p->type) {
-    case SHADER_PARAM_FLOAT4_DATA:
-        writeFloatData((float*)dataPtr, &p->float_value, p->float_vecSize);
-        break;
-    case SHADER_PARAM_FLOAT4_CAMERA_POS:
-        writeFloatData((float*)dataPtr, &currentCam->position, p->float_vecSize);
-        break;
-    case SHADER_PARAM_FLOAT4_CAMERA_DIR: break;
-    case SHADER_PARAM_FLOAT4_LIGHT_COLOR: break;
-    case SHADER_PARAM_FLOAT4_LIGHT_POS: break;
-    case SHADER_PARAM_FLOAT4_LIGHT_DIR: break;
-
-    case SHADER_PARAM_TRANSFORM_DATA:
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &pTransform->globalMat);
-        break;
-    case SHADER_PARAM_TRANSFORM_VIEW:
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->view);
-        break;
-    case SHADER_PARAM_TRANSFORM_PROJ:
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->proj);
-        break;
-    case SHADER_PARAM_TRANSFORM_VIEW_PROJ:
-        rsDebug("View proj ptr: ", (void*)&vConst->viewProj);
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->viewProj);
-        break;
-    case SHADER_PARAM_TRANSFORM_MODEL:
-        rsDebug("Model ptr: ", (void*)&vConst->model);
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &pTransform->globalMat);
-        break;
-    case SHADER_PARAM_TRANSFORM_MODEL_VIEW:
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->view);
-        rsMatrixLoadMultiply((rs_matrix4x4*)dataPtr,
-                             (rs_matrix4x4*)dataPtr,
-                             &pTransform->globalMat);
-        break;
-    case SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ:
-        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->viewProj);
-        rsMatrixLoadMultiply((rs_matrix4x4*)dataPtr,
-                             (rs_matrix4x4*)dataPtr,
-                             &pTransform->globalMat);
-        break;
-    }
-}
-
-static void updateParams(SgRenderable *drawable) {
-    if (rsIsObject(drawable->pf_const)) {
-        uint8_t *constantBuffer = (uint8_t*)fConst;
-
-        int numParams = 0;
-        if (rsIsObject(drawable->pf_constParams)) {
-            rsAllocationGetDimX(drawable->pf_constParams);
-        }
-        for (int i = 0; i < numParams; i ++) {
-            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pf_constParams, i);
-            processParam(current, constantBuffer, gActiveCamera);
-            rsDebug("Setting f param", i);
-        }
-        rsgAllocationSyncAll(rsGetAllocation(fConst));
-    }
-
-    if (rsIsObject(drawable->pv_const)) {
-        uint8_t *constantBuffer = (uint8_t*)vConst;
-
-        rsDebug("_______________________", 0);
-
-        int numParams = 0;
-        if (rsIsObject(drawable->pv_constParams)) {
-            numParams = rsAllocationGetDimX(drawable->pv_constParams);
-        }
-        for (int i = 0; i < numParams; i ++) {
-            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pv_constParams, i);
-            processParam(current, constantBuffer, gActiveCamera);
-        }
-        rsgAllocationSyncAll(rsGetAllocation(vConst));
-    }
-}
 
 //#define DEBUG_RENDERABLES
 static void draw(SgRenderable *obj) {
@@ -166,14 +56,8 @@ static void draw(SgRenderable *obj) {
     printName(obj->name);
 #endif //DEBUG_RENDERABLES
 
-    updateParams(obj);
-    /*SgCamera *cam = gActiveCamera;
-
-    rsMatrixLoad(&vConst->model, &objTransform->globalMat);
-    rsMatrixLoad(&vConst->viewProj, &cam->viewProj);
-    rsgAllocationSyncAll(rsGetAllocation(vConst));*/
-    fConst->cameraPos = gActiveCamera->position;
-    rsgAllocationSyncAll(rsGetAllocation(fConst));
+    rsgBindConstant(renderState->pv, 0, obj->pv_const);
+    rsgBindConstant(renderState->pf, 0, obj->pf_const);
 
     if (rsIsObject(renderState->ps)) {
         rsgBindProgramStore(renderState->ps);
@@ -203,13 +87,7 @@ static void draw(SgRenderable *obj) {
 static void sortToBucket(SgRenderable *obj) {
     const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     if (rsIsObject(renderState->ps)) {
-#define MR1_API
-#ifndef MR1_API
-        bool isOpaque = (rsgProgramStoreGetBlendSrcFunc(renderState->ps) == RS_BLEND_SRC_ONE) &&
-                        (rsgProgramStoreGetBlendDstFunc(renderState->ps) == RS_BLEND_DST_ZERO);
-#else
         bool isOpaque = false;
-#endif
         if (isOpaque) {
             gFrontToBack[gFrontToBackCount++] = (uint32_t)obj;
         } else {

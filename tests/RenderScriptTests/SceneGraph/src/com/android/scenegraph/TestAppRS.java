@@ -261,7 +261,6 @@ public class TestAppRS {
             fb.addTexture(TextureType.TEXTURE_CUBE);
         }
         ProgramFragment pf = fb.create();
-        pf.bindConstants(mFsConst.getAllocation(), 0);
         pf.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
         if (addCubemap) {
             pf.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
@@ -278,7 +277,6 @@ public class TestAppRS {
         vb.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         vb.setShader(mRes, R.raw.shader2v);
         mPV_Paint = vb.create();
-        mPV_Paint.bindConstants(mVsConst.getAllocation(), 0);
 
         mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
 
@@ -422,8 +420,6 @@ public class TestAppRS {
         new ImageLoaderTask().execute();
 
         ScriptC_render renderLoop = mSceneManager.getRenderLoop();
-        renderLoop.bind_vConst(mVsConst);
-        renderLoop.bind_fConst(mFsConst);
 
         mScript.set_gRenderLoop(renderLoop);
         Allocation dummyAlloc = Allocation.createSized(mRS, Element.I32(mRS), 1);
