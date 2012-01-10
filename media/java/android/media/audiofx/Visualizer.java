@@ -396,6 +396,9 @@ public class Visualizer {
     public interface OnDataCaptureListener  {
         /**
          * Method called when a new waveform capture is available.
+         * <p>Data in the waveform buffer is valid only within the scope of the callback.
+         * Applications which needs access to the waveform data after returning from the callback
+         * should make a copy of the data instead of holding a reference.
          * @param visualizer Visualizer object on which the listener is registered.
          * @param waveform array of bytes containing the waveform representation.
          * @param samplingRate sampling rate of the audio visualized.
@@ -404,6 +407,9 @@ public class Visualizer {
 
         /**
          * Method called when a new frequency capture is available.
+         * <p>Data in the fft buffer is valid only within the scope of the callback.
+         * Applications which needs access to the fft data after returning from the callback
+         * should make a copy of the data instead of holding a reference.
          * @param visualizer Visualizer object on which the listener is registered.
          * @param fft array of bytes containing the frequency representation.
          * @param samplingRate sampling rate of the audio visualized.
