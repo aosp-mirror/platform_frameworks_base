@@ -46,7 +46,7 @@ android:targetSdkVersion}</a> set to {@code "4"} or higher, then this document i
 default, an application written for Android 1.5 or below that does not set the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> set to {@code "4"} or higher runs in <a
-href="screen-compat-mode">screen compatibility mode</a> when on a device with a screen larger than
+href="screen-compat-mode.html">screen compatibility mode</a> when on a device with a screen larger than
 the
 <em>normal</em> screen size (basically, the system displays the application in a small window
 that is roughly the size of the normal screen size).</p>

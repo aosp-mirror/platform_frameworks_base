@@ -63,8 +63,8 @@ Tasks</code>.</li>
 strings that identify your app to the service. You need to obtain these strings
 directly from the service owner. Google has a self-service system for obtaining
 client ids and secrets. The article <a
-href="http://code.google.com/apis/tasks/articles/oauth-and-tasks-on-android.
-html">Getting Started with the Tasks API and OAuth 2.0 on Android</a> explains
+href="http://code.google.com/apis/tasks/articles/oauth-and-tasks-on-android.html">Getting
+Started with the Tasks API and OAuth 2.0 on Android</a> explains
 how to use this system to obtain these values for use with the Google Tasks
 API.</li>
 </ul>

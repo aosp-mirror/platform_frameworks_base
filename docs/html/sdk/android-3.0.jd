@@ -262,8 +262,8 @@ android.content.ClipData.Item}s.</p>
 
 <p>For more information, read the <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy
 and Paste</a> documentation. You can also see a simple implementation of copy and paste in the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.
-html">API Demos</a> and a more complete implementation in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.html">API Demos</a>
+and a more complete implementation in the <a
 href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> application.</p>
 
 
@@ -386,7 +386,7 @@ loader for your activity or fragment.</p>
 <p>For more information, read the <a
 href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> documentation. You can also see
 example code using loaders in the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentListCursorLoader.html">FragmentListCursorLoader</a>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">LoaderCursor</a>
 and <a
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
 LoaderThrottle</a> samples.</p>
