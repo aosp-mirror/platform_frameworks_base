@@ -117,6 +117,8 @@ public class LockPatternUtils {
             = "lockscreen.biometric_weak_fallback";
     public final static String BIOMETRIC_WEAK_EVER_CHOSEN_KEY
             = "lockscreen.biometricweakeverchosen";
+    public final static String LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
+            = "lockscreen.power_button_instantly_locks";
 
     private final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
@@ -335,7 +337,7 @@ public class LockPatternUtils {
      * @return True if the user has ever chosen a pattern.
      */
     public boolean isPatternEverChosen() {
-        return getBoolean(PATTERN_EVER_CHOSEN_KEY);
+        return getBoolean(PATTERN_EVER_CHOSEN_KEY, false);
     }
 
     /**
@@ -345,7 +347,7 @@ public class LockPatternUtils {
      * @return True if the user has ever chosen biometric weak.
      */
     public boolean isBiometricWeakEverChosen() {
-        return getBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY);
+        return getBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, false);
     }
 
     /**
@@ -845,7 +847,7 @@ public class LockPatternUtils {
                 getLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
                 == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
-        return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED)
+        return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, false)
                 && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
                         == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING ||
                         (usingBiometricWeak() && backupEnabled));
@@ -891,7 +893,7 @@ public class LockPatternUtils {
      * @return Whether the visible pattern is enabled.
      */
     public boolean isVisiblePatternEnabled() {
-        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, false);
     }
 
     /**
@@ -905,7 +907,7 @@ public class LockPatternUtils {
      * @return Whether tactile feedback for the pattern is enabled.
      */
     public boolean isTactileFeedbackEnabled() {
-        return getBoolean(Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED, false);
     }
 
     /**
@@ -946,7 +948,7 @@ public class LockPatternUtils {
      *   attempts.
      */
     public boolean isPermanentlyLocked() {
-        return getBoolean(LOCKOUT_PERMANENT_KEY);
+        return getBoolean(LOCKOUT_PERMANENT_KEY, false);
     }
 
     /**
@@ -989,9 +991,10 @@ public class LockPatternUtils {
         return nextAlarm;
     }
 
-    private boolean getBoolean(String secureSettingKey) {
+    private boolean getBoolean(String secureSettingKey, boolean defaultValue) {
         return 1 ==
-                android.provider.Settings.Secure.getInt(mContentResolver, secureSettingKey, 0);
+                android.provider.Settings.Secure.getInt(mContentResolver, secureSettingKey,
+                        defaultValue ? 1 : 0);
     }
 
     private void setBoolean(String secureSettingKey, boolean enabled) {
@@ -1090,6 +1093,14 @@ public class LockPatternUtils {
         intent.setClassName("com.android.facelock",
                 "com.android.facelock.SetupEndScreen");
         mContext.startActivity(intent);
+    }
+
+    public void setPowerButtonInstantlyLocks(boolean enabled) {
+        setBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, enabled);
+    }
+
+    public boolean getPowerButtonInstantlyLocks() {
+        return getBoolean(LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS, true);
     }
 
 }
