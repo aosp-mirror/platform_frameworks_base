@@ -75,7 +75,7 @@ bool rsdPathInitStatic(const Context *rsc, const Path *m,
     cleanup(rsc, m);
 
     DrvPathStatic *dps = new DrvPathStatic(vtx, loops);
-    LOGE("init path m %p,  %p", m, dps);
+    //LOGE("init path m %p,  %p", m, dps);
     m->mHal.drv = dps;
     return dps != NULL;
 }
@@ -86,11 +86,11 @@ bool rsdPathInitDynamic(const Context *rsc, const Path *m) {
 
 
 void rsdPathDraw(const Context *rsc, const Path *m) {
-    LOGE("render m=%p", m);
+    //LOGE("render m=%p", m);
 
     DrvPath *drv = (DrvPath *)m->mHal.drv;
     if(drv) {
-        LOGE("render 2 drv=%p", drv);
+        //LOGE("render 2 drv=%p", drv);
         drv->draw((Context *)rsc);
     }
 }
@@ -138,7 +138,7 @@ void DrvPathStatic::draw(Context *rsc) {
         1.f, 1.f, 1.f, 1.f,  1.f, 1.f, 1.f, 1.f};
     float vtx[12];
 
-    LOGE("draw");
+    //LOGE("draw");
     if (!rsc->setupCheck()) {
         return;
     }
@@ -154,7 +154,7 @@ void DrvPathStatic::draw(Context *rsc) {
     RsdVertexArray va(attribs, 2);
     va.setup(rsc);
 
-    LOGE("mSegmentCount %i", mSegmentCount);
+    //LOGE("mSegmentCount %i", mSegmentCount);
     for (uint32_t ct=0; ct < mSegmentCount; ct++) {
         segment_t *s = &mSegments[ct];
 

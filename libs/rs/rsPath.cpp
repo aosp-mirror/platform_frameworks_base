@@ -31,10 +31,10 @@ Path::Path(Context *rsc, RsPathPrimitive pp, bool isStatic,
     mHal.state.quality = quality;
     mHal.state.primitive = pp;
 
-    LOGE("i1");
+    //LOGE("i1");
     rsc->mHal.funcs.path.initStatic(rsc, this, vtx, loops);
 
-    LOGE("i2");
+    //LOGE("i2");
 }
 
 Path::Path(Context *rsc, uint32_t vertexBuffersCount, uint32_t primitivesCount)
