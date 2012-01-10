@@ -376,7 +376,7 @@ describes how these classes are generated through reflection.</p>
   you call the constructor for the {@link android.renderscript.Script.FieldBase} class and specify
   the amount of structures that you want to allocate memory for. To allocate memory for a primitive
   type pointer, you must build an allocation manually, using the memory management classes
-  described in <a href="mem-mgmt-table">Table 1</a>. The example below allocates memory for both
+  described in <a href="#mem-mgmt-table">Table 1</a>. The example below allocates memory for both
   the <code>intPointer</code> and <code>touchPoints</code> pointer and binds it to the
   RenderScript:</p>
   <pre>

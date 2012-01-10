@@ -518,15 +518,12 @@ method. From within the Service, you can perform your own updates
 to the App Widget without worrying about the AppWidgetProvider closing down due
 to an <a href="{@docRoot}guide/practices/design/responsiveness.html">Application
 Not Responding</a> (ANR) error. See the <a
-href="http://code.google.com/p/wiktionary-android/source/browse/trunk/Wiktionary
-/src/com/example/android/wiktionary/WordWidget.java">Wiktionary sample's
-AppWidgetProvider</a> for an example of an App Widget running a {@link
+href="http://code.google.com/p/wiktionary-android/source/browse/trunk/Wiktionary/src/com/example/android/wiktionary/WordWidget.java">Wiktionary sample's AppWidgetProvider</a> for an example of an App Widget running a {@link
 android.app.Service}.</p>
 
 <p>Also see the <a 
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/
-appwidget/ExampleAppWidgetProvider.html">
-ExampleAppWidgetProvider.java</a> sample class.</p>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetProvider.html">ExampleAppWidgetProvider.java</a>
+sample class.</p>
 
 
 <h3 id="ProviderBroadcasts">Receiving App Widget broadcast Intents</h3>
@@ -683,9 +680,8 @@ cancelled and the
 App Widget will not be added.</p>
 
 <p>See the <a 
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/
-appwidget/ExampleAppWidgetConfigure.html">
-ExampleAppWidgetConfigure.java</a> sample class in ApiDemos for an example.</p>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/appwidget/ExampleAppWidgetConfigure.html">ExampleAppWidgetConfigure.java</a>
+sample class in ApiDemos for an example.</p>
 
 <h2 id="preview">Setting a Preview Image</h2>
 

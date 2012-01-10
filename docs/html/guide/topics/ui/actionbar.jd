@@ -642,7 +642,7 @@ work as designed otherwise.</p>
   <p>Adding this value requires that you set your build target to Android 4.0 or higher in order to
 compile. Older versions of Android ignore the {@code "collapseActionView"} value because they don't
 understand it. Just be sure not to use other APIs in your source code that are not supported in the
-version declared by your <a href="{@docRoot}guide/topics/manifest/uses-sdk-elementl.html#min">{@code
+version declared by your <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 minSdkVersion}</a>, unless you add the appropriate version check at runtime.</p>
 </div>
 </div>
@@ -843,8 +843,8 @@ you <em>do not</em> need to handle click events from the {@link
 android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} callback method.</p>
 
 <p>For a sample using the share action provider, see
-<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarActionProviderActivity.html"
->ActionBarActionProviderActivity</a>.
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarShareActionProviderActivity.html"
+>ActionBarShareActionProviderActivity</a>.
 
 
 

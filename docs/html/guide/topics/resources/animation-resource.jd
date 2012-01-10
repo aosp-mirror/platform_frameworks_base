@@ -335,7 +335,7 @@ set.start();
 <dd>
 <ul>
   <li><a href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a></li>
-  <li><a href="http://zoso:8080/resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API Demos</a> for examples
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API Demos</a> for examples
   on how to use the property animation system.</li>
 </ul>
 </dd>

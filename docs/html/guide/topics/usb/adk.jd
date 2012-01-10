@@ -699,7 +699,7 @@ bool AndroidAccessory::switchDevice(byte addr)
 </pre>If this method returns false, the board waits until a new device is connected. If it is
 successful, the device displays itself on the USB bus as being in accessory mode when the ADK board
 re-enumerates the bus. When the device is in accessory mode, the accessory then <a href=
-"establish-adk">establishes communication with the device</a>.
+"#establish-adk">establishes communication with the device</a>.
 
   <h3 id="establish-adk">Establish communication with the device</h3>
 

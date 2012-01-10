@@ -28,7 +28,7 @@ parent.link=index.html
 href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html">
 API Demos (OS - RotationVectorDemo)</a></li>
       <li><a
-href="{@docRoot}/resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html"
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/os/RotationVectorDemo.html"
 >API Demos (OS - Sensors)</a></li>
     </ol>
     <h2>See also</h2>
