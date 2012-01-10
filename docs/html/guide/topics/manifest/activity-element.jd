@@ -59,7 +59,7 @@ by the system and will never be run.
 
 <dt>attributes:</dt>
 <dd><dl class="attr">
-<dt><a href name="reparent"></a>{@code android:allowTaskReparenting}</dt>
+<dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
 <dd>Whether or not the activity can move from the task that started it to 
 the task it has an affinity for when that task is next brought to the 
 front &mdash; "{@code true}" if it can move, and "{@code false}" if it 

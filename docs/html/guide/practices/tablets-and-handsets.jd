@@ -481,7 +481,7 @@ href="{@docRoot}guide/topics/ui/actionbar.html#Home">Action Bar</a> developer gu
 information in each list item based on the available space. That is, you can create alternative
 layouts to be used by the items in your list adapter such that a large screen might display more
 detail for each item.</li>
-  <li>Create <a href="{@docRoot}guide/topics/resources/more-resources.html ">alternative resource
+  <li>Create <a href="{@docRoot}guide/topics/resources/more-resources.html">alternative resource
 files</a> for values such as integers, dimensions, and even booleans. Using size qualifiers for
 these resources, you can easily apply different layout sizes, font sizes, or enable/disable features
 based on the current screen size.</li>
