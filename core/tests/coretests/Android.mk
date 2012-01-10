@@ -1,4 +1,14 @@
-LOCAL_PATH:= $(call my-dir)
+ACTUAL_LOCAL_PATH := $(call my-dir)
+
+# this var will hold all the test apk module names later.
+FrameworkCoreTests_all_apks :=
+
+# We have to include the subdir makefiles first
+# so that FrameworkCoreTests_all_apks will be populated correctly.
+include $(call all-makefiles-under,$(ACTUAL_LOCAL_PATH))
+
+LOCAL_PATH := $(ACTUAL_LOCAL_PATH)
+
 include $(CLEAR_VARS)
 
 # We only want this apk build for tests.
@@ -18,6 +28,21 @@ LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
 LOCAL_CERTIFICATE := platform
 
-include $(BUILD_PACKAGE)
+# intermediate dir to include all the test apks as raw resource
+FrameworkCoreTests_intermediates := $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME))/test_apks/res
+LOCAL_RESOURCE_DIR := $(FrameworkCoreTests_intermediates) $(LOCAL_PATH)/res
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+include $(BUILD_PACKAGE)
+# Rules to copy all the test apks to the intermediate raw resource directory
+FrameworkCoreTests_all_apks_res := $(addprefix $(FrameworkCoreTests_intermediates)/raw/, \
+    $(foreach a, $(FrameworkCoreTests_all_apks), $(patsubst FrameworkCoreTests_%,%,$(a))))
+
+$(FrameworkCoreTests_all_apks_res): $(FrameworkCoreTests_intermediates)/raw/%: $(call intermediates-dir-for,APPS,FrameworkCoreTests_%)/package.apk | $(ACP)
+	$(call copy-file-to-new-target)
+
+# Use R_file_stamp as dependency because we want the test apks in place before the R.java is generated.
+$(R_file_stamp) : $(FrameworkCoreTests_all_apks_res)
+
+FrameworkCoreTests_all_apks :=
+FrameworkCoreTests_intermediates :=
+FrameworkCoreTests_all_apks_res :=
