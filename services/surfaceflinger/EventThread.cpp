@@ -107,27 +107,17 @@ bool EventThread::threadLoop() {
     { // scope for the lock
         Mutex::Autolock _l(mLock);
         do {
-            // wait for listeners
+            // see if we need to wait for the VSYNC at all
             do {
                 bool waitForNextVsync = false;
                 size_t count = mDisplayEventConnections.size();
                 for (size_t i=0 ; i<count ; i++) {
                     const ConnectionInfo& info(
                             mDisplayEventConnections.valueAt(i));
-                    if (info.count >= 1) {
-                        // continuous mode
+                    if (info.count >= 0) {
+                        // at least one continuous mode or active one-shot event
                         waitForNextVsync = true;
-                    } else {
-                        // one-shot event
-                        if (info.count >= -1) {
-                            ConnectionInfo& info(
-                                    mDisplayEventConnections.editValueAt(i));
-                            info.count--;
-                            if (info.count == -1) {
-                                // fired this time around
-                                waitForNextVsync = true;
-                            }
-                        }
+                        break;
                     }
                 }
 
@@ -137,14 +127,38 @@ bool EventThread::threadLoop() {
                 mCondition.wait(mLock);
             } while(true);
 
-            // wait for vsync
+            // at least one listener requested VSYNC
             mLock.unlock();
             timestamp = mHw.waitForVSync();
             mLock.lock();
             mDeliveredEvents++;
 
-            // make sure we still have some listeners
-        } while (!mDisplayEventConnections.size());
+            // now see if we still need to report this VSYNC event
+            bool reportVsync = false;
+            size_t count = mDisplayEventConnections.size();
+            for (size_t i=0 ; i<count ; i++) {
+                const ConnectionInfo& info(
+                        mDisplayEventConnections.valueAt(i));
+                if (info.count >= 1) {
+                    if (info.count==1 || (mDeliveredEvents % info.count) == 0) {
+                        // continuous event, and time to report it
+                        reportVsync = true;
+                    }
+                } else if (info.count >= -1) {
+                    ConnectionInfo& info(
+                            mDisplayEventConnections.editValueAt(i));
+                    if (info.count == 0) {
+                        // fired this time around
+                        reportVsync = true;
+                    }
+                    info.count--;
+                }
+            }
+
+            if (reportVsync) {
+                break;
+            }
+        } while (true);
 
         // dispatch vsync events to listeners...
         vsync.header.type = DisplayEventReceiver::DISPLAY_EVENT_VSYNC;
@@ -161,27 +175,6 @@ bool EventThread::threadLoop() {
         sp<DisplayEventConnection> conn(displayEventConnections.keyAt(i).promote());
         // make sure the connection didn't die
         if (conn != NULL) {
-
-            const ConnectionInfo& info(
-                    displayEventConnections.valueAt(i));
-
-            if ((info.count > 1) && (mDeliveredEvents % info.count)) {
-                // continuous event, but not time to send this event yet
-                continue;
-            } else if (info.count < -1) {
-                // disabled event
-                continue;
-            } else if (info.count == 0) {
-                // impossible by construction. but we prefer to be safe.
-                continue;
-            }
-
-            // here, either:
-            // count = -1 : one-shot scheduled this time around
-            // count =  1 : continuous not rate-limited
-            // count >  1 : continuous, rate-limited
-            // Note: count == 0 is not possible by construction
-
             status_t err = conn->postEvent(vsync);
             if (err == -EAGAIN || err == -EWOULDBLOCK) {
                 // The destination doesn't accept events anymore, it's probably
