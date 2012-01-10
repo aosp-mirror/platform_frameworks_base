@@ -94,7 +94,7 @@ private:
     S_JET_STATUS        mJetStatus;
     S_JET_STATUS        mPreviousJetStatus;
 
-    char                mJetFilePath[256];
+    char                mJetFilePath[PATH_MAX];
 
     class JetPlayerThread : public Thread {
     public:
