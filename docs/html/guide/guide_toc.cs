@@ -751,20 +751,20 @@ applications</span>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">
                    <span class="en">Icon Design</span>
-                 </a> <span class="new">updated</span></div>
+                 </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_launcher.html">
                     <span class="en">Launcher Icons</span>
-                  </a> <span class="new">updated</span></li>
+                  </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_menu.html">
                     <span class="en">Menu Icons</span>
                   </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_action_bar.html">
                     <span class="en">Action Bar Icons</span>
-                  </a> <span class="new">new!</span></li>
+                  </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_status_bar.html">
                     <span class="en">Status Bar Icons</span>
-                  </a> <span class="new">updated</span></li>
+                  </a></li>
               <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design_tab.html">
                     <span class="en">Tab Icons</span>
                   </a></li>
