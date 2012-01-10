@@ -116,14 +116,9 @@ static jboolean android_net_wifi_unloadDriver(JNIEnv* env, jobject)
     return (jboolean)(::wifi_unload_driver() == 0);
 }
 
-static jboolean android_net_wifi_startSupplicant(JNIEnv* env, jobject)
+static jboolean android_net_wifi_startSupplicant(JNIEnv* env, jobject, jboolean p2pSupported)
 {
-    return (jboolean)(::wifi_start_supplicant() == 0);
-}
-
-static jboolean android_net_wifi_startP2pSupplicant(JNIEnv* env, jobject)
-{
-    return (jboolean)(::wifi_start_p2p_supplicant() == 0);
+    return (jboolean)(::wifi_start_supplicant(p2pSupported) == 0);
 }
 
 static jboolean android_net_wifi_killSupplicant(JNIEnv* env, jobject)
@@ -207,8 +202,7 @@ static JNINativeMethod gWifiMethods[] = {
     { "loadDriver", "()Z",  (void *)android_net_wifi_loadDriver },
     { "isDriverLoaded", "()Z",  (void *)android_net_wifi_isDriverLoaded },
     { "unloadDriver", "()Z",  (void *)android_net_wifi_unloadDriver },
-    { "startSupplicant", "()Z",  (void *)android_net_wifi_startSupplicant },
-    { "startP2pSupplicant", "()Z",  (void *)android_net_wifi_startP2pSupplicant },
+    { "startSupplicant", "(Z)Z",  (void *)android_net_wifi_startSupplicant },
     { "killSupplicant", "()Z",  (void *)android_net_wifi_killSupplicant },
     { "connectToSupplicant", "(Ljava/lang/String;)Z",
             (void *)android_net_wifi_connectToSupplicant },

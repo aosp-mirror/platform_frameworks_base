@@ -366,17 +366,6 @@ public class WifiMonitor {
                     handleDriverEvent(eventData);
                 } else if (event == TERMINATING) {
                     /**
-                     * If monitor socket is closed, we have already
-                     * stopped the supplicant, simply exit the monitor thread
-                     */
-                    if (eventData.startsWith(MONITOR_SOCKET_CLOSED_STR)) {
-                        if (false) {
-                            Log.d(TAG, "Monitor socket is closed, exiting thread");
-                        }
-                        break;
-                    }
-
-                    /**
                      * Close the supplicant connection if we see
                      * too many recv errors
                      */

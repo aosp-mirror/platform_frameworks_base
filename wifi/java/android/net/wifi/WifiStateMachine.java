@@ -45,6 +45,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.DhcpInfoInternal;
@@ -117,6 +118,8 @@ public class WifiStateMachine extends StateMachine {
     private WifiConfigStore mWifiConfigStore;
     private INetworkManagementService mNwService;
     private ConnectivityManager mCm;
+
+    private final boolean mP2pSupported;
 
     /* Scan results handling */
     private List<ScanResult> mScanResults;
@@ -361,9 +364,9 @@ public class WifiStateMachine extends StateMachine {
     /* Reset the WPS state machine */
     static final int CMD_RESET_WPS_STATE                  = BASE + 122;
 
-    /* Interaction with WifiP2pService */
-    public static final int WIFI_ENABLE_PENDING           = BASE + 131;
-    public static final int P2P_ENABLE_PROCEED            = BASE + 132;
+    /* P2p commands */
+    public static final int CMD_ENABLE_P2P                = BASE + 131;
+    public static final int CMD_DISABLE_P2P               = BASE + 132;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
@@ -482,9 +485,6 @@ public class WifiStateMachine extends StateMachine {
     /* Waiting for untether confirmation to stop soft Ap */
     private State mSoftApStoppingState = new SoftApStoppingState();
 
-    /* Wait till p2p is disabled */
-    private State mWaitForP2pDisableState = new WaitForP2pDisableState();
-
     private class TetherStateChange {
         ArrayList<String> available;
         ArrayList<String> active;
@@ -555,6 +555,9 @@ public class WifiStateMachine extends StateMachine {
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         mNwService = INetworkManagementService.Stub.asInterface(b);
+
+        mP2pSupported = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WIFI_DIRECT);
 
         mWifiNative = new WifiNative(mInterfaceName);
         mWifiConfigStore = new WifiConfigStore(context, mWifiNative);
@@ -639,7 +642,6 @@ public class WifiStateMachine extends StateMachine {
                 addState(mTetheringState, mSoftApStartedState);
                 addState(mTetheredState, mSoftApStartedState);
             addState(mSoftApStoppingState, mDefaultState);
-            addState(mWaitForP2pDisableState, mDefaultState);
 
         setInitialState(mInitialState);
 
@@ -1892,11 +1894,6 @@ public class WifiStateMachine extends StateMachine {
                     mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED,
                                 new WpsResult(Status.FAILURE));
                     break;
-                case WifiP2pService.P2P_ENABLE_PENDING:
-                    // turn off wifi and defer to be handled in DriverUnloadedState
-                    setWifiEnabled(false);
-                    deferMessage(message);
-                    break;
                 default:
                     loge("Error! unhandled message" + message);
                     break;
@@ -2056,7 +2053,7 @@ public class WifiStateMachine extends StateMachine {
                         loge("Unable to change interface settings: " + ie);
                     }
 
-                    if(mWifiNative.startSupplicant()) {
+                    if(mWifiNative.startSupplicant(mP2pSupported)) {
                         if (DBG) log("Supplicant start successful");
                         mWifiMonitor.startMonitoring();
                         transitionTo(mSupplicantStartingState);
@@ -2168,11 +2165,7 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_LOAD_DRIVER:
-                    mWifiP2pChannel.sendMessage(WIFI_ENABLE_PENDING);
-                    transitionTo(mWaitForP2pDisableState);
-                    break;
-                case WifiP2pService.P2P_ENABLE_PENDING:
-                    mReplyChannel.replyToMessage(message, P2P_ENABLE_PROCEED);
+                    transitionTo(mDriverLoadingState);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2549,13 +2542,15 @@ public class WifiStateMachine extends StateMachine {
                 mWifiNative.status();
                 transitionTo(mDisconnectedState);
             }
+
+            if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
         }
         @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString() + "\n");
             boolean eventLoggingEnabled = true;
             switch(message.what) {
-                case CMD_SET_SCAN_TYPE:
+               case CMD_SET_SCAN_TYPE:
                     mSetScanActive = (message.arg1 == SCAN_ACTIVE);
                     mWifiNative.setScanMode(mSetScanActive);
                     break;
@@ -2668,6 +2663,8 @@ public class WifiStateMachine extends StateMachine {
             mIsRunning = false;
             updateBatteryWorkSource(null);
             mScanResults = null;
+
+            if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_DISABLE_P2P);
         }
     }
 
@@ -3341,7 +3338,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                 case CMD_TETHER_STATE_CHANGE:
-                case WifiP2pService.P2P_ENABLE_PENDING:
                     deferMessage(message);
                     break;
                 case WifiStateMachine.CMD_RESPONSE_AP_CONFIG:
@@ -3405,55 +3401,6 @@ public class WifiStateMachine extends StateMachine {
                         transitionTo(mTetheringState);
                     }
                     break;
-                case WifiP2pService.P2P_ENABLE_PENDING:
-                    // turn of soft Ap and defer to be handled in DriverUnloadedState
-                    setWifiApEnabled(null, false);
-                    deferMessage(message);
-                    break;
-                default:
-                    return NOT_HANDLED;
-            }
-            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-            return HANDLED;
-        }
-    }
-
-    class WaitForP2pDisableState extends State {
-        private int mSavedArg;
-        @Override
-        public void enter() {
-            if (DBG) log(getName() + "\n");
-            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
-
-            //Preserve the argument arg1 that has information used in DriverLoadingState
-            mSavedArg = getCurrentMessage().arg1;
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString() + "\n");
-            switch(message.what) {
-                case WifiP2pService.WIFI_ENABLE_PROCEED:
-                    //restore argument from original message (CMD_LOAD_DRIVER)
-                    message.arg1 = mSavedArg;
-                    transitionTo(mDriverLoadingState);
-                    break;
-                case CMD_LOAD_DRIVER:
-                case CMD_UNLOAD_DRIVER:
-                case CMD_START_SUPPLICANT:
-                case CMD_STOP_SUPPLICANT:
-                case CMD_START_AP:
-                case CMD_STOP_AP:
-                case CMD_START_DRIVER:
-                case CMD_STOP_DRIVER:
-                case CMD_SET_SCAN_MODE:
-                case CMD_SET_SCAN_TYPE:
-                case CMD_SET_HIGH_PERF_MODE:
-                case CMD_SET_COUNTRY_CODE:
-                case CMD_SET_FREQUENCY_BAND:
-                case CMD_START_PACKET_FILTERING:
-                case CMD_STOP_PACKET_FILTERING:
-                    deferMessage(message);
-                    break;
                 default:
                     return NOT_HANDLED;
             }
@@ -3503,7 +3450,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                case WifiP2pService.P2P_ENABLE_PENDING:
                     deferMessage(message);
                     break;
                 default:
@@ -3599,7 +3545,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
-                case WifiP2pService.P2P_ENABLE_PENDING:
                     deferMessage(message);
                     break;
                 default:

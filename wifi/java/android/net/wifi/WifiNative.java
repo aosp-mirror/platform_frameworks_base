@@ -39,6 +39,8 @@ import java.util.List;
  */
 public class WifiNative {
 
+    private static final boolean DBG = false;
+    private final String mTAG;
     private static final int DEFAULT_GROUP_OWNER_INTENT = 7;
 
     static final int BLUETOOTH_COEXISTENCE_MODE_ENABLED = 0;
@@ -53,9 +55,7 @@ public class WifiNative {
 
     public native static boolean unloadDriver();
 
-    public native static boolean startSupplicant();
-
-    public native static boolean startP2pSupplicant();
+    public native static boolean startSupplicant(boolean p2pSupported);
 
     /* Sends a kill signal to supplicant. To be used when we have lost connection
        or when the supplicant is hung */
@@ -79,6 +79,7 @@ public class WifiNative {
 
     public WifiNative(String iface) {
         mInterface = iface;
+        mTAG = "WifiNative-" + iface;
     }
 
     public boolean connectToSupplicant() {
@@ -94,14 +95,17 @@ public class WifiNative {
     }
 
     private boolean doBooleanCommand(String command) {
+        if (DBG) Log.d(mTAG, "doBoolean: " + command);
         return doBooleanCommand(mInterface, command);
     }
 
     private int doIntCommand(String command) {
+        if (DBG) Log.d(mTAG, "doInt: " + command);
         return doIntCommand(mInterface, command);
     }
 
     private String doStringCommand(String command) {
+        if (DBG) Log.d(mTAG, "doString: " + command);
         return doStringCommand(mInterface, command);
     }
 
@@ -435,6 +439,10 @@ public class WifiNative {
             return p2pFind();
         }
         return doBooleanCommand("P2P_FIND " + timeout);
+    }
+
+    public boolean p2pStopFind() {
+       return doBooleanCommand("P2P_STOP_FIND");
     }
 
     public boolean p2pListen() {

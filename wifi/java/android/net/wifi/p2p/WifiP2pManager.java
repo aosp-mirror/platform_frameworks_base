@@ -199,68 +199,61 @@ public class WifiP2pManager {
     private static final int BASE = Protocol.BASE_WIFI_P2P_MANAGER;
 
     /** @hide */
-    public static final int ENABLE_P2P                              = BASE + 1;
+    public static final int DISCOVER_PEERS                          = BASE + 1;
     /** @hide */
-    public static final int ENABLE_P2P_FAILED                       = BASE + 2;
+    public static final int DISCOVER_PEERS_FAILED                   = BASE + 2;
     /** @hide */
-    public static final int ENABLE_P2P_SUCCEEDED                    = BASE + 3;
+    public static final int DISCOVER_PEERS_SUCCEEDED                = BASE + 3;
 
     /** @hide */
-    public static final int DISABLE_P2P                             = BASE + 4;
+    public static final int STOP_DISCOVERY                          = BASE + 4;
     /** @hide */
-    public static final int DISABLE_P2P_FAILED                      = BASE + 5;
+    public static final int STOP_DISCOVERY_FAILED                   = BASE + 5;
     /** @hide */
-    public static final int DISABLE_P2P_SUCCEEDED                   = BASE + 6;
+    public static final int STOP_DISCOVERY_SUCCEEDED                = BASE + 6;
 
     /** @hide */
-    public static final int DISCOVER_PEERS                          = BASE + 7;
+    public static final int CONNECT                                 = BASE + 7;
     /** @hide */
-    public static final int DISCOVER_PEERS_FAILED                   = BASE + 8;
+    public static final int CONNECT_FAILED                          = BASE + 8;
     /** @hide */
-    public static final int DISCOVER_PEERS_SUCCEEDED                = BASE + 9;
+    public static final int CONNECT_SUCCEEDED                       = BASE + 9;
 
     /** @hide */
-    public static final int CONNECT                                 = BASE + 10;
+    public static final int CANCEL_CONNECT                          = BASE + 10;
     /** @hide */
-    public static final int CONNECT_FAILED                          = BASE + 11;
+    public static final int CANCEL_CONNECT_FAILED                   = BASE + 11;
     /** @hide */
-    public static final int CONNECT_SUCCEEDED                       = BASE + 12;
+    public static final int CANCEL_CONNECT_SUCCEEDED                = BASE + 12;
 
     /** @hide */
-    public static final int CANCEL_CONNECT                          = BASE + 13;
+    public static final int CREATE_GROUP                            = BASE + 13;
     /** @hide */
-    public static final int CANCEL_CONNECT_FAILED                   = BASE + 14;
+    public static final int CREATE_GROUP_FAILED                     = BASE + 14;
     /** @hide */
-    public static final int CANCEL_CONNECT_SUCCEEDED                = BASE + 15;
+    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 15;
 
     /** @hide */
-    public static final int CREATE_GROUP                            = BASE + 16;
+    public static final int REMOVE_GROUP                            = BASE + 16;
     /** @hide */
-    public static final int CREATE_GROUP_FAILED                     = BASE + 17;
+    public static final int REMOVE_GROUP_FAILED                     = BASE + 17;
     /** @hide */
-    public static final int CREATE_GROUP_SUCCEEDED                  = BASE + 18;
+    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 18;
 
     /** @hide */
-    public static final int REMOVE_GROUP                            = BASE + 19;
+    public static final int REQUEST_PEERS                           = BASE + 19;
     /** @hide */
-    public static final int REMOVE_GROUP_FAILED                     = BASE + 20;
-    /** @hide */
-    public static final int REMOVE_GROUP_SUCCEEDED                  = BASE + 21;
+    public static final int RESPONSE_PEERS                          = BASE + 20;
 
     /** @hide */
-    public static final int REQUEST_PEERS                           = BASE + 22;
+    public static final int REQUEST_CONNECTION_INFO                 = BASE + 21;
     /** @hide */
-    public static final int RESPONSE_PEERS                          = BASE + 23;
+    public static final int RESPONSE_CONNECTION_INFO                = BASE + 22;
 
     /** @hide */
-    public static final int REQUEST_CONNECTION_INFO                 = BASE + 24;
+    public static final int REQUEST_GROUP_INFO                      = BASE + 23;
     /** @hide */
-    public static final int RESPONSE_CONNECTION_INFO                = BASE + 25;
-
-    /** @hide */
-    public static final int REQUEST_GROUP_INFO                      = BASE + 26;
-    /** @hide */
-    public static final int RESPONSE_GROUP_INFO                     = BASE + 27;
+    public static final int RESPONSE_GROUP_INFO                     = BASE + 24;
 
     /**
      * Create a new WifiP2pManager instance. Applications use
@@ -376,6 +369,7 @@ public class WifiP2pManager {
                         break;
                     /* ActionListeners grouped together */
                     case WifiP2pManager.DISCOVER_PEERS_FAILED:
+                    case WifiP2pManager.STOP_DISCOVERY_FAILED:
                     case WifiP2pManager.CONNECT_FAILED:
                     case WifiP2pManager.CANCEL_CONNECT_FAILED:
                     case WifiP2pManager.CREATE_GROUP_FAILED:
@@ -386,6 +380,7 @@ public class WifiP2pManager {
                         break;
                     /* ActionListeners grouped together */
                     case WifiP2pManager.DISCOVER_PEERS_SUCCEEDED:
+                    case WifiP2pManager.STOP_DISCOVERY_SUCCEEDED:
                     case WifiP2pManager.CONNECT_SUCCEEDED:
                     case WifiP2pManager.CANCEL_CONNECT_SUCCEEDED:
                     case WifiP2pManager.CREATE_GROUP_SUCCEEDED:
@@ -459,26 +454,6 @@ public class WifiP2pManager {
     }
 
     /**
-     * Sends in a request to the system to enable p2p. This will pop up a dialog
-     * to the user and upon authorization will enable p2p.
-     * @hide
-     */
-    public void enableP2p(Channel c) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(ENABLE_P2P);
-    }
-
-    /**
-     * Sends in a request to the system to disable p2p. This will pop up a dialog
-     * to the user and upon authorization will enable p2p.
-     * @hide
-     */
-    public void disableP2p(Channel c) {
-        if (c == null) return;
-        c.mAsyncChannel.sendMessage(DISABLE_P2P);
-    }
-
-    /**
      * Initiate peer discovery. A discovery process involves scanning for available Wi-Fi peers
      * for the purpose of establishing a connection.
      *
@@ -500,6 +475,16 @@ public class WifiP2pManager {
     public void discoverPeers(Channel c, ActionListener listener) {
         if (c == null) return;
         c.mAsyncChannel.sendMessage(DISCOVER_PEERS, 0, c.putListener(listener));
+    }
+
+    /**
+     * TODO: Add more documentation before opening up
+     * Cancel peer discovery
+     * @hide
+     */
+    public void stopPeerDiscovery(Channel c, ActionListener listener) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(STOP_DISCOVERY, 0, c.putListener(listener));
     }
 
     /**
