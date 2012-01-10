@@ -90,6 +90,16 @@ static void SC_BindTexture(ProgramFragment *pf, uint32_t slot, Allocation *a) {
     rsrBindTexture(rsc, sc, pf, slot, a);
 }
 
+static void SC_BindVertexConstant(ProgramVertex *pv, uint32_t slot, Allocation *a) {
+    GET_TLS();
+    rsrBindConstant(rsc, sc, pv, slot, a);
+}
+
+static void SC_BindFragmentConstant(ProgramFragment *pf, uint32_t slot, Allocation *a) {
+    GET_TLS();
+    rsrBindConstant(rsc, sc, pf, slot, a);
+}
+
 static void SC_BindSampler(ProgramFragment *pf, uint32_t slot, Sampler *s) {
     GET_TLS();
     rsrBindSampler(rsc, sc, pf, slot, s);
@@ -591,6 +601,8 @@ static RsdSymbolTable gSyms[] = {
     { "_Z20rsgBindProgramRaster17rs_program_raster", (void *)&SC_BindProgramRaster, false },
     { "_Z14rsgBindSampler19rs_program_fragmentj10rs_sampler", (void *)&SC_BindSampler, false },
     { "_Z14rsgBindTexture19rs_program_fragmentj13rs_allocation", (void *)&SC_BindTexture, false },
+    { "_Z15rsgBindConstant19rs_program_fragmentj13rs_allocation", (void *)&SC_BindFragmentConstant, false },
+    { "_Z15rsgBindConstant17rs_program_vertexj13rs_allocation", (void *)&SC_BindVertexConstant, false },
 
     { "_Z36rsgProgramVertexLoadProjectionMatrixPK12rs_matrix4x4", (void *)&SC_VpLoadProjectionMatrix, false },
     { "_Z31rsgProgramVertexLoadModelMatrixPK12rs_matrix4x4", (void *)&SC_VpLoadModelMatrix, false },

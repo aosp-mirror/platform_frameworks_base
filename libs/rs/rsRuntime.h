@@ -30,6 +30,8 @@ namespace renderscript {
 //////////////////////////////////////////////////////////////////////////////
 
 void rsrBindTexture(Context *, Script *, ProgramFragment *, uint32_t slot, Allocation *);
+void rsrBindConstant(Context *, Script *, ProgramFragment *, uint32_t slot, Allocation *);
+void rsrBindConstant(Context *, Script *, ProgramVertex*, uint32_t slot, Allocation *);
 void rsrBindSampler(Context *, Script *, ProgramFragment *, uint32_t slot, Sampler *);
 void rsrBindProgramStore(Context *, Script *, ProgramStore *);
 void rsrBindProgramFragment(Context *, Script *, ProgramFragment *);
