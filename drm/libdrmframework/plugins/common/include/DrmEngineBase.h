@@ -80,10 +80,12 @@ public:
     DrmSupportInfo* getSupportInfo(int uniqueId);
 
     status_t openDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length);
+            int uniqueId, DecryptHandle* decryptHandle,
+            int fd, off64_t offset, off64_t length, const char* mime);
 
     status_t openDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, const char* uri);
+            int uniqueId, DecryptHandle* decryptHandle,
+            const char* uri, const char* mime);
 
     status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
@@ -375,7 +377,29 @@ protected:
      *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
      */
     virtual status_t onOpenDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length) = 0;
+            int uniqueId, DecryptHandle* decryptHandle,
+            int fd, off64_t offset, off64_t length) = 0;
+
+    /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] decryptHandle Handle for the current decryption session
+     * @param[in] fd File descriptor of the protected content to be decrypted
+     * @param[in] offset Start position of the content
+     * @param[in] length The length of the protected content
+     * @param[in] mime Mime type of the protected content
+     *     drm plugin may do some optimization since the mime type is known.
+     * @return
+     *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
+     */
+    virtual status_t onOpenDecryptSession(
+            int uniqueId, DecryptHandle* decryptHandle,
+            int fd, off64_t offset, off64_t length,
+            const char* mime) {
+
+        return DRM_ERROR_CANNOT_HANDLE;
+    }
 
     /**
      * Open the decrypt session to decrypt the given protected content
@@ -387,7 +411,26 @@ protected:
      *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
      */
     virtual status_t onOpenDecryptSession(
-            int uniqueId, DecryptHandle* decryptHandle, const char* uri) = 0;
+            int uniqueId, DecryptHandle* decryptHandle,
+            const char* uri) = 0;
+
+    /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] decryptHandle Handle for the current decryption session
+     * @param[in] uri Path of the protected content to be decrypted
+     * @param[in] mime Mime type of the protected content. The corresponding
+     *     drm plugin may do some optimization since the mime type is known.
+     * @return
+     *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
+     */
+    virtual status_t onOpenDecryptSession(
+            int uniqueId, DecryptHandle* decryptHandle,
+            const char* uri, const char* mime) {
+
+        return DRM_ERROR_CANNOT_HANDLE;
+    }
 
     /**
      * Close the decrypt session for the given handle

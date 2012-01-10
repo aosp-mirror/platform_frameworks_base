@@ -259,7 +259,7 @@ void ChromiumHTTPDataSource::onDisconnectComplete() {
     mCondition.broadcast();
 }
 
-sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization() {
+sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization(const char* mime) {
     Mutex::Autolock autoLock(mLock);
 
     if (mDrmManagerClient == NULL) {
@@ -275,7 +275,7 @@ sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization() {
          * original one
          */
         mDecryptHandle = mDrmManagerClient->openDecryptSession(
-                String8(mURI.c_str()));
+                String8(mURI.c_str()), mime);
     }
 
     if (mDecryptHandle == NULL) {

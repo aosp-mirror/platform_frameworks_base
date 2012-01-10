@@ -208,20 +208,20 @@ status_t DrmManagerService::getAllSupportInfo(
 }
 
 DecryptHandle* DrmManagerService::openDecryptSession(
-            int uniqueId, int fd, off64_t offset, off64_t length) {
+            int uniqueId, int fd, off64_t offset, off64_t length, const char* mime) {
     ALOGV("Entering DrmManagerService::openDecryptSession");
     if (isProtectedCallAllowed()) {
-        return mDrmManager->openDecryptSession(uniqueId, fd, offset, length);
+        return mDrmManager->openDecryptSession(uniqueId, fd, offset, length, mime);
     }
 
     return NULL;
 }
 
 DecryptHandle* DrmManagerService::openDecryptSession(
-            int uniqueId, const char* uri) {
+            int uniqueId, const char* uri, const char* mime) {
     ALOGV("Entering DrmManagerService::openDecryptSession with uri");
     if (isProtectedCallAllowed()) {
-        return mDrmManager->openDecryptSession(uniqueId, uri);
+        return mDrmManager->openDecryptSession(uniqueId, uri, mime);
     }
 
     return NULL;
