@@ -683,7 +683,6 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      * @return Drawable An object that can be used to draw this resource.
-     * @hide
      */
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
         synchronized (mTmpValue) {
@@ -1032,7 +1031,6 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      * @see #getValue(String, TypedValue, boolean)
-     * @hide
      */
     public void getValueForDensity(int id, int density, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
