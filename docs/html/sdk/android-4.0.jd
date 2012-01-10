@@ -1292,9 +1292,9 @@ public boolean onCreateOptionsMenu(Menu menu) {
 }
 </pre>
 
-<p>For an example using the {@link android.widget.ShareActionProvider}, see the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarActionProviderActivity.html"
->ActionBarActionProviderActivity</a> class in ApiDemos.</p>
+<p>For an example using the {@link android.widget.ShareActionProvider}, see <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarShareActionProviderActivity.html"
+>ActionBarShareActionProviderActivity</a> in ApiDemos.</p>
 
 
 <h4>Collapsible action views</h4>

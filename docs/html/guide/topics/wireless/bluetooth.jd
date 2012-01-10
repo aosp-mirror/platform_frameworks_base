@@ -902,8 +902,9 @@ the Bluetooth A2DP  Service via IPC.</li>
 <p>Here are the basic steps for working with a profile:</p> 
 <ol> 
 
-  <li>Get the default adapter, as described in <a href="{@docRoot}guide/topics/wireless/bluetooth.
-html#SettingUp">Setting Up Bluetooth</a>.</li> 
+  <li>Get the default adapter, as described in
+    <a href="{@docRoot}guide/topics/wireless/bluetooth.html#SettingUp">Setting Up
+      Bluetooth</a>.</li> 
 
   <li>Use {@link
 android.bluetooth.BluetoothAdapter#getProfileProxy(android.content.Context,

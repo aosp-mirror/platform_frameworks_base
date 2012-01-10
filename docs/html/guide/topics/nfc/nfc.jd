@@ -666,7 +666,7 @@ Android Market is launched to download the application.</p>
 potentially handling specific tags that you have deployed. AARs are only supported at the
 application level, because of the package name constraint, and not at the Activity level as with
 intent filtering. If you want to handle an intent at the Activity level, <a
-href="filtering-intents">use intent filters</a>.
+href="#filtering-intents">use intent filters</a>.
 </p>
 
 
@@ -795,8 +795,8 @@ depending on what the user is doing in your application.</p>
 
 <p>The following sample shows how a simple activity calls {@link
 android.nfc.NfcAdapter.CreateNdefMessageCallback} in the <code>onCreate()</code> method of an
-activity (see <a href="{@docRoot}resources/samples/AndroidBeam/index.html"></a> for the
-complete sample). This example also has methods to help you create a MIME record:</p>
+activity (see <a href="{@docRoot}resources/samples/AndroidBeamDemo/index.html">AndroidBeamDemo</a>
+for the complete sample). This example also has methods to help you create a MIME record:</p>
 
 <pre id="code-example">
 package com.example.android.beam;

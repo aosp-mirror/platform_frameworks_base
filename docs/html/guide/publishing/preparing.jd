@@ -120,8 +120,8 @@ suitable private key</a>.</p>
 <p>You may also have to obtain other release keys if your application accesses a service or uses a
 third-party library that requires you to use a key that is based on your private key. For example,
 if your application uses the <a
-href="http://code.google.com/android/add-ons/google-apis/reference/com/google/android/maps/ MapView.
-html">MapView</a> class, which is part of the <a
+href="http://code.google.com/android/add-ons/google-apis/reference/com/google/android/maps/MapView.html">MapView</a>
+class, which is part of the <a
 href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps external
 library</a>, you will need to register your application with the Google Maps service and obtain
 a Maps API key. For information about getting a Maps API key, see <a

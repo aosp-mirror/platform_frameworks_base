@@ -422,10 +422,9 @@ onGenericMotionEvent()} there instead.</p>
 
 <p class="note">To look at a sample application that uses joystick motion
 events, see <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/
-GameControllerInput.html">GameControllerInput</a> and <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/
-GameView.html">GameView</a>.</p>
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameControllerInput.html">GameControllerInput</a> 
+and <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/GameView.html">GameView</a>.</p>
 
 <h3>RTP API</h3>
 
@@ -931,7 +930,7 @@ devices.</li>
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
 &lt;uses-feature&gt;}</a> manifest elements. For more information about
 declaring features in an application manifest, read <a
-href="{docRoot}guide/appendix/market-filters.html">Android Market
+href="{@docRoot}guide/appendix/market-filters.html">Android Market
 Filters</a>.</p>
 
 

@@ -169,8 +169,9 @@ UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXT
     include a <code>&lt;uses-feature&gt;</code> element that declares that your application uses
     the <code>android.hardware.usb.accessory</code> feature.</li>
 
-    <li>If you are using the <a href="addon">add-on library</a>, add the
-    <code>&lt;uses-library&gt;</code> element specifying
+    <li>If you are using the 
+    <a href="http://code.google.com/android/add-ons/google-apis/index.html">add-on library</a>,
+    add the <code>&lt;uses-library&gt;</code> element specifying
     <code>com.android.future.usb.accessory</code> for the library.</li>
 
     <li>Set the minimum SDK of the application to API Level 10 if you are using the add-on library
