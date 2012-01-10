@@ -17,6 +17,7 @@
 package android.graphics;
 
 public class PathMeasure {
+    private Path mPath;
 
     /**
      * Create an empty PathMeasure object. To uses this to measure the length
@@ -28,6 +29,7 @@ public class PathMeasure {
      * is used. If the path is modified, you must call setPath with the path.
      */
     public PathMeasure() {
+        mPath = null;
         native_instance = native_create(0, false);
     }
     
@@ -46,8 +48,8 @@ public class PathMeasure {
      *        even if its contour was not explicitly closed.
      */
     public PathMeasure(Path path, boolean forceClosed) {
-        // note: the native side makes a copy of path, so we don't need a java
-        // reference to it here, since it's fine if it gets GC'd
+        // The native implementation does not copy the path, prevent it from being GC'd
+        mPath = path;
         native_instance = native_create(path != null ? path.ni() : 0,
                                         forceClosed);
     }
@@ -56,8 +58,7 @@ public class PathMeasure {
      * Assign a new path, or null to have none.
      */
     public void setPath(Path path, boolean forceClosed) {
-        // note: the native side makes a copy of path, so we don't need a java
-        // reference to it here, since it's fine if it gets GC'd
+        mPath = path;
         native_setPath(native_instance,
                        path != null ? path.ni() : 0,
                        forceClosed);
