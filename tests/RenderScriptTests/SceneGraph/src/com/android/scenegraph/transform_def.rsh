@@ -55,10 +55,19 @@ typedef struct RenderState_s {
     rs_program_raster pr;
 } SgRenderState;
 
+#define CULL_FRUSTUM 0
+#define CULL_ALWAYS 2
+
 typedef struct Renderable_s {
     rs_allocation render_state;
+    // Buffer with vertex constant data
     rs_allocation pv_const;
+    // ShaderParam's that populate data
+    rs_allocation pv_constParams;
+    // Buffer with fragment constant data
     rs_allocation pf_const;
+    // ShaderParam's that populate data
+    rs_allocation pf_constParams;
     rs_allocation pf_textures[8];
     int pf_num_textures;
     rs_mesh mesh;
@@ -69,6 +78,7 @@ typedef struct Renderable_s {
     float4 worldBoundingSphere;
     int bVolInitialized;
     int cullType; // specifies whether to frustum cull
+    int isVisible;
 } SgRenderable;
 
 typedef struct RenderPass_s {
@@ -94,6 +104,7 @@ typedef struct __attribute__((packed, aligned(4))) Camera_s {
     float aspect;
     rs_allocation name;
     rs_allocation transformMatrix;
+    float4 frustumPlanes[6];
 } SgCamera;
 
 #define LIGHT_POINT 0
@@ -108,6 +119,39 @@ typedef struct __attribute__((packed, aligned(4))) Light_s {
     rs_allocation transformMatrix;
 } SgLight;
 
+#define SHADER_PARAM_FLOAT4_DATA 0
+#define SHADER_PARAM_FLOAT4_CAMERA_POS 1
+#define SHADER_PARAM_FLOAT4_CAMERA_DIR 2
+#define SHADER_PARAM_FLOAT4_LIGHT_COLOR 3
+#define SHADER_PARAM_FLOAT4_LIGHT_POS 4
+#define SHADER_PARAM_FLOAT4_LIGHT_DIR 5
+
+#define SHADER_PARAM_TRANSFORM_DATA 100
+#define SHADER_PARAM_TRANSFORM_VIEW 101
+#define SHADER_PARAM_TRANSFORM_PROJ 102
+#define SHADER_PARAM_TRANSFORM_VIEW_PROJ 103
+#define SHADER_PARAM_TRANSFORM_MODEL 104
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW 105
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ 106
+
+#define SHADER_PARAM_TEXTURE 200
+
+// This represents a shader parameter that knows for to update itself
+typedef struct ShaderParam_s {
+    uint32_t type;
+    uint32_t bufferOffset;
+
+    float4 float_value;
+    // Use one param type to handle all vector types for now
+    uint32_t float_vecSize;
+
+    rs_allocation camera;
+    rs_allocation light;
+    rs_allocation transform;
+    rs_allocation texture;
+} SgShaderParam;
+
+// Helpers
 typedef struct VShaderParams_s {
     rs_matrix4x4 model;
     rs_matrix4x4 viewProj;

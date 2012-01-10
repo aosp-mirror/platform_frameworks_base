@@ -39,6 +39,7 @@ public class SceneManager extends SceneGraphBase {
     ScriptC_render mRenderLoop;
     ScriptC_camera mCameraScript;
     ScriptC_light mLightScript;
+    ScriptC_params mParamsScript;
     ScriptC_transform mTransformScript;
 
     RenderScriptGL mRS;
@@ -130,11 +131,13 @@ public class SceneManager extends SceneGraphBase {
 
         mCameraScript = new ScriptC_camera(rs, res, R.raw.camera);
         mLightScript = new ScriptC_light(rs, res, R.raw.light);
+        mParamsScript = new ScriptC_params(rs, res, R.raw.params);
 
         mRenderLoop = new ScriptC_render(rs, res, R.raw.render);
         mRenderLoop.set_gTransformScript(mTransformScript);
         mRenderLoop.set_gCameraScript(mCameraScript);
         mRenderLoop.set_gLightScript(mLightScript);
+        mRenderLoop.set_gParamsScript(mParamsScript);
 
         Allocation checker = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.checker,
                                                          MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,

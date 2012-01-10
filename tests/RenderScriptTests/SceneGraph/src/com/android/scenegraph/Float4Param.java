@@ -19,7 +19,7 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
-import android.graphics.Camera;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.Float4;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
@@ -33,18 +33,14 @@ import android.util.Log;
  */
 public class Float4Param extends ShaderParam {
 
-    public static final int VALUE = 0;
-    public static final int CAMERA_POSITION = 1;
-    public static final int CAMERA_DIRECTION = 2;
-    public static final int LIGHT_POSITION = 3;
-    public static final int LIGHT_COLOR = 4;
-    public static final int LIGHT_DIRECTION = 5;
     Float4 mValue;
     Camera mCamera;
     LightBase mLight;
+    int mVecSize;
 
     public Float4Param(String name) {
         super(name);
+        mValue = new Float4();
     }
 
     public void setValue(Float4 v) {
@@ -55,12 +51,45 @@ public class Float4Param extends ShaderParam {
         return mValue;
     }
 
+    public void setVecSize(int vecSize) {
+        mVecSize = vecSize;
+    }
+
     public void setCamera(Camera c) {
         mCamera = c;
     }
 
     public void setLight(LightBase l) {
         mLight = l;
+    }
+
+    int getTypeFromName() {
+        int paramType = FLOAT4_DATA;
+        if (mParamName.equalsIgnoreCase(cameraPos)) {
+            paramType = FLOAT4_CAMERA_POS;
+        } else if(mParamName.equalsIgnoreCase(cameraDir)) {
+            paramType = FLOAT4_CAMERA_DIR;
+        } else if(mParamName.equalsIgnoreCase(lightColor)) {
+            paramType = FLOAT4_LIGHT_COLOR;
+        } else if(mParamName.equalsIgnoreCase(lightPos)) {
+            paramType = FLOAT4_LIGHT_POS;
+        } else if(mParamName.equalsIgnoreCase(lightDir)) {
+            paramType = FLOAT4_LIGHT_DIR;
+        }
+        return paramType;
+    }
+
+    void initLocalData(RenderScriptGL rs) {
+        mRsFieldItem.type = getTypeFromName();
+        mRsFieldItem.bufferOffset = mOffset;
+        mRsFieldItem.float_value = mValue;
+        mRsFieldItem.float_vecSize = mVecSize;
+        if (mCamera != null) {
+            mRsFieldItem.camera = mCamera.getRSData(rs).getAllocation();
+        }
+        if (mLight != null) {
+            mRsFieldItem.light = mLight.getRSData(rs).getAllocation();
+        }
     }
 }
 

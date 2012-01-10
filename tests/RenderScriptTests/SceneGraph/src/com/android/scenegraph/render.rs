@@ -22,6 +22,7 @@
 rs_script gTransformScript;
 rs_script gCameraScript;
 rs_script gLightScript;
+rs_script gParamsScript;
 
 SgTransform *gRootNode;
 rs_allocation gCameras;
@@ -43,9 +44,115 @@ uint32_t *gBackToFront;
 static uint32_t gBackToFrontCount = 0;
 
 static SgCamera *gActiveCamera = NULL;
-static float4 gFrustumPlanes[6];
 
 static rs_allocation nullAlloc;
+
+static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
+    switch (vecSize) {
+    case 1:
+        *ptr = input->x;
+        break;
+    case 2:
+        *ptr++ = input->x;
+        *ptr = input->y;
+        break;
+    case 3:
+        *ptr++ = input->x;
+        *ptr++ = input->y;
+        *ptr = input->z;
+        break;
+    case 4:
+        *((float4*)ptr) = *input;
+        break;
+    }
+}
+
+static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
+    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
+    const SgTransform *pTransform = NULL;
+    if (rsIsObject(p->transform)) {
+        pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
+    }
+
+    rsDebug("data ptr: ", (void*)dataPtr);
+    rsDebug("p type: ", p->type);
+
+    switch(p->type) {
+    case SHADER_PARAM_FLOAT4_DATA:
+        writeFloatData((float*)dataPtr, &p->float_value, p->float_vecSize);
+        break;
+    case SHADER_PARAM_FLOAT4_CAMERA_POS:
+        writeFloatData((float*)dataPtr, &currentCam->position, p->float_vecSize);
+        break;
+    case SHADER_PARAM_FLOAT4_CAMERA_DIR: break;
+    case SHADER_PARAM_FLOAT4_LIGHT_COLOR: break;
+    case SHADER_PARAM_FLOAT4_LIGHT_POS: break;
+    case SHADER_PARAM_FLOAT4_LIGHT_DIR: break;
+
+    case SHADER_PARAM_TRANSFORM_DATA:
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &pTransform->globalMat);
+        break;
+    case SHADER_PARAM_TRANSFORM_VIEW:
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->view);
+        break;
+    case SHADER_PARAM_TRANSFORM_PROJ:
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->proj);
+        break;
+    case SHADER_PARAM_TRANSFORM_VIEW_PROJ:
+        rsDebug("View proj ptr: ", (void*)&vConst->viewProj);
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->viewProj);
+        break;
+    case SHADER_PARAM_TRANSFORM_MODEL:
+        rsDebug("Model ptr: ", (void*)&vConst->model);
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &pTransform->globalMat);
+        break;
+    case SHADER_PARAM_TRANSFORM_MODEL_VIEW:
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->view);
+        rsMatrixLoadMultiply((rs_matrix4x4*)dataPtr,
+                             (rs_matrix4x4*)dataPtr,
+                             &pTransform->globalMat);
+        break;
+    case SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ:
+        rsMatrixLoad((rs_matrix4x4*)dataPtr, &currentCam->viewProj);
+        rsMatrixLoadMultiply((rs_matrix4x4*)dataPtr,
+                             (rs_matrix4x4*)dataPtr,
+                             &pTransform->globalMat);
+        break;
+    }
+}
+
+static void updateParams(SgRenderable *drawable) {
+    if (rsIsObject(drawable->pf_const)) {
+        uint8_t *constantBuffer = (uint8_t*)fConst;
+
+        int numParams = 0;
+        if (rsIsObject(drawable->pf_constParams)) {
+            rsAllocationGetDimX(drawable->pf_constParams);
+        }
+        for (int i = 0; i < numParams; i ++) {
+            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pf_constParams, i);
+            processParam(current, constantBuffer, gActiveCamera);
+            rsDebug("Setting f param", i);
+        }
+        rsgAllocationSyncAll(rsGetAllocation(fConst));
+    }
+
+    if (rsIsObject(drawable->pv_const)) {
+        uint8_t *constantBuffer = (uint8_t*)vConst;
+
+        rsDebug("_______________________", 0);
+
+        int numParams = 0;
+        if (rsIsObject(drawable->pv_constParams)) {
+            numParams = rsAllocationGetDimX(drawable->pv_constParams);
+        }
+        for (int i = 0; i < numParams; i ++) {
+            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pv_constParams, i);
+            processParam(current, constantBuffer, gActiveCamera);
+        }
+        rsgAllocationSyncAll(rsGetAllocation(vConst));
+    }
+}
 
 //#define DEBUG_RENDERABLES
 static void draw(SgRenderable *obj) {
@@ -59,12 +166,13 @@ static void draw(SgRenderable *obj) {
     printName(obj->name);
 #endif //DEBUG_RENDERABLES
 
-    SgCamera *cam = gActiveCamera;
+    updateParams(obj);
+    /*SgCamera *cam = gActiveCamera;
 
     rsMatrixLoad(&vConst->model, &objTransform->globalMat);
     rsMatrixLoad(&vConst->viewProj, &cam->viewProj);
-    rsgAllocationSyncAll(rsGetAllocation(vConst));
-    fConst->cameraPos = cam->position;
+    rsgAllocationSyncAll(rsGetAllocation(vConst));*/
+    fConst->cameraPos = gActiveCamera->position;
     rsgAllocationSyncAll(rsGetAllocation(fConst));
 
     if (rsIsObject(renderState->ps)) {
@@ -92,64 +200,7 @@ static void draw(SgRenderable *obj) {
     rsgDrawMesh(obj->mesh, obj->meshIndex);
 }
 
-static void getTransformedSphere(SgRenderable *obj) {
-    obj->worldBoundingSphere = obj->boundingSphere;
-    obj->worldBoundingSphere.w = 1.0f;
-    const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
-    obj->worldBoundingSphere = rsMatrixMultiply(&objTransform->globalMat, obj->worldBoundingSphere);
-
-    const float4 unitVec = {0.57735f, 0.57735f, 0.57735f, 0.0f};
-    float4 scaledVec = rsMatrixMultiply(&objTransform->globalMat, unitVec);
-    scaledVec.w = 0.0f;
-    obj->worldBoundingSphere.w = obj->boundingSphere.w * length(scaledVec);
-}
-
-static bool frustumCulled(SgRenderable *obj) {
-    if (!obj->bVolInitialized) {
-        float minX, minY, minZ, maxX, maxY, maxZ;
-        rsgMeshComputeBoundingBox(obj->mesh,
-                                  &minX, &minY, &minZ,
-                                  &maxX, &maxY, &maxZ);
-        //rsDebug("min", minX, minY, minZ);
-        //rsDebug("max", maxX, maxY, maxZ);
-        float4 sphere;
-        sphere.x = (maxX + minX) * 0.5f;
-        sphere.y = (maxY + minY) * 0.5f;
-        sphere.z = (maxZ + minZ) * 0.5f;
-        float3 radius;
-        radius.x = (maxX - sphere.x);
-        radius.y = (maxY - sphere.y);
-        radius.z = (maxZ - sphere.z);
-
-        sphere.w = length(radius);
-        obj->boundingSphere = sphere;
-        obj->bVolInitialized = 1;
-        //rsDebug("Sphere", sphere);
-    }
-
-    getTransformedSphere(obj);
-
-    return !rsIsSphereInFrustum(&obj->worldBoundingSphere,
-                                &gFrustumPlanes[0], &gFrustumPlanes[1],
-                                &gFrustumPlanes[2], &gFrustumPlanes[3],
-                                &gFrustumPlanes[3], &gFrustumPlanes[4]);
-}
-
 static void sortToBucket(SgRenderable *obj) {
-    // Not loaded yet
-    if (!rsIsObject(obj->mesh) || obj->cullType == 2) {
-        return;
-    }
-
-    // check to see if we are culling this object and if it's
-    // outside the frustum
-    if (obj->cullType == 0 && frustumCulled(obj)) {
-#ifdef DEBUG_RENDERABLES
-        rsDebug("Culled", obj);
-        printName(obj->name);
-#endif //DEBUG_RENDERABLES
-        return;
-    }
     const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     if (rsIsObject(renderState->ps)) {
 #define MR1_API
@@ -171,11 +222,6 @@ static void sortToBucket(SgRenderable *obj) {
 
 static void updateActiveCamera(rs_allocation cam) {
     gActiveCamera = (SgCamera *)rsGetElementAt(cam, 0);
-
-    rsExtractFrustumPlanes(&gActiveCamera->viewProj,
-                           &gFrustumPlanes[0], &gFrustumPlanes[1],
-                           &gFrustumPlanes[2], &gFrustumPlanes[3],
-                           &gFrustumPlanes[3], &gFrustumPlanes[4]);
 }
 
 static void prepareCameras() {
@@ -206,11 +252,17 @@ static void drawAllObjects(rs_allocation allObj) {
     if (!rsIsObject(allObj)) {
         return;
     }
+
+    // Run the params and cull script
+    rsForEach(gParamsScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
+
     int numRenderables = rsAllocationGetDimX(allObj);
     for (int i = 0; i < numRenderables; i ++) {
         rs_allocation *drawAlloc = (rs_allocation*)rsGetElementAt(allObj, i);
         SgRenderable *current = (SgRenderable*)rsGetElementAt(*drawAlloc, 0);
-        sortToBucket(current);
+        if (current->isVisible) {
+            sortToBucket(current);
+        }
     }
     drawSorted();
 }
@@ -301,7 +353,7 @@ void pick(int screenX, int screenY) {
         SgRenderable *current = (SgRenderable*)gFrontToBack[i];
         bool isPicked = intersect(current, pnt, vec);
         if (isPicked) {
-            current->cullType = 2;
+            current->cullType = CULL_ALWAYS;
         }
     }
 
@@ -309,7 +361,7 @@ void pick(int screenX, int screenY) {
         SgRenderable *current = (SgRenderable*)gBackToFront[i];
         bool isPicked = intersect(current, pnt, vec);
         if (isPicked) {
-            current->cullType = 2;
+            current->cullType = CULL_ALWAYS;
         }
     }
 }

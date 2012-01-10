@@ -186,10 +186,6 @@ public class ColladaParser {
 
                 //Log.v(TAG, "Created drawable geo " + geoURL + " index " + meshIndexName + " material " + materialName);
 
-                // Append transform and material data here
-                TransformParam modelP = new TransformParam("model");
-                modelP.setTransform(t);
-                d.appendSourceParams(modelP);
                 d.setTransform(t);
                 //Log.v(TAG, "Set source param " + t.getName());
 

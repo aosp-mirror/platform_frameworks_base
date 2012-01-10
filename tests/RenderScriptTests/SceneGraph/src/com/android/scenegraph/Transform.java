@@ -28,14 +28,14 @@ import android.util.Log;
  */
 public abstract class Transform extends SceneGraphBase {
 
-    RenderScriptGL mRS;
-    Transform mParent;
-    ArrayList<Transform> mChildren;
-
     static final int RS_ID_NONE = 0;
     static final int RS_ID_TRANSLATE = 1;
     static final int RS_ID_ROTATE = 2;
     static final int RS_ID_SCALE = 3;
+
+    RenderScriptGL mRS;
+    Transform mParent;
+    ArrayList<Transform> mChildren;
 
     ScriptField_SgTransform mField;
     ScriptField_SgTransform.Item mTransformData;

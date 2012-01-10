@@ -20,6 +20,7 @@ import java.lang.Math;
 import java.util.ArrayList;
 
 import android.graphics.Camera;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.Float4;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
@@ -45,6 +46,9 @@ public class TextureParam extends ShaderParam {
 
     public Texture2D getTexture() {
         return mTexture;
+    }
+
+    void initLocalData(RenderScriptGL rs) {
     }
 }
 
