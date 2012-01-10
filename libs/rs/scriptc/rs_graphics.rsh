@@ -369,6 +369,28 @@ extern void __attribute__((overloadable))
     rsgProgramFragmentConstantColor(rs_program_fragment pf, float r, float g, float b, float a);
 
 /**
+ * Bind a new Allocation object to a ProgramFragment.  The
+ * Allocation must be a valid constant input for the Program.
+ *
+ * @param ps program object
+ * @param slot index of the constant buffer on the program
+ * @param c constants to bind
+ */
+extern void __attribute__((overloadable))
+    rsgBindConstant(rs_program_fragment ps, uint slot, rs_allocation c);
+
+/**
+ * Bind a new Allocation object to a ProgramVertex.  The
+ * Allocation must be a valid constant input for the Program.
+ *
+ * @param pv program object
+ * @param slot index of the constant buffer on the program
+ * @param c constants to bind
+ */
+extern void __attribute__((overloadable))
+    rsgBindConstant(rs_program_vertex pv, uint slot, rs_allocation c);
+
+/**
  * Get the width of the current rendering surface.
  *
  * @return uint

@@ -50,6 +50,18 @@ void rsrBindTexture(Context *rsc, Script *sc, ProgramFragment *pf, uint32_t slot
     pf->bindTexture(rsc, slot, a);
 }
 
+void rsrBindConstant(Context *rsc, Script *sc, ProgramFragment *pf, uint32_t slot, Allocation *a) {
+    CHECK_OBJ_OR_NULL(a);
+    CHECK_OBJ(pf);
+    pf->bindAllocation(rsc, a, slot);
+}
+
+void rsrBindConstant(Context *rsc, Script *sc, ProgramVertex *pf, uint32_t slot, Allocation *a) {
+    CHECK_OBJ_OR_NULL(a);
+    CHECK_OBJ(pf);
+    pf->bindAllocation(rsc, a, slot);
+}
+
 void rsrBindSampler(Context *rsc, Script *sc, ProgramFragment *pf, uint32_t slot, Sampler *s) {
     CHECK_OBJ_OR_NULL(vs);
     CHECK_OBJ(vpf);
