@@ -49,7 +49,7 @@ size_t AudioSystem::gInBuffSize = 0;
 const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
 {
     Mutex::Autolock _l(gLock);
-    if (gAudioFlinger.get() == 0) {
+    if (gAudioFlinger == 0) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder;
         do {
@@ -499,7 +499,7 @@ sp<AudioSystem::AudioPolicyServiceClient> AudioSystem::gAudioPolicyServiceClient
 const sp<IAudioPolicyService>& AudioSystem::get_audio_policy_service()
 {
     gLock.lock();
-    if (gAudioPolicyService.get() == 0) {
+    if (gAudioPolicyService == 0) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder;
         do {
