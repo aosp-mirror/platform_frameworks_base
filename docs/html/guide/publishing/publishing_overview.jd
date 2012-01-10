@@ -21,7 +21,7 @@ page.title=Publishing Overview
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/publishing/publishing_preparing.html">Preparing for
+    <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing for
     Release</a></li>
     <li><a href="{@docRoot}guide/publishing/publishing.html">Publishing on Android Market</a></li>
   </ol>

@@ -154,7 +154,7 @@ Highlights</a></td></tr>
     <td>2</td>
     <td>{@link android.os.Build.VERSION_CODES#BASE_1_1}</td><td></td></tr>
     
-  <tr><td><a href="{@docRoot}sdk/android-1.0.html">Android 1.0</td>
+  <tr><td>Android 1.0</td>
     <td>1</td>
     <td>{@link android.os.Build.VERSION_CODES#BASE}</td>
     <td></td></tr>

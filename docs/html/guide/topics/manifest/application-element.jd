@@ -249,7 +249,7 @@ of that name is created.  A global process can be shared with other
 applications, reducing resource usage.
 </p></dd>
 
-<dt><a href name="restoreany"></a>{@code android:restoreAnyVersion}</dt>
+<dt><a name="restoreany"></a>{@code android:restoreAnyVersion}</dt>
 <dd>Indicate that the application is prepared to attempt a restore of any
 backed-up data set, even if the backup was stored by a newer version
 of the application than is currently installed on the device.  Setting
@@ -260,7 +260,7 @@ incompatible.  <em>Use with caution!</em>
 <p>The default value of this attribute is {@code false}.
 </p></dd>
 
-<dt><a href name="aff"></a>{@code android:taskAffinity}</dt>
+<dt><a name="aff"></a>{@code android:taskAffinity}</dt>
 <dd>An affinity name that applies to all activities within the application,
 except for those that set a different affinity with their own
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> 

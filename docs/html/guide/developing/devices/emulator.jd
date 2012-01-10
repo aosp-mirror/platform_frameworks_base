@@ -480,7 +480,7 @@ on disk images, use <code>-help-disk-images</code>.</p>
   <td>Enable the root shell (as in <code>-shell</code> and specify the QEMU character 
   device to use for communication with the shell.</td>
   <td>&lt;device&gt; must be a QEMU device type. See the documentation for '-serial <em>dev</em>' at 
-  <a href="http://www.nongnu.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a> 
+  <a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a> 
   for a list of device types.
 
 <p>Here are some examples: </p>
@@ -619,7 +619,7 @@ scale in direct relationship with &lt;delay&gt; values.</p>
   <td>Use this command to emulate an NMEA-compatible GPS unit connected to
   an external character device or socket. The format of <code>&lt;device&gt;</code> must be QEMU-specific 
   serial device specification. See the documentation for 'serial -dev' at 
-  <a href="http://www.bellard.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a>.
+  <a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a>.
 </td>
 </tr>
 <tr>
@@ -638,7 +638,7 @@ scale in direct relationship with &lt;delay&gt; values.</p>
   <td>Redirect radio mode to the specified character device.</td>
   <td>The format of <code>&lt;device&gt;</code> must be QEMU-specific 
   serial device specification. See the documentation for 'serial -dev' at 
-<a href="http://www.bellard.org/qemu/qemu-doc.html#SEC10">http://www.bellard.org/qemu/qemu-doc.html#SEC10</a>.
+<a href="http://wiki.qemu.org/download/qemu-doc.html">http://wiki.qemu.org/download/qemu-doc.html</a>.
 </td>
 </tr>
 <tr>

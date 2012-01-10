@@ -251,7 +251,7 @@ href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Ch
 "background media" even when the user leaves your activity, much in the same
 way that the built-in Music application behaves. In this case, what you need is
 a {@link android.media.MediaPlayer MediaPlayer} controlled by a {@link android.app.Service}, as
-discussed in <a href="mpandservices">Using a Service with MediaPlayer</a>.</p>
+discussed in <a href="#mpandservices">Using a Service with MediaPlayer</a>.</p>
 
 <h2 id="mpandservices">Using a Service with MediaPlayer</h2>
 
