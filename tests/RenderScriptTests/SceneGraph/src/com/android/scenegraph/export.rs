@@ -28,3 +28,7 @@ SgLight *exportPtrLight;
 SgShaderParam *spExport;
 FBlurOffsets *blurExport;
 VertexShaderInputs *iExport;
+
+VShaderParams *vConst;
+FShaderParams *fConst;
+

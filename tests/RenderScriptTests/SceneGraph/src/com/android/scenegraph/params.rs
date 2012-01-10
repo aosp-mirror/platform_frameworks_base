@@ -1,4 +1,4 @@
-// Copyright (C) 2011 The Android Open Source Project
+// Copyright (C) 2012 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 #pragma rs java_package_name(com.android.scenegraph)
 
-//#define DEBUG_PARAMS
 #include "transform_def.rsh"
 
 static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
@@ -128,7 +127,7 @@ static bool frustumCulled(SgRenderable *obj, SgCamera *cam) {
     return !rsIsSphereInFrustum(&obj->worldBoundingSphere,
                                 &cam->frustumPlanes[0], &cam->frustumPlanes[1],
                                 &cam->frustumPlanes[2], &cam->frustumPlanes[3],
-                                &cam->frustumPlanes[3], &cam->frustumPlanes[4]);
+                                &cam->frustumPlanes[4], &cam->frustumPlanes[5]);
 }
 
 
@@ -149,24 +148,24 @@ void root(const rs_allocation *v_in, rs_allocation *v_out, const void *usrData) 
 #ifdef DEBUG_RENDERABLES
         rsDebug("Culled", drawable);
         printName(drawable->name);
-#endif //DEBUG_RENDERABLES
+#endif // DEBUG_RENDERABLES
         return;
     }
     drawable->isVisible = 1;
 
     // Data we are updating
-    /*if (rsIsObject(drawable->pf_const)) {
+    if (rsIsObject(drawable->pf_const)) {
         uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(drawable->pf_const, 0);
 
         int numParams = 0;
         if (rsIsObject(drawable->pf_constParams)) {
-            rsAllocationGetDimX(drawable->pf_constParams);
+            numParams = rsAllocationGetDimX(drawable->pf_constParams);
         }
         for (int i = 0; i < numParams; i ++) {
             SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pf_constParams, i);
             processParam(current, constantBuffer, camera);
         }
-        rsgAllocationSyncAll(drawable->pf_const);
+        //rsgAllocationSyncAll(drawable->pf_const);
     }
 
     if (rsIsObject(drawable->pv_const)) {
@@ -180,9 +179,6 @@ void root(const rs_allocation *v_in, rs_allocation *v_out, const void *usrData) 
             SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pv_constParams, i);
             processParam(current, constantBuffer, camera);
         }
-        rsgAllocationSyncAll(drawable->pv_const);
-    }*/
-
-#ifdef DEBUG_PARAMS
-#endif //DEBUG_PARAMS
+        //rsgAllocationSyncAll(drawable->pv_const);
+    }
 }
