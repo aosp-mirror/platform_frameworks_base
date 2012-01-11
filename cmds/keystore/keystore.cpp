@@ -581,7 +581,7 @@ static ResponseCode get(KeyStore* keyStore, int sock, uid_t uid, Value* keyName,
 static ResponseCode insert(KeyStore* keyStore, int sock, uid_t uid, Value* keyName, Value* val) {
     char filename[NAME_MAX];
     encode_key(filename, uid, keyName);
-    Blob keyBlob(val->value, val->length, 0, NULL);
+    Blob keyBlob(val->value, val->length, NULL, 0);
     return keyStore->put(filename, &keyBlob);
 }
 
