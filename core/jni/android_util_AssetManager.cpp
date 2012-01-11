@@ -434,12 +434,12 @@ static jint android_content_AssetManager_addAssetPath(JNIEnv* env, jobject clazz
 {
     ScopedUtfChars path8(env, path);
     if (path8.c_str() == NULL) {
-        return NULL;
+        return 0;
     }
 
     AssetManager* am = assetManagerForJavaObject(env, clazz);
     if (am == NULL) {
-        return JNI_FALSE;
+        return 0;
     }
 
     void* cookie;
