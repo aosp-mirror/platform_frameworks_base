@@ -1562,6 +1562,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.DEVICE_PROVISIONED,
                     R.bool.def_device_provisioned);
+
+            loadBooleanSetting(stmt, Settings.Secure.NETSTATS_ENABLED,
+                    R.bool.def_netstats_enabled);
         } finally {
             if (stmt != null) stmt.close();
         }
