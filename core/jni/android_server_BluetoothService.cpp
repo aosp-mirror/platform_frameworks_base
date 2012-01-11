@@ -1035,7 +1035,7 @@ static jboolean removeReservedServiceRecordsNative(JNIEnv *env, jobject object,
                             DBUS_ADAPTER_IFACE, "RemoveReservedServiceRecords",
                             DBUS_TYPE_ARRAY, DBUS_TYPE_UINT32,
                             &values, len, DBUS_TYPE_INVALID);
-    env->ReleaseIntArrayElements(handles, values, NULL);
+    env->ReleaseIntArrayElements(handles, values, 0);
     return reply ? JNI_TRUE : JNI_FALSE;
 #endif
     return JNI_FALSE;
