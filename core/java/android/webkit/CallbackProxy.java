@@ -791,7 +791,8 @@ class CallbackProxy extends Handler {
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
                     UploadFileMessageData data = (UploadFileMessageData)msg.obj;
-                    mWebChromeClient.openFileChooser(data.getUploadFile(), data.getAcceptType());
+                    mWebChromeClient.openFileChooser(data.getUploadFile(), data.getAcceptType(),
+                            data.getCapture());
                 }
                 break;
 
@@ -1566,10 +1567,12 @@ class CallbackProxy extends Handler {
     private static class UploadFileMessageData {
         private UploadFile mCallback;
         private String mAcceptType;
+        private String mCapture;
 
-        public UploadFileMessageData(UploadFile uploadFile, String acceptType) {
+        public UploadFileMessageData(UploadFile uploadFile, String acceptType, String capture) {
             mCallback = uploadFile;
             mAcceptType = acceptType;
+            mCapture = capture;
         }
 
         public UploadFile getUploadFile() {
@@ -1578,6 +1581,10 @@ class CallbackProxy extends Handler {
 
         public String getAcceptType() {
             return mAcceptType;
+        }
+
+        public String getCapture() {
+            return mCapture;
         }
     }
 
@@ -1597,13 +1604,13 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to open a file chooser.
      */
-    /* package */ Uri openFileChooser(String acceptType) {
+    /* package */ Uri openFileChooser(String acceptType, String capture) {
         if (mWebChromeClient == null) {
             return null;
         }
         Message myMessage = obtainMessage(OPEN_FILE_CHOOSER);
         UploadFile uploadFile = new UploadFile();
-        UploadFileMessageData data = new UploadFileMessageData(uploadFile, acceptType);
+        UploadFileMessageData data = new UploadFileMessageData(uploadFile, acceptType, capture);
         myMessage.obj = data;
         synchronized (this) {
             sendMessage(myMessage);

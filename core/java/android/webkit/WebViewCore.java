@@ -394,10 +394,12 @@ public final class WebViewCore {
      * Called by JNI.  Open a file chooser to upload a file.
      * @param acceptType The value of the 'accept' attribute of the
      *         input tag associated with this file picker.
+     * @param capture The value of the 'capture' attribute of the
+     *         input tag associated with this file picker.
      * @return String version of the URI.
      */
-    private String openFileChooser(String acceptType) {
-        Uri uri = mCallbackProxy.openFileChooser(acceptType);
+    private String openFileChooser(String acceptType, String capture) {
+        Uri uri = mCallbackProxy.openFileChooser(acceptType, capture);
         if (uri != null) {
             String filePath = "";
             // Note - querying for MediaStore.Images.Media.DATA
