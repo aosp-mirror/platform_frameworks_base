@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Application Structure
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Application Structure</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Apps come in many varieties that address very different needs. For example:</p>
+<ul>
+<li>Apps such as Calculator or Camera that are built around a single focused activity handled from a
+  single screen</li>
+<li>Apps such as Phone whose main purpose is to switch between different activities without deeper
+  navigation</li>
+<li>Apps such as Gmail or Market that combine a broad set of data views with deep navigation</li>
+</ul>
+<p>Your app's structure depends largely on the content and tasks you want to surface for your users.</p>
+<h2>General Structure</h2>
+<p>A typical Android app consists of top level and detail/edit views. If the navigation hierarchy is
+deep and complex, category views connect top level and detail views.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+    <img src="../static/content/app_structure_overview.png">
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<h4>Top level views</h4>
+<p>The top level of the app typically consists of the different views that your app supports. The views
+either show different representations of the same data or expose an altogether different functional
+facet of your app.</p>
+<div class="vspace size-3">&nbsp;</div>
+
+<h4>Category views</h4>
+<p>Category views allow you to drill deeper into your data.</p>
+<div class="vspace size-11">&nbsp;</div>
+
+<h4>Detail/edit view</h4>
+<p>The detail/edit view is where you consume or create data.</p>
+
+  </div>
+</div>
+
+<h2>Top Level</h2>
+<p>The layout of your start screen requires special attention. This is the first screen people see
+after launching your app, so it should be an equally rewarding experience for new and frequent
+visitors alike.</p>
+<p>Ask yourself: "What are my typical users most likely going to want to do in my app?", and structure
+your start screen experience accordingly.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Put content forward</h4>
+<p>Many apps focus on the content display. Avoid navigation-only screens and instead let people get to
+the meat of your app right away by making content the centerpiece of your start screen. Choose
+layouts that are visually engaging and appropriate for the data type and screen size.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="../static/content/app_structure_market.png">
+    <div class="figure-caption">
+      Market's start screen primarily allows navigation into the stores for Apps, Music, Books, and
+      Games. It is also enriched with tailored recommendations and promotions that surface content
+      of interest to the user. Search is readily available from the action bar.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Set up action bars for navigation and actions</h4>
+<p>All screens in your app should display action bars to provide consistent navigation and surface
+important actions.</p>
+<p>At the top level, special considerations apply to the action bar:</p>
+<ul>
+<li>Use the action bar to display your app's icon or title.</li>
+<li>If your top level consists of multiple views, or if switching between data from different user
+  accounts is a significant use case, make sure that it's easy for the user to navigate between them
+  by adding view controls to your action bar.</li>
+<li>If your app allows people to create content, consider making the content accessible right from the
+  top level.</li>
+<li>If your content is searchable, include the Search action in the action bar so people can cut
+  through the navigation hierarchy.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="../static/content/app_structure_gmail.png">
+    <div class="figure-caption">
+      Email is about productivity, so an efficient, easy-to-skim list with higher data density works
+      well. Navigation supports switching between accounts and recent labels. Icons for creating a
+      new message or searching are prominent in the split action bar at the bottom.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+
+<h4>Create an identity for your app</h4>
+<p>Creating an identity for your app goes beyond the action bar. Your app communicates its identity
+through its data, the way that data is arranged, and how people interact with it. Especially for
+media-rich applications, try to create unique layouts that showcase your data and go beyond the
+monotony of simple list views.</p>
+
+  </div>
+  <div class="layout-content-col span-8">
+
+    <img src="../static/content/app_structure_music_lndscp.png">
+    <div class="figure-caption">
+      The 3D carousel celebrates cover art and establishes a unique identity for the Music app.
+      Defaulting to the Recent view keeps the focus on music the user has been listening to lately.
+    </div>
+
+  </div>
+</div>
+
+<h2>Categories</h2>
+<p>Generally, the purpose of a deep, data-driven app is to navigate through organizational categories
+to the detail level, where data can be viewed and managed. Minimize perceived navigation effort by
+keeping your apps shallow.</p>
+<p>Even though the number of vertical navigation steps from the top level down to the detail views is
+typically dictated by the structure of your app's content, there are several ways you can cut down
+on the perception of onerous navigation.</p>
+<h4>Use tabs to combine category selection and data display</h4>
+<p>This can be successful if the categories are familiar or the number of categories is small. It has
+the advantage that a level of hierarchy is removed and data remains at the center of the user's
+attention. Navigating laterally between data-rich categories is more akin to a casual browsing
+experience than to an explicit navigation step.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8">
+
+<p>If the categories are familiar, predictable, or closely related, use scrolling tabs (where not all
+items are in view simultaneously). Keep the number of scrolling tabs at a manageable level to
+minimize navigational effort. Rule of thumb: no more than 5&ndash;7 tabs.</p>
+
+    <img src="../static/content/app_structure_scrolltabs.png">
+    <div class="figure-caption">
+      Market uses tabs to simultaneously show category choice and content. To navigate between
+      categories, users can swipe left/right on the content.
+    </div>
+
+  </div>
+  <div class="layout-content-col span-5">
+
+<p>If the categories in the tabs are not closely related, favor fixed tabs, so that all categories are
+in view at the same time.</p>
+
+    <img src="../static/content/app_structure_fixedtabs.png">
+    <div class="figure-caption">
+      YouTube uses fixed tabs to switch between different, relatively unrelated functional areas.
+    </div>
+
+
+  </div>
+</div>
+
+<h4>Allow cutting through hierarchies</h4>
+<p>Take advantage of shortcuts that allow people to reach their goals quicker. To allow top-level
+invocation of actions for a data item from within list or grid views, display prominent actions
+directly on list view items using drop-downs or split list items. This lets people invoke actions on
+data without having to navigate all the way down the hierarchy.</p>
+
+<img src="../static/content/app_structure_shortcut_on_item.png">
+<div class="figure-caption">
+  Music allows the user to act upon a data item (song) from within the category view (album),
+  thereby removing the need to navigate all the way down to the song's detail view.
+</div>
+
+<h4>Acting upon multiple data items</h4>
+<p>Even though category views mostly serve to guide people to content detail, keep in mind that there
+are often good reasons to act on collections of data as well.</p>
+<p>For example, if you allow people to delete an item in a detail view, you should also allow them to
+delete multiple items in the category view. Analyze which detail view actions are applicable to
+collections of items. Then use multi-select to allow application of those actions to multiple items
+in a category view.</p>
+<h2>Details</h2>
+<p>The detail view allows you to view and act on your data. The layout of the detail view depends on
+the data type being displayed, and therefore differs widely among apps.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<h4>Layout</h4>
+<p>Consider the activities people will perform in the detail view and arrange the layout accordingly.
+For immersive content, make use of the lights-out mode to allow for distraction-free viewing of
+full-screen content.</p>
+
+    <img src="../static/content/app_structure_people_detail.png">
+
+  </div>
+  <div class="layout-content-col span-9">
+
+    <img src="../static/content/app_structure_book_detail_page_flip.png">
+    <div class="figure-caption">
+      Google Books' detail view is all about replicating the experience of reading an actual book.
+      The page-flip animation reinforces that notion. To create an immersive experience the app
+      enters lights-out mode, which hides all system UI affordances.
+    </div>
+
+    <div class="figure-caption">
+      The purpose of the People app's detail view is to surface communication options. The list view
+      allows for efficient scanning and quick access of phone numbers, email addresses and other
+      information items. Split items are used to combine calling and messaging into one compact line
+      item.
+    </div>
+  </div>
+</div>
+
+<h4>Make navigation between detail views efficient</h4>
+<p>If your users are likely to want to look at multiple items in sequence, allow them to navigate
+between items from within the detail view. Use swipe views or other techniques, such as filmstrips,
+to achieve this.</p>
+
+<img src="../static/content/app_structure_gmail_swipe.png">
+<div class="figure-caption">
+  Gmail using swipe views to navigate from detail view to detail view.
+</div>
+
+<img src="../static/content/app_structure_gallery_filmstrip.png">
+<div class="figure-caption">
+  In addition to supporting swipe gestures to move left or right through images, Gallery provides a
+  filmstrip control that lets people quickly jump to specific images.
+</div>
+
+<h2>Checklist</h2>
+<ul>
+<li>
+<p>Find ways to display useful content on your start screen.</p>
+</li>
+<li>
+<p>Use action bars to provide consistent navigation.</p>
+</li>
+<li>
+<p>Keep your hierarchies shallow by using horizontal navigation and shortcuts.</p>
+</li>
+<li>
+<p>Use multi-select to allow the user to act on collections of data.</p>
+</li>
+<li>
+<p>Allow for quick navigation between detail items with swipe views.</p>
+</li>
+</ul>
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>
