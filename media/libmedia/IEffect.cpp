@@ -83,8 +83,15 @@ public:
             size = *pReplySize;
         }
         data.writeInt32(size);
-        remote()->transact(COMMAND, data, &reply);
-        status_t status = reply.readInt32();
+
+        status_t status = remote()->transact(COMMAND, data, &reply);
+        if (status != NO_ERROR) {
+            if (pReplySize != NULL)
+                *pReplySize = 0;
+            return status;
+        }
+
+        status = reply.readInt32();
         size = reply.readInt32();
         if (size != 0 && pReplyData != NULL && pReplySize != NULL) {
             reply.read(pReplyData, size);

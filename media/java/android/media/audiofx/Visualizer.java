@@ -84,6 +84,7 @@ public class Visualizer {
     // to keep in sync with frameworks/base/media/jni/audioeffect/android_media_Visualizer.cpp
     private static final int NATIVE_EVENT_PCM_CAPTURE = 0;
     private static final int NATIVE_EVENT_FFT_CAPTURE = 1;
+    private static final int NATIVE_EVENT_SERVER_DIED = 2;
 
     // Error codes:
     /**
@@ -147,6 +148,10 @@ public class Visualizer {
      *  PCM and FFT capture listener registered by client
      */
     private OnDataCaptureListener mCaptureListener = null;
+    /**
+     *  Server Died listener registered by client
+     */
+    private OnServerDiedListener mServerDiedListener = null;
 
     // accessed by native methods
     private int mNativeVisualizer;
@@ -458,6 +463,43 @@ public class Visualizer {
     }
 
     /**
+     * @hide
+     *
+     * The OnServerDiedListener interface defines a method called by the Visualizer to indicate that
+     * the connection to the native media server has been broken and that the Visualizer object will
+     * need to be released and re-created.
+     * The client application can implement this interface and register the listener with the
+     * {@link #setServerDiedListener(OnServerDiedListener)} method.
+     */
+    public interface OnServerDiedListener  {
+        /**
+         * @hide
+         *
+         * Method called when the native media server has died.
+         * <p>If the native media server encounters a fatal error and needs to restart, the binder
+         * connection from the {@link #Visualizer} to the media server will be broken.  Data capture
+         * callbacks will stop happening, and client initiated calls to the {@link #Visualizer}
+         * instance will fail with the error code {@link #DEAD_OBJECT}.  To restore functionality,
+         * clients should {@link #release()} their old visualizer and create a new instance.
+         */
+        void onServerDied();
+    }
+
+    /**
+     * @hide
+     *
+     * Registers an OnServerDiedListener interface.
+     * <p>Call this method with a null listener to stop receiving server death notifications.
+     * @return {@link #SUCCESS} in case of success,
+     */
+    public int setServerDiedListener(OnServerDiedListener listener) {
+        synchronized (mListenerLock) {
+            mServerDiedListener = listener;
+        }
+        return SUCCESS;
+    }
+
+    /**
      * Helper class to handle the forwarding of native events to the appropriate listeners
      */
     private class NativeEventHandler extends Handler
@@ -469,11 +511,7 @@ public class Visualizer {
             mVisualizer = v;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            if (mVisualizer == null) {
-                return;
-            }
+        private void handleCaptureMessage(Message msg) {
             OnDataCaptureListener l = null;
             synchronized (mListenerLock) {
                 l = mVisualizer.mCaptureListener;
@@ -482,6 +520,7 @@ public class Visualizer {
             if (l != null) {
                 byte[] data = (byte[])msg.obj;
                 int samplingRate = msg.arg1;
+
                 switch(msg.what) {
                 case NATIVE_EVENT_PCM_CAPTURE:
                     l.onWaveFormDataCapture(mVisualizer, data, samplingRate);
@@ -490,9 +529,39 @@ public class Visualizer {
                     l.onFftDataCapture(mVisualizer, data, samplingRate);
                     break;
                 default:
-                    Log.e(TAG,"Unknown native event: "+msg.what);
+                    Log.e(TAG,"Unknown native event in handleCaptureMessge: "+msg.what);
                     break;
                 }
+            }
+        }
+
+        private void handleServerDiedMessage(Message msg) {
+            OnServerDiedListener l = null;
+            synchronized (mListenerLock) {
+                l = mVisualizer.mServerDiedListener;
+            }
+
+            if (l != null)
+                l.onServerDied();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (mVisualizer == null) {
+                return;
+            }
+
+            switch(msg.what) {
+            case NATIVE_EVENT_PCM_CAPTURE:
+            case NATIVE_EVENT_FFT_CAPTURE:
+                handleCaptureMessage(msg);
+                break;
+            case NATIVE_EVENT_SERVER_DIED:
+                handleServerDiedMessage(msg);
+                break;
+            default:
+                Log.e(TAG,"Unknown native event: "+msg.what);
+                break;
             }
         }
     }

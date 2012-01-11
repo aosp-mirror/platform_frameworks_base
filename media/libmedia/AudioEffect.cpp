@@ -202,7 +202,7 @@ bool AudioEffect::getEnabled() const
 status_t AudioEffect::setEnabled(bool enabled)
 {
     if (mStatus != NO_ERROR) {
-        return INVALID_OPERATION;
+        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
     }
 
     status_t status = NO_ERROR;
@@ -231,7 +231,7 @@ status_t AudioEffect::command(uint32_t cmdCode,
 {
     if (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS) {
         LOGV("command() bad status %d", mStatus);
-        return INVALID_OPERATION;
+        return mStatus;
     }
 
     if (cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) {
@@ -263,7 +263,7 @@ status_t AudioEffect::command(uint32_t cmdCode,
 status_t AudioEffect::setParameter(effect_param_t *param)
 {
     if (mStatus != NO_ERROR) {
-        return INVALID_OPERATION;
+        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
     }
 
     if (param == NULL || param->psize == 0 || param->vsize == 0) {
@@ -281,7 +281,7 @@ status_t AudioEffect::setParameter(effect_param_t *param)
 status_t AudioEffect::setParameterDeferred(effect_param_t *param)
 {
     if (mStatus != NO_ERROR) {
-        return INVALID_OPERATION;
+        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
     }
 
     if (param == NULL || param->psize == 0 || param->vsize == 0) {
@@ -307,7 +307,7 @@ status_t AudioEffect::setParameterDeferred(effect_param_t *param)
 status_t AudioEffect::setParameterCommit()
 {
     if (mStatus != NO_ERROR) {
-        return INVALID_OPERATION;
+        return (mStatus == ALREADY_EXISTS) ? INVALID_OPERATION : mStatus;
     }
 
     Mutex::Autolock _l(mCblk->lock);
@@ -321,7 +321,7 @@ status_t AudioEffect::setParameterCommit()
 status_t AudioEffect::getParameter(effect_param_t *param)
 {
     if (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS) {
-        return INVALID_OPERATION;
+        return mStatus;
     }
 
     if (param == NULL || param->psize == 0 || param->vsize == 0) {
@@ -341,7 +341,7 @@ status_t AudioEffect::getParameter(effect_param_t *param)
 void AudioEffect::binderDied()
 {
     LOGW("IEffect died");
-    mStatus = NO_INIT;
+    mStatus = DEAD_OBJECT;
     if (mCbf) {
         status_t status = DEAD_OBJECT;
         mCbf(EVENT_ERROR, mUserData, &status);

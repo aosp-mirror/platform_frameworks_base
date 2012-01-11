@@ -173,7 +173,7 @@ status_t Visualizer::getWaveForm(uint8_t *waveform)
         uint32_t replySize = mCaptureSize;
         status = command(VISUALIZER_CMD_CAPTURE, 0, NULL, &replySize, waveform);
         LOGV("getWaveForm() command returned %d", status);
-        if (replySize == 0) {
+        if ((status == NO_ERROR) && (replySize == 0)) {
             status = NOT_ENOUGH_DATA;
         }
     } else {

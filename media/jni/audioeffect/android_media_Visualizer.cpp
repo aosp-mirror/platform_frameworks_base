@@ -39,6 +39,7 @@ using namespace android;
 
 #define NATIVE_EVENT_PCM_CAPTURE                0
 #define NATIVE_EVENT_FFT_CAPTURE                1
+#define NATIVE_EVENT_SERVER_DIED                2
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/audiofx/Visualizer";
@@ -284,6 +285,23 @@ android_media_visualizer_native_init(JNIEnv *env)
 
 }
 
+static void android_media_visualizer_effect_callback(int32_t event,
+                                                     void *user,
+                                                     void *info) {
+    if ((event == AudioEffect::EVENT_ERROR) &&
+        (*((status_t*)info) == DEAD_OBJECT)) {
+        visualizerJniStorage* lpJniStorage = (visualizerJniStorage*)user;
+        visualizer_callback_cookie* callbackInfo = &lpJniStorage->mCallbackData;
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+        env->CallStaticVoidMethod(
+            callbackInfo->visualizer_class,
+            fields.midPostNativeEvent,
+            callbackInfo->visualizer_ref,
+            NATIVE_EVENT_SERVER_DIED,
+            0, 0, 0);
+    }
+}
 
 static jint
 android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
@@ -319,8 +337,8 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // create the native Visualizer object
     lpVisualizer = new Visualizer(0,
-                                  NULL,
-                                  NULL,
+                                  android_media_visualizer_effect_callback,
+                                  lpJniStorage,
                                   sessionId);
     if (lpVisualizer == NULL) {
         LOGE("Error creating Visualizer");
