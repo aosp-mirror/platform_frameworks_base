@@ -338,8 +338,8 @@ int JetPlayer::loadFromFile(const char* path)
     Mutex::Autolock lock(mMutex);
 
     mEasJetFileLoc = (EAS_FILE_LOCATOR) malloc(sizeof(EAS_FILE));
-    memset(mJetFilePath, 0, 256);
-    strncpy(mJetFilePath, path, strlen(path));
+    strncpy(mJetFilePath, path, sizeof(mJetFilePath));
+    mJetFilePath[sizeof(mJetFilePath) - 1] = '\0';
     mEasJetFileLoc->path = mJetFilePath;
 
     mEasJetFileLoc->fd = 0;
