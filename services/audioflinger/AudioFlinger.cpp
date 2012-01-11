@@ -294,7 +294,7 @@ status_t AudioFlinger::dumpInternals(int fd, const Vector<String16>& args)
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
-    int hardwareStatus = mHardwareStatus;
+    hardware_call_state hardwareStatus = mHardwareStatus;
 
     snprintf(buffer, SIZE, "Hardware status: %d\n", hardwareStatus);
     result.append(buffer);
