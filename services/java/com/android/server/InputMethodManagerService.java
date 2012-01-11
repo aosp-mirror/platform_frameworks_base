@@ -142,6 +142,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
+    private static final String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
+            "EnabledWhenDefaultIsNotAsciiCapable";
+    private static final String TAG_ASCII_CAPABLE = "AsciiCapable";
 
     final Context mContext;
     final Resources mRes;
@@ -2163,6 +2166,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
+            if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
+                final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtype();
+                if (currentSubtype != null) {
+                    final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
+                    lastInputMethodSubtypeId =
+                            getSubtypeIdFromHashCode(currentImi, currentSubtype.hashCode());
+                }
+            }
+
             final int N = imList.size();
             mIms = new InputMethodInfo[N];
             mSubtypeIds = new int[N];
@@ -2472,7 +2484,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap =
                 new HashMap<String, InputMethodSubtype>();
         final int N = subtypes.size();
-        boolean containsKeyboardSubtype = false;
         for (int i = 0; i < N; ++i) {
             // scan overriding implicitly enabled subtypes.
             InputMethodSubtype subtype = subtypes.get(i);
@@ -2506,15 +2517,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (!systemLocale.equals(locale)) continue;
                 }
                 applicableModeAndSubtypesMap.put(mode, subtype);
-                if (!containsKeyboardSubtype
-                        && SUBTYPE_MODE_KEYBOARD.equalsIgnoreCase(subtype.getMode())) {
-                    containsKeyboardSubtype = true;
+            }
+        }
+        final InputMethodSubtype keyboardSubtype
+                = applicableModeAndSubtypesMap.get(SUBTYPE_MODE_KEYBOARD);
+        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
+                applicableModeAndSubtypesMap.values());
+        if (keyboardSubtype != null && !keyboardSubtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
+            for (int i = 0; i < N; ++i) {
+                final InputMethodSubtype subtype = subtypes.get(i);
+                final String mode = subtype.getMode();
+                if (SUBTYPE_MODE_KEYBOARD.equals(mode) && subtype.containsExtraValueKey(
+                        TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE)) {
+                    applicableSubtypes.add(subtype);
                 }
             }
         }
-        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
-                applicableModeAndSubtypesMap.values());
-        if (!containsKeyboardSubtype) {
+        if (keyboardSubtype == null) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
                     res, subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
