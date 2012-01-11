@@ -163,7 +163,7 @@ again:
             bufit++;
     }
 
-    *bufit = NULL;
+    *bufit = 0;
 
     // According to ITU V.250 section 5.1, IA5 7 bit chars are used, 
     //   the eighth bit or higher bits are ignored if they exists
