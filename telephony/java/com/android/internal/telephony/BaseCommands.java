@@ -715,4 +715,7 @@ public abstract class BaseCommands implements CommandsInterface {
                 "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
         return retVal;
     }
+
+    @Override
+    public void testingEmergencyCall() {}
 }

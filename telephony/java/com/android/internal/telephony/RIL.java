@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@hide}
@@ -230,6 +231,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     ArrayList<RILRequest> mRequestsList = new ArrayList<RILRequest>();
 
     Object     mLastNITZTimeInfo;
+
+    // When we are testing emergency calls
+    AtomicBoolean mTestingEmergencyCall = new AtomicBoolean(false);
 
     //***** Events
 
@@ -2194,7 +2198,16 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_GET_IMSI: ret =  responseString(p); break;
             case RIL_REQUEST_HANGUP: ret =  responseVoid(p); break;
             case RIL_REQUEST_HANGUP_WAITING_OR_BACKGROUND: ret =  responseVoid(p); break;
-            case RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: ret =  responseVoid(p); break;
+            case RIL_REQUEST_HANGUP_FOREGROUND_RESUME_BACKGROUND: {
+                if (mTestingEmergencyCall.getAndSet(false)) {
+                    if (mEmergencyCallbackModeRegistrant != null) {
+                        riljLog("testing emergency call, notify ECM Registrants");
+                        mEmergencyCallbackModeRegistrant.notifyRegistrant();
+                    }
+                }
+                ret =  responseVoid(p);
+                break;
+            }
             case RIL_REQUEST_SWITCH_WAITING_OR_HOLDING_AND_ACTIVE: ret =  responseVoid(p); break;
             case RIL_REQUEST_CONFERENCE: ret =  responseVoid(p); break;
             case RIL_REQUEST_UDUB: ret =  responseVoid(p); break;
@@ -2985,6 +2998,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         num = p.readInt();
         response = new ArrayList<DriverCall>(num);
 
+        if (RILJ_LOGV) {
+            riljLog("responseCallList: num=" + num +
+                    " mEmergencyCallbackModeRegistrant=" + mEmergencyCallbackModeRegistrant +
+                    " mTestingEmergencyCall=" + mTestingEmergencyCall.get());
+        }
         for (int i = 0 ; i < num ; i++) {
             dc = new DriverCall();
 
@@ -3035,6 +3053,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         }
 
         Collections.sort(response);
+
+        if ((num == 0) && mTestingEmergencyCall.getAndSet(false)) {
+            if (mEmergencyCallbackModeRegistrant != null) {
+                riljLog("responseCallList: call ended, testing emergency call," +
+                            " notify ECM Registrants");
+                mEmergencyCallbackModeRegistrant.notifyRegistrant();
+            }
+        }
 
         return response;
     }
@@ -3761,5 +3787,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
+    }
+
+    /* (non-Javadoc)
+     * @see com.android.internal.telephony.BaseCommands#testingEmergencyCall()
+     */
+    @Override
+    public void testingEmergencyCall() {
+        if (RILJ_LOGD) riljLog("testingEmergencyCall");
+        mTestingEmergencyCall.set(true);
     }
 }

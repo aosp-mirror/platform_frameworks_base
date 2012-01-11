@@ -210,7 +210,8 @@ public final class CdmaCallTracker extends CallTracker {
             return dialThreeWay(dialString);
         }
 
-        pendingMO = new CdmaConnection(phone.getContext(), dialString, this, foregroundCall);
+        pendingMO = new CdmaConnection(phone.getContext(), checkForTestEmergencyNumber(dialString),
+                this, foregroundCall);
         hangupPendingMO = false;
 
         if (pendingMO.address == null || pendingMO.address.length() == 0
@@ -259,7 +260,7 @@ public final class CdmaCallTracker extends CallTracker {
 
             // Attach the new connection to foregroundCall
             pendingMO = new CdmaConnection(phone.getContext(),
-                                dialString, this, foregroundCall);
+                                checkForTestEmergencyNumber(dialString), this, foregroundCall);
             cm.sendCDMAFeatureCode(pendingMO.address,
                 obtainMessage(EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA));
             return pendingMO;
