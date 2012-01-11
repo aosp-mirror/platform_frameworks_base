@@ -43,6 +43,8 @@
 #include <system/audio.h>
 #include <system/audio_policy.h>
 
+#include <audio_utils/primitives.h>
+
 namespace android {
 // ---------------------------------------------------------------------------
 
@@ -999,12 +1001,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
         if (mFormat == AUDIO_FORMAT_PCM_8_BIT && !(mFlags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT)) {
             // Divide capacity by 2 to take expansion into account
             toWrite = audioBuffer.size>>1;
-            // 8 to 16 bit conversion
-            int count = toWrite;
-            int16_t *dst = (int16_t *)(audioBuffer.i8);
-            while(count--) {
-                *dst++ = (int16_t)(*src++^0x80) << 8;
-            }
+            memcpy_to_i16_from_u8(audioBuffer.i16, (const uint8_t *) src, toWrite);
         } else {
             toWrite = audioBuffer.size;
             memcpy(audioBuffer.i8, src, toWrite);
@@ -1125,13 +1122,8 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         if (writtenSize > reqSize) writtenSize = reqSize;
 
         if (mFormat == AUDIO_FORMAT_PCM_8_BIT && !(mFlags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT)) {
-            // 8 to 16 bit conversion
-            const int8_t *src = audioBuffer.i8 + writtenSize-1;
-            int count = writtenSize;
-            int16_t *dst = audioBuffer.i16 + writtenSize-1;
-            while(count--) {
-                *dst-- = (int16_t)(*src--^0x80) << 8;
-            }
+            // 8 to 16 bit conversion, note that source and destination are the same address
+            memcpy_to_i16_from_u8(audioBuffer.i16, (const uint8_t *) audioBuffer.i8, writtenSize);
             writtenSize <<= 1;
         }
 
