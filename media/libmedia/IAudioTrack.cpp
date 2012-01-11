@@ -46,6 +46,18 @@ public:
     {
     }
     
+    virtual sp<IMemory> getCblk() const
+    {
+        Parcel data, reply;
+        sp<IMemory> cblk;
+        data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
+        status_t status = remote()->transact(GET_CBLK, data, &reply);
+        if (status == NO_ERROR) {
+            cblk = interface_cast<IMemory>(reply.readStrongBinder());
+        }
+        return cblk;
+    }
+
     virtual status_t start()
     {
         Parcel data, reply;
@@ -88,18 +100,6 @@ public:
         remote()->transact(PAUSE, data, &reply);
     }
     
-    virtual sp<IMemory> getCblk() const
-    {
-        Parcel data, reply;
-        sp<IMemory> cblk;
-        data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
-        status_t status = remote()->transact(GET_CBLK, data, &reply);
-        if (status == NO_ERROR) {
-            cblk = interface_cast<IMemory>(reply.readStrongBinder());
-        }
-        return cblk;
-    }
-
     virtual status_t attachAuxEffect(int effectId)
     {
         Parcel data, reply;
