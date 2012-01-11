@@ -16,7 +16,7 @@ alt="Android Design" width="160px" style="padding:10px 33px 5px"/>
                                   <div id="announcement" style="width:275px">
     <p>Introducing <b>Android Design</b>: The place to learn about principles, building blocks, and patterns
       for creating world-class Android user interfaces. Whether you're a UI professional or a developer
-      playing that role, these docs will show you how to make good design decisions, big and small.</p>
+      playing that role, these docs show you how to make good design decisions, big and small.</p>
     <p><a href="{@docRoot}design/index.html">Android Design &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
