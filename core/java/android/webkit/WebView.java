@@ -327,6 +327,15 @@ import static javax.microedition.khronos.egl.EGL10.EGL_DEFAULT_DISPLAY;
  * property to {@code device-dpi}. This stops Android from performing scaling in your web page and
  * allows you to make the necessary adjustments for each density via CSS and JavaScript.</p>
  *
+ * <h3>HTML5 Video support</h3>
+ *
+ * <p>In order to support inline HTML5 video in your application, you need to have hardware
+ * acceleration turned on, and set a {@link android.webkit.WebChromeClient}. For full screen support,
+ * implementations of {@link WebChromeClient#onShowCustomView(View, WebChromeClient.CustomViewCallback)}
+ * and {@link WebChromeClient#onHideCustomView()} are required,
+ * {@link WebChromeClient#getVideoLoadingProgressView()} is optional.
+ * </p>
+ *
  *
  */
 @Widget
