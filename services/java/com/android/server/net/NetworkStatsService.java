@@ -71,7 +71,7 @@ import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.NetworkStats;
-import android.net.NetworkStats.NonMonotonicException;
+import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Binder;
@@ -1551,6 +1551,30 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    private StatsObserver mStatsObserver = new StatsObserver();
+
+    private class StatsObserver implements NonMonotonicObserver {
+        private String mCurrentType;
+
+        public void setCurrentType(String type) {
+            mCurrentType = type;
+        }
+
+        /** {@inheritDoc} */
+        public void foundNonMonotonic(
+                NetworkStats left, int leftIndex, NetworkStats right, int rightIndex) {
+            Log.w(TAG, "found non-monotonic values; saving to dropbox");
+
+            // record error for debugging
+            final StringBuilder builder = new StringBuilder();
+            builder.append("found non-monotonic " + mCurrentType + " values at left[" + leftIndex
+                    + "] - right[" + rightIndex + "]\n");
+            builder.append("left=").append(left).append('\n');
+            builder.append("right=").append(right).append('\n');
+            mDropBox.addText(TAG_NETSTATS_ERROR, builder.toString());
+        }
+    }
+
     /**
      * Return the delta between two {@link NetworkStats} snapshots, where {@code
      * before} can be {@code null}.
@@ -1558,27 +1582,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private NetworkStats computeStatsDelta(
             NetworkStats before, NetworkStats current, boolean collectStale, String type) {
         if (before != null) {
-            try {
-                return current.subtract(before, false);
-            } catch (NonMonotonicException e) {
-                Log.w(TAG, "found non-monotonic values; saving to dropbox");
-
-                // record error for debugging
-                final StringBuilder builder = new StringBuilder();
-                builder.append("found non-monotonic " + type + " values at left[" + e.leftIndex
-                        + "] - right[" + e.rightIndex + "]\n");
-                builder.append("left=").append(e.left).append('\n');
-                builder.append("right=").append(e.right).append('\n');
-                mDropBox.addText(TAG_NETSTATS_ERROR, builder.toString());
-
-                try {
-                    // return clamped delta to help recover
-                    return current.subtract(before, true);
-                } catch (NonMonotonicException e1) {
-                    Log.wtf(TAG, "found non-monotonic values; returning empty delta", e1);
-                    return new NetworkStats(0L, 10);
-                }
-            }
+            mStatsObserver.setCurrentType(type);
+            return NetworkStats.subtract(current, before, mStatsObserver);
         } else if (collectStale) {
             // caller is okay collecting stale stats for first call.
             return current;
