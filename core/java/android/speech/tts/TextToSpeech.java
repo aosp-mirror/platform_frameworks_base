@@ -486,6 +486,11 @@ public class TextToSpeech {
     private final Object mStartLock = new Object();
 
     private String mRequestedEngine;
+    // Whether to initialize this TTS object with the default engine,
+    // if the requested engine is not available. Valid only if mRequestedEngine
+    // is not null. Used only for testing, though potentially useful API wise
+    // too.
+    private final boolean mUseFallback;
     private final Map<String, Uri> mEarcons;
     private final Map<String, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
@@ -519,7 +524,7 @@ public class TextToSpeech {
      * @param engine Package name of the TTS engine to use.
      */
     public TextToSpeech(Context context, OnInitListener listener, String engine) {
-        this(context, listener, engine, null);
+        this(context, listener, engine, null, true);
     }
 
     /**
@@ -529,10 +534,11 @@ public class TextToSpeech {
      * @hide
      */
     public TextToSpeech(Context context, OnInitListener listener, String engine,
-            String packageName) {
+            String packageName, boolean useFallback) {
         mContext = context;
         mInitListener = listener;
         mRequestedEngine = engine;
+        mUseFallback = useFallback;
 
         mEarcons = new HashMap<String, Uri>();
         mUtterances = new HashMap<String, Uri>();
@@ -567,10 +573,21 @@ public class TextToSpeech {
 
     private int initTts() {
         // Step 1: Try connecting to the engine that was requested.
-        if (mRequestedEngine != null && mEnginesHelper.isEngineInstalled(mRequestedEngine)) {
-            if (connectToEngine(mRequestedEngine)) {
-                mCurrentEngine = mRequestedEngine;
-                return SUCCESS;
+        if (mRequestedEngine != null) {
+            if (mEnginesHelper.isEngineInstalled(mRequestedEngine)) {
+                if (connectToEngine(mRequestedEngine)) {
+                    mCurrentEngine = mRequestedEngine;
+                    return SUCCESS;
+                } else if (!mUseFallback) {
+                    mCurrentEngine = null;
+                    dispatchOnInit(ERROR);
+                    return ERROR;
+                }
+            } else if (!mUseFallback) {
+                Log.i(TAG, "Requested engine not installed: " + mRequestedEngine);
+                mCurrentEngine = null;
+                dispatchOnInit(ERROR);
+                return ERROR;
             }
         }
 
