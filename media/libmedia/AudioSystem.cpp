@@ -158,7 +158,7 @@ status_t AudioSystem::getStreamMute(int stream, bool* mute)
 
 status_t AudioSystem::setMode(int mode)
 {
-    if (mode >= AUDIO_MODE_CNT) return BAD_VALUE;
+    if (uint32_t(mode) >= AUDIO_MODE_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     return af->setMode(mode);

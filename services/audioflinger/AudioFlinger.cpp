@@ -574,7 +574,7 @@ status_t AudioFlinger::setMode(int mode)
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
-    if ((mode < 0) || (mode >= AUDIO_MODE_CNT)) {
+    if (uint32_t(mode) >= AUDIO_MODE_CNT) {
         ALOGW("Illegal value: setMode(%d)", mode);
         return BAD_VALUE;
     }
