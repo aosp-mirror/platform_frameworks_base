@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Spinners
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Spinners</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Spinners provide a quick way to select one value from a set. In the default state, a spinner shows
+its currently selected value. Touching the spinner displays a dropdown menu with all other available
+values, from which the user can select a new one.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/spinners_form.png">
+
+<h4>Spinners in forms</h4>
+<p>Spinners are useful for data picking in forms. They are compact and integrate nicely with other
+components. Use spinners in forms for both simple data input and in combination with other input
+fields. For example, a text field might let you edit an email address for a contact, while its
+associated spinner allows you to select whether it's a Home or Work address.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/spinners_actionbar.png">
+
+<h4>Spinners in action bars</h4>
+<p>Use spinners in action bars to switch views. For example, Gmail uses a spinner to permit switching
+between accounts or commonly used labels. Spinners are useful when changing the view is important to
+your app, but not necessarily a frequent occurrence. In cases where view switching is frequent, use
+tabs.</p>
+
+  </div>
+</div>
+
+<img src="../static/content/spinners_hololightanddark.png">
+<div class="figure-caption">
+  Spinners in the Holo Dark and Holo Light themes, in various states.
+</div>
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>

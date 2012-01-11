@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Text Fields
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Text Fields</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Text fields allow the user to type text into your app. They can be either single line or multi-line.
+Touching a text field places the cursor and automatically displays the keyboard. In addition to
+typing, text fields allow for a variety of other activities, such as text selection (cut, copy,
+paste) and data lookup via auto-completion.</p>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-12">
+
+    <img src="../static/content/text_input_singlevsmultiline.png">
+
+  </div>
+</div>
+
+<h4>Single line and multi line</h4>
+<p>Single-line fields automatically scroll their content to the left as the text input cursor reaches
+the right edge of the input field. Multi-line text fields automatically break to a new line for
+overflow text and scroll vertically when the cursor reaches the lower edge.</p>
+
+<img src="../static/content/text_input_typesandtypedown.png">
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Text field types</h4>
+<p>Text fields can have different types, such as number, message, or email address. The type determines
+what kind of characters are allowed inside the field, and may prompt the virtual keyboard to
+optimize its layout for frequently used characters.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<h4>Auto-complete text fields</h4>
+<p>Use auto-complete text fields to present real-time completions or search results in popups, so users
+can enter information more accurately and efficiently.</p>
+
+  </div>
+</div>
+
+<h2>Text Selection</h2>
+
+<p>Users can select any word in a text field with a long press. This action triggers a text selection
+mode that facilitates extending the selection or choosing an action to perform on the selected text.
+Selection mode includes:</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-9">
+
+    <img src="../static/content/text_input_textselection.png">
+
+  </div>
+  <div class="layout-content-col span-4 with-callouts">
+
+<ol>
+<li>
+<h4>Contextual action bar</h4>
+<p>A contextual action bar (CAB) displays the actions available to perform on the selection:
+ typically cut, copy, and paste, but apps can insert additional commands as needed.</p>
+</li>
+<li>
+<h4>Selection handles</h4>
+<p>Selection handles can be dragged to select more or less text while remaining in selection mode.</p>
+</li>
+</ol>
+
+  </div>
+</div>
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>
