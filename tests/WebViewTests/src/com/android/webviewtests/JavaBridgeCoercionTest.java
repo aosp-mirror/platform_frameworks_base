@@ -47,7 +47,6 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         private long mLongValue;
         private float mFloatValue;
         private double mDoubleValue;
-        // TODO: Test passing to methods with array parameters.
         private String mStringValue;
         private Object mObjectValue;
         private CustomType mCustomTypeValue;
@@ -100,7 +99,6 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
             mDoubleValue = x;
             notifyResultIsReady();
         }
-        // TODO: Test passing to methods with array parameters.
         public synchronized void setStringValue(String x) {
             mStringValue = x;
             notifyResultIsReady();
@@ -146,7 +144,6 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
             waitForResult();
             return mDoubleValue;
         }
-        // TODO: Test passing to methods with array parameters.
         public synchronized String waitForStringValue() {
             waitForResult();
             return mStringValue;
@@ -471,8 +468,6 @@ public class JavaBridgeCoercionTest extends JavaBridgeTestBase {
         executeJavaScript("testObject.setCustomTypeValue(\"+042.10\");");
         assertNull(mTestObject.waitForCustomTypeValue());
     }
-
-    // TODO: Test passing arrays.
 
     // Test passing a JavaScript object to a method of an injected object.
     public void testPassJavaScriptObject() throws Throwable {
