@@ -295,7 +295,7 @@ uint32_t AudioTrack::frameCount() const
     return mCblk->frameCount;
 }
 
-int AudioTrack::frameSize() const
+size_t AudioTrack::frameSize() const
 {
     if (audio_is_linear_pcm(mFormat)) {
         return channelCount()*audio_bytes_per_sample(mFormat);
@@ -979,7 +979,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     ssize_t written = 0;
     const int8_t *src = (const int8_t *)buffer;
     Buffer audioBuffer;
-    size_t frameSz = (size_t)frameSize();
+    size_t frameSz = frameSize();
 
     do {
         audioBuffer.frameCount = userSize/frameSz;
@@ -1137,7 +1137,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
         audioBuffer.size = writtenSize;
         // NOTE: mCblk->frameSize is not equal to AudioTrack::frameSize() for
-        // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sampel size of
+        // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
         // 16 bit.
         audioBuffer.frameCount = writtenSize/mCblk->frameSize;
 

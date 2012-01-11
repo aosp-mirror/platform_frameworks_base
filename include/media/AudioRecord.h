@@ -206,7 +206,7 @@ public:
             int         channelCount() const;
             int         channels() const;
             uint32_t    frameCount() const;
-            int         frameSize() const;
+            size_t      frameSize() const;
             int         inputSource() const;
 
 

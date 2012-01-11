@@ -219,7 +219,12 @@ public:
             audio_format_t format() const;
             int         channelCount() const;
             uint32_t    frameCount() const;
-            int         frameSize() const;
+
+    /* Return channelCount * (bit depth per channel / 8).
+     * channelCount is determined from channelMask, and bit depth comes from format.
+     */
+            size_t      frameSize() const;
+
             sp<IMemory>& sharedBuffer();
 
 
