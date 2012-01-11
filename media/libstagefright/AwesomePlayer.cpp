@@ -30,7 +30,7 @@
 #include "include/MPEG2TSExtractor.h"
 #include "include/WVMExtractor.h"
 
-#include "timedtext/TimedTextPlayer.h"
+#include "timedtext/TimedTextDriver.h"
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -192,7 +192,7 @@ AwesomePlayer::AwesomePlayer()
       mVideoBuffer(NULL),
       mDecryptHandle(NULL),
       mLastVideoTimeUs(-1),
-      mTextPlayer(NULL) {
+      mTextDriver(NULL) {
     CHECK_EQ(mClient.connect(), (status_t)OK);
 
     DataSource::RegisterDefaultSniffers();
@@ -530,9 +530,9 @@ void AwesomePlayer::reset_l() {
     delete mAudioPlayer;
     mAudioPlayer = NULL;
 
-    if (mTextPlayer != NULL) {
-        delete mTextPlayer;
-        mTextPlayer = NULL;
+    if (mTextDriver != NULL) {
+        delete mTextDriver;
+        mTextDriver = NULL;
     }
 
     mVideoRenderer.clear();
@@ -1118,7 +1118,7 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
     }
 
     if (mFlags & TEXTPLAYER_STARTED) {
-        mTextPlayer->pause();
+        mTextDriver->pause();
         modifyFlags(TEXT_RUNNING, CLEAR);
     }
 
@@ -1272,9 +1272,9 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
 }
 
 status_t AwesomePlayer::setTimedTextTrackIndex(int32_t index) {
-    if (mTextPlayer != NULL) {
+    if (mTextDriver != NULL) {
         if (index >= 0) { // to turn on a text track
-            status_t err = mTextPlayer->setTimedTextTrackIndex(index);
+            status_t err = mTextDriver->setTimedTextTrackIndex(index);
             if (err != OK) {
                 return err;
             }
@@ -1290,7 +1290,7 @@ status_t AwesomePlayer::setTimedTextTrackIndex(int32_t index) {
                 modifyFlags(TEXTPLAYER_STARTED, CLEAR);
             }
 
-            return mTextPlayer->setTimedTextTrackIndex(index);
+            return mTextDriver->setTimedTextTrackIndex(index);
         }
     } else {
         return INVALID_OPERATION;
@@ -1319,7 +1319,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     seekAudioIfNecessary_l();
 
     if (mFlags & TEXTPLAYER_STARTED) {
-        mTextPlayer->seekTo(mSeekTimeUs);
+        mTextDriver->seekToAsync(mSeekTimeUs);
     }
 
     if (!(mFlags & PLAYING)) {
@@ -1364,11 +1364,11 @@ void AwesomePlayer::addTextSource(sp<MediaSource> source) {
     Mutex::Autolock autoLock(mTimedTextLock);
     CHECK(source != NULL);
 
-    if (mTextPlayer == NULL) {
-        mTextPlayer = new TimedTextPlayer(this, mListener, &mQueue);
+    if (mTextDriver == NULL) {
+        mTextDriver = new TimedTextDriver(mListener);
     }
 
-    mTextPlayer->addTextSource(source);
+    mTextDriver->addInBandTextSource(source);
 }
 
 status_t AwesomePlayer::initAudioDecoder() {
@@ -1695,7 +1695,7 @@ void AwesomePlayer::onVideoEvent() {
     }
 
     if ((mFlags & TEXTPLAYER_STARTED) && !(mFlags & (TEXT_RUNNING | SEEK_PREVIEW))) {
-        mTextPlayer->resume();
+        mTextDriver->resume();
         modifyFlags(TEXT_RUNNING, SET);
     }
 
@@ -2241,11 +2241,11 @@ status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
         case KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE:
         {
             Mutex::Autolock autoLock(mTimedTextLock);
-            if (mTextPlayer == NULL) {
-                mTextPlayer = new TimedTextPlayer(this, mListener, &mQueue);
+            if (mTextDriver == NULL) {
+                mTextDriver = new TimedTextDriver(mListener);
             }
 
-            return mTextPlayer->setParameter(key, request);
+            return mTextDriver->addOutOfBandTextSource(request);
         }
         case KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS:
         {

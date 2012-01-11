@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,98 +15,60 @@
  */
 
 #ifndef TIMEDTEXT_PLAYER_H_
-
 #define TIMEDTEXT_PLAYER_H_
 
-#include <media/MediaPlayerInterface.h>
+#include <binder/Parcel.h>
 #include <media/stagefright/foundation/ABase.h>
-#include <media/stagefright/foundation/AString.h>
+#include <media/stagefright/foundation/AHandler.h>
+#include <media/stagefright/MediaSource.h>
+#include <utils/RefBase.h>
 
-#include "include/TimedEventQueue.h"
-#include "TimedTextParser.h"
+#include "TimedTextSource.h"
 
 namespace android {
 
-class MediaSource;
-class AwesomePlayer;
-class MediaBuffer;
+class AMessage;
+class MediaPlayerBase;
+class TimedTextDriver;
+class TimedTextSource;
 
-class TimedTextPlayer {
+class TimedTextPlayer : public AHandler {
 public:
-    TimedTextPlayer(AwesomePlayer *observer,
-                    const wp<MediaPlayerBase> &listener,
-                    TimedEventQueue *queue);
+    TimedTextPlayer(const wp<MediaPlayerBase> &listener);
 
     virtual ~TimedTextPlayer();
 
-    // index: the index of the text track which will
-    // be turned on
-    status_t start(uint8_t index);
-
+    void start();
     void pause();
-
     void resume();
+    void seekToAsync(int64_t timeUs);
+    void setDataSource(sp<TimedTextSource> source);
 
-    status_t seekTo(int64_t time_us);
-
-    void addTextSource(sp<MediaSource> source);
-
-    status_t setTimedTextTrackIndex(int32_t index);
-    status_t setParameter(int key, const Parcel &request);
+protected:
+    virtual void onMessageReceived(const sp<AMessage> &msg);
 
 private:
-    enum TextType {
-        kNoText        = 0,
-        kInBandText    = 1,
-        kOutOfBandText = 2,
+    enum {
+        kWhatPause = 'paus',
+        kWhatSeek = 'seek',
+        kWhatSendSubtitle = 'send',
+        kWhatSetSource = 'ssrc',
     };
 
-    Mutex mLock;
-
-    sp<MediaSource> mSource;
-    sp<DataSource> mOutOfBandSource;
-
-    bool mSeeking;
-    int64_t mSeekTimeUs;
-
-    bool mStarted;
-
-    sp<TimedEventQueue::Event> mTextEvent;
-    bool mTextEventPending;
-
-    TimedEventQueue *mQueue;
+    // To add Parcel into an AMessage as an object, it should be 'RefBase'.
+    struct ParcelEvent : public RefBase {
+        Parcel parcel;
+    };
 
     wp<MediaPlayerBase> mListener;
-    AwesomePlayer *mObserver;
+    sp<TimedTextSource> mSource;
+    int32_t mSendSubtitleGeneration;
 
-    MediaBuffer *mTextBuffer;
-    Parcel mData;
-
-    // for in-band timed text
-    Vector<sp<MediaSource> > mTextTrackVector;
-
-    // for out-of-band timed text
-    struct OutOfBandText {
-        TimedTextParser::FileType type;
-        sp<DataSource> source;
-    };
-    Vector<OutOfBandText > mTextOutOfBandVector;
-
-    sp<TimedTextParser> mTextParser;
-    AString mText;
-
-    TextType mTextType;
-
-    void reset();
-
+    void doSeekAndRead(int64_t seekTimeUs);
+    void doRead(MediaSource::ReadOptions* options = NULL);
     void onTextEvent();
-    void postTextEvent(int64_t delayUs = -1);
-    void cancelTextEvent();
-
+    void postTextEvent(const sp<ParcelEvent>& parcel = NULL, int64_t timeUs = -1);
     void notifyListener(int msg, const Parcel *parcel = NULL);
-
-    status_t extractAndAppendLocalDescriptions(int64_t timeUs);
-    status_t extractAndSendGlobalDescriptions();
 
     DISALLOW_EVIL_CONSTRUCTORS(TimedTextPlayer);
 };
