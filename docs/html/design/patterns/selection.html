@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Selection
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Selection</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Android 3.0 introduced the <em>long press</em> gesture&mdash;that is, a touch that's held in the same
+position for a moment&mdash;as the global gesture to select data. This affects the way you should
+handle multi-select and contextual actions in your apps.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>What has changed?</h4>
+<p>In previous versions of Android, the long press gesture was universally used to display contextual
+actions for a given data item in a contextual menu.</p>
+<p>This pattern changed with Android 3.0. The long press gesture is now used to select data, combining
+contextual actions and selection management functions for selected data into a new element called
+the contextual action bar (CAB).</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/selection_context_menu.png">
+    <div class="figure-caption">
+      Traditional use of the long press gesture to show contextual menus.
+    </div>
+
+  </div>
+</div>
+
+<h4>Using the contextual action bar (CAB)</h4>
+<p>The selection CAB is a temporary action bar that overlays your app's current action bar while data
+is selected. It appears after the user long presses on a selectable data item.</p>
+
+<img src="../static/content/selection_cab_big.png">
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<p>From here the user can:</p>
+<ul>
+<li>Select additional data items by touching them.</li>
+<li>Trigger an action from the CAB that applies to all highlighted data items. The CAB then
+  automatically dismisses itself.</li>
+<li>Dismiss the CAB via the navigation bar's Back button or the CAB's checkmark button. This removes
+  the CAB along with all selection highlights.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/selection_cab_example.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Selecting CAB actions</h4>
+<p>You can decide which actions and elements appear in the CAB. Use the guidelines in the <a href="actionbar.html">Action Bar
+pattern</a> to decide which items to surface at the top level and which to move to the
+action overflow.</p>
+<h4>Dynamically adjust CAB actions</h4>
+<p>In most cases you need to adjust the actions in the CAB dynamically as the user adds more items to
+the selection. Actions that apply to a single selected data item don't necessarily apply to multiple
+selected data items of the same kind.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/selection_adjusting_actions.png">
+    <div class="figure-caption">
+      Adjusting actions in the CAB as additional items are selected.
+    </div>
+
+  </div>
+</div>
+
+<h2>Checklist</h2>
+<ul>
+<li>
+<p>Whenever your app supports the selection of multiple data items, make use of the contextual action
+  bar (CAB).</p>
+</li>
+<li>
+<p>Reserve the long press gesture for selection exclusively. Don't use it to display traditional
+  contextual menus.</p>
+</li>
+<li>
+<p>If you don't support multi-selection within a list, long press should do nothing.</p>
+</li>
+<li>
+<p>Plan the actions you want to display inside of a CAB in the same way you would plan the actions
+  inside your app's action bar.</p>
+</li>
+</ul>
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>
