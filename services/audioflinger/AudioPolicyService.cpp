@@ -193,7 +193,7 @@ status_t AudioPolicyService::setPhoneState(int state)
     if (!checkPermission()) {
         return PERMISSION_DENIED;
     }
-    if (state < 0 || state >= AUDIO_MODE_CNT) {
+    if (uint32_t(state) >= AUDIO_MODE_CNT) {
         return BAD_VALUE;
     }
 
