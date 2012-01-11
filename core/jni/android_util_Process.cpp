@@ -389,7 +389,7 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     jlong mem = 0;
 
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
-    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), NULL };
+    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
 
     char* p = buffer;
     while (*p && numFound < 2) {
