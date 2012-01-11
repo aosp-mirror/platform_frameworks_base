@@ -34,9 +34,8 @@ public class HTML5VideoInline extends HTML5VideoView{
         }
     }
 
-    HTML5VideoInline(int videoLayerId, int position,
-            boolean autoStart) {
-        init(videoLayerId, position, autoStart);
+    HTML5VideoInline(int videoLayerId, int position) {
+        init(videoLayerId, position);
         mTextureNames = null;
     }
 

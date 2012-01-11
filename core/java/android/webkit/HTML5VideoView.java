@@ -52,10 +52,6 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     // Switching between inline and full screen will also create a new instance.
     protected MediaPlayer mPlayer;
 
-    // This will be set up every time we create the Video View object.
-    // Set to true only when switching into full screen while playing
-    protected boolean mAutostart;
-
     // We need to save such info.
     protected Uri mUri;
     protected Map<String, String> mHeaders;
@@ -141,22 +137,17 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         }
     }
 
-    public boolean getAutostart() {
-        return mAutostart;
-    }
-
     public boolean getPauseDuringPreparing() {
         return mPauseDuringPreparing;
     }
 
     // Every time we start a new Video, we create a VideoView and a MediaPlayer
-    public void init(int videoLayerId, int position, boolean autoStart) {
+    public void init(int videoLayerId, int position) {
         mPlayer = new MediaPlayer();
         mCurrentState = STATE_INITIALIZED;
         mProxy = null;
         mVideoLayerId = videoLayerId;
         mSaveSeekTime = position;
-        mAutostart = autoStart;
         mTimer = null;
         mPauseDuringPreparing = false;
     }
