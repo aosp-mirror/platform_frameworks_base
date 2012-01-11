@@ -2,18 +2,28 @@ page.title=User Interface Guidelines
 @jd:body
 
 
-<img src="{@docRoot}assets/images/uiguidelines1.png" alt="" align="right">
+
+<div class="design-announce" style="background:none;overflow:auto;padding:10px 5px">
+  <a href="{@docRoot}design/index.html"><img src="{@docRoot}images/home/android-design.png" alt=""
+style="float:left;margin:0 1em 0 0;"/></a>
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>The Android UX team has put together a set of guidelines for the interaction and
+visual design of Android applications. The new collection provides an overview of
+Android styles, design patterns, building blocks for exceptional Android designs, and more.</p>
+<p><strong><a href="{@docRoot}design/index.html">Android Design</a></strong></p>
+
+<p>Over time, the documents below will be deprecated as more design information is published at
+the new location.</p>
+</div>
 
 
-<p>The Android UI team has begun developing guidelines for the interaction and
-visual design of Android applications. Look here for articles that describe
-these guidelines as we release them.</p>
+
 
  <dl>
   <dt><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon
 Design Guidelines</a> and <a
 href="{@docRoot}shareables/icon_templates-v4.0.zip">Android Icon Templates Pack
-&raquo; </a> <span class="new">updated</span></dt>
+&raquo; </a></dt>
   <dd>Your applications need a wide variety of icons, from a launcher icon to
 icons in menus, dialogs, tabs, the status bar, and lists. The Icon Guidelines
 describe each kind of icon in detail, with specifications for the size, color,
@@ -22,7 +32,8 @@ The Icon Templates Pack is an archive of Photoshop and Illustrator templates and
 filters that make it much simpler to create conforming icons.</dd>
 </dl>
  <dl>
-  <dt><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">Widget Design Guidelines</a> <span class="new">updated</span></dt>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">Widget Design
+Guidelines</a> </dt>
   <dd>A widget displays an application's most important or timely information
 at a glance, on a user's Home screen. These design guidelines describe how to
 design widgets that fit with others on the Home screen. They include links to
@@ -43,7 +54,7 @@ graphics files and templates that will make your designer's life easier.</dd>
   <dd>Android applications make use of Option menus and Context menus 
       that enable users to perform operations and navigate to other parts
       of your application or to other applications.  These guidelines describe
-      the difference between Options and Context menus, how to arrange
+      the difference between Options anontext menus, how to arrange
       menu items, when to put commands on-screen, and other details about
       menu design.
 </dd>

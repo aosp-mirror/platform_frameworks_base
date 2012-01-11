@@ -37,6 +37,11 @@ DatePicker</a></li>
       <li><a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Hello
 TimePicker</a></li>
     </ol>
+    
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}design/building-blocks/dialogs.html">Android Design: Dialogs</a></li>
+    </ol>
   </div>
 </div>
 
@@ -69,6 +74,13 @@ of the following subclasses:</p>
 <p>If you would like to customize your own dialog, you can extend the
 base {@link android.app.Dialog} object or any of the subclasses listed above and define a new layout.
 See the section on <a href="#CustomDialog">Creating a Custom Dialog</a> below.</p>
+
+<div class="design-announce">
+<p><strong>Dialog Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+href="{@docRoot}design/building-blocks/dialogs.html">Dialogs</a> guide.</p>
+</div>
+
 
 
 <h2 id="ShowingADialog">Showing a Dialog</h2>

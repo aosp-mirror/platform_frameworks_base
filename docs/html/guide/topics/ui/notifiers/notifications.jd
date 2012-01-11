@@ -33,6 +33,12 @@ user clicks it</li>
       <li>{@link android.app.Notification}</li>
       <li>{@link android.app.NotificationManager}</li>
     </ol>
+    
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}design/patterns/notifications.html">Android
+Design: Notifications</a></li>
+    </ol>
   </div>
 </div>
 
@@ -59,6 +65,14 @@ when selected by the user.</p>
 
 <img src="{@docRoot}images/notifications_window.png" alt="" />
 <p class="img-caption"><strong>Figure 2.</strong> The notifications window.</p>
+
+
+<div class="design-announce">
+<p><strong>Notification Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+href="{@docRoot}design/patterns/notifications.html">Notifications</a> guide.</p>
+</div>
+
 
 
 <h2 id="Basics">The Basics</h2>

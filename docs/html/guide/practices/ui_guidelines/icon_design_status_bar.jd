@@ -40,6 +40,13 @@ Screens</a></li>
 </div>
 
 
+<div class="design-announce">
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>Check out the new documents for designers at <strong><a
+href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
+for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
+</div>
+
 
 <p>Status bar icons are used to represent notifications from your application in
 the status bar.</p>
