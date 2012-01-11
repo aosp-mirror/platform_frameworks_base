@@ -34,7 +34,9 @@ to perform other tasks without losing their work</li>
 
 <h2>See also</h2>
 <ol>
-  <li><a><a href="{@docRoot}videos/index.html#v=fL6gSd4ugSI">Application Lifecycle video</a></li>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Android Design:
+Navigation</a></li>
+  <li><a href="{@docRoot}videos/index.html#v=fL6gSd4ugSI">Application Lifecycle video</a></li>
   <li><a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;} manifest
 element</a></li>
@@ -170,6 +172,13 @@ destroyed. The previous activity in the stack is resumed. When an activity is de
 <em>does not</em> retain the activity's state.</li>
   <li>Activities can be instantiated multiple times, even from other tasks.</li>
 </ul>
+
+
+<div class="design-announce">
+<p><strong>Navigation Design</strong></p>
+  <p>For more about how app navigation works on Android, read Android Design's <a
+href="{@docRoot}design/patterns/navigation.html">Navigation</a> guide.</p>
+</div>
 
 
 <h2 id="ActivityState">Saving Activity State</h2>

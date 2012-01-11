@@ -44,6 +44,13 @@ parent.link=index.html
 </div>
 
 
+<div class="design-announce">
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>Check out the new documents for designers at <strong><a
+href="{@docRoot}design/index.html">Android Design</a></strong>.</p>
+</div>
+
+
 <p>App widgets (sometimes just "widgets") are a feature introduced in Android 1.5 and vastly
 improved in Android 3.0 and 3.1. A widget can display an application's most timely or otherwise
 relevant information at a glance, on a user's Home screen. The standard Android system image

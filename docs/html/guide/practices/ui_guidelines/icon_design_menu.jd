@@ -32,6 +32,13 @@ Screens</a></li>
 </div>
 
 
+<div class="design-announce">
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>Check out the new documents for designers at <strong><a
+href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
+for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
+</div>
+
 
 <p>Menu icons are graphical elements placed in the options menu shown to users
 when they press the Menu button. They are drawn in a flat-front perspective and
