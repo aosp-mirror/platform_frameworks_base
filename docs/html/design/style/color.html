@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Color
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+<style>
+  .color-row {
+    width: 740px;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+
+    display:         box;
+    display: -webkit-box;
+    display:    -moz-box;
+
+            box-orient: horizontal;
+    -webkit-box-orient: horizontal;
+       -moz-box-orient: horizontal;
+
+    cursor: pointer;
+
+            user-select: none;
+    -webkit-user-select: none;
+    /* nested user-select in FF is broken as of Jan 2012, don't use it */
+  }
+
+  .color-row-container {
+    line-height: 0; /* to remove more top space in FF for -moz-box elements */
+  }
+
+  .color-row-container + .color-row-container {
+    margin-top: -10px !important;
+  }
+
+  .color-row li {
+    margin-left: 0 !important;
+    position: relative;
+    list-style-type: none;
+    height: 80px;
+    display: block;
+
+            box-flex: 1;
+    -webkit-box-flex: 1;
+       -moz-box-flex: 1;
+  }
+
+  .color-row li:before {
+    display: none;
+  }
+
+  .color-row li.thin {
+    height: 40px;
+  }
+
+  .color-row li span {
+    display: none;
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    margin-left: -2.5em;
+    width: 5em;
+    background-color: #fff;
+    padding: 10px;
+    font-weight: 600;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 5px 5px rgba(0,0,0,0.1);
+    cursor: text;
+
+            user-select: text;
+    -webkit-user-select: text;
+    /* nested user-select in FF is broken as of Jan 2012, don't use it */
+  }
+
+  .color-row li:hover span {
+    display: block;
+  }
+
+  /*.color-row li span:before {
+    color: #999;
+    content: 'copy ';
+  }*/
+
+  /* triangle callout */
+  .color-row li span:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: -16px;
+    border: 8px solid transparent;
+    border-top-color: #fff;
+    width: 0;
+    height: 0;
+    margin-left: -8px;
+  }
+</style>
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Color</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>Use color primarily for emphasis. Choose colors that fit with your brand and provide good contrast
+between visual components. Note that red and green may be indistinguishable to color-blind users.</p>
+
+    <div class="color-row-container">
+      <ul class="color-row">
+        <li><span>#33b5e5</span></li>
+        <li><span>#aa66cc</span></li>
+        <li><span>#99cc00</span></li>
+        <li><span>#ffbb33</span></li>
+        <li><span>#ff4444</span></li>
+      </ul>
+    </div>
+
+    <div class="color-row-container">
+      <ul class="color-row">
+        <li class="thin"><span>#0099cc</span></li>
+        <li class="thin"><span>#9933cc</span></li>
+        <li class="thin"><span>#669900</span></li>
+        <li class="thin"><span>#ff8800</span></li>
+        <li class="thin"><span>#cc0000</span></li>
+      </ul>
+    </div>
+
+<h2>Palette</h2>
+<p>Blue is the standard accent color in Android's color palette. Each color has a corresponding darker
+shade that can be used as a complement when needed.</p>
+<p><a href="../static/download/color_swatches.zip">Download the swatches</a></p>
+
+<img src="../static/content/color_spectrum.png">
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('.color-row li').each(function() {
+      var color = $(this).text();
+      $(this).css('background-color', color);
+      $(this).find('span')
+          .css('color', color)
+          .text(color.toUpperCase());
+    });
+    
+  });
+</script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>

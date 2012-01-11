@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Action Bar
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Action Bar</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<img src="../static/content/action_bar_pattern_overview.png">
+
+<p>The <em>action bar</em> is arguably the most important structural element of an Android app. It's a
+dedicated piece of real estate at the top of each screen that is generally persistent throughout the
+app.</p>
+<p><strong>The main purpose of the action bar is to</strong>:</p>
+<ul>
+<li>Make important actions (such as <em>New</em> or <em>Search</em>, etc) prominent and accessible in a predictable
+   way.</li>
+<li>Support consistent navigation and view switching within apps.</li>
+<li>Reduce clutter by providing an action overflow for rarely used actions.</li>
+<li>Provide a dedicated space for giving your app an identity.</li>
+</ul>
+<p>If you're new to writing Android apps, note that the action bar is one of the most important design
+elements you can implement. Following the guidelines described here will go a long way toward making
+your app's interface consistent with the core Android apps.</p>
+<h2>General Organization</h2>
+<p>The action bar is split into four different functional areas that apply to most apps.</p>
+<img src="../static/content/action_bar_basics.png">
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7 with-callouts">
+
+    <ol>
+      <li class="value-1"><h4>App icon</h4>
+        <p>
+
+The app icon establishes your app's identity. It can be replaced with a different logo or branding if
+you wish.
+Important: If the app is currently not displaying the top-level screen, be sure to display the Up
+caret to the left of the app icon, so the user can navigate up the hierarchy. For more discussion of
+Up navigation, see the "Navigation" pattern.
+
+<div class="figure">
+  <img src="../static/content/action_bar_pattern_up_app_icon.png">
+  <div class="figure-caption">
+    App icon with and without "up" affordance.
+  </div>
+</div>
+
+        </p>
+      </li>
+    </ol>
+
+  </div>
+  <div class="layout-content-col span-6 with-callouts">
+
+    <ol>
+      <li class="value-2"><h4>View control</h4>
+        <p>
+
+If your app displays data in different views, this segment of the action bar allows users to switch
+views. Examples of view-switching controls are drop-down menus or tab controls. 
+
+        </p>
+        <p>
+
+If your app doesn't support different views, you can also use this space to display non-interactive
+content, such as an app title or longer branding information.
+
+        </p>
+      </li>
+      <li class="value-3"><h4>Action buttons</h4>
+        <p>
+
+Show the most important actions of your app in the actions section. Actions that don't fit in the
+action bar are moved automatically to the action overflow.
+
+        </p>
+      </li>
+      <li class="value-4"><h4>Action overflow</h4>
+        <p>
+
+Move less often used actions to the action overflow.
+
+        </p>
+      </li>
+    </ol>
+
+  </div>
+</div>
+
+
+<h2>Adapting to Rotation and Different Screen Sizes</h2>
+<p>One of the most important UI issues to consider when creating an app is how to adjust to screen
+rotation on different screen sizes.</p>
+<p>You can adapt to such changes by using <em>split action bars</em>, which allow you to distribute action bar
+content across multiple bars located below the main action bar or at the bottom of the screen.</p>
+
+<img src="../static/content/action_bar_pattern_rotation.png">
+<div class="figure-caption">
+  Split action bar showing action buttons at the bottom of the screen in vertical orientation.
+</div>
+
+<h2>Layout Considerations for Split Action Bars</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-8 with-callouts">
+
+<p>When splitting up content across multiple action bars, you generally have three possible locations
+for action bar content:</p>
+<ol>
+<li><strong>Main action bar</strong></li>
+<li><strong>Top bar</strong></li>
+<li><strong>Bottom bar</strong></li>
+</ol>
+<p>If the user can navigate up the hierarchy from a given screen, the main action bar contains the up
+caret, at a minimum.</p>
+<p>To allow the user to quickly switch between the views your app provides, use tabs or a spinner in
+the top bar.</p>
+<p>To display actions and, if necessary, the action overflow, use the bottom bar.</p>
+
+  </div>
+  <div class="layout-content-col span-3">
+
+    <img src="../static/content/action_bar_pattern_considerations.png">
+
+  </div>
+</div>
+
+<h2>Contextual Action Bars</h2>
+<p>A <em>contextual action bar (CAB)</em> is a temporary action bar that overlays the app's action bar for the
+duration of a particular sub-task. CABs are most typically used for tasks that involve acting on
+selected data or text.</p>
+
+<img src="../static/content/action_bar_cab.png">
+<div class="figure-caption">
+  Contextual action bar shown in Browser and Gmail
+</div>
+
+<p>The selection CAB appears after a long press on a selectable data item triggers selection mode.</p>
+<p><strong>From here the user can</strong>:</p>
+<ul>
+<li>Select additional elements by touching them.</li>
+<li>Trigger an action from the CAB that applies to all selected data items. The CAB then
+   automatically dismisses itself.</li>
+<li>Dismiss the CAB via the navigation bar's Back button or the CAB's checkmark button. This removes
+   the CAB along with all selection highlights.</li>
+</ul>
+<p>Use CABs whenever you allow the user to select data via long press. You can control the action
+content of a CAB in order to insert the actions you would like the user to be able to perform.</p>
+<p>For more information, refer to the "Selection" pattern.</p>
+<h2>Action Bar Elements</h2>
+<h4>Tabs</h4>
+<p><em>Tabs</em> display app views concurrently and make it easy to explore and switch between them. Use tabs
+if you expect your users to switch views frequently.</p>
+
+<img src="../static/content/tabs_youtube.png">
+
+<p>There are two types of tabs: fixed and scrollable.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Scrollable tabs</h4>
+<p><em>Scrollable tabs</em> always take up the entire width of the bar, with the currently active view item in
+the center, and therefore need to live in a dedicated bar. Scrollable tabs can themselves be
+scrolled horizontally to bring more tabs into view.</p>
+<p>Use scrollable tabs if you have a large number of views or if you're unsure how many views will be
+displayed because your app inserts views dynamically (for example, open chats in a messaging app
+that the user can navigate between). Scrollable tabs should always allow the user to navigate
+between the views by swiping left or right on the content area as well as swiping the tabs
+themselves.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <video width="400" class="with-shadow play-on-hover" autoplay>
+      <source src="../static/content/tabs_scrolly.mp4" type="video/mp4">
+      <source src="../static/content/tabs_scrolly.webm" type="video/webm">
+      <source src="../static/content/tabs_scrolly.ogv" type="video/ogg">
+    </video>
+    <div class="figure-caption">
+      Scrolling tabs in Android Market.
+      <div class="video-instructions">&nbsp;</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Fixed tabs</h4>
+<p><em>Fixed tabs</em> are always visible on the screen, and can't be moved out of the way like scrollable
+tabs. Fixed tabs in the main action bar can move to the top bar when the screen orientation changes.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/action_bar_pattern_default_tabs.png">
+    <div class="figure-caption">
+      Default fixed tabs shown in Holo Dark &amp; Light.
+    </div>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Spinners</h4>
+<p>A <em>spinner</em> is a drop-down menu that allows users to switch between views of your app. </p>
+<p><strong>Use spinners rather than tabs in the main action bar if</strong>:</p>
+<ul>
+<li>You don't want to give up the vertical screen real estate for a dedicated tab bar.</li>
+<li>You expect your app's users to switch views infrequently.</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/action_bar_pattern_spinner.png">
+    <div class="figure-caption">
+      Action bar spinner from Calendar application.
+    </div>
+
+  </div>
+</div>
+
+<h4>Action buttons</h4>
+<p><em>Action buttons</em> on the action bar surface your app's most important activities. Think about which
+buttons will get used most often, and order them accordingly. Depending on available screen real
+estate, the system shows your most important actions as action buttons and moves the rest to the
+action overflow.</p>
+
+<img src="../static/content/action_bar_pattern_action_icons.png">
+<div class="figure-caption">
+  A sampling of action buttons used throughout the Gmail application.
+</div>
+
+<p>For guidance on prioritizing actions, use the FIT scheme.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-4">
+
+<p><strong>F &mdash; Frequent</strong></p>
+<ul>
+<li>Will people use this action at least 7 out of 10 times they visit the screen?</li>
+<li>Will they typically use it several times in a row?</li>
+<li>Would taking an extra step every time truly be burdensome?</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p><strong>I &mdash; Important</strong></p>
+<ul>
+<li>Do you want everyone to discover this action because it's especially cool or a selling point?</li>
+<li>Is it something that needs to be effortless in the rare cases it's needed?</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+<p><strong>T &mdash; Typical</strong></p>
+<ul>
+<li>Is it typically presented as a first-class action in similar apps?</li>
+<li>Given the context, would people be surprised if it were buried in the action overflow?</li>
+</ul>
+
+  </div>
+</div>
+
+<p>If either F, I, or T apply, then it's appropriate for the action bar. Otherwise, it belongs in the
+action overflow.</p>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<h4>Action overflow</h4>
+<p>The action overflow in the action bar provides access to your app's less frequently used actions.
+The overflow icon only appears on phones that have no menu hardware keys. Phones with menu keys
+display the action overflow when the user presses the key.</p>
+
+  </div>
+  <div class="layout-content-col span-7">
+
+    <img src="../static/content/action_bar_pattern_overflow.png">
+    <div class="figure-caption">
+      Action overflow is pinned to the right side.
+    </div>
+
+  </div>
+</div>
+
+<p>How many actions will fit in the main action bar? Action bar capacity is controlled by the following
+rules:</p>
+<ul>
+<li>Action buttons in the main action bar may not occupy more than 50% of the bar's width. Action
+  buttons on bottom action bars can use the entire width.</li>
+<li>The screen width in density-independent pixels
+  (<acronym title="Density-independent pixels. One dp is one pixel on a 160 dpi screen.">dp</acronym>)
+  determine the number of items that will fit in the main action bar:<ul>
+<li>smaller than 360 dp = 2 icons</li>
+<li>360-499 dp = 3 icons</li>
+<li>500-599 dp = 4 icons</li>
+<li>600 dp and larger = 5 icons</li>
+</ul>
+</li>
+</ul>
+
+<img src="../static/content/action_bar_pattern_table.png">
+<div class="figure-caption">
+  In the above table "o" denotes an action bar item and "=" an overflow icon.
+</div>
+
+<h4>Sharing data</h4>
+<p>Whenever your app permits sharing of data, such as images or movie clips, use a <em>share action
+provider</em> in your action bar. The share action provider is designed to speed up sharing by
+displaying the most recently used sharing service next to a spinner button that contains other
+sharing options.</p>
+
+<img src="../static/content/action_bar_pattern_share_pack.png">
+<div class="figure-caption">
+  The Gallery app's share action provider with extended spinner for additional sharing options.
+</div>
+
+<h2>Action Bar Checklist</h2>
+<p>When planning your split action bars, ask yourself questions like these:</p>
+<h4>How important is view navigation to the task?</h4>
+<p>If view navigation is very important to your app, use tabs (for fastest view-switching) or spinners.</p>
+<h4>Which of the app's actions need to be consistently available directly from the action bar, and which can be moved to the action overflow?</h4>
+<p>Use the <acronym title="Frequent, Important or Typical">FIT</acronym> scheme to decide if actions
+are displayed at the top-level or can be moved to the action overflow. If the number of top-level
+actions exceeds the capacity of the main action bar, display them separately in a bottom action bar.</p>
+<h4>What else is important enough to warrant continuous display?</h4>
+<p>Sometimes it is important to display contextual information for your app that's always visible.
+Examples are the number of unread messages in a messaging inbox view or the Now Playing information
+in a music player. Carefully plan which important information you would like to display and
+structure your action bars accordingly.</p>
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>

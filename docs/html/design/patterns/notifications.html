@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>
+
+Android Design - Notifications
+    </title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:regular,medium,thin,italic,mediumitalic">
+    <link rel="stylesheet" href="../static/yui-3.3.0-reset-min.css">
+    <link rel="stylesheet" href="../static/default.css">
+
+  </head>
+  <body>
+
+    <div id="page-container">
+
+      <div id="page-header"><a href="../index.html">Android Design</a></div>
+
+      <div id="main-row">
+
+        <ul id="nav">
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../index.html">Get Started</a></div>
+            <ul>
+              <li><a href="../get-started/creative-vision.html">Creative Vision</a></li>
+              <li><a href="../get-started/principles.html">Design Principles</a></li>
+              <li><a href="../get-started/ui-overview.html">UI Overview</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../style/index.html">Style</a></div>
+            <ul>
+              <li><a href="../style/devices-displays.html">Devices and Displays</a></li>
+              <li><a href="../style/themes.html">Themes</a></li>
+              <li><a href="../style/touch-feedback.html">Touch Feedback</a></li>
+              <li><a href="../style/metrics-grids.html">Metrics and Grids</a></li>
+              <li><a href="../style/typography.html">Typography</a></li>
+              <li><a href="../style/color.html">Color</a></li>
+              <li><a href="../style/iconography.html">Iconography</a></li>
+              <li><a href="../style/writing.html">Writing Style</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../patterns/index.html">Patterns</a></div>
+            <ul>
+              <li><a href="../patterns/new-4-0.html">New in Android 4.0</a></li>
+              <li><a href="../patterns/gestures.html">Gestures</a></li>
+              <li><a href="../patterns/app-structure.html">App Structure</a></li>
+              <li><a href="../patterns/navigation.html">Navigation</a></li>
+              <li><a href="../patterns/actionbar.html">Action Bar</a></li>
+              <li><a href="../patterns/multi-pane-layouts.html">Multi-pane Layouts</a></li>
+              <li><a href="../patterns/swipe-views.html">Swipe Views</a></li>
+              <li><a href="../patterns/selection.html">Selection</a></li>
+              <li><a href="../patterns/notifications.html">Notifications</a></li>
+              <li><a href="../patterns/compatibility.html">Compatibility</a></li>
+              <li><a href="../patterns/pure-android.html">Pure Android</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-section">
+            <div class="nav-section-header"><a href="../building-blocks/index.html">Building Blocks</a></div>
+            <ul>
+              <li><a href="../building-blocks/tabs.html">Tabs</a></li>
+              <li><a href="../building-blocks/lists.html">Lists</a></li>
+              <li><a href="../building-blocks/grid-lists.html">Grid Lists</a></li>
+              <li><a href="../building-blocks/scrolling.html">Scrolling</a></li>
+              <li><a href="../building-blocks/spinners.html">Spinners</a></li>
+              <li><a href="../building-blocks/buttons.html">Buttons</a></li>
+              <li><a href="../building-blocks/text-fields.html">Text Fields</a></li>
+              <li><a href="../building-blocks/seek-bars.html">Seek Bars</a></li>
+              <li><a href="../building-blocks/progress.html">Progress &amp; Activity</a></li>
+              <li><a href="../building-blocks/switches.html">Switches</a></li>
+              <li><a href="../building-blocks/dialogs.html">Dialogs</a></li>
+              <li><a href="../building-blocks/pickers.html">Pickers</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <div id="back-dac-section"><a href="../../index.html" target="_blank">Developers</a></div>
+          </li>
+
+        </ul>
+
+        <div id="content">
+
+          
+          <div class="layout-content-row content-header">
+            <div class="layout-content-col span-9">
+              <h2>Notifications</h2>
+            </div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+
+          
+
+<p>The notification system allows your app to keep the user informed about important events, such as
+new messages in a chat app or a calendar event.</p>
+<p>To create an app that feels streamlined, pleasant, and respectful, it is important to design your
+notifications carefully. Notifications embody your app's voice, and contribute to your app's
+personality. Unwanted or unimportant notifications can annoy the user, so use them judiciously.</p>
+<h4>When to display a notification</h4>
+<p>To create an application that people love, it's important to recognize that the user's attention and
+focus is a resource that must be protected. To use an analogy that might resonate with software
+developers, the user is not a method that can be invoked to return a value.  The user's focus is a
+resource more akin to a thread, and creating a notification momentarily blocks the user thread as
+they process and then dismiss the interruptive notification.</p>
+<p>Android's notification system has been designed to quickly inform users of events while they focus
+on a task, but it is nonetheless still important to be conscientious when deciding to create a
+notification.</p>
+<p>While well behaved apps generally only speak when spoken to, there are some limited cases where an
+app actually should interrupt the user with an unprompted notification.</p>
+<p>Notifications should be used primarily for <strong>time sensitive events</strong>, and especially if these
+synchronous events <strong>involve other people</strong>. For instance, an incoming chat is a real time and
+synchronous form of communication: there is another user actively waiting on you to respond.
+Calendar events are another good example of when to use a notification and grab the user's
+attention, because the event is imminent, and calendar events often involve other people.</p>
+
+<img src="../static/content/notifications_pattern_real_time_people.png">
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>When not to display a notification</h4>
+<p>There are however many other cases where notifications should not be used:</p>
+<ul>
+<li>
+<p>Don't notify the user of information that is not directed specifically at them, or information
+that is not truly time sensitive.  For instance the asynchronous and undirected updates flowing
+through a social network do not warrant a real time interruption.</p>
+</li>
+<li>
+<p>Don't create a notification if the relevant new information is currently on screen. Instead, use
+the UI of the application itself to notify the user of new information directly in context. For
+instance, a chat application should not create system notifications while the user is actively
+chatting with another user.</p>
+</li>
+<li>
+<p>Don't interrupt the user for low level technical operations, like saving or syncing information,
+or updating an application, if it is possible for the system to simply take care of itself without
+involving the user.</p>
+</li>
+<li>
+<p>Don't interrupt the user to inform them of an error if it is possible for the application to
+quickly recover from the error on its own without the user taking any action.</p>
+</li>
+<li>
+<p>Don't use notifications for services that the user cannot manually start or stop.</p>
+</li>
+<li>
+<p>Don't create superfluous notifications just to get your brand in front of users. Such
+notifications will only frustrate and likely alienate your audience. The best way to provide the
+user with a small amount of updated information and to keep them engaged with your application is to
+develop a widget that they can choose to place on their home screen.</p>
+</li>
+</ul>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_social_fail.png">
+
+  </div>
+</div>
+
+<h2>Design Guidelines</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_anatomy.png">
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<h4>Make it personal</h4>
+<p>For notifications of items sent by another user (such as a message or status update), include that
+person's image.</p>
+<p>Remember to include the app icon as a secondary icon in the notification, so that the user can
+still identify which app posted it.</p>    
+
+  </div>
+</div>
+
+<h4>Navigate to the right place</h4>
+<p>When the user touches a notification, be open your app to the place where the user can consume and
+act upon the data referenced in the notification. In most cases this will be the detail view of a
+single data item (e.g. a message), but it might also be a summary view if the notification is
+stacked (see <em>Stacked notifications</em> below) and references multiple items. If in any of those cases
+the user is taken to a hierarchy level below your app's top-level, insert navigation into your app's
+back stack to allow them to navigate to your app's top level using the system back key. For more
+information, see the chapter on <em>System-to-app navigation</em> in the
+<a href="../patterns/notifications.html">Navigation</a> design pattern.</p>
+<h4>Timestamps for time sensitive events</h4>
+<p>By default, standard Android notifications include a timestamp in the upper right corner. Consider
+whether the timestamp is valuable in the context of your notification. If the timestamp is not
+valuable, consider if the event is important enough to warrant grabbing the user's attention with a
+notification. If the notification is important enough, decide if you would like to opt out of
+displaying the timestamp.</p>
+<p>Include a timestamp if the user likely needs to know how long ago the notification occurred. Good
+candidates for timestamps include communication notifications (email, messaging, chat, voicemail)
+where the user may need the timestamp information to understand the context of a message or to
+tailor a response.</p>
+<h4>Stack your notifications</h4>
+<p>If your app creates a notification while another of the same type is still pending, avoid creating
+an altogether new notification object. Instead, stack the notification.</p>
+<p>A stacked notification builds a summary description and allows the user to understand how many
+notifications of a particular kind are pending.</p>
+<p><strong>Don't</strong>:</p>
+
+<img src="../static/content/notifications_pattern_additional_fail.png">
+
+<p><strong>Do</strong>:</p>
+
+<img src="../static/content/notifications_pattern_additional_win.png">
+
+<p>If you keep the summary and detail information on different screens, a stacked notification may need
+to open to a different place in the app than a single notification.</p>
+<p>For example, a single email notification should always open to the content of the email, whereas a
+stacked email notification opens to the Inbox view.</p>
+<h4>Clean up after yourself</h4>
+<p>Just like calendar events, some notifications alert the user to an event that happens at a
+particular point in time. After that moment has passed, the notification is likely not important to
+the user anymore, and you should consider removing it automatically.  The same is true for active
+chat conversations or voicemail messages the user has listened to, users should not have to manually
+dismiss notifications independently from taking action on them.</p>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-7">
+
+<h4>Provide a peek into your notification</h4>
+<p>You can provide a short preview of your notification's content by providing optional ticker text.
+The ticker text is shown for a short amount of time when the notification enters the system and then
+hides automatically.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_phone_ticker.png">
+
+  </div>
+</div>
+
+<h4>Make notifications optional</h4>
+<p>Users should always be in control of notifications. Allow the user to silence the notifications from
+your app by adding a notification settings item to your application settings.</p>
+<h4>Use distinct icons</h4>
+<p>By glancing at the notification area, the user should be able to discern what notification types are
+currently pending.</p>
+<p><strong>Do</strong>:</p>
+<ul>
+<li>Look at the notification icons the Android apps already provide and create notification icons for
+  your app that are sufficiently distinct in appearance.</li>
+</ul>
+<p><strong>Don't</strong>:</p>
+<ul>
+<li>Use color to distinguish your app from others. Notification icons should generally be monochrome.</li>
+</ul>
+
+<h2>Interacting With Notifications</h2>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_phone_icons.png">
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<p>Notifications are indicated by icons in the notification area and can be accessed by opening the
+notification drawer.</p>
+<p>Inside the drawer, notifications are chronologically sorted with the latest one on top. Touching a
+notification opens the associated app to detailed content matching the notification. Swiping left or
+right on a notification removes it from the drawer.</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+<p>On tablets, the notification area is integrated with the system bar at the bottom of the screen. The
+notification drawer is opened by touching anywhere inside the notification area.</p>
+
+  </div>
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_tablet.png">
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-6">
+
+    <img src="../static/content/notifications_pattern_ongoing_music.png">
+
+  </div>
+  <div class="layout-content-col span-6">
+
+<h4>Ongoing notifications</h4>
+<p>Ongoing notifications keep users informed about an ongoing process in the background. For example,
+music players announce the currently playing track in the notification system and continue to do so
+until the user stops the playback. They can also be used to show the user feedback for longer tasks
+like downloading a file, or encoding a video. Ongoing notifications cannot be manually removed from
+the notification drawer.</p>
+
+  </div>
+</div>
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-12">
+
+<h4>Dialogs and toasts are for feedback not notification</h4>
+<p>Your app should not create a dialog or toast if it is not currently on screen. Dialogs and Toasts
+should only be displayed as the immediate response to the user taking an action inside of your app.
+For instance, dialogs can be used to confirm that the user understands the severity of an action,
+and toasts can echo back that an action has been successfully taken.</p>
+
+  </div>
+</div>
+
+<div class="vspace size-1">&nbsp;</div>
+
+<img src="../static/content/notifications_pattern_dialog_toast.png">
+
+
+
+
+          
+          <div class="layout-content-row content-footer">
+            <div class="paging-links layout-content-col span-9">&nbsp;</div>
+            <div class="paging-links layout-content-col span-4">
+              <a href="#" class="prev-page-link">Previous</a>
+              <a href="#" class="next-page-link">Next</a>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div id="page-footer">
+
+        <p id="copyright">
+          Except as noted, this content is licensed under
+          <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">
+          Creative Commons Attribution 2.5</a>.<br>
+          For details and restrictions, see the
+          <a href="http://developer.android.com/license.html" target="_blank">Content License</a>.
+        </p>
+
+        <p>
+          <a href="http://www.android.com/terms.html" target="_blank">Site Terms of Service</a> &ndash;
+          <a href="http://www.android.com/privacy.html" target="_blank">Privacy Policy</a> &ndash;
+          <a href="http://www.android.com/branding.html" target="_blank">Brand Guidelines</a>
+        </p>
+
+      </div>
+    </div>
+
+    <script src="../static/jquery-1.6.2.min.js"></script>
+    <script>
+    var SITE_ROOT = '../';
+    </script>
+    <script src="../static/default.js"></script>
+
+
+    <script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-5831155-1");
+    pageTracker._trackPageview();
+    </script>
+  </body>
+</html>
