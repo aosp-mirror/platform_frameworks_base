@@ -35,6 +35,9 @@ class IAudioTrack : public IInterface
 public: 
     DECLARE_META_INTERFACE(AudioTrack);
 
+    /* Get this track's control block */
+    virtual sp<IMemory> getCblk() const = 0;
+
     /* After it's created the track is not active. Call start() to
      * make it active. If set, the callback will start being called.
      */
@@ -67,8 +70,6 @@ public:
      */
     virtual status_t    attachAuxEffect(int effectId) = 0;
 
-    /* get this track's control block */
-    virtual sp<IMemory> getCblk() const = 0;    
 };
 
 // ----------------------------------------------------------------------------
