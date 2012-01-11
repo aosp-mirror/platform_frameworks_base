@@ -73,8 +73,10 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/inde
 API Demos</a></li>
   </ol>
 
-  <h2>See also</h2>item
+  <h2>See also</h2>
   <ol>
+    <li><a
+href="{@docRoot}design/patterns/actionbar.html">Android Design: Action Bar</a></li>
     <li><a href="{@docRoot}guide/topics/ui/menus.html">Menus</a></li>
     <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Supporting Tablets
 and Handsets</a></li>
@@ -122,6 +124,14 @@ include a MENU button).</p>
 href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app (on a
 landscape handset), showing the logo on the left, navigation tabs, and an action item on the
 right (plus the overflow menu button).</p>
+
+
+<div class="design-announce">
+<p><strong>Action Bar Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+href="{@docRoot}design/patterns/actionbar.html">Action Bar</a> guide.</p>
+</div>
+
 
 
 <div class="sidebox-wrapper">
@@ -535,6 +545,12 @@ the email application, but presses the action bar icon to navigate up, rather th
 <img src="{@docRoot}images/ui/actionbar-navigate-up.png" alt="" />
 <p class="img-caption"><strong>Figure 6.</strong> Example behavior for UP navigation after
 entering the Email app from the People app.</p>
+
+<div class="design-announce">
+<p><strong>Navigation Design</strong></p>
+  <p>For more about how <em>Up</em> and <em>Back</em> navigation differ, read Android Design's <a
+href="{@docRoot}design/patterns/navigation.html">Navigation</a> guide.</p>
+</div>
 
 <p>To enable the icon for up navigation (which displays the "up" indicator next to the icon), call
 {@link android.app.ActionBar#setDisplayHomeAsUpEnabled setDisplayHomeAsUpEnabled(true)} on your

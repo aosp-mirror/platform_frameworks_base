@@ -57,6 +57,16 @@ Screens</a></li>
 </div>
 </div>
 
+
+<div class="design-announce">
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>Check out the new documents for designers at <strong><a
+href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
+for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
+</div>
+
+
+
 <p>Creating a unified look and feel throughout a user interface adds value to
 your product. Streamlining the graphic style will also make the UI seem more
 professional to users.</p>

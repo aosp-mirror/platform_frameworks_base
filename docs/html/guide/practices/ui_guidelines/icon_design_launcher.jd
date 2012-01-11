@@ -26,6 +26,15 @@ Screens</a></li>
 </div>
 
 
+<div class="design-announce">
+<p><strong>New Guides for App Designers!</strong></p> 
+<p>Check out the new documents for designers at <strong><a
+href="{@docRoot}design/index.html">Android Design</a></strong>, including more guidelines
+for <a href="{@docRoot}design/style/iconography.html">Iconography</a>.</p>
+</div>
+
+
+
 <p>A launcher icon is a graphic that represents your application. Launcher icons are used by
 Launcher applications and appear on the user’s Home screen. Launcher icons can also be used to
 represent shortcuts into your application (for example, a contact shortcut icon that opens detail
