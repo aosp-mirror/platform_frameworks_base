@@ -208,9 +208,6 @@ status_t AudioRecord::set(
 
     if (cbf != 0) {
         mClientRecordThread = new ClientRecordThread(*this, threadCanCallJava);
-        if (mClientRecordThread == 0) {
-            return NO_INIT;
-        }
     }
 
     mStatus = NO_ERROR;
