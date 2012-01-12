@@ -341,7 +341,7 @@ public class SQLiteQueryBuilder
             // in both the wrapped and original forms.
             String sqlForValidation = buildQuery(projectionIn, "(" + selection + ")", groupBy,
                     having, sortOrder, limit);
-            validateSql(db, sqlForValidation); // will throw if query is invalid
+            validateQuerySql(db, sqlForValidation); // will throw if query is invalid
         }
 
         String sql = buildQuery(
@@ -357,16 +357,12 @@ public class SQLiteQueryBuilder
     }
 
     /**
-     * Verifies that a SQL statement is valid by compiling it.
+     * Verifies that a SQL SELECT statement is valid by compiling it.
      * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
      */
-    private void validateSql(SQLiteDatabase db, String sql) {
-        db.lock(sql);
-        try {
-            new SQLiteCompiledSql(db, sql).releaseSqlStatement();
-        } finally {
-            db.unlock();
-        }
+    private void validateQuerySql(SQLiteDatabase db, String sql) {
+        db.getThreadSession().prepare(sql,
+                db.getThreadDefaultConnectionFlags(true /*readOnly*/), null);
     }
 
     /**

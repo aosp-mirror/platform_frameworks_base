@@ -30,6 +30,12 @@ import android.util.Printer;
  */
 public final class SQLiteDebug {
     /**
+     * Controls the printing of informational SQL log messages.
+     */
+    public static final boolean DEBUG_SQL_LOG =
+            Log.isLoggable("SQLiteLog", Log.VERBOSE);
+
+    /**
      * Controls the printing of SQL statements as they are executed.
      */
     public static final boolean DEBUG_SQL_STATEMENTS =
@@ -186,6 +192,7 @@ public final class SQLiteDebug {
      * @param printer The printer for dumping database state.
      */
     public static void dump(Printer printer, String[] args) {
+        SQLiteDatabase.dumpAll(printer);
     }
 
     /**

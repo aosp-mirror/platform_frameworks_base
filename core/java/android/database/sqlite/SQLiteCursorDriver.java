@@ -39,7 +39,7 @@ public interface SQLiteCursorDriver {
     void cursorDeactivated();
 
     /**
-     * Called by a SQLiteCursor when it is requeryed.
+     * Called by a SQLiteCursor when it is requeried.
      */
     void cursorRequeried(Cursor cursor);
 

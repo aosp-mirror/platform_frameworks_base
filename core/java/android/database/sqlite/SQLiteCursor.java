@@ -43,7 +43,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private final String[] mColumns;
 
     /** The query object for the cursor */
-    private SQLiteQuery mQuery;
+    private final SQLiteQuery mQuery;
 
     /** The compiled query this cursor came from */
     private final SQLiteCursorDriver mDriver;
@@ -96,9 +96,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         if (query == null) {
             throw new IllegalArgumentException("query object cannot be null");
         }
-        if (query.mDatabase == null) {
-            throw new IllegalArgumentException("query.mDatabase cannot be null");
-        }
         if (StrictMode.vmSqliteObjectLeaksEnabled()) {
             mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
         } else {
@@ -109,38 +106,21 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mColumnNameMap = null;
         mQuery = query;
 
-        query.mDatabase.lock(query.mSql);
-        try {
-            // Setup the list of columns
-            int columnCount = mQuery.columnCountLocked();
-            mColumns = new String[columnCount];
-
-            // Read in all column names
-            for (int i = 0; i < columnCount; i++) {
-                String columnName = mQuery.columnNameLocked(i);
-                mColumns[i] = columnName;
-                if (false) {
-                    Log.v("DatabaseWindow", "mColumns[" + i + "] is "
-                            + mColumns[i]);
-                }
-    
-                // Make note of the row ID column index for quick access to it
-                if ("_id".equals(columnName)) {
-                    mRowIdColumnIndex = i;
-                }
+        mColumns = query.getColumnNames();
+        for (int i = 0; i < mColumns.length; i++) {
+            // Make note of the row ID column index for quick access to it
+            if ("_id".equals(mColumns[i])) {
+                mRowIdColumnIndex = i;
             }
-        } finally {
-            query.mDatabase.unlock();
         }
     }
 
     /**
+     * Get the database that this cursor is associated with.
      * @return the SQLiteDatabase that this cursor is associated with.
      */
     public SQLiteDatabase getDatabase() {
-        synchronized (this) {
-            return mQuery.mDatabase;
-        }
+        return mQuery.getDatabase();
     }
 
     @Override
@@ -167,7 +147,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
 
         if (mCount == NO_COUNT) {
             int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos, 0);
-            mCount = getQuery().fillWindow(mWindow, startPos, requiredPos, true);
+            mCount = mQuery.fillWindow(mWindow, startPos, requiredPos, true);
             mCursorWindowCapacity = mWindow.getNumRows();
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "received count(*) from native_fill_window: " + mCount);
@@ -175,12 +155,8 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         } else {
             int startPos = DatabaseUtils.cursorPickFillWindowStartPosition(requiredPos,
                     mCursorWindowCapacity);
-            getQuery().fillWindow(mWindow, startPos, requiredPos, false);
+            mQuery.fillWindow(mWindow, startPos, requiredPos, false);
         }
-    }
-
-    private synchronized SQLiteQuery getQuery() {
-        return mQuery;
     }
 
     @Override
@@ -237,75 +213,28 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         if (isClosed()) {
             return false;
         }
-        long timeStart = 0;
-        if (false) {
-            timeStart = System.currentTimeMillis();
-        }
 
         synchronized (this) {
+            if (!mQuery.getDatabase().isOpen()) {
+                return false;
+            }
+
             if (mWindow != null) {
                 mWindow.clear();
             }
             mPos = -1;
-            SQLiteDatabase db = null;
-            try {
-                db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
-            } catch (IllegalStateException e) {
-                // for backwards compatibility, just return false
-                Log.w(TAG, "requery() failed " + e.getMessage(), e);
-                return false;
-            }
-            if (!db.equals(mQuery.mDatabase)) {
-                // since we need to use a different database connection handle,
-                // re-compile the query
-                try {
-                    db.lock(mQuery.mSql);
-                } catch (IllegalStateException e) {
-                    // for backwards compatibility, just return false
-                    Log.w(TAG, "requery() failed " + e.getMessage(), e);
-                    return false;
-                }
-                try {
-                    // close the old mQuery object and open a new one
-                    mQuery.close();
-                    mQuery = new SQLiteQuery(db, mQuery);
-                } catch (IllegalStateException e) {
-                    // for backwards compatibility, just return false
-                    Log.w(TAG, "requery() failed " + e.getMessage(), e);
-                    return false;
-                } finally {
-                    db.unlock();
-                }
-            }
-            // This one will recreate the temp table, and get its count
-            mDriver.cursorRequeried(this);
             mCount = NO_COUNT;
-            try {
-                mQuery.requery();
-            } catch (IllegalStateException e) {
-                // for backwards compatibility, just return false
-                Log.w(TAG, "requery() failed " + e.getMessage(), e);
-                return false;
-            }
+
+            mDriver.cursorRequeried(this);
         }
 
-        if (false) {
-            Log.v("DatabaseWindow", "closing window in requery()");
-            Log.v(TAG, "--- Requery()ed cursor " + this + ": " + mQuery);
-        }
-
-        boolean result = false;
         try {
-            result = super.requery();
+            return super.requery();
         } catch (IllegalStateException e) {
             // for backwards compatibility, just return false
             Log.w(TAG, "requery() failed " + e.getMessage(), e);
+            return false;
         }
-        if (false) {
-            long timeEnd = System.currentTimeMillis();
-            Log.v(TAG, "requery (" + (timeEnd - timeStart) + " ms): " + mDriver.toString());
-        }
-        return result;
     }
 
     @Override
@@ -330,20 +259,17 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
                 if (mStackTrace != null) {
-                    int len = mQuery.mSql.length();
+                    String sql = mQuery.getSql();
+                    int len = sql.length();
                     StrictMode.onSqliteObjectLeaked(
                         "Finalizing a Cursor that has not been deactivated or closed. " +
-                        "database = " + mQuery.mDatabase.getPath() + ", table = " + mEditTable +
-                        ", query = " + mQuery.mSql.substring(0, (len > 1000) ? 1000 : len),
+                        "database = " + mQuery.getDatabase().getLabel() +
+                        ", table = " + mEditTable +
+                        ", query = " + sql.substring(0, (len > 1000) ? 1000 : len),
                         mStackTrace);
                 }
                 close();
                 SQLiteDebug.notifyActiveCursorFinalized();
-            } else {
-                if (false) {
-                    Log.v(TAG, "Finalizing cursor on database = " + mQuery.mDatabase.getPath() +
-                            ", table = " + mEditTable + ", query = " + mQuery.mSql);
-                }
             }
         } finally {
             super.finalize();

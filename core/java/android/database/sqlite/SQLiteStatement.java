@@ -16,47 +16,19 @@
 
 package android.database.sqlite;
 
-import android.database.DatabaseUtils;
 import android.os.ParcelFileDescriptor;
-import android.os.SystemClock;
-import android.util.Log;
-
-import java.io.IOException;
-
-import dalvik.system.BlockGuard;
 
 /**
- * A pre-compiled statement against a {@link SQLiteDatabase} that can be reused.
- * The statement cannot return multiple rows, but 1x1 result sets are allowed.
- * Don't use SQLiteStatement constructor directly, please use
- * {@link SQLiteDatabase#compileStatement(String)}
- *<p>
- * SQLiteStatement is NOT internally synchronized so code using a SQLiteStatement from multiple
- * threads should perform its own synchronization when using the SQLiteStatement.
+ * Represents a statement that can be executed against a database.  The statement
+ * cannot return multiple rows or columns, but single value (1 x 1) result sets
+ * are supported.
+ * <p>
+ * This class is not thread-safe.
+ * </p>
  */
-@SuppressWarnings("deprecation")
-public final class SQLiteStatement extends SQLiteProgram
-{
-    private static final String TAG = "SQLiteStatement";
-
-    private static final boolean READ = true;
-    private static final boolean WRITE = false;
-
-    private SQLiteDatabase mOrigDb;
-    private int mState;
-    /** possible value for {@link #mState}. indicates that a transaction is started. */
-    private static final int TRANS_STARTED = 1;
-    /** possible value for {@link #mState}. indicates that a lock is acquired. */
-    private static final int LOCK_ACQUIRED = 2;
-
-    /**
-     * Don't use SQLiteStatement constructor directly, please use
-     * {@link SQLiteDatabase#compileStatement(String)}
-     * @param db
-     * @param sql
-     */
-    /* package */ SQLiteStatement(SQLiteDatabase db, String sql, Object[] bindArgs) {
-        super(db, sql, bindArgs, false /* don't compile sql statement */);
+public final class SQLiteStatement extends SQLiteProgram {
+    SQLiteStatement(SQLiteDatabase db, String sql, Object[] bindArgs) {
+        super(db, sql, bindArgs);
     }
 
     /**
@@ -67,7 +39,15 @@ public final class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
-        executeUpdateDelete();
+        acquireReference();
+        try {
+            getSession().execute(getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
+        } finally {
+            releaseReference();
+        }
     }
 
     /**
@@ -79,21 +59,15 @@ public final class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public int executeUpdateDelete() {
+        acquireReference();
         try {
-            saveSqlAsLastSqlStatement();
-            acquireAndLock(WRITE);
-            int numChanges = 0;
-            if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
-                // since the statement doesn't have to be prepared,
-                // call the following native method which will not prepare
-                // the query plan
-                native_executeSql(mSql);
-            } else {
-                numChanges = native_execute();
-            }
-            return numChanges;
+            return getSession().executeForChangedRowCount(
+                    getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
         } finally {
-            releaseAndUnlock();
+            releaseReference();
         }
     }
 
@@ -107,23 +81,18 @@ public final class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
+        acquireReference();
         try {
-            saveSqlAsLastSqlStatement();
-            acquireAndLock(WRITE);
-            return native_executeInsert();
+            return getSession().executeForLastInsertedRowId(
+                    getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
         } finally {
-            releaseAndUnlock();
+            releaseReference();
         }
     }
 
-    private void saveSqlAsLastSqlStatement() {
-        if (((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
-                DatabaseUtils.STATEMENT_UPDATE) ||
-                (mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
-                DatabaseUtils.STATEMENT_BEGIN) {
-            mDatabase.setLastSqlStatement(mSql);
-        }
-    }
     /**
      * Execute a statement that returns a 1 by 1 table with a numeric value.
      * For example, SELECT COUNT(*) FROM table;
@@ -133,17 +102,15 @@ public final class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
+        acquireReference();
         try {
-            long timeStart = acquireAndLock(READ);
-            long retValue = native_1x1_long();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return retValue;
-        } catch (SQLiteDoneException e) {
-            throw new SQLiteDoneException(
-                    "expected 1 row from this query but query returned no data. check the query: " +
-                    mSql);
+            return getSession().executeForLong(
+                    getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
         } finally {
-            releaseAndUnlock();
+            releaseReference();
         }
     }
 
@@ -156,17 +123,15 @@ public final class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
+        acquireReference();
         try {
-            long timeStart = acquireAndLock(READ);
-            String retValue = native_1x1_string();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return retValue;
-        } catch (SQLiteDoneException e) {
-            throw new SQLiteDoneException(
-                    "expected 1 row from this query but query returned no data. check the query: " +
-                    mSql);
+            return getSession().executeForString(
+                    getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
         } finally {
-            releaseAndUnlock();
+            releaseReference();
         }
     }
 
@@ -179,121 +144,20 @@ public final class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public ParcelFileDescriptor simpleQueryForBlobFileDescriptor() {
-        try {
-            long timeStart = acquireAndLock(READ);
-            ParcelFileDescriptor retValue = native_1x1_blob_ashmem();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return retValue;
-        } catch (IOException ex) {
-            Log.e(TAG, "simpleQueryForBlobFileDescriptor() failed", ex);
-            return null;
-        } catch (SQLiteDoneException e) {
-            throw new SQLiteDoneException(
-                    "expected 1 row from this query but query returned no data. check the query: " +
-                    mSql);
-        } finally {
-            releaseAndUnlock();
-        }
-    }
-
-    /**
-     * Called before every method in this class before executing a SQL statement,
-     * this method does the following:
-     * <ul>
-     *   <li>make sure the database is open</li>
-     *   <li>get a database connection from the connection pool,if possible</li>
-     *   <li>notifies {@link BlockGuard} of read/write</li>
-     *   <li>if the SQL statement is an update, start transaction if not already in one.
-     *   otherwise, get lock on the database</li>
-     *   <li>acquire reference on this object</li>
-     *   <li>and then return the current time _after_ the database lock was acquired</li>
-     * </ul>
-     * <p>
-     * This method removes the duplicate code from the other public
-     * methods in this class.
-     */
-    private long acquireAndLock(boolean rwFlag) {
-        mState = 0;
-        // use pooled database connection handles for SELECT SQL statements
-        mDatabase.verifyDbIsOpen();
-        SQLiteDatabase db = ((mStatementType & SQLiteProgram.STATEMENT_USE_POOLED_CONN) > 0)
-                ? mDatabase.getDbConnection(mSql) : mDatabase;
-        // use the database connection obtained above
-        mOrigDb = mDatabase;
-        mDatabase = db;
-        setNativeHandle(mDatabase.mNativeHandle);
-        if (rwFlag == WRITE) {
-            BlockGuard.getThreadPolicy().onWriteToDisk();
-        } else {
-            BlockGuard.getThreadPolicy().onReadFromDisk();
-        }
-
-        /*
-         * Special case handling of SQLiteDatabase.execSQL("BEGIN transaction").
-         * we know it is execSQL("BEGIN transaction") from the caller IF there is no lock held.
-         * beginTransaction() methods in SQLiteDatabase call lockForced() before
-         * calling execSQL("BEGIN transaction").
-         */
-        if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) == DatabaseUtils.STATEMENT_BEGIN) {
-            if (!mDatabase.isDbLockedByCurrentThread()) {
-                // transaction is  NOT started by calling beginTransaction() methods in
-                // SQLiteDatabase
-                mDatabase.setTransactionUsingExecSqlFlag();
-            }
-        } else if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
-                DatabaseUtils.STATEMENT_UPDATE) {
-            // got update SQL statement. if there is NO pending transaction, start one
-            if (!mDatabase.inTransaction()) {
-                mDatabase.beginTransactionNonExclusive();
-                mState = TRANS_STARTED;
-            }
-        }
-        // do I have database lock? if not, grab it.
-        if (!mDatabase.isDbLockedByCurrentThread()) {
-            mDatabase.lock(mSql);
-            mState = LOCK_ACQUIRED;
-        }
-
         acquireReference();
-        long startTime = SystemClock.uptimeMillis();
-        mDatabase.closePendingStatements();
-        compileAndbindAllArgs();
-        return startTime;
+        try {
+            return getSession().executeForBlobFileDescriptor(
+                    getSql(), getBindArgs(), getConnectionFlags());
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
+        } finally {
+            releaseReference();
+        }
     }
 
-    /**
-     * this method releases locks and references acquired in {@link #acquireAndLock(boolean)}
-     */
-    private void releaseAndUnlock() {
-        releaseReference();
-        if (mState == TRANS_STARTED) {
-            try {
-                mDatabase.setTransactionSuccessful();
-            } finally {
-                mDatabase.endTransaction();
-            }
-        } else if (mState == LOCK_ACQUIRED) {
-            mDatabase.unlock();
-        }
-        if ((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
-                DatabaseUtils.STATEMENT_COMMIT ||
-                (mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
-                DatabaseUtils.STATEMENT_ABORT) {
-            mDatabase.resetTransactionUsingExecSqlFlag();
-        }
-        clearBindings();
-        // release the compiled sql statement so that the caller's SQLiteStatement no longer
-        // has a hard reference to a database object that may get deallocated at any point.
-        release();
-        // restore the database connection handle to the original value
-        mDatabase = mOrigDb;
-        setNativeHandle(mDatabase.mNativeHandle);
+    @Override
+    public String toString() {
+        return "SQLiteProgram: " + getSql();
     }
-
-    private final native int native_execute();
-    private final native long native_executeInsert();
-    private final native long native_1x1_long();
-    private final native String native_1x1_string();
-    private final native ParcelFileDescriptor native_1x1_blob_ashmem() throws IOException;
-    private final native void native_executeSql(String sql);
 }
