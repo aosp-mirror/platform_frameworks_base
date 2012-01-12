@@ -71,7 +71,7 @@ public abstract class LightBase extends SceneGraphBase {
         }
 
         mFieldData.transformMatrix = mTransform.getRSData(rs).getAllocation();
-        mFieldData.name = getStringAsAllocation(rs, getName());
+        mFieldData.name = SceneManager.getStringAsAllocation(rs, getName());
         mFieldData.color = mColor;
         mFieldData.intensity = mIntensity;
     }

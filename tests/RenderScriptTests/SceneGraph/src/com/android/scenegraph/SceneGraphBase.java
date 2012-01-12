@@ -42,30 +42,6 @@ public abstract class SceneGraphBase {
     public String getName() {
         return mName;
     }
-
-    Allocation getStringAsAllocation(RenderScript rs, String str) {
-        if (str == null) {
-            return null;
-        }
-        if (str.length() == 0) {
-            return null;
-        }
-        byte[] allocArray = null;
-        byte[] nullChar = new byte[1];
-        nullChar[0] = 0;
-        try {
-            allocArray = str.getBytes("UTF-8");
-            Allocation alloc = Allocation.createSized(rs, Element.U8(rs),
-                                                      allocArray.length + 1,
-                                                      Allocation.USAGE_SCRIPT);
-            alloc.copy1DRangeFrom(0, allocArray.length, allocArray);
-            alloc.copy1DRangeFrom(allocArray.length, 1, nullChar);
-            return alloc;
-        }
-        catch (Exception e) {
-            throw new RSRuntimeException("Could not convert string to utf-8.");
-        }
-    }
 }
 
 
