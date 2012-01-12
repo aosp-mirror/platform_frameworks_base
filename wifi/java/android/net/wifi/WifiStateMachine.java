@@ -2541,6 +2541,10 @@ public class WifiStateMachine extends StateMachine {
             } else {
                 WifiNative.setScanResultHandling(CONNECT_MODE);
                 WifiNative.reconnect();
+                // Status pulls in the current supplicant state and network connection state
+                // events over the monitor connection. This helps framework sync up with
+                // current supplicant state
+                WifiNative.status();
                 transitionTo(mDisconnectedState);
             }
         }
