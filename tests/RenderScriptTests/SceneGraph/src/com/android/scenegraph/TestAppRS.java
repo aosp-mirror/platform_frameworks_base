@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ public class TestAppRS {
 
     boolean mUseBlur;
 
+    TestAppLoadingScreen mLoadingScreen;
+
     // Used to asynchronously load scene elements like meshes and transform hierarchies
     SceneLoadedCallback mLoadedCallback = new SceneLoadedCallback() {
         public void run() {
@@ -69,6 +71,25 @@ public class TestAppRS {
 
     // Used to move the camera around in the 3D world
     TouchHandler mTouchHandler;
+
+    private Resources mRes;
+    private RenderScriptGL mRS;
+
+    private ProgramFragment mPF_Paint;
+    private ProgramFragment mPF_Aluminum;
+    private ProgramFragment mPF_Plastic;
+    private ProgramFragment mPF_Diffuse;
+    private ProgramFragment mPF_Texture;
+    ScriptField_FShaderParams_s mFsConst;
+    private ProgramVertex mPV_Paint;
+    ScriptField_VShaderParams_s mVsConst;
+
+    private Allocation mDefaultCube;
+    private Allocation mAllocPV;
+    private Allocation mEnvCube;
+    private Allocation mDiffCube;
+
+    Scene mActiveScene;
 
     public TestAppRS() {
         mUseBlur = false;
@@ -104,10 +125,7 @@ public class TestAppRS {
         // Initializes all the RS specific scenegraph elements
         mSceneManager.initRS(mRS, mRes, mWidth, mHeight);
 
-        // Shows the loading screen with some text
-        renderLoading();
-        // Adds a little 3D bugdroid model to the laoding screen asynchronously.
-        new LoadingScreenLoaderTask().execute();
+        mLoadingScreen = new TestAppLoadingScreen(mRS, mRes);
 
         // Initi renderscript stuff specific to the app. This will need to be abstracted out later.
         initRS();
@@ -120,66 +138,9 @@ public class TestAppRS {
     void loadModel(String path) {
         //String shortName = path.substring(path.lastIndexOf('/') + 1);
         //shortName = shortName.substring(0, shortName.lastIndexOf('.'));
-        mScript.set_gInitialized(false);
+        mLoadingScreen.showLoadingScreen(true);
         mActiveScene.destroyRS(mSceneManager);
         mSceneManager.loadModel(path, mLoadedCallback);
-    }
-
-    private Resources mRes;
-    private RenderScriptGL mRS;
-    private Sampler mSampler;
-    private ProgramStore mPSBackground;
-    private ProgramFragment mPFBackground;
-    private ProgramVertex mPVBackground;
-    private ProgramVertexFixedFunction.Constants mPVA;
-
-    private ProgramFragment mPF_Paint;
-    private ProgramFragment mPF_Aluminum;
-    private ProgramFragment mPF_Plastic;
-    private ProgramFragment mPF_Diffuse;
-    private ProgramFragment mPF_Texture;
-    ScriptField_FShaderParams_s mFsConst;
-    private ProgramVertex mPV_Paint;
-    ScriptField_VShaderParams_s mVsConst;
-
-    private Allocation mDefaultCube;
-    private Allocation mAllocPV;
-    private Allocation mEnvCube;
-    private Allocation mDiffCube;
-
-    Scene mActiveScene;
-
-    private ScriptC_scenegraph mScript;
-
-    // The loading screen has some elements that shouldn't be loaded on the UI thread
-    private class LoadingScreenLoaderTask extends AsyncTask<String, Void, Boolean> {
-        Allocation robotTex;
-        Mesh robotMesh;
-        protected Boolean doInBackground(String... names) {
-            long start = System.currentTimeMillis();
-            robotTex = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.robot,
-                                                           MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                           Allocation.USAGE_GRAPHICS_TEXTURE);
-
-            FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.robot);
-            FileA3D.IndexEntry entry = model.getIndexEntry(0);
-            if (entry != null && entry.getEntryType() == FileA3D.EntryType.MESH) {
-                robotMesh = entry.getMesh();
-            }
-
-            initPFS();
-            initPF();
-            initPV();
-
-            long end = System.currentTimeMillis();
-            Log.v("TIMER", "Loading load time: " + (end - start));
-            return new Boolean(true);
-        }
-
-        protected void onPostExecute(Boolean result) {
-            mScript.set_gRobotTex(robotTex);
-            mScript.set_gRobotMesh(robotMesh);
-        }
     }
 
     // We use this to laod environment maps off the UI thread
@@ -290,54 +251,6 @@ public class TestAppRS {
         FullscreenBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
     }
 
-    // This needs to be cleaned up a bit, it's one of the default render state objects
-    private void initPFS() {
-        ProgramStore.Builder b = new ProgramStore.Builder(mRS);
-
-        b.setDepthFunc(ProgramStore.DepthFunc.LESS);
-        b.setDitherEnabled(false);
-        b.setDepthMaskEnabled(true);
-        mPSBackground = b.create();
-
-        mScript.set_gPFSBackground(mPSBackground);
-    }
-
-    // This needs to be cleaned up a bit, it's one of the default render state objects
-    private void initPF() {
-        Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMinification(Sampler.Value.LINEAR);
-        bs.setMagnification(Sampler.Value.LINEAR);
-        bs.setWrapS(Sampler.Value.CLAMP);
-        bs.setWrapT(Sampler.Value.CLAMP);
-        mSampler = bs.create();
-
-        ProgramFragmentFixedFunction.Builder b = new ProgramFragmentFixedFunction.Builder(mRS);
-        b.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
-                     ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
-        mPFBackground = b.create();
-        mPFBackground.bindSampler(Sampler.CLAMP_LINEAR(mRS), 0);
-
-        mScript.set_gPFBackground(mPFBackground);
-    }
-
-    private void initPV() {
-        ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
-        mPVBackground = pvb.create();
-
-        mPVA = new ProgramVertexFixedFunction.Constants(mRS);
-        ((ProgramVertexFixedFunction)mPVBackground).bindConstants(mPVA);
-
-        mScript.set_gPVBackground(mPVBackground);
-    }
-
-    // Creates a simple script to show a loding screen until everything is initialized
-    // Could also be used to do some custom renderscript work before handing things over
-    // to the scenegraph
-    void renderLoading() {
-        mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph);
-        mRS.bindRootScript(mScript);
-    }
-
     void initRenderPasses() {
         ArrayList<RenderableBase> allDraw = mActiveScene.getRenderables();
         int numDraw = allDraw.size();
@@ -403,7 +316,7 @@ public class TestAppRS {
         long end = System.currentTimeMillis();
         Log.v("TIMER", "Scene init time: " + (end - start));
 
-        mScript.set_gInitialized(true);
+        mLoadingScreen.showLoadingScreen(false);
     }
 
     private void initRS() {
@@ -421,8 +334,6 @@ public class TestAppRS {
 
         ScriptC_render renderLoop = mSceneManager.getRenderLoop();
 
-        mScript.set_gRenderLoop(renderLoop);
-        Allocation dummyAlloc = Allocation.createSized(mRS, Element.I32(mRS), 1);
-        mScript.set_gDummyAlloc(dummyAlloc);
+        mLoadingScreen.setRenderLoop(renderLoop);
     }
 }

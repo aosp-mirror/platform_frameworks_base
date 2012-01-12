@@ -133,14 +133,16 @@ public class Renderable extends RenderableBase {
 
     void updateTextures(RenderScriptGL rs, Resources res) {
         Iterator<ShaderParam> allParamsIter = mSourceParams.values().iterator();
+        int paramIndex = 0;
         while (allParamsIter.hasNext()) {
             ShaderParam sp = allParamsIter.next();
             if (sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                mRsFieldItem.pf_textures[0] = p.getTexture().getRsData(rs, res);
-                break;
+                mRsFieldItem.pf_textures[paramIndex++] = p.getTexture().getRsData(rs, res);
             }
         }
+        ProgramFragment pf = mRenderState.mFragment;
+        mRsFieldItem.pf_num_textures = pf != null ? Math.min(pf.getTextureCount(), paramIndex) : 0;
         mRsField.set(mRsFieldItem, 0, true);
     }
 
