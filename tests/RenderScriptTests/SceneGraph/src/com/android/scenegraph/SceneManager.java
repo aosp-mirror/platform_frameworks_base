@@ -16,11 +16,21 @@
 
 package com.android.scenegraph;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.Writer;
+
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import android.renderscript.RenderScriptGL;
 import android.renderscript.Mesh;
@@ -59,6 +69,44 @@ public class SceneManager extends SceneGraphBase {
             return true;
         }
         return false;
+    }
+
+    static Bitmap loadBitmap(String name, Resources res) {
+        InputStream is = null;
+        boolean loadFromSD = isSDCardPath(name);
+        try {
+            if (!loadFromSD) {
+                is = res.getAssets().open(name);
+            } else {
+                File f = new File(name);
+                is = new BufferedInputStream(new FileInputStream(f));
+            }
+        } catch (IOException e) {
+            Log.e("ImageLoaderTask", " Message: " + e.getMessage());
+            return null;
+        }
+
+        Bitmap b = BitmapFactory.decodeStream(is);
+        try {
+            is.close();
+        } catch (IOException e) {
+            Log.e("ImageLoaderTask", " Message: " + e.getMessage());
+        }
+        return b;
+    }
+
+    public static Allocation loadCubemap(String name, RenderScriptGL rs, Resources res) {
+        Bitmap b = loadBitmap(name, res);
+        return Allocation.createCubemapFromBitmap(rs, b,
+                                                  MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                                  Allocation.USAGE_GRAPHICS_TEXTURE);
+    }
+
+    public static Allocation loadTexture2D(String name, RenderScriptGL rs, Resources res) {
+        Bitmap b = loadBitmap(name, res);
+        return Allocation.createFromBitmap(rs, b,
+                                           Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
+                                           Allocation.USAGE_GRAPHICS_TEXTURE);
     }
 
     public static class SceneLoadedCallback implements Runnable {
