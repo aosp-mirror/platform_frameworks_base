@@ -68,16 +68,6 @@ public class SceneManager extends SceneGraphBase {
         }
     }
 
-    private void initPFS() {
-        ProgramStore.Builder b = new ProgramStore.Builder(mRS);
-
-        b.setDepthFunc(ProgramStore.DepthFunc.LESS);
-        b.setDitherEnabled(false);
-        b.setDepthMaskEnabled(true);
-
-        mRenderLoop.set_gPFSBackground(b.create());
-    }
-
     public SceneManager() {
     }
 
@@ -143,7 +133,7 @@ public class SceneManager extends SceneGraphBase {
                                                          MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
                                                          Allocation.USAGE_GRAPHICS_TEXTURE);
         mRenderLoop.set_gTGrid(checker);
-        initPFS();
+        mRenderLoop.set_gPFSBackground(ProgramStore.BLEND_NONE_DEPTH_TEST(mRS));
     }
 
     public ScriptC_render getRenderLoop() {

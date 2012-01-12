@@ -17,6 +17,10 @@
 
 package com.android.scenegraph;
 
+import java.util.ArrayList;
+
+import com.android.scenegraph.Float4Param;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,8 +32,6 @@ import android.renderscript.Font.Style;
 import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
-
-import java.util.ArrayList;
 
 class FullscreenBlur {
 
@@ -135,6 +137,13 @@ class FullscreenBlur {
         // Make blur shape
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadH", hBlur);
         quad.updateTextures(rs, sRenderTargetBlur2Color, 0);
+
+        float xAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getX();
+        quad.appendSourceParams(new Float4Param("blurOffset0", - xAdvance * 2.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset1", - xAdvance * 0.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset2", xAdvance * 1.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset3", xAdvance * 3.5f));
+
         horizontalBlurPass.appendRenderable(quad);
         scene.appendRenderPass(horizontalBlurPass);
 
@@ -147,6 +156,12 @@ class FullscreenBlur {
         // Make blur shape
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadV", vBlur);
         quad.updateTextures(rs, sRenderTargetBlur1Color, 0);
+        float yAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getY();
+        quad.appendSourceParams(new Float4Param("blurOffset0", - yAdvance * 2.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset1", - yAdvance * 0.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset2", yAdvance * 1.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset3", yAdvance * 3.5f));
+
         verticalBlurPass.appendRenderable(quad);
         scene.appendRenderPass(verticalBlurPass);
 
@@ -198,37 +213,23 @@ class FullscreenBlur {
         mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
 
         mFsBlurHConst = new ScriptField_FBlurOffsets_s(rs, 1);
-        float xAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getX();
-        ScriptField_FBlurOffsets_s.Item item = new ScriptField_FBlurOffsets_s.Item();
-        item.blurOffset0 = - xAdvance * 2.5f;
-        item.blurOffset1 = - xAdvance * 0.5f;
-        item.blurOffset2 =   xAdvance * 1.5f;
-        item.blurOffset3 =   xAdvance * 3.5f;
-        mFsBlurHConst.set(item, 0, true);
 
         fb = new ProgramFragment.Builder(rs);
         fb.addConstant(mFsBlurHConst.getAllocation().getType());
         fb.setShader(res, R.raw.blur_h);
         fb.addTexture(TextureType.TEXTURE_2D);
         mPF_BlurH = fb.create();
-        mPF_BlurH.bindConstants(mFsBlurHConst.getAllocation(), 0);
         mPF_BlurH.bindTexture(sRenderTargetBlur0Color, 0);
         mPF_BlurH.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
 
         mFsBlurVConst = new ScriptField_FBlurOffsets_s(rs, 1);
-        float yAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getY();
-        item.blurOffset0 = - yAdvance * 2.5f;
-        item.blurOffset1 = - yAdvance * 0.5f;
-        item.blurOffset2 =   yAdvance * 1.5f;
-        item.blurOffset3 =   yAdvance * 3.5f;
-        mFsBlurVConst.set(item, 0, true);
 
         fb = new ProgramFragment.Builder(rs);
         fb.addConstant(mFsBlurVConst.getAllocation().getType());
         fb.setShader(res, R.raw.blur_v);
         fb.addTexture(TextureType.TEXTURE_2D);
+
         mPF_BlurV = fb.create();
-        mPF_BlurV.bindConstants(mFsBlurVConst.getAllocation(), 0);
         mPF_BlurV.bindTexture(sRenderTargetBlur1Color, 0);
         mPF_BlurV.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
 

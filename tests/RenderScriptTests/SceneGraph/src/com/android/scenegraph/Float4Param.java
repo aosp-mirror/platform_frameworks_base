@@ -43,6 +43,40 @@ public class Float4Param extends ShaderParam {
         mValue = new Float4();
     }
 
+    public Float4Param(String name, float value) {
+        super(name);
+        mValue = new Float4();
+        mValue.x = value;
+        mVecSize = 1;
+    }
+
+    public Float4Param(String name, float x, float y) {
+        super(name);
+        mValue = new Float4();
+        mValue.x = x;
+        mValue.y = y;
+        mVecSize = 2;
+    }
+
+    public Float4Param(String name, float x, float y, float z) {
+        super(name);
+        mValue = new Float4();
+        mValue.x = x;
+        mValue.y = y;
+        mValue.z = z;
+        mVecSize = 3;
+    }
+
+    public Float4Param(String name, float x, float y, float z, float w) {
+        super(name);
+        mValue = new Float4();
+        mValue.x = x;
+        mValue.y = y;
+        mValue.z = z;
+        mValue.w = w;
+        mVecSize = 4;
+    }
+
     public void setValue(Float4 v) {
         mValue = v;
     }
@@ -69,11 +103,11 @@ public class Float4Param extends ShaderParam {
             paramType = FLOAT4_CAMERA_POS;
         } else if(mParamName.equalsIgnoreCase(cameraDir)) {
             paramType = FLOAT4_CAMERA_DIR;
-        } else if(mParamName.equalsIgnoreCase(lightColor)) {
+        } else if(mParamName.startsWith(lightColor)) {
             paramType = FLOAT4_LIGHT_COLOR;
-        } else if(mParamName.equalsIgnoreCase(lightPos)) {
+        } else if(mParamName.startsWith(lightPos)) {
             paramType = FLOAT4_LIGHT_POS;
-        } else if(mParamName.equalsIgnoreCase(lightDir)) {
+        } else if(mParamName.startsWith(lightDir)) {
             paramType = FLOAT4_LIGHT_DIR;
         }
         return paramType;

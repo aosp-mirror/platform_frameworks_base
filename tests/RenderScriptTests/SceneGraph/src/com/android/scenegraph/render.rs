@@ -75,10 +75,12 @@ static void draw(SgRenderable *obj) {
     rsgBindProgramFragment(renderState->pf);
     rsgBindProgramVertex(renderState->pv);
 
-    if (rsIsObject(obj->pf_textures[0])) {
-        rsgBindTexture(renderState->pf, 0, obj->pf_textures[0]);
-    } else {
-        rsgBindTexture(renderState->pf, 0, gTGrid);
+    for (uint32_t i = 0; i < obj->pf_num_textures; i ++) {
+        if (rsIsObject(obj->pf_textures[i])) {
+            rsgBindTexture(renderState->pf, i, obj->pf_textures[i]);
+        } else {
+            rsgBindTexture(renderState->pf, i, gTGrid);
+        }
     }
 
     rsgDrawMesh(obj->mesh, obj->meshIndex);
