@@ -1706,7 +1706,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /* Returns true if airplane mode is currently on */
-    private final boolean isAirplaneModeOn() {
+    /*package*/ final boolean isAirplaneModeOn() {
         return Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
