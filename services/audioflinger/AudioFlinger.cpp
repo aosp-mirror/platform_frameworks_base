@@ -382,7 +382,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
         pid_t pid,
         audio_stream_type_t streamType,
         uint32_t sampleRate,
-        uint32_t format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,
@@ -502,13 +502,13 @@ int AudioFlinger::channelCount(int output) const
     return thread->channelCount();
 }
 
-uint32_t AudioFlinger::format(int output) const
+audio_format_t AudioFlinger::format(int output) const
 {
     Mutex::Autolock _l(mLock);
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread == NULL) {
         ALOGW("format() unknown thread %d", output);
-        return 0;
+        return AUDIO_FORMAT_INVALID;
     }
     return thread->format();
 }
@@ -849,7 +849,7 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
     return String8("");
 }
 
-size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount)
 {
     status_t ret = initCheck();
     if (ret != NO_ERROR) {
@@ -990,7 +990,7 @@ void AudioFlinger::removeClient_l(pid_t pid)
 AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id, uint32_t device)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false),
+        mFrameSize(1), mFormat(AUDIO_FORMAT_INVALID), mStandby(false), mId(id), mExiting(false),
         mDevice(device)
 {
     mDeathRecipient = new PMDeathRecipient(this);
@@ -1033,7 +1033,7 @@ int AudioFlinger::ThreadBase::channelCount() const
     return (int)mChannelCount;
 }
 
-uint32_t AudioFlinger::ThreadBase::format() const
+audio_format_t AudioFlinger::ThreadBase::format() const
 {
     return mFormat;
 }
@@ -1495,7 +1495,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         const sp<AudioFlinger::Client>& client,
         audio_stream_type_t streamType,
         uint32_t sampleRate,
-        uint32_t format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         const sp<IMemory>& sharedBuffer,
@@ -2394,7 +2394,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             reconfig = true;
         }
         if (param.getInt(String8(AudioParameter::keyFormat), value) == NO_ERROR) {
-            if (value != AUDIO_FORMAT_PCM_16_BIT) {
+            if ((audio_format_t) value != AUDIO_FORMAT_PCM_16_BIT) {
                 status = BAD_VALUE;
             } else {
                 reconfig = true;
@@ -3233,7 +3233,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
             const wp<ThreadBase>& thread,
             const sp<Client>& client,
             uint32_t sampleRate,
-            uint32_t format,
+            audio_format_t format,
             uint32_t channelMask,
             int frameCount,
             uint32_t flags,
@@ -3395,7 +3395,7 @@ AudioFlinger::PlaybackThread::Track::Track(
             const sp<Client>& client,
             audio_stream_type_t streamType,
             uint32_t sampleRate,
-            uint32_t format,
+            audio_format_t format,
             uint32_t channelMask,
             int frameCount,
             const sp<IMemory>& sharedBuffer,
@@ -3701,7 +3701,7 @@ AudioFlinger::RecordThread::RecordTrack::RecordTrack(
             const wp<ThreadBase>& thread,
             const sp<Client>& client,
             uint32_t sampleRate,
-            uint32_t format,
+            audio_format_t format,
             uint32_t channelMask,
             int frameCount,
             uint32_t flags,
@@ -3814,7 +3814,7 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
             const wp<ThreadBase>& thread,
             DuplicatingThread *sourceThread,
             uint32_t sampleRate,
-            uint32_t format,
+            audio_format_t format,
             uint32_t channelMask,
             int frameCount)
     :   Track(thread, NULL, AUDIO_STREAM_CNT, sampleRate, format, channelMask, frameCount, NULL, 0),
@@ -4147,7 +4147,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         pid_t pid,
         int input,
         uint32_t sampleRate,
-        uint32_t format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,
@@ -4492,7 +4492,7 @@ bool AudioFlinger::RecordThread::threadLoop()
 sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createRecordTrack_l(
         const sp<AudioFlinger::Client>& client,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         int channelMask,
         int frameCount,
         uint32_t flags,
@@ -4704,7 +4704,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
         String8 keyValuePair = mNewParameters[0];
         AudioParameter param = AudioParameter(keyValuePair);
         int value;
-        int reqFormat = mFormat;
+        audio_format_t reqFormat = mFormat;
         int reqSamplingRate = mReqSampleRate;
         int reqChannelCount = mReqChannelCount;
 
@@ -4713,7 +4713,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
             reconfig = true;
         }
         if (param.getInt(String8(AudioParameter::keyFormat), value) == NO_ERROR) {
-            reqFormat = value;
+            reqFormat = (audio_format_t) value;
             reconfig = true;
         }
         if (param.getInt(String8(AudioParameter::keyChannels), value) == NO_ERROR) {
@@ -4924,7 +4924,7 @@ audio_stream_t* AudioFlinger::RecordThread::stream()
 
 int AudioFlinger::openOutput(uint32_t *pDevices,
                                 uint32_t *pSamplingRate,
-                                uint32_t *pFormat,
+                                audio_format_t *pFormat,
                                 uint32_t *pChannels,
                                 uint32_t *pLatencyMs,
                                 uint32_t flags)
@@ -4933,7 +4933,7 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
     PlaybackThread *thread = NULL;
     mHardwareStatus = AUDIO_HW_OUTPUT_OPEN;
     uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
-    uint32_t format = pFormat ? *pFormat : 0;
+    audio_format_t format = pFormat ? *pFormat : AUDIO_FORMAT_DEFAULT;
     uint32_t channels = pChannels ? *pChannels : 0;
     uint32_t latency = pLatencyMs ? *pLatencyMs : 0;
     audio_stream_out_t *outStream;
@@ -4956,7 +4956,7 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
     if (outHwDev == NULL)
         return 0;
 
-    status = outHwDev->open_output_stream(outHwDev, *pDevices, (int *)&format,
+    status = outHwDev->open_output_stream(outHwDev, *pDevices, &format,
                                           &channels, &samplingRate, &outStream);
     ALOGV("openOutput() openOutputStream returned output %p, SamplingRate %d, Format %d, Channels %x, status %d",
             outStream,
@@ -5084,17 +5084,17 @@ status_t AudioFlinger::restoreOutput(int output)
 
 int AudioFlinger::openInput(uint32_t *pDevices,
                                 uint32_t *pSamplingRate,
-                                uint32_t *pFormat,
+                                audio_format_t *pFormat,
                                 uint32_t *pChannels,
                                 uint32_t acoustics)
 {
     status_t status;
     RecordThread *thread = NULL;
     uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
-    uint32_t format = pFormat ? *pFormat : 0;
+    audio_format_t format = pFormat ? *pFormat : AUDIO_FORMAT_DEFAULT;
     uint32_t channels = pChannels ? *pChannels : 0;
     uint32_t reqSamplingRate = samplingRate;
-    uint32_t reqFormat = format;
+    audio_format_t reqFormat = format;
     uint32_t reqChannels = channels;
     audio_stream_in_t *inStream;
     audio_hw_device_t *inHwDev;
@@ -5109,7 +5109,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
     if (inHwDev == NULL)
         return 0;
 
-    status = inHwDev->open_input_stream(inHwDev, *pDevices, (int *)&format,
+    status = inHwDev->open_input_stream(inHwDev, *pDevices, &format,
                                         &channels, &samplingRate,
                                         (audio_in_acoustics_t)acoustics,
                                         &inStream);
@@ -5129,7 +5129,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
         (samplingRate <= 2 * reqSamplingRate) &&
         (popcount(channels) < 3) && (popcount(reqChannels) < 3)) {
         ALOGV("openInput() reopening with proposed sampling rate and channels");
-        status = inHwDev->open_input_stream(inHwDev, *pDevices, (int *)&format,
+        status = inHwDev->open_input_stream(inHwDev, *pDevices, &format,
                                             &channels, &samplingRate,
                                             (audio_in_acoustics_t)acoustics,
                                             &inStream);

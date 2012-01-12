@@ -48,7 +48,7 @@ namespace android {
 status_t AudioRecord::getMinFrameCount(
         int* frameCount,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         int channelCount)
 {
     size_t size = 0;
@@ -86,7 +86,7 @@ AudioRecord::AudioRecord()
 AudioRecord::AudioRecord(
         int inputSource,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,
@@ -121,7 +121,7 @@ AudioRecord::~AudioRecord()
 status_t AudioRecord::set(
         int inputSource,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,
@@ -148,7 +148,7 @@ status_t AudioRecord::set(
         sampleRate = DEFAULT_SAMPLE_RATE;
     }
     // these below should probably come from the audioFlinger too...
-    if (format == 0) {
+    if (format == AUDIO_FORMAT_DEFAULT) {
         format = AUDIO_FORMAT_PCM_16_BIT;
     }
     // validate parameters
@@ -248,7 +248,7 @@ uint32_t AudioRecord::latency() const
     return mLatency;
 }
 
-int AudioRecord::format() const
+audio_format_t AudioRecord::format() const
 {
     return mFormat;
 }
@@ -448,7 +448,7 @@ unsigned int AudioRecord::getInputFramesLost()
 // must be called with mLock held
 status_t AudioRecord::openRecord_l(
         uint32_t sampleRate,
-        uint32_t format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,

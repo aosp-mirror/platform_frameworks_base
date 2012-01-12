@@ -95,7 +95,7 @@ public:
 
     static bool routedToA2dpOutput(audio_stream_type_t streamType);
 
-    static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount,
+    static status_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount,
         size_t* buffSize);
 
     static status_t setVoiceVolume(float volume);
@@ -134,7 +134,7 @@ public:
     class OutputDescriptor {
     public:
         OutputDescriptor()
-        : samplingRate(0), format(0), channels(0), frameCount(0), latency(0)  {}
+        : samplingRate(0), format(AUDIO_FORMAT_DEFAULT), channels(0), frameCount(0), latency(0)  {}
 
         uint32_t samplingRate;
         int32_t format;
@@ -153,7 +153,7 @@ public:
     static audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage);
     static audio_io_handle_t getOutput(audio_stream_type_t stream,
                                         uint32_t samplingRate = 0,
-                                        uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                        audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                         uint32_t channels = AUDIO_CHANNEL_OUT_STEREO,
                                         audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_INDIRECT);
     static status_t startOutput(audio_io_handle_t output,
@@ -165,7 +165,7 @@ public:
     static void releaseOutput(audio_io_handle_t output);
     static audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
-                                    uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                    audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = AUDIO_CHANNEL_IN_MONO,
                                     audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0,
                                     int sessionId = 0);
@@ -242,7 +242,7 @@ private:
     static size_t gInBuffSize;
     // previous parameters for recording buffer size queries
     static uint32_t gPrevInSamplingRate;
-    static int gPrevInFormat;
+    static audio_format_t gPrevInFormat;
     static int gPrevInChannelCount;
 
     static sp<IAudioPolicyService> gAudioPolicyService;

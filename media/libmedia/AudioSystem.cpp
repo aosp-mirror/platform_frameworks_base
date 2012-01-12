@@ -40,7 +40,7 @@ DefaultKeyedVector<audio_io_handle_t, AudioSystem::OutputDescriptor *> AudioSyst
 
 // Cached values for recording queries, all protected by gLock
 uint32_t AudioSystem::gPrevInSamplingRate = 16000;
-int AudioSystem::gPrevInFormat = AUDIO_FORMAT_PCM_16_BIT;
+audio_format_t AudioSystem::gPrevInFormat = AUDIO_FORMAT_PCM_16_BIT;
 int AudioSystem::gPrevInChannelCount = 1;
 size_t AudioSystem::gInBuffSize = 0;
 
@@ -308,7 +308,7 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, audio_stream_type_t st
     return NO_ERROR;
 }
 
-status_t AudioSystem::getInputBufferSize(uint32_t sampleRate, int format, int channelCount,
+status_t AudioSystem::getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount,
     size_t* buffSize)
 {
     gLock.lock();
@@ -572,7 +572,7 @@ audio_policy_forced_cfg_t AudioSystem::getForceUse(audio_policy_force_use_t usag
 
 audio_io_handle_t AudioSystem::getOutput(audio_stream_type_t stream,
                                     uint32_t samplingRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channels,
                                     audio_policy_output_flags_t flags)
 {
@@ -632,7 +632,7 @@ void AudioSystem::releaseOutput(audio_io_handle_t output)
 
 audio_io_handle_t AudioSystem::getInput(int inputSource,
                                     uint32_t samplingRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channels,
                                     audio_in_acoustics_t acoustics,
                                     int sessionId)

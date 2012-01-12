@@ -122,7 +122,7 @@ public:
     virtual audio_io_handle_t getOutput(
                                         audio_stream_type_t stream,
                                         uint32_t samplingRate,
-                                        uint32_t format,
+                                        audio_format_t format,
                                         uint32_t channels,
                                         audio_policy_output_flags_t flags)
     {
@@ -174,7 +174,7 @@ public:
     virtual audio_io_handle_t getInput(
                                     int inputSource,
                                     uint32_t samplingRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channels,
                                     audio_in_acoustics_t acoustics,
                                     int audioSession)
@@ -416,7 +416,7 @@ status_t BnAudioPolicyService::onTransact(
             audio_stream_type_t stream =
                     static_cast <audio_stream_type_t>(data.readInt32());
             uint32_t samplingRate = data.readInt32();
-            uint32_t format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
             audio_policy_output_flags_t flags =
                     static_cast <audio_policy_output_flags_t>(data.readInt32());
@@ -463,7 +463,7 @@ status_t BnAudioPolicyService::onTransact(
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             int inputSource = data.readInt32();
             uint32_t samplingRate = data.readInt32();
-            uint32_t format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
             audio_in_acoustics_t acoustics =
                     static_cast <audio_in_acoustics_t>(data.readInt32());

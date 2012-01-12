@@ -48,7 +48,7 @@ public:
                                 pid_t pid,
                                 audio_stream_type_t streamType,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -61,7 +61,7 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -73,7 +73,7 @@ public:
      */
     virtual     uint32_t    sampleRate(int output) const = 0;
     virtual     int         channelCount(int output) const = 0;
-    virtual     uint32_t    format(int output) const = 0;
+    virtual     audio_format_t format(int output) const = 0;
     virtual     size_t      frameCount(int output) const = 0;
     virtual     uint32_t    latency(int output) const = 0;
 
@@ -109,11 +109,11 @@ public:
     virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
 
     // retrieve the audio recording buffer size
-    virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount) = 0;
+    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) = 0;
 
     virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
-                                    uint32_t *pFormat,
+                                    audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     uint32_t flags) = 0;
@@ -124,7 +124,7 @@ public:
 
     virtual int openInput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
-                                    uint32_t *pFormat,
+                                    audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t acoustics) = 0;
     virtual status_t closeInput(int input) = 0;

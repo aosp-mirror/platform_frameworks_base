@@ -241,7 +241,7 @@ audio_policy_forced_cfg_t AudioPolicyService::getForceUse(audio_policy_force_use
 
 audio_io_handle_t AudioPolicyService::getOutput(audio_stream_type_t stream,
                                     uint32_t samplingRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channels,
                                     audio_policy_output_flags_t flags)
 {
@@ -289,7 +289,7 @@ void AudioPolicyService::releaseOutput(audio_io_handle_t output)
 
 audio_io_handle_t AudioPolicyService::getInput(int inputSource,
                                     uint32_t samplingRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channels,
                                     audio_in_acoustics_t acoustics,
                                     int audioSession)
@@ -1352,7 +1352,7 @@ extern "C" {
 static audio_io_handle_t aps_open_output(void *service,
                                              uint32_t *pDevices,
                                              uint32_t *pSamplingRate,
-                                             uint32_t *pFormat,
+                                             audio_format_t *pFormat,
                                              uint32_t *pChannels,
                                              uint32_t *pLatencyMs,
                                              audio_policy_output_flags_t flags)
@@ -1413,7 +1413,7 @@ static int aps_restore_output(void *service, audio_io_handle_t output)
 static audio_io_handle_t aps_open_input(void *service,
                                             uint32_t *pDevices,
                                             uint32_t *pSamplingRate,
-                                            uint32_t *pFormat,
+                                            audio_format_t *pFormat,
                                             uint32_t *pChannels,
                                             uint32_t acoustics)
 {

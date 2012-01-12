@@ -84,7 +84,7 @@ public:
                                 pid_t pid,
                                 audio_stream_type_t streamType,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -131,7 +131,7 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -188,13 +188,13 @@ public:
         return reply.readInt32();
     }
 
-    virtual uint32_t format(int output) const
+    virtual audio_format_t format(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(output);
         remote()->transact(FORMAT, data, &reply);
-        return reply.readInt32();
+        return (audio_format_t) reply.readInt32();
     }
 
     virtual size_t frameCount(int output) const
@@ -343,7 +343,7 @@ public:
         remote()->transact(REGISTER_CLIENT, data, &reply);
     }
 
-    virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -356,7 +356,7 @@ public:
 
     virtual int openOutput(uint32_t *pDevices,
                             uint32_t *pSamplingRate,
-                            uint32_t *pFormat,
+                            audio_format_t *pFormat,
                             uint32_t *pChannels,
                             uint32_t *pLatencyMs,
                             uint32_t flags)
@@ -364,7 +364,7 @@ public:
         Parcel data, reply;
         uint32_t devices = pDevices ? *pDevices : 0;
         uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
-        uint32_t format = pFormat ? *pFormat : 0;
+        audio_format_t format = pFormat ? *pFormat : AUDIO_FORMAT_DEFAULT;
         uint32_t channels = pChannels ? *pChannels : 0;
         uint32_t latency = pLatencyMs ? *pLatencyMs : 0;
 
@@ -382,7 +382,7 @@ public:
         if (pDevices) *pDevices = devices;
         samplingRate = reply.readInt32();
         if (pSamplingRate) *pSamplingRate = samplingRate;
-        format = reply.readInt32();
+        format = (audio_format_t) reply.readInt32();
         if (pFormat) *pFormat = format;
         channels = reply.readInt32();
         if (pChannels) *pChannels = channels;
@@ -430,14 +430,14 @@ public:
 
     virtual int openInput(uint32_t *pDevices,
                             uint32_t *pSamplingRate,
-                            uint32_t *pFormat,
+                            audio_format_t *pFormat,
                             uint32_t *pChannels,
                             uint32_t acoustics)
     {
         Parcel data, reply;
         uint32_t devices = pDevices ? *pDevices : 0;
         uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
-        uint32_t format = pFormat ? *pFormat : 0;
+        audio_format_t format = pFormat ? *pFormat : AUDIO_FORMAT_DEFAULT;
         uint32_t channels = pChannels ? *pChannels : 0;
 
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -452,7 +452,7 @@ public:
         if (pDevices) *pDevices = devices;
         samplingRate = reply.readInt32();
         if (pSamplingRate) *pSamplingRate = samplingRate;
-        format = reply.readInt32();
+        format = (audio_format_t) reply.readInt32();
         if (pFormat) *pFormat = format;
         channels = reply.readInt32();
         if (pChannels) *pChannels = channels;
@@ -678,7 +678,7 @@ status_t BnAudioFlinger::onTransact(
             pid_t pid = data.readInt32();
             int streamType = data.readInt32();
             uint32_t sampleRate = data.readInt32();
-            int format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
@@ -699,7 +699,7 @@ status_t BnAudioFlinger::onTransact(
             pid_t pid = data.readInt32();
             int input = data.readInt32();
             uint32_t sampleRate = data.readInt32();
-            int format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
@@ -825,7 +825,7 @@ status_t BnAudioFlinger::onTransact(
         case GET_INPUTBUFFERSIZE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             uint32_t sampleRate = data.readInt32();
-            int format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             int channelCount = data.readInt32();
             reply->writeInt32( getInputBufferSize(sampleRate, format, channelCount) );
             return NO_ERROR;
@@ -834,7 +834,7 @@ status_t BnAudioFlinger::onTransact(
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             uint32_t devices = data.readInt32();
             uint32_t samplingRate = data.readInt32();
-            uint32_t format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
             uint32_t latency = data.readInt32();
             uint32_t flags = data.readInt32();
@@ -879,7 +879,7 @@ status_t BnAudioFlinger::onTransact(
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             uint32_t devices = data.readInt32();
             uint32_t samplingRate = data.readInt32();
-            uint32_t format = data.readInt32();
+            audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
             uint32_t acoutics = data.readInt32();
 
