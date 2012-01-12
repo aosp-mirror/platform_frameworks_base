@@ -87,7 +87,7 @@ public class KeyButtonView extends ImageView {
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         if (mGlowBG != null) {
-            mDrawingAlpha = BUTTON_QUIESCENT_ALPHA;
+            setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
         }
         
         a.recycle();
@@ -107,17 +107,13 @@ public class KeyButtonView extends ImageView {
             final int h = getHeight();
             canvas.scale(mGlowScale, mGlowScale, w*0.5f, h*0.5f);
             mGlowBG.setBounds(0, 0, w, h);
-            mGlowBG.setAlpha((int)(mGlowAlpha * 255));
+            mGlowBG.setAlpha((int)(mDrawingAlpha * mGlowAlpha * 255));
             mGlowBG.draw(canvas);
             canvas.restore();
             mRect.right = w;
             mRect.bottom = h;
-            canvas.saveLayerAlpha(mRect, (int)(mDrawingAlpha * 255), Canvas.ALL_SAVE_FLAG);
         }
         super.onDraw(canvas);
-        if (mGlowBG != null) {
-            canvas.restore();
-        }
     }
 
     public float getDrawingAlpha() {
@@ -127,8 +123,11 @@ public class KeyButtonView extends ImageView {
 
     public void setDrawingAlpha(float x) {
         if (mGlowBG == null) return;
+        // Calling setAlpha(int), which is an ImageView-specific
+        // method that's different from setAlpha(float). This sets
+        // the alpha on this ImageView's drawable directly
+        setAlpha((int) (x * 255));
         mDrawingAlpha = x;
-        invalidate();
     }
 
     public float getGlowAlpha() {
