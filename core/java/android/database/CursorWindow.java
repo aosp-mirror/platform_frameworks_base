@@ -98,8 +98,8 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      */
     public CursorWindow(String name) {
         mStartPos = 0;
-        mName = name;
-        mWindowPtr = nativeCreate(name, sCursorWindowSize);
+        mName = name != null && name.length() != 0 ? name : "<unnamed>";
+        mWindowPtr = nativeCreate(mName, sCursorWindowSize);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
                     (sCursorWindowSize / 1024) + " kb failed. " + printStats());
@@ -161,7 +161,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     }
 
     /**
-     * Gets the name of this cursor window.
+     * Gets the name of this cursor window, never null.
      * @hide
      */
     public String getName() {

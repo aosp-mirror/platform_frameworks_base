@@ -59,14 +59,9 @@ static void throwUnknownTypeException(JNIEnv * env, jint type) {
 
 static jint nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint cursorWindowSize) {
     String8 name;
-    if (nameObj) {
-        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        name.setTo(nameStr);
-        env->ReleaseStringUTFChars(nameObj, nameStr);
-    }
-    if (name.size() == 0) {
-        name.setTo("<unnamed>");
-    }
+    const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
+    name.setTo(nameStr);
+    env->ReleaseStringUTFChars(nameObj, nameStr);
 
     CursorWindow* window;
     status_t status = CursorWindow::create(name, cursorWindowSize, &window);

@@ -16,17 +16,12 @@
 
 package android.database;
 
-import android.app.Activity;
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.test.AndroidTestCase;
-
-import junit.framework.TestCase;
 
 /* 
  * This is a series of unit tests for database locks.
@@ -104,9 +99,9 @@ public class DatabaseLockTest extends AndroidTestCase {
         public void run() {
             for (int i = 0; i < NUM_ITERATIONS; i++) {
                 mDatabase.beginTransaction();
-                int val = mCounter.incrementAndGet();
+                mCounter.incrementAndGet();
                 try {
-                    Thread.currentThread().sleep(SLEEP_TIME);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     // ignore
                 }
@@ -124,7 +119,6 @@ public class DatabaseLockTest extends AndroidTestCase {
     @Suppress
     public void testLockLatency() {
         startDatabaseLatencyThread();
-        int previous = 0;
         long sumTime = 0;
         long maxTime = 0;
         for (int i = 0; i < NUM_ITERATIONS; i++) { 
@@ -137,7 +131,7 @@ public class DatabaseLockTest extends AndroidTestCase {
             }
             sumTime += elapsedTime;
             try {
-                Thread.currentThread().sleep(SLEEP_TIME); 
+                Thread.sleep(SLEEP_TIME); 
             } catch (InterruptedException e) {
                 // ignore
             }   
@@ -164,7 +158,7 @@ public class DatabaseLockTest extends AndroidTestCase {
             {
                 mDatabase.beginTransaction();
                 try {
-                    Thread.currentThread().sleep(SLEEP_TIME);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     // ignore
                 } 
