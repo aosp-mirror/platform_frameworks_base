@@ -15,12 +15,17 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "Power-JNI"
+
 #include "JNIHelp.h"
 #include "jni.h"
 #include "android_runtime/AndroidRuntime.h"
 #include <utils/misc.h>
+#include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <cutils/android_reboot.h>
+
+static struct power_module *sPowerModule;
 
 namespace android
 {
@@ -65,7 +70,9 @@ setLastUserActivityTimeout(JNIEnv *env, jobject clazz, jlong timeMS)
 static int
 setScreenState(JNIEnv *env, jobject clazz, jboolean on)
 {
-    return set_screen_state(on);
+    if (sPowerModule)
+        sPowerModule->setInteractive(sPowerModule, on);
+    return 0;
 }
 
 static void android_os_Power_shutdown(JNIEnv *env, jobject clazz)
@@ -85,12 +92,26 @@ static void android_os_Power_reboot(JNIEnv *env, jobject clazz, jstring reason)
     jniThrowIOException(env, errno);
 }
 
+static int android_os_Power_init(JNIEnv *env, jobject clazz)
+{
+    status_t err = hw_get_module(POWER_HARDWARE_MODULE_ID,
+        (hw_module_t const**)&sPowerModule);
+    ALOGE_IF(err, "couldn't load %s module (%s)",
+             POWER_HARDWARE_MODULE_ID, strerror(-err));
+
+    if (!err)
+        sPowerModule->init(sPowerModule);
+
+    return err;
+}
+
 static JNINativeMethod method_table[] = {
     { "acquireWakeLock", "(ILjava/lang/String;)V", (void*)acquireWakeLock },
     { "releaseWakeLock", "(Ljava/lang/String;)V", (void*)releaseWakeLock },
     { "setLastUserActivityTimeout", "(J)I", (void*)setLastUserActivityTimeout },
     { "setScreenState", "(Z)I", (void*)setScreenState },
     { "shutdown", "()V", (void*)android_os_Power_shutdown },
+    { "powerInitNative", "()I", (void*)android_os_Power_init },
     { "rebootNative", "(Ljava/lang/String;)V", (void*)android_os_Power_reboot },
 };
 

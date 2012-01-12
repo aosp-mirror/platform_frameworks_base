@@ -583,6 +583,7 @@ public class PowerManagerService extends IPowerManager.Stub
         }
         
         nativeInit();
+        Power.powerInitNative();
         synchronized (mLocks) {
             updateNativePowerStateLocked();
             // We make sure to start out with the screen on due to user activity.

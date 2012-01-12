@@ -104,4 +104,6 @@ public class Power
     }
 
     private static native void rebootNative(String reason) throws IOException ;
+
+    public static native int powerInitNative();
 }
