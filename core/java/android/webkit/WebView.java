@@ -92,6 +92,7 @@ import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TouchEventData;
 import android.webkit.WebViewCore.TouchHighlightData;
+import android.webkit.WebViewCore.WebKitHitTest;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -699,7 +700,7 @@ public class WebView extends AbsoluteLayout
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
 
-    static final boolean USE_WEBKIT_RINGS = false;
+    static boolean sDisableNavcache = false;
     // the color used to highlight the touch rectangles
     private static final int HIGHLIGHT_COLOR = 0x6633b5e5;
     // the round corner for the highlight path
@@ -775,7 +776,7 @@ public class WebView extends AbsoluteLayout
     static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
     static final int SET_SCROLLBAR_MODES                = 129;
     static final int SELECTION_STRING_CHANGED           = 130;
-    static final int SET_TOUCH_HIGHLIGHT_RECTS          = 131;
+    static final int HIT_TEST_RESULT                    = 131;
     static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
     static final int SET_AUTOFILLABLE                   = 133;
@@ -788,7 +789,7 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_ZOOM_DENSITY                = 139;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
-    private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
+    private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
 
     static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -1311,6 +1312,7 @@ public class WebView extends AbsoluteLayout
 
     private void init() {
         OnTrimMemoryListener.init(getContext());
+        sDisableNavcache = nativeDisableNavcache();
 
         setWillNotDraw(false);
         setFocusable(true);
@@ -2618,8 +2620,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private HitTestResult hitTestResult(HitTestResult fallback) {
-        if (mNativeClass == 0) {
-            return null;
+        if (mNativeClass == 0 || sDisableNavcache) {
+            return fallback;
         }
 
         HitTestResult result = new HitTestResult();
@@ -4376,7 +4378,7 @@ public class WebView extends AbsoluteLayout
                 || mTouchMode == TOUCH_SHORTPRESS_MODE
                 || mTouchMode == TOUCH_DONE_MODE);
         boolean drawNativeRings = !drawJavaRings;
-        if (USE_WEBKIT_RINGS) {
+        if (sDisableNavcache) {
             drawNativeRings = !drawJavaRings && !isInTouchMode();
         }
         drawContent(canvas, drawNativeRings);
@@ -4431,8 +4433,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private void removeTouchHighlight() {
-        mWebViewCore.removeMessages(EventHub.GET_TOUCH_HIGHLIGHT_RECTS);
-        mPrivateHandler.removeMessages(SET_TOUCH_HIGHLIGHT_RECTS);
+        mWebViewCore.removeMessages(EventHub.HIT_TEST);
+        mPrivateHandler.removeMessages(HIT_TEST_RESULT);
         setTouchHighlightRects(null);
     }
 
@@ -6198,7 +6200,7 @@ public class WebView extends AbsoluteLayout
                     nativeSetIsScrolling(false);
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
-                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                    if (sDisableNavcache) {
                         removeTouchHighlight();
                     }
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
@@ -6222,7 +6224,7 @@ public class WebView extends AbsoluteLayout
                         mWebViewCore.sendMessage(
                                 EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     }
-                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                    if (sDisableNavcache) {
                         TouchHighlightData data = new TouchHighlightData();
                         data.mX = contentX;
                         data.mY = contentY;
@@ -6234,7 +6236,7 @@ public class WebView extends AbsoluteLayout
                         if (!mBlockWebkitViewMessages) {
                             mTouchHighlightRequested = System.currentTimeMillis();
                             mWebViewCore.sendMessageAtFrontOfQueue(
-                                    EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data);
+                                    EventHub.HIT_TEST, data);
                         }
                         if (DEBUG_TOUCH_HIGHLIGHT) {
                             if (getSettings().getNavDump()) {
@@ -6322,7 +6324,7 @@ public class WebView extends AbsoluteLayout
                     if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_INIT_MODE;
                     }
-                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                    if (sDisableNavcache) {
                         removeTouchHighlight();
                     }
                 }
@@ -6924,7 +6926,7 @@ public class WebView extends AbsoluteLayout
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-        if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+        if (sDisableNavcache) {
             removeTouchHighlight();
         }
         mHeldMotionless = MOTIONLESS_TRUE;
@@ -7481,7 +7483,7 @@ public class WebView extends AbsoluteLayout
      * and calls showCursorTimed on the native side
      */
     private void updateSelection() {
-        if (mNativeClass == 0) {
+        if (mNativeClass == 0 || sDisableNavcache) {
             return;
         }
         mPrivateHandler.removeMessages(UPDATE_SELECTION);
@@ -7589,7 +7591,7 @@ public class WebView extends AbsoluteLayout
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
         int slop = viewToContentDimension(mNavSlop);
-        if (USE_WEBKIT_RINGS && !mTouchHighlightRegion.isEmpty()) {
+        if (sDisableNavcache && !mTouchHighlightRegion.isEmpty()) {
             // set mTouchHighlightRequested to 0 to cause an immediate
             // drawing of the touch rings
             mTouchHighlightRequested = 0;
@@ -7601,8 +7603,7 @@ public class WebView extends AbsoluteLayout
                 }
             }, ViewConfiguration.getPressedStateDuration());
         }
-        if (getSettings().supportTouchOnly()) {
-            removeTouchHighlight();
+        if (sDisableNavcache) {
             WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
             // use "0" as generation id to inform WebKit to use the same x/y as
             // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
@@ -8487,9 +8488,8 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
-                    mInitialHitTestResult = null; // set by updateSelection()
                     if (mTouchMode == TOUCH_INIT_MODE) {
-                        if (!getSettings().supportTouchOnly()
+                        if (!sDisableNavcache
                                 && mPreventDefault != PREVENT_DEFAULT_YES) {
                             mTouchMode = TOUCH_SHORTPRESS_START_MODE;
                             updateSelection();
@@ -8504,7 +8504,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    if (USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+                    if (sDisableNavcache) {
                         removeTouchHighlight();
                     }
                     if (inFullScreenMode() || mDeferTouchProcess) {
@@ -8835,10 +8835,16 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
-                case SET_TOUCH_HIGHLIGHT_RECTS:
-                    @SuppressWarnings("unchecked")
-                    ArrayList<Rect> rects = (ArrayList<Rect>) msg.obj;
-                    setTouchHighlightRects(rects);
+                case HIT_TEST_RESULT:
+                    WebKitHitTest hit = (WebKitHitTest) msg.obj;
+                    setTouchHighlightRects(hit != null ? hit.mTouchRects : null);
+                    if (hit == null) {
+                        mInitialHitTestResult = null;
+                    } else {
+                        mInitialHitTestResult = new HitTestResult();
+                        mInitialHitTestResult.mType = hit.mType;
+                        mInitialHitTestResult.mExtra = hit.mExtra;
+                    }
                     break;
 
                 case SAVE_WEBARCHIVE_FINISHED:
@@ -8875,7 +8881,7 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void setTouchHighlightRects(ArrayList<Rect> rects) {
+    private void setTouchHighlightRects(Rect[] rects) {
         invalidate(mTouchHighlightRegion.getBounds());
         mTouchHighlightRegion.setEmpty();
         if (rects != null) {
@@ -9793,4 +9799,5 @@ public class WebView extends AbsoluteLayout
      */
     private static native void     nativeOnTrimMemory(int level);
     private static native void nativeSetPauseDrawing(int instance, boolean pause);
+    private static native boolean nativeDisableNavcache();
 }

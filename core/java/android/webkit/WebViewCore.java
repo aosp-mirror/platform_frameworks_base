@@ -860,6 +860,12 @@ public final class WebViewCore {
         Rect mNativeLayerRect;
     }
 
+    static class WebKitHitTest {
+        int mType;
+        String mExtra;
+        Rect[] mTouchRects;
+    }
+
     static class AutoFillData {
         public AutoFillData() {
             mQueryId = WebTextView.FORM_NOT_AUTOFILLABLE;
@@ -1072,7 +1078,7 @@ public final class WebViewCore {
         static final int ADD_PACKAGE_NAME = 185;
         static final int REMOVE_PACKAGE_NAME = 186;
 
-        static final int GET_TOUCH_HIGHLIGHT_RECTS = 187;
+        static final int HIT_TEST = 187;
 
         // accessibility support
         static final int MODIFY_SELECTION = 190;
@@ -1550,7 +1556,7 @@ public final class WebViewCore {
                             break;
 
                         case MODIFY_SELECTION:
-                            String modifiedSelectionString = 
+                            String modifiedSelectionString =
                                 nativeModifySelection(mNativeClass, msg.arg1,
                                         msg.arg2);
                             mWebView.mPrivateHandler.obtainMessage(WebView.SELECTION_STRING_CHANGED,
@@ -1671,16 +1677,16 @@ public final class WebViewCore {
                                     (Set<String>) msg.obj);
                             break;
 
-                        case GET_TOUCH_HIGHLIGHT_RECTS:
+                        case HIT_TEST:
                             TouchHighlightData d = (TouchHighlightData) msg.obj;
                             if (d.mNativeLayer != 0) {
                                 nativeScrollLayer(mNativeClass,
                                         d.mNativeLayer, d.mNativeLayerRect);
                             }
-                            ArrayList<Rect> rects = nativeGetTouchHighlightRects
-                                    (mNativeClass, d.mX, d.mY, d.mSlop);
+                            WebKitHitTest hit = nativeHitTest(mNativeClass,
+                                    d.mX, d.mY, d.mSlop);
                             mWebView.mPrivateHandler.obtainMessage(
-                                    WebView.SET_TOUCH_HIGHLIGHT_RECTS, rects)
+                                    WebView.HIT_TEST_RESULT, hit)
                                     .sendToTarget();
                             break;
 
@@ -2335,9 +2341,9 @@ public final class WebViewCore {
         }
 
         // remove the touch highlight when moving to a new page
-        if (WebView.USE_WEBKIT_RINGS || getSettings().supportTouchOnly()) {
+        if (WebView.sDisableNavcache) {
             mWebView.mPrivateHandler.sendEmptyMessage(
-                    WebView.SET_TOUCH_HIGHLIGHT_RECTS);
+                    WebView.HIT_TEST_RESULT);
         }
 
         // reset the scroll position, the restored offset and scales
@@ -2927,8 +2933,7 @@ public final class WebViewCore {
     private native boolean nativeValidNodeAndBounds(int nativeClass, int frame,
             int node, Rect bounds);
 
-    private native ArrayList<Rect> nativeGetTouchHighlightRects(int nativeClass,
-            int x, int y, int slop);
+    private native WebKitHitTest nativeHitTest(int nativeClass, int x, int y, int slop);
 
     private native void nativeAutoFillForm(int nativeClass, int queryId);
     private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
