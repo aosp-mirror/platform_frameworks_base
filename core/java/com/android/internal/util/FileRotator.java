@@ -17,9 +17,9 @@
 package com.android.internal.util;
 
 import android.os.FileUtils;
+import android.util.Slog;
 
-import com.android.internal.util.FileRotator.Reader;
-import com.android.internal.util.FileRotator.Writer;
+import com.android.internal.util.FileRotator.Rewriter;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -41,12 +41,15 @@ import libcore.io.IoUtils;
  * Instead of manipulating files directly, users implement interfaces that
  * perform operations on {@link InputStream} and {@link OutputStream}. This
  * enables atomic rewriting of file contents in
- * {@link #combineActive(Reader, Writer, long)}.
+ * {@link #rewriteActive(Rewriter, long)}.
  * <p>
  * Users must periodically call {@link #maybeRotate(long)} to perform actual
  * rotation. Not inherently thread safe.
  */
 public class FileRotator {
+    private static final String TAG = "FileRotator";
+    private static final boolean LOGD = true;
+
     private final File mBasePath;
     private final String mPrefix;
     private final long mRotateAgeMillis;
@@ -73,6 +76,15 @@ public class FileRotator {
     }
 
     /**
+     * External class that reads existing data from given {@link InputStream},
+     * then writes any modified data to {@link OutputStream}.
+     */
+    public interface Rewriter extends Reader, Writer {
+        public void reset();
+        public boolean shouldWrite();
+    }
+
+    /**
      * Create a file rotator.
      *
      * @param basePath Directory under which all files will be placed.
@@ -96,6 +108,8 @@ public class FileRotator {
             if (!name.startsWith(mPrefix)) continue;
 
             if (name.endsWith(SUFFIX_BACKUP)) {
+                if (LOGD) Slog.d(TAG, "recovering " + name);
+
                 final File backupFile = new File(mBasePath, name);
                 final File file = new File(
                         mBasePath, name.substring(0, name.length() - SUFFIX_BACKUP.length()));
@@ -104,6 +118,8 @@ public class FileRotator {
                 backupFile.renameTo(file);
 
             } else if (name.endsWith(SUFFIX_NO_BACKUP)) {
+                if (LOGD) Slog.d(TAG, "recovering " + name);
+
                 final File noBackupFile = new File(mBasePath, name);
                 final File file = new File(
                         mBasePath, name.substring(0, name.length() - SUFFIX_NO_BACKUP.length()));
@@ -116,26 +132,95 @@ public class FileRotator {
     }
 
     /**
-     * Atomically combine data with existing data in currently active file.
-     * Maintains a backup during write, which is restored if the write fails.
+     * Delete all files managed by this rotator.
      */
-    public void combineActive(Reader reader, Writer writer, long currentTimeMillis)
+    public void deleteAll() {
+        final FileInfo info = new FileInfo(mPrefix);
+        for (String name : mBasePath.list()) {
+            if (!info.parse(name)) continue;
+
+            // delete each file that matches parser
+            new File(mBasePath, name).delete();
+        }
+    }
+
+    /**
+     * Process currently active file, first reading any existing data, then
+     * writing modified data. Maintains a backup during write, which is restored
+     * if the write fails.
+     */
+    public void rewriteActive(Rewriter rewriter, long currentTimeMillis)
             throws IOException {
         final String activeName = getActiveName(currentTimeMillis);
+        rewriteSingle(rewriter, activeName);
+    }
 
-        final File file = new File(mBasePath, activeName);
+    @Deprecated
+    public void combineActive(final Reader reader, final Writer writer, long currentTimeMillis)
+            throws IOException {
+        rewriteActive(new Rewriter() {
+            /** {@inheritDoc} */
+            public void reset() {
+                // ignored
+            }
+
+            /** {@inheritDoc} */
+            public void read(InputStream in) throws IOException {
+                reader.read(in);
+            }
+
+            /** {@inheritDoc} */
+            public boolean shouldWrite() {
+                return true;
+            }
+
+            /** {@inheritDoc} */
+            public void write(OutputStream out) throws IOException {
+                writer.write(out);
+            }
+        }, currentTimeMillis);
+    }
+
+    /**
+     * Process all files managed by this rotator, usually to rewrite historical
+     * data. Each file is processed atomically.
+     */
+    public void rewriteAll(Rewriter rewriter) throws IOException {
+        final FileInfo info = new FileInfo(mPrefix);
+        for (String name : mBasePath.list()) {
+            if (!info.parse(name)) continue;
+
+            // process each file that matches parser
+            rewriteSingle(rewriter, name);
+        }
+    }
+
+    /**
+     * Process a single file atomically, first reading any existing data, then
+     * writing modified data. Maintains a backup during write, which is restored
+     * if the write fails.
+     */
+    private void rewriteSingle(Rewriter rewriter, String name) throws IOException {
+        if (LOGD) Slog.d(TAG, "rewriting " + name);
+
+        final File file = new File(mBasePath, name);
         final File backupFile;
+
+        rewriter.reset();
 
         if (file.exists()) {
             // read existing data
-            readFile(file, reader);
+            readFile(file, rewriter);
+
+            // skip when rewriter has nothing to write
+            if (!rewriter.shouldWrite()) return;
 
             // backup existing data during write
-            backupFile = new File(mBasePath, activeName + SUFFIX_BACKUP);
+            backupFile = new File(mBasePath, name + SUFFIX_BACKUP);
             file.renameTo(backupFile);
 
             try {
-                writeFile(file, writer);
+                writeFile(file, rewriter);
 
                 // write success, delete backup
                 backupFile.delete();
@@ -148,11 +233,11 @@ public class FileRotator {
 
         } else {
             // create empty backup during write
-            backupFile = new File(mBasePath, activeName + SUFFIX_NO_BACKUP);
+            backupFile = new File(mBasePath, name + SUFFIX_NO_BACKUP);
             backupFile.createNewFile();
 
             try {
-                writeFile(file, writer);
+                writeFile(file, rewriter);
 
                 // write success, delete empty backup
                 backupFile.delete();
@@ -176,6 +261,8 @@ public class FileRotator {
 
             // read file when it overlaps
             if (info.startMillis <= matchEndMillis && matchStartMillis <= info.endMillis) {
+                if (LOGD) Slog.d(TAG, "reading matching " + name);
+
                 final File file = new File(mBasePath, name);
                 readFile(file, reader);
             }
@@ -224,16 +311,20 @@ public class FileRotator {
             if (!info.parse(name)) continue;
 
             if (info.isActive()) {
-                // found active file; rotate if old enough
-                if (info.startMillis < rotateBefore) {
+                if (info.startMillis <= rotateBefore) {
+                    // found active file; rotate if old enough
+                    if (LOGD) Slog.d(TAG, "rotating " + name);
+
                     info.endMillis = currentTimeMillis;
 
                     final File file = new File(mBasePath, name);
                     final File destFile = new File(mBasePath, info.build());
                     file.renameTo(destFile);
                 }
-            } else if (info.endMillis < deleteBefore) {
+            } else if (info.endMillis <= deleteBefore) {
                 // found rotated file; delete if old enough
+                if (LOGD) Slog.d(TAG, "deleting " + name);
+
                 final File file = new File(mBasePath, name);
                 file.delete();
             }

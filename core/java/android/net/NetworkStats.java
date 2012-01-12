@@ -102,6 +102,15 @@ public class NetworkStats implements Parcelable {
             this.operations = operations;
         }
 
+        public boolean isNegative() {
+            return rxBytes < 0 || rxPackets < 0 || txBytes < 0 || txPackets < 0 || operations < 0;
+        }
+
+        public boolean isEmpty() {
+            return rxBytes == 0 && rxPackets == 0 && txBytes == 0 && txPackets == 0
+                    && operations == 0;
+        }
+
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder();
@@ -343,6 +352,7 @@ public class NetworkStats implements Parcelable {
      * on matching {@link #uid} and {@link #tag} rows. Ignores {@link #iface},
      * since operation counts are at data layer.
      */
+    @Deprecated
     public void spliceOperationsFrom(NetworkStats stats) {
         for (int i = 0; i < size; i++) {
             final int j = stats.findIndex(IFACE_ALL, uid[i], set[i], tag[i]);
@@ -397,7 +407,7 @@ public class NetworkStats implements Parcelable {
      * Return total of all fields represented by this snapshot object.
      */
     public Entry getTotal(Entry recycle) {
-        return getTotal(recycle, null, UID_ALL);
+        return getTotal(recycle, null, UID_ALL, false);
     }
 
     /**
@@ -405,7 +415,7 @@ public class NetworkStats implements Parcelable {
      * the requested {@link #uid}.
      */
     public Entry getTotal(Entry recycle, int limitUid) {
-        return getTotal(recycle, null, limitUid);
+        return getTotal(recycle, null, limitUid, false);
     }
 
     /**
@@ -413,7 +423,11 @@ public class NetworkStats implements Parcelable {
      * the requested {@link #iface}.
      */
     public Entry getTotal(Entry recycle, HashSet<String> limitIface) {
-        return getTotal(recycle, limitIface, UID_ALL);
+        return getTotal(recycle, limitIface, UID_ALL, false);
+    }
+
+    public Entry getTotalIncludingTags(Entry recycle) {
+        return getTotal(recycle, null, UID_ALL, true);
     }
 
     /**
@@ -423,7 +437,8 @@ public class NetworkStats implements Parcelable {
      * @param limitIface Set of {@link #iface} to include in total; or {@code
      *            null} to include all ifaces.
      */
-    private Entry getTotal(Entry recycle, HashSet<String> limitIface, int limitUid) {
+    private Entry getTotal(
+            Entry recycle, HashSet<String> limitIface, int limitUid, boolean includeTags) {
         final Entry entry = recycle != null ? recycle : new Entry();
 
         entry.iface = IFACE_ALL;
@@ -442,7 +457,7 @@ public class NetworkStats implements Parcelable {
 
             if (matchesUid && matchesIface) {
                 // skip specific tags, since already counted in TAG_NONE
-                if (tag[i] != TAG_NONE) continue;
+                if (tag[i] != TAG_NONE && !includeTags) continue;
 
                 entry.rxBytes += rxBytes[i];
                 entry.rxPackets += rxPackets[i];
@@ -460,7 +475,7 @@ public class NetworkStats implements Parcelable {
      * time, and that none of them have disappeared.
      */
     public NetworkStats subtract(NetworkStats right) {
-        return subtract(this, right, null);
+        return subtract(this, right, null, null);
     }
 
     /**
@@ -471,12 +486,12 @@ public class NetworkStats implements Parcelable {
      * If counters have rolled backwards, they are clamped to {@code 0} and
      * reported to the given {@link NonMonotonicObserver}.
      */
-    public static NetworkStats subtract(
-            NetworkStats left, NetworkStats right, NonMonotonicObserver observer) {
+    public static <C> NetworkStats subtract(
+            NetworkStats left, NetworkStats right, NonMonotonicObserver<C> observer, C cookie) {
         long deltaRealtime = left.elapsedRealtime - right.elapsedRealtime;
         if (deltaRealtime < 0) {
             if (observer != null) {
-                observer.foundNonMonotonic(left, -1, right, -1);
+                observer.foundNonMonotonic(left, -1, right, -1, cookie);
             }
             deltaRealtime = 0;
         }
@@ -510,7 +525,7 @@ public class NetworkStats implements Parcelable {
                 if (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
                         || entry.txPackets < 0 || entry.operations < 0) {
                     if (observer != null) {
-                        observer.foundNonMonotonic(left, i, right, j);
+                        observer.foundNonMonotonic(left, i, right, j, cookie);
                     }
                     entry.rxBytes = Math.max(entry.rxBytes, 0);
                     entry.rxPackets = Math.max(entry.rxPackets, 0);
@@ -663,8 +678,8 @@ public class NetworkStats implements Parcelable {
         }
     };
 
-    public interface NonMonotonicObserver {
+    public interface NonMonotonicObserver<C> {
         public void foundNonMonotonic(
-                NetworkStats left, int leftIndex, NetworkStats right, int rightIndex);
+                NetworkStats left, int leftIndex, NetworkStats right, int rightIndex, C cookie);
     }
 }
