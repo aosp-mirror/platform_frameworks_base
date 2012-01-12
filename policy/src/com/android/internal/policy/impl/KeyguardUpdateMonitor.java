@@ -583,8 +583,7 @@ public class KeyguardUpdateMonitor {
      * through mHandler, this *must* be called from the UI thread.
      */
     public void reportSimUnlocked() {
-        mSimState = IccCard.State.READY;
-        handleSimStateChange(new SimArgs(mSimState));
+        handleSimStateChange(new SimArgs(IccCard.State.READY));
     }
 
     public boolean isKeyguardBypassEnabled() {
