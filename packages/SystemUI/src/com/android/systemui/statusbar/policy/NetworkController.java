@@ -135,7 +135,9 @@ public class NetworkController extends BroadcastReceiver {
     ArrayList<ImageView> mWimaxIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
-    ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
+    ArrayList<TextView> mCombinedLabelViews = new ArrayList<TextView>();
+    ArrayList<TextView> mMobileLabelViews = new ArrayList<TextView>();
+    ArrayList<TextView> mWifiLabelViews = new ArrayList<TextView>();
     ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     int mLastPhoneSignalIconId = -1;
     int mLastDataDirectionIconId = -1;
@@ -144,7 +146,7 @@ public class NetworkController extends BroadcastReceiver {
     int mLastWimaxIconId = -1;
     int mLastCombinedSignalIconId = -1;
     int mLastDataTypeIconId = -1;
-    String mLastLabel = "";
+    String mLastCombinedLabel = "";
 
     private boolean mHasMobileDataFeature;
 
@@ -257,8 +259,16 @@ public class NetworkController extends BroadcastReceiver {
         mDataTypeIconViews.add(v);
     }
 
-    public void addLabelView(TextView v) {
-        mLabelViews.add(v);
+    public void addCombinedLabelView(TextView v) {
+        mCombinedLabelViews.add(v);
+    }
+
+    public void addMobileLabelView(TextView v) {
+        mMobileLabelViews.add(v);
+    }
+
+    public void addWifiLabelView(TextView v) {
+        mWifiLabelViews.add(v);
     }
 
     public void addSignalCluster(SignalCluster cluster) {
@@ -873,11 +883,16 @@ public class NetworkController extends BroadcastReceiver {
 
         int combinedSignalIconId = 0;
         int combinedActivityIconId = 0;
-        String label = "";
+        String combinedLabel = "";
+        String wifiLabel = "";
+        String mobileLabel = "";
         int N;
 
         if (mDataConnected) {
-            label = mNetworkName;
+            mobileLabel = mNetworkName;
+            if (DEBUG) {
+                mobileLabel += "yyyyYYYYyyyyYYYY";
+            }
             combinedSignalIconId = mDataSignalIconId;
             switch (mDataActivity) {
                 case TelephonyManager.DATA_ACTIVITY_IN:
@@ -894,6 +909,7 @@ public class NetworkController extends BroadcastReceiver {
                     break;
             }
 
+            combinedLabel = mobileLabel;
             combinedActivityIconId = mMobileActivityIconId;
             combinedSignalIconId = mDataSignalIconId; // set by updateDataIcon()
             mContentDescriptionCombinedSignal = mContentDescriptionDataType;
@@ -901,10 +917,13 @@ public class NetworkController extends BroadcastReceiver {
 
         if (mWifiConnected) {
             if (mWifiSsid == null) {
-                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
+                wifiLabel = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
                 mWifiActivityIconId = 0; // no wifis, no bits
             } else {
-                label = mWifiSsid;
+                wifiLabel = mWifiSsid;
+                if (DEBUG) {
+                    wifiLabel += "xxxxXXXXxxxxXXXX";
+                }
                 switch (mWifiActivity) {
                     case WifiManager.DATA_ACTIVITY_IN:
                         mWifiActivityIconId = R.drawable.stat_sys_wifi_in;
@@ -922,12 +941,13 @@ public class NetworkController extends BroadcastReceiver {
             }
 
             combinedActivityIconId = mWifiActivityIconId;
+            combinedLabel = wifiLabel;
             combinedSignalIconId = mWifiIconId; // set by updateWifiIcons()
             mContentDescriptionCombinedSignal = mContentDescriptionWifi;
         }
 
         if (mBluetoothTethered) {
-            label = mContext.getString(R.string.bluetooth_tethered);
+            combinedLabel = mContext.getString(R.string.bluetooth_tethered);
             combinedSignalIconId = mBluetoothTetherIconId;
             mContentDescriptionCombinedSignal = mContext.getString(
                     R.string.accessibility_bluetooth_tether);
@@ -945,7 +965,8 @@ public class NetworkController extends BroadcastReceiver {
 
             // combined values from connected wifi take precedence over airplane mode
             if (!mWifiConnected) {
-                label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+                wifiLabel = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+                combinedLabel = wifiLabel;
                 mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal;
                 combinedSignalIconId = mDataSignalIconId;
             }
@@ -953,7 +974,7 @@ public class NetworkController extends BroadcastReceiver {
         else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected) {
             // pretty much totally disconnected
 
-            label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+            combinedLabel = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
             combinedSignalIconId =
                 mHasMobileDataFeature ? mDataSignalIconId : mWifiIconId;
@@ -1028,7 +1049,7 @@ public class NetworkController extends BroadcastReceiver {
             for (int i=0; i<N; i++) {
                 final ImageView v = mWifiIconViews.get(i);
                 if (mWifiIconId == 0) {
-                    v.setVisibility(View.INVISIBLE);
+                    v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
                     v.setImageResource(mWifiIconId);
@@ -1044,7 +1065,7 @@ public class NetworkController extends BroadcastReceiver {
             for (int i=0; i<N; i++) {
                 final ImageView v = mWimaxIconViews.get(i);
                 if (mWimaxIconId == 0) {
-                    v.setVisibility(View.INVISIBLE);
+                    v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
                     v.setImageResource(mWimaxIconId);
@@ -1070,7 +1091,7 @@ public class NetworkController extends BroadcastReceiver {
             for (int i=0; i<N; i++) {
                 final ImageView v = mDataTypeIconViews.get(i);
                 if (mDataTypeIconId == 0) {
-                    v.setVisibility(View.INVISIBLE);
+                    v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
                     v.setImageResource(mDataTypeIconId);
@@ -1089,7 +1110,7 @@ public class NetworkController extends BroadcastReceiver {
             for (int i=0; i<N; i++) {
                 final ImageView v = mDataDirectionOverlayIconViews.get(i);
                 if (combinedActivityIconId == 0) {
-                    v.setVisibility(View.INVISIBLE);
+                    v.setVisibility(View.GONE);
                 } else {
                     v.setVisibility(View.VISIBLE);
                     v.setImageResource(combinedActivityIconId);
@@ -1098,14 +1119,28 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 
-        // the label in the notification panel
-        if (!mLastLabel.equals(label)) {
-            mLastLabel = label;
-            N = mLabelViews.size();
+        // the combinedLabel in the notification panel
+        if (!mLastCombinedLabel.equals(combinedLabel)) {
+            mLastCombinedLabel = combinedLabel;
+            N = mCombinedLabelViews.size();
             for (int i=0; i<N; i++) {
-                TextView v = mLabelViews.get(i);
-                v.setText(label);
+                TextView v = mCombinedLabelViews.get(i);
+                v.setText(combinedLabel);
             }
+        }
+
+        // wifi label
+        N = mWifiLabelViews.size();
+        for (int i=0; i<N; i++) {
+            TextView v = mWifiLabelViews.get(i);
+            v.setText(wifiLabel);
+        }
+        
+        // mobile label
+        N = mMobileLabelViews.size();
+        for (int i=0; i<N; i++) {
+            TextView v = mMobileLabelViews.get(i);
+            v.setText(mobileLabel);
         }
     }
 
@@ -1220,8 +1255,8 @@ public class NetworkController extends BroadcastReceiver {
         pw.print(Integer.toHexString(mLastDataTypeIconId));
         pw.print("/");
         pw.println(getResourceName(mLastDataTypeIconId));
-        pw.print("  mLastLabel=");
-        pw.print(mLastLabel);
+        pw.print("  mLastCombinedLabel=");
+        pw.print(mLastCombinedLabel);
         pw.println("");
     }
 
