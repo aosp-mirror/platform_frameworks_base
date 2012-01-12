@@ -16,39 +16,27 @@
 
 package com.android.scenegraph;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+
+import com.android.scenegraph.SceneManager;
+import com.android.scenegraph.SceneManager.SceneLoadedCallback;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.renderscript.*;
-import android.renderscript.Allocation.MipmapControl;
-import android.renderscript.Element.Builder;
-import android.renderscript.Font.Style;
 import android.renderscript.Program.TextureType;
-import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
-
-import com.android.scenegraph.SceneManager.SceneLoadedCallback;
 
 // This is where the scenegraph and the rendered objects are initialized and used
 public class TestAppRS {
 
     private static String modelName = "orientation_test.dae";
     private static String TAG = "TestAppRS";
-    private final int STATE_LAST_FOCUS = 1;
-    private final boolean mLoadFromSD = true;
-    private static String mSDFilePath = "sdcard/scenegraph/";
     private static String mFilePath = "";
 
     int mWidth;
@@ -148,38 +136,11 @@ public class TestAppRS {
         Allocation tempEnv;
         Allocation tempDiff;
 
-        Allocation loadCubemap(String name) {
-            InputStream is = null;
-            try {
-                if (!mLoadFromSD) {
-                    is = mRes.getAssets().open(name);
-                } else {
-                    File f = new File(mSDFilePath + name);
-                    is = new BufferedInputStream(new FileInputStream(f));
-                }
-            } catch (IOException e) {
-                Log.e("ImageLoaderTask", " Message: " + e.getMessage());
-                return null;
-            }
-
-            Bitmap b = BitmapFactory.decodeStream(is);
-            try {
-                is.close();
-            } catch (IOException e) {
-                Log.e("ImageLoaderTask", " Message: " + e.getMessage());
-            }
-
-            return Allocation.createCubemapFromBitmap(mRS,
-                                                      b,
-                                                      MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                      Allocation.USAGE_GRAPHICS_TEXTURE);
-        }
-
         protected Boolean doInBackground(String... names) {
             long start = System.currentTimeMillis();
 
-            tempEnv = loadCubemap("cube_env.png");
-            tempDiff = loadCubemap("cube_spec.png");
+            tempEnv = SceneManager.loadCubemap("sdcard/scenegraph/cube_env.png", mRS, mRes);
+            tempDiff = SceneManager.loadCubemap("sdcard/scenegraph/cube_spec.png", mRS, mRes);
 
             long end = System.currentTimeMillis();
             Log.v("TIMER", "Image load time: " + (end - start));

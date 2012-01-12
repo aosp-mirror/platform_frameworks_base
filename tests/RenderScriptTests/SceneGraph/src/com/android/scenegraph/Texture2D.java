@@ -16,40 +16,26 @@
 
 package com.android.scenegraph;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
 import java.lang.Math;
-import java.net.URL;
-import java.util.ArrayList;
+
+import com.android.scenegraph.SceneManager;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.renderscript.*;
-import android.renderscript.Allocation.MipmapControl;
-import android.renderscript.Matrix4f;
-import android.renderscript.Type.Builder;
 import android.util.Log;
 
 /**
  * @hide
  */
 public class Texture2D extends SceneGraphBase {
-    private boolean mLoadFromSD;
-
     String mFileName;
     String mFileDir;
     Allocation mRsTexture;
 
     public Texture2D() {
-        mLoadFromSD = false;
     }
 
     public void setFileDir(String dir) {
-        mLoadFromSD = SceneManager.isSDCardPath(dir);
         mFileDir = dir;
     }
 
@@ -67,24 +53,8 @@ public class Texture2D extends SceneGraphBase {
         }
 
         String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        InputStream is = null;
-        try {
-            if (!mLoadFromSD) {
-                is = res.getAssets().open(mFileDir + shortName);
-            } else {
-                File f = new File(mFileDir + shortName);
-                is = new BufferedInputStream(new FileInputStream(f));
-            }
-        } catch (IOException e) {
-            Log.e("Texture2D",
-                  "Could not open image file " + shortName + " Message: " + e.getMessage());
-            return null;
-        }
+        mRsTexture = SceneManager.loadTexture2D(mFileDir + shortName, rs, res);
 
-        Bitmap b = BitmapFactory.decodeStream(is);
-        mRsTexture = Allocation.createFromBitmap(rs, b,
-                                                 Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                 Allocation.USAGE_GRAPHICS_TEXTURE);
         return mRsTexture;
     }
 }
