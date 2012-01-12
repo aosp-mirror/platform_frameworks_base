@@ -1992,10 +1992,11 @@ package android.accessibilityservice {
     method public static java.lang.String feedbackTypeToString(int);
     method public static java.lang.String flagToString(int);
     method public boolean getCanRetrieveWindowContent();
-    method public java.lang.String getDescription();
+    method public deprecated java.lang.String getDescription();
     method public java.lang.String getId();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public java.lang.String getSettingsActivityName();
+    method public java.lang.String loadDescription(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT = 1; // 0x1
