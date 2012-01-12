@@ -213,10 +213,6 @@ public class WallpaperManager {
             mHandler.sendEmptyMessage(MSG_CLEAR_WALLPAPER);
         }
 
-        public Handler getHandler() {
-            return mHandler;
-        }
-
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
             synchronized (this) {
                 if (mWallpaper != null) {
@@ -623,24 +619,14 @@ public class WallpaperManager {
      * @param yOffset The offset along the Y dimension, from 0 to 1.
      */
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
-        final IBinder fWindowToken = windowToken;
-        final float fXOffset = xOffset;
-        final float fYOffset = yOffset;
-        sGlobals.getHandler().post(new Runnable() {
-            public void run() {
-                try {
-                    //Log.v(TAG, "Sending new wallpaper offsets from app...");
-                    ViewRootImpl.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
-                            fWindowToken, fXOffset, fYOffset, mWallpaperXStep, mWallpaperYStep);
-                    //Log.v(TAG, "...app returning after sending offsets!");
-                } catch (RemoteException e) {
-                    // Ignore.
-                } catch (IllegalArgumentException e) {
-                    // Since this is being posted, it's possible that this windowToken is no longer
-                    // valid, for example, if setWallpaperOffsets is called just before rotation.
-                }
-            }
-        });
+        try {
+            //Log.v(TAG, "Sending new wallpaper offsets from app...");
+            ViewRootImpl.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
+                    windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
+            //Log.v(TAG, "...app returning after sending offsets!");
+        } catch (RemoteException e) {
+            // Ignore.
+        }
     }
 
     /**
