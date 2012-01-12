@@ -504,12 +504,13 @@ bailout:
 
 // generate a unique device ID that can be used for arbitration
 bool CommonTimeServer::assignDeviceID() {
-    // on the PandaBoard, derive the device ID from the MAC address of
-    // the eth0 interface
+    if (!mBindIfaceValid)
+        return false;
+
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_addr.sa_family = AF_INET;
-    strlcpy(ifr.ifr_name, "eth0", IFNAMSIZ);
+    strlcpy(ifr.ifr_name, mBindIface.string(), IFNAMSIZ);
 
     int rc = ioctl(mSocket, SIOCGIFHWADDR, &ifr);
     if (rc) {
