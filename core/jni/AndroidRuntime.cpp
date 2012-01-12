@@ -121,12 +121,9 @@ extern int register_android_view_HardwareRenderer(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
-extern int register_android_database_SQLiteCompiledSql(JNIEnv* env);
-extern int register_android_database_SQLiteDatabase(JNIEnv* env);
+extern int register_android_database_SQLiteConnection(JNIEnv* env);
+extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
-extern int register_android_database_SQLiteProgram(JNIEnv* env);
-extern int register_android_database_SQLiteQuery(JNIEnv* env);
-extern int register_android_database_SQLiteStatement(JNIEnv* env);
 extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_text_format_Time(JNIEnv* env);
@@ -1141,12 +1138,9 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_YuvImage),
 
     REG_JNI(register_android_database_CursorWindow),
-    REG_JNI(register_android_database_SQLiteCompiledSql),
-    REG_JNI(register_android_database_SQLiteDatabase),
+    REG_JNI(register_android_database_SQLiteConnection),
+    REG_JNI(register_android_database_SQLiteGlobal),
     REG_JNI(register_android_database_SQLiteDebug),
-    REG_JNI(register_android_database_SQLiteProgram),
-    REG_JNI(register_android_database_SQLiteQuery),
-    REG_JNI(register_android_database_SQLiteStatement),
     REG_JNI(register_android_os_Debug),
     REG_JNI(register_android_os_FileObserver),
     REG_JNI(register_android_os_FileUtils),

@@ -16,8 +16,6 @@
 
 package android.database.sqlite;
 
-import android.database.CursorWindow;
-
 /**
  * An object created from a SQLiteDatabase that can be closed.
  */
@@ -31,7 +29,7 @@ public abstract class SQLiteClosable {
         synchronized(this) {
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
-                        "attempt to re-open an already-closed object: " + getObjInfo());
+                        "attempt to re-open an already-closed object: " + this);
             }
             mReferenceCount++;
         }
@@ -55,23 +53,5 @@ public abstract class SQLiteClosable {
         if (refCountIsZero) {
             onAllReferencesReleasedFromContainer();
         }
-    }
-
-    private String getObjInfo() {
-        StringBuilder buff = new StringBuilder();
-        buff.append(this.getClass().getName());
-        buff.append(" (");
-        if (this instanceof SQLiteDatabase) {
-            buff.append("database = ");
-            buff.append(((SQLiteDatabase)this).getPath());
-        } else if (this instanceof SQLiteProgram) {
-            buff.append("mSql = ");
-            buff.append(((SQLiteProgram)this).mSql);
-        } else if (this instanceof CursorWindow) {
-            buff.append("mStartPos = ");
-            buff.append(((CursorWindow)this).getStartPosition());
-        }
-        buff.append(") ");
-        return buff.toString();
     }
 }

@@ -21,8 +21,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 import java.io.File;
 import java.util.HashSet;
@@ -54,52 +52,8 @@ public class SQLiteCursorTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    @SmallTest
-    public void testQueryObjReassignment() {
-        mDatabase.enableWriteAheadLogging();
-        // have a few connections in the database connection pool
-        DatabaseConnectionPool pool = mDatabase.mConnectionPool;
-        pool.setMaxPoolSize(5);
-        SQLiteCursor cursor =
-                (SQLiteCursor) mDatabase.rawQuery("select * from " + TABLE_NAME, null);
-        assertNotNull(cursor);
-        // it should use a pooled database connection
-        SQLiteDatabase db = cursor.getDatabase();
-        assertTrue(db.mConnectionNum > 0);
-        assertFalse(mDatabase.equals(db));
-        assertEquals(mDatabase, db.mParentConnObj);
-        assertTrue(pool.getConnectionList().contains(db));
-        assertTrue(db.isOpen());
-        // do a requery. cursor should continue to use the above pooled connection
-        cursor.requery();
-        SQLiteDatabase dbAgain = cursor.getDatabase();
-        assertEquals(db, dbAgain);
-        // disable WAL so that the pooled connection held by the above cursor is closed
-        mDatabase.disableWriteAheadLogging();
-        assertFalse(db.isOpen());
-        assertNull(mDatabase.mConnectionPool);
-        // requery - which should make the cursor use mDatabase connection since the pooled
-        // connection is no longer available
-        cursor.requery();
-        SQLiteDatabase db1 = cursor.getDatabase();
-        assertTrue(db1.mConnectionNum == 0);
-        assertEquals(mDatabase, db1);
-        assertNull(mDatabase.mConnectionPool);
-        assertTrue(db1.isOpen());
-        assertFalse(mDatabase.equals(db));
-        // enable WAL and requery - this time a pooled connection should be used
-        mDatabase.enableWriteAheadLogging();
-        cursor.requery();
-        db = cursor.getDatabase();
-        assertTrue(db.mConnectionNum > 0);
-        assertFalse(mDatabase.equals(db));
-        assertEquals(mDatabase, db.mParentConnObj);
-        assertTrue(mDatabase.mConnectionPool.getConnectionList().contains(db));
-        assertTrue(db.isOpen());
-    }
-
     /**
-     * this test could take a while to execute. so, designate it as LargetTest
+     * this test could take a while to execute. so, designate it as LargeTest
      */
     @LargeTest
     public void testFillWindow() {
