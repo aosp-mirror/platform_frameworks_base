@@ -410,40 +410,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         }
     }
 
-    private class ChangeObserver extends ContentObserver {
-        private int mCursorNotificationCount = 0;
-        private int mNotificationCount = 0;
-
-        public int getCursorNotificationCount() {
-            return mCursorNotificationCount;
-        }
-
-        public int getNotificationCount() {
-            return mNotificationCount;
-        }
-
-        public ChangeObserver(boolean cursor) {
-            super(new Handler());
-            mCursor = cursor;
-        }
-
-        @Override
-        public boolean deliverSelfNotifications() {
-            return true;
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            if (mCursor) {
-                mCursorNotificationCount++;
-            } else {
-                mNotificationCount++;
-            }
-        }
-
-        boolean mCursor;
-    }
-
     @MediumTest
     public void testSelectionArgs() throws Exception {
         mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, data TEXT);");

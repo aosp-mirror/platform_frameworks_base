@@ -35,6 +35,7 @@ import java.util.Random;
  * 
  */
 
+@SuppressWarnings("deprecation")
 public class DatabasePerformanceTests {
 
     public static String[] children() {

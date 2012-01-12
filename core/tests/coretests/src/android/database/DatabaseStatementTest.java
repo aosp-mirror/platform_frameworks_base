@@ -25,8 +25,6 @@ import android.database.sqlite.SQLiteStatement;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
 
 import java.io.File;
 

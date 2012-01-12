@@ -35,15 +35,45 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
     }
 
     @SmallTest
-    public void testValuesLocalWindow() {
-        doTestValues(new CursorWindow(true));
+    public void testConstructor_WithName() {
+        CursorWindow window = new CursorWindow("MyWindow");
+        assertEquals("MyWindow", window.getName());
+        assertEquals(0, window.getStartPosition());
+        window.close();
     }
-    
+
     @SmallTest
-    public void testValuesRemoteWindow() {
-        doTestValues(new CursorWindow(false));
+    public void testConstructorWithEmptyName() {
+        CursorWindow window = new CursorWindow("");
+        assertEquals("<unnamed>", window.getName());
+        assertEquals(0, window.getStartPosition());
+        window.close();
     }
-    
+
+    @SmallTest
+    public void testConstructorWithNullName() {
+        CursorWindow window = new CursorWindow(null);
+        assertEquals("<unnamed>", window.getName());
+        assertEquals(0, window.getStartPosition());
+        window.close();
+    }
+
+    @SmallTest
+    public void testDeprecatedConstructor() {
+        @SuppressWarnings("deprecation")
+        CursorWindow window = new CursorWindow(true /*this argument is ignored*/);
+        assertEquals("<unnamed>", window.getName());
+        assertEquals(0, window.getStartPosition());
+        window.close();
+    }
+
+    @SmallTest
+    public void testValues() {
+        CursorWindow window = new CursorWindow("MyWindow");
+        doTestValues(window);
+        window.close();
+    }
+
     private void doTestValues(CursorWindow window) {
         assertTrue(window.setNumColumns(7));
         assertTrue(window.allocRow());

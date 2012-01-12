@@ -20,7 +20,6 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.PerformanceTestCase;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -493,8 +492,6 @@ public class NewDatabasePerformanceTests {
     private static final int SIZE = 1 * kMultiplier;
     private static final String[] COLUMNS = {"b"};
 
-    private String[] where = new String[SIZE];
-
     @Override
     public void setUp() {
       super.setUp();
@@ -525,8 +522,6 @@ public class NewDatabasePerformanceTests {
   public static class SelectString100 extends PerformanceBase {
     private static final int SIZE = 1 * kMultiplier;
     private static final String[] COLUMNS = {"c"};
-
-    private String[] where = new String[SIZE];
 
     @Override
     public void setUp() {
@@ -661,7 +656,6 @@ public class NewDatabasePerformanceTests {
 
   public static class DeleteIndexed1000 extends PerformanceBase {
     private static final int SIZE = 10 * kMultiplier;
-    private static final String[] COLUMNS = {"c"};
 
     @Override
     public void setUp() {
@@ -693,7 +687,6 @@ public class NewDatabasePerformanceTests {
 
   public static class Delete1000 extends PerformanceBase {
     private static final int SIZE = 10 * kMultiplier;
-    private static final String[] COLUMNS = {"c"};       
 
     @Override
     public void setUp() {
