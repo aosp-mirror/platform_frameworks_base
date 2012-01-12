@@ -63,7 +63,7 @@ __inline Word32 L_mpy_wx(Word32 L_var2, Word16 var1)
 	Word32 result;
 	asm volatile(
 		"SMULWB  %[result], %[L_var2], %[var1] \n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var2]"r"(L_var2), [var1]"r"(var1)
 		);
 	return result;
