@@ -24890,9 +24890,11 @@ package android.view.textservice {
 
   public final class SpellCheckerSubtype implements android.os.Parcelable {
     ctor public SpellCheckerSubtype(int, java.lang.String, java.lang.String);
+    method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
     method public java.lang.String getExtraValue();
+    method public java.lang.String getExtraValueOf(java.lang.String);
     method public java.lang.String getLocale();
     method public int getNameResId();
     method public void writeToParcel(android.os.Parcel, int);

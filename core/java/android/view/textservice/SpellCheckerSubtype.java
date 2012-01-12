@@ -110,7 +110,6 @@ public final class SpellCheckerSubtype implements Parcelable {
     }
 
     /**
-     * @hide
      * The string of ExtraValue in subtype should be defined as follows:
      * example: key0,key1=value1,key2,key3,key4=value4
      * @param key the key of extra value
@@ -121,7 +120,6 @@ public final class SpellCheckerSubtype implements Parcelable {
     }
 
     /**
-     * @hide
      * The string of ExtraValue in subtype should be defined as follows:
      * example: key0,key1=value1,key2,key3,key4=value4
      * @param key the key of extra value
