@@ -11,8 +11,10 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
+                                <a href="{@docRoot}design/index.html">
                                   <img src="{@docRoot}images/home/android-design.png"
 alt="Android Design" width="160px" style="padding:10px 33px 5px"/>
+                                </a>
                                   <div id="announcement" style="width:275px">
     <p>Introducing <b>Android Design</b>: The place to learn about principles, building blocks, and patterns
       for creating world-class Android user interfaces. Whether you're a UI professional or a developer
