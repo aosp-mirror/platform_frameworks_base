@@ -568,10 +568,10 @@ public class SignalStrength implements Parcelable {
         int levelLteRsrp = 0;
 
         if (mLteRsrp == -1) levelLteRsrp = 0;
-        else if (mLteRsrp >= -85) levelLteRsrp = SIGNAL_STRENGTH_GREAT;
-        else if (mLteRsrp >= -95) levelLteRsrp = SIGNAL_STRENGTH_GOOD;
-        else if (mLteRsrp >= -105) levelLteRsrp = SIGNAL_STRENGTH_MODERATE;
-        else if (mLteRsrp >= -115) levelLteRsrp = SIGNAL_STRENGTH_POOR;
+        else if (mLteRsrp >= -90) levelLteRsrp = SIGNAL_STRENGTH_GREAT;
+        else if (mLteRsrp >= -100) levelLteRsrp = SIGNAL_STRENGTH_GOOD;
+        else if (mLteRsrp >= -110) levelLteRsrp = SIGNAL_STRENGTH_MODERATE;
+        else if (mLteRsrp >= -118) levelLteRsrp = SIGNAL_STRENGTH_POOR;
         else levelLteRsrp = 0;
 
         if (DBG) log("Lte level: "+levelLteRsrp);
