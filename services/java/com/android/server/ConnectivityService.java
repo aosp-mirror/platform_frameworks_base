@@ -1431,6 +1431,12 @@ private NetworkStateTracker makeWimaxStateTracker() {
             }
             mNetTrackers[ConnectivityManager.TYPE_MOBILE].setUserDataEnable(enabled);
         }
+        if (mNetTrackers[ConnectivityManager.TYPE_WIMAX] != null) {
+            if (VDBG) {
+                log(mNetTrackers[ConnectivityManager.TYPE_WIMAX].toString() + enabled);
+            }
+            mNetTrackers[ConnectivityManager.TYPE_WIMAX].setUserDataEnable(enabled);
+        }
     }
 
     @Override
