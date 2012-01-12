@@ -412,7 +412,7 @@ void bio_init(struct binder_io *bio, void *data,
         return;
     }
 
-    bio->data = bio->data0 = data + n;
+    bio->data = bio->data0 = (char *) data + n;
     bio->offs = bio->offs0 = data;
     bio->data_avail = maxdata - n;
     bio->offs_avail = maxoffs;
