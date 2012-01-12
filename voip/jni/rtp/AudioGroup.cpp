@@ -1008,7 +1008,7 @@ error:
     delete stream;
     delete codec;
     close(socket);
-    env->SetIntField(thiz, gNative, NULL);
+    env->SetIntField(thiz, gNative, 0);
 }
 
 void remove(JNIEnv *env, jobject thiz, jint socket)
@@ -1017,7 +1017,7 @@ void remove(JNIEnv *env, jobject thiz, jint socket)
     if (group) {
         if (socket == -1 || !group->remove(socket)) {
             delete group;
-            env->SetIntField(thiz, gNative, NULL);
+            env->SetIntField(thiz, gNative, 0);
         }
     }
 }
