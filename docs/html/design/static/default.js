@@ -125,7 +125,8 @@ $(document).ready(function() {
   });
 
   // Set up play-on-hover <video> tags.
-  $('video.play-on-hover').bind('mouseenter click', function(){
+  $('video.play-on-hover').bind('click', function(){
+    $(this).get(0).load(); // in case the video isn't seekable
     $(this).get(0).play();
   });
 
