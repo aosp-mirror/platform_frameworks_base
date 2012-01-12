@@ -313,15 +313,8 @@ public class MediaScanner
     private final String mExternalStoragePath;
 
     // WARNING: Bulk inserts sounded like a great idea and gave us a good performance improvement,
-    // but unfortunately it also introduced a number of bugs.  Many of those bugs were fixed,
-    // but (at least) one problem is still outstanding:
-    //
-    // - Bulk inserts broke the code that sets the default ringtones, notifications, and alarms
-    //   on first boot
-    //
-    // This problem might be solvable by moving the logic to the media provider or disabling bulk
-    // inserts only for those cases. For now, we are disabling bulk inserts until we have a solid
-    // fix for this problem.
+    // but unfortunately it also introduced a number of bugs. All the known bugs were fixed,
+    // but we need more testing before enabling.
     private static final boolean ENABLE_BULK_INSERTS = false;
 
     // used when scanning the image database so we know whether we have to prune
@@ -895,6 +888,7 @@ public class MediaScanner
                 }
             }
             Uri result = null;
+            boolean needToSetSettings = false;
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
                     values.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
@@ -906,12 +900,37 @@ public class MediaScanner
                     }
                     values.put(Files.FileColumns.FORMAT, format);
                 }
+                // Setting a flag in order not to use bulk insert for the file related with
+                // notifications, ringtones, and alarms, because the rowId of the inserted file is
+                // needed.
+                if (mWasEmptyPriorToScan) {
+                    if (notifications && !mDefaultNotificationSet) {
+                        if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
+                                doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
+                            needToSetSettings = true;
+                        }
+                    } else if (ringtones && !mDefaultRingtoneSet) {
+                        if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
+                                doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
+                            needToSetSettings = true;
+                        }
+                    } else if (alarms && !mDefaultAlarmSet) {
+                        if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
+                                doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                            needToSetSettings = true;
+                        }
+                    }
+                }
+
                 // new file, insert it
                 // We insert directories immediately to ensure they are in the database
                 // before the files they contain.
                 // Otherwise we can get duplicate directory entries in the database
                 // if one of the media FileInserters is flushed before the files table FileInserter
-                if (inserter == null || entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
+                // Also, we immediately insert the file if the rowId of the inserted file is
+                // needed.
+                if (inserter == null || needToSetSettings ||
+                        entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
                     result = mMediaProvider.insert(tableUri, values);
                 } else {
                     inserter.insert(tableUri, values);
@@ -930,21 +949,14 @@ public class MediaScanner
                 mMediaProvider.update(result, values, null, null);
             }
 
-            if (notifications && mWasEmptyPriorToScan && !mDefaultNotificationSet) {
-                if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
-                        doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
+            if(needToSetSettings) {
+                if (notifications) {
                     setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
-                }
-            } else if (ringtones && mWasEmptyPriorToScan && !mDefaultRingtoneSet) {
-                if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
-                        doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
+                } else if (ringtones) {
                     setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
-                }
-            } else if (alarms && mWasEmptyPriorToScan && !mDefaultAlarmSet) {
-                if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
-                        doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                } else if (alarms) {
                     setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
                 }
