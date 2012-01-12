@@ -539,7 +539,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     }
 
                     // we turn all the way to PowerOff with AIRPLANE_MODE_ON
-                    if (message.what == AIRPLANE_MODE_ON) {
+                    if (message.what == AIRPLANE_MODE_ON || mBluetoothService.isAirplaneModeOn()) {
                         // We inform all the per process callbacks
                         allProcessesCallback(false);
                         deferMessage(obtainMessage(AIRPLANE_MODE_ON));
