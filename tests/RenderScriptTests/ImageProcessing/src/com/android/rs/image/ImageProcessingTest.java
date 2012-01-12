@@ -41,6 +41,7 @@ import java.io.IOException;
 public class ImageProcessingTest extends ActivityInstrumentationTestCase2<ImageProcessingActivity> {
     private final String TAG = "ImageProcessingTest";
     private final String RESULT_FILE = "image_processing_result.txt";
+    private int ITERATION = 5;
     private ImageProcessingActivity mAct;
 
     public ImageProcessingTest() {
@@ -63,9 +64,8 @@ public class ImageProcessingTest extends ActivityInstrumentationTestCase2<ImageP
      */
     @LargeTest
     public void testImageProcessingBench() {
-        long t = mAct.getBenchmark();
-        Log.v(TAG, "t = " + t);
-
+        long t = 0;
+        long sum = 0;
         // write result into a file
         File externalStorage = Environment.getExternalStorageDirectory();
         if (!externalStorage.canWrite()) {
@@ -75,10 +75,18 @@ public class ImageProcessingTest extends ActivityInstrumentationTestCase2<ImageP
         File resultFile = new File(externalStorage, RESULT_FILE);
         resultFile.setWritable(true, false);
         try {
-            BufferedWriter results = new BufferedWriter(new FileWriter(resultFile));
-            results.write("Renderscript frame time core: " + t + " ms");
-            results.close();
+            BufferedWriter rsWriter = new BufferedWriter(new FileWriter(resultFile));
             Log.v(TAG, "Saved results in: " + resultFile.getAbsolutePath());
+            for (int i = 0; i < ITERATION; i++ ) {
+                t = mAct.getBenchmark();
+                sum += t;
+                rsWriter.write("Renderscript frame time core: " + t + " ms\n");
+                Log.v(TAG, "RenderScript framew time core: " + t + " ms");
+            }
+            long avgValue = sum/ITERATION;
+            rsWriter.write("Averge frame time: " + avgValue + " ms\n");
+            Log.v(TAG, "Average frame time: " + avgValue + " ms");
+            rsWriter.close();
         } catch (IOException e) {
             Log.v(TAG, "Unable to write result file " + e.getMessage());
         }
