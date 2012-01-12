@@ -709,7 +709,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
     }
 }
 
-/*static*/ sp<IMemory> MediaPlayer::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+/*static*/ sp<IMemory> MediaPlayer::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
 {
     ALOGV("decode(%s)", url);
     sp<IMemory> p;
@@ -729,7 +729,7 @@ void MediaPlayer::died()
     notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0);
 }
 
-/*static*/ sp<IMemory> MediaPlayer::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+/*static*/ sp<IMemory> MediaPlayer::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
 {
     ALOGV("decode(%d, %lld, %lld)", fd, offset, length);
     sp<IMemory> p;

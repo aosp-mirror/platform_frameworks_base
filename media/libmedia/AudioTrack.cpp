@@ -85,7 +85,7 @@ AudioTrack::AudioTrack()
 AudioTrack::AudioTrack(
         int streamType,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         int channelMask,
         int frameCount,
         uint32_t flags,
@@ -104,7 +104,7 @@ AudioTrack::AudioTrack(
 AudioTrack::AudioTrack(
         int streamType,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         int channelMask,
         const sp<IMemory>& sharedBuffer,
         uint32_t flags,
@@ -142,7 +142,7 @@ AudioTrack::~AudioTrack()
 status_t AudioTrack::set(
         int streamType,
         uint32_t sampleRate,
-        int format,
+        audio_format_t format,
         int channelMask,
         int frameCount,
         uint32_t flags,
@@ -179,7 +179,7 @@ status_t AudioTrack::set(
         sampleRate = afSampleRate;
     }
     // these below should probably come from the audioFlinger too...
-    if (format == 0) {
+    if (format == AUDIO_FORMAT_DEFAULT) {
         format = AUDIO_FORMAT_PCM_16_BIT;
     }
     if (channelMask == 0) {
@@ -205,7 +205,7 @@ status_t AudioTrack::set(
 
     audio_io_handle_t output = AudioSystem::getOutput(
                                     (audio_stream_type_t)streamType,
-                                    sampleRate,format, channelMask,
+                                    sampleRate, format, channelMask,
                                     (audio_policy_output_flags_t)flags);
 
     if (output == 0) {
@@ -224,7 +224,7 @@ status_t AudioTrack::set(
     // create the IAudioTrack
     status_t status = createTrack_l(streamType,
                                   sampleRate,
-                                  (uint32_t)format,
+                                  format,
                                   (uint32_t)channelMask,
                                   frameCount,
                                   flags,
@@ -243,7 +243,7 @@ status_t AudioTrack::set(
     mStatus = NO_ERROR;
 
     mStreamType = streamType;
-    mFormat = (uint32_t)format;
+    mFormat = format;
     mChannelMask = (uint32_t)channelMask;
     mChannelCount = channelCount;
     mSharedBuffer = sharedBuffer;
@@ -280,7 +280,7 @@ int AudioTrack::streamType() const
     return mStreamType;
 }
 
-int AudioTrack::format() const
+audio_format_t AudioTrack::format() const
 {
     return mFormat;
 }
@@ -713,7 +713,7 @@ status_t AudioTrack::attachAuxEffect(int effectId)
 status_t AudioTrack::createTrack_l(
         int streamType,
         uint32_t sampleRate,
-        uint32_t format,
+        audio_format_t format,
         uint32_t channelMask,
         int frameCount,
         uint32_t flags,
