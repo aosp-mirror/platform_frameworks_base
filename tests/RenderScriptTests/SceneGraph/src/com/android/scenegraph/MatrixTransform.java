@@ -44,7 +44,7 @@ public class MatrixTransform extends Transform {
 
         mTransformData.isDirty = 1;
         mTransformData.children = null;
-        mTransformData.name = getStringAsAllocation(mRS, getName());
+        mTransformData.name = SceneManager.getStringAsAllocation(mRS, getName());
     }
 
     public void updateRSData() {

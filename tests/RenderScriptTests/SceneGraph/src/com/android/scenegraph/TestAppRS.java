@@ -41,7 +41,6 @@ public class TestAppRS {
 
     int mWidth;
     int mHeight;
-    int mRotation;
 
     boolean mUseBlur;
 
@@ -105,7 +104,6 @@ public class TestAppRS {
         mRes = res;
         mWidth = width;
         mHeight = height;
-        mRotation = 0;
 
         mTouchHandler = new TouchHandler();
 

@@ -68,7 +68,7 @@ public class Camera extends SceneGraphBase {
         cam.near = mNear;
         cam.far = mFar;
         cam.transformMatrix = mTransform.getRSData(rs).getAllocation();
-        cam.name = getStringAsAllocation(rs, getName());
+        cam.name = SceneManager.getStringAsAllocation(rs, getName());
         mField.set(cam, 0, true);
 
         return mField;

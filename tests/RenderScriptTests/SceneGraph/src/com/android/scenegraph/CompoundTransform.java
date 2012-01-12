@@ -87,14 +87,14 @@ public class CompoundTransform extends Transform {
             Component ith = mTransformComponents.get(i);
             mTransformData.transforms[i] = ith.mValue;
             mTransformData.transformTypes[i] = ith.mRsId;
-            mTransformData.transformNames[i] = getStringAsAllocation(mRS, ith.mName);
+            mTransformData.transformNames[i] = SceneManager.getStringAsAllocation(mRS, ith.mName);
         }
         // "null" terminate the array
         mTransformData.transformTypes[numElements] = RS_ID_NONE;
 
         mTransformData.isDirty = 1;
         mTransformData.children = null;
-        mTransformData.name = getStringAsAllocation(mRS, getName());
+        mTransformData.name = SceneManager.getStringAsAllocation(mRS, getName());
     }
 
     public void updateRSData() {
@@ -103,7 +103,7 @@ public class CompoundTransform extends Transform {
             Component ith = mTransformComponents.get(i);
             mTransformData.transforms[i] = ith.mValue;
             mTransformData.transformTypes[i] = ith.mRsId;
-            mTransformData.transformNames[i] = getStringAsAllocation(mRS, ith.mName);
+            mTransformData.transformNames[i] = SceneManager.getStringAsAllocation(mRS, ith.mName);
         }
         // "null" terminate the array
         mTransformData.transformTypes[numElements] = RS_ID_NONE;
