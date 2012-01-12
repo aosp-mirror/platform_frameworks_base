@@ -249,8 +249,6 @@ public class ConnectivityManagerTestActivity extends Activity {
         sleep(SHORT_TIMEOUT);
         removeConfiguredNetworksAndDisableWifi();
         mWifiRegexs = mCM.getTetherableWifiRegexs();
-        // after wifi is shutdown, wait for 2 minute to enable wifi
-        sleep(WIFI_STOP_START_INTERVAL);
      }
 
     public List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
