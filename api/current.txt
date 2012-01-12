@@ -24618,6 +24618,7 @@ package android.view.inputmethod {
     field public static final int IME_ACTION_SEARCH = 3; // 0x3
     field public static final int IME_ACTION_SEND = 4; // 0x4
     field public static final int IME_ACTION_UNSPECIFIED = 0; // 0x0
+    field public static final int IME_FLAG_FORCE_ASCII = -2147483648; // 0x80000000
     field public static final int IME_FLAG_NAVIGATE_NEXT = 134217728; // 0x8000000
     field public static final int IME_FLAG_NAVIGATE_PREVIOUS = 67108864; // 0x4000000
     field public static final int IME_FLAG_NO_ACCESSORY_ACTION = 536870912; // 0x20000000

@@ -1154,6 +1154,21 @@
              <p>Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_ENTER_ACTION}. -->
         <flag name="flagNoEnterAction" value="0x40000000" />
+        <!-- Used to request that the IME should be capable of inputting ASCII
+             characters.  The intention of this flag is to ensure that the user
+             can type Roman alphabet characters in a {@link android.widget.TextView}
+             used for, typically, account ID or password input.  It is expected that IMEs
+             normally are able to input ASCII even without being told so (such IMEs
+             already respect this flag in a sense), but there could be some cases they
+             aren't when, for instance, only non-ASCII input languagaes like Arabic,
+             Greek, Hebrew, Russian are enabled in the IME.  Applications need to be
+             aware that the flag is not a guarantee, and not all IMEs will respect it.
+             However, it is strongly recommended for IME authors to respect this flag
+             especially when their IME could end up with a state that has only non-ASCII
+             input languages enabled.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_FORCE_ASCII}. -->
+        <flag name="flagForceAscii" value="0x80000000" />
     </attr>
 
     <!-- A coordinate in the X dimension. -->
