@@ -322,7 +322,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     .setContentTitle(title)
                     .setContentText(text)
                     .setContentIntent(VpnConfig.getIntentForStatusPanel(mContext, config))
-                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setDefaults(0)
                     .setOngoing(true)
                     .getNotification();
             nm.notify(R.drawable.vpn_connected, notification);
