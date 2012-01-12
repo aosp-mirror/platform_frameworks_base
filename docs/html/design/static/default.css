@@ -279,8 +279,7 @@ video.with-shadow {
       background: rgba(0, 0, 0, 0.03); }
   #nav #back-dac-section {
     padding: 10px;
-    border-top: 1px solid #ddd;
-    background: transparent url(open_new_page.png) no-repeat scroll 139px 9px; }
+    border-top: 1px solid #ddd; }
     #nav #back-dac-section a {
       color: #333333;
       font-weight: 500;
@@ -569,4 +568,4 @@ li.no-bullet {
     height: 12px;
     margin-right: 8px; }
   .video-instructions:after {
-    content: 'Click or move mouse over screenshot to replay movie.'; }
+    content: 'Click to replay movie.'; }
