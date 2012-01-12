@@ -23,6 +23,7 @@
 #include <utils/String8.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
+#include <system/audio.h>
 
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
@@ -43,8 +44,8 @@ public:
     virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid) = 0;
     virtual sp<IMediaPlayer> create(pid_t pid, const sp<IMediaPlayerClient>& client, int audioSessionId = 0) = 0;
 
-    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
-    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
+    virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat) = 0;
+    virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat) = 0;
     virtual sp<IOMX>            getOMX() = 0;
 
     // codecs and audio devices usage tracking for the battery app

@@ -56,7 +56,7 @@ public:
     int sampleID() { return mSampleID; }
     int numChannels() { return mNumChannels; }
     int sampleRate() { return mSampleRate; }
-    int format() { return mFormat; }
+    audio_format_t format() { return mFormat; }
     size_t size() { return mSize; }
     int state() { return mState; }
     uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
@@ -65,7 +65,7 @@ public:
     sp<IMemory> getIMemory() { return mData; }
 
     // hack
-    void init(int numChannels, int sampleRate, int format, size_t size, sp<IMemory> data ) {
+    void init(int numChannels, int sampleRate, audio_format_t format, size_t size, sp<IMemory> data ) {
         mNumChannels = numChannels; mSampleRate = sampleRate; mFormat = format; mSize = size; mData = data; }
 
 private:
@@ -77,7 +77,7 @@ private:
     uint16_t            mSampleRate;
     uint8_t             mState : 3;
     uint8_t             mNumChannels : 2;
-    uint8_t             mFormat : 2;
+    audio_format_t      mFormat;
     int                 mFd;
     int64_t             mOffset;
     int64_t             mLength;

@@ -1149,7 +1149,7 @@ int Antagonizer::callbackThread(void* user)
 
 static size_t kDefaultHeapSize = 1024 * 1024; // 1MB
 
-sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
 {
     ALOGV("decode(%s)", url);
     sp<MemoryBase> mem;
@@ -1197,7 +1197,7 @@ sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, i
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
     *pNumChannels = cache->channelCount();
-    *pFormat = (int)cache->format();
+    *pFormat = cache->format();
     ALOGV("return memory @ %p, sampleRate=%u, channelCount = %d, format = %d", mem->pointer(), *pSampleRate, *pNumChannels, *pFormat);
 
 Exit:
@@ -1205,7 +1205,7 @@ Exit:
     return mem;
 }
 
-sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat)
+sp<IMemory> MediaPlayerService::decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat)
 {
     ALOGV("decode(%d, %lld, %lld)", fd, offset, length);
     sp<MemoryBase> mem;
@@ -1339,7 +1339,7 @@ status_t MediaPlayerService::AudioOutput::getPosition(uint32_t *position)
 }
 
 status_t MediaPlayerService::AudioOutput::open(
-        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        uint32_t sampleRate, int channelCount, audio_format_t format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
     mCallback = cb;
@@ -1611,7 +1611,7 @@ bool CallbackThread::threadLoop() {
 ////////////////////////////////////////////////////////////////////////////////
 
 status_t MediaPlayerService::AudioCache::open(
-        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        uint32_t sampleRate, int channelCount, audio_format_t format, int bufferCount,
         AudioCallback cb, void *cookie)
 {
     ALOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
@@ -1621,7 +1621,7 @@ status_t MediaPlayerService::AudioCache::open(
 
     mSampleRate = sampleRate;
     mChannelCount = (uint16_t)channelCount;
-    mFormat = (uint16_t)format;
+    mFormat = format;
     mMsecsPerFrame = 1.e3 / (float) sampleRate;
 
     if (cb != NULL) {

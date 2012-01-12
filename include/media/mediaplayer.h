@@ -190,8 +190,8 @@ public:
             bool            isLooping();
             status_t        setVolume(float leftVolume, float rightVolume);
             void            notify(int msg, int ext1, int ext2, const Parcel *obj = NULL);
-    static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
-    static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
+    static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
+    static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, audio_format_t* pFormat);
             status_t        invoke(const Parcel& request, Parcel *reply);
             status_t        setMetadataFilter(const Parcel& filter);
             status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
