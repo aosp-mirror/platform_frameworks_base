@@ -335,7 +335,6 @@ private:
             status_t electronBeamOnAnimationImplLocked();
 
             void        debugFlashRegions();
-            void        debugShowFPS() const;
             void        drawWormhole() const;
            
 

@@ -29,7 +29,6 @@
 
 #include <ui/Rect.h>
 #include <ui/FramebufferNativeWindow.h>
-#include <ui/GraphicLog.h>
 
 #include <EGL/egl.h>
 
@@ -211,9 +210,6 @@ int FramebufferNativeWindow::dequeueBuffer(ANativeWindow* window,
     if (self->mBufferHead >= self->mNumBuffers)
         self->mBufferHead = 0;
 
-    GraphicLog& logger(GraphicLog::getInstance());
-    logger.log(GraphicLog::SF_FB_DEQUEUE_BEFORE, index);
-
     // wait for a free buffer
     while (!self->mNumFreeBuffers) {
         self->mCondition.wait(self->mutex);
@@ -224,7 +220,6 @@ int FramebufferNativeWindow::dequeueBuffer(ANativeWindow* window,
 
     *buffer = self->buffers[index].get();
 
-    logger.log(GraphicLog::SF_FB_DEQUEUE_AFTER, index);
     return 0;
 }
 
@@ -235,15 +230,11 @@ int FramebufferNativeWindow::lockBuffer(ANativeWindow* window,
     Mutex::Autolock _l(self->mutex);
 
     const int index = self->mCurrentBufferIndex;
-    GraphicLog& logger(GraphicLog::getInstance());
-    logger.log(GraphicLog::SF_FB_LOCK_BEFORE, index);
 
     // wait that the buffer we're locking is not front anymore
     while (self->front == buffer) {
         self->mCondition.wait(self->mutex);
     }
-
-    logger.log(GraphicLog::SF_FB_LOCK_AFTER, index);
 
     return NO_ERROR;
 }
@@ -257,13 +248,7 @@ int FramebufferNativeWindow::queueBuffer(ANativeWindow* window,
     buffer_handle_t handle = static_cast<NativeBuffer*>(buffer)->handle;
 
     const int index = self->mCurrentBufferIndex;
-    GraphicLog& logger(GraphicLog::getInstance());
-    logger.log(GraphicLog::SF_FB_POST_BEFORE, index);
-
     int res = fb->post(fb, handle);
-
-    logger.log(GraphicLog::SF_FB_POST_AFTER, index);
-
     self->front = static_cast<NativeBuffer*>(buffer);
     self->mNumFreeBuffers++;
     self->mCondition.broadcast();

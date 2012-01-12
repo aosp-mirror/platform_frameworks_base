@@ -384,10 +384,6 @@ status_t DisplayHardware::compositionComplete() const {
     return mNativeWindow->compositionComplete();
 }
 
-int DisplayHardware::getCurrentBufferIndex() const {
-    return mNativeWindow->getCurrentBufferIndex();
-}
-
 void DisplayHardware::flip(const Region& dirty) const
 {
     checkGLErrors();
