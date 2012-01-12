@@ -270,6 +270,9 @@ void SetPriority(const Context *rsc, int32_t priority) {
     for (uint32_t ct=0; ct < dc->mWorkers.mCount; ct++) {
         setpriority(PRIO_PROCESS, dc->mWorkers.mNativeThreadId[ct], priority);
     }
+    if (dc->mHasGraphics) {
+        rsdGLSetPriority(rsc, priority);
+    }
 }
 
 void Shutdown(Context *rsc) {
