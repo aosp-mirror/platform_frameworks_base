@@ -181,7 +181,14 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     }
 
     public boolean isInContentArea(int x, int y) {
-        return pointInside(x, y, mRecentsContainer) || pointInside(x, y, mStatusBarTouchProxy);
+        if (pointInside(x, y, mRecentsContainer)) {
+            return true;
+        } else if (mStatusBarTouchProxy != null &&
+                pointInside(x, y, mStatusBarTouchProxy)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void show(boolean show, boolean animate) {
