@@ -82,6 +82,8 @@ bool rsdGLSetSurface(const android::renderscript::Context *rsc,
 void rsdGLSwap(const android::renderscript::Context *rsc);
 void rsdGLCheckError(const android::renderscript::Context *rsc,
                      const char *msg, bool isFatal = false);
+void rsdGLSetPriority(const android::renderscript::Context *rsc,
+                      int32_t priority);
 
 #endif
 

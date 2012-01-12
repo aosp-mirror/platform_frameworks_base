@@ -359,6 +359,7 @@ bool rsdGLInit(const Context *rsc) {
     dc->gl.vertexArrayState = new RsdVertexArrayState();
     dc->gl.vertexArrayState->init(dc->gl.gl.maxVertexAttribs);
     dc->gl.currentFrameBuffer = NULL;
+    dc->mHasGraphics = true;
 
     ALOGV("%p initGLThread end", rsc);
     rsc->setWatchdogGL(NULL, 0, NULL);
@@ -417,6 +418,15 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
 void rsdGLSwap(const android::renderscript::Context *rsc) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
     RSD_CALL_GL(eglSwapBuffers, dc->gl.egl.display, dc->gl.egl.surface);
+}
+
+void rsdGLSetPriority(const Context *rsc, int32_t priority) {
+    if (priority > 0) {
+        // Mark context as low priority.
+        ALOGV("low pri");
+    } else {
+        ALOGV("normal pri");
+    }
 }
 
 void rsdGLCheckError(const android::renderscript::Context *rsc,

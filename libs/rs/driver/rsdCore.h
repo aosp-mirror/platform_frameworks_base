@@ -46,6 +46,7 @@ typedef struct ScriptTLSStructRec {
 typedef struct RsdHalRec {
     uint32_t version_major;
     uint32_t version_minor;
+    bool mHasGraphics;
 
     struct Workers {
         volatile int mRunningCount;

@@ -347,6 +347,7 @@ void Context::setPriority(int32_t p) {
 #else
     setpriority(PRIO_PROCESS, mNativeThreadId, p);
 #endif
+    mHal.funcs.setPriority(this, mThreadPriority);
 }
 
 Context::Context() {
