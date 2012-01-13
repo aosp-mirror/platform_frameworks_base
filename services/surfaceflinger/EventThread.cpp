@@ -102,7 +102,7 @@ bool EventThread::threadLoop() {
 
     nsecs_t timestamp;
     DisplayEventReceiver::Event vsync;
-    KeyedVector< wp<DisplayEventConnection>, ConnectionInfo > displayEventConnections;
+    Vector< wp<DisplayEventConnection> > displayEventConnections;
 
     { // scope for the lock
         Mutex::Autolock _l(mLock);
@@ -153,6 +153,9 @@ bool EventThread::threadLoop() {
                     }
                     info.count--;
                 }
+                if (reportVsync) {
+                    displayEventConnections.add(mDisplayEventConnections.keyAt(i));
+                }
             }
 
             if (reportVsync) {
@@ -164,15 +167,11 @@ bool EventThread::threadLoop() {
         vsync.header.type = DisplayEventReceiver::DISPLAY_EVENT_VSYNC;
         vsync.header.timestamp = timestamp;
         vsync.vsync.count = mDeliveredEvents;
-
-        // make a copy of our connection list, so we can
-        // dispatch events without holding mLock
-        displayEventConnections = mDisplayEventConnections;
     }
 
     const size_t count = displayEventConnections.size();
     for (size_t i=0 ; i<count ; i++) {
-        sp<DisplayEventConnection> conn(displayEventConnections.keyAt(i).promote());
+        sp<DisplayEventConnection> conn(displayEventConnections[i].promote());
         // make sure the connection didn't die
         if (conn != NULL) {
             status_t err = conn->postEvent(vsync);
@@ -186,12 +185,12 @@ bool EventThread::threadLoop() {
                 // handle any other error on the pipe as fatal. the only
                 // reasonable thing to do is to clean-up this connection.
                 // The most common error we'll get here is -EPIPE.
-                removeDisplayEventConnection(displayEventConnections.keyAt(i));
+                removeDisplayEventConnection(displayEventConnections[i]);
             }
         } else {
             // somehow the connection is dead, but we still have it in our list
             // just clean the list.
-            removeDisplayEventConnection(displayEventConnections.keyAt(i));
+            removeDisplayEventConnection(displayEventConnections[i]);
         }
     }
 
