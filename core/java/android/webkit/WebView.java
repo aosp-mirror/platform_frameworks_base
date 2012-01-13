@@ -611,6 +611,7 @@ public class WebView extends AbsoluteLayout
     private boolean mIsPaused;
 
     private HitTestResult mInitialHitTestResult;
+    private WebKitHitTest mFocusedNode;
 
     /**
      * Customizable constant
@@ -1070,6 +1071,15 @@ public class WebView extends AbsoluteLayout
         public String getExtra() {
             return mExtra;
         }
+    }
+
+    /**
+     * Refer to {@link WebView#requestFocusNodeHref(Message)} for more information
+     */
+    static class FocusNodeHref {
+        static final String TITLE = "title";
+        static final String URL = "url";
+        static final String SRC = "src";
     }
 
     /**
@@ -2704,6 +2714,14 @@ public class WebView extends AbsoluteLayout
         }
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
+        if (mFocusedNode != null && mFocusedNode.mHitTestX == contentX
+                && mFocusedNode.mHitTestY == contentY) {
+            hrefMsg.getData().putString(FocusNodeHref.URL, mFocusedNode.mLinkUrl);
+            hrefMsg.getData().putString(FocusNodeHref.TITLE, mFocusedNode.mAnchorText);
+            hrefMsg.getData().putString(FocusNodeHref.SRC, mFocusedNode.mImageUrl);
+            hrefMsg.sendToTarget();
+            return;
+        }
         if (nativeHasCursorNode()) {
             Rect cursorBounds = nativeGetCursorRingBounds();
             if (!cursorBounds.contains(contentX, contentY)) {
@@ -8837,13 +8855,25 @@ public class WebView extends AbsoluteLayout
 
                 case HIT_TEST_RESULT:
                     WebKitHitTest hit = (WebKitHitTest) msg.obj;
+                    mFocusedNode = hit;
                     setTouchHighlightRects(hit != null ? hit.mTouchRects : null);
                     if (hit == null) {
                         mInitialHitTestResult = null;
                     } else {
                         mInitialHitTestResult = new HitTestResult();
-                        mInitialHitTestResult.mType = hit.mType;
-                        mInitialHitTestResult.mExtra = hit.mExtra;
+                        if (hit.mLinkUrl != null) {
+                            mInitialHitTestResult.mType = HitTestResult.SRC_ANCHOR_TYPE;
+                            mInitialHitTestResult.mExtra = hit.mLinkUrl;
+                            if (hit.mImageUrl != null) {
+                                mInitialHitTestResult.mType = HitTestResult.SRC_IMAGE_ANCHOR_TYPE;
+                                mInitialHitTestResult.mExtra = hit.mImageUrl;
+                            }
+                        } else if (hit.mImageUrl != null) {
+                            mInitialHitTestResult.mType = HitTestResult.IMAGE_TYPE;
+                            mInitialHitTestResult.mExtra = hit.mImageUrl;
+                        } else if (hit.mEditable) {
+                            mInitialHitTestResult.mType = HitTestResult.EDIT_TEXT_TYPE;
+                        }
                     }
                     break;
 
@@ -8882,8 +8912,10 @@ public class WebView extends AbsoluteLayout
     }
 
     private void setTouchHighlightRects(Rect[] rects) {
-        invalidate(mTouchHighlightRegion.getBounds());
-        mTouchHighlightRegion.setEmpty();
+        if (!mTouchHighlightRegion.isEmpty()) {
+            invalidate(mTouchHighlightRegion.getBounds());
+            mTouchHighlightRegion.setEmpty();
+        }
         if (rects != null) {
             for (Rect rect : rects) {
                 Rect viewRect = contentToViewRect(rect);

@@ -26,6 +26,7 @@ import android.graphics.Region;
 import android.media.MediaFile;
 import android.net.ProxyProperties;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -37,6 +38,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.webkit.WebView.FocusNodeHref;
 
 import junit.framework.Assert;
 
@@ -861,9 +863,19 @@ public final class WebViewCore {
     }
 
     static class WebKitHitTest {
-        int mType;
-        String mExtra;
+        String mLinkUrl;
+        String mAnchorText;
+        String mImageUrl;
+        String mAltDisplayString;
+        String mTitle;
         Rect[] mTouchRects;
+        boolean mEditable;
+
+        // These are the input values that produced this hit test
+        int mHitTestX;
+        int mHitTestY;
+        int mHitTestSlop;
+        boolean mHitTestMovedMouse;
     }
 
     static class AutoFillData {
@@ -1512,13 +1524,12 @@ public final class WebViewCore {
                             break;
 
                         case REQUEST_CURSOR_HREF: {
+                            WebKitHitTest hit = performHitTest(msg.arg1, msg.arg2, 1, false);
                             Message hrefMsg = (Message) msg.obj;
-                            hrefMsg.getData().putString("url",
-                                    nativeRetrieveHref(mNativeClass, msg.arg1, msg.arg2));
-                            hrefMsg.getData().putString("title",
-                                    nativeRetrieveAnchorText(mNativeClass, msg.arg1, msg.arg2));
-                            hrefMsg.getData().putString("src",
-                                    nativeRetrieveImageSource(mNativeClass, msg.arg1, msg.arg2));
+                            Bundle data = hrefMsg.getData();
+                            data.putString(FocusNodeHref.URL,hit.mLinkUrl);
+                            data.putString(FocusNodeHref.TITLE, hit.mAnchorText);
+                            data.putString(FocusNodeHref.SRC, hit.mImageUrl);
                             hrefMsg.sendToTarget();
                             break;
                         }
@@ -1683,8 +1694,7 @@ public final class WebViewCore {
                                 nativeScrollLayer(mNativeClass,
                                         d.mNativeLayer, d.mNativeLayerRect);
                             }
-                            WebKitHitTest hit = nativeHitTest(mNativeClass,
-                                    d.mX, d.mY, d.mSlop);
+                            WebKitHitTest hit = performHitTest(d.mX, d.mY, d.mSlop, true);
                             mWebView.mPrivateHandler.obtainMessage(
                                     WebView.HIT_TEST_RESULT, hit)
                                     .sendToTarget();
@@ -1882,6 +1892,15 @@ public final class WebViewCore {
     //-------------------------------------------------------------------------
     // WebViewCore private methods
     //-------------------------------------------------------------------------
+
+    private WebKitHitTest performHitTest(int x, int y, int slop, boolean moveMouse) {
+        WebKitHitTest hit = nativeHitTest(mNativeClass, x, y, slop, moveMouse);
+        hit.mHitTestX = x;
+        hit.mHitTestY = y;
+        hit.mHitTestSlop = slop;
+        hit.mHitTestMovedMouse = moveMouse;
+        return hit;
+    }
 
     private void clearCache(boolean includeDiskFiles) {
         mBrowserFrame.clearCache();
@@ -2933,7 +2952,8 @@ public final class WebViewCore {
     private native boolean nativeValidNodeAndBounds(int nativeClass, int frame,
             int node, Rect bounds);
 
-    private native WebKitHitTest nativeHitTest(int nativeClass, int x, int y, int slop);
+    private native WebKitHitTest nativeHitTest(int nativeClass, int x, int y,
+            int slop, boolean moveMouse);
 
     private native void nativeAutoFillForm(int nativeClass, int queryId);
     private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
