@@ -3446,7 +3446,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // the value of the previous configuration.
             mTempConfiguration.setToDefaults();
             mTempConfiguration.fontScale = currentConfig.fontScale;
-            if (computeNewConfigurationLocked(mTempConfiguration)) {
+            if (computeScreenConfigurationLocked(mTempConfiguration)) {
                 if (currentConfig.diff(mTempConfiguration) != 0) {
                     mWaitingForConfig = true;
                     mLayoutNeeded = true;
@@ -5362,6 +5362,14 @@ public class WindowManagerService extends IWindowManager.Stub
         startFreezingDisplayLocked(inTransaction);
         mInputManager.setDisplayOrientation(0, rotation);
 
+        // We need to update our screen size information to match the new
+        // rotation.  Note that this is redundant with the later call to
+        // sendNewConfiguration() that must be called after this function
+        // returns...  however we need to do the screen size part of that
+        // before then so we have the correct size to use when initializiation
+        // the rotation animation for the new rotation.
+        computeScreenConfigurationLocked(null);
+
         if (!inTransaction) {
             if (SHOW_TRANSACTIONS)  Slog.i(TAG,
                     ">>> OPEN TRANSACTION setRotationUnchecked");
@@ -5372,7 +5380,11 @@ public class WindowManagerService extends IWindowManager.Stub
             //       it doesn't support hardware OpenGL emulation yet.
             if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
                     && mScreenRotationAnimation.hasScreenshot()) {
-                mScreenRotationAnimation.setRotation(rotation);
+                if (mScreenRotationAnimation.setRotation(rotation, mFxSession,
+                        MAX_ANIMATION_DURATION, mTransitionAnimationScale,
+                        mCurDisplayWidth, mCurDisplayHeight)) {
+                    requestAnimationLocked(0);
+                }
             }
             Surface.setOrientation(0, rotation);
         } finally {
@@ -5860,7 +5872,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Configuration computeNewConfigurationLocked() {
         Configuration config = new Configuration();
         config.fontScale = 0;
-        if (!computeNewConfigurationLocked(config)) {
+        if (!computeScreenConfigurationLocked(config)) {
             return null;
         }
         return config;
@@ -6011,12 +6023,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return sw;
     }
 
-    boolean computeNewConfigurationLocked(Configuration config) {
+    boolean computeScreenConfigurationLocked(Configuration config) {
         if (mDisplay == null) {
             return false;
         }
-        
-        mInputManager.getInputConfiguration(config);
 
         // Use the effective "visual" dimensions based on current rotation
         final boolean rotated = (mRotation == Surface.ROTATION_90
@@ -6050,13 +6060,17 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
 
-        int orientation = Configuration.ORIENTATION_SQUARE;
-        if (dw < dh) {
-            orientation = Configuration.ORIENTATION_PORTRAIT;
-        } else if (dw > dh) {
-            orientation = Configuration.ORIENTATION_LANDSCAPE;
+        if (config != null) {
+            mInputManager.getInputConfiguration(config);
+
+            int orientation = Configuration.ORIENTATION_SQUARE;
+            if (dw < dh) {
+                orientation = Configuration.ORIENTATION_PORTRAIT;
+            } else if (dw > dh) {
+                orientation = Configuration.ORIENTATION_LANDSCAPE;
+            }
+            config.orientation = orientation;
         }
-        config.orientation = orientation;
 
         // Update real display metrics.
         mDisplay.getMetricsWithSize(mRealDisplayMetrics, mCurDisplayWidth, mCurDisplayHeight);
@@ -6078,36 +6092,39 @@ public class WindowManagerService extends IWindowManager.Stub
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
 
-        config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation)
-                / dm.density);
-        config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
-                / dm.density);
-        computeSmallestWidthAndScreenLayout(rotated, dw, dh, dm.density, config);
+        if (config != null) {
+            config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation)
+                    / dm.density);
+            config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
+                    / dm.density);
+            computeSmallestWidthAndScreenLayout(rotated, dw, dh, dm.density, config);
 
-        config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
-        config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
-        config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
+            config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
+            config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
+            config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
 
-        // Determine whether a hard keyboard is available and enabled.
-        boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
-        if (hardKeyboardAvailable != mHardKeyboardAvailable) {
-            mHardKeyboardAvailable = hardKeyboardAvailable;
-            mHardKeyboardEnabled = hardKeyboardAvailable;
+            // Determine whether a hard keyboard is available and enabled.
+            boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+            if (hardKeyboardAvailable != mHardKeyboardAvailable) {
+                mHardKeyboardAvailable = hardKeyboardAvailable;
+                mHardKeyboardEnabled = hardKeyboardAvailable;
 
-            mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
-            mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+                mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+                mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+            }
+            if (!mHardKeyboardEnabled) {
+                config.keyboard = Configuration.KEYBOARD_NOKEYS;
+            }
+
+            // Update value of keyboardHidden, hardKeyboardHidden and navigationHidden
+            // based on whether a hard or soft keyboard is present, whether navigation keys
+            // are present and the lid switch state.
+            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+            config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
+            mPolicy.adjustConfigurationLw(config);
         }
-        if (!mHardKeyboardEnabled) {
-            config.keyboard = Configuration.KEYBOARD_NOKEYS;
-        }
 
-        // Update value of keyboardHidden, hardKeyboardHidden and navigationHidden
-        // based on whether a hard or soft keyboard is present, whether navigation keys
-        // are present and the lid switch state.
-        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
-        config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
-        mPolicy.adjustConfigurationLw(config);
         return true;
     }
 
@@ -7114,7 +7131,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
         mTempConfiguration.setToDefaults();
         mTempConfiguration.fontScale = mCurConfiguration.fontScale;
-        if (computeNewConfigurationLocked(mTempConfiguration)) {
+        if (computeScreenConfigurationLocked(mTempConfiguration)) {
             if (mCurConfiguration.diff(mTempConfiguration) != 0) {
                 configChanged = true;
             }
