@@ -21,6 +21,7 @@
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 #include <utils/KeyedVector.h>
+#include <system/audio.h>
 
 namespace android {
 
@@ -51,7 +52,7 @@ public:
     virtual status_t        getCurrentPosition(int* msec) = 0;
     virtual status_t        getDuration(int* msec) = 0;
     virtual status_t        reset() = 0;
-    virtual status_t        setAudioStreamType(int type) = 0;
+    virtual status_t        setAudioStreamType(audio_stream_type_t type) = 0;
     virtual status_t        setLooping(int loop) = 0;
     virtual status_t        setVolume(float leftVolume, float rightVolume) = 0;
     virtual status_t        setAuxEffectSendLevel(float level) = 0;

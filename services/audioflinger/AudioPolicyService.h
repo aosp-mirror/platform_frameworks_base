@@ -102,7 +102,7 @@ public:
                                     int id);
     virtual status_t unregisterEffect(int id);
     virtual status_t setEffectEnabled(int id, bool enabled);
-    virtual bool isStreamActive(int stream, uint32_t inPastMs = 0) const;
+    virtual bool isStreamActive(audio_stream_type_t stream, uint32_t inPastMs = 0) const;
 
     virtual status_t queryDefaultPreProcessing(int audioSession,
                                               effect_descriptor_t *descriptors,
@@ -168,9 +168,9 @@ private:
         virtual     bool        threadLoop();
 
                     void        exit();
-                    void        startToneCommand(int type = 0, int stream = 0);
+                    void        startToneCommand(int type = 0, audio_stream_type_t stream = AUDIO_STREAM_VOICE_CALL);
                     void        stopToneCommand();
-                    status_t    volumeCommand(int stream, float volume, int output, int delayMs = 0);
+                    status_t    volumeCommand(audio_stream_type_t stream, float volume, int output, int delayMs = 0);
                     status_t    parametersCommand(int ioHandle, const char *keyValuePairs, int delayMs = 0);
                     status_t    voiceVolumeCommand(float volume, int delayMs = 0);
                     void        insertCommand_l(AudioCommand *command, int delayMs = 0);
@@ -196,12 +196,12 @@ private:
         class ToneData {
         public:
             int mType;      // tone type (START_TONE only)
-            int mStream;    // stream type (START_TONE only)
+            audio_stream_type_t mStream;    // stream type (START_TONE only)
         };
 
         class VolumeData {
         public:
-            int mStream;
+            audio_stream_type_t mStream;
             float mVolume;
             int mIO;
         };

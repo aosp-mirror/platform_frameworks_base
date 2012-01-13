@@ -75,7 +75,7 @@ class AudioTrackJniStorage {
         sp<MemoryHeapBase>         mMemHeap;
         sp<MemoryBase>             mMemBase;
         audiotrack_callback_cookie mCallbackData;
-        int                        mStreamType;
+        audio_stream_type_t        mStreamType;
 
     AudioTrackJniStorage() {
         mCallbackData.audioTrack_class = 0;
@@ -175,11 +175,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     int afSampleRate;
     int afFrameCount;
 
-    if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+    if (AudioSystem::getOutputFrameCount(&afFrameCount, (audio_stream_type_t) streamType) != NO_ERROR) {
         ALOGE("Error creating AudioTrack: Could not get AudioSystem frame count.");
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
-    if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+    if (AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t) streamType) != NO_ERROR) {
         ALOGE("Error creating AudioTrack: Could not get AudioSystem sampling rate.");
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }

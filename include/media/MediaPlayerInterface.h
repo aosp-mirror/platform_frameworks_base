@@ -199,7 +199,7 @@ public:
     virtual             ~MediaPlayerHWInterface() {}
     virtual bool        hardwareOutput() { return true; }
     virtual status_t    setVolume(float leftVolume, float rightVolume) = 0;
-    virtual status_t    setAudioStreamType(int streamType) = 0;
+    virtual status_t    setAudioStreamType(audio_stream_type_t streamType) = 0;
 };
 
 }; // namespace android

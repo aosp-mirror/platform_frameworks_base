@@ -1010,7 +1010,7 @@ status_t MediaPlayerService::Client::reset()
     return p->reset();
 }
 
-status_t MediaPlayerService::Client::setAudioStreamType(int type)
+status_t MediaPlayerService::Client::setAudioStreamType(audio_stream_type_t type)
 {
     ALOGV("[%d] setAudioStreamType(%d)", mConnId, type);
     // TODO: for hardware output, call player instead

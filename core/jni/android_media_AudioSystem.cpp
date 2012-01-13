@@ -72,7 +72,7 @@ static jboolean
 android_media_AudioSystem_isStreamActive(JNIEnv *env, jobject thiz, jint stream, jint inPastMs)
 {
     bool state = false;
-    AudioSystem::isStreamActive(stream, &state, inPastMs);
+    AudioSystem::isStreamActive((audio_stream_type_t) stream, &state, inPastMs);
     return state;
 }
 
