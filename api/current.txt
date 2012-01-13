@@ -19290,6 +19290,7 @@ package android.telephony.cdma {
   public class CdmaCellLocation extends android.telephony.CellLocation {
     ctor public CdmaCellLocation();
     ctor public CdmaCellLocation(android.os.Bundle);
+    method public static double convertQuartSecToDecDegrees(int);
     method public void fillInNotifierBundle(android.os.Bundle);
     method public int getBaseStationId();
     method public int getBaseStationLatitude();

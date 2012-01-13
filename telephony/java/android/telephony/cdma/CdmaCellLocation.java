@@ -215,6 +215,22 @@ public class CdmaCellLocation extends CellLocation {
                 this.mNetworkId == -1);
     }
 
+    /**
+     * Converts latitude or longitude from 0.25 seconds (as defined in the
+     * 3GPP2 C.S0005-A v6.0 standard) to decimal degrees
+     *
+     * @param quartSec latitude or longitude in 0.25 seconds units
+     * @return latitude or longitude in decimal degrees units
+     * @throws IllegalArgumentException if value is less than -2592000,
+     *                                  greater than 2592000, or is not a number.
+     */
+    public static double convertQuartSecToDecDegrees(int quartSec) {
+        if(Double.isNaN(quartSec) || quartSec < -2592000 || quartSec > 2592000){
+            // Invalid value
+            throw new IllegalArgumentException("Invalid coordiante value:" + quartSec);
+        }
+        return ((double)quartSec) / (3600 * 4);
+    }
 
 }
 
