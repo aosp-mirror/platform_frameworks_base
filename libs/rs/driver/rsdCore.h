@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,6 @@
 
 typedef void (* InvokeFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
-
-typedef void (*outer_foreach_t)(const void *,
-    const android::renderscript::RsForEachStubParamStruct *,
-                                uint32_t x1, uint32_t x2,
-                                uint32_t instep, uint32_t outstep);
 
 typedef struct RsdSymbolTableRec {
     const char * mName;
@@ -61,8 +56,6 @@ typedef struct RsdHalRec {
     };
     Workers mWorkers;
     bool mExit;
-
-    outer_foreach_t mForEachLaunch[32];
 
     ScriptTLSStruct mTlsStruct;
 
