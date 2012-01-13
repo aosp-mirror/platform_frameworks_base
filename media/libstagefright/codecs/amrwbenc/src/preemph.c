@@ -35,20 +35,20 @@ void Preemph(
 	Word16 temp;
 	Word32 i, L_tmp;
 
-	temp = x[lg - 1];                     
+	temp = x[lg - 1];
 
 	for (i = lg - 1; i > 0; i--)
 	{
 		L_tmp = L_deposit_h(x[i]);
 		L_tmp -= (x[i - 1] * mu)<<1;
-		x[i] = (L_tmp + 0x8000)>>16;               
+		x[i] = (L_tmp + 0x8000)>>16;
 	}
 
 	L_tmp = L_deposit_h(x[0]);
 	L_tmp -= ((*mem) * mu)<<1;
-	x[0] = (L_tmp + 0x8000)>>16;                   
+	x[0] = (L_tmp + 0x8000)>>16;
 
-	*mem = temp;                           
+	*mem = temp;
 
 	return;
 }
@@ -64,22 +64,22 @@ void Preemph2(
 	Word16 temp;
 	Word32 i, L_tmp;
 
-	temp = x[lg - 1];                     
+	temp = x[lg - 1];
 
 	for (i = (Word16) (lg - 1); i > 0; i--)
 	{
 		L_tmp = L_deposit_h(x[i]);
 		L_tmp -= (x[i - 1] * mu)<<1;
 		L_tmp = (L_tmp << 1);
-		x[i] = (L_tmp + 0x8000)>>16;               
+		x[i] = (L_tmp + 0x8000)>>16;
 	}
 
 	L_tmp = L_deposit_h(x[0]);
 	L_tmp -= ((*mem) * mu)<<1;
 	L_tmp = (L_tmp << 1);
-	x[0] = (L_tmp + 0x8000)>>16;                   
+	x[0] = (L_tmp + 0x8000)>>16;
 
-	*mem = temp;                           
+	*mem = temp;
 
 	return;
 }
