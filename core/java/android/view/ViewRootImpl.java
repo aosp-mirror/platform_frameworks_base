@@ -57,7 +57,6 @@ import android.util.Poolable;
 import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -2530,7 +2529,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         mFullRedrawNeeded = true;
                         try {
                             mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                    mAttachInfo, mHolder);
+                                    mHolder);
                         } catch (Surface.OutOfResourcesException e) {
                             Log.e(TAG, "OutOfResourcesException locking surface", e);
                             try {
