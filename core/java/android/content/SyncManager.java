@@ -1034,6 +1034,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
     protected void dumpSyncState(PrintWriter pw) {
         pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
+        pw.print("auto sync: "); pw.println(mSyncStorageEngine.getMasterSyncAutomatically());
         pw.print("memory low: "); pw.println(mStorageIsLow);
 
         final Account[] accounts = mAccounts;
@@ -1272,57 +1273,17 @@ public class SyncManager implements OnAccountsUpdateListener {
 
             }
 
-            pw.println();
-            pw.printf("Detailed Statistics (Recent history):  %d (# of times) %ds (sync time)\n",
-                    totalTimes, totalElapsedTime / 1000);
+            if (totalElapsedTime > 0) {
+                pw.println();
+                pw.printf("Detailed Statistics (Recent history):  "
+                        + "%d (# of times) %ds (sync time)\n",
+                        totalTimes, totalElapsedTime / 1000);
 
-            final List<AuthoritySyncStats> sortedAuthorities =
-                    new ArrayList<AuthoritySyncStats>(authorityMap.values());
-            Collections.sort(sortedAuthorities, new Comparator<AuthoritySyncStats>() {
-                @Override
-                public int compare(AuthoritySyncStats lhs, AuthoritySyncStats rhs) {
-                    // reverse order
-                    int compare = Integer.compare(rhs.times, lhs.times);
-                    if (compare == 0) {
-                        compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
-                    }
-                    return compare;
-                }
-            });
-
-            final int maxLength = Math.max(maxAuthority, maxAccount + 3);
-            final int padLength = 2 + 2 + maxLength + 2 + 10 + 11;
-            final char chars[] = new char[padLength];
-            Arrays.fill(chars, '-');
-            final String separator = new String(chars);
-
-            final String authorityFormat = String.format("  %%-%ds: %%-9s  %%-11s\n", maxLength + 2);
-            final String accountFormat = String.format("    %%-%ds:   %%-9s  %%-11s\n", maxLength);
-
-            pw.println(separator);
-            for (AuthoritySyncStats authoritySyncStats : sortedAuthorities) {
-                String name = authoritySyncStats.name;
-                long elapsedTime;
-                int times;
-                String timeStr;
-                String timesStr;
-
-                elapsedTime = authoritySyncStats.elapsedTime;
-                times = authoritySyncStats.times;
-                timeStr = String.format("%ds/%d%%",
-                        elapsedTime / 1000,
-                        elapsedTime * 100 / totalElapsedTime);
-                timesStr = String.format("%d/%d%%",
-                        times,
-                        times * 100 / totalTimes);
-                pw.printf(authorityFormat, name, timesStr, timeStr);
-
-                final List<AccountSyncStats> sortedAccounts =
-                        new ArrayList<AccountSyncStats>(
-                                authoritySyncStats.accountMap.values());
-                Collections.sort(sortedAccounts, new Comparator<AccountSyncStats>() {
+                final List<AuthoritySyncStats> sortedAuthorities =
+                        new ArrayList<AuthoritySyncStats>(authorityMap.values());
+                Collections.sort(sortedAuthorities, new Comparator<AuthoritySyncStats>() {
                     @Override
-                    public int compare(AccountSyncStats lhs, AccountSyncStats rhs) {
+                    public int compare(AuthoritySyncStats lhs, AuthoritySyncStats rhs) {
                         // reverse order
                         int compare = Integer.compare(rhs.times, lhs.times);
                         if (compare == 0) {
@@ -1331,18 +1292,63 @@ public class SyncManager implements OnAccountsUpdateListener {
                         return compare;
                     }
                 });
-                for (AccountSyncStats stats: sortedAccounts) {
-                    elapsedTime = stats.elapsedTime;
-                    times = stats.times;
+
+                final int maxLength = Math.max(maxAuthority, maxAccount + 3);
+                final int padLength = 2 + 2 + maxLength + 2 + 10 + 11;
+                final char chars[] = new char[padLength];
+                Arrays.fill(chars, '-');
+                final String separator = new String(chars);
+
+                final String authorityFormat =
+                        String.format("  %%-%ds: %%-9s  %%-11s\n", maxLength + 2);
+                final String accountFormat =
+                        String.format("    %%-%ds:   %%-9s  %%-11s\n", maxLength);
+
+                pw.println(separator);
+                for (AuthoritySyncStats authoritySyncStats : sortedAuthorities) {
+                    String name = authoritySyncStats.name;
+                    long elapsedTime;
+                    int times;
+                    String timeStr;
+                    String timesStr;
+
+                    elapsedTime = authoritySyncStats.elapsedTime;
+                    times = authoritySyncStats.times;
                     timeStr = String.format("%ds/%d%%",
                             elapsedTime / 1000,
                             elapsedTime * 100 / totalElapsedTime);
                     timesStr = String.format("%d/%d%%",
                             times,
                             times * 100 / totalTimes);
-                    pw.printf(accountFormat, stats.name, timesStr, timeStr);
+                    pw.printf(authorityFormat, name, timesStr, timeStr);
+
+                    final List<AccountSyncStats> sortedAccounts =
+                            new ArrayList<AccountSyncStats>(
+                                    authoritySyncStats.accountMap.values());
+                    Collections.sort(sortedAccounts, new Comparator<AccountSyncStats>() {
+                        @Override
+                        public int compare(AccountSyncStats lhs, AccountSyncStats rhs) {
+                            // reverse order
+                            int compare = Integer.compare(rhs.times, lhs.times);
+                            if (compare == 0) {
+                                compare = Long.compare(rhs.elapsedTime, lhs.elapsedTime);
+                            }
+                            return compare;
+                        }
+                    });
+                    for (AccountSyncStats stats: sortedAccounts) {
+                        elapsedTime = stats.elapsedTime;
+                        times = stats.times;
+                        timeStr = String.format("%ds/%d%%",
+                                elapsedTime / 1000,
+                                elapsedTime * 100 / totalElapsedTime);
+                        timesStr = String.format("%d/%d%%",
+                                times,
+                                times * 100 / totalTimes);
+                        pw.printf(accountFormat, stats.name, timesStr, timeStr);
+                    }
+                    pw.println(separator);
                 }
-                pw.println(separator);
             }
 
             pw.println();
