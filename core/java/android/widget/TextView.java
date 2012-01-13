@@ -5254,10 +5254,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         state.handleUpEvent(event);
                     }
                     if (event.isTracking() && !event.isCanceled()) {
-                        if (isInSelectionMode) {
-                            stopSelectionActionMode();
-                            return true;
-                        }
+                        stopSelectionActionMode();
+                        return true;
                     }
                 }
             }
@@ -10158,7 +10156,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    private void stopSelectionActionMode() {
+    /**
+     * @hide
+     */
+    protected void stopSelectionActionMode() {
         if (mSelectionActionMode != null) {
             // This will hide the mSelectionModifierCursorController
             mSelectionActionMode.finish();
