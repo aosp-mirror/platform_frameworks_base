@@ -274,6 +274,7 @@ public class Process {
      * @param gids Additional group-ids associated with the process.
      * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
+     * @param seInfo null-ok SE Android information for the new process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
      * @return An object that describes the result of the attempt to start the process.
@@ -285,10 +286,11 @@ public class Process {
                                   final String niceName,
                                   int uid, int gid, int[] gids,
                                   int debugFlags, int targetSdkVersion,
+                                  String seInfo,
                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
-                    debugFlags, targetSdkVersion, zygoteArgs);
+                    debugFlags, targetSdkVersion, seInfo, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -451,6 +453,7 @@ public class Process {
      * new process should setgroup() to.
      * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
+     * @param seInfo null-ok SE Android information for the new process.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -460,6 +463,7 @@ public class Process {
                                   final int uid, final int gid,
                                   final int[] gids,
                                   int debugFlags, int targetSdkVersion,
+                                  String seInfo,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
         synchronized(Process.class) {
@@ -508,6 +512,10 @@ public class Process {
 
             if (niceName != null) {
                 argsForZygote.add("--nice-name=" + niceName);
+            }
+
+            if (seInfo != null) {
+                argsForZygote.add("--seinfo=" + seInfo);
             }
 
             argsForZygote.add(processClass);
