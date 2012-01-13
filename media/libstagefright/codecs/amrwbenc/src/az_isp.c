@@ -90,9 +90,9 @@ void Az_isp(
 		f1[i] = vo_round(t0 + (a[M - i] << 15));        /* =(a[i]+a[M-i])/2 */
 		f2[i] = vo_round(t0 - (a[M - i] << 15));        /* =(a[i]-a[M-i])/2 */
 	}
-	f1[NC] = a[NC];                        
+	f1[NC] = a[NC];
 	for (i = 2; i < NC; i++)               /* Divide by (1-z^-2) */
-		f2[i] = add1(f2[i], f2[i - 2]);     
+		f2[i] = add1(f2[i], f2[i - 2]);
 
 	/*---------------------------------------------------------------------*
 	 * Find the ISPs (roots of F1(z) and F2(z) ) using the                 *
@@ -107,17 +107,17 @@ void Az_isp(
 	 *---------------------------------------------------------------------*/
 	nf = 0;                                  /* number of found frequencies */
 	ip = 0;                                  /* indicator for f1 or f2      */
-	coef = f1;                             
-	order = NC;                            
-	xlow = vogrid[0];                        
+	coef = f1;
+	order = NC;
+	xlow = vogrid[0];
 	ylow = Chebps2(xlow, coef, order);
 	j = 0;
 	while ((nf < M - 1) && (j < GRID_POINTS))
 	{
 		j ++;
-		xhigh = xlow;                     
-		yhigh = ylow;                      
-		xlow = vogrid[j];                    
+		xhigh = xlow;
+		yhigh = ylow;
+		xlow = vogrid[j];
 		ylow = Chebps2(xlow, coef, order);
 		if ((ylow * yhigh) <= (Word32) 0)
 		{
@@ -128,12 +128,12 @@ void Az_isp(
 				ymid = Chebps2(xmid, coef, order);
 				if ((ylow * ymid) <= (Word32) 0)
 				{
-					yhigh = ymid;         
-					xhigh = xmid;          
+					yhigh = ymid;
+					xhigh = xmid;
 				} else
 				{
-					ylow = ymid;           
-					xlow = xmid;          
+					ylow = ymid;
+					xlow = xmid;
 				}
 			}
 			/*-------------------------------------------------------------*
@@ -144,10 +144,10 @@ void Az_isp(
 			y = yhigh - ylow;
 			if (y == 0)
 			{
-				xint = xlow;               
+				xint = xlow;
 			} else
 			{
-				sign = y;                 
+				sign = y;
 				y = abs_s(y);
 				exp = norm_s(y);
 				y = y << exp;
@@ -161,19 +161,19 @@ void Az_isp(
 				t0 = (t0 >> 10);        /* result in Q15 */
 				xint = vo_sub(xlow, vo_extract_l(t0));        /* xint = xlow - ylow*y */
 			}
-			isp[nf] = xint;                
-			xlow = xint;                   
-			nf++;                          
+			isp[nf] = xint;
+			xlow = xint;
+			nf++;
 			if (ip == 0)
 			{
-				ip = 1;                    
-				coef = f2;                
-				order = NC - 1;           
+				ip = 1;
+				coef = f2;
+				order = NC - 1;
 			} else
 			{
-				ip = 0;                   
-				coef = f1;                 
-				order = NC;              
+				ip = 0;
+				coef = f1;
+				order = NC;
 			}
 			ylow = Chebps2(xlow, coef, order);
 		}
@@ -183,7 +183,7 @@ void Az_isp(
 	{
 		for (i = 0; i < M; i++)
 		{
-			isp[i] = old_isp[i];          
+			isp[i] = old_isp[i];
 		}
 	} else
 	{
@@ -243,9 +243,9 @@ static __inline Word16 Chebps2(Word16 x, Word16 f[], Word32 n)
 		b0_l = (t0 & 0xffff) >> 1;
 
 		b2_l = b1_l;                         /* b2 = b1; */
-		b2_h = b1_h;                       
+		b2_h = b1_h;
 		b1_l = b0_l;                         /* b1 = b0; */
-		b1_h = b0_h;                       
+		b1_h = b0_h;
 	}
 
 	t0 = ((b1_h * x)<<1) + (((b1_l * x)>>15)<<1);

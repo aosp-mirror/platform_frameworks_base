@@ -32,7 +32,7 @@
 /*****************************************************************************
 *
 * function name: mem_malloc
-* description:  malloc the alignments memory 
+* description:  malloc the alignments memory
 * returns:      the point of the memory
 *
 **********************************************************************************/

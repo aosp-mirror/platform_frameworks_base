@@ -20,7 +20,7 @@
 *	Description:15th order band pass 6kHz to 7kHz FIR filter        *
 *       frequency: 4kHz   5kHz  5.5kHz  6kHz  6.5kHz  7kHz 7.5kHz 8kHz  *
 *	dB loss:  -60dB  -45dB  -13dB   -3dB   0dB    -3dB -13dB  -45dB *
-*	                                                                *                                                                 
+*	                                                                *
 ************************************************************************/
 
 #include "typedef.h"
@@ -63,7 +63,7 @@ void Filt_6k_7k(
 	for (i = lg - 1; i >= 0; i--)
 	{
 		x[i + L_FIR - 1] = signal[i] >> 2;                         /* gain of filter = 4 */
-	}	
+	}
 	for (i = 0; i < lg; i++)
 	{
 		L_tmp =  (x[i] + x[i+ 30]) * fir_6k_7k[0];
