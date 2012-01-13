@@ -233,19 +233,15 @@ struct key_value_pair_t {
     }
 };
 
-template<>
 template <typename K, typename V>
 struct trait_trivial_ctor< key_value_pair_t<K, V> >
 { enum { value = aggregate_traits<K,V>::has_trivial_ctor }; };
-template<> 
 template <typename K, typename V>
 struct trait_trivial_dtor< key_value_pair_t<K, V> >
 { enum { value = aggregate_traits<K,V>::has_trivial_dtor }; };
-template<> 
 template <typename K, typename V>
 struct trait_trivial_copy< key_value_pair_t<K, V> >
 { enum { value = aggregate_traits<K,V>::has_trivial_copy }; };
-template<> 
 template <typename K, typename V>
 struct trait_trivial_move< key_value_pair_t<K, V> >
 { enum { value = aggregate_traits<K,V>::has_trivial_move }; };
