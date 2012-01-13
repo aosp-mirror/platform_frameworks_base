@@ -139,9 +139,12 @@ public:
     virtual status_t getAllSupportInfo(
             int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray) = 0;
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length) = 0;
+    virtual DecryptHandle* openDecryptSession(
+                int uniqueId, int fd, off64_t offset,
+                off64_t length, const char* mime) = 0;
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri) = 0;
+    virtual DecryptHandle* openDecryptSession(
+                int uniqueId, const char* uri, const char* mime) = 0;
 
     virtual status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
 
@@ -222,9 +225,12 @@ public:
     virtual status_t getAllSupportInfo(
             int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
+    virtual DecryptHandle* openDecryptSession(
+                int uniqueId, int fd, off64_t offset, off64_t length,
+                const char* mime);
 
-    virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
+    virtual DecryptHandle* openDecryptSession(
+                int uniqueId, const char* uri, const char* mime);
 
     virtual status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 

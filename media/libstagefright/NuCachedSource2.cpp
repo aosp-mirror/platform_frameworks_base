@@ -603,8 +603,8 @@ void NuCachedSource2::resumeFetchingIfNecessary() {
     restartPrefetcherIfNecessary_l(true /* ignore low water threshold */);
 }
 
-sp<DecryptHandle> NuCachedSource2::DrmInitialization() {
-    return mSource->DrmInitialization();
+sp<DecryptHandle> NuCachedSource2::DrmInitialization(const char* mime) {
+    return mSource->DrmInitialization(mime);
 }
 
 void NuCachedSource2::getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client) {
