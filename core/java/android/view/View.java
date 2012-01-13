@@ -10433,6 +10433,19 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
+     * @return The HardwareRenderer associated with that view or null if hardware rendering
+     * is not supported or this this has not been attached to a window.
+     *
+     * @hide
+     */
+    public HardwareRenderer getHardwareRenderer() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.mHardwareRenderer;
+        }
+        return null;
+    }
+
+    /**
      * <p>Returns a display list that can be used to draw this view again
      * without executing its draw method.</p>
      *

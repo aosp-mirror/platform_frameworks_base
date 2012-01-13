@@ -42,12 +42,12 @@ public abstract class HardwareCanvas extends Canvas {
      * 
      * @param dirty The dirty rectangle to update, can be null.
      */
-    abstract void onPreDraw(Rect dirty);
+    public abstract void onPreDraw(Rect dirty);
 
     /**
      * Invoked after all drawing operation have been performed.
      */
-    abstract void onPostDraw();
+    public abstract void onPostDraw();
     
     /**
      * Draws the specified display list onto this canvas.
@@ -61,7 +61,7 @@ public abstract class HardwareCanvas extends Canvas {
      * @return True if the content of the display list requires another
      *         drawing pass (invalidate()), false otherwise
      */
-    abstract boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty);
+    public abstract boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty);
 
     /**
      * Outputs the specified display list to the log. This method exists for use by
