@@ -1906,10 +1906,21 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
                     connection->getInputChannelName());
             logOutboundMotionDetailsLocked("  ", splitMotionEntry);
 #endif
-            eventEntry = splitMotionEntry;
+            enqueueDispatchEntriesLocked(currentTime, connection,
+                    splitMotionEntry, inputTarget, resumeWithAppendedMotionSample);
+            splitMotionEntry->release();
+            return;
         }
     }
 
+    // Not splitting.  Enqueue dispatch entries for the event as is.
+    enqueueDispatchEntriesLocked(currentTime, connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample);
+}
+
+void InputDispatcher::enqueueDispatchEntriesLocked(nsecs_t currentTime,
+        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
+        bool resumeWithAppendedMotionSample) {
     // Resume the dispatch cycle with a freshly appended motion sample.
     // First we check that the last dispatch entry in the outbound queue is for the same
     // motion event to which we appended the motion sample.  If we find such a dispatch
@@ -2046,9 +2057,6 @@ void InputDispatcher::enqueueDispatchEntryLocked(
     DispatchEntry* dispatchEntry = new DispatchEntry(eventEntry, // increments ref
             inputTargetFlags, inputTarget->xOffset, inputTarget->yOffset,
             inputTarget->scaleFactor);
-    if (dispatchEntry->hasForegroundTarget()) {
-        incrementPendingForegroundDispatchesLocked(eventEntry);
-    }
 
     // Handle the case where we could not stream a new motion sample because the consumer has
     // already consumed the motion event (otherwise the corresponding dispatch entry would
@@ -2077,6 +2085,7 @@ void InputDispatcher::enqueueDispatchEntryLocked(
             ALOGD("channel '%s' ~ enqueueDispatchEntryLocked: skipping inconsistent key event",
                     connection->getInputChannelName());
 #endif
+            delete dispatchEntry;
             return; // skip the inconsistent event
         }
         break;
@@ -2118,10 +2127,16 @@ void InputDispatcher::enqueueDispatchEntryLocked(
             ALOGD("channel '%s' ~ enqueueDispatchEntryLocked: skipping inconsistent motion event",
                     connection->getInputChannelName());
 #endif
+            delete dispatchEntry;
             return; // skip the inconsistent event
         }
         break;
     }
+    }
+
+    // Remember that we are waiting for this dispatch to complete.
+    if (dispatchEntry->hasForegroundTarget()) {
+        incrementPendingForegroundDispatchesLocked(eventEntry);
     }
 
     // Enqueue the dispatch entry.
@@ -2462,14 +2477,17 @@ void InputDispatcher::synthesizeCancelationEventsForInputChannelLocked(
 
 void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
         const sp<Connection>& connection, const CancelationOptions& options) {
+    if (connection->status == Connection::STATUS_BROKEN) {
+        return;
+    }
+
     nsecs_t currentTime = now();
 
     mTempCancelationEvents.clear();
     connection->inputState.synthesizeCancelationEvents(currentTime,
             mTempCancelationEvents, options);
 
-    if (! mTempCancelationEvents.isEmpty()
-            && connection->status != Connection::STATUS_BROKEN) {
+    if (!mTempCancelationEvents.isEmpty()) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
         ALOGD("channel '%s' ~ Synthesized %d cancelation events to bring channel back in sync "
                 "with reality: %s, mode=%d.",
