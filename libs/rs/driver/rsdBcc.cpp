@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ using namespace android::renderscript;
 
 struct DrvScript {
     int (*mRoot)();
+    int (*mRootExpand)();
     void (*mInit)();
     void (*mFreeChildren)();
 
@@ -52,6 +53,10 @@ struct DrvScript {
     uint32_t mScriptTextLength;
 };
 
+typedef void (*outer_foreach_t)(
+    const android::renderscript::RsForEachStubParamStruct *,
+    uint32_t x1, uint32_t x2,
+    uint32_t instep, uint32_t outstep);
 
 static Script * setTLS(Script *sc) {
     ScriptTLSStruct * tls = (ScriptTLSStruct *)pthread_getspecific(rsdgThreadTLSKey);
@@ -123,6 +128,7 @@ bool rsdScriptInit(const Context *rsc,
     }
 
     drv->mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root"));
+    drv->mRootExpand = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root.expand"));
     drv->mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, "init"));
     drv->mFreeChildren = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, ".rs.dtor"));
 
@@ -165,7 +171,12 @@ bool rsdScriptInit(const Context *rsc,
     script->mHal.info.exportedPragmaCount = drv->ME->getPragmaCount();
     script->mHal.info.exportedPragmaKeyList = drv->ME->getPragmaKeyList();
     script->mHal.info.exportedPragmaValueList = drv->ME->getPragmaValueList();
-    script->mHal.info.root = drv->mRoot;
+
+    if (drv->mRootExpand) {
+      script->mHal.info.root = drv->mRootExpand;
+    } else {
+      script->mHal.info.root = drv->mRoot;
+    }
 
     pthread_mutex_unlock(&rsdgInitMutex);
     return true;
@@ -224,7 +235,7 @@ static void wc_xy(void *usr, uint32_t idx) {
     RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
     uint32_t sig = mtls->sig;
 
-    outer_foreach_t fn = dc->mForEachLaunch[sig];
+    outer_foreach_t fn = (outer_foreach_t) mtls->script->mHal.info.root;
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
         uint32_t yStart = mtls->yStart + slice * mtls->mSliceSize;
@@ -240,8 +251,7 @@ static void wc_xy(void *usr, uint32_t idx) {
             uint32_t offset = mtls->dimX * p.y;
             p.out = mtls->ptrOut + (mtls->eStrideOut * offset);
             p.in = mtls->ptrIn + (mtls->eStrideIn * offset);
-            fn(&mtls->script->mHal.info.root, &p, mtls->xStart, mtls->xEnd,
-               mtls->eStrideIn, mtls->eStrideOut);
+            fn(&p, mtls->xStart, mtls->xEnd, mtls->eStrideIn, mtls->eStrideOut);
         }
     }
 }
@@ -255,7 +265,7 @@ static void wc_x(void *usr, uint32_t idx) {
     RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
     uint32_t sig = mtls->sig;
 
-    outer_foreach_t fn = dc->mForEachLaunch[sig];
+    outer_foreach_t fn = (outer_foreach_t) mtls->script->mHal.info.root;
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
         uint32_t xStart = mtls->xStart + slice * mtls->mSliceSize;
@@ -270,7 +280,7 @@ static void wc_x(void *usr, uint32_t idx) {
 
         p.out = mtls->ptrOut + (mtls->eStrideOut * xStart);
         p.in = mtls->ptrIn + (mtls->eStrideIn * xStart);
-        fn(&mtls->script->mHal.info.root, &p, xStart, xEnd, mtls->eStrideIn, mtls->eStrideOut);
+        fn(&p, xStart, xEnd, mtls->eStrideIn, mtls->eStrideOut);
     }
 }
 
@@ -381,7 +391,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
         uint32_t sig = mtls.sig;
 
         //ALOGE("launch 3");
-        outer_foreach_t fn = dc->mForEachLaunch[sig];
+        outer_foreach_t fn = (outer_foreach_t) mtls.script->mHal.info.root;
         for (p.ar[0] = mtls.arrayStart; p.ar[0] < mtls.arrayEnd; p.ar[0]++) {
             for (p.z = mtls.zStart; p.z < mtls.zEnd; p.z++) {
                 for (p.y = mtls.yStart; p.y < mtls.yEnd; p.y++) {
@@ -390,8 +400,8 @@ void rsdScriptInvokeForEach(const Context *rsc,
                                       mtls.dimX * p.y;
                     p.out = mtls.ptrOut + (mtls.eStrideOut * offset);
                     p.in = mtls.ptrIn + (mtls.eStrideIn * offset);
-                    fn(&mtls.script->mHal.info.root, &p, mtls.xStart, mtls.xEnd,
-                       mtls.eStrideIn, mtls.eStrideOut);
+                    fn(&p, mtls.xStart, mtls.xEnd, mtls.eStrideIn,
+                       mtls.eStrideOut);
                 }
             }
         }
