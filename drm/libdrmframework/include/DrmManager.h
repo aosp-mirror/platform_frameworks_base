@@ -111,9 +111,10 @@ public:
 
     status_t getAllSupportInfo(int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
-    DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
+    DecryptHandle* openDecryptSession(
+            int uniqueId, int fd, off64_t offset, off64_t length, const char* mime);
 
-    DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
+    DecryptHandle* openDecryptSession(int uniqueId, const char* uri, const char* mime);
 
     status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 

@@ -116,12 +116,18 @@ status_t DrmManagerClient::getAllSupportInfo(int* length, DrmSupportInfo** drmSu
     return mDrmManagerClientImpl->getAllSupportInfo(mUniqueId, length, drmSupportInfoArray);
 }
 
-sp<DecryptHandle> DrmManagerClient::openDecryptSession(int fd, off64_t offset, off64_t length) {
-    return mDrmManagerClientImpl->openDecryptSession(mUniqueId, fd, offset, length);
+sp<DecryptHandle> DrmManagerClient::openDecryptSession(
+        int fd, off64_t offset, off64_t length, const char* mime) {
+
+    return mDrmManagerClientImpl->openDecryptSession(
+                    mUniqueId, fd, offset, length, mime);
 }
 
-sp<DecryptHandle> DrmManagerClient::openDecryptSession(const char* uri) {
-    return mDrmManagerClientImpl->openDecryptSession(mUniqueId, uri);
+sp<DecryptHandle> DrmManagerClient::openDecryptSession(
+        const char* uri, const char* mime) {
+
+    return mDrmManagerClientImpl->openDecryptSession(
+                    mUniqueId, uri, mime);
 }
 
 status_t DrmManagerClient::closeDecryptSession(sp<DecryptHandle> &decryptHandle) {

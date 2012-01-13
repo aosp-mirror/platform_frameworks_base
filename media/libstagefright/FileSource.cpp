@@ -127,7 +127,7 @@ status_t FileSource::getSize(off64_t *size) {
     return OK;
 }
 
-sp<DecryptHandle> FileSource::DrmInitialization() {
+sp<DecryptHandle> FileSource::DrmInitialization(const char *mime) {
     if (mDrmManagerClient == NULL) {
         mDrmManagerClient = new DrmManagerClient();
     }
@@ -138,7 +138,7 @@ sp<DecryptHandle> FileSource::DrmInitialization() {
 
     if (mDecryptHandle == NULL) {
         mDecryptHandle = mDrmManagerClient->openDecryptSession(
-                mFd, mOffset, mLength);
+                mFd, mOffset, mLength, mime);
     }
 
     if (mDecryptHandle == NULL) {

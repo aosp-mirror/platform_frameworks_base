@@ -56,10 +56,10 @@ public:
     virtual uint32_t flags() const;
 
     // for DRM
-    virtual void setDrmFlag(bool flag) {
+    void setDrmFlag(bool flag) {
         mIsDrm = flag;
     };
-    virtual bool getDrmFlag() {
+    bool getDrmFlag() {
         return mIsDrm;
     }
     virtual char* getDrmTrackInfo(size_t trackID, int *len) {

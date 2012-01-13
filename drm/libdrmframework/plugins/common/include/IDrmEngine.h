@@ -320,11 +320,14 @@ public:
      * @param[in] fd File descriptor of the protected content to be decrypted
      * @param[in] offset Start position of the content
      * @param[in] length The length of the protected content
+     * @param[in] mime Mime type of the protected content if it is
+     *     not NULL or empty
      * @return
      *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
      */
     virtual status_t openDecryptSession(
-        int uniqueId, DecryptHandle* decryptHandle, int fd, off64_t offset, off64_t length) = 0;
+        int uniqueId, DecryptHandle* decryptHandle,
+        int fd, off64_t offset, off64_t length, const char* mime) = 0;
 
     /**
      * Open the decrypt session to decrypt the given protected content
@@ -332,11 +335,14 @@ public:
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] decryptHandle Handle for the current decryption session
      * @param[in] uri Path of the protected content to be decrypted
+     * @param[in] mime Mime type of the protected content if it is
+     *     not NULL or empty
      * @return
      *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
      */
     virtual status_t openDecryptSession(
-        int uniqueId, DecryptHandle* decryptHandle, const char* uri) = 0;
+        int uniqueId, DecryptHandle* decryptHandle,
+        const char* uri, const char* mime) = 0;
 
     /**
      * Close the decrypt session for the given handle

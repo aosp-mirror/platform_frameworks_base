@@ -290,6 +290,7 @@ private:
 
     bool isStreamingHTTP() const;
     void sendCacheStats();
+    void checkDrmStatus(const sp<DataSource>& dataSource);
 
     enum FlagMode {
         SET,

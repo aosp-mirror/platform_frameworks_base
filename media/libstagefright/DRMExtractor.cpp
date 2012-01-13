@@ -282,13 +282,13 @@ bool SniffDRM(
     if (decryptHandle != NULL) {
         if (decryptHandle->decryptApiType == DecryptApiType::CONTAINER_BASED) {
             *mimeType = String8("drm+container_based+") + decryptHandle->mimeType;
+            *confidence = 10.0f;
         } else if (decryptHandle->decryptApiType == DecryptApiType::ELEMENTARY_STREAM_BASED) {
             *mimeType = String8("drm+es_based+") + decryptHandle->mimeType;
-        } else if (decryptHandle->decryptApiType == DecryptApiType::WV_BASED) {
-            *mimeType = MEDIA_MIMETYPE_CONTAINER_WVM;
-            ALOGW("SniffWVM: found match\n");
+            *confidence = 10.0f;
+        } else {
+            return false;
         }
-        *confidence = 10.0f;
 
         return true;
     }

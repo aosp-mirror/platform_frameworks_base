@@ -66,19 +66,21 @@ public:
      * @param[in] fd File descriptor of the protected content to be decrypted
      * @param[in] offset Start position of the content
      * @param[in] length The length of the protected content
+     * @param[in] mime Mime type of the protected content if it is not NULL or empty
      * @return
      *     Handle for the decryption session
      */
-    sp<DecryptHandle> openDecryptSession(int fd, off64_t offset, off64_t length);
+    sp<DecryptHandle> openDecryptSession(int fd, off64_t offset, off64_t length, const char* mime);
 
     /**
      * Open the decrypt session to decrypt the given protected content
      *
      * @param[in] uri Path of the protected content to be decrypted
+     * @param[in] mime Mime type of the protected content if it is not NULL or empty
      * @return
      *     Handle for the decryption session
      */
-    sp<DecryptHandle> openDecryptSession(const char* uri);
+    sp<DecryptHandle> openDecryptSession(const char* uri, const char* mime);
 
     /**
      * Close the decrypt session for the given handle
