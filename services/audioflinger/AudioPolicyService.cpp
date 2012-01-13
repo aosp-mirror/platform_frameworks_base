@@ -587,7 +587,7 @@ status_t AudioPolicyService::dumpInternals(int fd)
 
 status_t AudioPolicyService::dump(int fd, const Vector<String16>& args)
 {
-    if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
+    if (!checkCallingPermission(String16("android.permission.DUMP"))) {
         dumpPermissionDenial(fd);
     } else {
         bool locked = tryLock(mLock);
