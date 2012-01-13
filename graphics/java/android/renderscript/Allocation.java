@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -78,6 +79,8 @@ public class Allocation extends BaseObj {
     boolean mConstrainedFace;
     boolean mConstrainedY;
     boolean mConstrainedZ;
+    boolean mReadAllowed = true;
+    boolean mWriteAllowed = true;
     int mSelectedY;
     int mSelectedZ;
     int mSelectedLOD;
@@ -127,6 +130,32 @@ public class Allocation extends BaseObj {
      */
     public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
 
+    /**
+     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * used with a SurfaceTexture object.  This usage will cause the
+     * allocation to be created read only.
+     *
+     * @hide
+     */
+    public static final int USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE = 0x0020;
+
+    /**
+     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * used with a SurfaceTexture object.  This usage will cause the
+     * allocation to be created read only.
+     *
+     * @hide
+     */
+
+    public static final int USAGE_IO_INPUT = 0x0040;
+    /**
+     * USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT The allcation will be
+     * used with a SurfaceTexture object.  This usage will cause the
+     * allocation to be created read only.
+     *
+     * @hide
+     */
+    public static final int USAGE_IO_OUTPUT = 0x0080;
 
     /**
      * Controls mipmap behavior when using the bitmap creation and
@@ -187,10 +216,26 @@ public class Allocation extends BaseObj {
                        USAGE_GRAPHICS_TEXTURE |
                        USAGE_GRAPHICS_VERTEX |
                        USAGE_GRAPHICS_CONSTANTS |
-                       USAGE_GRAPHICS_RENDER_TARGET)) != 0) {
+                       USAGE_GRAPHICS_RENDER_TARGET |
+                       USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
+                       USAGE_IO_INPUT |
+                       USAGE_IO_OUTPUT)) != 0) {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
+
+        if ((usage & (USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE | USAGE_IO_INPUT)) != 0) {
+            mWriteAllowed = false;
+
+            if ((usage & ~(USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE |
+                           USAGE_IO_INPUT |
+                           USAGE_GRAPHICS_TEXTURE |
+                           USAGE_SCRIPT)) != 0) {
+                throw new RSIllegalArgumentException("Invalid usage combination.");
+            }
+        }
+
         mType = t;
+        mUsage = usage;
 
         if (t != null) {
             updateCacheInfo(t);
@@ -1027,6 +1072,23 @@ public class Allocation extends BaseObj {
         }
         return new Allocation(id, rs, t, usage);
     }
+
+    /**
+     *
+     *
+     * @hide
+     *
+     */
+    public SurfaceTexture getSurfaceTexture() {
+        if ((mUsage & USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE) == 0) {
+            throw new RSInvalidStateException("Allocation is not a surface texture.");
+        }
+
+        int id = mRS.nAllocationGetSurfaceTextureID(getID());
+        return new SurfaceTexture(id);
+
+    }
+
 
     /**
      * Creates a non-mipmapped renderscript allocation to use as a

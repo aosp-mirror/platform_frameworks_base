@@ -443,6 +443,13 @@ nAllocationSyncAll(JNIEnv *_env, jobject _this, RsContext con, jint a, jint bits
     rsAllocationSyncAll(con, (RsAllocation)a, (RsAllocationUsageType)bits);
 }
 
+static jint
+nAllocationGetSurfaceTextureID(JNIEnv *_env, jobject _this, RsContext con, jint a)
+{
+    LOG_API("nAllocationGetSurfaceTextureID, con(%p), a(%p)", con, (RsAllocation)a);
+    return rsAllocationGetSurfaceTextureID(con, (RsAllocation)a);
+}
+
 static void
 nAllocationGenerateMipmaps(JNIEnv *_env, jobject _this, RsContext con, jint alloc)
 {
@@ -1269,6 +1276,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationCopyToBitmap",        "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyToBitmap },
 
 {"rsnAllocationSyncAll",             "(III)V",                                (void*)nAllocationSyncAll },
+{"rsnAllocationGetSurfaceTextureID", "(II)I",                                 (void*)nAllocationGetSurfaceTextureID },
 {"rsnAllocationData1D",              "(IIIII[II)V",                           (void*)nAllocationData1D_i },
 {"rsnAllocationData1D",              "(IIIII[SI)V",                           (void*)nAllocationData1D_s },
 {"rsnAllocationData1D",              "(IIIII[BI)V",                           (void*)nAllocationData1D_b },

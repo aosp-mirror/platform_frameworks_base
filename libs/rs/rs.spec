@@ -64,7 +64,10 @@ AllocationCubeCreateFromBitmap {
     ret RsAllocation
 }
 
-
+AllocationGetSurfaceTextureID {
+    param RsAllocation alloc
+    ret int32_t
+}
 
 ContextFinish {
 	sync

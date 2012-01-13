@@ -108,6 +108,7 @@ protected:
             }
             if (numFragUnis) {
                 fragUniforms = new UniformData[numFragUnis];
+                fragUniformIsSTO = new bool[numFragUnis];
             }
         }
         ~ProgramEntry() {
@@ -123,6 +124,10 @@ protected:
                 delete[] fragUniforms;
                 fragUniforms = NULL;
             }
+            if (fragUniformIsSTO) {
+                delete[] fragUniformIsSTO;
+                fragUniformIsSTO = NULL;
+            }
         }
         uint32_t vtx;
         uint32_t frag;
@@ -131,6 +136,7 @@ protected:
         AttrData *vtxAttrs;
         UniformData *vtxUniforms;
         UniformData *fragUniforms;
+        bool *fragUniformIsSTO;
     };
     android::Vector<ProgramEntry*> mEntries;
     ProgramEntry *mCurrent;

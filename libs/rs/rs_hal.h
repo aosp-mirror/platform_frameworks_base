@@ -115,6 +115,7 @@ typedef struct {
                        bool zeroNew);
         void (*syncAll)(const Context *rsc, const Allocation *alloc, RsAllocationUsageType src);
         void (*markDirty)(const Context *rsc, const Allocation *alloc);
+        int32_t (*initSurfaceTexture)(const Context *rsc, const Allocation *alloc);
 
         void (*data1D)(const Context *rsc, const Allocation *alloc,
                        uint32_t xoff, uint32_t lod, uint32_t count,

@@ -134,6 +134,13 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
 static void UploadToTexture(const Context *rsc, const Allocation *alloc) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
+    if (alloc->mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_SURFACE_TEXTURE_INPUT_OPAQUE) {
+        if (!drv->textureID) {
+            RSD_CALL_GL(glGenTextures, 1, &drv->textureID);
+        }
+        return;
+    }
+
     if (!drv->glType || !drv->glFormat) {
         return;
     }
@@ -371,6 +378,12 @@ void rsdAllocationSyncAll(const Context *rsc, const Allocation *alloc,
 void rsdAllocationMarkDirty(const Context *rsc, const Allocation *alloc) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
     drv->uploadDeferred = true;
+}
+
+int32_t rsdAllocationInitSurfaceTexture(const Context *rsc, const Allocation *alloc) {
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+    UploadToTexture(rsc, alloc);
+    return drv->textureID;
 }
 
 void rsdAllocationData1D(const Context *rsc, const Allocation *alloc,
