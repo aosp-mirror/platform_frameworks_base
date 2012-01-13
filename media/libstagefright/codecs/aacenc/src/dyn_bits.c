@@ -45,12 +45,12 @@ buildBitLookUp(const Word16 *quantSpectrum,
   for (i=0; i<maxSfb; i++) {
     Word16 sfbWidth, maxVal;
 
-    sectionInfo[i].sfbCnt = 1;                                   
-    sectionInfo[i].sfbStart = i;                                 
-    sectionInfo[i].sectionBits = INVALID_BITCOUNT;               
-    sectionInfo[i].codeBook = -1;                                
-    sfbWidth = sfbOffset[i + 1] - sfbOffset[i];              
-    maxVal = sfbMax[i];                                          
+    sectionInfo[i].sfbCnt = 1;
+    sectionInfo[i].sfbStart = i;
+    sectionInfo[i].sectionBits = INVALID_BITCOUNT;
+    sectionInfo[i].codeBook = -1;
+    sfbWidth = sfbOffset[i + 1] - sfbOffset[i];
+    maxVal = sfbMax[i];
     bitCount(quantSpectrum + sfbOffset[i], sfbWidth, maxVal, bitLookUp[i]);
   }
 }
@@ -66,13 +66,13 @@ static Word16
 findBestBook(const Word16 *bc, Word16 *book)
 {
   Word32 minBits, j;
-  minBits = INVALID_BITCOUNT;                                    
+  minBits = INVALID_BITCOUNT;
 
   for (j=0; j<=CODE_BOOK_ESC_NDX; j++) {
-     
+
     if (bc[j] < minBits) {
-      minBits = bc[j];                                           
-      *book = j;                                                 
+      minBits = bc[j];
+      *book = j;
     }
   }
   return extract_l(minBits);
@@ -82,12 +82,12 @@ static Word16
 findMinMergeBits(const Word16 *bc1, const Word16 *bc2)
 {
   Word32 minBits, j, sum;
-  minBits = INVALID_BITCOUNT;                                    
+  minBits = INVALID_BITCOUNT;
 
   for (j=0; j<=CODE_BOOK_ESC_NDX; j++) {
     sum = bc1[j] + bc2[j];
     if (sum < minBits) {
-      minBits = sum;                                             
+      minBits = sum;
     }
   }
   return extract_l(minBits);
@@ -109,13 +109,13 @@ findMaxMerge(const Word16 mergeGainLookUp[MAX_SFB_LONG],
              const Word16 maxSfb, Word16 *maxNdx)
 {
   Word32 i, maxMergeGain;
-  maxMergeGain = 0;                                              
+  maxMergeGain = 0;
 
   for (i=0; i+sectionInfo[i].sfbCnt < maxSfb; i += sectionInfo[i].sfbCnt) {
-     
+
     if (mergeGainLookUp[i] > maxMergeGain) {
-      maxMergeGain = mergeGainLookUp[i];                         
-      *maxNdx = i;                                               
+      maxMergeGain = mergeGainLookUp[i];
+      *maxNdx = i;
     }
   }
   return extract_l(maxMergeGain);
@@ -159,7 +159,7 @@ gmStage0(SECTION_INFO * sectionInfo,
 
   for (i=0; i<maxSfb; i++) {
     /* Side-Info bits will be calculated in Stage 1!  */
-     
+
     if (sectionInfo[i].sectionBits == INVALID_BITCOUNT) {
       sectionInfo[i].sectionBits = findBestBook(bitLookUp[i], &(sectionInfo[i].codeBook));
     }
@@ -180,13 +180,13 @@ gmStage1(SECTION_INFO * sectionInfo,
   SECTION_INFO * sectionInfo_s;
   SECTION_INFO * sectionInfo_e;
   Word32 mergeStart, mergeEnd;
-  mergeStart = 0;                                                        
+  mergeStart = 0;
 
   do {
 
     sectionInfo_s = sectionInfo + mergeStart;
 	for (mergeEnd=mergeStart+1; mergeEnd<maxSfb; mergeEnd++) {
-      sectionInfo_e = sectionInfo + mergeEnd; 
+      sectionInfo_e = sectionInfo + mergeEnd;
       if (sectionInfo_s->codeBook != sectionInfo_e->codeBook)
         break;
       sectionInfo_s->sfbCnt += 1;
@@ -196,11 +196,11 @@ gmStage1(SECTION_INFO * sectionInfo,
     }
 
     sectionInfo_s->sectionBits += sideInfoTab[sectionInfo_s->sfbCnt];
-    sectionInfo[mergeEnd - 1].sfbStart = sectionInfo_s->sfbStart;      /* speed up prev search */  
+    sectionInfo[mergeEnd - 1].sfbStart = sectionInfo_s->sfbStart;      /* speed up prev search */
 
-    mergeStart = mergeEnd;                                               
+    mergeStart = mergeEnd;
 
-     
+
   } while (mergeStart - maxSfb < 0);
 }
 
@@ -230,7 +230,7 @@ gmStage2(SECTION_INFO *sectionInfo,
 
     maxMergeGain = findMaxMerge(mergeGainLookUp, sectionInfo, maxSfb, &maxNdx);
 
-     
+
     if (maxMergeGain <= 0)
       break;
 
@@ -244,7 +244,7 @@ gmStage2(SECTION_INFO *sectionInfo,
 
     mergeBitLookUp(bitLookUp[maxNdx], bitLookUp[maxNdxNext]);
 
-     
+
     if (maxNdx != 0) {
       maxNdxLast = sectionInfo[maxNdx - 1].sfbStart;
       mergeGainLookUp[maxNdxLast] = CalcMergeGain(sectionInfo,
@@ -255,9 +255,9 @@ gmStage2(SECTION_INFO *sectionInfo,
     }
     maxNdxNext = maxNdx + sectionInfo[maxNdx].sfbCnt;
 
-    sectionInfo[maxNdxNext - 1].sfbStart = sectionInfo[maxNdx].sfbStart;             
+    sectionInfo[maxNdxNext - 1].sfbStart = sectionInfo[maxNdx].sfbStart;
 
-     
+
     if (maxNdxNext - maxSfb < 0) {
       mergeGainLookUp[maxNdx] = CalcMergeGain(sectionInfo,
                                               bitLookUp,
@@ -286,7 +286,7 @@ noiselessCounter(SECTION_DATA *sectionData,
 
   /*
     use appropriate side info table
-  */   
+  */
   switch (blockType)
   {
     case LONG_WINDOW:
@@ -300,11 +300,11 @@ noiselessCounter(SECTION_DATA *sectionData,
   }
 
 
-  sectionData->noOfSections = 0;                                         
-  sectionData->huffmanBits = 0;                                          
-  sectionData->sideInfoBits = 0;                                         
+  sectionData->noOfSections = 0;
+  sectionData->huffmanBits = 0;
+  sectionData->sideInfoBits = 0;
 
-   
+
   if (sectionData->maxSfbPerGroup == 0)
     return;
 
@@ -353,7 +353,7 @@ noiselessCounter(SECTION_DATA *sectionData,
       sectionData->huffmanBits = (sectionData->huffmanBits +
                                      (sectionInfo[i].sectionBits - sideInfoTab[sectionInfo[i].sfbCnt]));
       sectionData->sideInfoBits = (sectionData->sideInfoBits + sideInfoTab[sectionInfo[i].sfbCnt]);
-      sectionData->sectionInfo[sectionData->noOfSections] = sectionInfo[i];             
+      sectionData->sectionInfo[sectionData->noOfSections] = sectionInfo[i];
       sectionData->noOfSections = sectionData->noOfSections + 1;
     }
   }
@@ -386,25 +386,25 @@ static void scfCount(const Word16 *scalefacGain,
   Word32 lastValScf     = 0;
   Word32 deltaScf       = 0;
   Flag found            = 0;
-  Word32 scfSkipCounter = 0;           
-         
+  Word32 scfSkipCounter = 0;
 
-  sectionData->scalefacBits = 0;                                 
 
-   
+  sectionData->scalefacBits = 0;
+
+
   if (scalefacGain == NULL) {
     return;
   }
 
-  lastValScf = 0;                                                
-  sectionData->firstScf = 0;        
-  
+  lastValScf = 0;
+  sectionData->firstScf = 0;
+
   psectionInfo = sectionData->sectionInfo;
   for (i=0; i<sectionData->noOfSections; i++) {
-     
+
     if (psectionInfo->codeBook != CODE_BOOK_ZERO_NO) {
-      sectionData->firstScf = psectionInfo->sfbStart;      
-      lastValScf = scalefacGain[sectionData->firstScf];                  
+      sectionData->firstScf = psectionInfo->sfbStart;
+      lastValScf = scalefacGain[sectionData->firstScf];
       break;
     }
 	psectionInfo += 1;
@@ -412,38 +412,38 @@ static void scfCount(const Word16 *scalefacGain,
 
   psectionInfo = sectionData->sectionInfo;
   for (i=0; i<sectionData->noOfSections; i++, psectionInfo += 1) {
-       
+
     if (psectionInfo->codeBook != CODE_BOOK_ZERO_NO
         && psectionInfo->codeBook != CODE_BOOK_PNS_NO) {
       for (j = psectionInfo->sfbStart;
            j < (psectionInfo->sfbStart + psectionInfo->sfbCnt); j++) {
         /* check if we can repeat the last value to save bits */
-         
+
         if (maxValueInSfb[j] == 0) {
-          found = 0;                                                     
-           
+          found = 0;
+
           if (scfSkipCounter == 0) {
             /* end of section */
-             
+
             if (j - ((psectionInfo->sfbStart + psectionInfo->sfbCnt) - 1) == 0) {
-              found = 0;                                                 
+              found = 0;
             }
             else {
               for (k = j + 1; k < psectionInfo->sfbStart + psectionInfo->sfbCnt; k++) {
-                 
+
                 if (maxValueInSfb[k] != 0) {
                   int tmp = L_abs(scalefacGain[k] - lastValScf);
-				  found = 1;                                             
-                   
+				  found = 1;
+
                   if ( tmp < CODE_BOOK_SCF_LAV) {
                     /* save bits */
-                    deltaScf = 0;                                        
+                    deltaScf = 0;
                   }
                   else {
                     /* do not save bits */
                     deltaScf = lastValScf - scalefacGain[j];
-                    lastValScf = scalefacGain[j];                        
-                    scfSkipCounter = 0;                                  
+                    lastValScf = scalefacGain[j];
+                    scfSkipCounter = 0;
                   }
                   break;
                 }
@@ -451,26 +451,26 @@ static void scfCount(const Word16 *scalefacGain,
                 scfSkipCounter = scfSkipCounter + 1;
               }
             }
-			
+
 			psectionInfom = psectionInfo + 1;
             /* search for the next maxValueInSfb[] != 0 in all other sections */
             for (m = i + 1; (m < sectionData->noOfSections) && (found == 0); m++) {
-                 
+
               if ((psectionInfom->codeBook != CODE_BOOK_ZERO_NO) &&
                   (psectionInfom->codeBook != CODE_BOOK_PNS_NO)) {
                 for (n = psectionInfom->sfbStart;
                      n < (psectionInfom->sfbStart + psectionInfom->sfbCnt); n++) {
-                   
+
                   if (maxValueInSfb[n] != 0) {
-                    found = 1;                                           
-                     
+                    found = 1;
+
                     if ( (abs_s(scalefacGain[n] - lastValScf) < CODE_BOOK_SCF_LAV)) {
-                      deltaScf = 0;                                      
+                      deltaScf = 0;
                     }
                     else {
                       deltaScf = (lastValScf - scalefacGain[j]);
-                      lastValScf = scalefacGain[j];                      
-                      scfSkipCounter = 0;                                
+                      lastValScf = scalefacGain[j];
+                      scfSkipCounter = 0;
                     }
                     break;
                   }
@@ -481,20 +481,20 @@ static void scfCount(const Word16 *scalefacGain,
 
 			  psectionInfom += 1;
             }
-             
+
             if (found == 0) {
-              deltaScf = 0;                                              
-              scfSkipCounter = 0;                                        
+              deltaScf = 0;
+              scfSkipCounter = 0;
             }
           }
           else {
-            deltaScf = 0;                                                
+            deltaScf = 0;
             scfSkipCounter = scfSkipCounter - 1;
           }
         }
         else {
           deltaScf = lastValScf - scalefacGain[j];
-          lastValScf = scalefacGain[j];                                  
+          lastValScf = scalefacGain[j];
         }
         sectionData->scalefacBits += bitCountScalefactorDelta(deltaScf);
       }
@@ -517,14 +517,14 @@ dynBitCount(const Word16  *quantSpectrum,
             const Word16  *sfbOffset,
             SECTION_DATA  *sectionData)
 {
-  sectionData->blockType      = blockType;                       
-  sectionData->sfbCnt         = sfbCnt;                          
-  sectionData->sfbPerGroup    = sfbPerGroup;           
+  sectionData->blockType      = blockType;
+  sectionData->sfbCnt         = sfbCnt;
+  sectionData->sfbPerGroup    = sfbPerGroup;
   if(sfbPerGroup)
-	sectionData->noOfGroups   = sfbCnt/sfbPerGroup; 
+	sectionData->noOfGroups   = sfbCnt/sfbPerGroup;
   else
 	sectionData->noOfGroups   = 0x7fff;
-  sectionData->maxSfbPerGroup = maxSfbPerGroup;                  
+  sectionData->maxSfbPerGroup = maxSfbPerGroup;
 
   noiselessCounter(sectionData,
                    sectionData->mergeGainLookUp,
@@ -539,7 +539,7 @@ dynBitCount(const Word16  *quantSpectrum,
            sectionData);
 
 
-  return (sectionData->huffmanBits + sectionData->sideInfoBits + 
+  return (sectionData->huffmanBits + sectionData->sideInfoBits +
 	      sectionData->scalefacBits);
 }
 

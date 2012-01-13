@@ -23,7 +23,7 @@
 @******************************************************************
 @ r0    ---  signal[]
 @ r1    ---  lg
-@ r2    ---  mem[] 
+@ r2    ---  mem[]
 
           .section  .text
           .global  Filt_6k_7k_asm
@@ -32,7 +32,7 @@
 
 Filt_6k_7k_asm:
 
-          STMFD   		r13!, {r4 - r12, r14} 
+          STMFD   		r13!, {r4 - r12, r14}
           SUB    		r13, r13, #240              @ x[L_SUBFR16k + (L_FIR - 1)]
           MOV     		r8, r0                      @ copy signal[] address
           MOV     		r4, r1                      @ copy lg address
@@ -43,9 +43,9 @@ Filt_6k_7k_asm:
           MOV     		r2, #30                     @ L_FIR - 1
           BL      		voAWB_Copy                   @ memcpy(x, mem, (L_FIR - 1)<<1)
 
-          LDR     		r10, Lable1                 @ get fir_7k address     
+          LDR     		r10, Lable1                 @ get fir_7k address
 
-          MOV           	r14, #0  
+          MOV           	r14, #0
           MOV                   r3, r8                      @ change myMemCopy to Copy, due to Copy will change r3 content
           ADD     	    	r6, r13, #60                @ get x[L_FIR - 1] address
           MOV           	r7, r3                      @ get signal[i]
@@ -76,14 +76,14 @@ LOOP1:
           STRH          	r12, [r6], #2
           ADD           	r14, r14, #8
           CMP           	r14, #80
-          BLT           	LOOP1          
+          BLT           	LOOP1
 
 
           STR     		r5, [sp, #-4]               @ PUSH  r5 to stack
 
           @ not use registers: r4, r10, r12, r14, r5
-          MOV     		r4, r13 
-          MOV     		r5, #0                      @ i = 0              
+          MOV     		r4, r13
+          MOV     		r5, #0                      @ i = 0
 LOOP2:
           LDR           	r0, [r10]
 
@@ -111,13 +111,13 @@ LOOP2:
           LDRSH                 r8, [r4, #10]              @ load x[i+5]
           LDRSH                 r9, [r4, #50]              @ load x[i+25]
           SMLABT                r14, r1, r0, r14           @ (x[i+3] + x[i+27]) * fir_7k[3]
-          ADD                   r8, r8, r9                 @ x[i+5] + x[i+25] 
- 
+          ADD                   r8, r8, r9                 @ x[i+5] + x[i+25]
+
           LDR                   r0, [r10, #8]
           LDRSH                 r1, [r4, #12]              @ x[i+6]
           LDRSH                 r2, [r4, #48]              @ x[i+24]
           SMLABB                r14, r6, r0, r14           @ (x[i+4] + x[i+26]) * fir_7k[4]
-          LDRSH                 r6, [r4, #14]              @ x[i+7] 
+          LDRSH                 r6, [r4, #14]              @ x[i+7]
           LDRSH                 r7, [r4, #46]              @ x[i+23]
           SMLABT                r14, r8, r0, r14           @ (x[i+5] + x[i+25]) * fir_7k[5]
           LDR                   r0, [r10, #12]
@@ -125,8 +125,8 @@ LOOP2:
           ADD                   r6, r6, r7                 @ (x[i+7] + x[i+23])
           SMLABB                r14, r1, r0, r14           @ (x[i+6] + x[i+24]) * fir_7k[6]
           LDRSH                 r8, [r4, #16]              @ x[i+8]
-          LDRSH                 r9, [r4, #44]              @ x[i+22] 
-          SMLABT                r14, r6, r0, r14           @ (x[i+7] + x[i+23]) * fir_7k[7]  
+          LDRSH                 r9, [r4, #44]              @ x[i+22]
+          SMLABT                r14, r6, r0, r14           @ (x[i+7] + x[i+23]) * fir_7k[7]
           LDR                   r0, [r10, #16]
           LDRSH                 r1, [r4, #18]              @ x[i+9]
           LDRSH                 r2, [r4, #42]              @ x[i+21]
@@ -144,7 +144,7 @@ LOOP2:
           LDRSH                 r2, [r4, #36]              @ x[i+18]
           SMLABB                r14, r6, r0, r14           @ (x[i+10] + x[i+20]) * fir_7k[10]
           LDRSH                 r6, [r4, #26]              @ x[i+13]
-          ADD                   r8, r8, r9                 @ (x[i+11] + x[i+19])  
+          ADD                   r8, r8, r9                 @ (x[i+11] + x[i+19])
           LDRSH                 r7, [r4, #34]              @ x[i+17]
           SMLABT                r14, r8, r0, r14           @ (x[i+11] + x[i+19]) * fir_7k[11]
           LDR                   r0, [r10, #24]
@@ -152,31 +152,31 @@ LOOP2:
           LDRSH                 r8, [r4, #28]              @ x[i+14]
           SMLABB                r14, r1, r0, r14           @ (x[i+12] + x[i+18]) * fir_7k[12]
           ADD                   r6, r6, r7                 @ (x[i+13] + x[i+17])
-          LDRSH                 r9, [r4, #32]              @ x[i+16] 
+          LDRSH                 r9, [r4, #32]              @ x[i+16]
           SMLABT                r14, r6, r0, r14           @ (x[i+13] + x[i+17]) * fir_7k[13]
-          LDR                   r0, [r10, #28]         
+          LDR                   r0, [r10, #28]
           ADD                   r8, r8, r9                 @ (x[i+14] + x[i+16])
           LDRSH                 r1, [r4, #30]              @ x[i+15]
           SMLABB                r14, r8, r0, r14           @ (x[i+14] + x[i+16]) * fir_7k[14]
-          SMLABT                r14, r1, r0, r14           @ x[i+15] * fir_7k[15]                              
+          SMLABT                r14, r1, r0, r14           @ x[i+15] * fir_7k[15]
 
           ADD     		r5, r5, #1
           ADD     		r14, r14, #0x4000
-          ADD     		r4, r4, #2                
+          ADD     		r4, r4, #2
           MOV     		r1, r14, ASR #15
           CMP     		r5, #80
           STRH    		r1, [r3], #2               @signal[i] = (L_tmp + 0x4000) >> 15
-          BLT     		LOOP2      
-           
+          BLT     		LOOP2
+
           LDR     		r1, [sp, #-4]               @mem address
           ADD     		r0, r13, #160               @x + lg
           MOV     		r2, #30
           BL      		voAWB_Copy
-                    
+
 Filt_6k_7k_end:
-          ADD     		r13, r13, #240  
-          LDMFD   		r13!, {r4 - r12, r15} 
- 
+          ADD     		r13, r13, #240
+          LDMFD   		r13!, {r4 - r12, r15}
+
 Lable1:
           .word   		fir_6k_7k
           @ENDFUNC

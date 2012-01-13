@@ -26,7 +26,7 @@
 #include "qc_data.h"
 #include "tns.h"
 #include "channel_map.h"
-#include "interface.h"  
+#include "interface.h"
 
 struct BITSTREAMENCODER_INIT
 {

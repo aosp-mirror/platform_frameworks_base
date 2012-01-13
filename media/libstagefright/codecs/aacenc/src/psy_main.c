@@ -81,7 +81,7 @@ Word16 PsyNew(PSY_KERNEL *hPsy, Word32 nChan, VO_MEM_OPERATOR *pMemOP)
   Word32 *mdctSpectrum;
   Word32 *scratchTNS;
   Word16 *mdctDelayBuffer;
-  
+
   mdctSpectrum = (Word32 *)mem_malloc(pMemOP, nChan * FRAME_LEN_LONG * sizeof(Word32), 32, VO_INDEX_ENC_AAC);
   if(NULL == mdctSpectrum)
 	  return 1;
@@ -99,7 +99,7 @@ Word16 PsyNew(PSY_KERNEL *hPsy, Word32 nChan, VO_MEM_OPERATOR *pMemOP)
   }
 
   for (i=0; i<nChan; i++){
-    hPsy->psyData[i].mdctDelayBuffer = mdctDelayBuffer + i*BLOCK_SWITCHING_OFFSET;      
+    hPsy->psyData[i].mdctDelayBuffer = mdctDelayBuffer + i*BLOCK_SWITCHING_OFFSET;
     hPsy->psyData[i].mdctSpectrum = mdctSpectrum + i*FRAME_LEN_LONG;
   }
 
@@ -124,12 +124,12 @@ Word16 PsyDelete(PSY_KERNEL  *hPsy, VO_MEM_OPERATOR *pMemOP)
   {
 	if(hPsy->psyData[0].mdctDelayBuffer)
 		mem_free(pMemOP, hPsy->psyData[0].mdctDelayBuffer, VO_INDEX_ENC_AAC);
-      
+
     if(hPsy->psyData[0].mdctSpectrum)
 		mem_free(pMemOP, hPsy->psyData[0].mdctSpectrum, VO_INDEX_ENC_AAC);
 
     for (nch=0; nch<MAX_CHANNELS; nch++){
-	  hPsy->psyData[nch].mdctDelayBuffer = NULL;      
+	  hPsy->psyData[nch].mdctDelayBuffer = NULL;
 	  hPsy->psyData[nch].mdctSpectrum = NULL;
 	}
 
@@ -216,14 +216,14 @@ Word16 psyMainInit(PSY_KERNEL *hPsy,
 
   if (!err)
     for(ch=0;ch < channels;ch++){
-  
+
       InitBlockSwitching(&hPsy->psyData[ch].blockSwitchingControl,
                          bitRate, channels);
 
       InitPreEchoControl(hPsy->psyData[ch].sfbThresholdnm1,
                          hPsy->psyConfLong.sfbCnt,
                          hPsy->psyConfLong.sfbThresholdQuiet);
-      hPsy->psyData[ch].mdctScalenm1 = 0;                                
+      hPsy->psyData[ch].mdctScalenm1 = 0;
     }
 
 	return(err);
@@ -241,7 +241,7 @@ Word16 psyMainInit(PSY_KERNEL *hPsy,
 
 Word16 psyMain(Word16                   nChannels,
                ELEMENT_INFO            *elemInfo,
-               Word16                  *timeSignal, 
+               Word16                  *timeSignal,
                PSY_DATA                 psyData[MAX_CHANNELS],
                TNS_DATA                 tnsData[MAX_CHANNELS],
                PSY_CONFIGURATION_LONG  *hPsyConfLong,
@@ -260,8 +260,8 @@ Word16 psyMain(Word16                   nChannels,
   Word16 channels;
   Word16 maxScale;
 
-  channels = elemInfo->nChannelsInEl;                            
-  maxScale = 0;                                                  
+  channels = elemInfo->nChannelsInEl;
+  maxScale = 0;
 
   /* block switching */
   for(ch = 0; ch < channels; ch++) {
@@ -291,7 +291,7 @@ Word16 psyMain(Word16                   nChannels,
   /* common scaling for all channels */
   for (ch=0; ch<channels; ch++) {
     Word16 scaleDiff = maxScale - mdctScalingArray[ch];
-     
+
     if (scaleDiff > 0) {
       Word32 *Spectrum = psyData[ch].mdctSpectrum;
 	  for(line=0; line<FRAME_LEN_LONG; line++) {
@@ -299,11 +299,11 @@ Word16 psyMain(Word16                   nChannels,
 		Spectrum++;
       }
     }
-    psyData[ch].mdctScale = maxScale;                                    
+    psyData[ch].mdctScale = maxScale;
   }
 
   for (ch=0; ch<channels; ch++) {
-     
+
     if(psyData[ch].blockSwitchingControl.windowSequence != SHORT_WINDOW) {
       /* update long block parameter */
 	  advancePsychLong(&psyData[ch],
@@ -317,7 +317,7 @@ Word16 psyMain(Word16                   nChannels,
       /* determine maxSfb */
       for (sfb=hPsyConfLong->sfbCnt-1; sfb>=0; sfb--) {
         for (line=hPsyConfLong->sfbOffset[sfb+1] - 1; line>=hPsyConfLong->sfbOffset[sfb]; line--) {
-           
+
           if (psyData[ch].mdctSpectrum[line] != 0) break;
         }
         if (line >= hPsyConfLong->sfbOffset[sfb]) break;
@@ -326,7 +326,7 @@ Word16 psyMain(Word16                   nChannels,
 
       /* Calc bandwise energies for mid and side channel
          Do it only if 2 channels exist */
-       
+
       if (ch == 1)
         advancePsychLongMS(psyData, hPsyConfLong);
     }
@@ -341,7 +341,7 @@ Word16 psyMain(Word16                   nChannels,
 
       /* Calc bandwise energies for mid and side channel
          Do it only if 2 channels exist */
-       
+
       if (ch == 1)
         advancePsychShortMS (psyData, hPsyConfShort);
     }
@@ -349,7 +349,7 @@ Word16 psyMain(Word16                   nChannels,
 
   /* group short data */
   for(ch=0; ch<channels; ch++) {
-     
+
     if (psyData[ch].blockSwitchingControl.windowSequence == SHORT_WINDOW) {
       groupShortData(psyData[ch].mdctSpectrum,
                      pScratchTns,
@@ -374,10 +374,10 @@ Word16 psyMain(Word16                   nChannels,
     stereo Processing
   */
   if (channels == 2) {
-    psyOutElement->toolsInfo.msDigest = MS_NONE;                 
+    psyOutElement->toolsInfo.msDigest = MS_NONE;
     maxSfbPerGroup[0] = maxSfbPerGroup[1] = max(maxSfbPerGroup[0], maxSfbPerGroup[1]);
 
-     
+
     if (psyData[0].blockSwitchingControl.windowSequence != SHORT_WINDOW)
       MsStereoProcessing(psyData[0].sfbEnergy.sfbLong,
                          psyData[1].sfbEnergy.sfbLong,
@@ -420,7 +420,7 @@ Word16 psyMain(Word16                   nChannels,
     build output
   */
   for(ch=0;ch<channels;ch++) {
-     
+
     if (psyData[ch].blockSwitchingControl.windowSequence != SHORT_WINDOW)
       BuildInterface(psyData[ch].mdctSpectrum,
                      psyData[ch].mdctScale,
@@ -483,7 +483,7 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
   /* low pass */
   data0 = psyData->mdctSpectrum + hPsyConfLong->lowpassLine;
   for(i=hPsyConfLong->lowpassLine; i<FRAME_LEN_LONG; i++) {
-    *data0++ = 0;                                
+    *data0++ = 0;
   }
 
   /* Calc sfb-bandwise mdct-energies for left and right channel */
@@ -505,7 +505,7 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
             psyData->blockSwitchingControl.windowSequence,
             psyData->sfbEnergy.sfbLong);
 
-  /*  TnsSync */   
+  /*  TnsSync */
   if (ch == 1) {
     TnsSync(tnsData,
             tnsData2,
@@ -514,7 +514,7 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
             psyData->blockSwitchingControl.windowSequence);
   }
 
-  /*  Tns Encoder */ 
+  /*  Tns Encoder */
   TnsEncode(&psyOutChannel->tnsInfo,
             tnsData,
             hPsyConfLong->sfbCnt,
@@ -532,15 +532,15 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
     *data1++ = min(tdata, clipEnergy);
   }
 
-  /* Calc sfb-bandwise mdct-energies for left and right channel again */   
+  /* Calc sfb-bandwise mdct-energies for left and right channel again */
   if (tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive!=0) {
-    Word16 tnsStartBand = hPsyConfLong->tnsConf.tnsStartBand;                            
+    Word16 tnsStartBand = hPsyConfLong->tnsConf.tnsStartBand;
     CalcBandEnergy( psyData->mdctSpectrum,
                     hPsyConfLong->sfbOffset+tnsStartBand,
                     hPsyConfLong->sfbActive - tnsStartBand,
                     psyData->sfbEnergy.sfbLong+tnsStartBand,
                     &psyData->sfbEnergySum.sfbLong);
-    
+
 	data0 = psyData->sfbEnergy.sfbLong;
 	tdata = psyData->sfbEnergySum.sfbLong;
 	for (i=0; i<tnsStartBand; i++)
@@ -565,13 +565,13 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
 	  data0++; data1++;
   }
 
-  /* preecho control */   
+  /* preecho control */
   if (psyData->blockSwitchingControl.windowSequence == STOP_WINDOW) {
     data0 = psyData->sfbThresholdnm1;
 	for (i=hPsyConfLong->sfbCnt; i; i--) {
-      *data0++ = MAX_32;                              
+      *data0++ = MAX_32;
     }
-    psyData->mdctScalenm1 = 0;                                           
+    psyData->mdctScalenm1 = 0;
   }
 
   PreEchoControl( psyData->sfbThresholdnm1,
@@ -581,15 +581,15 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
                   psyData->sfbThreshold.sfbLong,
                   psyData->mdctScale,
                   psyData->mdctScalenm1);
-  psyData->mdctScalenm1 = psyData->mdctScale;                            
+  psyData->mdctScalenm1 = psyData->mdctScale;
 
-   
+
   if (psyData->blockSwitchingControl.windowSequence== START_WINDOW) {
     data0 = psyData->sfbThresholdnm1;
 	for (i=hPsyConfLong->sfbCnt; i; i--) {
-      *data0++ = MAX_32;                              
+      *data0++ = MAX_32;
     }
-    psyData->mdctScalenm1 = 0;                                           
+    psyData->mdctScalenm1 = 0;
   }
 
   /* apply tns mult table on cb thresholds */
@@ -603,13 +603,13 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
   data0 = psyData->sfbSpreadedEnergy.sfbLong;
   data1 = psyData->sfbEnergy.sfbLong;
   for (i=hPsyConfLong->sfbCnt; i; i--) {
-    //psyData->sfbSpreadedEnergy.sfbLong[i] = psyData->sfbEnergy.sfbLong[i];       
+    //psyData->sfbSpreadedEnergy.sfbLong[i] = psyData->sfbEnergy.sfbLong[i];
 	  *data0++ = *data1++;
   }
 
   /* spreading energy */
   SpreadingMax(hPsyConfLong->sfbCnt,
-               hPsyConfLong->sfbMaskLowFactorSprEn, 
+               hPsyConfLong->sfbMaskLowFactorSprEn,
                hPsyConfLong->sfbMaskHighFactorSprEn,
                psyData->sfbSpreadedEnergy.sfbLong);
 
@@ -619,7 +619,7 @@ static Word16 advancePsychLong(PSY_DATA* psyData,
 /*****************************************************************************
 *
 * function name: advancePsychLongMS
-* description:   update mdct-energies for left add or minus right channel 
+* description:   update mdct-energies for left add or minus right channel
 *				for long block
 *
 *****************************************************************************/
@@ -657,7 +657,7 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
   Word32 w;
   Word32 normEnergyShift = (psyData->mdctScale + 1) << 1; /* in reference code, mdct spectrum must be multipied with 2, so +1 */
   Word32 clipEnergy = hPsyConfShort->clipEnergy >> normEnergyShift;
-  Word32 wOffset = 0;     
+  Word32 wOffset = 0;
   Word32 *data0, *data1;
 
   for(w = 0; w < TRANS_FAC; w++) {
@@ -666,7 +666,7 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
     /* low pass */
     data0 = psyData->mdctSpectrum + wOffset + hPsyConfShort->lowpassLine;
 	for(i=hPsyConfShort->lowpassLine; i<FRAME_LEN_SHORT; i++){
-      *data0++ = 0;                                      
+      *data0++ = 0;
     }
 
     /* Calc sfb-bandwise mdct-energies for left and right channel */
@@ -713,9 +713,9 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
       *data0++ = min(tdata, clipEnergy);
     }
 
-    /* Calc sfb-bandwise mdct-energies for left and right channel again */     
+    /* Calc sfb-bandwise mdct-energies for left and right channel again */
     if (tnsData->dataRaw.tnsShort.subBlockInfo[w].tnsActive != 0) {
-      Word16 tnsStartBand = hPsyConfShort->tnsConf.tnsStartBand;                            
+      Word16 tnsStartBand = hPsyConfShort->tnsConf.tnsStartBand;
       CalcBandEnergy( psyData->mdctSpectrum+wOffset,
                       hPsyConfShort->sfbOffset+tnsStartBand,
                       (hPsyConfShort->sfbActive - tnsStartBand),
@@ -748,7 +748,7 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
 	}
 
 
-    /* preecho */     
+    /* preecho */
     PreEchoControl( psyData->sfbThresholdnm1,
                     hPsyConfShort->sfbCnt,
                     hPsyConfShort->maxAllowedIncreaseFactor,
@@ -770,14 +770,14 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
 	  *data0++ = *data1++;
     }
     SpreadingMax(hPsyConfShort->sfbCnt,
-                 hPsyConfShort->sfbMaskLowFactorSprEn, 
+                 hPsyConfShort->sfbMaskLowFactorSprEn,
                  hPsyConfShort->sfbMaskHighFactorSprEn,
                  psyData->sfbSpreadedEnergy.sfbShort[w]);
 
     wOffset += FRAME_LEN_SHORT;
   } /* for TRANS_FAC */
 
-  psyData->mdctScalenm1 = psyData->mdctScale;              
+  psyData->mdctScalenm1 = psyData->mdctScale;
 
   return 0;
 }
@@ -785,7 +785,7 @@ static Word16 advancePsychShort(PSY_DATA* psyData,
 /*****************************************************************************
 *
 * function name: advancePsychShortMS
-* description:   update mdct-energies for left add or minus right channel 
+* description:   update mdct-energies for left add or minus right channel
 *				for short block
 *
 *****************************************************************************/
@@ -793,7 +793,7 @@ static Word16 advancePsychShortMS (PSY_DATA psyData[MAX_CHANNELS],
                                    const PSY_CONFIGURATION_SHORT *hPsyConfShort)
 {
   Word32 w, wOffset;
-  wOffset = 0;                                   
+  wOffset = 0;
   for(w=0; w<TRANS_FAC; w++) {
     CalcBandEnergyMS(psyData[0].mdctSpectrum+wOffset,
                      psyData[1].mdctSpectrum+wOffset,
