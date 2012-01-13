@@ -1070,6 +1070,9 @@ private:
     void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
+    void enqueueDispatchEntriesLocked(nsecs_t currentTime, const sp<Connection>& connection,
+            EventEntry* eventEntry, const InputTarget* inputTarget,
+            bool resumeWithAppendedMotionSample);
     void enqueueDispatchEntryLocked(const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample, int32_t dispatchMode);
