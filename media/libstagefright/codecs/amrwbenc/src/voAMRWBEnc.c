@@ -84,11 +84,11 @@ void Reset_encoder(void *st, Word16 reset_all)
 	Set_zero(cod_state->old_exc, PIT_MAX + L_INTERPOL);
 	Set_zero(cod_state->mem_syn, M);
 	Set_zero(cod_state->past_isfq, M);
-	cod_state->mem_w0 = 0;                 
-	cod_state->tilt_code = 0;              
-	cod_state->first_frame = 1;            
+	cod_state->mem_w0 = 0;
+	cod_state->tilt_code = 0;
+	cod_state->first_frame = 1;
 	Init_gp_clip(cod_state->gp_clip);
-	cod_state->L_gc_thres = 0;             
+	cod_state->L_gc_thres = 0;
 	if (reset_all != 0)
 	{
 		/* Static vectors to zero */
@@ -105,21 +105,21 @@ void Reset_encoder(void *st, Word16 reset_all)
 		Copy(isp_init, cod_state->ispold, M);
 		Copy(isp_init, cod_state->ispold_q, M);
 		/* variable initialization */
-		cod_state->mem_preemph = 0;        
-		cod_state->mem_wsp = 0;            
-		cod_state->Q_old = 15;             
-		cod_state->Q_max[0] = 15;          
-		cod_state->Q_max[1] = 15;          
-		cod_state->old_wsp_max = 0;        
-		cod_state->old_wsp_shift = 0;      
+		cod_state->mem_preemph = 0;
+		cod_state->mem_wsp = 0;
+		cod_state->Q_old = 15;
+		cod_state->Q_max[0] = 15;
+		cod_state->Q_max[1] = 15;
+		cod_state->old_wsp_max = 0;
+		cod_state->old_wsp_shift = 0;
 		/* pitch ol initialization */
-		cod_state->old_T0_med = 40;        
-		cod_state->ol_gain = 0;            
-		cod_state->ada_w = 0;              
-		cod_state->ol_wght_flg = 0;        
+		cod_state->old_T0_med = 40;
+		cod_state->ol_gain = 0;
+		cod_state->ada_w = 0;
+		cod_state->ol_wght_flg = 0;
 		for (i = 0; i < 5; i++)
 		{
-			cod_state->old_ol_lag[i] = 40; 
+			cod_state->old_ol_lag[i] = 40;
 		}
 		Set_zero(cod_state->old_hp_wsp, (L_FRAME / 2) / OPL_DECIM + (PIT_MAX / OPL_DECIM));
 		Set_zero(cod_state->mem_syn_hf, M);
@@ -129,10 +129,10 @@ void Reset_encoder(void *st, Word16 reset_all)
 		Init_Filt_6k_7k(cod_state->mem_hf);
 		Init_HP400_12k8(cod_state->mem_hp400);
 		Copy(isf_init, cod_state->isfold, M);
-		cod_state->mem_deemph = 0;         
-		cod_state->seed2 = 21845;          
+		cod_state->mem_deemph = 0;
+		cod_state->seed2 = 21845;
 		Init_Filt_6k_7k(cod_state->mem_hf2);
-		cod_state->gain_alpha = 32767;     
+		cod_state->gain_alpha = 32767;
 		cod_state->vad_hist = 0;
 		wb_vad_reset(cod_state->vadSt);
 		dtx_enc_reset(cod_state->dtx_encSt, isf_init);
@@ -212,8 +212,8 @@ void coder(
 
 	st = (Coder_State *) spe_state;
 
-	*ser_size = nb_of_bits[*mode];         
-	codec_mode = *mode;                    
+	*ser_size = nb_of_bits[*mode];
+	codec_mode = *mode;
 
 	/*--------------------------------------------------------------------------*
 	 *          Initialize pointers to speech vector.                           *
@@ -233,10 +233,10 @@ void coder(
 
 	new_speech = old_speech + L_TOTAL - L_FRAME - L_FILT;         /* New speech     */
 	speech = old_speech + L_TOTAL - L_FRAME - L_NEXT;             /* Present frame  */
-	p_window = old_speech + L_TOTAL - L_WINDOW; 
+	p_window = old_speech + L_TOTAL - L_WINDOW;
 
-	exc = old_exc + PIT_MAX + L_INTERPOL;  
-	wsp = old_wsp + (PIT_MAX / OPL_DECIM); 
+	exc = old_exc + PIT_MAX + L_INTERPOL;
+	wsp = old_wsp + (PIT_MAX / OPL_DECIM);
 
 	/* copy coder memory state into working space */
 	Copy(st->old_speech, old_speech, L_TOTAL - L_FRAME);
@@ -287,7 +287,7 @@ void coder(
 		L_tmp = L_abs(L_tmp);
 		if(L_tmp > L_max)
 		{
-			L_max = L_tmp;                 
+			L_max = L_tmp;
 		}
 	}
 
@@ -297,50 +297,50 @@ void coder(
 	tmp = extract_h(L_max);
 	if (tmp == 0)
 	{
-		shift = Q_MAX;                     
+		shift = Q_MAX;
 	} else
 	{
 		shift = norm_s(tmp) - 1;
 		if (shift < 0)
 		{
-			shift = 0;                     
+			shift = 0;
 		}
 		if (shift > Q_MAX)
 		{
-			shift = Q_MAX;                 
+			shift = Q_MAX;
 		}
 	}
-	Q_new = shift;                         
+	Q_new = shift;
 	if (Q_new > st->Q_max[0])
 	{
-		Q_new = st->Q_max[0];              
+		Q_new = st->Q_max[0];
 	}
 	if (Q_new > st->Q_max[1])
 	{
-		Q_new = st->Q_max[1];              
+		Q_new = st->Q_max[1];
 	}
 	exp = (Q_new - st->Q_old);
-	st->Q_old = Q_new;                     
-	st->Q_max[1] = st->Q_max[0];           
-	st->Q_max[0] = shift;                  
+	st->Q_old = Q_new;
+	st->Q_max[1] = st->Q_max[0];
+	st->Q_max[0] = shift;
 
 	/* preemphasis with scaling (L_FRAME+L_FILT) */
-	tmp = new_speech[L_FRAME - 1];         
+	tmp = new_speech[L_FRAME - 1];
 
 	for (i = L_FRAME + L_FILT - 1; i > 0; i--)
 	{
 		L_tmp = new_speech[i] << 15;
 		L_tmp -= (new_speech[i - 1] * mu)<<1;
 		L_tmp = (L_tmp << Q_new);
-		new_speech[i] = vo_round(L_tmp);      
+		new_speech[i] = vo_round(L_tmp);
 	}
 
 	L_tmp = new_speech[0] << 15;
 	L_tmp -= (st->mem_preemph * mu)<<1;
 	L_tmp = (L_tmp << Q_new);
-	new_speech[0] = vo_round(L_tmp);          
+	new_speech[0] = vo_round(L_tmp);
 
-	st->mem_preemph = tmp;                 
+	st->mem_preemph = tmp;
 
 	/* scale previous samples and memory */
 
@@ -364,13 +364,13 @@ void coder(
 	Scale_sig(buf, L_FRAME, 1 - Q_new);
 #endif
 
-	vad_flag = wb_vad(st->vadSt, buf);          /* Voice Activity Detection */ 
+	vad_flag = wb_vad(st->vadSt, buf);          /* Voice Activity Detection */
 	if (vad_flag == 0)
 	{
-		st->vad_hist = (st->vad_hist + 1);        
+		st->vad_hist = (st->vad_hist + 1);
 	} else
 	{
-		st->vad_hist = 0;             
+		st->vad_hist = 0;
 	}
 
 	/* DTX processing */
@@ -378,7 +378,7 @@ void coder(
 	{
 		/* Note that mode may change here */
 		tx_dtx_handler(st->dtx_encSt, vad_flag, mode);
-		*ser_size = nb_of_bits[*mode]; 
+		*ser_size = nb_of_bits[*mode];
 	}
 
 	if(*mode != MRDTX)
@@ -423,7 +423,7 @@ void coder(
 	 * - scale wsp[] to avoid overflow in pitch estimation                  *
 	 * - Find open loop pitch lag for whole speech frame                    *
 	 *----------------------------------------------------------------------*/
-	p_A = A;                             
+	p_A = A;
 	for (i_subfr = 0; i_subfr < L_FRAME; i_subfr += L_SUBFR)
 	{
 		/* Weighting of LPC coefficients */
@@ -435,27 +435,27 @@ void coder(
 		Residu(Ap, &speech[i_subfr], &wsp[i_subfr], L_SUBFR);
 #endif
 
-		p_A += (M + 1);                    
+		p_A += (M + 1);
 	}
 
 	Deemph2(wsp, TILT_FAC, L_FRAME, &(st->mem_wsp));
 
 	/* find maximum value on wsp[] for 12 bits scaling */
-	max = 0;                              
+	max = 0;
 	for (i = 0; i < L_FRAME; i++)
 	{
 		tmp = abs_s(wsp[i]);
 		if(tmp > max)
 		{
-			max = tmp;                     
+			max = tmp;
 		}
 	}
-	tmp = st->old_wsp_max;                 
+	tmp = st->old_wsp_max;
 	if(max > tmp)
 	{
 		tmp = max;                         /* tmp = max(wsp_max, old_wsp_max) */
 	}
-	st->old_wsp_max = max;                
+	st->old_wsp_max = max;
 
 	shift = norm_s(tmp) - 3;
 	if (shift > 0)
@@ -494,8 +494,8 @@ void coder(
 
 	if(st->ol_gain > 19661)       /* 0.6 in Q15 */
 	{
-		st->old_T0_med = Med_olag(T_op, st->old_ol_lag);       
-		st->ada_w = 32767;                 
+		st->old_T0_med = Med_olag(T_op, st->old_ol_lag);
+		st->ada_w = 32767;
 	} else
 	{
 		st->ada_w = vo_mult(st->ada_w, 29491);
@@ -507,7 +507,7 @@ void coder(
 		st->ol_wght_flg = 1;
 
 	wb_vad_tone_detection(st->vadSt, st->ol_gain);
-	T_op *= OPL_DECIM;                     
+	T_op *= OPL_DECIM;
 
 	if(*ser_size != NBBITS_7k)
 	{
@@ -516,11 +516,11 @@ void coder(
 
 		if(st->ol_gain > 19661)   /* 0.6 in Q15 */
 		{
-			st->old_T0_med = Med_olag(T_op2, st->old_ol_lag);  
-			st->ada_w = 32767;             
+			st->old_T0_med = Med_olag(T_op2, st->old_ol_lag);
+			st->ada_w = 32767;
 		} else
 		{
-			st->ada_w = mult(st->ada_w, 29491); 
+			st->ada_w = mult(st->ada_w, 29491);
 		}
 
 		if(st->ada_w < 26214)
@@ -530,11 +530,11 @@ void coder(
 
 		wb_vad_tone_detection(st->vadSt, st->ol_gain);
 
-		T_op2 *= OPL_DECIM;                
+		T_op2 *= OPL_DECIM;
 
 	} else
 	{
-		T_op2 = T_op;                      
+		T_op2 = T_op;
 	}
 	/*----------------------------------------------------------------------*
 	 *                              DTX-CNG                                 *
@@ -550,10 +550,10 @@ void coder(
 
 		for (i = 0; i < L_FRAME; i++)
 		{
-			exc2[i] = shr(exc[i], Q_new);  
+			exc2[i] = shr(exc[i], Q_new);
 		}
 
-		L_tmp = 0;                         
+		L_tmp = 0;
 		for (i = 0; i < L_FRAME; i++)
 			L_tmp += (exc2[i] * exc2[i])<<1;
 
@@ -617,23 +617,23 @@ void coder(
 
 	/* Check stability on isf : distance between old isf and current isf */
 
-	L_tmp = 0;                           
+	L_tmp = 0;
 	for (i = 0; i < M - 1; i++)
 	{
 		tmp = vo_sub(isf[i], st->isfold[i]);
 		L_tmp += (tmp * tmp)<<1;
 	}
 
-	tmp = extract_h(L_shl2(L_tmp, 8)); 
+	tmp = extract_h(L_shl2(L_tmp, 8));
 
 	tmp = vo_mult(tmp, 26214);                /* tmp = L_tmp*0.8/256 */
 	tmp = vo_sub(20480, tmp);                 /* 1.25 - tmp (in Q14) */
 
-	stab_fac = shl(tmp, 1); 
+	stab_fac = shl(tmp, 1);
 
 	if (stab_fac < 0)
 	{
-		stab_fac = 0;                      
+		stab_fac = 0;
 	}
 	Copy(isf, st->isfold, M);
 
@@ -642,7 +642,7 @@ void coder(
 
 	if (st->first_frame != 0)
 	{
-		st->first_frame = 0;              
+		st->first_frame = 0;
 		Copy(ispnew_q, st->ispold_q, M);
 	}
 	/* Find the interpolated ISPs and convert to a[] for all subframes */
@@ -660,7 +660,7 @@ void coder(
 #else
 		Residu(p_Aq, &speech[i_subfr], &exc[i_subfr], L_SUBFR);
 #endif
-		p_Aq += (M + 1);                   
+		p_Aq += (M + 1);
 	}
 
 	/* Buffer isf's and energy for dtx on non-speech frame */
@@ -670,7 +670,7 @@ void coder(
 		{
 			exc2[i] = exc[i] >> Q_new;
 		}
-		L_tmp = 0;                         
+		L_tmp = 0;
 		for (i = 0; i < L_FRAME; i++)
 			L_tmp += (exc2[i] * exc2[i])<<1;
 		L_tmp >>= 1;
@@ -682,14 +682,14 @@ void coder(
 	T0_min = T_op - 8;
 	if (T0_min < PIT_MIN)
 	{
-		T0_min = PIT_MIN;                  
+		T0_min = PIT_MIN;
 	}
 	T0_max = (T0_min + 15);
 
 	if(T0_max > PIT_MAX)
 	{
-		T0_max = PIT_MAX;                  
-		T0_min = T0_max - 15;          
+		T0_max = PIT_MAX;
+		T0_min = T0_max - 15;
 	}
 	/*------------------------------------------------------------------------*
 	 *          Loop for every subframe in the analysis frame                 *
@@ -711,25 +711,25 @@ void coder(
 	 *     - update states of weighting filter                                *
 	 *     - find excitation and synthesis speech                             *
 	 *------------------------------------------------------------------------*/
-	p_A = A;                               
-	p_Aq = Aq;                             
+	p_A = A;
+	p_Aq = Aq;
 	for (i_subfr = 0; i_subfr < L_FRAME; i_subfr += L_SUBFR)
 	{
-		pit_flag = i_subfr;                
+		pit_flag = i_subfr;
 		if ((i_subfr == 2 * L_SUBFR) && (*ser_size > NBBITS_7k))
 		{
-			pit_flag = 0;                 
+			pit_flag = 0;
 			/* range for closed loop pitch search in 3rd subframe */
 			T0_min = (T_op2 - 8);
 
 			if (T0_min < PIT_MIN)
 			{
-				T0_min = PIT_MIN;          
+				T0_min = PIT_MIN;
 			}
 			T0_max = (T0_min + 15);
 			if (T0_max > PIT_MAX)
 			{
-				T0_max = PIT_MAX;         
+				T0_max = PIT_MAX;
 				T0_min = (T0_max - 15);
 			}
 		}
@@ -776,7 +776,7 @@ void coder(
 		/* first half: xn[] --> cn[] */
 		Set_zero(code, M);
 		Copy(xn, code + M, L_SUBFR / 2);
-		tmp = 0;                          
+		tmp = 0;
 		Preemph2(code + M, TILT_FAC, L_SUBFR / 2, &tmp);
 		Weight_a(p_A, Ap, GAMMA1, M);
 		Syn_filt(Ap,code + M, code + M, L_SUBFR / 2, code, 0);
@@ -791,7 +791,7 @@ void coder(
 		Copy(&exc[i_subfr + (L_SUBFR / 2)], cn + (L_SUBFR / 2), L_SUBFR / 2);
 
 		/*---------------------------------------------------------------*
-		 * Compute impulse response, h1[], of weighted synthesis filter  * 
+		 * Compute impulse response, h1[], of weighted synthesis filter  *
 		 *---------------------------------------------------------------*/
 
 		Set_zero(error, M + L_SUBFR);
@@ -814,7 +814,7 @@ void coder(
 			*vo_p3++ = *vo_p0++ = vo_round((L_tmp <<4));
 		}
 		/* deemph without division by 2 -> Q14 to Q15 */
-		tmp = 0; 
+		tmp = 0;
 		Deemph2(h1, TILT_FAC, L_SUBFR, &tmp);   /* h1 in Q14 */
 
 		/* h2 in Q12 for codebook search */
@@ -917,7 +917,7 @@ void coder(
 				T0_min = (T0 - 8);
 				if (T0_min < PIT_MIN)
 				{
-					T0_min = PIT_MIN; 
+					T0_min = PIT_MIN;
 				}
 				T0_max = T0_min + 15;
 
@@ -964,18 +964,18 @@ void coder(
 			Convolve_asm(&exc[i_subfr], h1, y1, L_SUBFR);
 #else
 			Convolve(&exc[i_subfr], h1, y1, L_SUBFR);
-#endif 
+#endif
 			gain1 = G_pitch(xn, y1, g_coeff, L_SUBFR);
 			/* clip gain if necessary to avoid problem at decoder */
 			if ((clip_gain != 0) && (gain1 > GP_CLIP))
 			{
-				gain1 = GP_CLIP; 
+				gain1 = GP_CLIP;
 			}
 			/* find energy of new target xn2[] */
 			Updt_tar(xn, dn, y1, gain1, L_SUBFR);       /* dn used temporary */
 		} else
 		{
-			gain1 = 0; 
+			gain1 = 0;
 		}
 		/*-----------------------------------------------------------------*
 		 * - find pitch excitation filtered by 1st order LP filter.        *
@@ -1002,7 +1002,7 @@ void coder(
 		Convolve_asm(code, h1, y2, L_SUBFR);
 #else
 		Convolve(code, h1, y2, L_SUBFR);
-#endif 
+#endif
 
 		gain2 = G_pitch(xn, y2, g_coeff2, L_SUBFR);
 
@@ -1016,7 +1016,7 @@ void coder(
 		/*-----------------------------------------------------------------*
 		 * use the best prediction (minimise quadratic error).             *
 		 *-----------------------------------------------------------------*/
-		select = 0; 
+		select = 0;
 		if(*ser_size > NBBITS_9k)
 		{
 			L_tmp = 0L;
@@ -1036,7 +1036,7 @@ void coder(
 
 			if (L_tmp <= 0)
 			{
-				select = 1; 
+				select = 1;
 			}
 			Parm_serial(select, 1, &prms);
 		}
@@ -1154,7 +1154,7 @@ void coder(
 		/*-------------------------------------------------------*
 		 * - Add the fixed-gain pitch contribution to code[].    *
 		 *-------------------------------------------------------*/
-		tmp = 0; 
+		tmp = 0;
 		Preemph(code, st->tilt_code, L_SUBFR, &tmp);
 		Pit_shrp(code, T0, PIT_SHARP, L_SUBFR);
 		/*----------------------------------------------------------*
@@ -1175,7 +1175,7 @@ void coder(
 		/* test quantized gain of pitch for pitch clipping algorithm */
 		Gp_clip_test_gain_pit(gain_pit, st->gp_clip);
 
-		L_tmp = L_shl(L_gain_code, Q_new); 
+		L_tmp = L_shl(L_gain_code, Q_new);
 		gain_code = extract_h(L_add(L_tmp, 0x8000));
 
 		/*----------------------------------------------------------*
@@ -1218,7 +1218,7 @@ void coder(
 			L_tmp = (gain_code * code[i])<<1;
 			L_tmp = (L_tmp << 5);
 			L_tmp += (exc[i + i_subfr] * gain_pit)<<1;
-			L_tmp = L_shl2(L_tmp, 1); 
+			L_tmp = L_shl2(L_tmp, 1);
 			exc[i + i_subfr] = extract_h(L_add(L_tmp, 0x8000));
 		}
 
@@ -1242,7 +1242,7 @@ void coder(
 			 *------------------------------------------------------------*/
 			tmp = (16384 - (voice_fac >> 1));        /* 1=unvoiced, 0=voiced */
 			fac = vo_mult(stab_fac, tmp);
-			L_tmp = L_gain_code; 
+			L_tmp = L_gain_code;
 			if(L_tmp < st->L_gc_thres)
 			{
 				L_tmp = vo_L_add(L_tmp, Mpy_32_16(gain_code, gain_code_lo, 6226));
@@ -1276,19 +1276,19 @@ void coder(
 
 			L_tmp = L_deposit_h(code[0]);
 			L_tmp -= (code[1] * tmp)<<1;
-			code2[0] = vo_round(L_tmp); 
+			code2[0] = vo_round(L_tmp);
 
 			for (i = 1; i < L_SUBFR - 1; i++)
 			{
 				L_tmp = L_deposit_h(code[i]);
 				L_tmp -= (code[i + 1] * tmp)<<1;
 				L_tmp -= (code[i - 1] * tmp)<<1;
-				code2[i] = vo_round(L_tmp); 
+				code2[i] = vo_round(L_tmp);
 			}
 
 			L_tmp = L_deposit_h(code[L_SUBFR - 1]);
 			L_tmp -= (code[L_SUBFR - 2] * tmp)<<1;
-			code2[L_SUBFR - 1] = vo_round(L_tmp); 
+			code2[L_SUBFR - 1] = vo_round(L_tmp);
 
 			/* build excitation */
 			gain_code = vo_round(L_shl(L_gain_code, Q_new));
@@ -1381,7 +1381,7 @@ static Word16 synthesis(
 	/* Original speech signal as reference for high band gain quantisation */
 	for (i = 0; i < L_SUBFR16k; i++)
 	{
-		HF_SP[i] = synth16k[i]; 
+		HF_SP[i] = synth16k[i];
 	}
 
 	/*------------------------------------------------------*
@@ -1454,7 +1454,7 @@ static Word16 synthesis(
 		fac = div_s(tmp, ener);
 	} else
 	{
-		fac = 0; 
+		fac = 0;
 	}
 
 	/* modify energy of white noise according to synthesis tilt */
@@ -1550,7 +1550,7 @@ static Word16 synthesis(
 
 /*************************************************
 *
-* Breif: Codec main function 
+* Breif: Codec main function
 *
 **************************************************/
 
@@ -1622,7 +1622,7 @@ VO_U32 VO_API voAMRWB_Init(VO_HANDLE * phCodec,                   /* o: the audi
 	else
 	{
 		pMemOP = (VO_MEM_OPERATOR *)pUserData->memData;
-	} 
+	}
 	/*-------------------------------------------------------------------------*
 	 * Memory allocation for coder state.                                      *
 	 *-------------------------------------------------------------------------*/
@@ -1631,8 +1631,8 @@ VO_U32 VO_API voAMRWB_Init(VO_HANDLE * phCodec,                   /* o: the audi
 		return VO_ERR_OUTOF_MEMORY;
 	}
 
-	st->vadSt = NULL;                      
-	st->dtx_encSt = NULL;                  
+	st->vadSt = NULL;
+	st->dtx_encSt = NULL;
 	st->sid_update_counter = 3;
 	st->sid_handover_debt = 0;
 	st->prev_ft = TX_SPEECH;
@@ -1764,7 +1764,7 @@ VO_U32 VO_API voAMRWB_GetOutputData(
 	{
 		pAudioFormat->Format.Channels = 1;
 		pAudioFormat->Format.SampleRate = 8000;
-		pAudioFormat->Format.SampleBits = 16;	
+		pAudioFormat->Format.SampleBits = 16;
 		pAudioFormat->InputUsed = stream->used_len;
 	}
 	return VO_ERR_NONE;
@@ -1792,14 +1792,14 @@ VO_U32 VO_API voAMRWB_SetParam(
 		/* setting AMR-WB frame type*/
 		case VO_PID_AMRWB_FRAMETYPE:
 			if(*lValue < VOAMRWB_DEFAULT || *lValue > VOAMRWB_RFC3267)
-				return VO_ERR_WRONG_PARAM_ID; 
+				return VO_ERR_WRONG_PARAM_ID;
 			gData->frameType = *lValue;
 			break;
 		/* setting AMR-WB bit rate */
 		case VO_PID_AMRWB_MODE:
 			{
 				if(*lValue < VOAMRWB_MD66 || *lValue > VOAMRWB_MD2385)
-					return VO_ERR_WRONG_PARAM_ID; 
+					return VO_ERR_WRONG_PARAM_ID;
 				gData->mode = *lValue;
 			}
 			break;
@@ -1839,7 +1839,7 @@ VO_U32 VO_API voAMRWB_GetParam(
 	int    temp;
 	Coder_State* gData = (Coder_State*)hCodec;
 
-	if (gData==NULL) 
+	if (gData==NULL)
 		return VO_ERR_INVALID_ARG;
 	switch(uParamID)
 	{

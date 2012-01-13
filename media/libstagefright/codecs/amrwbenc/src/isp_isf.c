@@ -51,9 +51,9 @@ void Isp_isf(
 		/* acos(isp[i])= ind*128 + ( ( isp[i]-table[ind] ) * slope[ind] )/2048 */
 		L_tmp = vo_L_mult(vo_sub(isp[i], table[ind]), slope[ind]);
 		isf[i] = vo_round((L_tmp << 4));   /* (isp[i]-table[ind])*slope[ind])>>11 */
-		isf[i] = add1(isf[i], (ind << 7)); 
+		isf[i] = add1(isf[i], (ind << 7));
 	}
-	isf[m - 1] = (isf[m - 1] >> 1);      
+	isf[m - 1] = (isf[m - 1] >> 1);
 	return;
 }
 
@@ -69,7 +69,7 @@ void Isf_isp(
 
 	for (i = 0; i < m - 1; i++)
 	{
-		isp[i] = isf[i];                  
+		isp[i] = isf[i];
 	}
 	isp[m - 1] = (isf[m - 1] << 1);
 
@@ -80,7 +80,7 @@ void Isf_isp(
 
 		/* isp[i] = table[ind]+ ((table[ind+1]-table[ind])*offset) / 128 */
 		L_tmp = vo_L_mult(vo_sub(table[ind + 1], table[ind]), offset);
-		isp[i] = add1(table[ind], (Word16)((L_tmp >> 8)));   
+		isp[i] = add1(table[ind], (Word16)((L_tmp >> 8)));
 	}
 
 	return;

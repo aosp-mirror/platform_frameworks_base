@@ -100,20 +100,20 @@ static Word16 FreqToBandWithRounding(Word32 freq,                   /*!< frequen
   /*  assert(freq >= 0);  */
   shift = norm_l(fs);
   lineNumber = (extract_l(fixmul((bandStartOffset[numOfBands] << 2),Div_32(freq << shift,fs << shift))) + 1) >> 1;
- 
+
   /* freq > fs/2 */
-  temp = lineNumber - bandStartOffset[numOfBands] ;                                            
+  temp = lineNumber - bandStartOffset[numOfBands] ;
   if (temp >= 0)
     return numOfBands;
 
   /* find band the line number lies in */
   for (band=0; band<numOfBands; band++) {
-    temp = bandStartOffset[band + 1] - lineNumber;                                           
+    temp = bandStartOffset[band + 1] - lineNumber;
     if (temp > 0) break;
   }
 
   temp = (lineNumber - bandStartOffset[band]);
-  temp = (temp - (bandStartOffset[band + 1] - lineNumber));                                   
+  temp = (temp - (bandStartOffset[band + 1] - lineNumber));
   if ( temp > 0 )
   {
     band = band + 1;
@@ -139,25 +139,25 @@ Word16 InitTnsConfigurationLong(Word32 bitRate,          /*!< bitrate */
 {
 
   Word32 bitratePerChannel;
-  tC->maxOrder     = TNS_MAX_ORDER;                                           
+  tC->maxOrder     = TNS_MAX_ORDER;
   tC->tnsStartFreq = 1275;
-  tC->coefRes      = 4;                                                                                 
-  
+  tC->coefRes      = 4;
+
   /* to avoid integer division */
-  if ( sub(channels,2) == 0 ) { 
-    bitratePerChannel = bitRate >> 1;    
+  if ( sub(channels,2) == 0 ) {
+    bitratePerChannel = bitRate >> 1;
   }
   else {
-    bitratePerChannel = bitRate;                                                                    
+    bitratePerChannel = bitRate;
   }
 
   tC->tnsMaxSfb = tnsMaxBandsLongMainLow[pC->sampRateIdx];
 
-  tC->tnsActive = active;                                                                           
+  tC->tnsActive = active;
 
   /* now calc band and line borders */
   tC->tnsStopBand = min(pC->sfbCnt, tC->tnsMaxSfb);
-  tC->tnsStopLine = pC->sfbOffset[tC->tnsStopBand];                                                 
+  tC->tnsStopLine = pC->sfbOffset[tC->tnsStopBand];
 
   tC->tnsStartBand = FreqToBandWithRounding(tC->tnsStartFreq, sampleRate,
                                             pC->sfbCnt, (const Word16*)pC->sfbOffset);
@@ -173,18 +173,18 @@ Word16 InitTnsConfigurationLong(Word32 bitRate,          /*!< bitrate */
                                                      (const Word16*)pC->sfbOffset);
 
 
-  tC->tnsStartLine = pC->sfbOffset[tC->tnsStartBand];                                                                                                             
+  tC->tnsStartLine = pC->sfbOffset[tC->tnsStartBand];
 
   tC->lpcStopBand = tnsMaxBandsLongMainLow[pC->sampRateIdx];
   tC->lpcStopBand = min(tC->lpcStopBand, pC->sfbActive);
 
-  tC->lpcStopLine = pC->sfbOffset[tC->lpcStopBand];   
-  
+  tC->lpcStopLine = pC->sfbOffset[tC->lpcStopBand];
+
   tC->lpcStartBand = tnsMinBandNumberLong[pC->sampRateIdx];
 
-  tC->lpcStartLine = pC->sfbOffset[tC->lpcStartBand];                                               
+  tC->lpcStartLine = pC->sfbOffset[tC->lpcStartBand];
 
-  tC->threshold = TNS_GAIN_THRESH;                                                             
+  tC->threshold = TNS_GAIN_THRESH;
 
 
   return(0);
@@ -207,23 +207,23 @@ Word16 InitTnsConfigurationShort(Word32 bitRate,              /*!< bitrate */
   Word32 bitratePerChannel;
   tC->maxOrder     = TNS_MAX_ORDER_SHORT;
   tC->tnsStartFreq = 2750;
-  tC->coefRes      = 3;                                                                                 
-  
+  tC->coefRes      = 3;
+
   /* to avoid integer division */
   if ( sub(channels,2) == 0 ) {
-    bitratePerChannel = L_shr(bitRate,1);    
+    bitratePerChannel = L_shr(bitRate,1);
   }
   else {
-    bitratePerChannel = bitRate;                                                                    
+    bitratePerChannel = bitRate;
   }
 
   tC->tnsMaxSfb = tnsMaxBandsShortMainLow[pC->sampRateIdx];
 
-  tC->tnsActive = active;                                                                           
+  tC->tnsActive = active;
 
   /* now calc band and line borders */
   tC->tnsStopBand = min(pC->sfbCnt, tC->tnsMaxSfb);
-  tC->tnsStopLine = pC->sfbOffset[tC->tnsStopBand];                                                 
+  tC->tnsStopLine = pC->sfbOffset[tC->tnsStopBand];
 
   tC->tnsStartBand=FreqToBandWithRounding(tC->tnsStartFreq, sampleRate,
                                           pC->sfbCnt, (const Word16*)pC->sfbOffset);
@@ -239,19 +239,19 @@ Word16 InitTnsConfigurationShort(Word32 bitRate,              /*!< bitrate */
                                                      (const Word16*)pC->sfbOffset);
 
 
-  tC->tnsStartLine = pC->sfbOffset[tC->tnsStartBand];                                               
+  tC->tnsStartLine = pC->sfbOffset[tC->tnsStartBand];
 
   tC->lpcStopBand = tnsMaxBandsShortMainLow[pC->sampRateIdx];
 
   tC->lpcStopBand = min(tC->lpcStopBand, pC->sfbActive);
 
-  tC->lpcStopLine = pC->sfbOffset[tC->lpcStopBand];                                                 
+  tC->lpcStopLine = pC->sfbOffset[tC->lpcStopBand];
 
   tC->lpcStartBand = tnsMinBandNumberShort[pC->sampRateIdx];
 
-  tC->lpcStartLine = pC->sfbOffset[tC->lpcStartBand];                                               
+  tC->lpcStartLine = pC->sfbOffset[tC->lpcStartBand];
 
-  tC->threshold = TNS_GAIN_THRESH;                                                             
+  tC->threshold = TNS_GAIN_THRESH;
 
   return(0);
 }
@@ -259,7 +259,7 @@ Word16 InitTnsConfigurationShort(Word32 bitRate,              /*!< bitrate */
 /**
 *
 * function name: TnsDetect
-* description:  Calculate TNS filter and decide on TNS usage 
+* description:  Calculate TNS filter and decide on TNS usage
 * returns:		0 if success
 *
 */
@@ -278,7 +278,7 @@ Word32 TnsDetect(TNS_DATA* tnsData,        /*!< tns data structure (modified) */
   Word32* pWork32 = &pScratchTns[subBlockNumber >> 8];
   Word16* pWeightedSpectrum = (Word16 *)&pScratchTns[subBlockNumber >> 8];
 
-                                                                                                    
+
   if (tC.tnsActive) {
     CalcWeightedSpectrum(spectrum,
                          pWeightedSpectrum,
@@ -290,7 +290,7 @@ Word32 TnsDetect(TNS_DATA* tnsData,        /*!< tns data structure (modified) */
                          tC.lpcStopBand,
                          pWork32);
 
-    temp = blockType - SHORT_WINDOW;                                                          
+    temp = blockType - SHORT_WINDOW;
     if ( temp != 0 ) {
         predictionGain = CalcTnsFilter( &pWeightedSpectrum[tC.lpcStartLine],
                                         tC.acfWindow,
@@ -299,15 +299,15 @@ Word32 TnsDetect(TNS_DATA* tnsData,        /*!< tns data structure (modified) */
                                         tnsData->dataRaw.tnsLong.subBlockInfo.parcor);
 
 
-        temp = predictionGain - tC.threshold;                                                  
+        temp = predictionGain - tC.threshold;
         if ( temp > 0 ) {
-          tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 1;                                      
+          tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 1;
         }
         else {
-          tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 0;                                      
+          tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 0;
         }
 
-        tnsData->dataRaw.tnsLong.subBlockInfo.predictionGain = predictionGain;                      
+        tnsData->dataRaw.tnsLong.subBlockInfo.predictionGain = predictionGain;
     }
     else{
 
@@ -317,28 +317,28 @@ Word32 TnsDetect(TNS_DATA* tnsData,        /*!< tns data structure (modified) */
                                         tC.maxOrder,
                                         tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].parcor);
 
-        temp = predictionGain - tC.threshold;                                                 
+        temp = predictionGain - tC.threshold;
         if ( temp > 0 ) {
-          tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 1;                     
+          tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 1;
         }
         else {
-          tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 0;                     
+          tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 0;
         }
 
-        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].predictionGain = predictionGain;     
+        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].predictionGain = predictionGain;
     }
 
   }
   else{
 
-    temp = blockType - SHORT_WINDOW;                                                          
+    temp = blockType - SHORT_WINDOW;
     if ( temp != 0 ) {
-        tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 0;                                        
-        tnsData->dataRaw.tnsLong.subBlockInfo.predictionGain = 0;                                   
+        tnsData->dataRaw.tnsLong.subBlockInfo.tnsActive = 0;
+        tnsData->dataRaw.tnsLong.subBlockInfo.predictionGain = 0;
     }
     else {
-        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 0;                       
-        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].predictionGain = 0;                  
+        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].tnsActive = 0;
+        tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber].predictionGain = 0;
     }
   }
 
@@ -362,21 +362,21 @@ void TnsSync(TNS_DATA *tnsDataDest,
    const TNS_SUBBLOCK_INFO *sbInfoSrc;
    Word32 i, temp;
 
-   temp =  blockType - SHORT_WINDOW;                                                           
+   temp =  blockType - SHORT_WINDOW;
    if ( temp != 0 ) {
-      sbInfoDest = &tnsDataDest->dataRaw.tnsLong.subBlockInfo;                                      
-      sbInfoSrc  = &tnsDataSrc->dataRaw.tnsLong.subBlockInfo;                                       
+      sbInfoDest = &tnsDataDest->dataRaw.tnsLong.subBlockInfo;
+      sbInfoSrc  = &tnsDataSrc->dataRaw.tnsLong.subBlockInfo;
    }
    else {
-      sbInfoDest = &tnsDataDest->dataRaw.tnsShort.subBlockInfo[subBlockNumber];                     
-      sbInfoSrc  = &tnsDataSrc->dataRaw.tnsShort.subBlockInfo[subBlockNumber];                      
+      sbInfoDest = &tnsDataDest->dataRaw.tnsShort.subBlockInfo[subBlockNumber];
+      sbInfoSrc  = &tnsDataSrc->dataRaw.tnsShort.subBlockInfo[subBlockNumber];
    }
 
    if (100*abs_s(sbInfoDest->predictionGain - sbInfoSrc->predictionGain) <
        (3 * sbInfoDest->predictionGain)) {
-      sbInfoDest->tnsActive = sbInfoSrc->tnsActive;                                                 
+      sbInfoDest->tnsActive = sbInfoSrc->tnsActive;
       for ( i=0; i< tC.maxOrder; i++) {
-        sbInfoDest->parcor[i] = sbInfoSrc->parcor[i];                                               
+        sbInfoDest->parcor[i] = sbInfoSrc->parcor[i];
       }
    }
 }
@@ -402,11 +402,11 @@ Word16 TnsEncode(TNS_INFO* tnsInfo,     /*!< tns info structure (modified) */
   Word32 temp;
   TNS_SUBBLOCK_INFO *psubBlockInfo;
 
-  temp_s = blockType - SHORT_WINDOW;                                                             
-  if ( temp_s != 0) {                                                                               
+  temp_s = blockType - SHORT_WINDOW;
+  if ( temp_s != 0) {
     psubBlockInfo = &tnsData->dataRaw.tnsLong.subBlockInfo;
 	if (psubBlockInfo->tnsActive == 0) {
-      tnsInfo->tnsActive[subBlockNumber] = 0;                                                       
+      tnsInfo->tnsActive[subBlockNumber] = 0;
       return(0);
     }
     else {
@@ -422,22 +422,22 @@ Word16 TnsEncode(TNS_INFO* tnsInfo,     /*!< tns info structure (modified) */
                    tC.coefRes);
 
       for (i=tC.maxOrder - 1; i>=0; i--)  {
-        temp = psubBlockInfo->parcor[i] - TNS_PARCOR_THRESH;         
+        temp = psubBlockInfo->parcor[i] - TNS_PARCOR_THRESH;
         if ( temp > 0 )
           break;
-        temp = psubBlockInfo->parcor[i] + TNS_PARCOR_THRESH;         
+        temp = psubBlockInfo->parcor[i] + TNS_PARCOR_THRESH;
         if ( temp < 0 )
           break;
       }
-      tnsInfo->order[subBlockNumber] = i + 1;                                                    
+      tnsInfo->order[subBlockNumber] = i + 1;
 
 
-      tnsInfo->tnsActive[subBlockNumber] = 1;                                                       
+      tnsInfo->tnsActive[subBlockNumber] = 1;
       for (i=subBlockNumber+1; i<TRANS_FAC; i++) {
-        tnsInfo->tnsActive[i] = 0;                                                                  
+        tnsInfo->tnsActive[i] = 0;
       }
-      tnsInfo->coefRes[subBlockNumber] = tC.coefRes;                                                
-      tnsInfo->length[subBlockNumber] = numOfSfb - tC.tnsStartBand;                                 
+      tnsInfo->coefRes[subBlockNumber] = tC.coefRes;
+      tnsInfo->length[subBlockNumber] = numOfSfb - tC.tnsStartBand;
 
 
       AnalysisFilterLattice(&(spectrum[tC.tnsStartLine]),
@@ -448,10 +448,10 @@ Word16 TnsEncode(TNS_INFO* tnsInfo,     /*!< tns info structure (modified) */
 
     }
   }     /* if (blockType!=SHORT_WINDOW) */
-  else /*short block*/ {                                                                            
+  else /*short block*/ {
     psubBlockInfo = &tnsData->dataRaw.tnsShort.subBlockInfo[subBlockNumber];
 	if (psubBlockInfo->tnsActive == 0) {
-      tnsInfo->tnsActive[subBlockNumber] = 0;                                                       
+      tnsInfo->tnsActive[subBlockNumber] = 0;
       return(0);
     }
     else {
@@ -466,19 +466,19 @@ Word16 TnsEncode(TNS_INFO* tnsInfo,     /*!< tns info structure (modified) */
                    tC.maxOrder,
                    tC.coefRes);
       for (i=(tC.maxOrder - 1); i>=0; i--)  {
-        temp = psubBlockInfo->parcor[i] - TNS_PARCOR_THRESH;    
+        temp = psubBlockInfo->parcor[i] - TNS_PARCOR_THRESH;
          if ( temp > 0 )
           break;
 
-        temp = psubBlockInfo->parcor[i] + TNS_PARCOR_THRESH;    
+        temp = psubBlockInfo->parcor[i] + TNS_PARCOR_THRESH;
         if ( temp < 0 )
           break;
       }
-      tnsInfo->order[subBlockNumber] = i + 1;                                                    
+      tnsInfo->order[subBlockNumber] = i + 1;
 
-      tnsInfo->tnsActive[subBlockNumber] = 1;                                                       
-      tnsInfo->coefRes[subBlockNumber] = tC.coefRes;                                                
-      tnsInfo->length[subBlockNumber] = numOfSfb - tC.tnsStartBand;                             
+      tnsInfo->tnsActive[subBlockNumber] = 1;
+      tnsInfo->coefRes[subBlockNumber] = tC.coefRes;
+      tnsInfo->length[subBlockNumber] = numOfSfb - tC.tnsStartBand;
 
 
       AnalysisFilterLattice(&(spectrum[tC.tnsStartLine]), (tC.tnsStopLine - tC.tnsStartLine),
@@ -507,14 +507,14 @@ static Word32 m_pow2_cordic(Word32 x, Word16 scale)
 {
   Word32 k;
 
-  Word32 accu_y = 0x40000000;                                                                     
+  Word32 accu_y = 0x40000000;
   accu_y = L_shr(accu_y,scale);
 
   for(k=1; k<INT_BITS; k++) {
-    const Word32 z = m_log2_table[k];                                                             
+    const Word32 z = m_log2_table[k];
 
     while(L_sub(x,z) >= 0) {
-       
+
       x = L_sub(x, z);
       accu_y = L_add(accu_y, (accu_y >> k));
     }
@@ -548,43 +548,43 @@ static void CalcWeightedSpectrum(const Word32  spectrum[],         /*!< input sp
     Word32 maxWS;
     Word32 tnsSfbMean[MAX_SFB];    /* length [lpcStopBand-lpcStartBand] should be sufficient here */
 
-    maxWS = 0;                                                                                   
-  
+    maxWS = 0;
+
     /* calc 1.0*2^-INT_BITS/2/sqrt(en) */
     for( sfb = lpcStartBand; sfb < lpcStopBand; sfb++) {
 
-      tmp2 = sfbEnergy[sfb] - 2;                                                            
+      tmp2 = sfbEnergy[sfb] - 2;
       if( tmp2 > 0) {
         tmp = rsqrt(sfbEnergy[sfb], INT_BITS);
-		if(tmp > INT_BITS_SCAL) 
+		if(tmp > INT_BITS_SCAL)
 		{
 			shift =  norm_l(tmp);
-			tmp = Div_32( INT_BITS_SCAL << shift, tmp << shift ); 
+			tmp = Div_32( INT_BITS_SCAL << shift, tmp << shift );
 		}
 		else
 		{
-			tmp = 0x7fffffff; 
+			tmp = 0x7fffffff;
 		}
       }
       else {
-        tmp = 0x7fffffff;                                                                           
-      } 
-      tnsSfbMean[sfb] = tmp;                                                                        
+        tmp = 0x7fffffff;
+      }
+      tnsSfbMean[sfb] = tmp;
     }
 
     /* spread normalized values from sfbs to lines */
-    sfb = lpcStartBand;                                                                             
-    tmp = tnsSfbMean[sfb];                                                                          
+    sfb = lpcStartBand;
+    tmp = tnsSfbMean[sfb];
     for ( i=lpcStartLine; i<lpcStopLine; i++){
-      tmp_s = sfbOffset[sfb + 1] - i;                                                      
+      tmp_s = sfbOffset[sfb + 1] - i;
       if ( tmp_s == 0 ) {
         sfb = sfb + 1;
-        tmp2_s = sfb + 1 - lpcStopBand;                                                       
+        tmp2_s = sfb + 1 - lpcStopBand;
         if (tmp2_s <= 0) {
-          tmp = tnsSfbMean[sfb];                                                                    
+          tmp = tnsSfbMean[sfb];
         }
       }
-      pWork32[i] = tmp;                                                                    
+      pWork32[i] = tmp;
     }
     /*filter down*/
     for (i=(lpcStopLine - 2); i>=lpcStartLine; i--){
@@ -597,8 +597,8 @@ static void CalcWeightedSpectrum(const Word32  spectrum[],         /*!< input sp
 
     /* weight and normalize */
     for (i=lpcStartLine; i<lpcStopLine; i++){
-      pWork32[i] = MULHIGH(pWork32[i], spectrum[i]);                               
-      maxWS |= L_abs(pWork32[i]);                                                          
+      pWork32[i] = MULHIGH(pWork32[i], spectrum[i]);
+      maxWS |= L_abs(pWork32[i]);
     }
     maxShift = norm_l(maxWS);
 
@@ -646,7 +646,7 @@ static Word16 CalcTnsFilter(const Word16 *signal,
   assert(tnsOrder <= TNS_MAX_ORDER);      /* remove asserts later? (btg) */
 
   for(i=0;i<tnsOrder;i++) {
-    parcor[i] = 0;                               
+    parcor[i] = 0;
   }
 
   AutoCorrelation(signal, parcorWorkBuffer, numOfLines, tnsOrderPlus1);
@@ -678,15 +678,15 @@ void AutoCorrelation(const Word16		 input[],
   Word32 accu;
   Word32 scf;
 
-  scf = 10 - 1;                                                                                      
+  scf = 10 - 1;
 
   isamples = samples;
   /* calc first corrCoef:  R[0] = sum { t[i] * t[i] } ; i = 0..N-1 */
-  accu = 0;                                                                                      
+  accu = 0;
   for(j=0; j<isamples; j++) {
     accu = L_add(accu, ((input[j] * input[j]) >> scf));
   }
-  corr[0] = accu;                                                                                
+  corr[0] = accu;
 
   /* early termination if all corr coeffs are likely going to be zero */
   if(corr[0] == 0) return ;
@@ -694,13 +694,13 @@ void AutoCorrelation(const Word16		 input[],
   /* calc all other corrCoef:  R[j] = sum { t[i] * t[i+j] } ; i = 0..(N-j-1), j=1..p */
   for(i=1; i<corrCoeff; i++) {
     isamples = isamples - 1;
-    accu = 0;                                                                                    
+    accu = 0;
     for(j=0; j<isamples; j++) {
       accu = L_add(accu, ((input[j] * input[j+i]) >> scf));
     }
-    corr[i] = accu;                                                                              
+    corr[i] = accu;
   }
-}    
+}
 #endif
 
 /*****************************************************************************
@@ -720,20 +720,20 @@ static Word16 AutoToParcor(Word32 workBuffer[], Word32 reflCoeff[], Word16 numOf
   Word32 predictionGain = 0;
   Word32 num, denom;
   Word32 temp, workBuffer0;
-   
 
-  num = workBuffer[0];                                                                           
-  temp = workBuffer[numOfCoeff];                                                                 
+
+  num = workBuffer[0];
+  temp = workBuffer[numOfCoeff];
 
   for(i=0; i<numOfCoeff-1; i++) {
-    workBuffer[i + numOfCoeff] = workBuffer[i + 1];                                        
+    workBuffer[i + numOfCoeff] = workBuffer[i + 1];
   }
-  workBuffer[i + numOfCoeff] = temp;                                                                           
-  
+  workBuffer[i + numOfCoeff] = temp;
+
   for(i=0; i<numOfCoeff; i++) {
     Word32 refc;
 
-     
+
     if (workBuffer[0] < L_abs(workBuffer[i + numOfCoeff])) {
       return 0 ;
     }
@@ -742,21 +742,21 @@ static Word16 AutoToParcor(Word32 workBuffer[], Word32 reflCoeff[], Word16 numOf
     /* calculate refc = -workBuffer[numOfCoeff+i] / workBuffer[0]; -1 <= refc < 1 */
 	refc = L_negate(fixmul(workBuffer[numOfCoeff + i], workBuffer0));
 
-    reflCoeff[i] = refc;                                                                           
+    reflCoeff[i] = refc;
 
-    pWorkBuffer = &(workBuffer[numOfCoeff]);                                                        
+    pWorkBuffer = &(workBuffer[numOfCoeff]);
 
     for(j=i; j<numOfCoeff; j++) {
       Word32 accu1, accu2;
       accu1 = L_add(pWorkBuffer[j], fixmul(refc, workBuffer[j - i]));
       accu2 = L_add(workBuffer[j - i], fixmul(refc, pWorkBuffer[j]));
-      pWorkBuffer[j] = accu1;                                                                       
-      workBuffer[j - i] = accu2;                                                                 
+      pWorkBuffer[j] = accu1;
+      workBuffer[j - i] = accu2;
     }
   }
 
   denom = MULHIGH(workBuffer[0], NORM_COEF);
-   
+
   if (denom != 0) {
     Word32 temp;
 	shift = norm_l(denom);
@@ -774,11 +774,11 @@ static Word16 Search3(Word32 parcor)
   Word32 index = 0;
   Word32 i;
   Word32 temp;
-   
+
   for (i=0;i<8;i++) {
-    temp = L_sub( parcor, tnsCoeff3Borders[i]);                                                     
+    temp = L_sub( parcor, tnsCoeff3Borders[i]);
     if (temp > 0)
-      index=i;                                                                                      
+      index=i;
   }
   return extract_l(index - 4);
 }
@@ -788,12 +788,12 @@ static Word16 Search4(Word32 parcor)
   Word32 index = 0;
   Word32 i;
   Word32 temp;
-   
+
 
   for (i=0;i<16;i++) {
-    temp = L_sub(parcor, tnsCoeff4Borders[i]);                                                      
+    temp = L_sub(parcor, tnsCoeff4Borders[i]);
     if (temp > 0)
-      index=i;                                                                                      
+      index=i;
   }
   return extract_l(index - 8);
 }
@@ -814,12 +814,12 @@ static void Parcor2Index(const Word32 parcor[],   /*!< parcor coefficients */
   Word32 temp;
 
   for(i=0; i<order; i++) {
-    temp = bitsPerCoeff - 3;                                                                    
+    temp = bitsPerCoeff - 3;
     if (temp == 0) {
-      index[i] = Search3(parcor[i]);                                                                
-    } 
+      index[i] = Search3(parcor[i]);
+    }
     else {
-      index[i] = Search4(parcor[i]);                                                                
+      index[i] = Search4(parcor[i]);
     }
   }
 }
@@ -839,12 +839,12 @@ static void Index2Parcor(const Word16 index[],  /*!< quantized values */
   Word32 temp;
 
   for (i=0; i<order; i++) {
-    temp = bitsPerCoeff - 4;                                                                     
+    temp = bitsPerCoeff - 4;
     if ( temp == 0 ) {
-        parcor[i] = tnsCoeff4[index[i] + 8];                                                     
+        parcor[i] = tnsCoeff4[index[i] + 8];
     }
     else {
-        parcor[i] = tnsCoeff3[index[i] + 4];                                                  
+        parcor[i] = tnsCoeff3[index[i] + 4];
     }
   }
 }
@@ -865,20 +865,20 @@ static Word32 FIRLattice(Word16 order,           /*!< filter order */
    Word32 accu,tmp,tmpSave;
 
    x = x >> 1;
-   tmpSave = x;                                                                                     
+   tmpSave = x;
 
    for (i=0; i<(order - 1); i++) {
 
      tmp = L_add(fixmul(coef_par[i], x), state_par[i]);
      x   = L_add(fixmul(coef_par[i], state_par[i]), x);
 
-     state_par[i] = tmpSave;                                                                        
-     tmpSave = tmp;                                                                                 
+     state_par[i] = tmpSave;
+     tmpSave = tmp;
   }
 
   /* last stage: only need half operations */
   accu = fixmul(state_par[order - 1], coef_par[(order - 1)]);
-  state_par[(order - 1)] = tmpSave;                                                                
+  state_par[(order - 1)] = tmpSave;
 
   x = L_add(accu, x);
   x = L_add(x, x);
@@ -903,11 +903,11 @@ static void AnalysisFilterLattice(const  Word32 signal[],  /*!< input spectrum *
   Word32 j;
 
   for ( j=0; j<TNS_MAX_ORDER; j++ ) {
-    state_par[j] = 0;                                                                               
+    state_par[j] = 0;
   }
 
   for(j=0; j<numOfLines; j++) {
-    output[j] = FIRLattice(order,signal[j],state_par,parCoeff);                                     
+    output[j] = FIRLattice(order,signal[j],state_par,parCoeff);
   }
 }
 
@@ -922,11 +922,11 @@ void ApplyTnsMultTableToRatios(Word16 startCb,
                                TNS_SUBBLOCK_INFO subInfo, /*!< TNS subblock info */
                                Word32 *thresholds)        /*!< thresholds (modified) */
 {
-  Word32 i;                                                                                         
+  Word32 i;
   if (subInfo.tnsActive) {
     for(i=startCb; i<stopCb; i++) {
       /* thresholds[i] * 0.25 */
-      thresholds[i] = (thresholds[i] >> 2);                                                      
+      thresholds[i] = (thresholds[i] >> 2);
     }
   }
 }
