@@ -139,7 +139,12 @@ void RsdShader::appendTextures() {
     char buf[256];
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.texturesCount; ct++) {
         if (mRSProgram->mHal.state.textureTargets[ct] == RS_TEXTURE_2D) {
-            snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
+            Allocation *a = mRSProgram->mHal.state.textures[ct];
+            if (a && a->mHal.state.surfaceTextureID) {
+                snprintf(buf, sizeof(buf), "uniform samplerExternalOES UNI_Tex%i;\n", ct);
+            } else {
+                snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
+            }
             mTextureTargets[ct] = GL_TEXTURE_2D;
         } else {
             snprintf(buf, sizeof(buf), "uniform samplerCube UNI_Tex%i;\n", ct);
