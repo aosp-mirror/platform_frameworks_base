@@ -316,14 +316,13 @@ public abstract class HardwareRenderer {
      * potentially lost the hardware renderer. The hardware renderer should be
      * reinitialized and setup when the render {@link #isRequested()} and
      * {@link #isEnabled()}.
-     * 
+     *
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
-     * @param attachInfo The 
-     * @param holder
+     * @param holder The target surface
      */
-    void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
-            SurfaceHolder holder) throws Surface.OutOfResourcesException {
+    void initializeIfNeeded(int width, int height, SurfaceHolder holder)
+            throws Surface.OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
