@@ -4045,6 +4045,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
+                SystemProperties.set("dev.bootcomplete", "1");
                 broadcastIntentLocked(null, null,
                         new Intent(Intent.ACTION_BOOT_COMPLETED, null),
                         null, null, 0, null, null,

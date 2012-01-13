@@ -3456,7 +3456,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void systemReady() {
         // tell the keyguard
         mKeyguardMediator.onSystemReady();
-        android.os.SystemProperties.set("dev.bootcomplete", "1"); 
         synchronized (mLock) {
             updateOrientationListenerLp();
             mSystemReady = true;
