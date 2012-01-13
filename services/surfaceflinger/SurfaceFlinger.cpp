@@ -59,14 +59,8 @@
 #include "DisplayHardware/DisplayHardware.h"
 #include "DisplayHardware/HWComposer.h"
 
+#include <private/android_filesystem_config.h>
 #include <private/surfaceflinger/SharedBufferStack.h>
-
-/* ideally AID_GRAPHICS would be in a semi-public header
- * or there would be a way to map a user/group name to its id
- */
-#ifndef AID_GRAPHICS
-#define AID_GRAPHICS 1003
-#endif
 
 #define EGL_VERSION_HW_ANDROID  0x3143
 
