@@ -84,6 +84,7 @@ import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.method.TransformationMethod2;
 import android.text.method.WordIterator;
+import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
 import android.text.style.EasyEditSpan;
 import android.text.style.ParagraphStyle;
@@ -101,9 +102,11 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
+import android.view.DisplayList;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.HardwareCanvas;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -282,6 +285,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int mDrawablePadding;
     }
     private Drawables mDrawables;
+
+    private DisplayList mTextDisplayList;
+    private boolean mTextDisplayListIsValid;
 
     private CharSequence mError;
     private boolean mErrorWasChanged;
@@ -4520,6 +4526,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         resetResolvedDrawables();
 
+        if (mTextDisplayList != null) {
+            mTextDisplayList.invalidate();
+        }
+
         if (mSpellChecker != null) {
             mSpellChecker.closeSession();
             // Forces the creation of a new SpellChecker next time this window is created.
@@ -4970,17 +4980,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        /*  Comment out until we decide what to do about animations
-        boolean isLinearTextOn = false;
-        if (currentTransformation != null) {
-            isLinearTextOn = mTextPaint.isLinearTextOn();
-            Matrix m = currentTransformation.getMatrix();
-            if (!m.isIdentity()) {
-                // mTextPaint.setLinearTextOn(true);
-            }
-        }
-        */
-
         final InputMethodState ims = mInputMethodState;
         final int cursorOffsetVertical = voffsetCursor - voffsetText;
         if (ims != null && ims.mBatchEditNesting == 0) {
@@ -5038,18 +5037,38 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             highlight = null;
         }
 
-        layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
+        if (canHaveDisplayList() && canvas.isHardwareAccelerated()) {
+            final int width = mRight - mLeft;
+            final int height = mBottom - mTop;
+
+            if (mTextDisplayList == null || !mTextDisplayList.isValid() ||
+                    !mTextDisplayListIsValid) {
+                if (mTextDisplayList == null) {
+                    mTextDisplayList = getHardwareRenderer().createDisplayList();
+                }
+
+                final HardwareCanvas hardwareCanvas = mTextDisplayList.start();
+                try {
+                    hardwareCanvas.setViewport(width, height);
+                    // The dirty rect should always be null for a display list
+                    hardwareCanvas.onPreDraw(null);
+                    layout.draw(hardwareCanvas, highlight, mHighlightPaint, cursorOffsetVertical);
+                } finally {
+                    hardwareCanvas.onPostDraw();
+                    mTextDisplayList.end();
+                    mTextDisplayListIsValid = true;
+                }
+            }
+            ((HardwareCanvas) canvas).drawDisplayList(mTextDisplayList,
+                    mScrollX + width, mScrollY + height, null);
+        } else {
+            layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
+        }
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
             canvas.translate((int) mMarquee.getGhostOffset(), 0.0f);
             layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
         }
-
-        /*  Comment out until we decide what to do about animations
-        if (currentTransformation != null) {
-            mTextPaint.setLinearTextOn(isLinearTextOn);
-        }
-        */
 
         canvas.restore();
     }
@@ -7562,6 +7581,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
+        mTextDisplayListIsValid = false;
     }
 
     /**
@@ -7641,6 +7661,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         updateSpellCheckSpans(start, start + after, false);
+        mTextDisplayListIsValid = false;
 
         // Hide the controllers as soon as text is modified (typing, procedural...)
         // We do not hide the span controllers, since they can be added when a new text is
@@ -7743,7 +7764,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (what instanceof UpdateAppearance || what instanceof ParagraphStyle) {
+        if (what instanceof UpdateAppearance || what instanceof ParagraphStyle ||
+                what instanceof CharacterStyle) {
             if (ims == null || ims.mBatchEditNesting == 0) {
                 invalidate();
                 mHighlightPathBogus = true;
@@ -7751,6 +7773,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 ims.mContentChanged = true;
             }
+            mTextDisplayListIsValid = false;
         }
 
         if (MetaKeyKeyListener.isMetaTracker(buf, what)) {

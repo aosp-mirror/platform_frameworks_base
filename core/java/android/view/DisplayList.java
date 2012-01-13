@@ -32,20 +32,20 @@ public abstract class DisplayList {
      * 
      * @return A canvas to record drawing operations.
      */
-    abstract HardwareCanvas start();
+    public abstract HardwareCanvas start();
 
     /**
      * Ends the recording for this display list. A display list cannot be
      * replayed if recording is not finished. 
      */
-    abstract void end();
+    public abstract void end();
 
     /**
      * Invalidates the display list, indicating that it should be repopulated
      * with new drawing commands prior to being used again. Calling this method
      * causes calls to {@link #isValid()} to return <code>false</code>.
      */
-    abstract void invalidate();
+    public abstract void invalidate();
 
     /**
      * Returns whether the display list is currently usable. If this returns false,
@@ -53,12 +53,12 @@ public abstract class DisplayList {
      *
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
-    abstract boolean isValid();
+    public abstract boolean isValid();
 
     /**
      * Return the amount of memory used by this display list.
      * 
      * @return The size of this display list in bytes
      */
-    abstract int getSize();
+    public abstract int getSize();
 }

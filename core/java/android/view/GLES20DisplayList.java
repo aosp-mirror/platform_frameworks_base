@@ -43,7 +43,7 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    HardwareCanvas start() {
+    public HardwareCanvas start() {
         if (mCanvas != null) {
             throw new IllegalStateException("Recording has already started");
         }
@@ -55,7 +55,7 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    void invalidate() {
+    public void invalidate() {
         if (mCanvas != null) {
             mCanvas.recycle();
             mCanvas = null;
@@ -64,12 +64,12 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    boolean isValid() {
+    public boolean isValid() {
         return mValid;
     }
 
     @Override
-    void end() {
+    public void end() {
         if (mCanvas != null) {
             if (mFinalizer != null) {
                 mCanvas.end(mFinalizer.mNativeDisplayList);
@@ -83,7 +83,7 @@ class GLES20DisplayList extends DisplayList {
     }
 
     @Override
-    int getSize() {
+    public int getSize() {
         if (mFinalizer == null) return 0;
         return GLES20Canvas.getDisplayListSize(mFinalizer.mNativeDisplayList);
     }
