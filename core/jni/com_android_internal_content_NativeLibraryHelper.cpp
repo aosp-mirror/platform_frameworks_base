@@ -283,6 +283,7 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
     const int N = zipFile.getNumEntries();
 
     char fileName[PATH_MAX];
+    bool hasPrimaryAbi = false;
 
     for (int i = 0; i < N; i++) {
         const ZipEntryRO entry = zipFile.findEntryByIndex(i);
@@ -318,11 +319,22 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
         if (cpuAbi.size() == cpuAbiRegionSize
                 && *(cpuAbiOffset + cpuAbi.size()) == '/'
                 && !strncmp(cpuAbiOffset, cpuAbi.c_str(), cpuAbiRegionSize)) {
-            LOGV("Using ABI %s\n", cpuAbi.c_str());
+            LOGV("Using primary ABI %s\n", cpuAbi.c_str());
+            hasPrimaryAbi = true;
         } else if (cpuAbi2.size() == cpuAbiRegionSize
                 && *(cpuAbiOffset + cpuAbi2.size()) == '/'
                 && !strncmp(cpuAbiOffset, cpuAbi2.c_str(), cpuAbiRegionSize)) {
-            LOGV("Using ABI %s\n", cpuAbi2.c_str());
+
+            /*
+             * If this library matches both the primary and secondary ABIs,
+             * only use the primary ABI.
+             */
+            if (hasPrimaryAbi) {
+                LOGV("Already saw primary ABI, skipping secondary ABI %s\n", cpuAbi2.c_str());
+                continue;
+            } else {
+                LOGV("Using secondary ABI %s\n", cpuAbi2.c_str());
+            }
         } else {
             LOGV("abi didn't match anything: %s (end at %zd)\n", cpuAbiOffset, cpuAbiRegionSize);
             continue;
