@@ -33,7 +33,7 @@
 #define  static_vo  static __inline__
 #else
 #define  static_vo  static __inline
-#endif 
+#endif
 
 #define saturate(L_var1) (((L_var1) > 0X00007fffL) ? (MAX_16): (((L_var1) < (Word32) 0xffff8000L) ? (MIN_16): ((L_var1) & 0xffff)))
 
@@ -87,7 +87,7 @@ static_vo Word32 L_shr (Word32 L_var1, Word16 var2);    	 	 	/* Long shift right
 static_vo Word32 L_shr_r (Word32 L_var1, Word16 var2); 				/* Long shift right with round,  3   */
 static_vo Word16 norm_s (Word16 var1);             				/* Short norm,           15  */
 static_vo Word16 div_s (Word16 var1, Word16 var2); 				/* Short division,       18  */
-static_vo Word16 norm_l (Word32 L_var1);           				/* Long norm,            30  */   
+static_vo Word16 norm_l (Word32 L_var1);           				/* Long norm,            30  */
 
 /*___________________________________________________________________________
 |                                                                           |
@@ -1030,8 +1030,8 @@ static_vo Word16 div_s (Word16 var1, Word16 var2)
 				L_num <<= 1;
 				if (L_num >= L_denom)
 				{
-					L_num -= L_denom;      
-					var_out += 1;          
+					L_num -= L_denom;
+					var_out += 1;
 				}
 			}
 		}

@@ -32,15 +32,15 @@ static void updateBitBufWordPtr(HANDLE_BIT_BUF hBitBuf,
                                 UWord8 **pBitBufWord,
                                 Word16   cnt)
 {
-  *pBitBufWord += cnt;                                                                  
+  *pBitBufWord += cnt;
 
-                                                                                        
+
   if(*pBitBufWord > hBitBuf->pBitBufEnd) {
-    *pBitBufWord -= (hBitBuf->pBitBufEnd - hBitBuf->pBitBufBase + 1);                   
+    *pBitBufWord -= (hBitBuf->pBitBufEnd - hBitBuf->pBitBufBase + 1);
   }
-                                                                                        
+
   if(*pBitBufWord < hBitBuf->pBitBufBase) {
-    *pBitBufWord += (hBitBuf->pBitBufEnd - hBitBuf->pBitBufBase + 1);                   
+    *pBitBufWord += (hBitBuf->pBitBufEnd - hBitBuf->pBitBufBase + 1);
   }
 }
 
@@ -57,18 +57,18 @@ HANDLE_BIT_BUF CreateBitBuffer(HANDLE_BIT_BUF hBitBuf,
 {
   assert(bitBufSize*8 <= 32768);
 
-  hBitBuf->pBitBufBase = pBitBufBase;                                                    
-  hBitBuf->pBitBufEnd  = pBitBufBase + bitBufSize - 1;                                  
+  hBitBuf->pBitBufBase = pBitBufBase;
+  hBitBuf->pBitBufEnd  = pBitBufBase + bitBufSize - 1;
 
-  hBitBuf->pWriteNext  = pBitBufBase;                                                    
+  hBitBuf->pWriteNext  = pBitBufBase;
 
   hBitBuf->cache       = 0;
-  
-  hBitBuf->wBitPos     = 0;                                                              
-  hBitBuf->cntBits     = 0;   
-  
-  hBitBuf->size        = (bitBufSize << 3);                                             
-  hBitBuf->isValid     = 1;                                                              
+
+  hBitBuf->wBitPos     = 0;
+  hBitBuf->cntBits     = 0;
+
+  hBitBuf->size        = (bitBufSize << 3);
+  hBitBuf->isValid     = 1;
 
   return hBitBuf;
 }
@@ -82,8 +82,8 @@ HANDLE_BIT_BUF CreateBitBuffer(HANDLE_BIT_BUF hBitBuf,
 void DeleteBitBuffer(HANDLE_BIT_BUF *hBitBuf)
 {
   if(*hBitBuf)
-	(*hBitBuf)->isValid = 0;                                                               
-  *hBitBuf = NULL;                                                                       
+	(*hBitBuf)->isValid = 0;
+  *hBitBuf = NULL;
 }
 
 /*****************************************************************************
@@ -96,15 +96,15 @@ void ResetBitBuf(HANDLE_BIT_BUF hBitBuf,
                  UWord8 *pBitBufBase,
                  Word16  bitBufSize)
 {
-  hBitBuf->pBitBufBase = pBitBufBase;                                                    
-  hBitBuf->pBitBufEnd  = pBitBufBase + bitBufSize - 1;                                  
+  hBitBuf->pBitBufBase = pBitBufBase;
+  hBitBuf->pBitBufEnd  = pBitBufBase + bitBufSize - 1;
 
-                                                 
-  hBitBuf->pWriteNext  = pBitBufBase;                                                    
 
-  hBitBuf->wBitPos     = 0;    
-  hBitBuf->cntBits     = 0;    
-  
+  hBitBuf->pWriteNext  = pBitBufBase;
+
+  hBitBuf->wBitPos     = 0;
+  hBitBuf->cntBits     = 0;
+
   hBitBuf->cache	   = 0;
 }
 
@@ -117,7 +117,7 @@ void ResetBitBuf(HANDLE_BIT_BUF hBitBuf,
 void CopyBitBuf(HANDLE_BIT_BUF hBitBufSrc,
                 HANDLE_BIT_BUF hBitBufDst)
 {
-  *hBitBufDst = *hBitBufSrc;                                                             
+  *hBitBufDst = *hBitBufSrc;
 }
 
 /*****************************************************************************
@@ -148,25 +148,25 @@ Word16 WriteBits(HANDLE_BIT_BUF hBitBuf,
   if(noBitsToWrite == 0)
 	  return noBitsToWrite;
 
-  hBitBuf->cntBits += noBitsToWrite;   
+  hBitBuf->cntBits += noBitsToWrite;
 
   wBitPos = hBitBuf->wBitPos;
   wBitPos += noBitsToWrite;
-  writeValue <<= 32 - wBitPos;	
+  writeValue <<= 32 - wBitPos;
   writeValue |= hBitBuf->cache;
-  
-  while (wBitPos >= 8) 
+
+  while (wBitPos >= 8)
   {
 	  UWord8 tmp;
 	  tmp = (UWord8)((writeValue >> 24) & 0xFF);
-	  
-	  *hBitBuf->pWriteNext++ = tmp;		
+
+	  *hBitBuf->pWriteNext++ = tmp;
 	  writeValue <<= 8;
 	  wBitPos -= 8;
   }
-  
+
   hBitBuf->wBitPos = wBitPos;
   hBitBuf->cache = writeValue;
-                                                                                     
+
   return noBitsToWrite;
 }

@@ -70,30 +70,30 @@ void Qpisf_2s_46b(
 	for (i = 0; i < ORDER; i++)
 	{
 		isf[i] = vo_sub(isf1[i], mean_isf[i]);
-		isf[i] = vo_sub(isf[i], vo_mult(MU, past_isfq[i])); 
+		isf[i] = vo_sub(isf[i], vo_mult(MU, past_isfq[i]));
 	}
 
 	VQ_stage1(&isf[0], dico1_isf, 9, SIZE_BK1, surv1, nb_surv);
 
-	distance = MAX_32;          
+	distance = MAX_32;
 
 	for (k = 0; k < nb_surv; k++)
 	{
 		for (i = 0; i < 9; i++)
 		{
-			isf_stage2[i] = vo_sub(isf[i], dico1_isf[i + surv1[k] * 9]); 
+			isf_stage2[i] = vo_sub(isf[i], dico1_isf[i + surv1[k] * 9]);
 		}
-		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico21_isf, 3, SIZE_BK21, &min_err); 
+		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico21_isf, 3, SIZE_BK21, &min_err);
 		temp = min_err;
-		tmp_ind[1] = Sub_VQ(&isf_stage2[3], dico22_isf, 3, SIZE_BK22, &min_err); 
+		tmp_ind[1] = Sub_VQ(&isf_stage2[3], dico22_isf, 3, SIZE_BK22, &min_err);
 		temp = vo_L_add(temp, min_err);
-		tmp_ind[2] = Sub_VQ(&isf_stage2[6], dico23_isf, 3, SIZE_BK23, &min_err);  
+		tmp_ind[2] = Sub_VQ(&isf_stage2[6], dico23_isf, 3, SIZE_BK23, &min_err);
 		temp = vo_L_add(temp, min_err);
 
 		if(temp < distance)
 		{
-			distance = temp;               
-			indice[0] = surv1[k];          
+			distance = temp;
+			indice[0] = surv1[k];
 			for (i = 0; i < 3; i++)
 			{
 				indice[i + 2] = tmp_ind[i];
@@ -104,24 +104,24 @@ void Qpisf_2s_46b(
 
 	VQ_stage1(&isf[9], dico2_isf, 7, SIZE_BK2, surv1, nb_surv);
 
-	distance = MAX_32;                   
+	distance = MAX_32;
 
 	for (k = 0; k < nb_surv; k++)
 	{
 		for (i = 0; i < 7; i++)
 		{
-			isf_stage2[i] = vo_sub(isf[9 + i], dico2_isf[i + surv1[k] * 7]);       
+			isf_stage2[i] = vo_sub(isf[9 + i], dico2_isf[i + surv1[k] * 7]);
 		}
 
 		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico24_isf, 3, SIZE_BK24, &min_err);
-		temp = min_err; 
+		temp = min_err;
 		tmp_ind[1] = Sub_VQ(&isf_stage2[3], dico25_isf, 4, SIZE_BK25, &min_err);
 		temp = vo_L_add(temp, min_err);
 
 		if(temp < distance)
 		{
-			distance = temp;               
-			indice[1] = surv1[k];          
+			distance = temp;
+			indice[1] = surv1[k];
 			for (i = 0; i < 2; i++)
 			{
 				indice[i + 5] = tmp_ind[i];
@@ -165,24 +165,24 @@ void Qpisf_2s_36b(
 
 	VQ_stage1(&isf[0], dico1_isf, 9, SIZE_BK1, surv1, nb_surv);
 
-	distance = MAX_32;                  
+	distance = MAX_32;
 
 	for (k = 0; k < nb_surv; k++)
 	{
 		for (i = 0; i < 9; i++)
 		{
-			isf_stage2[i] = vo_sub(isf[i], dico1_isf[i + surv1[k] * 9]); 
+			isf_stage2[i] = vo_sub(isf[i], dico1_isf[i + surv1[k] * 9]);
 		}
 
-		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico21_isf_36b, 5, SIZE_BK21_36b, &min_err);        
-		temp = min_err;                  
-		tmp_ind[1] = Sub_VQ(&isf_stage2[5], dico22_isf_36b, 4, SIZE_BK22_36b, &min_err);        
+		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico21_isf_36b, 5, SIZE_BK21_36b, &min_err);
+		temp = min_err;
+		tmp_ind[1] = Sub_VQ(&isf_stage2[5], dico22_isf_36b, 4, SIZE_BK22_36b, &min_err);
 		temp = vo_L_add(temp, min_err);
 
 		if(temp < distance)
 		{
-			distance = temp;               
-			indice[0] = surv1[k];          
+			distance = temp;
+			indice[0] = surv1[k];
 			for (i = 0; i < 2; i++)
 			{
 				indice[i + 2] = tmp_ind[i];
@@ -191,23 +191,23 @@ void Qpisf_2s_36b(
 	}
 
 	VQ_stage1(&isf[9], dico2_isf, 7, SIZE_BK2, surv1, nb_surv);
-	distance = MAX_32;                    
+	distance = MAX_32;
 
 	for (k = 0; k < nb_surv; k++)
 	{
 		for (i = 0; i < 7; i++)
 		{
-			isf_stage2[i] = vo_sub(isf[9 + i], dico2_isf[i + surv1[k] * 7]);     
+			isf_stage2[i] = vo_sub(isf[9 + i], dico2_isf[i + surv1[k] * 7]);
 		}
 
-		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico23_isf_36b, 7, SIZE_BK23_36b, &min_err);  
-		temp = min_err;                  
+		tmp_ind[0] = Sub_VQ(&isf_stage2[0], dico23_isf_36b, 7, SIZE_BK23_36b, &min_err);
+		temp = min_err;
 
 		if(temp < distance)
 		{
-			distance = temp;               
-			indice[1] = surv1[k];          
-			indice[4] = tmp_ind[0];        
+			distance = temp;
+			indice[1] = surv1[k];
+			indice[4] = tmp_ind[0];
 		}
 	}
 
@@ -239,32 +239,32 @@ void Dpisf_2s_46b(
 	{
 		for (i = 0; i < 9; i++)
 		{
-			isf_q[i] = dico1_isf[indice[0] * 9 + i];    
+			isf_q[i] = dico1_isf[indice[0] * 9 + i];
 		}
 		for (i = 0; i < 7; i++)
 		{
-			isf_q[i + 9] = dico2_isf[indice[1] * 7 + i];       
+			isf_q[i + 9] = dico2_isf[indice[1] * 7 + i];
 		}
 
 		for (i = 0; i < 3; i++)
 		{
-			isf_q[i] = add1(isf_q[i], dico21_isf[indice[2] * 3 + i]);   
-			isf_q[i + 3] = add1(isf_q[i + 3], dico22_isf[indice[3] * 3 + i]);  
-			isf_q[i + 6] = add1(isf_q[i + 6], dico23_isf[indice[4] * 3 + i]); 
-			isf_q[i + 9] = add1(isf_q[i + 9], dico24_isf[indice[5] * 3 + i]); 
+			isf_q[i] = add1(isf_q[i], dico21_isf[indice[2] * 3 + i]);
+			isf_q[i + 3] = add1(isf_q[i + 3], dico22_isf[indice[3] * 3 + i]);
+			isf_q[i + 6] = add1(isf_q[i + 6], dico23_isf[indice[4] * 3 + i]);
+			isf_q[i + 9] = add1(isf_q[i + 9], dico24_isf[indice[5] * 3 + i]);
 		}
 
 		for (i = 0; i < 4; i++)
 		{
-			isf_q[i + 12] = add1(isf_q[i + 12], dico25_isf[indice[6] * 4 + i]);  
+			isf_q[i + 12] = add1(isf_q[i + 12], dico25_isf[indice[6] * 4 + i]);
 		}
 
 		for (i = 0; i < ORDER; i++)
 		{
-			tmp = isf_q[i];               
-			isf_q[i] = add1(tmp, mean_isf[i]);  
+			tmp = isf_q[i];
+			isf_q[i] = add1(tmp, mean_isf[i]);
 			isf_q[i] = add1(isf_q[i], vo_mult(MU, past_isfq[i]));
-			past_isfq[i] = tmp;  
+			past_isfq[i] = tmp;
 		}
 
 		if (enc_dec)
@@ -273,9 +273,9 @@ void Dpisf_2s_46b(
 			{
 				for (j = (L_MEANBUF - 1); j > 0; j--)
 				{
-					isf_buf[j * M + i] = isf_buf[(j - 1) * M + i]; 
+					isf_buf[j * M + i] = isf_buf[(j - 1) * M + i];
 				}
-				isf_buf[i] = isf_q[i]; 
+				isf_buf[i] = isf_q[i];
 			}
 		}
 	} else
@@ -293,14 +293,14 @@ void Dpisf_2s_46b(
 		/* use the past ISFs slightly shifted towards their mean */
 		for (i = 0; i < ORDER; i++)
 		{
-			isf_q[i] = add1(vo_mult(ALPHA, isfold[i]), vo_mult(ONE_ALPHA, ref_isf[i])); 
+			isf_q[i] = add1(vo_mult(ALPHA, isfold[i]), vo_mult(ONE_ALPHA, ref_isf[i]));
 		}
 
 		/* estimate past quantized residual to be used in next frame */
 		for (i = 0; i < ORDER; i++)
 		{
 			tmp = add1(ref_isf[i], vo_mult(past_isfq[i], MU));      /* predicted ISF */
-			past_isfq[i] = vo_sub(isf_q[i], tmp); 
+			past_isfq[i] = vo_sub(isf_q[i], tmp);
 			past_isfq[i] = (past_isfq[i] >> 1);        /* past_isfq[i] *= 0.5 */
 		}
 	}
@@ -332,32 +332,32 @@ void Dpisf_2s_36b(
 	{
 		for (i = 0; i < 9; i++)
 		{
-			isf_q[i] = dico1_isf[indice[0] * 9 + i];    
+			isf_q[i] = dico1_isf[indice[0] * 9 + i];
 		}
 		for (i = 0; i < 7; i++)
 		{
-			isf_q[i + 9] = dico2_isf[indice[1] * 7 + i];       
+			isf_q[i + 9] = dico2_isf[indice[1] * 7 + i];
 		}
 
 		for (i = 0; i < 5; i++)
 		{
-			isf_q[i] = add1(isf_q[i], dico21_isf_36b[indice[2] * 5 + i]);       
+			isf_q[i] = add1(isf_q[i], dico21_isf_36b[indice[2] * 5 + i]);
 		}
 		for (i = 0; i < 4; i++)
 		{
-			isf_q[i + 5] = add1(isf_q[i + 5], dico22_isf_36b[indice[3] * 4 + i]);        
+			isf_q[i + 5] = add1(isf_q[i + 5], dico22_isf_36b[indice[3] * 4 + i]);
 		}
 		for (i = 0; i < 7; i++)
 		{
-			isf_q[i + 9] = add1(isf_q[i + 9], dico23_isf_36b[indice[4] * 7 + i]);       
+			isf_q[i + 9] = add1(isf_q[i + 9], dico23_isf_36b[indice[4] * 7 + i]);
 		}
 
 		for (i = 0; i < ORDER; i++)
 		{
 			tmp = isf_q[i];
-			isf_q[i] = add1(tmp, mean_isf[i]);   
-			isf_q[i] = add1(isf_q[i], vo_mult(MU, past_isfq[i]));   
-			past_isfq[i] = tmp;           
+			isf_q[i] = add1(tmp, mean_isf[i]);
+			isf_q[i] = add1(isf_q[i], vo_mult(MU, past_isfq[i]));
+			past_isfq[i] = tmp;
 		}
 
 
@@ -367,9 +367,9 @@ void Dpisf_2s_36b(
 			{
 				for (j = (L_MEANBUF - 1); j > 0; j--)
 				{
-					isf_buf[j * M + i] = isf_buf[(j - 1) * M + i];      
+					isf_buf[j * M + i] = isf_buf[(j - 1) * M + i];
 				}
-				isf_buf[i] = isf_q[i];    
+				isf_buf[i] = isf_q[i];
 			}
 		}
 	} else
@@ -381,20 +381,20 @@ void Dpisf_2s_36b(
 			{
 				L_tmp += (isf_buf[j * M + i] << 14);
 			}
-			ref_isf[i] = vo_round(L_tmp);    
+			ref_isf[i] = vo_round(L_tmp);
 		}
 
 		/* use the past ISFs slightly shifted towards their mean */
 		for (i = 0; i < ORDER; i++)
 		{
-			isf_q[i] = add1(vo_mult(ALPHA, isfold[i]), vo_mult(ONE_ALPHA, ref_isf[i]));        
+			isf_q[i] = add1(vo_mult(ALPHA, isfold[i]), vo_mult(ONE_ALPHA, ref_isf[i]));
 		}
 
 		/* estimate past quantized residual to be used in next frame */
 		for (i = 0; i < ORDER; i++)
 		{
 			tmp = add1(ref_isf[i], vo_mult(past_isfq[i], MU));      /* predicted ISF */
-			past_isfq[i] = vo_sub(isf_q[i], tmp);  
+			past_isfq[i] = vo_sub(isf_q[i], tmp);
 			past_isfq[i] = past_isfq[i] >> 1;         /* past_isfq[i] *= 0.5 */
 		}
 	}
@@ -424,15 +424,15 @@ void Reorder_isf(
 		Word16 n                              /* (i)      : number of ISF                        */
 		)
 {
-	Word32 i; 
+	Word32 i;
 	Word16 isf_min;
 
-	isf_min = min_dist;                    
+	isf_min = min_dist;
 	for (i = 0; i < n - 1; i++)
 	{
 		if(isf[i] < isf_min)
 		{
-			isf[i] = isf_min;              
+			isf[i] = isf_min;
 		}
 		isf_min = (isf[i] + min_dist);
 	}
@@ -452,13 +452,13 @@ Word16 Sub_VQ(                             /* output: return quantization index 
 	Word32 i, j, index;
 	Word32 dist_min, dist;
 
-	dist_min = MAX_32;                     
-	p_dico = dico;                         
+	dist_min = MAX_32;
+	p_dico = dico;
 
-	index = 0;                             
+	index = 0;
 	for (i = 0; i < dico_size; i++)
 	{
-		dist = 0;  
+		dist = 0;
 
 		for (j = 0; j < dim; j++)
 		{
@@ -468,18 +468,18 @@ Word16 Sub_VQ(                             /* output: return quantization index 
 
 		if(dist < dist_min)
 		{
-			dist_min = dist;               
-			index = i;                     
+			dist_min = dist;
+			index = i;
 		}
 	}
 
-	*distance = dist_min;                  
+	*distance = dist_min;
 
 	/* Reading the selected vector */
-	p_dico = &dico[index * dim];           
+	p_dico = &dico[index * dim];
 	for (j = 0; j < dim; j++)
 	{
-		x[j] = *p_dico++;                  
+		x[j] = *p_dico++;
 	}
 
 	return index;
@@ -508,11 +508,11 @@ static void VQ_stage1(
 	index[2] = 2;
 	index[3] = 3;
 
-	p_dico = dico;                         
+	p_dico = dico;
 
 	for (i = 0; i < dico_size; i++)
 	{
-		dist = 0;                          
+		dist = 0;
 		for (j = 0; j < dim; j++)
 		{
 			temp = x[j] -  (*p_dico++);
@@ -525,11 +525,11 @@ static void VQ_stage1(
 			{
 				for (l = surv - 1; l > k; l--)
 				{
-					dist_min[l] = dist_min[l - 1];      
-					index[l] = index[l - 1];    
+					dist_min[l] = dist_min[l - 1];
+					index[l] = index[l - 1];
 				}
-				dist_min[k] = dist;        
-				index[k] = i;              
+				dist_min[k] = dist;
+				index[k] = i;
 				break;
 			}
 		}

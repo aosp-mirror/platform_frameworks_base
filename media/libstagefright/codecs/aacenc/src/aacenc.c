@@ -48,7 +48,7 @@ VO_U32 VO_API voAACEncInit(VO_HANDLE * phCodec,VO_AUDIO_CODINGTYPE vType, VO_COD
 
 	interMem = 0;
 	error = 0;
-	
+
 	/* init the memory operator */
 	if(pUserData == NULL || pUserData->memflag != VO_IMF_USERMEMOPERATOR || pUserData->memData == NULL )
 	{
@@ -113,7 +113,7 @@ VO_U32 VO_API voAACEncInit(VO_HANDLE * phCodec,VO_AUDIO_CODINGTYPE vType, VO_COD
 		{
 			mem_free(pMemOP, hAacEnc, VO_INDEX_ENC_AAC);
 			hAacEnc = NULL;
-		}		
+		}
 		*phCodec = NULL;
 		return VO_ERR_OUTOF_MEMORY;
 	}
@@ -168,9 +168,9 @@ VO_U32 VO_API voAACEncSetInputData(VO_HANDLE hCodec, VO_CODECBUFFER * pInput)
 	{
 		return VO_ERR_INVALID_ARG;
 	}
-	
+
 	hAacEnc = (AAC_ENCODER *)hCodec;
-	
+
 	/* init input pcm buffer and length*/
 	hAacEnc->inbuf = (short *)pInput->Buffer;
 	hAacEnc->inlen = pInput->Length / sizeof(short);
@@ -178,12 +178,12 @@ VO_U32 VO_API voAACEncSetInputData(VO_HANDLE hCodec, VO_CODECBUFFER * pInput)
 
 	hAacEnc->encbuf = hAacEnc->inbuf;
 	hAacEnc->enclen = hAacEnc->inlen;
-	
+
 	/* rebuild intra pcm buffer and length*/
 	if(hAacEnc->intlen)
 	{
 		length = min(hAacEnc->config.nChannelsIn*AACENC_BLOCKSIZE - hAacEnc->intlen, hAacEnc->inlen);
-		hAacEnc->voMemop->Copy(VO_INDEX_ENC_AAC, hAacEnc->intbuf + hAacEnc->intlen, 
+		hAacEnc->voMemop->Copy(VO_INDEX_ENC_AAC, hAacEnc->intbuf + hAacEnc->intlen,
 			hAacEnc->inbuf, length*sizeof(short));
 
 		hAacEnc->encbuf = hAacEnc->intbuf;
@@ -192,7 +192,7 @@ VO_U32 VO_API voAACEncSetInputData(VO_HANDLE hCodec, VO_CODECBUFFER * pInput)
 		hAacEnc->inbuf += length;
 		hAacEnc->inlen -= length;
 	}
-	
+
 	return VO_ERR_NONE;
 }
 
@@ -219,11 +219,11 @@ VO_U32 VO_API voAACEncGetOutputData(VO_HANDLE hCodec, VO_CODECBUFFER * pOutput, 
 	 /* check the input pcm buffer and length*/
 	 if(NULL == hAacEnc->encbuf || hAacEnc->enclen < inbuflen)
 	 {
-		length = hAacEnc->enclen;		
+		length = hAacEnc->enclen;
 		if(hAacEnc->intlen == 0)
-		{	
-			hAacEnc->voMemop->Copy(VO_INDEX_ENC_AAC, hAacEnc->intbuf, 
-				hAacEnc->encbuf, length*sizeof(short));		
+		{
+			hAacEnc->voMemop->Copy(VO_INDEX_ENC_AAC, hAacEnc->intbuf,
+				hAacEnc->encbuf, length*sizeof(short));
 			hAacEnc->uselength += length*sizeof(short);
 		}
 		else
@@ -236,7 +236,7 @@ VO_U32 VO_API voAACEncGetOutputData(VO_HANDLE hCodec, VO_CODECBUFFER * pOutput, 
 		pOutput->Length = 0;
 		if(pOutInfo)
 			pOutInfo->InputUsed = hAacEnc->uselength;
-		return VO_ERR_INPUT_BUFFER_SMALL;	
+		return VO_ERR_INPUT_BUFFER_SMALL;
 	 }
 
 	 /* check the output aac buffer and length*/
@@ -254,7 +254,7 @@ VO_U32 VO_API voAACEncGetOutputData(VO_HANDLE hCodec, VO_CODECBUFFER * pOutput, 
 	 /* update the input pcm buffer and length*/
 	 if(hAacEnc->intlen)
 	 {
-		length = inbuflen - hAacEnc->intlen;		
+		length = inbuflen - hAacEnc->intlen;
 		hAacEnc->encbuf = hAacEnc->inbuf;
 		hAacEnc->enclen = hAacEnc->inlen;
 		hAacEnc->uselength += length*sizeof(short);
@@ -265,7 +265,7 @@ VO_U32 VO_API voAACEncGetOutputData(VO_HANDLE hCodec, VO_CODECBUFFER * pOutput, 
 		 hAacEnc->encbuf = hAacEnc->encbuf + inbuflen;
 		 hAacEnc->enclen = hAacEnc->enclen - inbuflen;
 		 hAacEnc->uselength += inbuflen*sizeof(short);
-	 }	 
+	 }
 
 	 /* update the output aac information */
 	if(pOutInfo)
@@ -287,7 +287,7 @@ VO_U32 VO_API voAACEncGetOutputData(VO_HANDLE hCodec, VO_CODECBUFFER * pOutput, 
 VO_U32 VO_API voAACEncUninit(VO_HANDLE hCodec)
 {
 	AAC_ENCODER* hAacEnc = (AAC_ENCODER*)hCodec;
-	
+
 	if(NULL != hAacEnc)
 	{
 		/* close the aac encoder */
@@ -296,7 +296,7 @@ VO_U32 VO_API voAACEncUninit(VO_HANDLE hCodec)
 		/* free the aac encoder handle*/
 		mem_free(hAacEnc->voMemop, hAacEnc, VO_INDEX_ENC_AAC);
 		hAacEnc = NULL;
-	}	
+	}
 
 	return VO_ERR_NONE;
 }
@@ -319,7 +319,7 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 
 	if(NULL == hAacEnc)
 		return VO_ERR_INVALID_ARG;
-	
+
 	switch(uParamID)
 	{
 	case VO_PID_AAC_ENCPARAM:  /* init aac encoder parameter*/
@@ -354,11 +354,11 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 		SampleRateIdx = i;
 
 		tmp = 441;
-		if(config.sampleRate%8000 == 0) 
+		if(config.sampleRate%8000 == 0)
 			tmp =480;
 		/* check the bitrate */
 		if(config.bitRate!=0 && (config.bitRate/config.nChannelsOut < 4000) ||
-           (config.bitRate/config.nChannelsOut > 160000) || 
+           (config.bitRate/config.nChannelsOut > 160000) ||
 		   (config.bitRate > config.sampleRate*6*config.nChannelsOut))
 		{
 			config.bitRate = 640*config.sampleRate/tmp*config.nChannelsOut;
@@ -385,7 +385,7 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 
 		/* init aac encoder core */
 		ret = AacEncOpen(hAacEnc, config);
-		if(ret) 
+		if(ret)
 			return VO_ERR_AUDIO_UNSFEATURE;
 		break;
 	case VO_PID_AUDIO_FORMAT:	/* init pcm channel and samplerate*/
@@ -426,7 +426,7 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 
 		/* update the bitrates */
 		tmp = 441;
-		if(config.sampleRate%8000 == 0) 
+		if(config.sampleRate%8000 == 0)
 			tmp =480;
 
 		config.bitRate = 640*config.sampleRate/tmp*config.nChannelsOut;
@@ -449,10 +449,10 @@ VO_U32 VO_API voAACEncSetParam(VO_HANDLE hCodec, VO_S32 uParamID, VO_PTR pData)
 		}
 
 		config.bandWidth = BandwithCoefTab[i][SampleRateIdx];
-		
+
 		/* init aac encoder core */
 		ret = AacEncOpen(hAacEnc, config);
-		if(ret) 
+		if(ret)
 			return VO_ERR_AUDIO_UNSFEATURE;
 		break;
 	default:
@@ -483,7 +483,7 @@ VO_S32 VO_API voGetAACEncAPI(VO_AUDIO_CODECAPI * pDecHandle)
 {
 	if(pDecHandle == NULL)
 		return VO_ERR_INVALID_ARG;
-		
+
 	pDecHandle->Init = voAACEncInit;
 	pDecHandle->SetInputData = voAACEncSetInputData;
 	pDecHandle->GetOutputData = voAACEncGetOutputData;

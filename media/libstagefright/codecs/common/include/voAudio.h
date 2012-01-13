@@ -135,7 +135,7 @@ typedef struct VO_AUDIO_CODECAPI
 	 * \param pOutInfo [OUT] The codec fills audio format and the input data size used in current call.
 	 *						 pOutInfo->InputUsed is total used input data size in byte.
 	 * \retval  VO_ERR_NONE Succeeded.
-	 *			VO_ERR_INPUT_BUFFER_SMALL. The input was finished or the input data was not enought. Continue to input 
+	 *			VO_ERR_INPUT_BUFFER_SMALL. The input was finished or the input data was not enought. Continue to input
 	 *										data before next call.
 	 */
 	VO_U32 (VO_API * GetOutputData) (VO_HANDLE hCodec, VO_CODECBUFFER * pOutBuffer, VO_AUDIO_OUTPUTINFO * pOutInfo);

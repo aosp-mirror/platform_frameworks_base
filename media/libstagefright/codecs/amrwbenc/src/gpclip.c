@@ -22,7 +22,7 @@
 *      case occurs                                                        *
 *      a resonance on LPC filter(lp_disp < 60Hz)                          *
 *      a good pitch prediction (lp_gp > 0.95)                             *
-*                                                                         *   
+*                                                                         *
 ***************************************************************************/
 #include "typedef.h"
 #include "basic_op.h"
@@ -38,8 +38,8 @@ void Init_gp_clip(
 		Word16 mem[]                          /* (o) : memory of gain of pitch clipping algorithm */
 		)
 {
-	mem[0] = DIST_ISF_MAX;                 
-	mem[1] = GAIN_PIT_MIN;                 
+	mem[0] = DIST_ISF_MAX;
+	mem[1] = GAIN_PIT_MIN;
 }
 
 
@@ -49,7 +49,7 @@ Word16 Gp_clip(
 {
 	Word16 clip = 0;
 	if ((mem[0] < DIST_ISF_THRES) && (mem[1] > GAIN_PIT_THRES))
-		clip = 1;                          
+		clip = 1;
 
 	return (clip);
 }
@@ -70,7 +70,7 @@ void Gp_clip_test_isf(
 		dist = vo_sub(isf[i], isf[i - 1]);
 		if(dist < dist_min)
 		{
-			dist_min = dist;               
+			dist_min = dist;
 		}
 	}
 
@@ -78,9 +78,9 @@ void Gp_clip_test_isf(
 
 	if (dist > DIST_ISF_MAX)
 	{
-		dist = DIST_ISF_MAX;               
+		dist = DIST_ISF_MAX;
 	}
-	mem[0] = dist;                        
+	mem[0] = dist;
 
 	return;
 }
@@ -100,9 +100,9 @@ void Gp_clip_test_gain_pit(
 
 	if(gain < GAIN_PIT_MIN)
 	{
-		gain = GAIN_PIT_MIN;              
+		gain = GAIN_PIT_MIN;
 	}
-	mem[1] = gain;                         
+	mem[1] = gain;
 	return;
 }
 
