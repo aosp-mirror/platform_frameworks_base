@@ -1029,8 +1029,10 @@ public abstract class DataConnectionTracker extends Handler {
                     didDisable = true;
                 }
             }
-            if (didDisable && enabledCount == 0) {
-                onCleanUpConnection(true, apnId, Phone.REASON_DATA_DISABLED);
+            if (didDisable) {
+                if (enabledCount == 0) {
+                    onCleanUpConnection(true, apnId, Phone.REASON_DATA_DISABLED);
+                }
 
                 // send the disconnect msg manually, since the normal route wont send
                 // it (it's not enabled)
