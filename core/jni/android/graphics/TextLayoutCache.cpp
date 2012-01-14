@@ -659,6 +659,13 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
             continue;
         }
 
+#if DEBUG_GLYPHS
+        ALOGD("Returned logclusters");
+        for (size_t i = 0; i < mShaperItem.num_glyphs; i++) {
+            ALOGD("         -- lc[%d] = %d, hb-adv[%d] = %0.2f", i, mShaperItem.log_clusters[i],
+                    i, HBFixedToFloat(mShaperItem.advances[i]));
+        }
+#endif
         // Get Advances and their total
         jfloat currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[0]]);
         jfloat totalFontRunAdvance = currentAdvance;
@@ -670,11 +677,14 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
                 outAdvances->add(0);
             } else {
                 currentAdvance = HBFixedToFloat(mShaperItem.advances[mShaperItem.log_clusters[i]]);
-                totalFontRunAdvance += currentAdvance;
                 outAdvances->add(currentAdvance);
             }
         }
-
+        // TODO: can be removed and go back in the previous loop when Harfbuzz log clusters are fixed
+        for (size_t i = 1; i < mShaperItem.num_glyphs; i++) {
+            currentAdvance = HBFixedToFloat(mShaperItem.advances[i]);
+            totalFontRunAdvance += currentAdvance;
+        }
         totalAdvance += totalFontRunAdvance;
 
 #if DEBUG_ADVANCES
@@ -684,7 +694,6 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
                     (*outAdvances)[i], mShaperItem.log_clusters[i], totalFontRunAdvance);
         }
 #endif
-
         // Get Glyphs and reverse them in place if RTL
         if (outGlyphs) {
             size_t countGlyphs = mShaperItem.num_glyphs;
