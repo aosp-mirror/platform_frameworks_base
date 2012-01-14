@@ -113,6 +113,8 @@ public class WifiStateMachine extends StateMachine {
     private static final String SOFTAP_IFACE = "wl0.1";
 
     private WifiMonitor mWifiMonitor;
+    private WifiNative mWifiNative;
+    private WifiConfigStore mWifiConfigStore;
     private INetworkManagementService mNwService;
     private ConnectivityManager mCm;
 
@@ -554,11 +556,14 @@ public class WifiStateMachine extends StateMachine {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         mNwService = INetworkManagementService.Stub.asInterface(b);
 
-        mWifiMonitor = new WifiMonitor(this);
+        mWifiNative = new WifiNative(mInterfaceName);
+        mWifiConfigStore = new WifiConfigStore(context, mWifiNative);
+        mWifiMonitor = new WifiMonitor(this, mWifiNative);
         mDhcpInfoInternal = new DhcpInfoInternal();
         mWifiInfo = new WifiInfo();
-        mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
-        mWpsStateMachine = new WpsStateMachine(context, this, getHandler());
+        mSupplicantStateTracker = new SupplicantStateTracker(context, this, mWifiConfigStore,
+                getHandler());
+        mWpsStateMachine = new WpsStateMachine(context, this, mWifiConfigStore, getHandler());
         mLinkProperties = new LinkProperties();
 
         WifiApConfigStore wifiApConfigStore = WifiApConfigStore.makeWifiApConfigStore(
@@ -571,9 +576,6 @@ public class WifiStateMachine extends StateMachine {
         mLastBssid = null;
         mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         mLastSignalLevel = -1;
-
-        /* Set default interface for all primary socket communication */
-        WifiNative.setDefaultInterface(mInterfaceName);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent scanIntent = new Intent(ACTION_START_SCAN, null);
@@ -1044,7 +1046,7 @@ public class WifiStateMachine extends StateMachine {
      * Returns the wifi configuration file
      */
     public String getConfigFile() {
-        return WifiConfigStore.getConfigFile();
+        return mWifiConfigStore.getConfigFile();
     }
 
     /**
@@ -1118,9 +1120,9 @@ public class WifiStateMachine extends StateMachine {
         sb.append("mReconnectCount ").append(mReconnectCount).append(LS);
         sb.append("mIsScanMode ").append(mIsScanMode).append(LS);
         sb.append("Supplicant status").append(LS)
-                .append(WifiNative.status()).append(LS).append(LS);
+                .append(mWifiNative.status()).append(LS).append(LS);
 
-        sb.append(WifiConfigStore.dump());
+        sb.append(mWifiConfigStore.dump());
         return sb.toString();
     }
 
@@ -1413,7 +1415,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private String fetchSSID() {
-        String status = WifiNative.status();
+        String status = mWifiNative.status();
         if (status == null) {
             return null;
         }
@@ -1436,7 +1438,7 @@ public class WifiStateMachine extends StateMachine {
         int newRssi = -1;
         int newLinkSpeed = -1;
 
-        String signalPoll = WifiNative.signalPoll();
+        String signalPoll = mWifiNative.signalPoll();
 
         if (signalPoll != null) {
             String[] lines = signalPoll.split("\n");
@@ -1486,28 +1488,28 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void setHighPerfModeEnabledNative(boolean enable) {
-        if(!WifiNative.setSuspendOptimizations(!enable)) {
+        if(!mWifiNative.setSuspendOptimizations(!enable)) {
             loge("set suspend optimizations failed!");
         }
         if (enable) {
-            if (!WifiNative.setPowerMode(POWER_MODE_ACTIVE)) {
+            if (!mWifiNative.setPowerMode(POWER_MODE_ACTIVE)) {
                 loge("set power mode active failed!");
             }
         } else {
-            if (!WifiNative.setPowerMode(POWER_MODE_AUTO)) {
+            if (!mWifiNative.setPowerMode(POWER_MODE_AUTO)) {
                 loge("set power mode auto failed!");
             }
         }
     }
 
     private void configureLinkProperties() {
-        if (WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-            mLinkProperties = WifiConfigStore.getLinkProperties(mLastNetworkId);
+        if (mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            mLinkProperties = mWifiConfigStore.getLinkProperties(mLastNetworkId);
         } else {
             synchronized (mDhcpInfoInternal) {
                 mLinkProperties = mDhcpInfoInternal.makeLinkProperties();
             }
-            mLinkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
+            mLinkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
         }
         mLinkProperties.setInterfaceName(mInterfaceName);
         if (DBG) {
@@ -1648,7 +1650,7 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo.setLinkSpeed(-1);
 
         setNetworkDetailedState(DetailedState.DISCONNECTED);
-        WifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
+        mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
 
         /* send event to CM & network change broadcast */
         sendNetworkStateChangeBroadcast(mLastBssid);
@@ -1656,8 +1658,8 @@ public class WifiStateMachine extends StateMachine {
         /* Clear network properties */
         mLinkProperties.clear();
         /* Clear IP settings if the network used DHCP */
-        if (!WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-            WifiConfigStore.clearIpConfiguration(mLastNetworkId);
+        if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            mWifiConfigStore.clearIpConfiguration(mLastNetworkId);
         }
 
         mLastBssid= null;
@@ -1683,29 +1685,29 @@ public class WifiStateMachine extends StateMachine {
              * coexistence would interrupt that connection.
              */
             // Disable the coexistence mode
-            WifiNative.setBluetoothCoexistenceMode(
-                    WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
+            mWifiNative.setBluetoothCoexistenceMode(
+                    mWifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
         }
 
-        mPowerMode =  WifiNative.getPowerMode();
+        mPowerMode =  mWifiNative.getPowerMode();
         if (mPowerMode < 0) {
             // Handle the case where supplicant driver does not support
             // getPowerModeCommand.
             mPowerMode = WifiStateMachine.POWER_MODE_AUTO;
         }
         if (mPowerMode != WifiStateMachine.POWER_MODE_ACTIVE) {
-            WifiNative.setPowerMode(WifiStateMachine.POWER_MODE_ACTIVE);
+            mWifiNative.setPowerMode(WifiStateMachine.POWER_MODE_ACTIVE);
         }
     }
 
 
     void handlePostDhcpSetup() {
         /* restore power mode */
-        WifiNative.setPowerMode(mPowerMode);
+        mWifiNative.setPowerMode(mPowerMode);
 
         // Set the coexistence mode back to its default value
-        WifiNative.setBluetoothCoexistenceMode(
-                WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
+        mWifiNative.setBluetoothCoexistenceMode(
+                mWifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
     }
 
     private void handleSuccessfulIpConfiguration(DhcpInfoInternal dhcpInfoInternal) {
@@ -1714,13 +1716,13 @@ public class WifiStateMachine extends StateMachine {
         }
         mLastSignalLevel = -1; // force update of signal strength
         mReconnectCount = 0; //Reset IP failure tracking
-        WifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
+        mWifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
         InetAddress addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
         mWifiInfo.setInetAddress(addr);
         if (getNetworkDetailedState() == DetailedState.CONNECTED) {
             //DHCP renewal in connected state
             LinkProperties linkProperties = dhcpInfoInternal.makeLinkProperties();
-            linkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
+            linkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
             linkProperties.setInterfaceName(mInterfaceName);
             if (!linkProperties.equals(mLinkProperties)) {
                 if (DBG) {
@@ -1733,7 +1735,7 @@ public class WifiStateMachine extends StateMachine {
         } else {
             configureLinkProperties();
             setNetworkDetailedState(DetailedState.CONNECTED);
-            WifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
+            mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
             sendNetworkStateChangeBroadcast(mLastBssid);
         }
     }
@@ -1749,7 +1751,7 @@ public class WifiStateMachine extends StateMachine {
         if (++mReconnectCount > getMaxDhcpRetries()) {
             loge("Failed " +
                     mReconnectCount + " times, Disabling " + mLastNetworkId);
-            WifiConfigStore.disableNetwork(mLastNetworkId,
+            mWifiConfigStore.disableNetwork(mLastNetworkId,
                     WifiConfiguration.DISABLED_DHCP_FAILURE);
             mReconnectCount = 0;
         }
@@ -1757,8 +1759,8 @@ public class WifiStateMachine extends StateMachine {
         /* DHCP times out after about 30 seconds, we do a
          * disconnect and an immediate reconnect to try again
          */
-        WifiNative.disconnect();
-        WifiNative.reconnect();
+        mWifiNative.disconnect();
+        mWifiNative.reconnect();
     }
 
     /* Current design is to not set the config on a running hostapd but instead
@@ -1826,7 +1828,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_GET_CONFIGURED_NETWORKS:
                     mReplyChannel.replyToMessage(message, message.what,
-                            WifiConfigStore.getConfiguredNetworks());
+                            mWifiConfigStore.getConfiguredNetworks());
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
@@ -1913,7 +1915,7 @@ public class WifiStateMachine extends StateMachine {
             // 50021 wifi_state_changed (custom|1|5)
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
-            if (WifiNative.isDriverLoaded()) {
+            if (mWifiNative.isDriverLoaded()) {
                 transitionTo(mDriverLoadedState);
             }
             else {
@@ -1966,7 +1968,7 @@ public class WifiStateMachine extends StateMachine {
                             break;
                     }
 
-                    if(WifiNative.loadDriver()) {
+                    if(mWifiNative.loadDriver()) {
                         if (DBG) log("Driver load successful");
                         sendMessage(CMD_LOAD_DRIVER_SUCCESS);
                     } else {
@@ -2054,7 +2056,7 @@ public class WifiStateMachine extends StateMachine {
                         loge("Unable to change interface settings: " + ie);
                     }
 
-                    if(WifiNative.startSupplicant()) {
+                    if(mWifiNative.startSupplicant()) {
                         if (DBG) log("Supplicant start successful");
                         mWifiMonitor.startMonitoring();
                         transitionTo(mSupplicantStartingState);
@@ -2086,7 +2088,7 @@ public class WifiStateMachine extends StateMachine {
                 public void run() {
                     if (DBG) log(getName() + message.toString() + "\n");
                     mWakeLock.acquire();
-                    if(WifiNative.unloadDriver()) {
+                    if(mWifiNative.unloadDriver()) {
                         if (DBG) log("Driver unload successful");
                         sendMessage(CMD_UNLOAD_DRIVER_SUCCESS);
 
@@ -2217,9 +2219,9 @@ public class WifiStateMachine extends StateMachine {
                     mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
                     mLastSignalLevel = -1;
 
-                    mWifiInfo.setMacAddress(WifiNative.getMacAddress());
+                    mWifiInfo.setMacAddress(mWifiNative.getMacAddress());
 
-                    WifiConfigStore.initialize(mContext);
+                    mWifiConfigStore.initialize();
 
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
@@ -2227,7 +2229,7 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     if (++mSupplicantRestartCount <= SUPPLICANT_RESTART_TRIES) {
                         loge("Failed to setup control channel, restart supplicant");
-                        WifiNative.killSupplicant();
+                        mWifiNative.killSupplicant();
                         transitionTo(mDriverLoadedState);
                         sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     } else {
@@ -2276,7 +2278,7 @@ public class WifiStateMachine extends StateMachine {
             long supplicantScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     mDefaultSupplicantScanIntervalMs);
-            WifiNative.setScanInterval((int)supplicantScanIntervalMs / 1000);
+            mWifiNative.setScanInterval((int)supplicantScanIntervalMs / 1000);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2289,8 +2291,8 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
                     loge("Connection lost, restart supplicant");
-                    WifiNative.killSupplicant();
-                    WifiNative.closeSupplicantConnection();
+                    mWifiNative.killSupplicant();
+                    mWifiNative.closeSupplicantConnection();
                     mNetworkInfo.setIsAvailable(false);
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
@@ -2301,46 +2303,46 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     eventLoggingEnabled = false;
-                    setScanResults(WifiNative.scanResults());
+                    setScanResults(mWifiNative.scanResults());
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
                     break;
                 case CMD_PING_SUPPLICANT:
-                    boolean ok = WifiNative.ping();
+                    boolean ok = mWifiNative.ping();
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ADD_OR_UPDATE_NETWORK:
                     config = (WifiConfiguration) message.obj;
                     mReplyChannel.replyToMessage(message, CMD_ADD_OR_UPDATE_NETWORK,
-                            WifiConfigStore.addOrUpdateNetwork(config));
+                            mWifiConfigStore.addOrUpdateNetwork(config));
                     break;
                 case CMD_REMOVE_NETWORK:
-                    ok = WifiConfigStore.removeNetwork(message.arg1);
+                    ok = mWifiConfigStore.removeNetwork(message.arg1);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_NETWORK:
-                    ok = WifiConfigStore.enableNetwork(message.arg1, message.arg2 == 1);
+                    ok = mWifiConfigStore.enableNetwork(message.arg1, message.arg2 == 1);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_ALL_NETWORKS:
                     long time =  android.os.SystemClock.elapsedRealtime();
                     if (time - mLastEnableAllNetworksTime > MIN_INTERVAL_ENABLE_ALL_NETWORKS_MS) {
-                        WifiConfigStore.enableAllNetworks();
+                        mWifiConfigStore.enableAllNetworks();
                         mLastEnableAllNetworksTime = time;
                     }
                     break;
                 case CMD_DISABLE_NETWORK:
-                    ok = WifiConfigStore.disableNetwork(message.arg1, message.arg2);
+                    ok = mWifiConfigStore.disableNetwork(message.arg1, message.arg2);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_BLACKLIST_NETWORK:
-                    WifiNative.addToBlacklist((String)message.obj);
+                    mWifiNative.addToBlacklist((String)message.obj);
                     break;
                 case CMD_CLEAR_BLACKLIST:
-                    WifiNative.clearBlacklist();
+                    mWifiNative.clearBlacklist();
                     break;
                 case CMD_SAVE_CONFIG:
-                    ok = WifiConfigStore.saveConfig();
+                    ok = mWifiConfigStore.saveConfig();
                     mReplyChannel.replyToMessage(message, CMD_SAVE_CONFIG, ok ? SUCCESS : FAILURE);
 
                     // Inform the backup manager about a data change
@@ -2364,10 +2366,10 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_SAVE_NETWORK:
                     config = (WifiConfiguration) message.obj;
-                    WifiConfigStore.saveNetwork(config);
+                    mWifiConfigStore.saveNetwork(config);
                     break;
                 case CMD_FORGET_NETWORK:
-                    WifiConfigStore.forgetNetwork(message.arg1);
+                    mWifiConfigStore.forgetNetwork(message.arg1);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2390,7 +2392,7 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
             if (DBG) log("stopping supplicant");
-            if (!WifiNative.stopSupplicant()) {
+            if (!mWifiNative.stopSupplicant()) {
                 loge("Failed to stop supplicant");
             }
 
@@ -2417,15 +2419,15 @@ public class WifiStateMachine extends StateMachine {
                     /* Socket connection can be lost when we do a graceful shutdown
                      * or when the driver is hung. Ensure supplicant is stopped here.
                      */
-                    WifiNative.killSupplicant();
-                    WifiNative.closeSupplicantConnection();
+                    mWifiNative.killSupplicant();
+                    mWifiNative.closeSupplicantConnection();
                     transitionTo(mDriverLoadedState);
                     break;
                 case CMD_STOP_SUPPLICANT_FAILED:
                     if (message.arg1 == mSupplicantStopFailureToken) {
                         loge("Timed out on a supplicant stop, kill and proceed");
-                        WifiNative.killSupplicant();
-                        WifiNative.closeSupplicantConnection();
+                        mWifiNative.killSupplicant();
+                        mWifiNative.closeSupplicantConnection();
                         transitionTo(mDriverLoadedState);
                     }
                     break;
@@ -2516,7 +2518,7 @@ public class WifiStateMachine extends StateMachine {
              * When this mode is on, some of the low-level scan parameters used by the
              * driver are changed to reduce interference with bluetooth
              */
-            WifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
+            mWifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
             /* set country code */
             setCountryCode();
             /* set frequency band of operation */
@@ -2525,26 +2527,26 @@ public class WifiStateMachine extends StateMachine {
             setNetworkDetailedState(DetailedState.DISCONNECTED);
 
             /* Remove any filtering on Multicast v6 at start */
-            WifiNative.stopFilteringMulticastV6Packets();
+            mWifiNative.stopFilteringMulticastV6Packets();
 
             /* Reset Multicast v4 filtering state */
             if (mFilteringMulticastV4Packets.get()) {
-                WifiNative.startFilteringMulticastV4Packets();
+                mWifiNative.startFilteringMulticastV4Packets();
             } else {
-                WifiNative.stopFilteringMulticastV4Packets();
+                mWifiNative.stopFilteringMulticastV4Packets();
             }
 
             if (mIsScanMode) {
-                WifiNative.setScanResultHandling(SCAN_ONLY_MODE);
-                WifiNative.disconnect();
+                mWifiNative.setScanResultHandling(SCAN_ONLY_MODE);
+                mWifiNative.disconnect();
                 transitionTo(mScanModeState);
             } else {
-                WifiNative.setScanResultHandling(CONNECT_MODE);
-                WifiNative.reconnect();
+                mWifiNative.setScanResultHandling(CONNECT_MODE);
+                mWifiNative.reconnect();
                 // Status pulls in the current supplicant state and network connection state
                 // events over the monitor connection. This helps framework sync up with
                 // current supplicant state
-                WifiNative.status();
+                mWifiNative.status();
                 transitionTo(mDisconnectedState);
             }
         }
@@ -2555,17 +2557,17 @@ public class WifiStateMachine extends StateMachine {
             switch(message.what) {
                 case CMD_SET_SCAN_TYPE:
                     mSetScanActive = (message.arg1 == SCAN_ACTIVE);
-                    WifiNative.setScanMode(mSetScanActive);
+                    mWifiNative.setScanMode(mSetScanActive);
                     break;
                 case CMD_START_SCAN:
                     eventLoggingEnabled = false;
                     boolean forceActive = (message.arg1 == SCAN_ACTIVE);
                     if (forceActive && !mSetScanActive) {
-                        WifiNative.setScanMode(forceActive);
+                        mWifiNative.setScanMode(forceActive);
                     }
-                    WifiNative.scan();
+                    mWifiNative.scan();
                     if (forceActive && !mSetScanActive) {
-                        WifiNative.setScanMode(mSetScanActive);
+                        mWifiNative.setScanMode(mSetScanActive);
                     }
                     mScanResultIsPending = true;
                     break;
@@ -2575,14 +2577,14 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     if (DBG) log("set country code " + country);
-                    if (!WifiNative.setCountryCode(country.toUpperCase())) {
+                    if (!mWifiNative.setCountryCode(country.toUpperCase())) {
                         loge("Failed to set country code " + country);
                     }
                     break;
                 case CMD_SET_FREQUENCY_BAND:
                     int band =  message.arg1;
                     if (DBG) log("set frequency band " + band);
-                    if (WifiNative.setBand(band)) {
+                    if (mWifiNative.setBand(band)) {
                         mFrequencyBand.set(band);
                         //Fetch the latest scan results when frequency band is set
                         startScan(true);
@@ -2593,7 +2595,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
                     mBluetoothConnectionActive = (message.arg1 !=
                             BluetoothAdapter.STATE_DISCONNECTED);
-                    WifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
+                    mWifiNative.setBluetoothCoexistenceScanMode(mBluetoothConnectionActive);
                     break;
                 case CMD_STOP_DRIVER:
                     int mode = message.arg1;
@@ -2626,28 +2628,28 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DELAYED_STOP_DRIVER:
                     if (message.arg1 != mDelayedStopCounter) break;
                     if (getCurrentState() != mDisconnectedState) {
-                        WifiNative.disconnect();
+                        mWifiNative.disconnect();
                         handleNetworkDisconnect();
                     }
                     mWakeLock.acquire();
-                    WifiNative.stopDriver();
+                    mWifiNative.stopDriver();
                     transitionTo(mDriverStoppingState);
                     mWakeLock.release();
                     break;
                 case CMD_START_PACKET_FILTERING:
                     if (message.arg1 == MULTICAST_V6) {
-                        WifiNative.startFilteringMulticastV6Packets();
+                        mWifiNative.startFilteringMulticastV6Packets();
                     } else if (message.arg1 == MULTICAST_V4) {
-                        WifiNative.startFilteringMulticastV4Packets();
+                        mWifiNative.startFilteringMulticastV4Packets();
                     } else {
                         loge("Illegal arugments to CMD_START_PACKET_FILTERING");
                     }
                     break;
                 case CMD_STOP_PACKET_FILTERING:
                     if (message.arg1 == MULTICAST_V6) {
-                        WifiNative.stopFilteringMulticastV6Packets();
+                        mWifiNative.stopFilteringMulticastV6Packets();
                     } else if (message.arg1 == MULTICAST_V4) {
-                        WifiNative.stopFilteringMulticastV4Packets();
+                        mWifiNative.stopFilteringMulticastV4Packets();
                     } else {
                         loge("Illegal arugments to CMD_STOP_PACKET_FILTERING");
                     }
@@ -2729,7 +2731,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_START_DRIVER:
                     mWakeLock.acquire();
-                    WifiNative.startDriver();
+                    mWifiNative.startDriver();
                     mWakeLock.release();
                     transitionTo(mDriverStartingState);
                     break;
@@ -2756,8 +2758,8 @@ public class WifiStateMachine extends StateMachine {
                         /* Ignore */
                         return HANDLED;
                     } else {
-                        WifiNative.setScanResultHandling(message.arg1);
-                        WifiNative.reconnect();
+                        mWifiNative.setScanResultHandling(message.arg1);
+                        mWifiNative.reconnect();
                         mIsScanMode = false;
                         transitionTo(mDisconnectedState);
                     }
@@ -2824,13 +2826,13 @@ public class WifiStateMachine extends StateMachine {
                     break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
-                    WifiNative.disconnect();
+                    mWifiNative.disconnect();
                     break;
                 case CMD_RECONNECT:
-                    WifiNative.reconnect();
+                    mWifiNative.reconnect();
                     break;
                 case CMD_REASSOCIATE:
-                    WifiNative.reassociate();
+                    mWifiNative.reassociate();
                     break;
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
@@ -2844,15 +2846,15 @@ public class WifiStateMachine extends StateMachine {
                      * a connection to the enabled network.
                      */
                     if (config != null) {
-                        netId = WifiConfigStore.selectNetwork(config);
+                        netId = mWifiConfigStore.selectNetwork(config);
                     } else {
-                        WifiConfigStore.selectNetwork(netId);
+                        mWifiConfigStore.selectNetwork(netId);
                     }
 
                     /* The state tracker handles enabling networks upon completion/failure */
                     mSupplicantStateTracker.sendMessage(CMD_CONNECT_NETWORK);
 
-                    WifiNative.reconnect();
+                    mWifiNative.reconnect();
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
@@ -2862,7 +2864,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
-                    WifiNative.setScanResultHandling(CONNECT_MODE);
+                    mWifiNative.setScanResultHandling(CONNECT_MODE);
                     /* Handle scan results */
                     return NOT_HANDLED;
                 case WifiMonitor.NETWORK_CONNECTION_EVENT:
@@ -2907,14 +2909,14 @@ public class WifiStateMachine extends StateMachine {
                 loge("Failed to enable IPv6: " + e);
             }
 
-            if (!WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
                 //start DHCP
                 mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
                         mContext, WifiStateMachine.this, mInterfaceName);
                 mDhcpStateMachine.registerForPreDhcpNotification();
                 mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
             } else {
-                DhcpInfoInternal dhcpInfoInternal = WifiConfigStore.getIpConfiguration(
+                DhcpInfoInternal dhcpInfoInternal = mWifiConfigStore.getIpConfiguration(
                         mLastNetworkId);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
                 ifcg.setLinkAddress(dhcpInfoInternal.makeLinkAddress());
@@ -2960,7 +2962,7 @@ public class WifiStateMachine extends StateMachine {
                   transitionTo(mDisconnectingState);
                   break;
               case CMD_DISCONNECT:
-                  WifiNative.disconnect();
+                  mWifiNative.disconnect();
                   transitionTo(mDisconnectingState);
                   break;
                   /* Ignore connection to same network */
@@ -3027,7 +3029,7 @@ public class WifiStateMachine extends StateMachine {
                   }
                   break;
                 case CMD_DISCONNECT:
-                    WifiNative.disconnect();
+                    mWifiNative.disconnect();
                     transitionTo(mDisconnectingState);
                     break;
                 case CMD_SET_SCAN_MODE:
@@ -3043,7 +3045,7 @@ public class WifiStateMachine extends StateMachine {
                      * When scan results are received, the mode is switched
                      * back to CONNECT_MODE.
                      */
-                    WifiNative.setScanResultHandling(SCAN_ONLY_MODE);
+                    mWifiNative.setScanResultHandling(SCAN_ONLY_MODE);
                     /* Have the parent state handle the rest */
                     return NOT_HANDLED;
                     /* Ignore connection to same network */
@@ -3055,7 +3057,7 @@ public class WifiStateMachine extends StateMachine {
                     return NOT_HANDLED;
                 case CMD_SAVE_NETWORK:
                     WifiConfiguration config = (WifiConfiguration) message.obj;
-                    NetworkUpdateResult result = WifiConfigStore.saveNetwork(config);
+                    NetworkUpdateResult result = mWifiConfigStore.saveNetwork(config);
                     if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
                         if (result.hasIpChanged()) {
                             log("Reconfiguring IP on connection");
@@ -3111,7 +3113,7 @@ public class WifiStateMachine extends StateMachine {
              * is in SCAN_ONLY_MODE. Restore CONNECT_MODE on exit
              */
             if (mScanResultIsPending) {
-                WifiNative.setScanResultHandling(CONNECT_MODE);
+                mWifiNative.setScanResultHandling(CONNECT_MODE);
             }
         }
     }
@@ -3192,7 +3194,7 @@ public class WifiStateMachine extends StateMachine {
                  * cleared
                  */
                 if (!mScanResultIsPending) {
-                    WifiNative.enableBackgroundScan(true);
+                    mWifiNative.enableBackgroundScan(true);
                 }
             } else {
                 setScanAlarm(true);
@@ -3204,9 +3206,9 @@ public class WifiStateMachine extends StateMachine {
             switch (message.what) {
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
-                        WifiNative.setScanResultHandling(message.arg1);
+                        mWifiNative.setScanResultHandling(message.arg1);
                         //Supplicant disconnect to prevent further connects
-                        WifiNative.disconnect();
+                        mWifiNative.disconnect();
                         mIsScanMode = true;
                         transitionTo(mScanModeState);
                     }
@@ -3214,10 +3216,10 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
                     if (mEnableBackgroundScan) {
-                        WifiNative.enableBackgroundScan(true);
+                        mWifiNative.enableBackgroundScan(true);
                         setScanAlarm(false);
                     } else {
-                        WifiNative.enableBackgroundScan(false);
+                        mWifiNative.enableBackgroundScan(false);
                         setScanAlarm(true);
                     }
                     break;
@@ -3232,14 +3234,14 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_SCAN:
                     /* Disable background scan temporarily during a regular scan */
                     if (mEnableBackgroundScan) {
-                        WifiNative.enableBackgroundScan(false);
+                        mWifiNative.enableBackgroundScan(false);
                     }
                     /* Handled in parent state */
                     return NOT_HANDLED;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Re-enable background scan when a pending scan result is received */
                     if (mEnableBackgroundScan && mScanResultIsPending) {
-                        WifiNative.enableBackgroundScan(true);
+                        mWifiNative.enableBackgroundScan(true);
                     }
                     /* Handled in parent state */
                     return NOT_HANDLED;
@@ -3254,7 +3256,7 @@ public class WifiStateMachine extends StateMachine {
         public void exit() {
             /* No need for a background scan upon exit from a disconnected state */
             if (mEnableBackgroundScan) {
-                WifiNative.enableBackgroundScan(false);
+                mWifiNative.enableBackgroundScan(false);
             }
             setScanAlarm(false);
         }

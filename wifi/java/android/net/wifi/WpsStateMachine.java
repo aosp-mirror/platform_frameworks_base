@@ -52,6 +52,7 @@ class WpsStateMachine extends StateMachine {
     private static final boolean DBG = false;
 
     private WifiStateMachine mWifiStateMachine;
+    private WifiConfigStore mWifiConfigStore;
 
     private WpsInfo mWpsInfo;
 
@@ -62,11 +63,12 @@ class WpsStateMachine extends StateMachine {
     private State mInactiveState = new InactiveState();
     private State mActiveState = new ActiveState();
 
-    public WpsStateMachine(Context context, WifiStateMachine wsm, Handler target) {
-        super(TAG, target.getLooper());
+    public WpsStateMachine(Context context, WifiStateMachine wsm, WifiConfigStore wcs, Handler t) {
+        super(TAG, t.getLooper());
 
         mContext = context;
         mWifiStateMachine = wsm;
+        mWifiConfigStore = wcs;
         addState(mDefaultState);
             addState(mInactiveState, mDefaultState);
             addState(mActiveState, mDefaultState);
@@ -97,13 +99,13 @@ class WpsStateMachine extends StateMachine {
                     WpsResult result;
                     switch (mWpsInfo.setup) {
                         case WpsInfo.PBC:
-                            result = WifiConfigStore.startWpsPbc(mWpsInfo);
+                            result = mWifiConfigStore.startWpsPbc(mWpsInfo);
                             break;
                         case WpsInfo.KEYPAD:
-                            result = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsInfo);
+                            result = mWifiConfigStore.startWpsWithPinFromAccessPoint(mWpsInfo);
                             break;
                         case WpsInfo.DISPLAY:
-                            result = WifiConfigStore.startWpsWithPinFromDevice(mWpsInfo);
+                            result = mWifiConfigStore.startWpsWithPinFromDevice(mWpsInfo);
                             break;
                         default:
                             result = new WpsResult(Status.FAILURE);
@@ -151,9 +153,9 @@ class WpsStateMachine extends StateMachine {
                              * and the configuration list needs to be reloaded from the supplicant.
                              */
                             Log.d(TAG, "WPS set up successful");
-                            WifiConfigStore.enableAllNetworks();
-                            WifiConfigStore.loadConfiguredNetworks();
-                            WifiConfigStore.updateIpAndProxyFromWpsConfig(
+                            mWifiConfigStore.enableAllNetworks();
+                            mWifiConfigStore.loadConfiguredNetworks();
+                            mWifiConfigStore.updateIpAndProxyFromWpsConfig(
                                     stateChangeResult.networkId, mWpsInfo);
                             mWifiStateMachine.sendMessage(WifiStateMachine.WPS_COMPLETED_EVENT);
                             transitionTo(mInactiveState);
@@ -161,7 +163,7 @@ class WpsStateMachine extends StateMachine {
                         case INACTIVE:
                             /* A failed WPS connection */
                             Log.d(TAG, "WPS set up failed, enabling other networks");
-                            WifiConfigStore.enableAllNetworks();
+                            mWifiConfigStore.enableAllNetworks();
                             mWifiStateMachine.sendMessage(WifiStateMachine.WPS_COMPLETED_EVENT);
                             transitionTo(mInactiveState);
                             break;
