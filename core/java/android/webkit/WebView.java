@@ -3742,6 +3742,8 @@ public class WebView extends AbsoluteLayout
         nativeScrollLayer(mCurrentScrollingLayerId, x, y);
         mScrollingLayerRect.left = x;
         mScrollingLayerRect.top = y;
+        mWebViewCore.sendMessage(WebViewCore.EventHub.SCROLL_LAYER, mCurrentScrollingLayerId,
+                mScrollingLayerRect);
         onScrollChanged(mScrollX, mScrollY, mScrollX, mScrollY);
         invalidate();
     }

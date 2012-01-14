@@ -1097,6 +1097,8 @@ public final class WebViewCore {
 
         static final int HEARTBEAT = 197;
 
+        static final int SCROLL_LAYER = 198;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1708,6 +1710,11 @@ public final class WebViewCore {
                                 mBrowserFrame.stringByEvaluatingJavaScriptFromString((String) msg.obj);
                             }
                             break;
+                        case SCROLL_LAYER:
+                            int nativeLayer = msg.arg1;
+                            Rect rect = (Rect) msg.obj;
+                            nativeScrollLayer(mNativeClass, nativeLayer,
+                                    rect);
                     }
                 }
             };
