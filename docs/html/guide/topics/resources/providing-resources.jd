@@ -231,6 +231,9 @@ for which these resources are to be used (defined in table 2).</li>
     </ul>
     <p>You can append more than one <em>{@code &lt;qualifier&gt;}</em>. Separate each
 one with a dash.</p>
+    <p class="caution"><strong>Caution:</strong> When appending multiple qualifiers, you must
+place them in the same order in which they are listed in table 2. If the qualifiers are ordered
+wrong, the resources are ignored.</p>
   </li>
   <li>Save the respective alternative resources in this new directory. The resource files must be
 named exactly the same as the default resource files.</li>
@@ -254,20 +257,14 @@ screen density, but the filenames are exactly
 the same. This way, the resource ID that you use to reference the {@code icon.png} or {@code
 background.png} image is always the same, but Android selects the
 version of each resource that best matches the current device, by comparing the device
-configuration information with the qualifiers in the alternative resource directory name.</p>
+configuration information with the qualifiers in the resource directory name.</p>
 
 <p>Android supports several configuration qualifiers and you can
 add multiple qualifiers to one directory name, by separating each qualifier with a dash. Table 2
 lists the valid configuration qualifiers, in order of precedence&mdash;if you use multiple
-qualifiers for one resource directory, they must be added to the directory name in the order they
+qualifiers for a resource directory, you must add them to the directory name in the order they
 are listed in the table.</p>
 
-<p class="note"><strong>Note:</strong> Some configuration qualifiers were added after Android 1.0,
-so not
-all versions of Android support all the qualifiers listed in table 2. New qualifiers
-indicate the version in which they were added. To avoid any issues, always include a set of default
-resources for resources that your application uses. For more information, see the section about <a
-href="#Compatibility">Providing the Best Device Compatibility with Resources</a>.</p>
 
 <p class="table-caption" id="table2"><strong>Table 2.</strong> Configuration qualifier
 names.</p>
@@ -750,6 +747,17 @@ href="#KnownIssues">Known Issues</a> for more information.</p>
       </td>
     </tr>
 </table>
+
+
+<p class="note"><strong>Note:</strong> Some configuration qualifiers have been added since Android
+1.0, so not all versions of Android support all the qualifiers. Using a new qualifier implicitly
+adds the platform version qualifier so that older devices are sure to ignore it. For example, using
+a <code>w600dp</code> qualifier will automatically include the <code>v13</code> qualifier, because
+the available-width qualifier was new in API level 13. To avoid any issues, always include a set of
+default resources (a set of resources with <em>no qualifiers</em>). For more information, see the
+section about <a href="#Compatibility">Providing the Best Device Compatibility with
+Resources</a>.</p>
+
 
 
 <h3 id="QualifierRules">Qualifier name rules</h3>
