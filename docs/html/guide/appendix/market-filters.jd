@@ -398,8 +398,8 @@ country (as determined by SIM carrier) in which paid apps are available.</p></td
       the device's SIM (for GSM devices), not the current roaming carrier.</p></li></ul>
 </td> </tr> <tr>
   <td valign="top">Native Platform</td> <td valign="top"><p>An application that includes native
-    libraries that target a specific platform (ARM EABI v7, for example) will only be
-    visible on devices that support that platform. For details about the NDK and using
+    libraries that target a specific platform (ARM EABI v7 or x86, for example) are
+    visible only on devices that support that platform. For details about the NDK and using
     native libraries, see <a href="{@docRoot}sdk/ndk/index.html#overview">What is the
       Android NDK?</a></p> </tr> <tr>
         <td valign="top">Copy-Protected Applications</td> <td valign="top"><p>To
