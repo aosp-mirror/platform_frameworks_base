@@ -40,7 +40,7 @@ parent.link=index.html
       <li><a href=#reusing_tip>Handle case where no activity matches</a></li>
       <li><a href=#activity_launching_tip>Consider how to launch your activities</a></li>
       <li><a href=#activities_added_to_task_tip>Allow activities to add to current task</a></li>
-      <li><a href=#notifications_get_back_tip>Notifications should let user easily get back</li>
+      <li><a href=#notifications_get_back_tip>Notifications and App Widgets should provide consistent back behavior</li>
       <li><a href=#use_notification_tip>Use the notification system</a></li>
       <li><a href=#taking_over_back_key>Don't take over BACK key unless you absolutely need to</a></li>
     </ol>
@@ -1063,110 +1063,23 @@ MAIN and
 </p>
 
     
-<h3 id="notifications_get_back_tip">Notifications should let the user easily get back to the previous activity</h3>
+<h3 id="notifications_get_back_tip">Notifications and App Widgets should provide consistent back behavior</h3>
 <p>
-  Applications that are in the background or not running can have
-  services that send out notifications to the user letting them know about
-  events of interest. Two examples are Calendar, which can send out notifications of
-  upcoming events, and Email, which can send out notifications when new
-  messages arrive. One of the user interface guidelines is that when the
-  user is in activity A, gets a notification for activity B and
-  picks that notification, when they press the BACK key, they should
-  go back to activity A.&nbsp;
+  Notifications and app widgets are two common ways that a user can launch
+  your app through something besides its main icon in Launcher.  You must
+  take care when implementing these so that the user has a consistent experience
+  with the back button, not causing surprises in where they return to or the
+  state the application ends up in.
 </p>
 
 <p>
-  The following scenario shows how the activity stack should work
-  when the user responds to a notification.
-</p>
-
-<ol>
-  <li>
-    User is creating a new event in Calendar. They realize they
-    need to copy part of an email message into this event
-  </li>
-  <li>
-    The user chooses Home &gt; Gmail
-  </li>
-  <li>
-    While in Gmail, they receive a notification from Calendar for an upcoming meeting
-  </li>
-  <li>
-    So they choose that notification, which takes them to a
-    dedicated Calendar activity that displays brief details of the
-    upcoming meeting
-  </li>
-  <li>
-    The user chooses this short notice to view further details
-  </li>
-  <li>
-    When done viewing the event, the user presses the BACK
-    key. They should be taken to Gmail, which is where they were
-    when they took the notification
-  </li>
-</ol>
-
-<p>
-This behavior doesn't necessarily happen by default.
-</p>
-
-<p>
-Notifications generally happen primarily in one of two ways:
-</p>
-
-  <ul>
-    <li>
-      <b>The chosen activity is dedicated for notification only</b> -
-      For example, when the user receives a
-      Calendar notification, choosing that
-      notification starts a special activity that displays a list
-      of upcoming calendar events &mdash; this view is available only
-      from the notification, not through the Calendar's own user
-      interface. After viewing this upcoming event, to ensure that
-      the user pressing the BACK key will return to the activity
-      the user was in when they picked the notification, you would
-      make sure this dedicated activity does not have the same
-      task affinity as the Calendar or any other activity. (You do
-      this by setting task affinity to the empty string, which
-      means it has no affinity to anything.) The explanation for
-      this follows.
-
-      <p>
-      Because of the way tasks work, if the taskAffinity of the
-      dedicated activity is kept as its default, then pressing the
-      BACK key (in step 6, above) would go to Calendar, rather
-      than Gmail. The reason is that, by default, all activities
-      in a given application have the same task
-      affinity. Therefore, the task affinity of the dedicated
-      activity matches the Calendar task, which is already running
-      in step 1. This means in step 4, choosing the notification
-      brings the existing Calendar event (in step 1) forward and
-      starts the dedicated activity on top of it.  This is not
-      what you want to have happen. Setting the dedicated
-      activity's taskAffinity to empty string fixes this.
-      </p>
-    </li>
-
-    <li>
-      <b>The chosen activity is not dedicated, but always comes to
-      the foreground in its initial state</b> - For example, in
-      response to a notification, when the Gmail application comes
-      to the foreground, it always presents the list of conversations.
-      You can ensure this happens by setting a "clear top" flag in the
-      intent that the notification triggers.  This ensures that when the
-      activity is launched, it displays its initial activity, preventing
-      Gmail from coming to the foreground in whatever state the user last
-      happened to be viewing it. (To do this, you put {@link
-      android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP
-      FLAG_ACTIVITY_CLEAR_TOP} in the intent you pass to startActivity()). 
-    </li>
-  </ul>
-
-<p>
-  There are other ways to handle notifications, such as bringing the
-  activity to the foreground, set to display specific data, such as
-  displaying the text message thread for the person who just sent a
-  new text message.
+  The
+  <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#HandlingNotifications">Handling
+  Notifications</a> section of the developer guide's
+  <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>
+  documentation provides an overview of how to write code to correctly handle
+  notification.  This dicussion applies equally to handling interactions with
+  app widgets.
 </p>
 
 <p>

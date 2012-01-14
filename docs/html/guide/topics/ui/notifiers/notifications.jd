@@ -16,6 +16,7 @@ user clicks it</li>
     <h2>In this document</h2>
     <ol>
       <li><a href="#Basics">The Basics</a></li>
+      <li><a href="#HandlingNotifications">Responding to Notifications</a></li>
       <li><a href="#ManageYourNotifications">Managing your Notifications</a></li>
       <li><a href="#CreateANotification">Creating a Notification</a>
         <ol>
@@ -136,6 +137,138 @@ mNotificationManager.notify(HELLO_ID, notification);
   </li>
 </ol>
 
+
+<h2 id="HandlingNotifications">Responding to Notifications</h2>
+
+<p>A central part of the user's experience with a notification revolves around
+how it interacts with the application's UI flow.  You must implement
+this correctly to provide a consistent user experience within your app.</p>
+
+<p>Two typical examples of notifications are provided by Calendar, which can send out
+notifications of upcoming events, and Email, which can send out notifications
+when new messages arrive.  These represent the two recommended patterns for handling
+notifications: either launching into an activity that is separate from the
+main application, or launching an entirely new instance of the application
+showing the appropriate point for the notification.</p>
+
+<p>The following scenario shows how the activity stack should work
+in these two typical notification flows, first handling a Calendar notification:
+</p>
+
+<ol>
+  <li>User is creating a new event in Calendar. They realize they
+    need to copy part of an email message into this event.
+  </li>
+  <li>
+    The user chooses Home &gt; Email.
+  </li>
+  <li>
+    While in Email, they receive a notification from Calendar for an upcoming
+    meeting.
+  </li>
+  <li>
+    So they choose that notification, which takes them to a
+    dedicated Calendar activity that displays brief details of the
+    upcoming meeting.
+  </li>
+  <li>
+    The user has seen enough to know they have a meeting coming up,
+    so they press the BACK button.  They are now returned to Email, which
+    is where they were when they took the notification.
+  </li>
+</ol>
+
+<p>Handling an Email notification:</p>
+
+<ol>
+  <li>
+    The user is currently in Email composing a message, and needs to
+    check a date in their calendar.
+  </li>
+  <li>
+    The user chooses Home &gt; Calendar.
+  </li>
+  <li>
+    While in Calendar, they receive a notification from Email about a new
+    message.
+  </li>
+  <li>
+    They select the notification, which brings them to Email with the message
+    details displayed.  This has replaced what they were previously doing
+    (writing an e-mail), but that message is still saved in their drafts.
+  </li>
+  <li>
+    The user presses BACK once to go to the message list (the typical flow in the
+    Email app), and press BACK again to return to Calendar as they left it.
+  </li>
+</ol>
+
+<p>In an Email style of notification, the UI launched by the notification
+shows the main application in a state representing that notification.
+For example, when the Email application comes to the foreground from its
+notification, it displays either the conversion list or a specific
+conversation depending on whether there are multiple or only one new
+email.  To achieve this, we want to completely replace whatever current
+state the application is in with a new activity stack representing the
+new notification state.</p>
+
+<p>The following code illustrates how to show this kind of notification.  Of
+most interest is the <code>makeMessageIntentStack()</code> method, which constructs
+an array of intents representing the app's new activity stack for this state.
+(If you are using fragments, you may need to initialize your fragment and
+app state so that pressing BACK will switch the UI back to its parent state.)
+The core of this is the {@link android.content.Intent#makeRestartActivityTask
+Intent.makeRestartActivityTask()} method, which constructs the root activity
+of the stack with the appropriate flags, such as
+{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK Intent.FLAG_ACTIVITY_CLEAR_TASK}.</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/IncomingMessage.java
+  app_notification}
+
+<p>In a Calendar style of notification, the UI launched by the notification
+is a dedicated activity that is not part of the normal application flow.
+For example, when the user receives a Calendar notification, choosing that
+notification starts a special activity that displays a list
+of upcoming calendar events &mdash; this view is available only
+from the notification, not through the Calendar's normal user
+interface.</p>
+
+<p>The code for posting this type of notification is very straight-forward; it
+is like the above, but the {@link android.app.PendingIntent} is for just a single
+activity, our dedicated notification activity.</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/IncomingMessage.java
+  interstitial_notification}
+
+<p>This is not enough, however.  Normally Android considers all activities within
+an application to be part of that application's UI flow, so simply launching the
+activity like this can cause it to be mixed with your normal application back stack
+in undesired ways.  To make it behave correctly, in the manifest declaration
+for the activity the attributes 
+<code>android:launchMode="singleInstance"</code> and
+<code>android:excludeFromRecents="true"</code>
+must be set.  The full activity declaration for this sample is:</p>
+
+{@sample development/samples/ApiDemos/AndroidManifest.xml interstitial_affinity}
+
+<p>Because of the use of <code>singleInstance</code>, you must be careful about launching
+any other activities from this one.  These activities will be launched
+in their own task, and care must be taken to make sure this interacts
+well with the current state of your application's task.  This is essentially
+the same as switching to the main application as described for the Email style
+notification shown before.  Given the <code>makeMessageIntentStack()</code>
+method previously shown, handling a click here would look something like this:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/IncomingMessageInterstitial.java
+  app_launch}
+
+<p>If you don't want to use the <code>singleInstance</code> launch mode for
+this activity, an alternative approach is to use <code>android:taskAffinity=""</code>.
+This tells Android that the activity should not be treated as part of the
+main application flow, so it will not get mixed together with that.  All of the
+other issues discussed here do still apply, though this would allow you to start
+additional activities that are part of this notification task instead of switching
+to and replacing the main application task.</p>
 
 <h2 id="ManageYourNotifications">Managing your Notifications</h2>
 
