@@ -202,6 +202,7 @@ public class WifiMonitor {
     private static final String AP_STA_DISCONNECTED_STR = "AP-STA-DISCONNECTED";
 
     private final StateMachine mStateMachine;
+    private final WifiNative mWifiNative;
 
     /* Supplicant events reported to a state machine */
     private static final int BASE = Protocol.BASE_WIFI_MONITOR;
@@ -266,8 +267,9 @@ public class WifiMonitor {
      */
     private static final int MAX_RECV_ERRORS    = 10;
 
-    public WifiMonitor(StateMachine wifiStateMachine) {
+    public WifiMonitor(StateMachine wifiStateMachine, WifiNative wifiNative) {
         mStateMachine = wifiStateMachine;
+        mWifiNative = wifiNative;
     }
 
     public void startMonitoring() {
@@ -292,7 +294,7 @@ public class WifiMonitor {
 
             //noinspection InfiniteLoopStatement
             for (;;) {
-                String eventStr = WifiNative.waitForEvent();
+                String eventStr = mWifiNative.waitForEvent();
 
                 // Skip logging the common but mostly uninteresting scan-results event
                 if (false && eventStr.indexOf(SCAN_RESULTS_STR) == -1) {
@@ -406,7 +408,7 @@ public class WifiMonitor {
             int connectTries = 0;
 
             while (true) {
-                if (WifiNative.connectToSupplicant()) {
+                if (mWifiNative.connectToSupplicant()) {
                     return true;
                 }
                 if (connectTries++ < 5) {
