@@ -281,16 +281,17 @@ page.title=Android Open Accessory Development Kit
       <p>On Mac:</p>
 
       <ol type="a">
-        <li>Right-click on the Arduino application in Finder and select <strong>Show Package
-        Contents</strong>.</li>
+        <li>Create, if it does not already exist, an <code>Arduino</code>
+        directory inside your user account's <code>Documents</code> directory, and within
+        that, a <code>libraries</code> directory.</li>
 
         <li>Copy the <code>firmware/arduino_libs/AndroidAccessory</code> and
-        <code>firmware/arduino_libs/USB_Host_Shield</code> directories (the complete directories,
-        not just the files within) to the <code>Contents/Resources/Java/libraries</code> directory
-        inside the Arduino application.</li>
+        <code>firmware/arduino_libs/USB_Host_Shield</code> directories (the
+        complete directories, not just the files within) to your
+        <code>Documents/Arduino/libraries/</code> directory.</li>
 
-        <li>Create a <code>CapSense</code> directory in the
-        <code>Contents/Resources/Java/libraries</code> directory.</li>
+        <li>Create a <code>CapSense</code> directory in your
+        <code>Documents/Arduino/libraries/</code> directory.</li>
 
         <li>Copy <code>CapSense.cpp</code> and <code>CapSense.h</code> from the unzipped CapSense
         download to the <code>CapSense</code> directory.</li>
