@@ -610,36 +610,41 @@ bool MatroskaExtractor::isLiveStreaming() const {
     return mIsLiveStreaming;
 }
 
-static void addESDSFromAudioSpecificInfo(
-        const sp<MetaData> &meta, const void *asi, size_t asiSize) {
+static void addESDSFromCodecPrivate(
+        const sp<MetaData> &meta,
+        bool isAudio, const void *priv, size_t privSize) {
     static const uint8_t kStaticESDS[] = {
         0x03, 22,
         0x00, 0x00,     // ES_ID
         0x00,           // streamDependenceFlag, URL_Flag, OCRstreamFlag
 
         0x04, 17,
-        0x40,                       // Audio ISO/IEC 14496-3
+        0x40,           // ObjectTypeIndication
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
 
         0x05,
-        // AudioSpecificInfo (with size prefix) follows
+        // CodecSpecificInfo (with size prefix) follows
     };
 
     // Make sure all sizes can be coded in a single byte.
-    CHECK(asiSize + 22 - 2 < 128);
-    size_t esdsSize = sizeof(kStaticESDS) + asiSize + 1;
+    CHECK(privSize + 22 - 2 < 128);
+    size_t esdsSize = sizeof(kStaticESDS) + privSize + 1;
     uint8_t *esds = new uint8_t[esdsSize];
     memcpy(esds, kStaticESDS, sizeof(kStaticESDS));
     uint8_t *ptr = esds + sizeof(kStaticESDS);
-    *ptr++ = asiSize;
-    memcpy(ptr, asi, asiSize);
+    *ptr++ = privSize;
+    memcpy(ptr, priv, privSize);
 
     // Increment by codecPrivateSize less 2 bytes that are accounted for
     // already in lengths of 22/17
-    esds[1] += asiSize - 2;
-    esds[6] += asiSize - 2;
+    esds[1] += privSize - 2;
+    esds[6] += privSize - 2;
+
+    // Set ObjectTypeIndication.
+    esds[7] = isAudio ? 0x40   // Audio ISO/IEC 14496-3
+                      : 0x20;  // Visual ISO/IEC 14496-2
 
     meta->setData(kKeyESDS, 0, esds, esdsSize);
 
@@ -707,9 +712,21 @@ void MatroskaExtractor::addTracks() {
                 if (!strcmp("V_MPEG4/ISO/AVC", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
                     meta->setData(kKeyAVCC, 0, codecPrivate, codecPrivateSize);
+                } else if (!strcmp("V_MPEG4/ISO/ASP", codecID)) {
+                    if (codecPrivateSize > 0) {
+                        meta->setCString(
+                                kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+                        addESDSFromCodecPrivate(
+                                meta, false, codecPrivate, codecPrivateSize);
+                    } else {
+                        ALOGW("%s is detected, but does not have configuration.",
+                                codecID);
+                        continue;
+                    }
                 } else if (!strcmp("V_VP8", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_VPX);
                 } else {
+                    ALOGW("%s is not supported.", codecID);
                     continue;
                 }
 
@@ -727,13 +744,16 @@ void MatroskaExtractor::addTracks() {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
                     CHECK(codecPrivateSize >= 2);
 
-                    addESDSFromAudioSpecificInfo(
-                            meta, codecPrivate, codecPrivateSize);
+                    addESDSFromCodecPrivate(
+                            meta, true, codecPrivate, codecPrivateSize);
                 } else if (!strcmp("A_VORBIS", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_VORBIS);
 
                     addVorbisCodecInfo(meta, codecPrivate, codecPrivateSize);
+                } else if (!strcmp("A_MPEG/L3", codecID)) {
+                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
                 } else {
+                    ALOGW("%s is not supported.", codecID);
                     continue;
                 }
 
