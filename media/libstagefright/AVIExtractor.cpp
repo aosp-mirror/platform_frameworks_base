@@ -577,6 +577,7 @@ static const char *GetMIMETypeForHandler(uint32_t handler) {
         case FOURCC('a', 'v', 'c', '1'):
         case FOURCC('d', 'a', 'v', 'c'):
         case FOURCC('x', '2', '6', '4'):
+        case FOURCC('H', '2', '6', '4'):
         case FOURCC('v', 's', 's', 'h'):
             return MEDIA_MIMETYPE_VIDEO_AVC;
 
