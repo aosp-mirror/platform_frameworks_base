@@ -27,8 +27,7 @@
 #include <cutils/bitops.h>
 
 #include <media/Visualizer.h>
-
-extern void fixed_fft_real(int n, int32_t *v);
+#include <audio_utils/fixedfft.h>
 
 namespace android {
 
