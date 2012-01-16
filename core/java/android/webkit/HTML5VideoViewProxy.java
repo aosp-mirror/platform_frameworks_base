@@ -162,6 +162,16 @@ class HTML5VideoViewProxy extends Handler
                 mHTML5VideoView.enterFullScreenVideoState(layerId, proxy, webView);
         }
 
+        public static void exitFullScreenVideo(HTML5VideoViewProxy proxy,
+                WebView webView) {
+            if (!mHTML5VideoView.fullScreenExited() && mHTML5VideoView.isFullScreenMode()) {
+                WebChromeClient client = webView.getWebChromeClient();
+                if (client != null) {
+                    client.onHideCustomView();
+                }
+            }
+        }
+
         // This is on the UI thread.
         // When native tell Java to play, we need to check whether or not it is
         // still the same video by using videoLayerId and treat it differently.
@@ -680,6 +690,10 @@ class HTML5VideoViewProxy extends Handler
 
     public void enterFullScreenVideo(int layerId, String url) {
         VideoPlayer.enterFullScreenVideo(layerId, url, this, mWebView);
+    }
+
+    public void exitFullScreenVideo() {
+        VideoPlayer.exitFullScreenVideo(this, mWebView);
     }
 
     /**
