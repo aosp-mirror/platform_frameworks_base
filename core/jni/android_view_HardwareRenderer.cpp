@@ -22,6 +22,8 @@
 
 #include <EGL/egl_cache.h>
 
+EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -36,6 +38,12 @@ static void android_view_HardwareRenderer_setupShadersDiskCache(JNIEnv* env, job
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
 }
 
+static void android_view_HardwareRenderer_beginFrame(JNIEnv* env, jobject clazz) {
+    EGLDisplay dpy = eglGetCurrentDisplay();
+    EGLSurface surf = eglGetCurrentSurface(EGL_DRAW);
+    eglBeginFrame(dpy, surf);
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -45,6 +53,8 @@ const char* const kClassPathName = "android/view/HardwareRenderer";
 static JNINativeMethod gMethods[] = {
     { "nSetupShadersDiskCache", "(Ljava/lang/String;)V",
             (void*) android_view_HardwareRenderer_setupShadersDiskCache },
+    { "nBeginFrame", "()V",
+            (void*) android_view_HardwareRenderer_beginFrame },
 };
 
 int register_android_view_HardwareRenderer(JNIEnv* env) {

@@ -63,6 +63,22 @@ Layer::Layer(SurfaceFlinger* flinger,
 {
     mCurrentCrop.makeInvalid();
     glGenTextures(1, &mTextureName);
+
+    mFrameLatencyNeeded = false;
+    mFrameLatencyOffset = 0;
+    for (int i = 0; i < 128; i++) {
+        mFrameLatencies[i] = 0;
+    }
+}
+
+void Layer::onLayerDisplayed() {
+    if (mFrameLatencyNeeded) {
+        int64_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+        mFrameLatencies[mFrameLatencyOffset] = now -
+                mSurfaceTexture->getTimestamp();
+        mFrameLatencyOffset = (mFrameLatencyOffset + 1) % 128;
+        mFrameLatencyNeeded = false;
+    }
 }
 
 void Layer::onFirstRef()
@@ -408,6 +424,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
         // update the active buffer
         mActiveBuffer = mSurfaceTexture->getCurrentBuffer();
+        mFrameLatencyNeeded = true;
 
         const Rect crop(mSurfaceTexture->getCurrentCrop());
         const uint32_t transform(mSurfaceTexture->getCurrentTransform());
@@ -537,6 +554,18 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
             getTransformHint(), mQueuedFrames);
 
     result.append(buffer);
+
+    const int64_t* l = mFrameLatencies;
+    int o = mFrameLatencyOffset;
+    for (int i = 0; i < 128; i += 8) {
+        snprintf(buffer, SIZE,
+                "      "
+                "% 12lld % 12lld % 12lld % 12lld "
+                "% 12lld % 12lld % 12lld % 12lld\n",
+                l[(o+i+0)%128], l[(o+i+1)%128], l[(o+i+2)%128], l[(o+i+3)%128],
+                l[(o+i+4)%128], l[(o+i+5)%128], l[(o+i+6)%128], l[(o+i+7)%128]);
+        result.append(buffer);
+    }
 
     if (mSurfaceTexture != 0) {
         mSurfaceTexture->dump(result, "            ", buffer, SIZE);

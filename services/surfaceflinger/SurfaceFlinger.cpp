@@ -445,6 +445,12 @@ void SurfaceFlinger::postFramebuffer()
     const nsecs_t now = systemTime();
     mDebugInSwapBuffers = now;
     hw.flip(mSwapRegion);
+
+    size_t numLayers = mVisibleLayersSortedByZ.size();
+    for (size_t i = 0; i < numLayers; i++) {
+        mVisibleLayersSortedByZ[i]->onLayerDisplayed();
+    }
+
     mLastSwapBufferTime = systemTime() - now;
     mDebugInSwapBuffers = 0;
     mSwapRegion.clear();

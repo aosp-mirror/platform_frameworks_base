@@ -78,6 +78,8 @@ public:
     // LayerBaseClient interface
     virtual wp<IBinder> getSurfaceTextureBinder() const;
 
+    virtual void onLayerDisplayed();
+
     // only for debugging
     inline const sp<GraphicBuffer>& getActiveBuffer() const { return mActiveBuffer; }
 
@@ -110,6 +112,9 @@ private:
     uint32_t mCurrentTransform;
     uint32_t mCurrentScalingMode;
     bool mCurrentOpacity;
+    bool mFrameLatencyNeeded;
+    int mFrameLatencyOffset;
+    int64_t mFrameLatencies[128];
 
     // constants
     PixelFormat mFormat;
