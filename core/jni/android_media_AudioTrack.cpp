@@ -214,7 +214,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
     // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
-    // in android_media_AudioTrack_native_write()
+    // in android_media_AudioTrack_native_write_byte()
     if ((audioFormat == javaAudioTrackFields.PCM8) 
         && (memoryMode == javaAudioTrackFields.MODE_STATIC)) {
         ALOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
@@ -506,13 +506,13 @@ jint writeToTrack(AudioTrack* pTrack, jint audioFormat, jbyte* data,
 }
 
 // ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
+static jint android_media_AudioTrack_native_write_byte(JNIEnv *env,  jobject thiz,
                                                   jbyteArray javaAudioData,
                                                   jint offsetInBytes, jint sizeInBytes,
                                                   jint javaAudioFormat) {
     jbyte* cAudioData = NULL;
     AudioTrack *lpTrack = NULL;
-    //ALOGV("android_media_AudioTrack_native_write(offset=%d, sizeInBytes=%d) called",
+    //ALOGV("android_media_AudioTrack_native_write_byte(offset=%d, sizeInBytes=%d) called",
     //    offsetInBytes, sizeInBytes);
     
     // get the audio track to load with samples
@@ -554,7 +554,7 @@ static jint android_media_AudioTrack_native_write_short(JNIEnv *env,  jobject th
                                                   jshortArray javaAudioData,
                                                   jint offsetInShorts, jint sizeInShorts,
                                                   jint javaAudioFormat) {
-    return (android_media_AudioTrack_native_write(env, thiz,
+    return (android_media_AudioTrack_native_write_byte(env, thiz,
                                                  (jbyteArray) javaAudioData,
                                                  offsetInShorts*2, sizeInShorts*2,
                                                  javaAudioFormat)
@@ -834,7 +834,7 @@ static JNINativeMethod gMethods[] = {
                                          (void *)android_media_AudioTrack_native_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_native_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_native_release},
-    {"native_write_byte",    "([BIII)I", (void *)android_media_AudioTrack_native_write},
+    {"native_write_byte",    "([BIII)I", (void *)android_media_AudioTrack_native_write_byte},
     {"native_write_short",   "([SIII)I", (void *)android_media_AudioTrack_native_write_short},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
     {"native_get_native_frame_count",
