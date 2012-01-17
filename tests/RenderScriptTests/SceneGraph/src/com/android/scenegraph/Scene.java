@@ -116,6 +116,10 @@ public class Scene extends SceneGraphBase {
         return mCameras;
     }
 
+    public ArrayList<LightBase> getLights() {
+        return mLights;
+    }
+
     public void appendRenderable(RenderableBase d) {
         mRenderables.add(d);
         mRenderableMap.put(d.getName(), d);

@@ -63,11 +63,13 @@ public class TestAppRS {
     private RenderScriptGL mRS;
 
     private ProgramFragment mPF_Paint;
+    private ProgramFragment mPF_Lights;
     private ProgramFragment mPF_Aluminum;
     private ProgramFragment mPF_Plastic;
     private ProgramFragment mPF_Diffuse;
     private ProgramFragment mPF_Texture;
     ScriptField_FShaderParams_s mFsConst;
+    ScriptField_FShaderLightParams_s mFsConst2;
     private ProgramVertex mPV_Paint;
     ScriptField_VShaderParams_s mVsConst;
 
@@ -107,7 +109,7 @@ public class TestAppRS {
 
         mTouchHandler = new TouchHandler();
 
-        mSceneManager = new SceneManager();
+        mSceneManager = SceneManager.getInstance();
         // Initializes all the RS specific scenegraph elements
         mSceneManager.initRS(mRS, mRes, mWidth, mHeight);
 
@@ -199,6 +201,7 @@ public class TestAppRS {
         mPV_Paint = vb.create();
 
         mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
+        mFsConst2 = new ScriptField_FShaderLightParams_s(mRS, 1);
 
         mPF_Paint = createFromResource(R.raw.paintf, true);
         mPF_Aluminum = createFromResource(R.raw.metal, true);
@@ -206,6 +209,11 @@ public class TestAppRS {
         mPF_Plastic = createFromResource(R.raw.plastic, false);
         mPF_Diffuse = createFromResource(R.raw.diffuse, false);
         mPF_Texture = createFromResource(R.raw.texture, false);
+
+        ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
+        fb.addConstant(mFsConst2.getAllocation().getType());
+        fb.setShader(mRes, R.raw.plastic_lights);
+        mPF_Lights = fb.create();
 
         FullscreenBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
     }
@@ -235,11 +243,13 @@ public class TestAppRS {
     }
 
     public void prepareToRender(Scene s) {
+        mSceneManager.setActiveScene(s);
         mActiveScene = s;
         RenderState plastic = new RenderState(mPV_Paint, mPF_Plastic, null, null);
         RenderState diffuse = new RenderState(mPV_Paint, mPF_Diffuse, null, null);
         RenderState paint = new RenderState(mPV_Paint, mPF_Paint, null, null);
         RenderState aluminum = new RenderState(mPV_Paint, mPF_Aluminum, null, null);
+        RenderState lights = new RenderState(mPV_Paint, mPF_Lights, null, null);
         RenderState glassTransp = new RenderState(mPV_Paint,
                                                   mPF_Paint,
                                                   ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS),
@@ -260,6 +270,8 @@ public class TestAppRS {
         mActiveScene.assignRenderStateToMaterial(aluminum, "^#Brake");
 
         mActiveScene.assignRenderStateToMaterial(glassTransp, "^#GlassLight");
+
+        mActiveScene.assignRenderStateToMaterial(lights, "^#LightBlinn");
 
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {

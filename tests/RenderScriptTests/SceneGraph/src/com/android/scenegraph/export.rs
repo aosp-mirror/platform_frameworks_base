@@ -31,4 +31,4 @@ VertexShaderInputs *iExport;
 
 VShaderParams *vConst;
 FShaderParams *fConst;
-
+FShaderLightParams *fConts2;
