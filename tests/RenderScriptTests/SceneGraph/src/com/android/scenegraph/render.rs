@@ -154,6 +154,7 @@ void root(const void *v_in, void *v_out) {
     rsForEach(gTransformScript, gRootNode->children, nullAlloc, 0, 0);
 
     prepareCameras();
+    prepareLights();
 
     rsgClearDepth(1.0f);
 

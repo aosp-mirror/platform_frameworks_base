@@ -16,30 +16,30 @@
 
 package com.android.scenegraph;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
 import java.io.Writer;
-
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.android.scenegraph.Scene;
+
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
-import android.renderscript.RenderScriptGL;
-import android.renderscript.Mesh;
+import android.os.AsyncTask;
 import android.renderscript.*;
 import android.renderscript.Allocation.MipmapControl;
-import android.content.res.Resources;
-import android.view.SurfaceHolder;
+import android.renderscript.Mesh;
+import android.renderscript.RenderScriptGL;
 import android.util.Log;
-import android.os.AsyncTask;
+import android.view.SurfaceHolder;
 
 /**
  * @hide
@@ -57,6 +57,9 @@ public class SceneManager extends SceneGraphBase {
     Mesh mQuad;
     int mWidth;
     int mHeight;
+
+    Scene mActiveScene;
+    private static SceneManager sSceneManager;
 
     public static boolean isSDCardPath(String path) {
         int sdCardIndex = path.indexOf("sdcard/");
@@ -140,7 +143,22 @@ public class SceneManager extends SceneGraphBase {
         }
     }
 
-    public SceneManager() {
+    public Scene getActiveScene() {
+        return mActiveScene;
+    }
+
+    public void setActiveScene(Scene s) {
+        mActiveScene = s;
+    }
+
+    public static SceneManager getInstance() {
+        if (sSceneManager == null) {
+            sSceneManager = new SceneManager();
+        }
+        return sSceneManager;
+    }
+
+    protected SceneManager() {
     }
 
     public void loadModel(String name, SceneLoadedCallback cb) {

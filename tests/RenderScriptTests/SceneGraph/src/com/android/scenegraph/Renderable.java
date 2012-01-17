@@ -167,13 +167,11 @@ public class Renderable extends RenderableBase {
             String inputName = constantElem.getSubElementName(i);
             int offset = constantElem.getSubElementOffsetBytes(i);
             ShaderParam matchingParam = findParamByName(inputName);
+            Element subElem = constantElem.getSubElement(i);
             // Make one if it's not there
             if (matchingParam == null) {
-                Element subElem = constantElem.getSubElement(i);
                 if (subElem.getDataType() == Element.DataType.FLOAT_32) {
-                    Float4Param fParam = new Float4Param(inputName);
-                    fParam.setVecSize(subElem.getVectorSize());
-                    matchingParam = fParam;
+                    matchingParam = new Float4Param(inputName);
                 } else if (subElem.getDataType() == Element.DataType.MATRIX_4X4) {
                     TransformParam trParam = new TransformParam(inputName);
                     trParam.setTransform(mTransform);
@@ -181,6 +179,10 @@ public class Renderable extends RenderableBase {
                 }
             }
             matchingParam.setOffset(offset);
+            if (subElem.getDataType() == Element.DataType.FLOAT_32) {
+                Float4Param fParam = (Float4Param)matchingParam;
+                fParam.setVecSize(subElem.getVectorSize());
+            }
             paramList.add(matchingParam);
         }
     }

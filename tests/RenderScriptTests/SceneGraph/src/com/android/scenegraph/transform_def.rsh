@@ -161,6 +161,15 @@ typedef struct FShaderParams_s {
     float4 cameraPos;
 } FShaderParams;
 
+typedef struct FShaderLightParams_s {
+    float4 lightPos_0;
+    float4 lightColor_0;
+    float4 lightPos_1;
+    float4 lightColor_1;
+    float4 cameraPos;
+    float4 diffuse;
+} FShaderLightParams;
+
 typedef struct FBlurOffsets_s {
     float blurOffset0;
     float blurOffset1;
@@ -174,7 +183,7 @@ typedef struct VertexShaderInputs_s {
     float2 texture0;
 } VertexShaderInputs;
 
-static void printCameraInfo(SgCamera *cam) {
+static void printCameraInfo(const SgCamera *cam) {
     rsDebug("***** Camera information. ptr:", cam);
     printName(cam->name);
     const SgTransform *camTransform = (const SgTransform *)rsGetElementAt(cam->transformMatrix, 0);
@@ -190,7 +199,7 @@ static void printCameraInfo(SgCamera *cam) {
     rsDebug("View: ", &cam->view);
 }
 
-static void printLightInfo(SgLight *light) {
+static void printLightInfo(const SgLight *light) {
     rsDebug("***** Light information. ptr:", light);
     printName(light->name);
     const SgTransform *lTransform = (const SgTransform *)rsGetElementAt(light->transformMatrix, 0);
