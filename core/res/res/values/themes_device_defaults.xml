@@ -411,13 +411,13 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Holo.Dialog.Alert">
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault</item>
     </style>
-    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.DeviceDefault.Light.Dialog.Alert">
+    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Holo.Light.Dialog.Alert">
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault.Light</item>
     </style>
-    <style name="Theme.DeviceDefault.SearchBar" parent="Theme.DeviceDefault.SearchBar">
+    <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Holo.SearchBar">
 
     </style>
-    <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.DeviceDefault.Light.SearchBar">
+    <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Holo.Light.SearchBar">
 
     </style>
 
