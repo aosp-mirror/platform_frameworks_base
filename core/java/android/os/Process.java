@@ -219,6 +219,36 @@ public class Process {
     public static final int THREAD_PRIORITY_LESS_FAVORABLE = +1;
 
     /**
+     * Default scheduling policy
+     * @hide
+     */
+    public static final int SCHED_OTHER = 0;
+
+    /**
+     * First-In First-Out scheduling policy
+     * @hide
+     */
+    public static final int SCHED_FIFO = 1;
+
+    /**
+     * Round-Robin scheduling policy
+     * @hide
+     */
+    public static final int SCHED_RR = 2;
+
+    /**
+     * Batch scheduling policy
+     * @hide
+     */
+    public static final int SCHED_BATCH = 3;
+
+    /**
+     * Idle scheduling policy
+     * @hide
+     */
+    public static final int SCHED_IDLE = 5;
+
+    /**
      * Default thread group - gets a 'normal' share of the CPU
      * @hide
      */
@@ -674,6 +704,24 @@ public class Process {
     public static final native int getThreadPriority(int tid)
             throws IllegalArgumentException;
     
+    /**
+     * Set the scheduling policy and priority of a thread, based on Linux.
+     *
+     * @param tid The identifier of the thread/process to change.
+     * @param policy A Linux scheduling policy such as SCHED_OTHER etc.
+     * @param priority A Linux priority level in a range appropriate for the given policy.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist, or if <var>priority</var> is out of range for the policy.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * scheduling policy or priority.
+     *
+     * {@hide}
+     */
+    public static final native void setThreadScheduler(int tid, int policy, int priority)
+            throws IllegalArgumentException;
+
     /**
      * Determine whether the current environment supports multiple processes.
      * 
