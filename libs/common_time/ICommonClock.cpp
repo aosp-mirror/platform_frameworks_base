@@ -49,8 +49,11 @@ class BpCommonClock : public BpInterface<ICommonClock>
                                              data,
                                              &reply);
         if (status == OK) {
-            *valid = reply.readInt32();
-            *timelineID = reply.readInt32();
+            status = reply.readInt32();
+            if (status == OK) {
+                *valid = reply.readInt32();
+                *timelineID = reply.readInt32();
+            }
         }
         return status;
     }
@@ -63,7 +66,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         status_t status = remote()->transact(COMMON_TIME_TO_LOCAL_TIME,
                 data, &reply);
         if (status == OK) {
-            *localTime = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *localTime = reply.readInt64();
+            }
         }
         return status;
     }
@@ -76,7 +82,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         status_t status = remote()->transact(LOCAL_TIME_TO_COMMON_TIME,
                 data, &reply);
         if (status == OK) {
-            *commonTime = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *commonTime = reply.readInt64();
+            }
         }
         return status;
     }
@@ -86,7 +95,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         status_t status = remote()->transact(GET_COMMON_TIME, data, &reply);
         if (status == OK) {
-            *commonTime = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *commonTime = reply.readInt64();
+            }
         }
         return status;
     }
@@ -96,7 +108,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         status_t status = remote()->transact(GET_COMMON_FREQ, data, &reply);
         if (status == OK) {
-            *freq = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *freq = reply.readInt64();
+            }
         }
         return status;
     }
@@ -106,7 +121,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         status_t status = remote()->transact(GET_LOCAL_TIME, data, &reply);
         if (status == OK) {
-            *localTime = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *localTime = reply.readInt64();
+            }
         }
         return status;
     }
@@ -116,7 +134,10 @@ class BpCommonClock : public BpInterface<ICommonClock>
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         status_t status = remote()->transact(GET_LOCAL_FREQ, data, &reply);
         if (status == OK) {
-            *freq = reply.readInt64();
+            status = reply.readInt32();
+            if (status == OK) {
+                *freq = reply.readInt64();
+            }
         }
         return status;
     }
@@ -126,7 +147,14 @@ class BpCommonClock : public BpInterface<ICommonClock>
         Parcel data, reply;
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         data.writeStrongBinder(listener->asBinder());
-        return remote()->transact(REGISTER_LISTENER, data, &reply);
+
+        status_t status = remote()->transact(REGISTER_LISTENER, data, &reply);
+
+        if (status == OK) {
+            status = reply.readInt32();
+        }
+
+        return status;
     }
 
     virtual status_t unregisterListener(
@@ -134,7 +162,13 @@ class BpCommonClock : public BpInterface<ICommonClock>
         Parcel data, reply;
         data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
         data.writeStrongBinder(listener->asBinder());
-        return remote()->transact(UNREGISTER_LISTENER, data, &reply);
+        status_t status = remote()->transact(UNREGISTER_LISTENER, data, &reply);
+
+        if (status == OK) {
+            status = reply.readInt32();
+        }
+
+        return status;
     }
 };
 
@@ -150,11 +184,12 @@ status_t BnCommonClock::onTransact(uint32_t code,
             bool valid;
             uint32_t timelineID;
             status_t status = isCommonTimeValid(&valid, &timelineID);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt32(valid);
                 reply->writeInt32(timelineID);
             }
-            return status;
+            return OK;
         } break;
 
         case COMMON_TIME_TO_LOCAL_TIME: {
@@ -162,10 +197,11 @@ status_t BnCommonClock::onTransact(uint32_t code,
             int64_t commonTime = data.readInt64();
             int64_t localTime;
             status_t status = commonTimeToLocalTime(commonTime, &localTime);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(localTime);
             }
-            return status;
+            return OK;
         } break;
 
         case LOCAL_TIME_TO_COMMON_TIME: {
@@ -173,64 +209,73 @@ status_t BnCommonClock::onTransact(uint32_t code,
             int64_t localTime = data.readInt64();
             int64_t commonTime;
             status_t status = localTimeToCommonTime(localTime, &commonTime);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(commonTime);
             }
-            return status;
+            return OK;
         } break;
 
         case GET_COMMON_TIME: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             int64_t commonTime;
             status_t status = getCommonTime(&commonTime);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(commonTime);
             }
-            return status;
+            return OK;
         } break;
 
         case GET_COMMON_FREQ: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             uint64_t freq;
             status_t status = getCommonFreq(&freq);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(freq);
             }
-            return status;
+            return OK;
         } break;
 
         case GET_LOCAL_TIME: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             int64_t localTime;
             status_t status = getLocalTime(&localTime);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(localTime);
             }
-            return status;
+            return OK;
         } break;
 
         case GET_LOCAL_FREQ: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             uint64_t freq;
             status_t status = getLocalFreq(&freq);
+            reply->writeInt32(status);
             if (status == OK) {
                 reply->writeInt64(freq);
             }
-            return status;
+            return OK;
         } break;
 
         case REGISTER_LISTENER: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             sp<ICommonClockListener> listener =
                 interface_cast<ICommonClockListener>(data.readStrongBinder());
-            return registerListener(listener);
+            status_t status = registerListener(listener);
+            reply->writeInt32(status);
+            return OK;
         } break;
 
         case UNREGISTER_LISTENER: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             sp<ICommonClockListener> listener =
                 interface_cast<ICommonClockListener>(data.readStrongBinder());
-            return unregisterListener(listener);
+            status_t status = unregisterListener(listener);
+            reply->writeInt32(status);
+            return OK;
         } break;
     }
     return BBinder::onTransact(code, data, reply, flags);
