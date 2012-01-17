@@ -70,6 +70,25 @@ class ICommonClock : public IInterface {
         sp<ICommonClock> clk = interface_cast<ICommonClock>(binder);
         return clk;
     }
+
+    enum State {
+        // the device just came up and is trying to discover the master
+        STATE_INITIAL,
+
+        // the device is a client of a master
+        STATE_CLIENT,
+
+        // the device is acting as master
+        STATE_MASTER,
+
+        // the device has lost contact with its master and needs to participate
+        // in the election of a new master
+        STATE_RONIN,
+
+        // the device is waiting for announcement of the newly elected master
+        STATE_WAIT_FOR_ELECTION,
+    };
+
 };
 
 class BnCommonClock : public BnInterface<ICommonClock> {

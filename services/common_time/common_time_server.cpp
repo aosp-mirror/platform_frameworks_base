@@ -221,27 +221,9 @@ class CommonTimeServer : public Thread {
     void notifyClockSync();
     void notifyClockSyncLoss();
 
-    enum State {
-        // the device just came up and is trying to discover the master
-        STATE_INITIAL,
-
-        // the device is a client of a master
-        STATE_CLIENT,
-
-        // the device is acting as master
-        STATE_MASTER,
-
-        // the device has lost contact with its master and needs to participate
-        // in the election of a new master
-        STATE_RONIN,
-
-        // the device is waiting for announcement of the newly elected master
-        STATE_WAIT_FOR_ELECTION,
-    };
-
-    State mState;
-    static const char* stateToString(State s);
-    void setState(State s);
+    ICommonClock::State mState;
+    static const char* stateToString(ICommonClock::State s);
+    void setState(ICommonClock::State s);
 
     // interval in milliseconds of the state machine's timeout
     int mTimeoutMs;
@@ -355,7 +337,7 @@ const int CommonTimeServer::kWaitForElection_TimeoutMs = 5000;
 
 CommonTimeServer::CommonTimeServer()
     : Thread(false)
-    , mState(STATE_INITIAL)
+    , mState(ICommonClock::STATE_INITIAL)
     , mTimeoutMs(kInfiniteTimeout)
     , mClockRecovery(&mLocalClock, &mCommonClock)
     , mSocket(-1)
@@ -635,15 +617,15 @@ bool CommonTimeServer::handlePacket() {
 
 bool CommonTimeServer::handleTimeout() {
     switch (mState) {
-        case STATE_INITIAL:
+        case ICommonClock::STATE_INITIAL:
             return handleTimeoutInitial();
-        case STATE_CLIENT:
+        case ICommonClock::STATE_CLIENT:
             return handleTimeoutClient();
-        case STATE_MASTER:
+        case ICommonClock::STATE_MASTER:
             return handleTimeoutMaster();
-        case STATE_RONIN:
+        case ICommonClock::STATE_RONIN:
             return handleTimeoutRonin();
-        case STATE_WAIT_FOR_ELECTION:
+        case ICommonClock::STATE_WAIT_FOR_ELECTION:
             return handleTimeoutWaitForElection();
     }
 
@@ -702,7 +684,7 @@ bool CommonTimeServer::handleTimeoutWaitForElection() {
 bool CommonTimeServer::handleWhoIsMasterRequest(
         const WhoIsMasterRequestPacket* request,
         const sockaddr_in& srcAddr) {
-    if (mState == STATE_MASTER) {
+    if (mState == ICommonClock::STATE_MASTER) {
         // is this request related to this master's timeline?
         if (ntohl(request->timelineID) != ICommonClock::kInvalidTimelineID &&
             ntohl(request->timelineID) != mTimelineID)
@@ -720,7 +702,7 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
             LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
             return false;
         }
-    } else if (mState == STATE_RONIN) {
+    } else if (mState == ICommonClock::STATE_RONIN) {
         // if we hear a WhoIsMaster request from another device following
         // the same timeline and that device wins arbitration, then we will stop
         // trying to elect ourselves master and will instead wait for an
@@ -732,7 +714,7 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
             return becomeWaitForElection();
 
         return true;
-    } else if (mState == STATE_INITIAL) {
+    } else if (mState == ICommonClock::STATE_INITIAL) {
         // If a group of devices booted simultaneously (e.g. after a power
         // outage) and all of them are in the initial state and there is no
         // master, then each device may time out and declare itself master at
@@ -752,11 +734,11 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
 bool CommonTimeServer::handleWhoIsMasterResponse(
         const WhoIsMasterResponsePacket* response,
         const sockaddr_in& srcAddr) {
-    if (mState == STATE_INITIAL || mState == STATE_RONIN) {
+    if (mState == ICommonClock::STATE_INITIAL || mState == ICommonClock::STATE_RONIN) {
         return becomeClient(srcAddr,
                             ntohq(response->deviceID),
                             ntohl(response->timelineID));
-    } else if (mState == STATE_CLIENT) {
+    } else if (mState == ICommonClock::STATE_CLIENT) {
         // if we get multiple responses because there are multiple devices
         // who believe that they are master, then follow the master that
         // wins arbitration
@@ -774,7 +756,7 @@ bool CommonTimeServer::handleWhoIsMasterResponse(
 bool CommonTimeServer::handleSyncRequest(const SyncRequestPacket* request,
                                        const sockaddr_in& srcAddr) {
     SyncResponsePacket response;
-    if (mState == STATE_MASTER && ntohl(request->timelineID) == mTimelineID) {
+    if (mState == ICommonClock::STATE_MASTER && ntohl(request->timelineID) == mTimelineID) {
         int64_t rxLocalTime = (request->header.kernelRxLocalTime) ?
             ntohq(request->header.kernelRxLocalTime) : mLastPacketRxLocalTime;
 
@@ -827,7 +809,7 @@ bool CommonTimeServer::handleSyncRequest(const SyncRequestPacket* request,
 bool CommonTimeServer::handleSyncResponse(
         const SyncResponsePacket* response,
         const sockaddr_in& srcAddr) {
-    if (mState != STATE_CLIENT)
+    if (mState != ICommonClock::STATE_CLIENT)
         return true;
 
     if ((srcAddr.sin_addr.s_addr != mClient_MasterAddr.sin_addr.s_addr) ||
@@ -897,18 +879,18 @@ bool CommonTimeServer::handleMasterAnnouncement(
     uint64_t newDeviceID = ntohq(packet->deviceID);
     uint32_t newTimelineID = ntohl(packet->timelineID);
 
-    if (mState == STATE_INITIAL ||
-        mState == STATE_RONIN ||
-        mState == STATE_WAIT_FOR_ELECTION) {
+    if (mState == ICommonClock::STATE_INITIAL ||
+        mState == ICommonClock::STATE_RONIN ||
+        mState == ICommonClock::STATE_WAIT_FOR_ELECTION) {
         // if we aren't currently following a master, then start following
         // this new master
         return becomeClient(srcAddr, newDeviceID, newTimelineID);
-    } else if (mState == STATE_CLIENT) {
+    } else if (mState == ICommonClock::STATE_CLIENT) {
         // if the new master wins arbitration against our current master,
         // then become a client of the new master
         if (arbitrateMaster(newDeviceID, mClient_MasterDeviceID))
             return becomeClient(srcAddr, newDeviceID, newTimelineID);
-    } else if (mState == STATE_MASTER) {
+    } else if (mState == ICommonClock::STATE_MASTER) {
         // two masters are competing - if the new one wins arbitration, then
         // cease acting as master
         if (arbitrateMaster(newDeviceID, mDeviceID))
@@ -919,7 +901,7 @@ bool CommonTimeServer::handleMasterAnnouncement(
 }
 
 bool CommonTimeServer::sendWhoIsMasterRequest() {
-    assert(mState == STATE_INITIAL || mState == STATE_RONIN);
+    assert(mState == ICommonClock::STATE_INITIAL || mState == ICommonClock::STATE_RONIN);
 
     WhoIsMasterRequestPacket request;
     request.senderDeviceID = htonq(mDeviceID);
@@ -933,7 +915,7 @@ bool CommonTimeServer::sendWhoIsMasterRequest() {
         LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
     }
 
-    if (mState == STATE_INITIAL) {
+    if (mState == ICommonClock::STATE_INITIAL) {
         mTimeoutMs = kInitial_WhoIsMasterTimeoutMs;
     } else {
         mTimeoutMs = kRonin_WhoIsMasterTimeoutMs;
@@ -943,7 +925,7 @@ bool CommonTimeServer::sendWhoIsMasterRequest() {
 }
 
 bool CommonTimeServer::sendSyncRequest() {
-    assert(mState == STATE_CLIENT);
+    assert(mState == ICommonClock::STATE_CLIENT);
 
     SyncRequestPacket request;
     request.timelineID = htonl(mTimelineID);
@@ -964,7 +946,7 @@ bool CommonTimeServer::sendSyncRequest() {
 }
 
 bool CommonTimeServer::sendMasterAnnouncement() {
-    assert(mState == STATE_MASTER);
+    assert(mState == ICommonClock::STATE_MASTER);
 
     MasterAnnouncementPacket announce;
     announce.deviceID = htonq(mDeviceID);
@@ -1018,7 +1000,7 @@ bool CommonTimeServer::becomeClient(const sockaddr_in& masterAddr,
     mClient_SyncsSentToCurMaster = 0;
     mClient_SyncRespsRvcedFromCurMaster = 0;
 
-    setState(STATE_CLIENT);
+    setState(ICommonClock::STATE_CLIENT);
 
     // add some jitter to when the various clients send their requests
     // in order to reduce the likelihood that a group of clients overload
@@ -1053,7 +1035,7 @@ bool CommonTimeServer::becomeMaster() {
 
     mClockRecovery.reset(false, true);
 
-    setState(STATE_MASTER);
+    setState(ICommonClock::STATE_MASTER);
     return sendMasterAnnouncement();
 }
 
@@ -1079,7 +1061,7 @@ bool CommonTimeServer::becomeRonin() {
              mClient_SyncRespsRvcedFromCurMaster);
 
         mRonin_WhoIsMasterRequestTimeouts = 0;
-        setState(STATE_RONIN);
+        setState(ICommonClock::STATE_RONIN);
         return sendWhoIsMasterRequest();
     } else {
         LOGI("%s --> INITIAL : never synced timeline "
@@ -1100,7 +1082,7 @@ bool CommonTimeServer::becomeWaitForElection() {
     LOGI("%s --> WAIT_FOR_ELECTION : dropping out of election, waiting %d mSec"
          " for completion.", stateToString(mState), kWaitForElection_TimeoutMs);
 
-    setState(STATE_WAIT_FOR_ELECTION);
+    setState(ICommonClock::STATE_WAIT_FOR_ELECTION);
     mTimeoutMs = kWaitForElection_TimeoutMs;
     return true;
 }
@@ -1108,7 +1090,7 @@ bool CommonTimeServer::becomeWaitForElection() {
 bool CommonTimeServer::becomeInitial() {
     LOGI("Entering INITIAL, total reset.");
 
-    setState(STATE_INITIAL);
+    setState(ICommonClock::STATE_INITIAL);
 
     // reset clock recovery
     mClockRecovery.reset(true, true);
@@ -1144,21 +1126,21 @@ void CommonTimeServer::notifyClockSyncLoss() {
     }
 }
 
-void CommonTimeServer::setState(State s) {
+void CommonTimeServer::setState(ICommonClock::State s) {
     mState = s;
 }
 
-const char* CommonTimeServer::stateToString(State s) {
+const char* CommonTimeServer::stateToString(ICommonClock::State s) {
     switch(s) {
-        case STATE_INITIAL:
+        case ICommonClock::STATE_INITIAL:
             return "INITIAL";
-        case STATE_CLIENT:
+        case ICommonClock::STATE_CLIENT:
             return "CLIENT";
-        case STATE_MASTER:
+        case ICommonClock::STATE_MASTER:
             return "MASTER";
-        case STATE_RONIN:
+        case ICommonClock::STATE_RONIN:
             return "RONIN";
-        case STATE_WAIT_FOR_ELECTION:
+        case ICommonClock::STATE_WAIT_FOR_ELECTION:
             return "WAIT_FOR_ELECTION";
         default:
             return "unknown";
