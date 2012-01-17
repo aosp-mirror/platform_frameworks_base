@@ -54,7 +54,7 @@ Visualizer::~Visualizer()
 
 status_t Visualizer::setEnabled(bool enabled)
 {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mCaptureLock);
 
     sp<CaptureThread> t = mCaptureThread;
     if (t != 0) {
@@ -93,7 +93,7 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
     if (rate > CAPTURE_RATE_MAX) {
         return BAD_VALUE;
     }
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mCaptureLock);
 
     if (mEnabled) {
         return INVALID_OPERATION;
@@ -129,7 +129,7 @@ status_t Visualizer::setCaptureSize(uint32_t size)
         return BAD_VALUE;
     }
 
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mCaptureLock);
     if (mEnabled) {
         return INVALID_OPERATION;
     }
@@ -231,7 +231,7 @@ status_t Visualizer::doFft(uint8_t *fft, uint8_t *waveform)
 
 void Visualizer::periodicCapture()
 {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mCaptureLock);
     ALOGV("periodicCapture() %p mCaptureCallBack %p mCaptureFlags 0x%08x",
             this, mCaptureCallBack, mCaptureFlags);
     if (mCaptureCallBack != NULL &&
