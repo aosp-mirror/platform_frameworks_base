@@ -107,19 +107,11 @@ void fixup_addFBContents(GLTraceContext *context, GLMessage *glmsg, FBBinding fb
     fb->add_contents(fbcontents, fbsize);
 }
 
-void fixup_glTexImage2D(GLMessage *glmsg) {
-    /* void glTexImage2D(GLenum target,
-                        GLint level,
-                        GLint internalformat,
-                        GLsizei width,
-                        GLsizei height,
-                        GLint border,
-                        GLenum format,
-                        GLenum type,
-                        const GLvoid *data); 
-     */
-    GLMessage_DataType arg_width  = glmsg->args(3);
-    GLMessage_DataType arg_height = glmsg->args(4);
+/** Common fixup routing for glTexImage2D & glTexSubImage2D. */
+void fixup_glTexImage(int widthIndex, int heightIndex, GLMessage *glmsg) {
+    GLMessage_DataType arg_width  = glmsg->args(widthIndex);
+    GLMessage_DataType arg_height = glmsg->args(heightIndex);
+
     GLMessage_DataType arg_format = glmsg->args(6);
     GLMessage_DataType arg_type   = glmsg->args(7);
     GLMessage_DataType *arg_data  = glmsg->mutable_args(8);
@@ -133,19 +125,49 @@ void fixup_glTexImage2D(GLMessage *glmsg) {
     int bytesPerTexel = getBytesPerTexel(format, type);
 
     arg_data->set_type(GLMessage::DataType::BYTE);
-    arg_data->set_isarray(true);
     arg_data->clear_rawbytes();
 
     if (data != NULL) {
+        arg_data->set_isarray(true);
         arg_data->add_rawbytes(data, bytesPerTexel * width * height);
     } else {
-        ALOGE("fixup_glTexImage2D: image data is NULL.\n");
+        arg_data->set_isarray(false);
         arg_data->set_type(GLMessage::DataType::VOID);
-        // FIXME:
-        // This will create the texture, but it will be uninitialized. 
-        // It can later be initialized with glTexSubImage2D or by
-        // attaching an FBO to it and rendering into the FBO.
     }
+}
+
+
+void fixup_glTexImage2D(GLMessage *glmsg) {
+    /* void glTexImage2D(GLenum target,
+                        GLint level,
+                        GLint internalformat,
+                        GLsizei width,
+                        GLsizei height,
+                        GLint border,
+                        GLenum format,
+                        GLenum type,
+                        const GLvoid *data); 
+    */
+    int widthIndex = 3;
+    int heightIndex = 4;
+    fixup_glTexImage(widthIndex, heightIndex, glmsg);
+}
+
+void fixup_glTexSubImage2D(GLMessage *glmsg) {
+    /*
+    void glTexSubImage2D(GLenum target,
+                        GLint level,
+                        GLint xoffset,
+                        GLint yoffset,
+                        GLsizei width,
+                        GLsizei height,
+                        GLenum format,
+                        GLenum type,
+                        const GLvoid * data);
+    */
+    int widthIndex = 4;
+    int heightIndex = 5;
+    fixup_glTexImage(widthIndex, heightIndex, glmsg);
 }
 
 void fixup_glShaderSource(GLMessage *glmsg) {
@@ -218,6 +240,14 @@ void fixup_glGenGeneric(GLMessage *glmsg) {
     fixup_GenericIntArray(1, n, glmsg);
 }
 
+void fixup_glDeleteGeneric(GLMessage *glmsg) {
+    /* void glDelete*(GLsizei n, GLuint *buffers); */
+    GLMessage_DataType arg_n  = glmsg->args(0);
+    GLsizei n = arg_n.intvalue(0);
+
+    fixup_GenericIntArray(1, n, glmsg);
+}
+
 void fixup_glGetBooleanv(GLMessage *glmsg) {
     /* void glGetBooleanv(GLenum pname, GLboolean *params); */
     GLMessage_DataType *arg_params = glmsg->mutable_args(1);
@@ -250,10 +280,16 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
 
     // do any custom message dependent processing
     switch (glmsg->function()) {
-    case GLMessage::glGenBuffers:        /* void glGenBuffers(GLsizei n, GLuint * buffers); */
-    case GLMessage::glGenFramebuffers:   /* void glGenFramebuffers(GLsizei n, GLuint * buffers); */
-    case GLMessage::glGenRenderbuffers:  /* void glGenFramebuffers(GLsizei n, GLuint * buffers); */
-    case GLMessage::glGenTextures:       /* void glGenTextures(GLsizei n, GLuint * buffers); */
+    case GLMessage::glDeleteBuffers:      /* glDeleteBuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glDeleteFramebuffers: /* glDeleteFramebuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glDeleteRenderbuffers:/* glDeleteRenderbuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glDeleteTextures:     /* glDeleteTextures(GLsizei n, GLuint *textures); */
+        fixup_glDeleteGeneric(glmsg);
+        break;
+    case GLMessage::glGenBuffers:        /* void glGenBuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glGenFramebuffers:   /* void glGenFramebuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glGenRenderbuffers:  /* void glGenFramebuffers(GLsizei n, GLuint *buffers); */
+    case GLMessage::glGenTextures:       /* void glGenTextures(GLsizei n, GLuint *textures); */
         fixup_glGenGeneric(glmsg);
         break;
     case GLMessage::glGetAttribLocation:  
@@ -285,6 +321,11 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
     case GLMessage::glTexImage2D:
         if (context->getGlobalTraceState()->shouldCollectTextureDataOnGlTexImage()) {
             fixup_glTexImage2D(glmsg);
+        }
+        break;
+    case GLMessage::glTexSubImage2D:
+        if (context->getGlobalTraceState()->shouldCollectTextureDataOnGlTexImage()) {
+            fixup_glTexSubImage2D(glmsg);
         }
         break;
     case GLMessage::glShaderSource:
