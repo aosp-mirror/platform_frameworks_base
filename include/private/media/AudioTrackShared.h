@@ -80,7 +80,7 @@ struct audio_track_cblk_t
                 // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
                 // 16 bit because data is converted to 16 bit before being stored in buffer
 
-                uint8_t     frameSize;
+                uint8_t     frameSize;       // would normally be size_t, but 8 bits is plenty
                 uint8_t     pad1;
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
 

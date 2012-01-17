@@ -1118,7 +1118,7 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
     result.append(buffer);
     snprintf(buffer, SIZE, "Format: %d\n", mFormat);
     result.append(buffer);
-    snprintf(buffer, SIZE, "Frame size: %d\n", mFrameSize);
+    snprintf(buffer, SIZE, "Frame size: %u\n", mFrameSize);
     result.append(buffer);
 
     snprintf(buffer, SIZE, "\nPending setParameters commands: \n");
@@ -1729,7 +1729,7 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
     mChannelMask = mOutput->stream->common.get_channels(&mOutput->stream->common);
     mChannelCount = (uint16_t)popcount(mChannelMask);
     mFormat = mOutput->stream->common.get_format(&mOutput->stream->common);
-    mFrameSize = (uint16_t)audio_stream_frame_size(&mOutput->stream->common);
+    mFrameSize = audio_stream_frame_size(&mOutput->stream->common);
     mFrameCount = mOutput->stream->common.get_buffer_size(&mOutput->stream->common) / mFrameSize;
 
     // FIXME - Current mixer implementation only supports stereo output: Always
@@ -3332,12 +3332,13 @@ uint32_t AudioFlinger::ThreadBase::TrackBase::channelMask() const {
 
 void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
     audio_track_cblk_t* cblk = this->cblk();
-    int8_t *bufferStart = (int8_t *)mBuffer + (offset-cblk->serverBase)*cblk->frameSize;
-    int8_t *bufferEnd = bufferStart + frames * cblk->frameSize;
+    size_t frameSize = cblk->frameSize;
+    int8_t *bufferStart = (int8_t *)mBuffer + (offset-cblk->serverBase)*frameSize;
+    int8_t *bufferEnd = bufferStart + frames * frameSize;
 
     // Check validity of returned pointer in case the track control block would have been corrupted.
     if (bufferStart < mBuffer || bufferStart > bufferEnd || bufferEnd > mBufferEnd ||
-        ((unsigned long)bufferStart & (unsigned long)(cblk->frameSize - 1))) {
+        ((unsigned long)bufferStart & (unsigned long)(frameSize - 1))) {
         ALOGE("TrackBase::getBuffer buffer out of range:\n    start: %p, end %p , mBuffer %p mBufferEnd %p\n    \
                 server %d, serverBase %d, user %d, userBase %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
@@ -4808,7 +4809,7 @@ void AudioFlinger::RecordThread::readInputParameters()
     mChannelMask = mInput->stream->common.get_channels(&mInput->stream->common);
     mChannelCount = (uint16_t)popcount(mChannelMask);
     mFormat = mInput->stream->common.get_format(&mInput->stream->common);
-    mFrameSize = (uint16_t)audio_stream_frame_size(&mInput->stream->common);
+    mFrameSize = audio_stream_frame_size(&mInput->stream->common);
     mInputBytes = mInput->stream->common.get_buffer_size(&mInput->stream->common);
     mFrameCount = mInputBytes / mFrameSize;
     mRsmpInBuffer = new int16_t[mFrameCount * mChannelCount];
