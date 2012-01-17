@@ -471,4 +471,8 @@ public class BridgeWindowManager implements IWindowManager {
     public boolean hasNavigationBar() {
         return false; // should this return something else?
     }
+
+    public void lockNow() {
+        // TODO Auto-generated method stub
+    }
 }
