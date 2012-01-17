@@ -536,7 +536,7 @@ private:
                     size_t                  mFrameCount;
                     uint32_t                mChannelMask;
                     uint16_t                mChannelCount;
-                    uint16_t                mFrameSize;
+                    size_t                  mFrameSize;
                     uint32_t                mFormat;
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;

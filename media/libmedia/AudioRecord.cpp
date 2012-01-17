@@ -263,7 +263,7 @@ uint32_t AudioRecord::frameCount() const
     return mFrameCount;
 }
 
-int AudioRecord::frameSize() const
+size_t AudioRecord::frameSize() const
 {
     if (audio_is_linear_pcm(mFormat)) {
         return channelCount()*audio_bytes_per_sample(mFormat);
