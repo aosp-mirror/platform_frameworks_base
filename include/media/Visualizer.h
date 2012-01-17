@@ -143,7 +143,7 @@ private:
     void periodicCapture();
     uint32_t initCaptureSize();
 
-    Mutex mLock;
+    Mutex mCaptureLock;
     uint32_t mCaptureRate;
     uint32_t mCaptureSize;
     uint32_t mSampleRate;
