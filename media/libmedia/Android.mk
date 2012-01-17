@@ -43,13 +43,12 @@ LOCAL_SRC_FILES:= \
     IEffectClient.cpp \
     AudioEffect.cpp \
     Visualizer.cpp \
-    MemoryLeakTrackUtil.cpp \
-    fixedfft.cpp.arm
+    MemoryLeakTrackUtil.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat \
         libcamera_client libstagefright_foundation \
-        libgui libdl
+        libgui libdl libaudioutils
 
 LOCAL_WHOLE_STATIC_LIBRARY := libmedia_helper
 
@@ -61,6 +60,7 @@ LOCAL_C_INCLUDES := \
     $(TOP)/frameworks/base/include/media/stagefright/openmax \
     external/icu4c/common \
     external/expat/lib \
-    system/media/audio_effects/include
+    system/media/audio_effects/include \
+    system/media/audio_utils/include
 
 include $(BUILD_SHARED_LIBRARY)
