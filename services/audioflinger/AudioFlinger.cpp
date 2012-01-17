@@ -72,7 +72,7 @@ static const char kHardwareLockedString[] = "Hardware lock is taken\n";
 
 //static const nsecs_t kStandbyTimeInNsecs = seconds(3);
 static const float MAX_GAIN = 4096.0f;
-static const float MAX_GAIN_INT = 0x1000;
+static const uint32_t MAX_GAIN_INT = 0x1000;
 
 // retry counts for buffer fill timeout
 // 50 * ~20msecs = 1 second
@@ -2190,14 +2190,29 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 // read original volumes with volume control
                 float typeVolume = mStreamTypes[track->type()].volume;
                 float v = masterVolume * typeVolume;
-                vl = (uint32_t)(v * cblk->volume[0]) << 12;
-                vr = (uint32_t)(v * cblk->volume[1]) << 12;
+                uint32_t vlr = cblk->volumeLR;
+                vl = vlr & 0xFFFF;
+                vr = vlr >> 16;
+                // track volumes come from shared memory, so can't be trusted and must be clamped
+                if (vl > MAX_GAIN_INT) {
+                    ALOGV("Track left volume out of range: %04X", vl);
+                    vl = MAX_GAIN_INT;
+                }
+                if (vr > MAX_GAIN_INT) {
+                    ALOGV("Track right volume out of range: %04X", vr);
+                    vr = MAX_GAIN_INT;
+                }
+                // now apply the master volume and stream type volume
+                vl = (uint32_t)(v * vl) << 12;
+                vr = (uint32_t)(v * vr) << 12;
+                // assuming master volume and stream type volume each go up to 1.0,
+                // vl and vr are now in 8.24 format
 
                 uint16_t sendLevel = cblk->getSendLevel_U4_12();
                 // send level comes from shared memory and so may be corrupt
-                if (sendLevel >= 0x1000) {
+                if (sendLevel >= MAX_GAIN_INT) {
                     ALOGV("Track send level out of range: %04X", sendLevel);
-                    sendLevel = 0x1000;
+                    sendLevel = MAX_GAIN_INT;
                 }
                 va = (uint32_t)(v * sendLevel);
             }
@@ -2217,6 +2232,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
             // Convert volumes from 8.24 to 4.12 format
             int16_t left, right, aux;
+            // This additional clamping is needed in case chain->setVolume_l() overshot
             uint32_t v_clamped = (vl + (1 << 11)) >> 12;
             if (v_clamped > MAX_GAIN_INT) v_clamped = MAX_GAIN_INT;
             left = int16_t(v_clamped);
@@ -2699,10 +2715,11 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     } else {
                         float typeVolume = mStreamTypes[track->type()].volume;
                         float v = mMasterVolume * typeVolume;
-                        float v_clamped = v * cblk->volume[0];
+                        uint32_t vlr = cblk->volumeLR;
+                        float v_clamped = v * (vlr & 0xFFFF);
                         if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
                         left = v_clamped/MAX_GAIN;
-                        v_clamped = v * cblk->volume[1];
+                        v_clamped = v * (vlr >> 16);
                         if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
                         right = v_clamped/MAX_GAIN;
                     }
@@ -3436,6 +3453,7 @@ void AudioFlinger::PlaybackThread::Track::destroy()
 
 void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
 {
+    uint32_t vlr = mCblk->volumeLR;
     snprintf(buffer, size, "   %05d %05d %03u %03u 0x%08x %05u   %04u %1d %1d %1d %05u %05u %05u  0x%08x 0x%08x 0x%08x 0x%08x\n",
             mName - AudioMixer::TRACK0,
             (mClient == NULL) ? getpid() : mClient->pid(),
@@ -3448,8 +3466,8 @@ void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
             mMute,
             mFillingUpStatus,
             mCblk->sampleRate,
-            mCblk->volume[0],
-            mCblk->volume[1],
+            vlr & 0xFFFF,
+            vlr >> 16,
             mCblk->server,
             mCblk->user,
             (int)mMainBuffer,
@@ -3794,7 +3812,7 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
     if (mCblk != NULL) {
         mCblk->flags |= CBLK_DIRECTION_OUT;
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-        mCblk->volume[0] = mCblk->volume[1] = 0x1000;
+        mCblk->volumeLR = (MAX_GAIN_INT << 16) | MAX_GAIN_INT;
         mOutBuffer.frameCount = 0;
         playbackThread->mTracks.add(this);
         ALOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, " \

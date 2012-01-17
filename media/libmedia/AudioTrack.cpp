@@ -480,7 +480,6 @@ status_t AudioTrack::setVolume(float left, float right)
     mVolume[LEFT] = left;
     mVolume[RIGHT] = right;
 
-    // write must be atomic
     mCblk->volumeLR = (uint32_t(uint16_t(right * 0x1000)) << 16) | uint16_t(left * 0x1000);
 
     return NO_ERROR;
