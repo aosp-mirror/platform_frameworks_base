@@ -3385,8 +3385,6 @@ AudioFlinger::PlaybackThread::Track::Track(
         if (mName < 0) {
             ALOGE("no more track names available");
         }
-        mVolume[0] = 1.0f;
-        mVolume[1] = 1.0f;
         mStreamType = streamType;
         // NOTE: audio_track_cblk_t::frameSize for 8 bit PCM data is based on a sample size of
         // 16 bit because data is converted to 16 bit before being stored in buffer by AudioTrack
@@ -3646,12 +3644,6 @@ void AudioFlinger::PlaybackThread::Track::reset()
 void AudioFlinger::PlaybackThread::Track::mute(bool muted)
 {
     mMute = muted;
-}
-
-void AudioFlinger::PlaybackThread::Track::setVolume(float left, float right)
-{
-    mVolume[0] = left;
-    mVolume[1] = right;
 }
 
 status_t AudioFlinger::PlaybackThread::Track::attachAuxEffect(int EffectId)
@@ -4101,10 +4093,6 @@ void AudioFlinger::TrackHandle::mute(bool e) {
 
 void AudioFlinger::TrackHandle::pause() {
     mTrack->pause();
-}
-
-void AudioFlinger::TrackHandle::setVolume(float left, float right) {
-    mTrack->setVolume(left, right);
 }
 
 sp<IMemory> AudioFlinger::TrackHandle::getCblk() const {
