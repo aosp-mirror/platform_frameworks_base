@@ -307,7 +307,7 @@ public class LinearLayout extends ViewGroup {
             if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
                     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                    final int top = child.getTop() - lp.topMargin;
+                    final int top = child.getTop() - lp.topMargin - mDividerHeight;
                     drawHorizontalDivider(canvas, top);
                 }
             }
@@ -334,7 +334,7 @@ public class LinearLayout extends ViewGroup {
             if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
                     final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                    final int left = child.getLeft() - lp.leftMargin;
+                    final int left = child.getLeft() - lp.leftMargin - mDividerWidth;
                     drawVerticalDivider(canvas, left);
                 }
             }
