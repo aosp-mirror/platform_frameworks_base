@@ -798,7 +798,7 @@ const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONE
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-ToneGenerator::ToneGenerator(int streamType, float volume, bool threadCanCallJava) {
+ToneGenerator::ToneGenerator(audio_stream_type_t streamType, float volume, bool threadCanCallJava) {
 
     ALOGV("ToneGenerator constructor: streamType=%d, volume=%f\n", streamType, volume);
 

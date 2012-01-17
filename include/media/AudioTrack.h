@@ -110,7 +110,7 @@ public:
      */
 
      static status_t getMinFrameCount(int* frameCount,
-                                      int streamType      =-1,
+                                      audio_stream_type_t streamType = AUDIO_STREAM_DEFAULT,
                                       uint32_t sampleRate = 0);
 
     /* Constructs an uninitialized AudioTrack. No connection with
@@ -142,7 +142,7 @@ public:
      * sessionId:          Specific session ID, or zero to use default.
      */
 
-                        AudioTrack( int streamType,
+                        AudioTrack( audio_stream_type_t streamType,
                                     uint32_t sampleRate  = 0,
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask      = 0,
@@ -162,7 +162,7 @@ public:
      * EVENT_UNDERRUN event.
      */
 
-                        AudioTrack( int streamType,
+                        AudioTrack( audio_stream_type_t streamType,
                                     uint32_t sampleRate = 0,
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     int channelMask     = 0,
@@ -186,7 +186,7 @@ public:
      *  - BAD_VALUE: invalid parameter (channels, format, sampleRate...)
      *  - NO_INIT: audio server or audio hardware not initialized
      * */
-            status_t    set(int streamType      =-1,
+            status_t    set(audio_stream_type_t streamType = AUDIO_STREAM_DEFAULT,
                             uint32_t sampleRate = 0,
                             audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             int channelMask     = 0,
@@ -215,7 +215,7 @@ public:
 
     /* getters, see constructor */
 
-            int         streamType() const;
+            audio_stream_type_t streamType() const;
             audio_format_t format() const;
             int         channelCount() const;
             uint32_t    frameCount() const;
@@ -433,7 +433,7 @@ private:
     };
 
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
-            status_t createTrack_l(int streamType,
+            status_t createTrack_l(audio_stream_type_t streamType,
                                  uint32_t sampleRate,
                                  audio_format_t format,
                                  uint32_t channelMask,
@@ -458,7 +458,7 @@ private:
 
     audio_track_cblk_t*     mCblk;
     audio_format_t          mFormat;
-    uint8_t                 mStreamType;
+    audio_stream_type_t     mStreamType;
     uint8_t                 mChannelCount;
     uint8_t                 mMuted;
     uint8_t                 mReserved;

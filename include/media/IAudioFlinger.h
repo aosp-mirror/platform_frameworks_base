@@ -46,7 +46,7 @@ public:
      */
     virtual sp<IAudioTrack> createTrack(
                                 pid_t pid,
-                                int streamType,
+                                audio_stream_type_t streamType,
                                 uint32_t sampleRate,
                                 uint32_t format,
                                 uint32_t channelMask,
@@ -89,11 +89,11 @@ public:
     /* set/get stream type state. This will probably be used by
      * the preference panel, mostly.
      */
-    virtual     status_t    setStreamVolume(int stream, float value, int output) = 0;
-    virtual     status_t    setStreamMute(int stream, bool muted) = 0;
+    virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value, int output) = 0;
+    virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted) = 0;
 
-    virtual     float       streamVolume(int stream, int output) const = 0;
-    virtual     bool        streamMute(int stream) const = 0;
+    virtual     float       streamVolume(audio_stream_type_t stream, int output) const = 0;
+    virtual     bool        streamMute(audio_stream_type_t stream) const = 0;
 
     // set audio mode
     virtual     status_t    setMode(int mode) = 0;
@@ -129,7 +129,7 @@ public:
                                     uint32_t acoustics) = 0;
     virtual status_t closeInput(int input) = 0;
 
-    virtual status_t setStreamOutput(uint32_t stream, int output) = 0;
+    virtual status_t setStreamOutput(audio_stream_type_t stream, int output) = 0;
 
     virtual status_t setVoiceVolume(float volume) = 0;
 

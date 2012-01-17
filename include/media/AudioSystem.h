@@ -55,19 +55,19 @@ public:
     static status_t getMasterMute(bool* mute);
 
     // set/get stream volume on specified output
-    static status_t setStreamVolume(int stream, float value, int output);
-    static status_t getStreamVolume(int stream, float* volume, int output);
+    static status_t setStreamVolume(audio_stream_type_t stream, float value, int output);
+    static status_t getStreamVolume(audio_stream_type_t stream, float* volume, int output);
 
     // mute/unmute stream
-    static status_t setStreamMute(int stream, bool mute);
-    static status_t getStreamMute(int stream, bool* mute);
+    static status_t setStreamMute(audio_stream_type_t stream, bool mute);
+    static status_t getStreamMute(audio_stream_type_t stream, bool* mute);
 
     // set audio mode in audio hardware (see audio_mode_t)
     static status_t setMode(int mode);
 
     // returns true in *state if tracks are active on the specified stream or has been active
     // in the past inPastMs milliseconds
-    static status_t isStreamActive(int stream, bool *state, uint32_t inPastMs = 0);
+    static status_t isStreamActive(audio_stream_type_t stream, bool *state, uint32_t inPastMs = 0);
 
     // set/get audio hardware parameters. The function accepts a list of parameters
     // key value pairs in the form: key1=value1;key2=value2;...
@@ -83,11 +83,11 @@ public:
     static float linearToLog(int volume);
     static int logToLinear(float volume);
 
-    static status_t getOutputSamplingRate(int* samplingRate, int stream = AUDIO_STREAM_DEFAULT);
-    static status_t getOutputFrameCount(int* frameCount, int stream = AUDIO_STREAM_DEFAULT);
-    static status_t getOutputLatency(uint32_t* latency, int stream = AUDIO_STREAM_DEFAULT);
+    static status_t getOutputSamplingRate(int* samplingRate, audio_stream_type_t stream = AUDIO_STREAM_DEFAULT);
+    static status_t getOutputFrameCount(int* frameCount, audio_stream_type_t stream = AUDIO_STREAM_DEFAULT);
+    static status_t getOutputLatency(uint32_t* latency, audio_stream_type_t stream = AUDIO_STREAM_DEFAULT);
 
-    static bool routedToA2dpOutput(int streamType);
+    static bool routedToA2dpOutput(audio_stream_type_t streamType);
 
     static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount,
         size_t* buffSize);
@@ -103,7 +103,7 @@ public:
     // - BAD_VALUE: invalid parameter
     // NOTE: this feature is not supported on all hardware platforms and it is
     // necessary to check returned status before using the returned values.
-    static status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream = AUDIO_STREAM_DEFAULT);
+    static status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, audio_stream_type_t stream = AUDIO_STREAM_DEFAULT);
 
     static unsigned int  getInputFramesLost(audio_io_handle_t ioHandle);
 

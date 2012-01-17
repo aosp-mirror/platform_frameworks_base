@@ -79,7 +79,7 @@ static void android_media_ToneGenerator_release(JNIEnv *env, jobject thiz) {
 
 static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,
         jint streamType, jint volume) {
-    ToneGenerator *lpToneGen = new ToneGenerator(streamType, AudioSystem::linearToLog(volume), true);
+    ToneGenerator *lpToneGen = new ToneGenerator((audio_stream_type_t) streamType, AudioSystem::linearToLog(volume), true);
 
     env->SetIntField(thiz, fields.context, 0);
 

@@ -198,11 +198,11 @@ public:
         return reply.readInt32();
     }
 
-    status_t setAudioStreamType(int type)
+    status_t setAudioStreamType(audio_stream_type_t stream)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
-        data.writeInt32(type);
+        data.writeInt32((int32_t) stream);
         remote()->transact(SET_AUDIO_STREAM_TYPE, data, &reply);
         return reply.readInt32();
     }
@@ -397,7 +397,7 @@ status_t BnMediaPlayer::onTransact(
         } break;
         case SET_AUDIO_STREAM_TYPE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
-            reply->writeInt32(setAudioStreamType(data.readInt32()));
+            reply->writeInt32(setAudioStreamType((audio_stream_type_t) data.readInt32()));
             return NO_ERROR;
         } break;
         case SET_LOOPING: {

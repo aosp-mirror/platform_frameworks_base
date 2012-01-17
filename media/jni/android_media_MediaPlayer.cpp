@@ -479,7 +479,7 @@ android_media_MediaPlayer_setAudioStreamType(JNIEnv *env, jobject thiz, int stre
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    process_media_player_call( env, thiz, mp->setAudioStreamType(streamtype) , NULL, NULL );
+    process_media_player_call( env, thiz, mp->setAudioStreamType((audio_stream_type_t) streamtype) , NULL, NULL );
 }
 
 static void

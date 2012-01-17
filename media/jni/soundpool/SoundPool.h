@@ -162,7 +162,7 @@ class SoundPool {
     friend class SoundPoolThread;
     friend class SoundChannel;
 public:
-    SoundPool(int maxChannels, int streamType, int srcQuality);
+    SoundPool(int maxChannels, audio_stream_type_t streamType, int srcQuality);
     ~SoundPool();
     int load(const char* url, int priority);
     int load(int fd, int64_t offset, int64_t length, int priority);
@@ -178,7 +178,7 @@ public:
     void setPriority(int channelID, int priority);
     void setLoop(int channelID, int loop);
     void setRate(int channelID, float rate);
-    int streamType() const { return mStreamType; }
+    audio_stream_type_t streamType() const { return mStreamType; }
     int srcQuality() const { return mSrcQuality; }
 
     // called from SoundPoolThread
@@ -220,7 +220,7 @@ private:
     List<SoundChannel*>     mStop;
     DefaultKeyedVector< int, sp<Sample> >   mSamples;
     int                     mMaxChannels;
-    int                     mStreamType;
+    audio_stream_type_t     mStreamType;
     int                     mSrcQuality;
     int                     mAllocated;
     int                     mNextSampleID;

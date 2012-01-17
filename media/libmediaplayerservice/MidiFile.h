@@ -78,7 +78,7 @@ private:
     EAS_I32             mDuration;
     EAS_STATE           mState;
     EAS_FILE            mFileLocator;
-    int                 mStreamType;
+    audio_stream_type_t mStreamType;
     bool                mLoop;
     volatile bool       mExit;
     bool                mPaused;
