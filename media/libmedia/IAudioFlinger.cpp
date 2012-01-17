@@ -289,7 +289,7 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setMode(int mode)
+    virtual status_t setMode(audio_mode_t mode)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -786,7 +786,7 @@ status_t BnAudioFlinger::onTransact(
         } break;
         case SET_MODE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int mode = data.readInt32();
+            audio_mode_t mode = (audio_mode_t) data.readInt32();
             reply->writeInt32( setMode(mode) );
             return NO_ERROR;
         } break;

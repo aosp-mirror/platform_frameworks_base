@@ -96,7 +96,7 @@ public:
     virtual     bool        streamMute(audio_stream_type_t stream) const = 0;
 
     // set audio mode
-    virtual     status_t    setMode(int mode) = 0;
+    virtual     status_t    setMode(audio_mode_t mode) = 0;
 
     // mic mute/state
     virtual     status_t    setMicMute(bool state) = 0;

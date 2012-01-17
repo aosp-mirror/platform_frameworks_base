@@ -99,7 +99,7 @@ public:
     virtual     float       streamVolume(audio_stream_type_t stream, int output) const;
     virtual     bool        streamMute(audio_stream_type_t stream) const;
 
-    virtual     status_t    setMode(int mode);
+    virtual     status_t    setMode(audio_mode_t mode);
 
     virtual     status_t    setMicMute(bool state);
     virtual     bool        getMicMute() const;
@@ -202,7 +202,7 @@ public:
                                 Parcel* reply,
                                 uint32_t flags);
 
-                uint32_t    getMode() { return mMode; }
+               audio_mode_t getMode() const { return mMode; }
 
                 bool        btNrecIsOff() { return mBtNrecIsOff; }
 
@@ -461,7 +461,7 @@ private:
                     // unlock effect chains after process
                     void unlockEffectChains(Vector<sp <EffectChain> >& effectChains);
                     // set audio mode to all effect chains
-                    void setMode(uint32_t mode);
+                    void setMode(audio_mode_t mode);
                     // get effect module with corresponding ID on specified audio session
                     sp<AudioFlinger::EffectModule> getEffect_l(int sessionId, int effectId);
                     // add and effect module. Also creates the effect chain is none exists for
@@ -1113,7 +1113,7 @@ private:
 
         status_t         setDevice(uint32_t device);
         status_t         setVolume(uint32_t *left, uint32_t *right, bool controller);
-        status_t         setMode(uint32_t mode);
+        status_t         setMode(audio_mode_t mode);
         status_t         start();
         status_t         stop();
         void             setSuspended(bool suspended);
@@ -1266,7 +1266,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         sp<EffectModule> getEffectFromType_l(const effect_uuid_t *type);
         bool setVolume_l(uint32_t *left, uint32_t *right);
         void setDevice_l(uint32_t device);
-        void setMode_l(uint32_t mode);
+        void setMode_l(audio_mode_t mode);
 
         void setInBuffer(int16_t *buffer, bool ownsBuffer = false) {
             mInBuffer = buffer;
@@ -1399,7 +1399,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 volatile int32_t                    mNextUniqueId;
-                uint32_t                            mMode;
+                audio_mode_t                        mMode;
                 bool                                mBtNrecIsOff;
 
                 Vector<AudioSessionRef*> mAudioSessionRefs;

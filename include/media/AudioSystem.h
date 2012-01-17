@@ -62,8 +62,8 @@ public:
     static status_t setStreamMute(audio_stream_type_t stream, bool mute);
     static status_t getStreamMute(audio_stream_type_t stream, bool* mute);
 
-    // set audio mode in audio hardware (see audio_mode_t)
-    static status_t setMode(int mode);
+    // set audio mode in audio hardware
+    static status_t setMode(audio_mode_t mode);
 
     // returns true in *state if tracks are active on the specified stream or has been active
     // in the past inPastMs milliseconds
@@ -142,7 +142,7 @@ public:
     //
     static status_t setDeviceConnectionState(audio_devices_t device, audio_policy_dev_state_t state, const char *device_address);
     static audio_policy_dev_state_t getDeviceConnectionState(audio_devices_t device, const char *device_address);
-    static status_t setPhoneState(int state);
+    static status_t setPhoneState(audio_mode_t state);
     static status_t setRingerMode(uint32_t mode, uint32_t mask);
     static status_t setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config);
     static audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage);
