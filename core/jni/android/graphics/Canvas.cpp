@@ -820,7 +820,12 @@ public:
             posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
             posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
         }
+        
+        SkPaint::TextEncoding encoding = paint->getTextEncoding();
+        paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
         canvas->drawPosText(textArray + index, count << 1, posPtr, *paint);
+        paint->setTextEncoding(encoding);
+        
         if (text) {
             env->ReleaseCharArrayElements(text, textArray, 0);
         }
@@ -844,7 +849,12 @@ public:
             posPtr[indx].fX = SkFloatToScalar(posArray[indx << 1]);
             posPtr[indx].fY = SkFloatToScalar(posArray[(indx << 1) + 1]);
         }
+
+        SkPaint::TextEncoding encoding = paint->getTextEncoding();
+        paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
         canvas->drawPosText(text_, byteLength << 1, posPtr, *paint);
+        paint->setTextEncoding(encoding);
+
         if (text) {
             env->ReleaseStringChars(text, (const jchar*) text_);
         }

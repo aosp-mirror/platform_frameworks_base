@@ -1516,6 +1516,9 @@ public class Canvas {
     /**
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
+     * 
+     * This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts.
      *
      * @param text     The text to be drawn
      * @param index    The index of the first character to draw
@@ -1536,6 +1539,9 @@ public class Canvas {
     /**
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
+     * 
+     * This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts.
      *
      * @param text  The text to be drawn
      * @param pos   Array of [x,y] positions, used to position each character
