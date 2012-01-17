@@ -50,5 +50,6 @@
     <string name="rtl">"والحق أن تترك ونص"</string>
     <string name="composing">"\u0644\u0627"</string>
     <string name="url">www.amazon.co.uk/gp/aw/h.html/275-8912818-8203452</string>
+    <string name="pointer_location" msgid="6084434787496938001">"ตำแหน่งของตัวชี้"</string>
 </resources>
 
