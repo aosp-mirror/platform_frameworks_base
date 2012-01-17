@@ -7597,15 +7597,17 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public void setAlpha(float alpha) {
         ensureTransformationInfo();
-        mTransformationInfo.mAlpha = alpha;
-        invalidateParentCaches();
-        if (onSetAlpha((int) (alpha * 255))) {
-            mPrivateFlags |= ALPHA_SET;
-            // subclass is handling alpha - don't optimize rendering cache invalidation
-            invalidate(true);
-        } else {
-            mPrivateFlags &= ~ALPHA_SET;
-            invalidate(false);
+        if (mTransformationInfo.mAlpha != alpha) {
+            mTransformationInfo.mAlpha = alpha;
+            invalidateParentCaches();
+            if (onSetAlpha((int) (alpha * 255))) {
+                mPrivateFlags |= ALPHA_SET;
+                // subclass is handling alpha - don't optimize rendering cache invalidation
+                invalidate(true);
+            } else {
+                mPrivateFlags &= ~ALPHA_SET;
+                invalidate(false);
+            }
         }
     }
 
@@ -7616,18 +7618,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * alpha (the return value for onSetAlpha()).
      *
      * @param alpha The new value for the alpha property
-     * @return true if the View subclass handles alpha (the return value for onSetAlpha())
+     * @return true if the View subclass handles alpha (the return value for onSetAlpha()) and
+     *         the new value for the alpha property is different from the old value
      */
     boolean setAlphaNoInvalidation(float alpha) {
         ensureTransformationInfo();
-        mTransformationInfo.mAlpha = alpha;
-        boolean subclassHandlesAlpha = onSetAlpha((int) (alpha * 255));
-        if (subclassHandlesAlpha) {
-            mPrivateFlags |= ALPHA_SET;
-        } else {
-            mPrivateFlags &= ~ALPHA_SET;
+        if (mTransformationInfo.mAlpha != alpha) {
+            mTransformationInfo.mAlpha = alpha;
+            boolean subclassHandlesAlpha = onSetAlpha((int) (alpha * 255));
+            if (subclassHandlesAlpha) {
+                mPrivateFlags |= ALPHA_SET;
+                return true;
+            } else {
+                mPrivateFlags &= ~ALPHA_SET;
+            }
         }
-        return subclassHandlesAlpha;
+        return false;
     }
 
     /**
