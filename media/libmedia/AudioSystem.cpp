@@ -121,7 +121,8 @@ status_t AudioSystem::getMasterMute(bool* mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::setStreamVolume(audio_stream_type_t stream, float value, int output)
+status_t AudioSystem::setStreamVolume(audio_stream_type_t stream, float value,
+        audio_io_handle_t output)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -139,7 +140,8 @@ status_t AudioSystem::setStreamMute(audio_stream_type_t stream, bool mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getStreamVolume(audio_stream_type_t stream, float* volume, int output)
+status_t AudioSystem::getStreamVolume(audio_stream_type_t stream, float* volume,
+        audio_io_handle_t output)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -402,7 +404,8 @@ void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
     ALOGW("AudioFlinger server died!");
 }
 
-void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, void *param2) {
+void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, audio_io_handle_t ioHandle,
+        void *param2) {
     ALOGV("ioConfigChanged() event %d", event);
     OutputDescriptor *desc;
     audio_stream_type_t stream;

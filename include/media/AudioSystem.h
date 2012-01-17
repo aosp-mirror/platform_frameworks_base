@@ -55,8 +55,10 @@ public:
     static status_t getMasterMute(bool* mute);
 
     // set/get stream volume on specified output
-    static status_t setStreamVolume(audio_stream_type_t stream, float value, int output);
-    static status_t getStreamVolume(audio_stream_type_t stream, float* volume, int output);
+    static status_t setStreamVolume(audio_stream_type_t stream, float value,
+                                    audio_io_handle_t output);
+    static status_t getStreamVolume(audio_stream_type_t stream, float* volume,
+                                    audio_io_handle_t output);
 
     // mute/unmute stream
     static status_t setStreamMute(audio_stream_type_t stream, bool mute);
@@ -217,7 +219,7 @@ private:
 
         // indicate a change in the configuration of an output or input: keeps the cached
         // values for output/input parameters upto date in client process
-        virtual void ioConfigChanged(int event, int ioHandle, void *param2);
+        virtual void ioConfigChanged(int event, audio_io_handle_t ioHandle, void *param2);
     };
 
     class AudioPolicyServiceClient: public IBinder::DeathRecipient
