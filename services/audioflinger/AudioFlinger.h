@@ -590,7 +590,6 @@ private:
                     void        flush();
                     void        destroy();
                     void        mute(bool);
-                    void        setVolume(float left, float right);
                     int name() const {
                         return mName;
                     }
@@ -633,7 +632,6 @@ private:
             }
 
             // we don't really need a lock for these
-            float               mVolume[2];
             volatile bool       mMute;
             // FILLED state is used for suppressing volume ramp at begin of playing
             enum {FS_FILLING, FS_FILLED, FS_ACTIVE};
@@ -908,7 +906,6 @@ private:
         virtual void        flush();
         virtual void        mute(bool);
         virtual void        pause();
-        virtual void        setVolume(float left, float right);
         virtual sp<IMemory> getCblk() const;
         virtual status_t    attachAuxEffect(int effectId);
         virtual status_t onTransact(
