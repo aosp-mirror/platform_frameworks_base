@@ -23,7 +23,8 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.QwertyKeyListener;
 import android.util.AttributeSet;
-import android.widget.MultiAutoCompleteTextView.Tokenizer;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * An editable text view, extending {@link AutoCompleteTextView}, that
@@ -194,6 +195,18 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
 
         QwertyKeyListener.markAsReplaced(editable, start, end, original);
         editable.replace(start, end, mTokenizer.terminateToken(text));
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(MultiAutoCompleteTextView.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(MultiAutoCompleteTextView.class.getName());
     }
 
     public static interface Tokenizer {

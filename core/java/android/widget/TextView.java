@@ -9006,6 +9006,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
 
+        event.setClassName(TextView.class.getName());
         final boolean isPassword = hasPasswordTransformationMethod();
         event.setPassword(isPassword);
 
@@ -9020,11 +9021,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
 
+        info.setClassName(TextView.class.getName());
         final boolean isPassword = hasPasswordTransformationMethod();
+        info.setPassword(isPassword);
+
         if (!isPassword) {
             info.setText(getTextForAccessibility());
         }
-        info.setPassword(isPassword);
     }
 
     @Override

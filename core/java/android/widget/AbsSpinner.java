@@ -28,6 +28,8 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * An abstract base class for spinner widgets. SDK users will probably not
@@ -40,7 +42,6 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
 
     int mHeightMeasureSpec;
     int mWidthMeasureSpec;
-    boolean mBlockLayoutRequests;
 
     int mSelectionLeftPadding = 0;
     int mSelectionTopPadding = 0;
@@ -462,5 +463,17 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
             }
             scrapHeap.clear();
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(AbsSpinner.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(AbsSpinner.class.getName());
     }
 }

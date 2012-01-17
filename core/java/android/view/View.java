@@ -4107,7 +4107,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         event.setSource(this);
-        event.setClassName(getClass().getName());
+        event.setClassName(View.class.getName());
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
@@ -4212,7 +4212,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         info.setPackageName(mContext.getPackageName());
-        info.setClassName(getClass().getName());
+        info.setClassName(View.class.getName());
         info.setContentDescription(getContentDescription());
 
         info.setEnabled(isEnabled());

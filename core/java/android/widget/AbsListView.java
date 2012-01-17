@@ -20,7 +20,6 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -1295,6 +1294,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
         super.sendAccessibilityEvent(eventType);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(AbsListView.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(AbsListView.class.getName());
     }
 
     /**

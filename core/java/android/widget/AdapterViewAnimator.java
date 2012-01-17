@@ -29,6 +29,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1044,5 +1046,17 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * perform any required setup, for example, to stop automatically advancing their children.
      */
     public void fyiWillBeAdvancedByHostKThx() {
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(AdapterViewAnimator.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(AdapterViewAnimator.class.getName());
     }
 }

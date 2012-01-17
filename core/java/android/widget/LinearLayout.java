@@ -27,6 +27,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
 
@@ -1729,7 +1731,19 @@ public class LinearLayout extends ViewGroup {
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LinearLayout.LayoutParams;
     }
-    
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(LinearLayout.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(LinearLayout.class.getName());
+    }
+
     /**
      * Per-child layout information associated with ViewLinearLayout.
      * 

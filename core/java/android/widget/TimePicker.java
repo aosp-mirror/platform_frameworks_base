@@ -27,6 +27,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.NumberPicker.OnValueChangeListener;
@@ -474,6 +475,18 @@ public class TimePicker extends FrameLayout {
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(TimePicker.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(TimePicker.class.getName());
     }
 
     private void updateHourControl() {

@@ -16,14 +16,12 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
-
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RelativeLayout;
 
 /**
@@ -85,5 +83,17 @@ public class TwoLineListItem extends RelativeLayout {
      */
     public TextView getText2() {
         return mText2;
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(TwoLineListItem.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(TwoLineListItem.class.getName());
     }
 }

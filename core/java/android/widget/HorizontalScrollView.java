@@ -721,12 +721,14 @@ public class HorizontalScrollView extends FrameLayout {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(HorizontalScrollView.class.getName());
         info.setScrollable(getScrollRange() > 0);
     }
 
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
+        event.setClassName(HorizontalScrollView.class.getName());
         event.setScrollable(getScrollRange() > 0);
         event.setScrollX(mScrollX);
         event.setScrollY(mScrollY);
