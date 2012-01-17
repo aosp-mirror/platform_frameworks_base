@@ -504,6 +504,17 @@ public final class WebViewCore {
     }
 
     /**
+     * Notify the webview that we want to exit the video fullscreen.
+     * This is called through JNI by webcore.
+     */
+    protected void exitFullscreenVideo() {
+        if (mWebView == null) return;
+        Message message = Message.obtain(mWebView.mPrivateHandler,
+                       WebView.EXIT_FULLSCREEN_VIDEO);
+        message.sendToTarget();
+    }
+
+    /**
      * Clear the picture set. To be called only on the WebCore thread.
      */
     /* package */ void clearContent() {
