@@ -646,12 +646,14 @@ status_t AudioFlinger::setMasterMute(bool muted)
 
 float AudioFlinger::masterVolume() const
 {
-    return mMasterVolume;
+    Mutex::Autolock _l(mLock);
+    return masterVolume_l();
 }
 
 bool AudioFlinger::masterMute() const
 {
-    return mMasterMute;
+    Mutex::Autolock _l(mLock);
+    return masterMute_l();
 }
 
 status_t AudioFlinger::setStreamVolume(audio_stream_type_t stream, float value, int output)
@@ -1379,8 +1381,10 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
 
     readOutputParameters();
 
-    mMasterVolume = mAudioFlinger->masterVolume();
-    mMasterMute = mAudioFlinger->masterMute();
+    // Assumes constructor is called by AudioFlinger with it's mLock held,
+    // but it would be safer to explicitly pass these as parameters
+    mMasterVolume = mAudioFlinger->masterVolume_l();
+    mMasterMute = mAudioFlinger->masterMute_l();
 
     // There is no AUDIO_STREAM_MIN, and ++ operator does not compile
     for (audio_stream_type_t stream = (audio_stream_type_t) 0; stream < AUDIO_STREAM_CNT;
