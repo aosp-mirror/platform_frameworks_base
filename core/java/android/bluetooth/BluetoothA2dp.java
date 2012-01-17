@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.server.BluetoothA2dpService;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -112,7 +111,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      */
     /*package*/ BluetoothA2dp(Context mContext, ServiceListener l) {
-        IBinder b = ServiceManager.getService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE);
+        //TODO(BT): Fix this
+        IBinder b = null;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         if (b != null) {

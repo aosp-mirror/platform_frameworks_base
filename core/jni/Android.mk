@@ -138,14 +138,6 @@ LOCAL_SRC_FILES:= \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
-	android_bluetooth_HeadsetBase.cpp \
-	android_bluetooth_common.cpp \
-	android_bluetooth_BluetoothAudioGateway.cpp \
-	android_bluetooth_BluetoothSocket.cpp \
-	android_bluetooth_c.c \
-	android_server_BluetoothService.cpp \
-	android_server_BluetoothEventLoop.cpp \
-	android_server_BluetoothA2dpService.cpp \
 	android_server_NetworkManagementSocketTagger.cpp \
 	android_server_Watchdog.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
