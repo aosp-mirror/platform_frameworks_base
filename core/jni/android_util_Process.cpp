@@ -50,7 +50,7 @@ Mutex gKeyCreateMutex;
 static pthread_key_t gBgKey = -1;
 #endif
 
-static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
+static void signalExceptionForPriorityError(JNIEnv* env, int err)
 {
     switch (err) {
         case EINVAL:
@@ -71,7 +71,7 @@ static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
     }
 }
 
-static void signalExceptionForGroupError(JNIEnv* env, jobject obj, int err)
+static void signalExceptionForGroupError(JNIEnv* env, int err)
 {
     switch (err) {
         case EINVAL:
@@ -173,7 +173,7 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
 {
     int res = androidSetThreadSchedulingGroup(pid, grp);
     if (res != NO_ERROR) {
-        signalExceptionForGroupError(env, clazz, res == BAD_VALUE ? EINVAL : errno);
+        signalExceptionForGroupError(env, res == BAD_VALUE ? EINVAL : errno);
         return;
     }
 }
@@ -186,7 +186,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     struct dirent *de;
 
     if (grp > ANDROID_TGROUP_MAX || grp < 0) {
-        signalExceptionForGroupError(env, clazz, EINVAL);
+        signalExceptionForGroupError(env, EINVAL);
         return;
     }
 
@@ -214,7 +214,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception
         if (errno != ENOENT)
-            signalExceptionForGroupError(env, clazz, errno);
+            signalExceptionForGroupError(env, errno);
         return;
     }
 
@@ -240,7 +240,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         }
 
         if (androidSetThreadSchedulingGroup(t_pid, grp) != NO_ERROR) {
-            signalExceptionForGroupError(env, clazz, errno);
+            signalExceptionForGroupError(env, errno);
             break;
         }
     }
@@ -264,6 +264,17 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
 #endif
 }
 
+void android_os_Process_setThreadScheduler(JNIEnv* env, jclass clazz,
+                                              jint tid, jint policy, jint pri)
+{
+    struct sched_param param;
+    param.sched_priority = pri;
+    int rc = sched_setscheduler(tid, policy, &param);
+    if (rc) {
+        signalExceptionForPriorityError(env, errno);
+    }
+}
+
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
@@ -285,9 +296,9 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
     int rc = androidSetThreadPriority(pid, pri);
     if (rc != 0) {
         if (rc == INVALID_OPERATION) {
-            signalExceptionForPriorityError(env, clazz, errno);
+            signalExceptionForPriorityError(env, errno);
         } else {
-            signalExceptionForGroupError(env, clazz, errno);
+            signalExceptionForGroupError(env, errno);
         }
     }
 
@@ -308,7 +319,7 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     errno = 0;
     jint pri = getpriority(PRIO_PROCESS, pid);
     if (errno != 0) {
-        signalExceptionForPriorityError(env, clazz, errno);
+        signalExceptionForPriorityError(env, errno);
     }
     //ALOGI("Returning priority of %d: %d\n", pid, pri);
     return pri;
@@ -852,6 +863,7 @@ static const JNINativeMethod methods[] = {
     {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
     {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},
+    {"setThreadScheduler",  "(III)V", (void*)android_os_Process_setThreadScheduler},
     {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
