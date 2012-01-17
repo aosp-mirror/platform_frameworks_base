@@ -5572,6 +5572,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * Hints the RemoteViewsAdapter, if it exists, about which views are currently
+     * being displayed by the AbsListView.
+     */
+    void setVisibleRangeHint(int start, int end) {
+        if (mRemoteAdapter != null) {
+            mRemoteAdapter.setVisibleRangeHint(start, end);
+        }
+    }
+
+    /**
      * Sets the recycler listener to be notified whenever a View is set aside in
      * the recycler for later reuse. This listener can be used to free resources
      * associated to the View.

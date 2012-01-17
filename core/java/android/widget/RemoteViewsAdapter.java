@@ -68,6 +68,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private RemoteViewsAdapterServiceConnection mServiceConnection;
     private WeakReference<RemoteAdapterConnectionCallback> mCallback;
     private FixedSizeRemoteViewsCache mCache;
+    private int mVisibleWindowLowerBound;
+    private int mVisibleWindowUpperBound;
 
     // A flag to determine whether we should notify data set changed after we connect
     private boolean mNotifyDataSetChangedAfterOnServiceConnected = false;
@@ -765,7 +767,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     }
                     if (position > -1) {
                         // Load the item, and notify any existing RemoteViewsFrameLayouts
-                        updateRemoteViews(position, isRequested);
+                        updateRemoteViews(position, isRequested, true);
 
                         // Queue up for the next one to load
                         loadNextIndexInBackground();
@@ -827,8 +829,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
-    private void updateRemoteViews(final int position, boolean isRequested) {
-        if (!mServiceConnection.isConnected()) return;
+    private void updateRemoteViews(final int position, boolean isRequested, boolean
+            notifyWhenLoaded) {
         IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
 
         // Load the item information from the remote service
@@ -864,12 +866,14 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             // there is new data for it.
             final RemoteViews rv = remoteViews;
             final int typeId = mCache.getMetaDataAt(position).typeId;
-            mMainQueue.post(new Runnable() {
-                @Override
-                public void run() {
-                    mRequestedViews.notifyOnRemoteViewsLoaded(position, rv, typeId);
-                }
-            });
+            if (notifyWhenLoaded) {
+                mMainQueue.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRequestedViews.notifyOnRemoteViewsLoaded(position, rv, typeId);
+                    }
+                });
+            }
         }
     }
 
@@ -927,6 +931,16 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
         }
         return typeId;
+    }
+
+    /**
+     * This method allows an AdapterView using this Adapter to provide information about which
+     * views are currently being displayed. This allows for certain optimizations and preloading
+     * which  wouldn't otherwise be possible.
+     */
+    public void setVisibleRangeHint(int lowerBound, int upperBound) {
+        mVisibleWindowLowerBound = lowerBound;
+        mVisibleWindowUpperBound = upperBound;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -1058,6 +1072,13 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         // Re-request the new metadata (only after the notification to the factory)
         updateTemporaryMetaData();
+
+        // Pre-load (our best guess of) the views which are currently visible in the AdapterView.
+        // This mitigates flashing and flickering of loading views when a widget notifies that
+        // its data has changed.
+        for (int i = mVisibleWindowLowerBound; i <= mVisibleWindowUpperBound; i++) {
+            updateRemoteViews(i, false, false);
+        }
 
         // Propagate the notification back to the base adapter
         mMainQueue.post(new Runnable() {

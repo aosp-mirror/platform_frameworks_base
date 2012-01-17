@@ -678,6 +678,7 @@ public class ListView extends AbsListView {
             pos++;
         }
 
+        setVisibleRangeHint(mFirstPosition, mFirstPosition + getChildCount() - 1);
         return selectedView;
     }
 
@@ -711,7 +712,7 @@ public class ListView extends AbsListView {
         }
 
         mFirstPosition = pos + 1;
-
+        setVisibleRangeHint(mFirstPosition, mFirstPosition + getChildCount() - 1);
         return selectedView;
     }
 

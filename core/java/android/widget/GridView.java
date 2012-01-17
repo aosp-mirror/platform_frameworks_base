@@ -290,6 +290,7 @@ public class GridView extends AbsListView {
             pos += mNumColumns;
         }
 
+        setVisibleRangeHint(mFirstPosition, mFirstPosition + getChildCount() - 1);
         return selectedView;
     }
 
@@ -382,6 +383,7 @@ public class GridView extends AbsListView {
             mFirstPosition = Math.max(0, pos + 1);
         }
 
+        setVisibleRangeHint(mFirstPosition, mFirstPosition + getChildCount() - 1);
         return selectedView;
     }
 
