@@ -61,6 +61,7 @@ class GLES20Canvas extends HardwareCanvas {
     private final float[] mLine = new float[4];
     
     private final Rect mClipBounds = new Rect();
+    private final RectF mPathBounds = new RectF();
 
     private DrawFilter mFilter;
 
@@ -406,12 +407,18 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean clipPath(Path path) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
+        path.computeBounds(mPathBounds, true);
+        return nClipRect(mRenderer, mPathBounds.left, mPathBounds.top,
+                mPathBounds.right, mPathBounds.bottom, Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
     public boolean clipPath(Path path, Region.Op op) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
+        path.computeBounds(mPathBounds, true);
+        return nClipRect(mRenderer, mPathBounds.left, mPathBounds.top,
+                mPathBounds.right, mPathBounds.bottom, op.nativeInt);
     }
 
     @Override
@@ -459,12 +466,18 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean clipRegion(Region region) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
+        region.getBounds(mClipBounds);
+        return nClipRect(mRenderer, mClipBounds.left, mClipBounds.top,
+                mClipBounds.right, mClipBounds.bottom, Region.Op.INTERSECT.nativeInt);
     }
 
     @Override
     public boolean clipRegion(Region region, Region.Op op) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
+        region.getBounds(mClipBounds);
+        return nClipRect(mRenderer, mClipBounds.left, mClipBounds.top,
+                mClipBounds.right, mClipBounds.bottom, op.nativeInt);
     }
 
     @Override
@@ -484,12 +497,14 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
-        throw new UnsupportedOperationException();
+        path.computeBounds(mPathBounds, true);
+        return nQuickReject(mRenderer, mPathBounds.left, mPathBounds.top,
+                mPathBounds.right, mPathBounds.bottom, type.nativeInt);
     }
 
     @Override
     public boolean quickReject(RectF rect, EdgeType type) {
-        return quickReject(rect.left, rect.top, rect.right, rect.bottom, type);
+        return nQuickReject(mRenderer, rect.left, rect.top, rect.right, rect.bottom, type.nativeInt);
     }
 
     ///////////////////////////////////////////////////////////////////////////
