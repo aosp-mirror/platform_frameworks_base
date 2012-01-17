@@ -29,7 +29,7 @@ import android.util.PoolableManager;
  * to begin tracking.  Put the motion events you receive into it with
  * {@link #addMovement(MotionEvent)}.  When you want to determine the velocity call
  * {@link #computeCurrentVelocity(int)} and then call {@link #getXVelocity(int)}
- * and {@link #getXVelocity(int)} to retrieve the velocity for each pointer id.
+ * and {@link #getYVelocity(int)} to retrieve the velocity for each pointer id.
  */
 public final class VelocityTracker implements Poolable<VelocityTracker> {
     private static final Pool<VelocityTracker> sPool = Pools.synchronizedPool(
@@ -39,6 +39,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
                 }
 
                 public void onAcquired(VelocityTracker element) {
+                    // Intentionally empty
                 }
 
                 public void onReleased(VelocityTracker element) {
