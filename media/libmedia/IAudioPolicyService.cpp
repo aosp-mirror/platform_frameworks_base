@@ -154,7 +154,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(output);
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(session);
         remote()->transact(START_OUTPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
@@ -167,7 +167,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(output);
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(session);
         remote()->transact(STOP_OUTPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
@@ -324,11 +324,11 @@ public:
         return static_cast <status_t> (reply.readInt32());
     }
 
-    virtual bool isStreamActive(int stream, uint32_t inPastMs) const
+    virtual bool isStreamActive(audio_stream_type_t stream, uint32_t inPastMs) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(inPastMs);
         remote()->transact(IS_STREAM_ACTIVE, data, &reply);
         return reply.readInt32();
@@ -598,9 +598,9 @@ status_t BnAudioPolicyService::onTransact(
 
         case IS_STREAM_ACTIVE: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            int stream = data.readInt32();
+            audio_stream_type_t stream = (audio_stream_type_t) data.readInt32();
             uint32_t inPastMs = (uint32_t)data.readInt32();
-            reply->writeInt32( isStreamActive(stream, inPastMs) );
+            reply->writeInt32( isStreamActive((audio_stream_type_t) stream, inPastMs) );
             return NO_ERROR;
         } break;
 

@@ -185,7 +185,7 @@ public:
             status_t        getCurrentPosition(int *msec);
             status_t        getDuration(int *msec);
             status_t        reset();
-            status_t        setAudioStreamType(int type);
+            status_t        setAudioStreamType(audio_stream_type_t type);
             status_t        setLooping(int loop);
             bool            isLooping();
             status_t        setVolume(float leftVolume, float rightVolume);
@@ -223,7 +223,7 @@ private:
     int                         mSeekPosition;
     bool                        mPrepareSync;
     status_t                    mPrepareStatus;
-    int                         mStreamType;
+    audio_stream_type_t         mStreamType;
     bool                        mLoop;
     float                       mLeftVolume;
     float                       mRightVolume;

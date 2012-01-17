@@ -70,7 +70,7 @@ public:
     // IAudioFlinger interface
     virtual sp<IAudioTrack> createTrack(
                                 pid_t pid,
-                                int streamType,
+                                audio_stream_type_t streamType,
                                 uint32_t sampleRate,
                                 uint32_t format,
                                 uint32_t channelMask,
@@ -93,11 +93,11 @@ public:
     virtual     float       masterVolume() const;
     virtual     bool        masterMute() const;
 
-    virtual     status_t    setStreamVolume(int stream, float value, int output);
-    virtual     status_t    setStreamMute(int stream, bool muted);
+    virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value, int output);
+    virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted);
 
-    virtual     float       streamVolume(int stream, int output) const;
-    virtual     bool        streamMute(int stream) const;
+    virtual     float       streamVolume(audio_stream_type_t stream, int output) const;
+    virtual     bool        streamMute(audio_stream_type_t stream) const;
 
     virtual     status_t    setMode(int mode);
 
@@ -135,7 +135,7 @@ public:
 
     virtual status_t closeInput(int input);
 
-    virtual status_t setStreamOutput(uint32_t stream, int output);
+    virtual status_t setStreamOutput(audio_stream_type_t stream, int output);
 
     virtual status_t setVoiceVolume(float volume);
 
@@ -573,7 +573,7 @@ private:
         public:
                                 Track(  const wp<ThreadBase>& thread,
                                         const sp<Client>& client,
-                                        int streamType,
+                                        audio_stream_type_t streamType,
                                         uint32_t sampleRate,
                                         uint32_t format,
                                         uint32_t channelMask,
@@ -595,7 +595,7 @@ private:
                         return mName;
                     }
 
-                    int type() const {
+                    audio_stream_type_t type() const {
                         return mStreamType;
                     }
                     status_t    attachAuxEffect(int EffectId);
@@ -641,7 +641,7 @@ private:
             int8_t              mRetryCount;
             sp<IMemory>         mSharedBuffer;
             bool                mResetDone;
-            int                 mStreamType;
+            audio_stream_type_t mStreamType;
             int                 mName;
             int16_t             *mMainBuffer;
             int32_t             *mAuxBuffer;
@@ -707,15 +707,15 @@ private:
         virtual     float       masterVolume() const;
         virtual     bool        masterMute() const;
 
-        virtual     status_t    setStreamVolume(int stream, float value);
-        virtual     status_t    setStreamMute(int stream, bool muted);
+        virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value);
+        virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted);
 
-        virtual     float       streamVolume(int stream) const;
-        virtual     bool        streamMute(int stream) const;
+        virtual     float       streamVolume(audio_stream_type_t stream) const;
+        virtual     bool        streamMute(audio_stream_type_t stream) const;
 
                     sp<Track>   createTrack_l(
                                     const sp<AudioFlinger::Client>& client,
-                                    int streamType,
+                                    audio_stream_type_t streamType,
                                     uint32_t sampleRate,
                                     uint32_t format,
                                     uint32_t channelMask,
@@ -747,7 +747,7 @@ private:
                     virtual uint32_t hasAudioSession(int sessionId);
                     virtual uint32_t getStrategyForSession_l(int sessionId);
 
-                            void setStreamValid(int streamType, bool valid);
+                            void setStreamValid(audio_stream_type_t streamType, bool valid);
 
         struct  stream_type_t {
             stream_type_t()
@@ -818,7 +818,7 @@ private:
         // Thread virtuals
         virtual     bool        threadLoop();
 
-                    void        invalidateTracks(int streamType);
+                    void        invalidateTracks(audio_stream_type_t streamType);
         virtual     bool        checkForNewParameters_l();
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
@@ -884,7 +884,7 @@ private:
               PlaybackThread *checkPlaybackThread_l(int output) const;
               MixerThread *checkMixerThread_l(int output) const;
               RecordThread *checkRecordThread_l(int input) const;
-              float streamVolumeInternal(int stream) const { return mStreamTypes[stream].volume; }
+              float streamVolumeInternal(audio_stream_type_t stream) const { return mStreamTypes[stream].volume; }
               void audioConfigChanged_l(int event, int ioHandle, void *param2);
 
               uint32_t nextUniqueId();

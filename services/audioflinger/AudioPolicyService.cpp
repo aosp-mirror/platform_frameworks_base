@@ -486,7 +486,7 @@ status_t AudioPolicyService::setEffectEnabled(int id, bool enabled)
     return mpAudioPolicy->set_effect_enabled(mpAudioPolicy, id, enabled);
 }
 
-bool AudioPolicyService::isStreamActive(int stream, uint32_t inPastMs) const
+bool AudioPolicyService::isStreamActive(audio_stream_type_t stream, uint32_t inPastMs) const
 {
     if (mpAudioPolicy == NULL) {
         return 0;
@@ -781,7 +781,7 @@ status_t AudioPolicyService::AudioCommandThread::dump(int fd)
     return NO_ERROR;
 }
 
-void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stream)
+void AudioPolicyService::AudioCommandThread::startToneCommand(int type, audio_stream_type_t stream)
 {
     AudioCommand *command = new AudioCommand();
     command->mCommand = START_TONE;
@@ -808,7 +808,7 @@ void AudioPolicyService::AudioCommandThread::stopToneCommand()
     mWaitWorkCV.signal();
 }
 
-status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream,
+status_t AudioPolicyService::AudioCommandThread::volumeCommand(audio_stream_type_t stream,
                                                                float volume,
                                                                int output,
                                                                int delayMs)
@@ -1019,7 +1019,7 @@ int AudioPolicyService::setStreamVolume(audio_stream_type_t stream,
                                         audio_io_handle_t output,
                                         int delayMs)
 {
-    return (int)mAudioCommandThread->volumeCommand((int)stream, volume,
+    return (int)mAudioCommandThread->volumeCommand(stream, volume,
                                                    (int)output, delayMs);
 }
 

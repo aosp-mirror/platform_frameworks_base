@@ -49,7 +49,7 @@ namespace android {
 // static
 status_t AudioTrack::getMinFrameCount(
         int* frameCount,
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate)
 {
     int afSampleRate;
@@ -83,7 +83,7 @@ AudioTrack::AudioTrack()
 }
 
 AudioTrack::AudioTrack(
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         audio_format_t format,
         int channelMask,
@@ -102,7 +102,7 @@ AudioTrack::AudioTrack(
 }
 
 AudioTrack::AudioTrack(
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         audio_format_t format,
         int channelMask,
@@ -140,7 +140,7 @@ AudioTrack::~AudioTrack()
 }
 
 status_t AudioTrack::set(
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         audio_format_t format,
         int channelMask,
@@ -204,7 +204,7 @@ status_t AudioTrack::set(
     uint32_t channelCount = popcount(channelMask);
 
     audio_io_handle_t output = AudioSystem::getOutput(
-                                    (audio_stream_type_t)streamType,
+                                    streamType,
                                     sampleRate, format, channelMask,
                                     (audio_policy_output_flags_t)flags);
 
@@ -275,7 +275,7 @@ uint32_t AudioTrack::latency() const
     return mLatency;
 }
 
-int AudioTrack::streamType() const
+audio_stream_type_t AudioTrack::streamType() const
 {
     return mStreamType;
 }
@@ -688,7 +688,7 @@ audio_io_handle_t AudioTrack::getOutput()
 // must be called with mLock held
 audio_io_handle_t AudioTrack::getOutput_l()
 {
-    return AudioSystem::getOutput((audio_stream_type_t)mStreamType,
+    return AudioSystem::getOutput(mStreamType,
             mCblk->sampleRate, mFormat, mChannelMask, (audio_policy_output_flags_t)mFlags);
 }
 
@@ -711,7 +711,7 @@ status_t AudioTrack::attachAuxEffect(int effectId)
 
 // must be called with mLock held
 status_t AudioTrack::createTrack_l(
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         audio_format_t format,
         uint32_t channelMask,

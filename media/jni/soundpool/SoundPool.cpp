@@ -39,7 +39,7 @@ uint32_t kMaxSampleRate = 48000;
 uint32_t kDefaultSampleRate = 44100;
 uint32_t kDefaultFrameCount = 1200;
 
-SoundPool::SoundPool(int maxChannels, int streamType, int srcQuality)
+SoundPool::SoundPool(int maxChannels, audio_stream_type_t streamType, int srcQuality)
 {
     ALOGV("SoundPool constructor: maxChannels=%d, streamType=%d, srcQuality=%d",
             maxChannels, streamType, srcQuality);
@@ -570,7 +570,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         // initialize track
         int afFrameCount;
         int afSampleRate;
-        int streamType = mSoundPool->streamType();
+        audio_stream_type_t streamType = mSoundPool->streamType();
         if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
             afFrameCount = kDefaultFrameCount;
         }

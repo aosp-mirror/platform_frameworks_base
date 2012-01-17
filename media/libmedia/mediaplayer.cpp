@@ -478,7 +478,7 @@ status_t MediaPlayer::reset()
     return reset_l();
 }
 
-status_t MediaPlayer::setAudioStreamType(int type)
+status_t MediaPlayer::setAudioStreamType(audio_stream_type_t type)
 {
     ALOGV("MediaPlayer::setAudioStreamType");
     Mutex::Autolock _l(mLock);

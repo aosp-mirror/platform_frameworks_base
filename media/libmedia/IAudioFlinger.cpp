@@ -82,7 +82,7 @@ public:
 
     virtual sp<IAudioTrack> createTrack(
                                 pid_t pid,
-                                int streamType,
+                                audio_stream_type_t streamType,
                                 uint32_t sampleRate,
                                 uint32_t format,
                                 uint32_t channelMask,
@@ -97,7 +97,7 @@ public:
         sp<IAudioTrack> track;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
-        data.writeInt32(streamType);
+        data.writeInt32((int32_t) streamType);
         data.writeInt32(sampleRate);
         data.writeInt32(format);
         data.writeInt32(channelMask);
@@ -249,42 +249,42 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setStreamVolume(int stream, float value, int output)
+    virtual status_t setStreamVolume(audio_stream_type_t stream, float value, int output)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeFloat(value);
         data.writeInt32(output);
         remote()->transact(SET_STREAM_VOLUME, data, &reply);
         return reply.readInt32();
     }
 
-    virtual status_t setStreamMute(int stream, bool muted)
+    virtual status_t setStreamMute(audio_stream_type_t stream, bool muted)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(muted);
         remote()->transact(SET_STREAM_MUTE, data, &reply);
         return reply.readInt32();
     }
 
-    virtual float streamVolume(int stream, int output) const
+    virtual float streamVolume(audio_stream_type_t stream, int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(output);
         remote()->transact(STREAM_VOLUME, data, &reply);
         return reply.readFloat();
     }
 
-    virtual bool streamMute(int stream) const
+    virtual bool streamMute(audio_stream_type_t stream) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         remote()->transact(STREAM_MUTE, data, &reply);
         return reply.readInt32();
     }
@@ -468,11 +468,11 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setStreamOutput(uint32_t stream, int output)
+    virtual status_t setStreamOutput(audio_stream_type_t stream, int output)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
+        data.writeInt32((int32_t) stream);
         data.writeInt32(output);
         remote()->transact(SET_STREAM_OUTPUT, data, &reply);
         return reply.readInt32();
@@ -687,7 +687,7 @@ status_t BnAudioFlinger::onTransact(
             int sessionId = data.readInt32();
             status_t status;
             sp<IAudioTrack> track = createTrack(pid,
-                    streamType, sampleRate, format,
+                    (audio_stream_type_t) streamType, sampleRate, format,
                     channelCount, bufferCount, flags, buffer, output, &sessionId, &status);
             reply->writeInt32(sessionId);
             reply->writeInt32(status);
@@ -762,26 +762,26 @@ status_t BnAudioFlinger::onTransact(
             int stream = data.readInt32();
             float volume = data.readFloat();
             int output = data.readInt32();
-            reply->writeInt32( setStreamVolume(stream, volume, output) );
+            reply->writeInt32( setStreamVolume((audio_stream_type_t) stream, volume, output) );
             return NO_ERROR;
         } break;
         case SET_STREAM_MUTE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int stream = data.readInt32();
-            reply->writeInt32( setStreamMute(stream, data.readInt32()) );
+            reply->writeInt32( setStreamMute((audio_stream_type_t) stream, data.readInt32()) );
             return NO_ERROR;
         } break;
         case STREAM_VOLUME: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int stream = data.readInt32();
             int output = data.readInt32();
-            reply->writeFloat( streamVolume(stream, output) );
+            reply->writeFloat( streamVolume((audio_stream_type_t) stream, output) );
             return NO_ERROR;
         } break;
         case STREAM_MUTE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int stream = data.readInt32();
-            reply->writeInt32( streamMute(stream) );
+            reply->writeInt32( streamMute((audio_stream_type_t) stream) );
             return NO_ERROR;
         } break;
         case SET_MODE: {
@@ -904,7 +904,7 @@ status_t BnAudioFlinger::onTransact(
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             uint32_t stream = data.readInt32();
             int output = data.readInt32();
-            reply->writeInt32(setStreamOutput(stream, output));
+            reply->writeInt32(setStreamOutput((audio_stream_type_t) stream, output));
             return NO_ERROR;
         } break;
         case SET_VOICE_VOLUME: {

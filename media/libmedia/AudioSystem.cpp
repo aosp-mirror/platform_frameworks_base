@@ -120,7 +120,7 @@ status_t AudioSystem::getMasterMute(bool* mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::setStreamVolume(int stream, float value, int output)
+status_t AudioSystem::setStreamVolume(audio_stream_type_t stream, float value, int output)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -129,7 +129,7 @@ status_t AudioSystem::setStreamVolume(int stream, float value, int output)
     return NO_ERROR;
 }
 
-status_t AudioSystem::setStreamMute(int stream, bool mute)
+status_t AudioSystem::setStreamMute(audio_stream_type_t stream, bool mute)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -138,7 +138,7 @@ status_t AudioSystem::setStreamMute(int stream, bool mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getStreamVolume(int stream, float* volume, int output)
+status_t AudioSystem::getStreamVolume(audio_stream_type_t stream, float* volume, int output)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -147,7 +147,7 @@ status_t AudioSystem::getStreamVolume(int stream, float* volume, int output)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getStreamMute(int stream, bool* mute)
+status_t AudioSystem::getStreamMute(audio_stream_type_t stream, bool* mute)
 {
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -203,7 +203,7 @@ int AudioSystem::logToLinear(float volume)
     return volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
 }
 
-status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
+status_t AudioSystem::getOutputSamplingRate(int* samplingRate, audio_stream_type_t streamType)
 {
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
@@ -212,7 +212,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
         streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((audio_stream_type_t)streamType);
+    output = getOutput(streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -236,7 +236,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
+status_t AudioSystem::getOutputFrameCount(int* frameCount, audio_stream_type_t streamType)
 {
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
@@ -245,7 +245,7 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
         streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((audio_stream_type_t)streamType);
+    output = getOutput(streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -267,7 +267,7 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getOutputLatency(uint32_t* latency, int streamType)
+status_t AudioSystem::getOutputLatency(uint32_t* latency, audio_stream_type_t streamType)
 {
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
@@ -276,7 +276,7 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, int streamType)
         streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((audio_stream_type_t)streamType);
+    output = getOutput(streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -333,7 +333,7 @@ status_t AudioSystem::setVoiceVolume(float value)
     return af->setVoiceVolume(value);
 }
 
-status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream)
+status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, audio_stream_type_t stream)
 {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
@@ -342,7 +342,7 @@ status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames
         stream = AUDIO_STREAM_MUSIC;
     }
 
-    return af->getRenderPosition(halFrames, dspFrames, getOutput((audio_stream_type_t)stream));
+    return af->getRenderPosition(halFrames, dspFrames, getOutput(stream));
 }
 
 unsigned int AudioSystem::getInputFramesLost(audio_io_handle_t ioHandle) {
@@ -467,7 +467,7 @@ void AudioSystem::setErrorCallback(audio_error_callback cb) {
     gAudioErrorCallback = cb;
 }
 
-bool AudioSystem::routedToA2dpOutput(int streamType) {
+bool AudioSystem::routedToA2dpOutput(audio_stream_type_t streamType) {
     switch(streamType) {
     case AUDIO_STREAM_MUSIC:
     case AUDIO_STREAM_VOICE_CALL:
@@ -728,7 +728,7 @@ status_t AudioSystem::setEffectEnabled(int id, bool enabled)
     return aps->setEffectEnabled(id, enabled);
 }
 
-status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs)
+status_t AudioSystem::isStreamActive(audio_stream_type_t stream, bool* state, uint32_t inPastMs)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;

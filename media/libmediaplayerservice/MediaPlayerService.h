@@ -92,7 +92,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual void            flush();
         virtual void            pause();
         virtual void            close();
-                void            setAudioStreamType(int streamType) { mStreamType = streamType; }
+                void            setAudioStreamType(audio_stream_type_t streamType) { mStreamType = streamType; }
                 void            setVolume(float left, float right);
                 status_t        setAuxEffectSendLevel(float level);
                 status_t        attachAuxEffect(int effectId);
@@ -108,7 +108,7 @@ class MediaPlayerService : public BnMediaPlayerService
         AudioTrack*             mTrack;
         AudioCallback           mCallback;
         void *                  mCallbackCookie;
-        int                     mStreamType;
+        audio_stream_type_t     mStreamType;
         float                   mLeftVolume;
         float                   mRightVolume;
         float                   mMsecsPerFrame;
@@ -149,7 +149,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual void            flush() {}
         virtual void            pause() {}
         virtual void            close() {}
-                void            setAudioStreamType(int streamType) {}
+                void            setAudioStreamType(audio_stream_type_t streamType) {}
                 void            setVolume(float left, float right) {}
                 uint32_t        sampleRate() const { return mSampleRate; }
                 audio_format_t  format() const { return mFormat; }
@@ -259,7 +259,7 @@ private:
         virtual status_t        getCurrentPosition(int* msec);
         virtual status_t        getDuration(int* msec);
         virtual status_t        reset();
-        virtual status_t        setAudioStreamType(int type);
+        virtual status_t        setAudioStreamType(audio_stream_type_t type);
         virtual status_t        setLooping(int loop);
         virtual status_t        setVolume(float leftVolume, float rightVolume);
         virtual status_t        invoke(const Parcel& request, Parcel *reply);

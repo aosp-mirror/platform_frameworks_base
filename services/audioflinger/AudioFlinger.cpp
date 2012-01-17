@@ -380,7 +380,7 @@ status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
 
 sp<IAudioTrack> AudioFlinger::createTrack(
         pid_t pid,
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         uint32_t format,
         uint32_t channelMask,
@@ -654,7 +654,7 @@ bool AudioFlinger::masterMute() const
     return mMasterMute;
 }
 
-status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
+status_t AudioFlinger::setStreamVolume(audio_stream_type_t stream, float value, int output)
 {
     // check calling permissions
     if (!settingsAllowed()) {
@@ -688,7 +688,7 @@ status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
     return NO_ERROR;
 }
 
-status_t AudioFlinger::setStreamMute(int stream, bool muted)
+status_t AudioFlinger::setStreamMute(audio_stream_type_t stream, bool muted)
 {
     // check calling permissions
     if (!settingsAllowed()) {
@@ -709,7 +709,7 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
     return NO_ERROR;
 }
 
-float AudioFlinger::streamVolume(int stream, int output) const
+float AudioFlinger::streamVolume(audio_stream_type_t stream, int output) const
 {
     if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT) {
         return 0.0f;
@@ -730,7 +730,7 @@ float AudioFlinger::streamVolume(int stream, int output) const
     return volume;
 }
 
-bool AudioFlinger::streamMute(int stream) const
+bool AudioFlinger::streamMute(audio_stream_type_t stream) const
 {
     if (stream < 0 || stream >= (int)AUDIO_STREAM_CNT) {
         return true;
@@ -1382,7 +1382,9 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
     mMasterVolume = mAudioFlinger->masterVolume();
     mMasterMute = mAudioFlinger->masterMute();
 
-    for (int stream = 0; stream < AUDIO_STREAM_CNT; stream++) {
+    // There is no AUDIO_STREAM_MIN, and ++ operator does not compile
+    for (audio_stream_type_t stream = (audio_stream_type_t) 0; stream < AUDIO_STREAM_CNT;
+            stream = (audio_stream_type_t) (stream + 1)) {
         mStreamTypes[stream].volume = mAudioFlinger->streamVolumeInternal(stream);
         mStreamTypes[stream].mute = mAudioFlinger->streamMute(stream);
         mStreamTypes[stream].valid = true;
@@ -1483,7 +1485,7 @@ void AudioFlinger::PlaybackThread::onFirstRef()
 // PlaybackThread::createTrack_l() must be called with AudioFlinger::mLock held
 sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTrack_l(
         const sp<AudioFlinger::Client>& client,
-        int streamType,
+        audio_stream_type_t streamType,
         uint32_t sampleRate,
         uint32_t format,
         uint32_t channelMask,
@@ -1606,24 +1608,24 @@ bool AudioFlinger::PlaybackThread::masterMute() const
     return mMasterMute;
 }
 
-status_t AudioFlinger::PlaybackThread::setStreamVolume(int stream, float value)
+status_t AudioFlinger::PlaybackThread::setStreamVolume(audio_stream_type_t stream, float value)
 {
     mStreamTypes[stream].volume = value;
     return NO_ERROR;
 }
 
-status_t AudioFlinger::PlaybackThread::setStreamMute(int stream, bool muted)
+status_t AudioFlinger::PlaybackThread::setStreamMute(audio_stream_type_t stream, bool muted)
 {
     mStreamTypes[stream].mute = muted;
     return NO_ERROR;
 }
 
-float AudioFlinger::PlaybackThread::streamVolume(int stream) const
+float AudioFlinger::PlaybackThread::streamVolume(audio_stream_type_t stream) const
 {
     return mStreamTypes[stream].volume;
 }
 
-bool AudioFlinger::PlaybackThread::streamMute(int stream) const
+bool AudioFlinger::PlaybackThread::streamMute(audio_stream_type_t stream) const
 {
     return mStreamTypes[stream].mute;
 }
@@ -2303,7 +2305,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     return mixerStatus;
 }
 
-void AudioFlinger::MixerThread::invalidateTracks(int streamType)
+void AudioFlinger::MixerThread::invalidateTracks(audio_stream_type_t streamType)
 {
     ALOGV ("MixerThread::invalidateTracks() mixer %p, streamType %d, mTracks.size %d",
             this,  streamType, mTracks.size());
@@ -2319,7 +2321,7 @@ void AudioFlinger::MixerThread::invalidateTracks(int streamType)
     }
 }
 
-void AudioFlinger::PlaybackThread::setStreamValid(int streamType, bool valid)
+void AudioFlinger::PlaybackThread::setStreamValid(audio_stream_type_t streamType, bool valid)
 {
     ALOGV ("PlaybackThread::setStreamValid() thread %p, streamType %d, valid %d",
             this,  streamType, valid);
@@ -3352,7 +3354,7 @@ void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t f
 AudioFlinger::PlaybackThread::Track::Track(
             const wp<ThreadBase>& thread,
             const sp<Client>& client,
-            int streamType,
+            audio_stream_type_t streamType,
             uint32_t sampleRate,
             uint32_t format,
             uint32_t channelMask,
@@ -5162,7 +5164,7 @@ status_t AudioFlinger::closeInput(int input)
     return NO_ERROR;
 }
 
-status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
+status_t AudioFlinger::setStreamOutput(audio_stream_type_t stream, int output)
 {
     Mutex::Autolock _l(mLock);
     MixerThread *dstThread = checkMixerThread_l(output);

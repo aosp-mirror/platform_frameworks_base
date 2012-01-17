@@ -151,7 +151,7 @@ public:
         NUM_SUP_TONES = LAST_SUP_TONE-FIRST_SUP_TONE+1
     };
 
-    ToneGenerator(int streamType, float volume, bool threadCanCallJava = false);
+    ToneGenerator(audio_stream_type_t streamType, float volume, bool threadCanCallJava = false);
     ~ToneGenerator();
 
     bool startTone(int toneType, int durationMs = -1);
@@ -266,7 +266,7 @@ private:
     Mutex mCbkCondLock; // Mutex associated to mWaitCbkCond
     Condition mWaitCbkCond; // condition enabling interface to wait for audio callback completion after a change is requested
     float mVolume;  // Volume applied to audio track
-    int mStreamType; // Audio stream used for output
+    audio_stream_type_t mStreamType; // Audio stream used for output
     unsigned int mProcessSize;  // Size of audio blocks generated at a time by audioCallback() (in PCM frames).
 
     bool initAudioTrack();
