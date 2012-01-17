@@ -397,8 +397,10 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
         mPreloadTasksRunnable = new Runnable() {
             public void run() {
-                setVisibility(INVISIBLE);
-                refreshRecentTasksList();
+                if (!mShowing) {
+                    setVisibility(INVISIBLE);
+                    refreshRecentTasksList();
+                }
             }
         };
     }
