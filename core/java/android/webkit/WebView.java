@@ -797,6 +797,7 @@ public class WebView extends AbsoluteLayout
     static final int ENTER_FULLSCREEN_VIDEO             = 137;
     static final int UPDATE_SELECTION                   = 138;
     static final int UPDATE_ZOOM_DENSITY                = 139;
+    static final int EXIT_FULLSCREEN_VIDEO              = 140;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -8769,6 +8770,12 @@ public class WebView extends AbsoluteLayout
                     String url = (String) msg.obj;
                     if (mHTML5VideoViewProxy != null) {
                         mHTML5VideoViewProxy.enterFullScreenVideo(layerId, url);
+                    }
+                    break;
+
+                case EXIT_FULLSCREEN_VIDEO:
+                    if (mHTML5VideoViewProxy != null) {
+                        mHTML5VideoViewProxy.exitFullScreenVideo();
                     }
                     break;
 
