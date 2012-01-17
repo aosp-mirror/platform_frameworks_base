@@ -76,7 +76,9 @@ struct audio_track_cblk_t
                 // Left channel is in [0:15], right channel is in [16:31].
                 // Always read and write the combined pair atomically.
                 // For AudioTrack only, not used by AudioRecord.
-                uint32_t    volumeLR;
+private:
+                uint32_t    mVolumeLR;
+public:
 
                 uint32_t    sampleRate;
                 // NOTE: audio_track_cblk_t::frameSize is not equal to AudioTrack::frameSize() for
@@ -116,6 +118,17 @@ public:
                 uint16_t    getSendLevel_U4_12() const {
                     return mSendLevel;
                 }
+
+                // for AudioTrack client only, caller must limit to 0 <= volumeLR <= 0x10001000
+                void        setVolumeLR(uint32_t volumeLR) {
+                    mVolumeLR = volumeLR;
+                }
+
+                // for AudioFlinger only; the return value must be validated by the caller
+                uint32_t    getVolumeLR() const {
+                    return mVolumeLR;
+                }
+
 };
 
 

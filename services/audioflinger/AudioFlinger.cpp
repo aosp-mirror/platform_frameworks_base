@@ -2191,7 +2191,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 // read original volumes with volume control
                 float typeVolume = mStreamTypes[track->type()].volume;
                 float v = masterVolume * typeVolume;
-                uint32_t vlr = cblk->volumeLR;
+                uint32_t vlr = cblk->getVolumeLR();
                 vl = vlr & 0xFFFF;
                 vr = vlr >> 16;
                 // track volumes come from shared memory, so can't be trusted and must be clamped
@@ -2727,7 +2727,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     } else {
                         float typeVolume = mStreamTypes[track->type()].volume;
                         float v = mMasterVolume * typeVolume;
-                        uint32_t vlr = cblk->volumeLR;
+                        uint32_t vlr = cblk->getVolumeLR();
                         float v_clamped = v * (vlr & 0xFFFF);
                         if (v_clamped > MAX_GAIN) v_clamped = MAX_GAIN;
                         left = v_clamped/MAX_GAIN;
@@ -3466,7 +3466,7 @@ void AudioFlinger::PlaybackThread::Track::destroy()
 
 void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
 {
-    uint32_t vlr = mCblk->volumeLR;
+    uint32_t vlr = mCblk->getVolumeLR();
     snprintf(buffer, size, "   %05d %05d %03u %03u 0x%08x %05u   %04u %1d %1d %1d %05u %05u %05u  0x%08x 0x%08x 0x%08x 0x%08x\n",
             mName - AudioMixer::TRACK0,
             (mClient == NULL) ? getpid() : mClient->pid(),
@@ -3825,7 +3825,6 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
     if (mCblk != NULL) {
         mCblk->flags |= CBLK_DIRECTION_OUT;
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-        mCblk->volumeLR = (MAX_GAIN_INT << 16) | MAX_GAIN_INT;
         mOutBuffer.frameCount = 0;
         playbackThread->mTracks.add(this);
         ALOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, " \
