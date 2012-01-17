@@ -398,7 +398,9 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     status_t lStatus;
     int lSessionId;
 
-    if (streamType >= AUDIO_STREAM_CNT) {
+    // client AudioTrack::set already implements AUDIO_STREAM_DEFAULT => AUDIO_STREAM_MUSIC,
+    // but if someone uses binder directly they could bypass that and cause us to crash
+    if (uint32_t(streamType) >= AUDIO_STREAM_CNT) {
         ALOGE("createTrack() invalid stream type %d", streamType);
         lStatus = BAD_VALUE;
         goto Exit;
@@ -663,7 +665,7 @@ status_t AudioFlinger::setStreamVolume(audio_stream_type_t stream, float value, 
         return PERMISSION_DENIED;
     }
 
-    if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT) {
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) {
         ALOGE("setStreamVolume() invalid stream %d", stream);
         return BAD_VALUE;
     }
@@ -697,7 +699,7 @@ status_t AudioFlinger::setStreamMute(audio_stream_type_t stream, bool muted)
         return PERMISSION_DENIED;
     }
 
-    if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT ||
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT ||
         uint32_t(stream) == AUDIO_STREAM_ENFORCED_AUDIBLE) {
         ALOGE("setStreamMute() invalid stream %d", stream);
         return BAD_VALUE;
@@ -713,7 +715,7 @@ status_t AudioFlinger::setStreamMute(audio_stream_type_t stream, bool muted)
 
 float AudioFlinger::streamVolume(audio_stream_type_t stream, int output) const
 {
-    if (stream < 0 || uint32_t(stream) >= AUDIO_STREAM_CNT) {
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) {
         return 0.0f;
     }
 
@@ -734,7 +736,7 @@ float AudioFlinger::streamVolume(audio_stream_type_t stream, int output) const
 
 bool AudioFlinger::streamMute(audio_stream_type_t stream) const
 {
-    if (stream < 0 || stream >= (int)AUDIO_STREAM_CNT) {
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) {
         return true;
     }
 
@@ -1386,12 +1388,14 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
     mMasterVolume = mAudioFlinger->masterVolume_l();
     mMasterMute = mAudioFlinger->masterMute_l();
 
+    // mStreamTypes[AUDIO_STREAM_CNT] is initialized by stream_type_t default constructor
     // There is no AUDIO_STREAM_MIN, and ++ operator does not compile
     for (audio_stream_type_t stream = (audio_stream_type_t) 0; stream < AUDIO_STREAM_CNT;
             stream = (audio_stream_type_t) (stream + 1)) {
         mStreamTypes[stream].volume = mAudioFlinger->streamVolumeInternal(stream);
         mStreamTypes[stream].mute = mAudioFlinger->streamMute(stream);
-        mStreamTypes[stream].valid = true;
+        // initialized by stream_type_t default constructor
+        // mStreamTypes[stream].valid = true;
     }
 }
 
