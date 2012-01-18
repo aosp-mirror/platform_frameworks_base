@@ -2084,23 +2084,81 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
 
 void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
-    if (text == NULL || count == 0) {
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
+            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
-    if (mSnapshot->isIgnored()) return;
 
-    // TODO: implement properly
-    drawText(text, bytesCount, count, 0, 0, paint);
+    // NOTE: Skia does not support perspective transform on drawPosText yet
+    if (!mSnapshot->transform->isSimple()) {
+        return;
+    }
+
+    float x = 0.0f;
+    float y = 0.0f;
+    const bool pureTranslate = mSnapshot->transform->isPureTranslate();
+    if (pureTranslate) {
+        x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
+        y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+    }
+
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
+    fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
+            paint->getTextSize());
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    // Pick the appropriate texture filtering
+    bool linearFilter = mSnapshot->transform->changesBounds();
+    if (pureTranslate && !linearFilter) {
+        linearFilter = fabs(y - (int) y) > 0.0f || fabs(x - (int) x) > 0.0f;
+    }
+
+    mCaches.activeTexture(0);
+    setupDraw();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x, y, pureTranslate, true);
+    setupDrawTexture(fontRenderer.getTexture(linearFilter));
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms(pureTranslate);
+
+    const Rect* clip = pureTranslate ? mSnapshot->clipRect : &mSnapshot->getLocalClip();
+    Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
+
+#if RENDER_LAYERS_AS_REGIONS
+    bool hasActiveLayer = hasLayer();
+#else
+    bool hasActiveLayer = false;
+#endif
+
+    if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+            positions, hasActiveLayer ? &bounds : NULL)) {
+#if RENDER_LAYERS_AS_REGIONS
+        if (hasActiveLayer) {
+            if (!pureTranslate) {
+                mSnapshot->transform->mapRect(bounds);
+            }
+            dirtyLayerUnchecked(bounds, getRegion());
+        }
+#endif
+    }
 }
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint, float length) {
-    if (text == NULL || count == 0) {
+    if (text == NULL || count == 0 || mSnapshot->isIgnored() ||
+            (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
-    if (mSnapshot->isIgnored()) return;
-
-    // NOTE: AA and glyph id encoding are set in DisplayListRenderer.cpp
 
     switch (paint->getTextAlign()) {
         case SkPaint::kCenter_Align:
@@ -2175,10 +2233,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-    }
-
-    if (paint->getAlpha() == 0 && paint->getXfermode() == NULL) {
-        return;
     }
 
     // Pick the appropriate texture filtering

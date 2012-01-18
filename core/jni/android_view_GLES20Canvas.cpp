@@ -585,10 +585,10 @@ static void renderPosText(OpenGLRenderer* renderer, const jchar* text, int count
 
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
+    if (count < int(glyphsCount)) glyphsCount = count;
     int bytesCount = glyphsCount * sizeof(jchar);
 
-    renderer->drawPosText((const char*) glyphs, bytesCount,
-            count < int(glyphsCount) ? count : glyphsCount, positions, paint);
+    renderer->drawPosText((const char*) glyphs, bytesCount, glyphsCount, positions, paint);
 }
 
 static void android_view_GLES20Canvas_drawPosTextArray(JNIEnv* env, jobject clazz,
