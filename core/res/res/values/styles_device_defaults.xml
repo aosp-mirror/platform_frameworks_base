@@ -687,7 +687,7 @@ easier.
     <style name="AlertDialog.DeviceDefault" parent="AlertDialog.Holo">
 
     </style>
-    <style name="AlertDialog.DeviceDefault.Light" parent="AlertDialog.DeviceDefault.Light" >
+    <style name="AlertDialog.DeviceDefault.Light" parent="AlertDialog.Holo.Light" >
 
     </style>
 
