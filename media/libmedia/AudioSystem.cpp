@@ -203,6 +203,11 @@ int AudioSystem::logToLinear(float volume)
     return volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
 }
 
+// DEPRECATED
+status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType) {
+    return getOutputSamplingRate(samplingRate, (audio_stream_type_t)streamType);
+}
+
 status_t AudioSystem::getOutputSamplingRate(int* samplingRate, audio_stream_type_t streamType)
 {
     OutputDescriptor *outputDesc;
@@ -234,6 +239,11 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, audio_stream_type
     ALOGV("getOutputSamplingRate() streamType %d, output %d, sampling rate %d", streamType, output, *samplingRate);
 
     return NO_ERROR;
+}
+
+// DEPRECATED
+status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType) {
+    return getOutputFrameCount(frameCount, (audio_stream_type_t)streamType);
 }
 
 status_t AudioSystem::getOutputFrameCount(int* frameCount, audio_stream_type_t streamType)
