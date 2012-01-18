@@ -194,6 +194,25 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         mPlayer.setOnInfoListener(proxy);
     }
 
+    public void prepareDataCommon(HTML5VideoViewProxy proxy) {
+        try {
+            mPlayer.setDataSource(proxy.getContext(), mUri, mHeaders);
+            mPlayer.prepareAsync();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mCurrentState = STATE_NOTPREPARED;
+    }
+
+    public void reprepareData(HTML5VideoViewProxy proxy) {
+        mPlayer.reset();
+        prepareDataCommon(proxy);
+    }
+
     // Normally called immediately after setVideoURI. But for full screen,
     // this should be after surface holder created
     public void prepareDataAndDisplayMode(HTML5VideoViewProxy proxy) {
@@ -204,19 +223,8 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         setOnPreparedListener(proxy);
         setOnErrorListener(proxy);
         setOnInfoListener(proxy);
-        // When there is exception, we could just bail out silently.
-        // No Video will be played though. Write the stack for debug
-        try {
-            mPlayer.setDataSource(mProxy.getContext(), mUri, mHeaders);
-            mPlayer.prepareAsync();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mCurrentState = STATE_NOTPREPARED;
+
+        prepareDataCommon(proxy);
     }
 
 
@@ -322,6 +330,16 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     public boolean fullScreenExited() {
         // Only meaningful for HTML5VideoFullScreen
         return false;
+    }
+
+    private boolean m_startWhenPrepared = false;
+
+    public void setStartWhenPrepared(boolean willPlay) {
+        m_startWhenPrepared  = willPlay;
+    }
+
+    public boolean getStartWhenPrepared() {
+        return m_startWhenPrepared;
     }
 
 }

@@ -182,6 +182,21 @@ class HTML5VideoViewProxy extends Handler
             if (mHTML5VideoView != null) {
                 currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 backFromFullScreenMode = mHTML5VideoView.fullScreenExited();
+
+                // When playing video back to back in full screen mode,
+                // javascript will switch the src and call play.
+                // In this case, we can just reuse the same full screen view,
+                // and play the video after prepared.
+                if (mHTML5VideoView.isFullScreenMode()
+                    && !backFromFullScreenMode
+                    && currentVideoLayerId != videoLayerId
+                    && mCurrentProxy != proxy) {
+                    mCurrentProxy = proxy;
+                    mHTML5VideoView.setStartWhenPrepared(true);
+                    mHTML5VideoView.setVideoURI(url, proxy);
+                    mHTML5VideoView.reprepareData(proxy);
+                    return;
+                }
             }
 
             if (backFromFullScreenMode
