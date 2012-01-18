@@ -40,6 +40,9 @@ public class UserDictionary {
     public static final Uri CONTENT_URI =
         Uri.parse("content://" + AUTHORITY);
 
+    private static final int FREQUENCY_MIN = 0;
+    private static final int FREQUENCY_MAX = 255;
+
     /**
      * Contains the user defined words.
      */
@@ -87,12 +90,24 @@ public class UserDictionary {
          */
         public static final String APP_ID = "appid";
 
-        /** The locale type to specify that the word is common to all locales. */
+        /**
+         * An optional shortcut for this word. When the shortcut is typed, supporting IMEs should
+         * suggest the word in this row as an alternate spelling too.
+         */
+        public static final String SHORTCUT = "shortcut";
+
+        /**
+         * @deprecated Use {@link #addWord(Context, String, int, String, Locale)}.
+         */
+        @Deprecated
         public static final int LOCALE_TYPE_ALL = 0;
-        
-        /** The locale type to specify that the word is for the current locale. */
+
+        /**
+         * @deprecated Use {@link #addWord(Context, String, int, String, Locale)}.
+         */
+        @Deprecated
         public static final int LOCALE_TYPE_CURRENT = 1;
-        
+
         /**
          * Sort by descending order of frequency.
          */
@@ -100,35 +115,65 @@ public class UserDictionary {
 
         /** Adds a word to the dictionary, with the given frequency and the specified
          *  specified locale type.
+         *
+         *  @deprecated Please use
+         *  {@link #addWord(Context, String, int, String, Locale)} instead.
+         *
          *  @param context the current application context
          *  @param word the word to add to the dictionary. This should not be null or
          *  empty.
          *  @param localeType the locale type for this word. It should be one of
          *  {@link #LOCALE_TYPE_ALL} or {@link #LOCALE_TYPE_CURRENT}.
          */
-        public static void addWord(Context context, String word, 
+        @Deprecated
+        public static void addWord(Context context, String word,
                 int frequency, int localeType) {
-            final ContentResolver resolver = context.getContentResolver();
 
-            if (TextUtils.isEmpty(word) || localeType < 0 || localeType > 1) {
+            if (localeType != LOCALE_TYPE_ALL && localeType != LOCALE_TYPE_CURRENT) {
                 return;
             }
-            
-            if (frequency < 0) frequency = 0;
-            if (frequency > 255) frequency = 255;
 
-            String locale = null;
+            final Locale locale;
 
-            // TODO: Verify if this is the best way to get the current locale
             if (localeType == LOCALE_TYPE_CURRENT) {
-                locale = Locale.getDefault().toString();
+                locale = Locale.getDefault();
+            } else {
+                locale = null;
             }
-            ContentValues values = new ContentValues(4);
+
+            addWord(context, word, frequency, null, locale);
+        }
+
+        /** Adds a word to the dictionary, with the given frequency and the specified
+         *  locale type.
+         *
+         *  @param context the current application context
+         *  @param word the word to add to the dictionary. This should not be null or
+         *  empty.
+         *  @param shortcut optional shortcut spelling for this word. When the shortcut
+         *  is typed, the word may be suggested by applications that support it. May be null.
+         *  @param locale the locale to insert the word for, or null to insert the word
+         *  for all locales.
+         */
+        public static void addWord(Context context, String word,
+                int frequency, String shortcut, Locale locale) {
+            final ContentResolver resolver = context.getContentResolver();
+
+            if (TextUtils.isEmpty(word)) {
+                return;
+            }
+
+            if (frequency < FREQUENCY_MIN) frequency = FREQUENCY_MIN;
+            if (frequency > FREQUENCY_MAX) frequency = FREQUENCY_MAX;
+
+            final int COLUMN_COUNT = 5;
+            ContentValues values = new ContentValues(COLUMN_COUNT);
 
             values.put(WORD, word);
             values.put(FREQUENCY, frequency);
-            values.put(LOCALE, locale);
+            values.put(LOCALE, null == locale ? null : locale.toString());
             values.put(APP_ID, 0); // TODO: Get App UID
+            values.put(SHORTCUT, shortcut);
 
             Uri result = resolver.insert(CONTENT_URI, values);
             // It's ok if the insert doesn't succeed because the word

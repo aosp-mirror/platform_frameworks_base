@@ -17657,7 +17657,8 @@ package android.provider {
 
   public static class UserDictionary.Words implements android.provider.BaseColumns {
     ctor public UserDictionary.Words();
-    method public static void addWord(android.content.Context, java.lang.String, int, int);
+    method public static deprecated void addWord(android.content.Context, java.lang.String, int, int);
+    method public static void addWord(android.content.Context, java.lang.String, int, java.lang.String, java.util.Locale);
     field public static final java.lang.String APP_ID = "appid";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.google.userword";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.google.userword";
@@ -17665,8 +17666,9 @@ package android.provider {
     field public static final java.lang.String DEFAULT_SORT_ORDER = "frequency DESC";
     field public static final java.lang.String FREQUENCY = "frequency";
     field public static final java.lang.String LOCALE = "locale";
-    field public static final int LOCALE_TYPE_ALL = 0; // 0x0
-    field public static final int LOCALE_TYPE_CURRENT = 1; // 0x1
+    field public static final deprecated int LOCALE_TYPE_ALL = 0; // 0x0
+    field public static final deprecated int LOCALE_TYPE_CURRENT = 1; // 0x1
+    field public static final java.lang.String SHORTCUT = "shortcut";
     field public static final java.lang.String WORD = "word";
     field public static final java.lang.String _ID = "_id";
   }
