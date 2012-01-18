@@ -370,6 +370,7 @@ void NuCachedSource2::onFetch() {
                     && (mSource->flags() & DataSource::kIsHTTPBasedSource)) {
                 ALOGV("Disconnecting at high watermark");
                 static_cast<HTTPBase *>(mSource.get())->disconnect();
+                mFinalStatus = -EAGAIN;
             }
         }
     } else {
@@ -549,7 +550,7 @@ ssize_t NuCachedSource2::readInternal(off64_t offset, void *data, size_t size) {
 
     size_t delta = offset - mCacheOffset;
 
-    if (mFinalStatus != OK) {
+    if (mFinalStatus != OK && mNumRetriesLeft == 0) {
         if (delta >= mCache->totalSize()) {
             return mFinalStatus;
         }
@@ -591,7 +592,7 @@ status_t NuCachedSource2::seekInternal_l(off64_t offset) {
     size_t totalSize = mCache->totalSize();
     CHECK_EQ(mCache->releaseFromStart(totalSize), totalSize);
 
-    mFinalStatus = OK;
+    mNumRetriesLeft = kMaxNumRetries;
     mFetching = true;
 
     return OK;
