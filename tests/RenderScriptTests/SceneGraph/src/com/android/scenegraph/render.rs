@@ -23,6 +23,7 @@ rs_script gTransformScript;
 rs_script gCameraScript;
 rs_script gLightScript;
 rs_script gParamsScript;
+rs_script gCullScript;
 
 SgTransform *gRootNode;
 rs_allocation gCameras;
@@ -56,8 +57,12 @@ static void draw(SgRenderable *obj) {
     printName(obj->name);
 #endif //DEBUG_RENDERABLES
 
-    rsgBindConstant(renderState->pv, 0, obj->pv_const);
-    rsgBindConstant(renderState->pf, 0, obj->pf_const);
+    if (rsIsObject(obj->pv_const)) {
+        rsgBindConstant(renderState->pv, 0, obj->pv_const);
+    }
+    if (rsIsObject(obj->pf_const)) {
+        rsgBindConstant(renderState->pf, 0, obj->pf_const);
+    }
 
     if (rsIsObject(renderState->ps)) {
         rsgBindProgramStore(renderState->ps);
@@ -134,6 +139,7 @@ static void drawAllObjects(rs_allocation allObj) {
     }
 
     // Run the params and cull script
+    rsForEach(gCullScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
     rsForEach(gParamsScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
 
     int numRenderables = rsAllocationGetDimX(allObj);

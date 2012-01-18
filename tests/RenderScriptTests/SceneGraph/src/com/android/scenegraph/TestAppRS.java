@@ -215,7 +215,7 @@ public class TestAppRS {
         fb.setShader(mRes, R.raw.plastic_lights);
         mPF_Lights = fb.create();
 
-        FullscreenBlur.initShaders(mRes, mRS, mVsConst, mFsConst);
+        FullscreenBlur.initShaders(mRes, mRS);
     }
 
     void initRenderPasses() {
@@ -223,7 +223,7 @@ public class TestAppRS {
         int numDraw = allDraw.size();
 
         if (mUseBlur) {
-            FullscreenBlur.addBlurPasses(mActiveScene, mRS, mSceneManager);
+            FullscreenBlur.addBlurPasses(mActiveScene, mRS);
         }
 
         RenderPass mainPass = new RenderPass();
@@ -238,7 +238,7 @@ public class TestAppRS {
         mActiveScene.appendRenderPass(mainPass);
 
         if (mUseBlur) {
-            FullscreenBlur.addCompositePass(mActiveScene, mRS, mSceneManager);
+            FullscreenBlur.addCompositePass(mActiveScene, mRS);
         }
     }
 
