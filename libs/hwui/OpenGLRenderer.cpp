@@ -2082,6 +2082,17 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 }
 
+void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
+        const float* positions, SkPaint* paint) {
+    if (text == NULL || count == 0) {
+        return;
+    }
+    if (mSnapshot->isIgnored()) return;
+
+    // TODO: implement properly
+    drawText(text, bytesCount, count, 0, 0, paint);
+}
+
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint, float length) {
     if (text == NULL || count == 0) {
@@ -2120,10 +2131,11 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
     }
 
-    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
 #if DEBUG_GLYPHS
     ALOGD("OpenGLRenderer drawText() with FontID=%d", SkTypeface::UniqueID(paint->getTypeface()));
 #endif
+
+    FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
