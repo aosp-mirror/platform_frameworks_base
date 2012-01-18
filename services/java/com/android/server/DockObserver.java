@@ -32,7 +32,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
-import android.server.BluetoothService;
 import android.util.Log;
 import android.util.Slog;
 
@@ -150,7 +149,8 @@ class DockObserver extends UEventObserver {
                         intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
 
                         // Check if this is Bluetooth Dock
-                        String address = BluetoothService.readDockBluetoothAddress();
+                        // TODO(BT): Get Dock address.
+                        String address = null;
                         if (address != null)
                             intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
                                     BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
