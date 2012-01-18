@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <linux/socket.h>
 
 #include <common_time/ICommonClock.h>
 #include <binder/Parcel.h>
+
+#include "utils.h"
 
 namespace android {
 
@@ -29,12 +32,17 @@ enum {
     GET_COMMON_FREQ,
     GET_LOCAL_TIME,
     GET_LOCAL_FREQ,
+    GET_ESTIMATED_ERROR,
+    GET_TIMELINE_ID,
+    GET_STATE,
+    GET_MASTER_ADDRESS,
     REGISTER_LISTENER,
     UNREGISTER_LISTENER,
 };
 
 const String16 ICommonClock::kServiceName("common_time.clock");
 const uint64_t ICommonClock::kInvalidTimelineID = 0;
+const int32_t ICommonClock::kErrorEstimateUnknown = 0x7FFFFFFF;
 
 class BpCommonClock : public BpInterface<ICommonClock>
 {
@@ -138,6 +146,57 @@ class BpCommonClock : public BpInterface<ICommonClock>
             if (status == OK) {
                 *freq = reply.readInt64();
             }
+        }
+        return status;
+    }
+
+    virtual status_t getEstimatedError(int32_t* estimate) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
+        status_t status = remote()->transact(GET_ESTIMATED_ERROR, data, &reply);
+        if (status == OK) {
+            status = reply.readInt32();
+            if (status == OK) {
+                *estimate = reply.readInt32();
+            }
+        }
+        return status;
+    }
+
+    virtual status_t getTimelineID(uint64_t* id) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
+        status_t status = remote()->transact(GET_TIMELINE_ID, data, &reply);
+        if (status == OK) {
+            status = reply.readInt32();
+            if (status == OK) {
+                *id = static_cast<uint64_t>(reply.readInt64());
+            }
+        }
+        return status;
+    }
+
+    virtual status_t getState(State* state) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
+        status_t status = remote()->transact(GET_STATE, data, &reply);
+        if (status == OK) {
+            status = reply.readInt32();
+            if (status == OK) {
+                *state = static_cast<State>(reply.readInt32());
+            }
+        }
+        return status;
+    }
+
+    virtual status_t getMasterAddr(struct sockaddr_storage* addr) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ICommonClock::getInterfaceDescriptor());
+        status_t status = remote()->transact(GET_MASTER_ADDRESS, data, &reply);
+        if (status == OK) {
+            status = reply.readInt32();
+            if (status == OK)
+                deserializeSockaddr(&reply, addr);
         }
         return status;
     }
@@ -260,6 +319,57 @@ status_t BnCommonClock::onTransact(uint32_t code,
             return OK;
         } break;
 
+        case GET_ESTIMATED_ERROR: {
+            CHECK_INTERFACE(ICommonClock, data, reply);
+            int32_t error;
+            status_t status = getEstimatedError(&error);
+            reply->writeInt32(status);
+            if (status == OK) {
+                reply->writeInt32(error);
+            }
+            return OK;
+        } break;
+
+        case GET_TIMELINE_ID: {
+            CHECK_INTERFACE(ICommonClock, data, reply);
+            uint64_t id;
+            status_t status = getTimelineID(&id);
+            reply->writeInt32(status);
+            if (status == OK) {
+                reply->writeInt64(static_cast<int64_t>(id));
+            }
+            return OK;
+        } break;
+
+        case GET_STATE: {
+            CHECK_INTERFACE(ICommonClock, data, reply);
+            State state;
+            status_t status = getState(&state);
+            reply->writeInt32(status);
+            if (status == OK) {
+                reply->writeInt32(static_cast<int32_t>(state));
+            }
+            return OK;
+        } break;
+
+        case GET_MASTER_ADDRESS: {
+            CHECK_INTERFACE(ICommonClock, data, reply);
+            struct sockaddr_storage addr;
+            status_t status = getMasterAddr(&addr);
+
+            if ((status == OK) && !canSerializeSockaddr(&addr)) {
+                status = UNKNOWN_ERROR;
+            }
+
+            reply->writeInt32(status);
+
+            if (status == OK) {
+                serializeSockaddr(reply, &addr);
+            }
+
+            return OK;
+        } break;
+
         case REGISTER_LISTENER: {
             CHECK_INTERFACE(ICommonClock, data, reply);
             sp<ICommonClockListener> listener =
@@ -284,8 +394,7 @@ status_t BnCommonClock::onTransact(uint32_t code,
 /***** ICommonClockListener *****/
 
 enum {
-    ON_CLOCK_SYNC = IBinder::FIRST_CALL_TRANSACTION,
-    ON_CLOCK_SYNC_LOSS,
+    ON_TIMELINE_CHANGED = IBinder::FIRST_CALL_TRANSACTION,
 };
 
 class BpCommonClockListener : public BpInterface<ICommonClockListener>
@@ -294,19 +403,12 @@ class BpCommonClockListener : public BpInterface<ICommonClockListener>
     BpCommonClockListener(const sp<IBinder>& impl)
         : BpInterface<ICommonClockListener>(impl) {}
 
-    virtual void onClockSync(uint32_t timelineID) {
+    virtual void onTimelineChanged(uint64_t timelineID) {
         Parcel data, reply;
         data.writeInterfaceToken(
                 ICommonClockListener::getInterfaceDescriptor());
-        data.writeInt32(timelineID);
-        remote()->transact(ON_CLOCK_SYNC, data, &reply);
-    }
-
-    virtual void onClockSyncLoss() {
-        Parcel data, reply;
-        data.writeInterfaceToken(
-                ICommonClockListener::getInterfaceDescriptor());
-        remote()->transact(ON_CLOCK_SYNC_LOSS, data, &reply);
+        data.writeInt64(timelineID);
+        remote()->transact(ON_TIMELINE_CHANGED, data, &reply);
     }
 };
 
@@ -316,16 +418,10 @@ IMPLEMENT_META_INTERFACE(CommonClockListener,
 status_t BnCommonClockListener::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) {
     switch(code) {
-        case ON_CLOCK_SYNC: {
+        case ON_TIMELINE_CHANGED: {
             CHECK_INTERFACE(ICommonClockListener, data, reply);
-            uint32_t timelineID = data.readInt32();
-            onClockSync(timelineID);
-            return NO_ERROR;
-        } break;
-
-        case ON_CLOCK_SYNC_LOSS: {
-            CHECK_INTERFACE(ICommonClockListener, data, reply);
-            onClockSyncLoss();
+            uint32_t timelineID = data.readInt64();
+            onTimelineChanged(timelineID);
             return NO_ERROR;
         } break;
     }

@@ -18,6 +18,7 @@
 #define ANDROID_ICOMMONCLOCK_H
 
 #include <stdint.h>
+#include <linux/socket.h>
 
 #include <binder/IInterface.h>
 #include <binder/IServiceManager.h>
@@ -28,8 +29,7 @@ class ICommonClockListener : public IInterface {
   public:
     DECLARE_META_INTERFACE(CommonClockListener);
 
-    virtual void onClockSync(uint32_t timelineID) = 0;
-    virtual void onClockSyncLoss() = 0;
+    virtual void onTimelineChanged(uint64_t timelineID) = 0;
 };
 
 class BnCommonClockListener : public BnInterface<ICommonClockListener> {
@@ -46,30 +46,10 @@ class ICommonClock : public IInterface {
     static const String16 kServiceName;
 
     // a reserved invalid timeline ID
-    static const uint32_t kInvalidTimelineID;
+    static const uint64_t kInvalidTimelineID;
 
-    virtual status_t isCommonTimeValid(bool* valid, uint32_t* timelineID) = 0;
-    virtual status_t commonTimeToLocalTime(int64_t commonTime,
-                                           int64_t* localTime) = 0;
-    virtual status_t localTimeToCommonTime(int64_t localTime,
-                                           int64_t* commonTime) = 0;
-    virtual status_t getCommonTime(int64_t* commonTime) = 0;
-    virtual status_t getCommonFreq(uint64_t* freq) = 0;
-    virtual status_t getLocalTime(int64_t* localTime) = 0;
-    virtual status_t getLocalFreq(uint64_t* freq) = 0;
-
-    virtual status_t registerListener(
-            const sp<ICommonClockListener>& listener) = 0;
-    virtual status_t unregisterListener(
-            const sp<ICommonClockListener>& listener) = 0;
-
-    // Simple helper to make it easier to connect to the CommonClock service.
-    static inline sp<ICommonClock> getInstance() {
-        sp<IBinder> binder = defaultServiceManager()->checkService(
-                ICommonClock::kServiceName);
-        sp<ICommonClock> clk = interface_cast<ICommonClock>(binder);
-        return clk;
-    }
+    // a reserved invalid error estimate
+    static const int32_t kErrorEstimateUnknown;
 
     enum State {
         // the device just came up and is trying to discover the master
@@ -89,6 +69,32 @@ class ICommonClock : public IInterface {
         STATE_WAIT_FOR_ELECTION,
     };
 
+    virtual status_t isCommonTimeValid(bool* valid, uint32_t* timelineID) = 0;
+    virtual status_t commonTimeToLocalTime(int64_t commonTime,
+                                           int64_t* localTime) = 0;
+    virtual status_t localTimeToCommonTime(int64_t localTime,
+                                           int64_t* commonTime) = 0;
+    virtual status_t getCommonTime(int64_t* commonTime) = 0;
+    virtual status_t getCommonFreq(uint64_t* freq) = 0;
+    virtual status_t getLocalTime(int64_t* localTime) = 0;
+    virtual status_t getLocalFreq(uint64_t* freq) = 0;
+    virtual status_t getEstimatedError(int32_t* estimate) = 0;
+    virtual status_t getTimelineID(uint64_t* id) = 0;
+    virtual status_t getState(State* state) = 0;
+    virtual status_t getMasterAddr(struct sockaddr_storage* addr) = 0;
+
+    virtual status_t registerListener(
+            const sp<ICommonClockListener>& listener) = 0;
+    virtual status_t unregisterListener(
+            const sp<ICommonClockListener>& listener) = 0;
+
+    // Simple helper to make it easier to connect to the CommonClock service.
+    static inline sp<ICommonClock> getInstance() {
+        sp<IBinder> binder = defaultServiceManager()->checkService(
+                ICommonClock::kServiceName);
+        sp<ICommonClock> clk = interface_cast<ICommonClock>(binder);
+        return clk;
+    }
 };
 
 class BnCommonClock : public BnInterface<ICommonClock> {

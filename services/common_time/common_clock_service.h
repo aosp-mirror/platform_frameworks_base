@@ -41,14 +41,17 @@ class CommonClockService : public BnCommonClock,
     virtual status_t getCommonFreq(uint64_t* freq);
     virtual status_t getLocalTime(int64_t* local_time);
     virtual status_t getLocalFreq(uint64_t* freq);
+    virtual status_t getEstimatedError(int32_t* estimate);
+    virtual status_t getTimelineID(uint64_t* id);
+    virtual status_t getState(ICommonClock::State* state);
+    virtual status_t getMasterAddr(struct sockaddr_storage* addr);
 
     virtual status_t registerListener(
             const sp<ICommonClockListener>& listener);
     virtual status_t unregisterListener(
             const sp<ICommonClockListener>& listener);
 
-    void notifyOnClockSync(uint32_t timelineID);
-    void notifyOnClockSyncLoss();
+    void notifyOnTimelineChanged(uint64_t timelineID);
 
   private:
     CommonClockService() {}

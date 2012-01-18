@@ -112,6 +112,22 @@ status_t CommonClockService::getLocalFreq(uint64_t* freq) {
     return OK;
 }
 
+status_t CommonClockService::getEstimatedError(int32_t* estimate) {
+    return UNKNOWN_ERROR;
+}
+
+status_t CommonClockService::getTimelineID(uint64_t* id) {
+    return UNKNOWN_ERROR;
+}
+
+status_t CommonClockService::getState(State* state) {
+    return UNKNOWN_ERROR;
+}
+
+status_t CommonClockService::getMasterAddr(struct sockaddr_storage* addr) {
+    return UNKNOWN_ERROR;
+}
+
 status_t CommonClockService::registerListener(
         const sp<ICommonClockListener>& listener) {
     Mutex::Autolock lock(mLock);
@@ -152,21 +168,12 @@ void CommonClockService::binderDied(const wp<IBinder>& who) {
     }
 }
 
-void CommonClockService::notifyOnClockSync(uint32_t timelineID) {
+void CommonClockService::notifyOnTimelineChanged(uint64_t timelineID) {
     Mutex::Autolock lock(mLock);
 
     mTimelineID = timelineID;
     for (size_t i = 0; i < mListeners.size(); i++) {
-        mListeners[i]->onClockSync(mTimelineID);
-    }
-}
-
-void CommonClockService::notifyOnClockSyncLoss() {
-    Mutex::Autolock lock(mLock);
-
-    mTimelineID = kInvalidTimelineID;
-    for (size_t i = 0; i < mListeners.size(); i++) {
-        mListeners[i]->onClockSyncLoss();
+        mListeners[i]->onTimelineChanged(mTimelineID);
     }
 }
 
