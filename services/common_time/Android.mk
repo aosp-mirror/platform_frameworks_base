@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     common_clock_service.cpp \
+    common_time_config_service.cpp \
     common_time_server.cpp \
     clock_recovery.cpp \
     common_clock.cpp
