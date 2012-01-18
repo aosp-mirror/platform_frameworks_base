@@ -36,8 +36,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.server.BluetoothA2dpService;
-import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.service.dreams.DreamManagerService;
 import android.util.DisplayMetrics;
@@ -130,8 +128,6 @@ class ServerThread extends Thread {
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
-        BluetoothService bluetooth = null;
-        BluetoothA2dpService bluetoothA2dp = null;
         DockObserver dock = null;
         UsbService usb = null;
         SerialService serial = null;
@@ -245,23 +241,11 @@ class ServerThread extends Thread {
             } else if (factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 Slog.i(TAG, "No Bluetooth Service (factory test)");
             } else {
-                Slog.i(TAG, "Bluetooth Service");
-                bluetooth = new BluetoothService(context);
-                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, bluetooth);
-                bluetooth.initAfterRegistration();
-
-                if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
-                    bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
-                    ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
-                                              bluetoothA2dp);
-                    bluetooth.initAfterA2dpRegistration();
-                }
-
+                //TODO(BT): Start BT services and turn on if needed.
+                int airplaneModeOn = Settings.System.getInt(mContentResolver,
+                        Settings.System.AIRPLANE_MODE_ON, 0);
                 int bluetoothOn = Settings.Secure.getInt(mContentResolver,
                     Settings.Secure.BLUETOOTH_ON, 0);
-                if (bluetoothOn != 0) {
-                    bluetooth.enable();
-                }
             }
 
         } catch (RuntimeException e) {
