@@ -712,13 +712,11 @@ public class WebView extends AbsoluteLayout
 
     static boolean sDisableNavcache = false;
     // the color used to highlight the touch rectangles
-    private static final int HIGHLIGHT_COLOR = 0x6633b5e5;
-    // the round corner for the highlight path
-    private static final float TOUCH_HIGHLIGHT_ARC = 5.0f;
+    static final int HIGHLIGHT_COLOR = 0x6633b5e5;
     // the region indicating where the user touched on the screen
     private Region mTouchHighlightRegion = new Region();
     // the paint for the touch highlight
-    private Paint mTouchHightlightPaint;
+    private Paint mTouchHightlightPaint = new Paint();
     // debug only
     private static final boolean DEBUG_TOUCH_HIGHLIGHT = true;
     private static final int TOUCH_HIGHLIGHT_ELAPSE_TIME = 2000;
@@ -4430,10 +4428,6 @@ public class WebView extends AbsoluteLayout
                 Rect r = mTouchHighlightRegion.getBounds();
                 postInvalidateDelayed(delay, r.left, r.top, r.right, r.bottom);
             } else {
-                if (mTouchHightlightPaint == null) {
-                    mTouchHightlightPaint = new Paint();
-                    mTouchHightlightPaint.setColor(HIGHLIGHT_COLOR);
-                }
                 RegionIterator iter = new RegionIterator(mTouchHighlightRegion);
                 Rect r = new Rect();
                 while (iter.next(r)) {
@@ -8874,7 +8868,7 @@ public class WebView extends AbsoluteLayout
                 case HIT_TEST_RESULT:
                     WebKitHitTest hit = (WebKitHitTest) msg.obj;
                     mFocusedNode = hit;
-                    setTouchHighlightRects(hit != null ? hit.mTouchRects : null);
+                    setTouchHighlightRects(hit);
                     if (hit == null) {
                         mInitialHitTestResult = null;
                     } else {
@@ -8929,12 +8923,14 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void setTouchHighlightRects(Rect[] rects) {
+    private void setTouchHighlightRects(WebKitHitTest hit) {
+        Rect[] rects = hit != null ? hit.mTouchRects : null;
         if (!mTouchHighlightRegion.isEmpty()) {
             invalidate(mTouchHighlightRegion.getBounds());
             mTouchHighlightRegion.setEmpty();
         }
         if (rects != null) {
+            mTouchHightlightPaint.setColor(hit.mTapHighlightColor);
             for (Rect rect : rects) {
                 Rect viewRect = contentToViewRect(rect);
                 // some sites, like stories in nytimes.com, set
