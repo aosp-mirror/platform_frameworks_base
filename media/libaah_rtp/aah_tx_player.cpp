@@ -22,7 +22,7 @@
 #include <netdb.h>
 #include <netinet/ip.h>
 
-#include <aah_timesrv/cc_helper.h>
+#include <common_time/cc_helper.h>
 #include <media/IMediaPlayer.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/FileSource.h>

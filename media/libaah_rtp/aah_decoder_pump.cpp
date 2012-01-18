@@ -21,7 +21,7 @@
 #include <poll.h>
 #include <pthread.h>
 
-#include <aah_timesrv/cc_helper.h>
+#include <common_time/cc_helper.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 #include <media/stagefright/foundation/ADebug.h>

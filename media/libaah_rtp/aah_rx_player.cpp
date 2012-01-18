@@ -17,7 +17,7 @@
 #define LOG_TAG "LibAAH_RTP"
 //#define LOG_NDEBUG 0
 
-#include <aah_timesrv/cc_helper.h>
+#include <common_time/cc_helper.h>
 #include <binder/IServiceManager.h>
 #include <media/MediaPlayerInterface.h>
 #include <utils/Log.h>

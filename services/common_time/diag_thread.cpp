@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "aah_timesrv"
+#define LOG_TAG "common_time"
 #include <utils/Log.h>
 
 #include <fcntl.h>
@@ -27,7 +27,7 @@
 #include <utils/Errors.h>
 #include <utils/misc.h>
 
-#include <aah_timesrv/local_clock.h>
+#include <common_time/local_clock.h>
 
 #include "common_clock.h"
 #include "diag_thread.h"

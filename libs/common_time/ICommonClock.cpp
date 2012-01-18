@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <aah_timesrv/ICommonClock.h>
+#include <common_time/ICommonClock.h>
 #include <binder/Parcel.h>
 
 namespace android {
@@ -33,8 +33,8 @@ enum {
     UNREGISTER_LISTENER,
 };
 
-const String16 ICommonClock::kServiceName("aah.common_clock");
-const uint32_t ICommonClock::kInvalidTimelineID = 0;
+const String16 ICommonClock::kServiceName("common_time.clock");
+const uint64_t ICommonClock::kInvalidTimelineID = 0;
 
 class BpCommonClock : public BpInterface<ICommonClock>
 {
@@ -138,7 +138,7 @@ class BpCommonClock : public BpInterface<ICommonClock>
     }
 };
 
-IMPLEMENT_META_INTERFACE(CommonClock, "android.aah.CommonClock");
+IMPLEMENT_META_INTERFACE(CommonClock, "android.os.ICommonClock");
 
 status_t BnCommonClock::onTransact(uint32_t code,
                                    const Parcel& data,
@@ -266,7 +266,7 @@ class BpCommonClockListener : public BpInterface<ICommonClockListener>
 };
 
 IMPLEMENT_META_INTERFACE(CommonClockListener,
-                         "android.aah.CommonClockListener");
+                         "android.os.ICommonClockListener");
 
 status_t BnCommonClockListener::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags) {

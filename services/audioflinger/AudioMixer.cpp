@@ -31,8 +31,8 @@
 
 #include <system/audio.h>
 
-#include <aah_timesrv/local_clock.h>
-#include <aah_timesrv/cc_helper.h>
+#include <common_time/local_clock.h>
+#include <common_time/cc_helper.h>
 
 #include "AudioMixer.h"
 

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include <aah_timesrv/local_clock.h>
+#include <common_time/local_clock.h>
 #include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
 #include <utils/String8.h>
 
-#include "aah_common_clock_service.h"
+#include "common_clock_service.h"
 #include "common_clock.h"
 
 namespace android {
 
-bool AAHCommonClock::init(CommonClock* common_clock,
-                          LocalClock*  local_clock) {
+bool CommonClockService::init(CommonClock* common_clock,
+                              LocalClock*  local_clock) {
     mCommonClock = common_clock;
     mLocalClock  = local_clock;
     mTimelineID  = kInvalidTimelineID;
@@ -33,13 +33,13 @@ bool AAHCommonClock::init(CommonClock* common_clock,
     return ((NULL != mCommonClock) && (NULL != mLocalClock));
 }
 
-status_t AAHCommonClock::dump(int fd, const Vector<String16>& args) {
+status_t CommonClockService::dump(int fd, const Vector<String16>& args) {
     const size_t SIZE = 256;
     char buffer[SIZE];
 
     if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
         snprintf(buffer, SIZE, "Permission Denial: "
-                 "can't dump AAHCommonClock from pid=%d, uid=%d\n",
+                 "can't dump CommonClockService from pid=%d, uid=%d\n",
                  IPCThreadState::self()->getCallingPid(),
                  IPCThreadState::self()->getCallingUid());
     } else {
@@ -63,9 +63,10 @@ status_t AAHCommonClock::dump(int fd, const Vector<String16>& args) {
     return NO_ERROR;
 }
 
-sp<AAHCommonClock> AAHCommonClock::instantiate(CommonClock* common_clock,
-                                               LocalClock* local_clock) {
-    sp<AAHCommonClock> tcc = new AAHCommonClock();
+sp<CommonClockService> CommonClockService::instantiate(
+        CommonClock* common_clock,
+        LocalClock* local_clock) {
+    sp<CommonClockService> tcc = new CommonClockService();
     if (tcc == NULL || !tcc->init(common_clock, local_clock))
         return NULL;
 
@@ -73,8 +74,8 @@ sp<AAHCommonClock> AAHCommonClock::instantiate(CommonClock* common_clock,
     return tcc;
 }
 
-status_t AAHCommonClock::isCommonTimeValid(bool* valid,
-                                           uint32_t* timelineID) {
+status_t CommonClockService::isCommonTimeValid(bool* valid,
+                                               uint32_t* timelineID) {
     Mutex::Autolock lock(mLock);
 
     *valid = mCommonClock->isValid();
@@ -82,36 +83,36 @@ status_t AAHCommonClock::isCommonTimeValid(bool* valid,
     return OK;
 }
 
-status_t AAHCommonClock::commonTimeToLocalTime(int64_t  commonTime,
-                                               int64_t* localTime) {
+status_t CommonClockService::commonTimeToLocalTime(int64_t  commonTime,
+                                                   int64_t* localTime) {
     return mCommonClock->commonToLocal(commonTime, localTime);
 }
 
-status_t AAHCommonClock::localTimeToCommonTime(int64_t  localTime,
-                                               int64_t* commonTime) {
+status_t CommonClockService::localTimeToCommonTime(int64_t  localTime,
+                                                   int64_t* commonTime) {
     return mCommonClock->localToCommon(localTime, commonTime);
 }
 
-status_t AAHCommonClock::getCommonTime(int64_t* commonTime) {
+status_t CommonClockService::getCommonTime(int64_t* commonTime) {
     return localTimeToCommonTime(mLocalClock->getLocalTime(), commonTime);
 }
 
-status_t AAHCommonClock::getCommonFreq(uint64_t* freq) {
+status_t CommonClockService::getCommonFreq(uint64_t* freq) {
     *freq = mCommonClock->getCommonFreq();
     return OK;
 }
 
-status_t AAHCommonClock::getLocalTime(int64_t* localTime) {
+status_t CommonClockService::getLocalTime(int64_t* localTime) {
     *localTime = mLocalClock->getLocalTime();
     return OK;
 }
 
-status_t AAHCommonClock::getLocalFreq(uint64_t* freq) {
+status_t CommonClockService::getLocalFreq(uint64_t* freq) {
     *freq = mLocalClock->getLocalFreq();
     return OK;
 }
 
-status_t AAHCommonClock::registerListener(
+status_t CommonClockService::registerListener(
         const sp<ICommonClockListener>& listener) {
     Mutex::Autolock lock(mLock);
 
@@ -125,7 +126,7 @@ status_t AAHCommonClock::registerListener(
     return listener->asBinder()->linkToDeath(this);
 }
 
-status_t AAHCommonClock::unregisterListener(
+status_t CommonClockService::unregisterListener(
         const sp<ICommonClockListener>& listener) {
     Mutex::Autolock lock(mLock);
 
@@ -140,7 +141,7 @@ status_t AAHCommonClock::unregisterListener(
     return NAME_NOT_FOUND;
 }
 
-void AAHCommonClock::binderDied(const wp<IBinder>& who) {
+void CommonClockService::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock lock(mLock);
 
     for (size_t i = 0; i < mListeners.size(); i++) {
@@ -151,7 +152,7 @@ void AAHCommonClock::binderDied(const wp<IBinder>& who) {
     }
 }
 
-void AAHCommonClock::notifyOnClockSync(uint32_t timelineID) {
+void CommonClockService::notifyOnClockSync(uint32_t timelineID) {
     Mutex::Autolock lock(mLock);
 
     mTimelineID = timelineID;
@@ -160,7 +161,7 @@ void AAHCommonClock::notifyOnClockSync(uint32_t timelineID) {
     }
 }
 
-void AAHCommonClock::notifyOnClockSyncLoss() {
+void CommonClockService::notifyOnClockSyncLoss() {
     Mutex::Autolock lock(mLock);
 
     mTimelineID = kInvalidTimelineID;

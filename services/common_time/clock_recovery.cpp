@@ -20,16 +20,16 @@
  */
 
 #define __STDC_LIMIT_MACROS
-#define LOG_TAG "aah_timesrv"
+#define LOG_TAG "common_time"
 #include <utils/Log.h>
 #include <stdint.h>
 
-#include <aah_timesrv/local_clock.h>
+#include <common_time/local_clock.h>
 #include <assert.h>
 
 #include "clock_recovery.h"
 #include "common_clock.h"
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
 #include "diag_thread.h"
 #endif
 
@@ -49,7 +49,7 @@ ClockRecoveryLoop::ClockRecoveryLoop(LocalClock* local_clock,
     computePIDParams();
     reset(true, true);
 
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
     diag_thread_ = new DiagThread(common_clock_, local_clock_);
     if (diag_thread_ != NULL) {
         status_t res = diag_thread_->startWorkThread();
@@ -61,7 +61,7 @@ ClockRecoveryLoop::ClockRecoveryLoop(LocalClock* local_clock,
 }
 
 ClockRecoveryLoop::~ClockRecoveryLoop() {
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
     diag_thread_->stopWorkThread();
 #endif
 }
@@ -251,7 +251,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
           correction_cur_I,
           correction_cur_D);
 
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
     diag_thread_->pushDisciplineEvent(
             local_time,
             observed_common,

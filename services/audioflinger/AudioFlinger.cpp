@@ -58,8 +58,8 @@
 #include <powermanager/PowerManager.h>
 // #define DEBUG_CPU_USAGE 10  // log statistics every n wall clock seconds
 
-#include <aah_timesrv/cc_helper.h>
-#include <aah_timesrv/local_clock.h>
+#include <common_time/cc_helper.h>
+#include <common_time/local_clock.h>
 
 // ----------------------------------------------------------------------------
 

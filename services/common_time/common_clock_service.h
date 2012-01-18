@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include <aah_timesrv/ICommonClock.h>
+#include <common_time/ICommonClock.h>
 
-#ifndef ANDROID_AAH_COMMONCLOCK_SERVICE_H
-#define ANDROID_AAH_COMMONCLOCK_SERVICE_H
+#ifndef ANDROID_COMMON_CLOCK_SERVICE_H
+#define ANDROID_COMMON_CLOCK_SERVICE_H
 
 namespace android {
 
 class CommonClock;
 class LocalClock;
 
-class AAHCommonClock : public BnCommonClock,
-                       public android::IBinder::DeathRecipient {
+class CommonClockService : public BnCommonClock,
+                           public android::IBinder::DeathRecipient {
   public:
-    static sp<AAHCommonClock> instantiate(CommonClock* common_clock,
-                                          LocalClock* local_clock);
+    static sp<CommonClockService> instantiate(CommonClock* common_clock,
+                                              LocalClock* local_clock);
 
     virtual status_t dump(int fd, const Vector<String16>& args);
 
@@ -51,7 +51,7 @@ class AAHCommonClock : public BnCommonClock,
     void notifyOnClockSyncLoss();
 
   private:
-    AAHCommonClock() {}
+    CommonClockService() {}
     bool init(CommonClock* common_clock, LocalClock* local_clock);
 
     virtual void binderDied(const wp<IBinder>& who);
@@ -68,4 +68,4 @@ class AAHCommonClock : public BnCommonClock,
 
 };  // namespace android
 
-#endif  // ANDROID_AAH_COMMONCLOCK_SERVICE_H
+#endif  // ANDROID_COMMON_CLOCK_SERVICE_H

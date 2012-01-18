@@ -33,15 +33,15 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#define LOG_TAG "aah_timesrv"
+#define LOG_TAG "common_time"
 
-#include <aah_timesrv/local_clock.h>
+#include <common_time/local_clock.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
 #include <utils/Timers.h>
 
-#include "aah_common_clock_service.h"
+#include "common_clock_service.h"
 #include "clock_recovery.h"
 #include "common_clock.h"
 
@@ -171,10 +171,10 @@ struct MasterAnnouncementPacket {
 
 /***** time service implementation *****/
 
-class AAHTimeService : public Thread {
+class CommonTimeServer : public Thread {
   public:
-    AAHTimeService();
-    ~AAHTimeService();
+    CommonTimeServer();
+    ~CommonTimeServer();
 
   private:
     bool threadLoop();
@@ -252,7 +252,7 @@ class AAHTimeService : public Thread {
     ClockRecoveryLoop mClockRecovery;
 
     // implementation of ICommonClock
-    sp<AAHCommonClock> mICommonClock;
+    sp<CommonClockService> mICommonClock;
 
     // UDP socket for the time sync protocol
     int mSocket;
@@ -306,54 +306,54 @@ class AAHTimeService : public Thread {
 };
 
 // multicast IP address used by this protocol
-const char* AAHTimeService::kServiceAddr = "224.128.87.87";
+const char* CommonTimeServer::kServiceAddr = "224.128.87.87";
 
 // UDP port used by this protocol
-const uint16_t AAHTimeService::kServicePort = 8787;
+const uint16_t CommonTimeServer::kServicePort = 8787;
 
 // mTimeoutMs value representing an infinite timeout
-const int AAHTimeService::kInfiniteTimeout = -1;
+const int CommonTimeServer::kInfiniteTimeout = -1;
 
 /*** Initial state constants ***/
 
 // number of WhoIsMaster attempts sent before giving up
-const int AAHTimeService::kInitial_NumWhoIsMasterRetries = 6;
+const int CommonTimeServer::kInitial_NumWhoIsMasterRetries = 6;
 
 // timeout used when waiting for a response to a WhoIsMaster request
-const int AAHTimeService::kInitial_WhoIsMasterTimeoutMs = 500;
+const int CommonTimeServer::kInitial_WhoIsMasterTimeoutMs = 500;
 
 /*** Client state constants ***/
 
 // interval between sync requests sent to the master
-const int AAHTimeService::kClient_SyncRequestIntervalMs = 1000;
+const int CommonTimeServer::kClient_SyncRequestIntervalMs = 1000;
 
 // timeout used when waiting for a response to a sync request
-const int AAHTimeService::kClient_SyncRequestTimeoutMs = 400;
+const int CommonTimeServer::kClient_SyncRequestTimeoutMs = 400;
 
 // number of sync requests that can fail before a client assumes its master
 // is dead
-const int AAHTimeService::kClient_NumSyncRequestRetries = 5;
+const int CommonTimeServer::kClient_NumSyncRequestRetries = 5;
 
 /*** Master state constants ***/
 
 // timeout between announcements by the master
-const int AAHTimeService::kMaster_AnnouncementIntervalMs = 10000;
+const int CommonTimeServer::kMaster_AnnouncementIntervalMs = 10000;
 
 /*** Ronin state constants ***/
 
 // number of WhoIsMaster attempts sent before declaring ourselves master
-const int AAHTimeService::kRonin_NumWhoIsMasterRetries = 4;
+const int CommonTimeServer::kRonin_NumWhoIsMasterRetries = 4;
 
 // timeout used when waiting for a response to a WhoIsMaster request
-const int AAHTimeService::kRonin_WhoIsMasterTimeoutMs = 500;
+const int CommonTimeServer::kRonin_WhoIsMasterTimeoutMs = 500;
 
 /*** WaitForElection state constants ***/
 
 // how long do we wait for an announcement from a master before
 // trying another election?
-const int AAHTimeService::kWaitForElection_TimeoutMs = 5000;
+const int CommonTimeServer::kWaitForElection_TimeoutMs = 5000;
 
-AAHTimeService::AAHTimeService()
+CommonTimeServer::CommonTimeServer()
     : Thread(false)
     , mState(STATE_INITIAL)
     , mTimeoutMs(kInfiniteTimeout)
@@ -374,20 +374,20 @@ AAHTimeService::AAHTimeService()
     memset(&mClient_MasterAddr, 0, sizeof(mClient_MasterAddr));
 }
 
-AAHTimeService::~AAHTimeService() {
+CommonTimeServer::~CommonTimeServer() {
     if (mSocket != -1) {
         close(mSocket);
         mSocket = -1;
     }
 }
 
-bool AAHTimeService::threadLoop() {
+bool CommonTimeServer::threadLoop() {
     runStateMachine();
     IPCThreadState::self()->stopProcess();
     return false;
 }
 
-bool AAHTimeService::runStateMachine() {
+bool CommonTimeServer::runStateMachine() {
     if (!mLocalClock.initCheck())
         return false;
 
@@ -437,7 +437,7 @@ bool AAHTimeService::runStateMachine() {
     return true;
 }
 
-bool AAHTimeService::setup() {
+bool CommonTimeServer::setup() {
     int rc;
 
     // seed the random number generator (used to generated timeline IDs)
@@ -495,7 +495,7 @@ bool AAHTimeService::setup() {
         return false;
 
     // start the ICommonClock service
-    mICommonClock = AAHCommonClock::instantiate(&mCommonClock, &mLocalClock);
+    mICommonClock = CommonClockService::instantiate(&mCommonClock, &mLocalClock);
     if (mICommonClock == NULL)
         return false;
 
@@ -503,7 +503,7 @@ bool AAHTimeService::setup() {
 }
 
 // generate a unique device ID that can be used for arbitration
-bool AAHTimeService::assignDeviceID() {
+bool CommonTimeServer::assignDeviceID() {
     // on the PandaBoard, derive the device ID from the MAC address of
     // the eth0 interface
     struct ifreq ifr;
@@ -531,7 +531,7 @@ bool AAHTimeService::assignDeviceID() {
 }
 
 // generate a new timeline ID
-void AAHTimeService::assignTimelineID() {
+void CommonTimeServer::assignTimelineID() {
     do {
         mTimelineID = rand();
     } while (mTimelineID == ICommonClock::kInvalidTimelineID);
@@ -539,12 +539,12 @@ void AAHTimeService::assignTimelineID() {
 
 // Select a preference between the device IDs of two potential masters.
 // Returns true if the first ID wins, or false if the second ID wins.
-bool AAHTimeService::arbitrateMaster(uint64_t deviceID1,
+bool CommonTimeServer::arbitrateMaster(uint64_t deviceID1,
         uint64_t deviceID2) {
     return (deviceID1 > deviceID2);
 }
 
-bool AAHTimeService::handlePacket() {
+bool CommonTimeServer::handlePacket() {
     const int kMaxPacketSize = 100;
     uint8_t buf[kMaxPacketSize];
     struct sockaddr_in srcAddr;
@@ -633,7 +633,7 @@ bool AAHTimeService::handlePacket() {
     return result;
 }
 
-bool AAHTimeService::handleTimeout() {
+bool CommonTimeServer::handleTimeout() {
     switch (mState) {
         case STATE_INITIAL:
             return handleTimeoutInitial();
@@ -650,7 +650,7 @@ bool AAHTimeService::handleTimeout() {
     return false;
 }
 
-bool AAHTimeService::handleTimeoutInitial() {
+bool CommonTimeServer::handleTimeoutInitial() {
     if (++mInitial_WhoIsMasterRequestTimeouts ==
             kInitial_NumWhoIsMasterRetries) {
         // none of our attempts to discover a master succeeded, so make
@@ -662,7 +662,7 @@ bool AAHTimeService::handleTimeoutInitial() {
     }
 }
 
-bool AAHTimeService::handleTimeoutClient() {
+bool CommonTimeServer::handleTimeoutClient() {
     if (mClient_SyncRequestPending) {
         mClient_SyncRequestPending = false;
 
@@ -681,12 +681,12 @@ bool AAHTimeService::handleTimeoutClient() {
     }
 }
 
-bool AAHTimeService::handleTimeoutMaster() {
+bool CommonTimeServer::handleTimeoutMaster() {
     // send another announcement from the master
     return sendMasterAnnouncement();
 }
 
-bool AAHTimeService::handleTimeoutRonin() {
+bool CommonTimeServer::handleTimeoutRonin() {
     if (++mRonin_WhoIsMasterRequestTimeouts == kRonin_NumWhoIsMasterRetries) {
         // no other master is out there, so we won the election
         return becomeMaster();
@@ -695,11 +695,11 @@ bool AAHTimeService::handleTimeoutRonin() {
     }
 }
 
-bool AAHTimeService::handleTimeoutWaitForElection() {
+bool CommonTimeServer::handleTimeoutWaitForElection() {
     return becomeRonin();
 }
 
-bool AAHTimeService::handleWhoIsMasterRequest(
+bool CommonTimeServer::handleWhoIsMasterRequest(
         const WhoIsMasterRequestPacket* request,
         const sockaddr_in& srcAddr) {
     if (mState == STATE_MASTER) {
@@ -749,7 +749,7 @@ bool AAHTimeService::handleWhoIsMasterRequest(
     return true;
 }
 
-bool AAHTimeService::handleWhoIsMasterResponse(
+bool CommonTimeServer::handleWhoIsMasterResponse(
         const WhoIsMasterResponsePacket* response,
         const sockaddr_in& srcAddr) {
     if (mState == STATE_INITIAL || mState == STATE_RONIN) {
@@ -771,7 +771,7 @@ bool AAHTimeService::handleWhoIsMasterResponse(
     return true;
 }
 
-bool AAHTimeService::handleSyncRequest(const SyncRequestPacket* request,
+bool CommonTimeServer::handleSyncRequest(const SyncRequestPacket* request,
                                        const sockaddr_in& srcAddr) {
     SyncResponsePacket response;
     if (mState == STATE_MASTER && ntohl(request->timelineID) == mTimelineID) {
@@ -824,7 +824,7 @@ bool AAHTimeService::handleSyncRequest(const SyncRequestPacket* request,
     return true;
 }
 
-bool AAHTimeService::handleSyncResponse(
+bool CommonTimeServer::handleSyncResponse(
         const SyncResponsePacket* response,
         const sockaddr_in& srcAddr) {
     if (mState != STATE_CLIENT)
@@ -891,7 +891,7 @@ bool AAHTimeService::handleSyncResponse(
     return result;
 }
 
-bool AAHTimeService::handleMasterAnnouncement(
+bool CommonTimeServer::handleMasterAnnouncement(
         const MasterAnnouncementPacket* packet,
         const sockaddr_in& srcAddr) {
     uint64_t newDeviceID = ntohq(packet->deviceID);
@@ -918,7 +918,7 @@ bool AAHTimeService::handleMasterAnnouncement(
     return true;
 }
 
-bool AAHTimeService::sendWhoIsMasterRequest() {
+bool CommonTimeServer::sendWhoIsMasterRequest() {
     assert(mState == STATE_INITIAL || mState == STATE_RONIN);
 
     WhoIsMasterRequestPacket request;
@@ -942,7 +942,7 @@ bool AAHTimeService::sendWhoIsMasterRequest() {
     return (sendBytes != -1);
 }
 
-bool AAHTimeService::sendSyncRequest() {
+bool CommonTimeServer::sendSyncRequest() {
     assert(mState == STATE_CLIENT);
 
     SyncRequestPacket request;
@@ -963,7 +963,7 @@ bool AAHTimeService::sendSyncRequest() {
     return (sendBytes != -1);
 }
 
-bool AAHTimeService::sendMasterAnnouncement() {
+bool CommonTimeServer::sendMasterAnnouncement() {
     assert(mState == STATE_MASTER);
 
     MasterAnnouncementPacket announce;
@@ -982,7 +982,7 @@ bool AAHTimeService::sendMasterAnnouncement() {
     return (sendBytes != -1);
 }
 
-bool AAHTimeService::becomeClient(const sockaddr_in& masterAddr,
+bool CommonTimeServer::becomeClient(const sockaddr_in& masterAddr,
                                   uint64_t masterDeviceID,
                                   uint32_t timelineID) {
     uint32_t newIP = ntohl(masterAddr.sin_addr.s_addr);
@@ -1028,7 +1028,7 @@ bool AAHTimeService::becomeClient(const sockaddr_in& masterAddr,
     return sendSyncRequest();
 }
 
-bool AAHTimeService::becomeMaster() {
+bool CommonTimeServer::becomeMaster() {
     uint32_t oldTimelineID = mTimelineID;
     if (mTimelineID == ICommonClock::kInvalidTimelineID) {
         // this device has not been following any existing timeline,
@@ -1057,7 +1057,7 @@ bool AAHTimeService::becomeMaster() {
     return sendMasterAnnouncement();
 }
 
-bool AAHTimeService::becomeRonin() {
+bool CommonTimeServer::becomeRonin() {
     // If we were the client of a given timeline, but had never received even a
     // single time sync packet, then we transition back to Initial instead of
     // Ronin.  If we transition to Ronin and end up becoming the new Master, we
@@ -1096,7 +1096,7 @@ bool AAHTimeService::becomeRonin() {
     }
 }
 
-bool AAHTimeService::becomeWaitForElection() {
+bool CommonTimeServer::becomeWaitForElection() {
     LOGI("%s --> WAIT_FOR_ELECTION : dropping out of election, waiting %d mSec"
          " for completion.", stateToString(mState), kWaitForElection_TimeoutMs);
 
@@ -1105,7 +1105,7 @@ bool AAHTimeService::becomeWaitForElection() {
     return true;
 }
 
-bool AAHTimeService::becomeInitial() {
+bool CommonTimeServer::becomeInitial() {
     LOGI("Entering INITIAL, total reset.");
 
     setState(STATE_INITIAL);
@@ -1130,25 +1130,25 @@ bool AAHTimeService::becomeInitial() {
     return sendWhoIsMasterRequest();
 }
 
-void AAHTimeService::notifyClockSync() {
+void CommonTimeServer::notifyClockSync() {
     if (!mClockSynced) {
         mICommonClock->notifyOnClockSync(mTimelineID);
         mClockSynced = true;
     }
 }
 
-void AAHTimeService::notifyClockSyncLoss() {
+void CommonTimeServer::notifyClockSyncLoss() {
     if (mClockSynced) {
         mICommonClock->notifyOnClockSyncLoss();
         mClockSynced = false;
     }
 }
 
-void AAHTimeService::setState(State s) {
+void CommonTimeServer::setState(State s) {
     mState = s;
 }
 
-const char* AAHTimeService::stateToString(State s) {
+const char* CommonTimeServer::stateToString(State s) {
     switch(s) {
         case STATE_INITIAL:
             return "INITIAL";
@@ -1170,12 +1170,12 @@ const char* AAHTimeService::stateToString(State s) {
 int main(int argc, char *argv[]) {
     using namespace android;
 
-    sp<AAHTimeService> service = new AAHTimeService();
+    sp<CommonTimeServer> service = new CommonTimeServer();
     if (service == NULL)
         return 1;
 
     ProcessState::self()->startThreadPool();
-    service->run("AAHTimeService", ANDROID_PRIORITY_NORMAL);
+    service->run("CommonTimeServer", ANDROID_PRIORITY_NORMAL);
 
     IPCThreadState::self()->joinThreadPool();
     return 0;

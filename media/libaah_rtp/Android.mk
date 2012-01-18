@@ -26,7 +26,7 @@ LOCAL_C_INCLUDES := \
     frameworks/base/media/libstagefright
 
 LOCAL_SHARED_LIBRARIES := \
-    libaah_timesrv_client \
+    libcommon_time_client \
     libbinder \
     libmedia \
     libstagefright \
