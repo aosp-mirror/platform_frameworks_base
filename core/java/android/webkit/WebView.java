@@ -422,7 +422,7 @@ public class WebView extends AbsoluteLayout
     private final Rect mViewRectViewport = new Rect();
     private final RectF mVisibleContentRect = new RectF();
     private boolean mGLViewportEmpty = false;
-    WebViewInputConnection mInputConnection = new WebViewInputConnection();
+    WebViewInputConnection mInputConnection = null;
 
 
     /**
@@ -4947,15 +4947,13 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public boolean onCheckIsTextEditor() {
-        return true;
-    }
-
-    @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
                 | EditorInfo.TYPE_CLASS_TEXT
                 | EditorInfo.TYPE_TEXT_VARIATION_NORMAL;
+        if (mInputConnection == null) {
+            mInputConnection = new WebViewInputConnection();
+        }
         return mInputConnection;
     }
 
