@@ -71,10 +71,13 @@ struct audio_track_cblk_t
                 uint32_t    loopStart;
                 uint32_t    loopEnd;
                 int         loopCount;
-    volatile    union {
-                    uint16_t    volume[2];
-                    uint32_t    volumeLR;
-                };
+
+                // Channel volumes are fixed point U4.12, so 0x1000 means 1.0.
+                // Left channel is in [0:15], right channel is in [16:31].
+                // Always read and write the combined pair atomically.
+                // For AudioTrack only, not used by AudioRecord.
+                uint32_t    volumeLR;
+
                 uint32_t    sampleRate;
                 // NOTE: audio_track_cblk_t::frameSize is not equal to AudioTrack::frameSize() for
                 // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
