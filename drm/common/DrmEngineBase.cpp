@@ -129,6 +129,11 @@ status_t DrmEngineBase::openDecryptSession(
     return onOpenDecryptSession(uniqueId, decryptHandle, uri);
 }
 
+status_t DrmEngineBase::openDecryptSession(int uniqueId, DecryptHandle* decryptHandle,
+        const DrmBuffer& buf, const String8& mimeType) {
+    return onOpenDecryptSession(uniqueId, decryptHandle, buf, mimeType);
+}
+
 status_t DrmEngineBase::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
     return onCloseDecryptSession(uniqueId, decryptHandle);
 }

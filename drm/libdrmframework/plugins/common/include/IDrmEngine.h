@@ -339,6 +339,19 @@ public:
         int uniqueId, DecryptHandle* decryptHandle, const char* uri) = 0;
 
     /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] decryptHandle Handle for the current decryption session
+     * @param[in] buf Data to initiate decrypt session
+     * @param[in] mimeType Mime type of the protected content
+     * @return
+     *     DRM_ERROR_CANNOT_HANDLE for failure and DRM_NO_ERROR for success
+     */
+    virtual status_t openDecryptSession(int uniqueId, DecryptHandle* decryptHandle,
+            const DrmBuffer& buf, const String8& mimeType) = 0;
+
+    /**
      * Close the decrypt session for the given handle
      *
      * @param[in] uniqueId Unique identifier for a session
