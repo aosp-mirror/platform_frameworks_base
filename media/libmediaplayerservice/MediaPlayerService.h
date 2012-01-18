@@ -34,6 +34,7 @@
 
 namespace android {
 
+class AudioTrack;
 class IMediaRecorder;
 class IMediaMetadataRetriever;
 class IOMX;
