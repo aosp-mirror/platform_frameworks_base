@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.renderscript.RenderScript;
 import android.renderscript.Allocation;
+import android.util.Log;
 import android.widget.ImageView;
 
 public class ComputePerf extends Activity {
-
     private LaunchTest mLT;
     private Mandelbrot mMandel;
     private RenderScript mRS;
@@ -35,14 +35,28 @@ public class ComputePerf extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        final int numTries = 100;
+
+        long timesXLW = 0;
+        long timesXYW = 0;
+
         mRS = RenderScript.create(this);
         mLT = new LaunchTest(mRS, getResources());
-        mLT.run();
-        mLT.run();
+        mLT.XLW();
+        mLT.XYW();
+        for (int i = 0; i < numTries; i++) {
+            timesXLW += mLT.XLW();
+            timesXYW += mLT.XYW();
+        }
+
+        timesXLW /= numTries;
+        timesXYW /= numTries;
+
+        // XLW and XYW running times should match pretty closely
+        Log.v("ComputePerf", "xlw launch test " + timesXLW + "ms");
+        Log.v("ComputePerf", "xyw launch test " + timesXYW + "ms");
 
         mMandel = new Mandelbrot(mRS, getResources());
         mMandel.run();
-
     }
-
 }
