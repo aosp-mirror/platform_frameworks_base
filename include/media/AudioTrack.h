@@ -153,6 +153,18 @@ public:
                                     int notificationFrames = 0,
                                     int sessionId = 0);
 
+                        // DEPRECATED
+                        explicit AudioTrack( int streamType,
+                                    uint32_t sampleRate  = 0,
+                                    int format = AUDIO_FORMAT_DEFAULT,
+                                    int channelMask      = 0,
+                                    int frameCount       = 0,
+                                    uint32_t flags       = 0,
+                                    callback_t cbf       = 0,
+                                    void* user           = 0,
+                                    int notificationFrames = 0,
+                                    int sessionId = 0);
+
     /* Creates an audio track and registers it with AudioFlinger. With this constructor,
      * the PCM data to be rendered by AudioTrack is passed in a shared memory buffer
      * identified by the argument sharedBuffer. This prototype is for static buffer playback.
