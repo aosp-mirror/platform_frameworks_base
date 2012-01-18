@@ -28,13 +28,13 @@
  *
  * To use Renderscript, you need to utilize the Renderscript runtime APIs documented here
  * as well as the Android framework APIs for Renderscript.
- * For documentation on the Android framework APIs, see the <a href=
+ * For documentation on the Android framework APIs, see the <a target="_parent" href=
  * "http://developer.android.com/reference/android/renderscript/package-summary.html">
  * android.renderscript</a> package reference.
  * For more information on how to develop with Renderscript and how the runtime and
- * Android framework APIs interact, see the <a href=
+ * Android framework APIs interact, see the <a target="_parent" href=
  * "http://developer.android.com/guide/topics/renderscript/index.html">Renderscript
- * developer guide</a> and the <a href=
+ * developer guide</a> and the <a target="_parent" href=
  * "http://developer.android.com/resources/samples/RenderScript/index.html">
  * Renderscript samples</a>.
  */
