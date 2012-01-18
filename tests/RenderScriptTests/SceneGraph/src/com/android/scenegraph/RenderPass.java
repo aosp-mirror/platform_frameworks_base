@@ -79,6 +79,10 @@ public class RenderPass extends SceneGraphBase {
         mShouldClearDepth = shouldClearDepth;
     }
 
+    public ArrayList<RenderableBase> getRenderables() {
+        return mObjectsToDraw;
+    }
+
     ScriptField_RenderPass_s.Item getRsField(RenderScriptGL rs, Resources res) {
         if (mRsField != null) {
             return mRsField;
