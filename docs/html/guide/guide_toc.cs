@@ -282,6 +282,10 @@
                 <span class="en">Compute</span>
               </a>
           </li>
+          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/reference.html">
+                <span class="en">Runtime API Reference</span>
+              </a>
+          </li>
         </ul>
       </li>
 
