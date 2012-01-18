@@ -102,6 +102,25 @@ AudioTrack::AudioTrack(
 }
 
 AudioTrack::AudioTrack(
+        int streamType,
+        uint32_t sampleRate,
+        int format,
+        int channelMask,
+        int frameCount,
+        uint32_t flags,
+        callback_t cbf,
+        void* user,
+        int notificationFrames,
+        int sessionId)
+    : mStatus(NO_INIT),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
+{
+    mStatus = set((audio_stream_type_t)streamType, sampleRate, (audio_format_t)format, channelMask,
+            frameCount, flags, cbf, user, notificationFrames,
+            0, false, sessionId);
+}
+
+AudioTrack::AudioTrack(
         audio_stream_type_t streamType,
         uint32_t sampleRate,
         audio_format_t format,
