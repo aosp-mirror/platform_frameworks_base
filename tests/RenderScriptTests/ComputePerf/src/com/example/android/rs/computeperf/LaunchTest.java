@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2011-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.example.android.rs.computeperf;
 import android.content.res.Resources;
 import android.renderscript.*;
 
-public class LaunchTest implements Runnable {
+public class LaunchTest {
     private RenderScript mRS;
     private Allocation mAllocationX;
     private Allocation mAllocationXY;
@@ -40,18 +40,19 @@ public class LaunchTest implements Runnable {
         mScript_xlw.bind_buf(mAllocationXY);
     }
 
-    public void run() {
+    public long XLW() {
         long t = java.lang.System.currentTimeMillis();
         mScript_xlw.forEach_root(mAllocationX);
         mRS.finish();
         t = java.lang.System.currentTimeMillis() - t;
-        android.util.Log.v("ComputePerf", "xlw launch test  ms " + t);
+        return t;
+    }
 
-        t = java.lang.System.currentTimeMillis();
+    public long XYW() {
+        long t = java.lang.System.currentTimeMillis();
         mScript_xyw.forEach_root(mAllocationXY);
         mRS.finish();
         t = java.lang.System.currentTimeMillis() - t;
-        android.util.Log.v("ComputePerf", "xyw launch test  ms " + t);
+        return t;
     }
-
 }
