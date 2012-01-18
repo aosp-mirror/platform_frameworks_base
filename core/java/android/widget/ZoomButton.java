@@ -23,6 +23,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 public class ZoomButton extends ImageButton implements OnLongClickListener {
 
@@ -95,5 +97,17 @@ public class ZoomButton extends ImageButton implements OnLongClickListener {
     public boolean dispatchUnhandledMove(View focused, int direction) {
         clearFocus();
         return super.dispatchUnhandledMove(focused, direction);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(ZoomButton.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(ZoomButton.class.getName());
     }
 }

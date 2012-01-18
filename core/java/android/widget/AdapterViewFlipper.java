@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +26,8 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.RemotableViewMethod;
-import android.view.animation.AlphaAnimation;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
 /**
@@ -267,5 +267,17 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     public void fyiWillBeAdvancedByHostKThx() {
         mAdvancedByHost = true;
         updateRunning(false);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(AdapterViewFlipper.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(AdapterViewFlipper.class.getName());
     }
 }

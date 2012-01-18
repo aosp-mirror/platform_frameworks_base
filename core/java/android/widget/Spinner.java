@@ -29,6 +29,8 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -456,10 +458,22 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         return handled;
     }
-    
+
     public void onClick(DialogInterface dialog, int which) {
         setSelection(which);
         dialog.dismiss();
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(Spinner.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(Spinner.class.getName());
     }
 
     /**

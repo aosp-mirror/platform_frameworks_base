@@ -40,6 +40,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.LinearInterpolator;
 import android.widget.RemoteViews.RemoteView;
 
@@ -1214,6 +1216,18 @@ public class StackView extends AdapterViewAnimator {
         }
         setMeasuredDimension(widthSpecSize, heightSpecSize);
         measureChildren();
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(StackView.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(StackView.class.getName());
     }
 
     class LayoutParams extends ViewGroup.LayoutParams {

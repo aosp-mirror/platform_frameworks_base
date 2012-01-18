@@ -35,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
 
@@ -650,5 +651,17 @@ public class Switch extends CompoundButton {
         super.jumpDrawablesToCurrentState();
         mThumbDrawable.jumpToCurrentState();
         mTrackDrawable.jumpToCurrentState();
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(Switch.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(Switch.class.getName());
     }
 }

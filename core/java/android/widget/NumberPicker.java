@@ -47,6 +47,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
@@ -1380,6 +1381,18 @@ public class NumberPicker extends LinearLayout {
     public void sendAccessibilityEvent(int eventType) {
         // Do not send accessibility events - we want the user to
         // perceive this widget as several controls rather as a whole.
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(NumberPicker.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(NumberPicker.class.getName());
     }
 
     /**

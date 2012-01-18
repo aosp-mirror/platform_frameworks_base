@@ -18,6 +18,8 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 
@@ -117,5 +119,16 @@ public class SeekBar extends AbsSeekBar {
             mOnSeekBarChangeListener.onStopTrackingTouch(this);
         }
     }
-    
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(SeekBar.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(SeekBar.class.getName());
+    }
 }

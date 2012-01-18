@@ -33,6 +33,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -319,6 +321,18 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         if (mCurrentView != null){
             mCurrentView.dispatchWindowFocusChanged(hasFocus);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(TabHost.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(TabHost.class.getName());
     }
 
     public void setCurrentTab(int index) {

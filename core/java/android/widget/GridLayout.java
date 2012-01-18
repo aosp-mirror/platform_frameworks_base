@@ -27,6 +27,9 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+
 import com.android.internal.R;
 
 import java.lang.reflect.Array;
@@ -1039,6 +1042,18 @@ public class GridLayout extends ViewGroup {
             }
             c.layout(cx, cy, cx + width, cy + height);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(GridLayout.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(GridLayout.class.getName());
     }
 
     // Inner classes
