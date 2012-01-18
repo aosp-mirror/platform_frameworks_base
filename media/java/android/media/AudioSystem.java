@@ -313,7 +313,6 @@ public class AudioSystem
     public static native int setDeviceConnectionState(int device, int state, String device_address);
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int setPhoneState(int state);
-    public static native int setRingerMode(int mode, int mask);
     public static native int setForceUse(int usage, int config);
     public static native int getForceUse(int usage);
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);

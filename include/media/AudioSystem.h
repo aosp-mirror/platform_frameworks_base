@@ -143,7 +143,6 @@ public:
     static status_t setDeviceConnectionState(audio_devices_t device, audio_policy_dev_state_t state, const char *device_address);
     static audio_policy_dev_state_t getDeviceConnectionState(audio_devices_t device, const char *device_address);
     static status_t setPhoneState(audio_mode_t state);
-    static status_t setRingerMode(uint32_t mode, uint32_t mask);
     static status_t setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config);
     static audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage);
     static audio_io_handle_t getOutput(audio_stream_type_t stream,
