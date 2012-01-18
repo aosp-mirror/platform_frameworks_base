@@ -60,6 +60,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawLines",
     "DrawPoints",
     "DrawText",
+    "DrawPosText",
     "ResetShader",
     "SetupShader",
     "ResetColorFilter",
@@ -482,6 +483,15 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                     text.text(), text.length(), count, x, y, paint, length);
             }
             break;
+            case DrawPosText: {
+                getText(&text);
+                int count = getInt();
+                int positionsCount = 0;
+                float* positions = getFloats(positionsCount);
+                SkPaint* paint = getPaint();
+                ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, paint);
+            }
             case ResetShader: {
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
@@ -842,6 +852,17 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
                         OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
                 renderer.drawText(text.text(), text.length(), count, x, y, paint, length);
+            }
+            break;
+            case DrawPosText: {
+                getText(&text);
+                int count = getInt();
+                int positionsCount = 0;
+                float* positions = getFloats(positionsCount);
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %p", (char*) indent,
+                        OP_NAMES[op], text.text(), text.length(), count, paint);
+                renderer.drawPosText(text.text(), text.length(), count, positions, paint);
             }
             break;
             case ResetShader: {
@@ -1214,6 +1235,17 @@ void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
     paint->setAntiAlias(true);
     addPaint(paint);
     addFloat(length < 0.0f ? paint->measureText(text, bytesCount) : length);
+}
+
+void DisplayListRenderer::drawPosText(const char* text, int bytesCount, int count,
+        const float* positions, SkPaint* paint) {
+    if (count <= 0) return;
+    addOp(DisplayList::DrawPosText);
+    addText(text, bytesCount);
+    addInt(count);
+    addFloats(positions, count * 2);
+    paint->setAntiAlias(true);
+    addPaint(paint);
 }
 
 void DisplayListRenderer::resetShader() {
