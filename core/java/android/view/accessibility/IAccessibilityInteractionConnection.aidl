@@ -31,13 +31,13 @@ oneway interface IAccessibilityInteractionConnection {
         IAccessibilityInteractionConnectionCallback callback,
         int interrogatingPid, long interrogatingTid);
 
-    void findAccessibilityNodeInfoByViewId(int id, int interactionId,
+    void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int id, int interactionId,
         IAccessibilityInteractionConnectionCallback callback,
         int interrogatingPid, long interrogatingTid);
 
-    void findAccessibilityNodeInfosByText(String text, long accessibilityNodeId,
-        int interactionId, IAccessibilityInteractionConnectionCallback callback,
-        int interrogatingPid, long interrogatingTid);
+    void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, int interactionId,
+        IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
+        long interrogatingTid);
 
     void performAccessibilityAction(long accessibilityNodeId, int action, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,

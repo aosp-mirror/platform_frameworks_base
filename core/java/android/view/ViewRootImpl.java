@@ -52,6 +52,7 @@ import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Pool;
 import android.util.Poolable;
 import android.util.PoolableManager;
@@ -300,6 +301,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager;
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
+
+    AccessibilityPrefetchStrategy mAccessibilityPrefetchStrategy;
 
     private final int mDensity;
 
@@ -3480,6 +3483,17 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         return mAccessibilityInteractionController;
     }
 
+    public AccessibilityPrefetchStrategy getAccessibilityPrefetchStrategy() {
+        if (mView == null) {
+            throw new IllegalStateException("getAccessibilityPrefetchStrategy"
+                    + " called when there is no mView");
+        }
+        if (mAccessibilityPrefetchStrategy == null) {
+            mAccessibilityPrefetchStrategy = new AccessibilityPrefetchStrategy();
+        }
+        return mAccessibilityPrefetchStrategy;
+    }
+
     private int relayoutWindow(WindowManager.LayoutParams params, int viewVisibility,
             boolean insetsPending) throws RemoteException {
 
@@ -3980,6 +3994,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         if (mView == null) {
             return false;
         }
+        getAccessibilityPrefetchStrategy().onAccessibilityEvent(event);
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
     }
@@ -4539,6 +4554,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
                         interactionId, callback, interrogatingPid, interrogatingTid);
+            } else {
+                // We cannot make the call and notify the caller so it does not wait.
+                try {
+                    callback.setFindAccessibilityNodeInfosResult(null, interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
             }
         }
 
@@ -4550,28 +4572,49 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 viewRootImpl.getAccessibilityInteractionController()
                     .performAccessibilityActionClientThread(accessibilityNodeId, action,
                             interactionId, callback, interogatingPid, interrogatingTid);
+            } else {
+                // We cannot make the call and notify the caller so it does not
+                try {
+                    callback.setPerformAccessibilityActionResult(false, interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
             }
         }
 
-        public void findAccessibilityNodeInfoByViewId(int viewId,
+        public void findAccessibilityNodeInfoByViewId(long accessibilityNodeId, int viewId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback,
                 int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback,
-                            interrogatingPid, interrogatingTid);
-            }
-        }
-
-        public void findAccessibilityNodeInfosByText(String text, long accessibilityNodeId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interrogatingPid, long interrogatingTid) {
-            ViewRootImpl viewRootImpl = mViewRootImpl.get();
-            if (viewRootImpl != null && viewRootImpl.mView != null) {
-                viewRootImpl.getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfosByTextClientThread(text, accessibilityNodeId,
+                    .findAccessibilityNodeInfoByViewIdClientThread(accessibilityNodeId, viewId,
                             interactionId, callback, interrogatingPid, interrogatingTid);
+            } else {
+                // We cannot make the call and notify the caller so it does not
+                try {
+                    callback.setFindAccessibilityNodeInfoResult(null, interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
+            }
+        }
+
+        public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
+                            interactionId, callback, interrogatingPid, interrogatingTid);
+            } else {
+                // We cannot make the call and notify the caller so it does not
+                try {
+                    callback.setFindAccessibilityNodeInfosResult(null, interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
             }
         }
     }
@@ -4649,6 +4692,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID;
+            message.arg1 = interrogatingPid;
             SomeArgs args = mPool.acquire();
             args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
             args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
@@ -4671,40 +4715,47 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         public void findAccessibilityNodeInfoByAccessibilityIdUiThread(Message message) {
             SomeArgs args = (SomeArgs) message.obj;
+            final int interrogatingPid = message.arg1;
             final int accessibilityViewId = args.argi1;
             final int virtualDescendantId = args.argi2;
             final int interactionId = args.argi3;
             final IAccessibilityInteractionConnectionCallback callback =
                 (IAccessibilityInteractionConnectionCallback) args.arg1;
             mPool.release(args);
-            AccessibilityNodeInfo info = null;
+            List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
+            infos.clear();
             try {
                 View target = findViewByAccessibilityId(accessibilityViewId);
                 if (target != null && target.getVisibility() == View.VISIBLE) {
                     AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                     if (provider != null) {
-                        info = provider.createAccessibilityNodeInfo(virtualDescendantId);
+                        infos.add(provider.createAccessibilityNodeInfo(virtualDescendantId));
                     } else if (virtualDescendantId == View.NO_ID) {
-                        info = target.createAccessibilityNodeInfo();
+                        getAccessibilityPrefetchStrategy().prefetchAccessibilityNodeInfos(
+                                interrogatingPid, target, infos);
                     }
                 }
             } finally {
                 try {
-                    callback.setFindAccessibilityNodeInfoResult(info, interactionId);
+                    callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
+                    infos.clear();
                 } catch (RemoteException re) {
                     /* ignore - the other side will time out */
                 }
             }
         }
 
-        public void findAccessibilityNodeInfoByViewIdClientThread(int viewId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
-                long interrogatingTid) {
+        public void findAccessibilityNodeInfoByViewIdClientThread(long accessibilityNodeId,
+                int viewId, int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID;
-            message.arg1 = viewId;
-            message.arg2 = interactionId;
-            message.obj = callback;
+            message.arg1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
+            SomeArgs args = mPool.acquire();
+            args.argi1 = viewId;
+            args.argi2 = interactionId;
+            args.arg1 = callback;
+            message.obj = args;
             // If the interrogation is performed by the same thread as the main UI
             // thread in this process, set the message as a static reference so
             // after this call completes the same thread but in the interrogating
@@ -4720,17 +4771,26 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
 
         public void findAccessibilityNodeInfoByViewIdUiThread(Message message) {
-            final int viewId = message.arg1;
-            final int interactionId = message.arg2;
+            final int accessibilityViewId = message.arg1;
+            SomeArgs args = (SomeArgs) message.obj;
+            final int viewId = args.argi1;
+            final int interactionId = args.argi2;
             final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) message.obj;
-
+                (IAccessibilityInteractionConnectionCallback) args.arg1;
+            mPool.release(args);
             AccessibilityNodeInfo info = null;
             try {
-                View root = ViewRootImpl.this.mView;
-                View target = root.findViewById(viewId);
-                if (target != null && target.getVisibility() == View.VISIBLE) {
-                    info = target.createAccessibilityNodeInfo();
+                View root = null;
+                if (accessibilityViewId != View.NO_ID) {
+                    root = findViewByAccessibilityId(accessibilityViewId);
+                } else {
+                    root = ViewRootImpl.this.mView;
+                }
+                if (root != null) {
+                    View target = root.findViewById(viewId);
+                    if (target != null && target.getVisibility() == View.VISIBLE) {
+                        info = target.createAccessibilityNodeInfo();
+                    }
                 }
             } finally {
                 try {
@@ -4741,8 +4801,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
 
-        public void findAccessibilityNodeInfosByTextClientThread(String text,
-                long accessibilityNodeId, int interactionId,
+        public void findAccessibilityNodeInfosByTextClientThread(long accessibilityNodeId,
+                String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
                 long interrogatingTid) {
             Message message = Message.obtain();
@@ -4931,6 +4991,90 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (mView != null) {
                 mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
                 mIsPending = false;
+            }
+        }
+    }
+
+    /**
+     * This class encapsulates a prefetching strategy for the accessibility APIs for
+     * querying window content.It is responsible to prefetch a batch of
+     * AccessibilityNodeInfos in addition to the one for a requested node. It caches
+     * the ids of the prefeteched nodes such that they are fetched only once.
+     */
+    class AccessibilityPrefetchStrategy {
+        private static final int MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE = 100;
+
+        // We need to keep track of what we have sent for each interrogating
+        // process. Usually there will be only one such process but we
+        // should support the general case. Note that the accessibility event
+        // stream will take care of clearing caches of querying processes that
+        // are not longer alive, so we do not waste memory.
+        private final LongSparseArray<AccessibilityNodeInfoCache> mAccessibilityNodeInfoCaches =
+            new LongSparseArray<AccessibilityNodeInfoCache>();
+
+        private AccessibilityNodeInfoCache getCacheForInterrogatingPid(long interrogatingPid) {
+            AccessibilityNodeInfoCache cache = mAccessibilityNodeInfoCaches.get(interrogatingPid);
+            if (cache == null) {
+                cache = AccessibilityNodeInfoCache.newAccessibilityNodeInfoCache();
+                mAccessibilityNodeInfoCaches.put(interrogatingPid, cache);
+            }
+            return cache;
+        }
+
+        public void onAccessibilityEvent(AccessibilityEvent event) {
+            final int cacheCount = mAccessibilityNodeInfoCaches.size();
+            for (int i = 0; i < cacheCount; i++) {
+                AccessibilityNodeInfoCache cache = mAccessibilityNodeInfoCaches.valueAt(i);
+                cache.onAccessibilityEvent(event);
+            }
+        }
+
+        public void prefetchAccessibilityNodeInfos(long interrogatingPid, View root,
+                List<AccessibilityNodeInfo> outInfos) {
+            addAndCacheNotCachedNodeInfo(interrogatingPid, root, outInfos);
+            addAndCacheNotCachedPredecessorInfos(interrogatingPid, root, outInfos);
+            addAndCacheNotCachedDescendantInfos(interrogatingPid, root, outInfos);
+        }
+
+        private void addAndCacheNotCachedNodeInfo(long interrogatingPid,
+                View view, List<AccessibilityNodeInfo> outInfos) {
+            final long accessibilityNodeId = AccessibilityNodeInfo.makeNodeId(
+                    view.getAccessibilityViewId(), View.NO_ID);
+            AccessibilityNodeInfoCache cache = getCacheForInterrogatingPid(interrogatingPid);
+            if (!cache.containsKey(accessibilityNodeId)) {
+                // Account for the ids of the fetched infos. The infos will be
+                // cached in the window querying process. We just need to know
+                // which infos are cached to avoid fetching a cached one again.
+                cache.put(accessibilityNodeId, null);
+                outInfos.add(view.createAccessibilityNodeInfo());
+            }
+        }
+
+        private void addAndCacheNotCachedPredecessorInfos(long interrogatingPid, View view,
+                List<AccessibilityNodeInfo> outInfos) {
+            ViewParent predecessor = view.getParent();
+            while (predecessor instanceof View
+                    && outInfos.size() < MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE) {
+                View predecessorView = (View) predecessor;
+                addAndCacheNotCachedNodeInfo(interrogatingPid, predecessorView, outInfos);
+                predecessor = predecessor.getParent();
+            }
+        }
+
+        private void addAndCacheNotCachedDescendantInfos(long interrogatingPid, View view,
+                List<AccessibilityNodeInfo> outInfos) {
+            if (outInfos.size() > MAX_ACCESSIBILITY_NODE_INFO_BATCH_SIZE
+                    || view.getAccessibilityNodeProvider() != null) {
+                return;
+            }
+            addAndCacheNotCachedNodeInfo(interrogatingPid, view, outInfos);
+            if (view instanceof ViewGroup) {
+                ViewGroup rootGroup = (ViewGroup) view;
+                final int childCount = rootGroup.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                View child = rootGroup.getChildAt(i);
+                    addAndCacheNotCachedDescendantInfos(interrogatingPid, child, outInfos);
+                }
             }
         }
     }

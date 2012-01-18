@@ -3352,6 +3352,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private void addViewInner(View child, int index, LayoutParams params,
             boolean preventRequestLayout) {
 
+        if (getAccessibilityNodeProvider() != null) {
+            throw new IllegalStateException("Views with AccessibilityNodeProvider"
+                    + " can't have children.");
+        }
+
         if (mTransition != null) {
             // Don't prevent other add transitions from completing, but cancel remove
             // transitions to let them complete the process before we add to the container

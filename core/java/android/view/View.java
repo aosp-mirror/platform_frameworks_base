@@ -12654,6 +12654,11 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.REQUEST_LAYOUT);
         }
 
+        if (getAccessibilityNodeProvider() != null) {
+            throw new IllegalStateException("Views with AccessibilityNodeProvider"
+                    + " can't have children.");
+        }
+
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
