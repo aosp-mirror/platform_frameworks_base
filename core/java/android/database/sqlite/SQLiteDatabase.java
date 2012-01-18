@@ -1665,17 +1665,17 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Dump detailed information about all open databases in the current process.
      * Used by bug report.
      */
-    static void dumpAll(Printer printer) {
+    static void dumpAll(Printer printer, boolean verbose) {
         for (SQLiteDatabase db : getActiveDatabases()) {
-            db.dump(printer);
+            db.dump(printer, verbose);
         }
     }
 
-    private void dump(Printer printer) {
+    private void dump(Printer printer, boolean verbose) {
         synchronized (mLock) {
             if (mConnectionPoolLocked != null) {
                 printer.println("");
-                mConnectionPoolLocked.dump(printer);
+                mConnectionPoolLocked.dump(printer, verbose);
             }
         }
     }
