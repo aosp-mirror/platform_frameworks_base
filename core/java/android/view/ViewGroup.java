@@ -2229,6 +2229,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.setClassName(ViewGroup.class.getName());
         for (int i = 0, count = mChildrenCount; i < count; i++) {
             View child = mChildren[i];
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
@@ -2236,6 +2237,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 info.addChild(child);
             }
         }
+    }
+
+    @Override
+    void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
+        event.setClassName(ViewGroup.class.getName());
     }
 
     /**

@@ -36,6 +36,8 @@ import android.provider.ContactsContract.RawContacts;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * Widget used to show an image with the standard QuickContact badge
@@ -226,6 +228,18 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
             // If a contact hasn't been assigned, don't react to click.
             return;
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(QuickContactBadge.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(QuickContactBadge.class.getName());
     }
 
     /**
