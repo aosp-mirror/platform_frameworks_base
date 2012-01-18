@@ -183,16 +183,29 @@ android_media_AudioSystem_initStreamVolume(JNIEnv *env, jobject thiz, jint strea
 }
 
 static int
-android_media_AudioSystem_setStreamVolumeIndex(JNIEnv *env, jobject thiz, jint stream, jint index)
+android_media_AudioSystem_setStreamVolumeIndex(JNIEnv *env,
+                                               jobject thiz,
+                                               jint stream,
+                                               jint index,
+                                               jint device)
 {
-    return check_AudioSystem_Command(AudioSystem::setStreamVolumeIndex(static_cast <audio_stream_type_t>(stream), index));
+    return check_AudioSystem_Command(
+            AudioSystem::setStreamVolumeIndex(static_cast <audio_stream_type_t>(stream),
+                                              index,
+                                              (audio_devices_t)device));
 }
 
 static int
-android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env, jobject thiz, jint stream)
+android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env,
+                                               jobject thiz,
+                                               jint stream,
+                                               jint device)
 {
     int index;
-    if (AudioSystem::getStreamVolumeIndex(static_cast <audio_stream_type_t>(stream), &index) != NO_ERROR) {
+    if (AudioSystem::getStreamVolumeIndex(static_cast <audio_stream_type_t>(stream),
+                                          &index,
+                                          (audio_devices_t)device)
+            != NO_ERROR) {
         index = -1;
     }
     return index;
@@ -219,8 +232,8 @@ static JNINativeMethod gMethods[] = {
     {"setForceUse",         "(II)I",    (void *)android_media_AudioSystem_setForceUse},
     {"getForceUse",         "(I)I",     (void *)android_media_AudioSystem_getForceUse},
     {"initStreamVolume",    "(III)I",   (void *)android_media_AudioSystem_initStreamVolume},
-    {"setStreamVolumeIndex","(II)I",    (void *)android_media_AudioSystem_setStreamVolumeIndex},
-    {"getStreamVolumeIndex","(I)I",     (void *)android_media_AudioSystem_getStreamVolumeIndex},
+    {"setStreamVolumeIndex","(III)I",   (void *)android_media_AudioSystem_setStreamVolumeIndex},
+    {"getStreamVolumeIndex","(II)I",    (void *)android_media_AudioSystem_getStreamVolumeIndex},
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
 };
 
