@@ -40,6 +40,11 @@ public class TextureParam extends ShaderParam {
         super(name);
     }
 
+    public TextureParam(String name, Texture2D t) {
+        super(name);
+        setTexture(t);
+    }
+
     public void setTexture(Texture2D t) {
         mTexture = t;
     }

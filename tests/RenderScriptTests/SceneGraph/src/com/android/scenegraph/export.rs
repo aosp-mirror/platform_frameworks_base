@@ -19,6 +19,7 @@
 // The sole purpose of this script is to have various structs exposed
 // so that java reflected classes are generated
 #include "transform_def.rsh"
+#include "testApp.rsh"
 SgTransform *exportPtr;
 SgRenderState *sExport;
 SgRenderable *drExport;

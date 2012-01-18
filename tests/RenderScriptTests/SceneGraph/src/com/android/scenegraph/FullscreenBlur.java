@@ -20,6 +20,9 @@ package com.android.scenegraph;
 import java.util.ArrayList;
 
 import com.android.scenegraph.Float4Param;
+import com.android.scenegraph.SceneManager;
+import com.android.scenegraph.Texture2D;
+import com.android.scenegraph.TextureParam;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -57,159 +60,115 @@ class FullscreenBlur {
         Type.Builder b = new Type.Builder(rs, Element.RGBA_8888(rs));
         b.setX(w/8).setY(h/8);
         Type renderType = b.create();
-        sRenderTargetBlur0Color = Allocation.createTyped(rs, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        sRenderTargetBlur1Color = Allocation.createTyped(rs, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        sRenderTargetBlur2Color = Allocation.createTyped(rs, renderType,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE |
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+        int usage = Allocation.USAGE_GRAPHICS_TEXTURE | Allocation.USAGE_GRAPHICS_RENDER_TARGET;
+        sRenderTargetBlur0Color = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur1Color = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur2Color = Allocation.createTyped(rs, renderType, usage);
 
-        b = new Type.Builder(rs,
-                             Element.createPixel(rs, Element.DataType.UNSIGNED_16,
-                                                 Element.DataKind.PIXEL_DEPTH));
+        b = new Type.Builder(rs, Element.createPixel(rs, Element.DataType.UNSIGNED_16,
+                                                     Element.DataKind.PIXEL_DEPTH));
         b.setX(w/8).setY(h/8);
-        sRenderTargetBlur0Depth = Allocation.createTyped(rs,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-
-        sRenderTargetBlur1Depth = Allocation.createTyped(rs,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
-        sRenderTargetBlur2Depth = Allocation.createTyped(rs,
-                                                         b.create(),
-                                                         Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+        renderType = b.create();
+        usage = Allocation.USAGE_GRAPHICS_RENDER_TARGET;
+        sRenderTargetBlur0Depth = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur1Depth = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur2Depth = Allocation.createTyped(rs, renderType, usage);
     }
 
-    static void addBlurPasses(Scene scene, RenderScriptGL rs, SceneManager sceneManager) {
+    static void addOffsets(Renderable quad, float advance) {
+        quad.appendSourceParams(new Float4Param("blurOffset0", - advance * 2.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset1", - advance * 0.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset2", advance * 1.5f));
+        quad.appendSourceParams(new Float4Param("blurOffset3", advance * 3.5f));
+    }
+
+    static RenderPass addPass(Scene scene, Allocation color, Allocation depth) {
+        RenderPass pass = new RenderPass();
+        pass.setColorTarget(color);
+        pass.setDepthTarget(depth);
+        pass.setShouldClearColor(false);
+        pass.setShouldClearDepth(false);
+        pass.setCamera(scene.getCameras().get(1));
+        scene.appendRenderPass(pass);
+        return pass;
+    }
+
+    static void addBlurPasses(Scene scene, RenderScriptGL rs) {
+        SceneManager sceneManager = SceneManager.getInstance();
         ArrayList<RenderableBase> allDraw = scene.getRenderables();
         int numDraw = allDraw.size();
 
-        RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture,
-                                            BLEND_ADD_DEPTH_NONE(rs),
-                                            ProgramRaster.CULL_NONE(rs));
+        ProgramRaster cullNone = ProgramRaster.CULL_NONE(rs);
+        ProgramStore blendAdd = SceneManager.BLEND_ADD_DEPTH_NONE(rs);
+        ProgramStore blendNone = ProgramStore.BLEND_NONE_DEPTH_NONE(rs);
 
-        RenderState selectCol = new RenderState(mPV_Blur, mPF_SelectColor,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(rs),
-                                            ProgramRaster.CULL_NONE(rs));
+        RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture, blendAdd, cullNone);
+        RenderState selectCol = new RenderState(mPV_Blur, mPF_SelectColor, blendNone, cullNone);
+        RenderState hBlur = new RenderState(mPV_Blur, mPF_BlurH, blendNone, cullNone);
+        RenderState vBlur = new RenderState(mPV_Blur, mPF_BlurV, blendNone, cullNone);
 
-        RenderState hBlur = new RenderState(mPV_Blur, mPF_BlurH,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(rs),
-                                            ProgramRaster.CULL_NONE(rs));
-
-        RenderState vBlur = new RenderState(mPV_Blur, mPF_BlurV,
-                                            ProgramStore.BLEND_NONE_DEPTH_NONE(rs),
-                                            ProgramRaster.CULL_NONE(rs));
-
-        RenderPass blurSourcePass = new RenderPass();
-        blurSourcePass.setColorTarget(sRenderTargetBlur0Color);
-        blurSourcePass.setDepthTarget(sRenderTargetBlur0Depth);
+        // Renders the scene off screen
+        RenderPass blurSourcePass = addPass(scene,
+                                            sRenderTargetBlur0Color,
+                                            sRenderTargetBlur0Depth);
         blurSourcePass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 1.0f));
         blurSourcePass.setShouldClearColor(true);
         blurSourcePass.setClearDepth(1.0f);
         blurSourcePass.setShouldClearDepth(true);
-        blurSourcePass.setCamera(scene.getCameras().get(1));
         for (int i = 0; i < numDraw; i ++) {
             blurSourcePass.appendRenderable((Renderable)allDraw.get(i));
         }
-        scene.appendRenderPass(blurSourcePass);
 
-        RenderPass selectColorPass = new RenderPass();
-        selectColorPass.setColorTarget(sRenderTargetBlur2Color);
-        selectColorPass.setDepthTarget(sRenderTargetBlur2Depth);
-        selectColorPass.setShouldClearColor(false);
-        selectColorPass.setShouldClearDepth(false);
-        selectColorPass.setCamera(scene.getCameras().get(1));
-        // Make blur shape
+        // Pass for selecting bright colors
+        RenderPass selectColorPass = addPass(scene,
+                                             sRenderTargetBlur2Color,
+                                             sRenderTargetBlur2Depth);
         Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadS", selectCol);
-        quad.updateTextures(rs, sRenderTargetBlur0Color, 0);
+        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur0Color)));
         selectColorPass.appendRenderable(quad);
-        scene.appendRenderPass(selectColorPass);
 
-        RenderPass horizontalBlurPass = new RenderPass();
-        horizontalBlurPass.setColorTarget(sRenderTargetBlur1Color);
-        horizontalBlurPass.setDepthTarget(sRenderTargetBlur1Depth);
-        horizontalBlurPass.setShouldClearColor(false);
-        horizontalBlurPass.setShouldClearDepth(false);
-        horizontalBlurPass.setCamera(scene.getCameras().get(1));
-        // Make blur shape
+        // Horizontal blur
+        RenderPass horizontalBlurPass = addPass(scene,
+                                                sRenderTargetBlur1Color,
+                                                sRenderTargetBlur1Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadH", hBlur);
-        quad.updateTextures(rs, sRenderTargetBlur2Color, 0);
-
-        float xAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getX();
-        quad.appendSourceParams(new Float4Param("blurOffset0", - xAdvance * 2.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset1", - xAdvance * 0.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset2", xAdvance * 1.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset3", xAdvance * 3.5f));
-
+        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur2Color)));
+        addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getX());
         horizontalBlurPass.appendRenderable(quad);
-        scene.appendRenderPass(horizontalBlurPass);
 
-        RenderPass verticalBlurPass = new RenderPass();
-        verticalBlurPass.setColorTarget(sRenderTargetBlur2Color);
-        verticalBlurPass.setDepthTarget(sRenderTargetBlur2Depth);
-        verticalBlurPass.setShouldClearColor(false);
-        verticalBlurPass.setShouldClearDepth(false);
-        verticalBlurPass.setCamera(scene.getCameras().get(1));
-        // Make blur shape
+        // Vertical Blur
+        RenderPass verticalBlurPass = addPass(scene,
+                                              sRenderTargetBlur2Color,
+                                              sRenderTargetBlur2Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadV", vBlur);
-        quad.updateTextures(rs, sRenderTargetBlur1Color, 0);
-        float yAdvance = 1.0f / (float)sRenderTargetBlur0Color.getType().getY();
-        quad.appendSourceParams(new Float4Param("blurOffset0", - yAdvance * 2.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset1", - yAdvance * 0.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset2", yAdvance * 1.5f));
-        quad.appendSourceParams(new Float4Param("blurOffset3", yAdvance * 3.5f));
-
+        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur1Color)));
+        addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getY());
         verticalBlurPass.appendRenderable(quad);
-        scene.appendRenderPass(verticalBlurPass);
-
     }
 
-    static void addCompositePass(Scene scene, RenderScriptGL rs, SceneManager sceneManager) {
+    // Additively renders the blurred colors on top of the scene
+    static void addCompositePass(Scene scene, RenderScriptGL rs) {
+        SceneManager sceneManager = SceneManager.getInstance();
         RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture,
-                                            BLEND_ADD_DEPTH_NONE(rs),
-                                            ProgramRaster.CULL_NONE(rs));
+                                              SceneManager.BLEND_ADD_DEPTH_NONE(rs),
+                                              ProgramRaster.CULL_NONE(rs));
 
-        RenderPass compositePass = new RenderPass();
-        compositePass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 0.0f));
-        compositePass.setShouldClearColor(false);
-        compositePass.setClearDepth(1.0f);
-        compositePass.setShouldClearDepth(false);
-        compositePass.setCamera(scene.getCameras().get(1));
+        RenderPass compositePass = addPass(scene, null, null);
         Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuad", drawTex);
-        quad.updateTextures(rs, sRenderTargetBlur2Color, 0);
+        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur2Color)));
         compositePass.appendRenderable(quad);
-
-        scene.appendRenderPass(compositePass);
     }
 
-    private static ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
-        ProgramStore.Builder builder = new ProgramStore.Builder(rs);
-        builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
-        builder.setBlendFunc(ProgramStore.BlendSrcFunc.ONE, ProgramStore.BlendDstFunc.ONE);
-        builder.setDitherEnabled(false);
-        builder.setDepthMaskEnabled(false);
-        return builder.create();
-    }
-
-    static void initShaders(Resources res, RenderScript rs,
-                            ScriptField_VShaderParams_s vsConst,
-                            ScriptField_FShaderParams_s fsConst) {
+    static void initShaders(Resources res, RenderScript rs) {
         ProgramVertex.Builder vb = new ProgramVertex.Builder(rs);
-        vb.addConstant(vsConst.getAllocation().getType());
         vb.addInput(ScriptField_VertexShaderInputs_s.createElement(rs));
         vb.setShader(res, R.raw.blur_vertex);
         mPV_Blur = vb.create();
-        mPV_Blur.bindConstants(vsConst.getAllocation(), 0);
 
         ProgramFragment.Builder fb = new ProgramFragment.Builder(rs);
-        fb.addConstant(fsConst.getAllocation().getType());
         fb.setShader(res, R.raw.texture);
         fb.addTexture(TextureType.TEXTURE_2D);
         mPF_Texture = fb.create();
-        mPF_Texture.bindConstants(fsConst.getAllocation(), 0);
         mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
 
         mFsBlurHConst = new ScriptField_FBlurOffsets_s(rs, 1);
@@ -219,7 +178,6 @@ class FullscreenBlur {
         fb.setShader(res, R.raw.blur_h);
         fb.addTexture(TextureType.TEXTURE_2D);
         mPF_BlurH = fb.create();
-        mPF_BlurH.bindTexture(sRenderTargetBlur0Color, 0);
         mPF_BlurH.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
 
         mFsBlurVConst = new ScriptField_FBlurOffsets_s(rs, 1);
@@ -230,16 +188,12 @@ class FullscreenBlur {
         fb.addTexture(TextureType.TEXTURE_2D);
 
         mPF_BlurV = fb.create();
-        mPF_BlurV.bindTexture(sRenderTargetBlur1Color, 0);
         mPF_BlurV.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
 
         fb = new ProgramFragment.Builder(rs);
-        //fb.addConstant(mFsBlurVConst.getAllocation().getType());
         fb.setShader(res, R.raw.select_color);
         fb.addTexture(TextureType.TEXTURE_2D);
         mPF_SelectColor = fb.create();
-        //mPF_SelectColor.bindConstants(mFsBlurVConst.getAllocation(), 0);
-        //mPF_SelectColor.bindTexture(sRenderTargetBlur1Color, 0);
         mPF_SelectColor.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
     }
 

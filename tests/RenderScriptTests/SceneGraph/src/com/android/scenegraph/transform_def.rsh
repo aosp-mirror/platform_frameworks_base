@@ -1,4 +1,4 @@
-// Copyright (C) 2009 The Android Open Source Project
+// Copyright (C) 2011-2012 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,28 @@
 #define TRANSFORM_ROTATE 2
 #define TRANSFORM_SCALE 3
 
-static void printName(rs_allocation name) {
-    rsDebug("Object Name: ", 0);
-    if (!rsIsObject(name)) {
-        rsDebug("no name", 0);
-        return;
-    }
+#define CULL_FRUSTUM 0
+#define CULL_ALWAYS 2
 
-    rsDebug((const char*)rsGetElementAt(name, 0), 0);
-}
+#define LIGHT_POINT 0
+#define LIGHT_DIRECTIONAL 1
+
+#define SHADER_PARAM_FLOAT4_DATA 0
+#define SHADER_PARAM_FLOAT4_CAMERA_POS 1
+#define SHADER_PARAM_FLOAT4_CAMERA_DIR 2
+#define SHADER_PARAM_FLOAT4_LIGHT_COLOR 3
+#define SHADER_PARAM_FLOAT4_LIGHT_POS 4
+#define SHADER_PARAM_FLOAT4_LIGHT_DIR 5
+
+#define SHADER_PARAM_TRANSFORM_DATA 100
+#define SHADER_PARAM_TRANSFORM_VIEW 101
+#define SHADER_PARAM_TRANSFORM_PROJ 102
+#define SHADER_PARAM_TRANSFORM_VIEW_PROJ 103
+#define SHADER_PARAM_TRANSFORM_MODEL 104
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW 105
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ 106
+
+#define SHADER_PARAM_TEXTURE 200
 
 typedef struct __attribute__((packed, aligned(4))) SgTransform {
     rs_matrix4x4 globalMat;
@@ -54,9 +67,6 @@ typedef struct RenderState_s {
     rs_program_store ps;
     rs_program_raster pr;
 } SgRenderState;
-
-#define CULL_FRUSTUM 0
-#define CULL_ALWAYS 2
 
 typedef struct Renderable_s {
     rs_allocation render_state;
@@ -107,9 +117,6 @@ typedef struct __attribute__((packed, aligned(4))) Camera_s {
     float4 frustumPlanes[6];
 } SgCamera;
 
-#define LIGHT_POINT 0
-#define LIGHT_DIRECTIONAL 1
-
 typedef struct __attribute__((packed, aligned(4))) Light_s {
     float4 position;
     float4 color;
@@ -118,23 +125,6 @@ typedef struct __attribute__((packed, aligned(4))) Light_s {
     rs_allocation name;
     rs_allocation transformMatrix;
 } SgLight;
-
-#define SHADER_PARAM_FLOAT4_DATA 0
-#define SHADER_PARAM_FLOAT4_CAMERA_POS 1
-#define SHADER_PARAM_FLOAT4_CAMERA_DIR 2
-#define SHADER_PARAM_FLOAT4_LIGHT_COLOR 3
-#define SHADER_PARAM_FLOAT4_LIGHT_POS 4
-#define SHADER_PARAM_FLOAT4_LIGHT_DIR 5
-
-#define SHADER_PARAM_TRANSFORM_DATA 100
-#define SHADER_PARAM_TRANSFORM_VIEW 101
-#define SHADER_PARAM_TRANSFORM_PROJ 102
-#define SHADER_PARAM_TRANSFORM_VIEW_PROJ 103
-#define SHADER_PARAM_TRANSFORM_MODEL 104
-#define SHADER_PARAM_TRANSFORM_MODEL_VIEW 105
-#define SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ 106
-
-#define SHADER_PARAM_TEXTURE 200
 
 // This represents a shader parameter that knows for to update itself
 typedef struct ShaderParam_s {
@@ -151,37 +141,15 @@ typedef struct ShaderParam_s {
     rs_allocation texture;
 } SgShaderParam;
 
-// Helpers
-typedef struct VShaderParams_s {
-    rs_matrix4x4 model;
-    rs_matrix4x4 viewProj;
-} VShaderParams;
+static void printName(rs_allocation name) {
+    rsDebug("Object Name: ", 0);
+    if (!rsIsObject(name)) {
+        rsDebug("no name", 0);
+        return;
+    }
 
-typedef struct FShaderParams_s {
-    float4 cameraPos;
-} FShaderParams;
-
-typedef struct FShaderLightParams_s {
-    float4 lightPos_0;
-    float4 lightColor_0;
-    float4 lightPos_1;
-    float4 lightColor_1;
-    float4 cameraPos;
-    float4 diffuse;
-} FShaderLightParams;
-
-typedef struct FBlurOffsets_s {
-    float blurOffset0;
-    float blurOffset1;
-    float blurOffset2;
-    float blurOffset3;
-} FBlurOffsets;
-
-typedef struct VertexShaderInputs_s {
-    float4 position;
-    float3 normal;
-    float2 texture0;
-} VertexShaderInputs;
+    rsDebug((const char*)rsGetElementAt(name, 0), 0);
+}
 
 static void printCameraInfo(const SgCamera *cam) {
     rsDebug("***** Camera information. ptr:", cam);

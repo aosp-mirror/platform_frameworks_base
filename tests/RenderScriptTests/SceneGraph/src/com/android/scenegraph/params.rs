@@ -31,13 +31,10 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
         *ptr = input->x;
         break;
     case 2:
-        *ptr++ = input->x;
-        *ptr = input->y;
+        *((float2*)ptr) = (*input).xy;
         break;
     case 3:
-        *ptr++ = input->x;
-        *ptr++ = input->y;
-        *ptr = input->z;
+        *((float3*)ptr) = (*input).xyz;
         break;
     case 4:
         *((float4*)ptr) = *input;
@@ -116,72 +113,15 @@ static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCame
     }
 }
 
-static void getTransformedSphere(SgRenderable *obj) {
-    obj->worldBoundingSphere = obj->boundingSphere;
-    obj->worldBoundingSphere.w = 1.0f;
-    const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
-    obj->worldBoundingSphere = rsMatrixMultiply(&objTransform->globalMat, obj->worldBoundingSphere);
-
-    const float4 unitVec = {0.57735f, 0.57735f, 0.57735f, 0.0f};
-    float4 scaledVec = rsMatrixMultiply(&objTransform->globalMat, unitVec);
-    scaledVec.w = 0.0f;
-    obj->worldBoundingSphere.w = obj->boundingSphere.w * length(scaledVec);
-}
-
-static bool frustumCulled(SgRenderable *obj, SgCamera *cam) {
-    if (!obj->bVolInitialized) {
-        float minX, minY, minZ, maxX, maxY, maxZ;
-        rsgMeshComputeBoundingBox(obj->mesh,
-                                  &minX, &minY, &minZ,
-                                  &maxX, &maxY, &maxZ);
-        //rsDebug("min", minX, minY, minZ);
-        //rsDebug("max", maxX, maxY, maxZ);
-        float4 sphere;
-        sphere.x = (maxX + minX) * 0.5f;
-        sphere.y = (maxY + minY) * 0.5f;
-        sphere.z = (maxZ + minZ) * 0.5f;
-        float3 radius;
-        radius.x = (maxX - sphere.x);
-        radius.y = (maxY - sphere.y);
-        radius.z = (maxZ - sphere.z);
-
-        sphere.w = length(radius);
-        obj->boundingSphere = sphere;
-        obj->bVolInitialized = 1;
-        //rsDebug("Sphere", sphere);
-    }
-
-    getTransformedSphere(obj);
-
-    return !rsIsSphereInFrustum(&obj->worldBoundingSphere,
-                                &cam->frustumPlanes[0], &cam->frustumPlanes[1],
-                                &cam->frustumPlanes[2], &cam->frustumPlanes[3],
-                                &cam->frustumPlanes[4], &cam->frustumPlanes[5]);
-}
-
-
 void root(const rs_allocation *v_in, rs_allocation *v_out, const void *usrData) {
 
     SgRenderable *drawable = (SgRenderable *)rsGetElementAt(*v_out, 0);
+    // Visibility flag was set earlier in the cull stage
+    if (!drawable->isVisible) {
+        return;
+    }
+
     const SgCamera *camera = (const SgCamera*)usrData;
-
-    drawable->isVisible = 0;
-    // Not loaded yet
-    if (!rsIsObject(drawable->mesh) || drawable->cullType == CULL_ALWAYS) {
-        return;
-    }
-
-    // check to see if we are culling this object and if it's
-    // outside the frustum
-    if (drawable->cullType == CULL_FRUSTUM && frustumCulled(drawable, (SgCamera*)camera)) {
-#ifdef DEBUG_RENDERABLES
-        rsDebug("Culled", drawable);
-        printName(drawable->name);
-#endif // DEBUG_RENDERABLES
-        return;
-    }
-    drawable->isVisible = 1;
-
     // Data we are updating
     if (rsIsObject(drawable->pf_const)) {
         uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(drawable->pf_const, 0);

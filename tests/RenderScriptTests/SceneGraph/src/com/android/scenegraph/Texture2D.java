@@ -35,6 +35,10 @@ public class Texture2D extends SceneGraphBase {
     public Texture2D() {
     }
 
+    public Texture2D(Allocation tex) {
+        setTexture(tex);
+    }
+
     public void setFileDir(String dir) {
         mFileDir = dir;
     }
@@ -45,6 +49,10 @@ public class Texture2D extends SceneGraphBase {
 
     public String getFileName() {
         return mFileName;
+    }
+
+    public void setTexture(Allocation tex) {
+        mRsTexture = tex;
     }
 
     Allocation getRsData(RenderScriptGL rs, Resources res) {

@@ -50,6 +50,7 @@ public class SceneManager extends SceneGraphBase {
     ScriptC_camera mCameraScript;
     ScriptC_light mLightScript;
     ScriptC_params mParamsScript;
+    ScriptC_cull mCullScript;
     ScriptC_transform mTransformScript;
 
     RenderScriptGL mRS;
@@ -110,6 +111,15 @@ public class SceneManager extends SceneGraphBase {
         return Allocation.createFromBitmap(rs, b,
                                            Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
                                            Allocation.USAGE_GRAPHICS_TEXTURE);
+    }
+
+    public static ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
+        ProgramStore.Builder builder = new ProgramStore.Builder(rs);
+        builder.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+        builder.setBlendFunc(ProgramStore.BlendSrcFunc.ONE, ProgramStore.BlendDstFunc.ONE);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(false);
+        return builder.create();
     }
 
     static Allocation getStringAsAllocation(RenderScript rs, String str) {
@@ -212,12 +222,14 @@ public class SceneManager extends SceneGraphBase {
         mCameraScript = new ScriptC_camera(rs, res, R.raw.camera);
         mLightScript = new ScriptC_light(rs, res, R.raw.light);
         mParamsScript = new ScriptC_params(rs, res, R.raw.params);
+        mCullScript = new ScriptC_cull(rs, res, R.raw.cull);
 
         mRenderLoop = new ScriptC_render(rs, res, R.raw.render);
         mRenderLoop.set_gTransformScript(mTransformScript);
         mRenderLoop.set_gCameraScript(mCameraScript);
         mRenderLoop.set_gLightScript(mLightScript);
         mRenderLoop.set_gParamsScript(mParamsScript);
+        mRenderLoop.set_gCullScript(mCullScript);
 
         Allocation checker = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.checker,
                                                          MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
