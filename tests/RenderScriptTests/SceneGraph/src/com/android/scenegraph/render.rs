@@ -154,8 +154,9 @@ static void drawAllObjects(rs_allocation allObj) {
 }
 
 void root(const void *v_in, void *v_out) {
-
-    //rsDebug("=============================================================================", 0);
+#ifdef DEBUG_RENDERABLES
+    rsDebug("=============================================================================", 0);
+#endif // DEBUG_RENDERABLES
     // first step is to update the transform hierachy
     rsForEach(gTransformScript, gRootNode->children, nullAlloc, 0, 0);
 

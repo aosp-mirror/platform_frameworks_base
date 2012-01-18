@@ -35,11 +35,11 @@ import android.os.AsyncTask;
 public class Scene extends SceneGraphBase {
     private static String TIMER_TAG = "TIMER";
 
-    private class ImageLoaderTask extends AsyncTask<String, Void, Boolean> {
-        protected Boolean doInBackground(String... names) {
+    private class ImageLoaderTask extends AsyncTask<ArrayList<RenderableBase>, Void, Boolean> {
+        protected Boolean doInBackground(ArrayList<RenderableBase>... objects) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < mRenderables.size(); i ++) {
-                Renderable dI = (Renderable)mRenderables.get(i);
+            for (int i = 0; i < objects[0].size(); i ++) {
+                Renderable dI = (Renderable)objects[0].get(i);
                 dI.updateTextures(mRS, mRes);
             }
             long end = System.currentTimeMillis();
@@ -202,9 +202,12 @@ public class Scene extends SceneGraphBase {
             mRenderPassAlloc = new ScriptField_RenderPass_s(mRS, mRenderPasses.size());
             for (int i = 0; i < mRenderPasses.size(); i ++) {
                 mRenderPassAlloc.set(mRenderPasses.get(i).getRsField(mRS, mRes), i, false);
+                new ImageLoaderTask().execute(mRenderPasses.get(i).getRenderables());
             }
             mRenderPassAlloc.copyAll();
             sceneManager.mRenderLoop.set_gRenderPasses(mRenderPassAlloc.getAllocation());
+        } else {
+            new ImageLoaderTask().execute(mRenderables);
         }
     }
 
@@ -237,8 +240,6 @@ public class Scene extends SceneGraphBase {
         sceneManager.mRenderLoop.set_gRenderableObjects(drawableData);
 
         initRenderPassRS(rs, sceneManager);
-
-        new ImageLoaderTask().execute();
 
         end = System.currentTimeMillis();
         Log.v(TIMER_TAG, "Renderable init time: " + (end - start));
