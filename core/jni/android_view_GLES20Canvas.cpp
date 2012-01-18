@@ -44,6 +44,7 @@
 #include <SkiaColorFilter.h>
 #include <Rect.h>
 
+#include <TextLayout.h>
 #include <TextLayoutCache.h>
 
 namespace android {
