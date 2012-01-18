@@ -110,7 +110,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int SENDMSG_QUEUE = 2;
 
     // AudioHandler message.whats
-    private static final int MSG_SET_SYSTEM_VOLUME = 0;
+    private static final int MSG_SET_DEVICE_VOLUME = 0;
     private static final int MSG_PERSIST_VOLUME = 1;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
     private static final int MSG_PERSIST_VIBRATE_SETTING = 4;
@@ -124,6 +124,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 12;
     private static final int MSG_RCDISPLAY_CLEAR = 13;
     private static final int MSG_RCDISPLAY_UPDATE = 14;
+    private static final int MSG_SET_ALL_VOLUMES = 15;
 
 
     // flags for MSG_PERSIST_VOLUME indicating if current and/or last audible volume should be
@@ -329,6 +330,7 @@ public class AudioService extends IAudioService.Stub {
     // Keyguard manager proxy
     private KeyguardManager mKeyguardManager;
 
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -431,12 +433,17 @@ public class AudioService extends IAudioService.Stub {
 
         // Correct stream index values for streams with aliases
         for (int i = 0; i < numStreamTypes; i++) {
+            int device = getDeviceForStream(i);
             if (STREAM_VOLUME_ALIAS[i] != i) {
-                int index = rescaleIndex(streams[i].mIndex, STREAM_VOLUME_ALIAS[i], i);
-                streams[i].mIndex = streams[i].getValidIndex(index);
-                setStreamVolumeIndex(i, index);
-                index = rescaleIndex(streams[i].mLastAudibleIndex, STREAM_VOLUME_ALIAS[i], i);
-                streams[i].mLastAudibleIndex = streams[i].getValidIndex(index);
+                int index = rescaleIndex(streams[i].getIndex(device, false  /* lastAudible */),
+                                STREAM_VOLUME_ALIAS[i],
+                                i);
+                streams[i].mIndex.put(device, streams[i].getValidIndex(index));
+                streams[i].applyDeviceVolume(device);
+                index = rescaleIndex(streams[i].getIndex(device, true  /* lastAudible */),
+                            STREAM_VOLUME_ALIAS[i],
+                            i);
+                streams[i].mLastAudibleIndex.put(device, streams[i].getValidIndex(index));
             }
         }
     }
@@ -488,10 +495,6 @@ public class AudioService extends IAudioService.Stub {
         restoreMediaButtonReceiver();
     }
 
-    private void setStreamVolumeIndex(int stream, int index) {
-        AudioSystem.setStreamVolumeIndex(stream, (index + 5)/10);
-    }
-
     private int rescaleIndex(int index, int srcStream, int dstStream) {
         return (index * mStreamStates[dstStream].getMaxIndex() + mStreamStates[srcStream].getMaxIndex() / 2) / mStreamStates[srcStream].getMaxIndex();
     }
@@ -535,7 +538,11 @@ public class AudioService extends IAudioService.Stub {
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
         int streamTypeAlias = STREAM_VOLUME_ALIAS[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
-        final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
+
+        final int device = getDeviceForStream(streamTypeAlias);
+        // get last audible index if stream is muted, current index otherwise
+        final int oldIndex = streamState.getIndex(device,
+                                                  (streamState.muteCount() != 0) /* lastAudible */);
         boolean adjustVolume = true;
 
         // If either the client forces allowing ringer modes for this adjustment,
@@ -564,32 +571,32 @@ public class AudioService extends IAudioService.Stub {
                     if (STREAM_VOLUME_ALIAS[i] == streamTypeAlias) {
                         VolumeStreamState s = mStreamStates[i];
 
-                        s.adjustLastAudibleIndex(direction);
+                        s.adjustLastAudibleIndex(direction, device);
                         // Post a persist volume msg
                         sendMsg(mAudioHandler,
                                 MSG_PERSIST_VOLUME,
                                 SENDMSG_REPLACE,
                                 PERSIST_LAST_AUDIBLE,
-                                0,
+                                device,
                                 s,
                                 PERSIST_DELAY);
                     }
                 }
             }
-            index = streamState.mLastAudibleIndex;
+            index = streamState.getIndex(device, true  /* lastAudible */);
         } else {
-            if (adjustVolume && streamState.adjustIndex(direction)) {
+            if (adjustVolume && streamState.adjustIndex(direction, device)) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist). Do not change volume if stream is muted.
                 sendMsg(mAudioHandler,
-                        MSG_SET_SYSTEM_VOLUME,
+                        MSG_SET_DEVICE_VOLUME,
                         SENDMSG_NOOP,
-                        0,
+                        device,
                         0,
                         streamState,
                         0);
             }
-            index = streamState.mIndex;
+            index = streamState.getIndex(device, false  /* lastAudible */);
         }
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
@@ -600,7 +607,10 @@ public class AudioService extends IAudioService.Stub {
         ensureValidStreamType(streamType);
         VolumeStreamState streamState = mStreamStates[STREAM_VOLUME_ALIAS[streamType]];
 
-        final int oldIndex = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
+        final int device = getDeviceForStream(streamType);
+        // get last audible index if stream is muted, current index otherwise
+        final int oldIndex = streamState.getIndex(device,
+                                                  (streamState.muteCount() != 0) /* lastAudible */);
 
         // setting ring or notifications volume to 0 on voice capable devices enters silent mode
         if (mVoiceCapable && (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
@@ -610,7 +620,11 @@ public class AudioService extends IAudioService.Stub {
                 newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
                     ? AudioManager.RINGER_MODE_VIBRATE
                     : AudioManager.RINGER_MODE_SILENT;
-                setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
+                setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType],
+                                   index,
+                                   device,
+                                   false,
+                                   true);
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
@@ -618,9 +632,10 @@ public class AudioService extends IAudioService.Stub {
         }
 
         index = rescaleIndex(index * 10, streamType, STREAM_VOLUME_ALIAS[streamType]);
-        setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, false, true);
-
-        index = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
+        setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, device, false, true);
+        // get last audible index if stream is muted, current index otherwise
+        index = streamState.getIndex(device,
+                                     (streamState.muteCount() != 0) /* lastAudible */);
 
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
@@ -648,35 +663,40 @@ public class AudioService extends IAudioService.Stub {
      *
      * @param streamType Type of the stream
      * @param index Desired volume index of the stream
+     * @param device the device whose volume must be changed
      * @param force If true, set the volume even if the desired volume is same
      * as the current volume.
      * @param lastAudible If true, stores new index as last audible one
      */
-    private void setStreamVolumeInt(int streamType, int index, boolean force, boolean lastAudible) {
+    private void setStreamVolumeInt(int streamType,
+                                    int index,
+                                    int device,
+                                    boolean force,
+                                    boolean lastAudible) {
         VolumeStreamState streamState = mStreamStates[streamType];
 
         // If stream is muted, set last audible index only
         if (streamState.muteCount() != 0) {
             // Do not allow last audible index to be 0
             if (index != 0) {
-                streamState.setLastAudibleIndex(index);
+                streamState.setLastAudibleIndex(index, device);
                 // Post a persist volume msg
                 sendMsg(mAudioHandler,
                         MSG_PERSIST_VOLUME,
                         SENDMSG_REPLACE,
                         PERSIST_LAST_AUDIBLE,
-                        0,
+                        device,
                         streamState,
                         PERSIST_DELAY);
             }
         } else {
-            if (streamState.setIndex(index, lastAudible) || force) {
+            if (streamState.setIndex(index, device, lastAudible) || force) {
                 // Post message to set system volume (it in turn will post a message
                 // to persist).
                 sendMsg(mAudioHandler,
-                        MSG_SET_SYSTEM_VOLUME,
+                        MSG_SET_DEVICE_VOLUME,
                         SENDMSG_NOOP,
-                        0,
+                        device,
                         0,
                         streamState,
                         0);
@@ -708,7 +728,8 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
-        return (mStreamStates[streamType].mIndex + 5) / 10;
+        int device = getDeviceForStream(streamType);
+        return (mStreamStates[streamType].getIndex(device, false  /* lastAudible */) + 5) / 10;
     }
 
     /** @see AudioManager#getStreamMaxVolume(int) */
@@ -721,7 +742,8 @@ public class AudioService extends IAudioService.Stub {
     /** Get last audible volume before stream was muted. */
     public int getLastAudibleStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
-        return (mStreamStates[streamType].mLastAudibleIndex + 5) / 10;
+        int device = getDeviceForStream(streamType);
+        return (mStreamStates[streamType].getIndex(device, true  /* lastAudible */) + 5) / 10;
     }
 
     /** @see AudioManager#getRingerMode() */
@@ -764,9 +786,16 @@ public class AudioService extends IAudioService.Stub {
                     // ring and notifications volume should never be 0 when not silenced
                     // on voice capable devices
                     if (mVoiceCapable &&
-                            STREAM_VOLUME_ALIAS[streamType] == AudioSystem.STREAM_RING &&
-                            mStreamStates[streamType].mLastAudibleIndex == 0) {
-                        mStreamStates[streamType].mLastAudibleIndex = 10;
+                            STREAM_VOLUME_ALIAS[streamType] == AudioSystem.STREAM_RING) {
+
+                        Set set = mStreamStates[streamType].mLastAudibleIndex.entrySet();
+                        Iterator i = set.iterator();
+                        while (i.hasNext()) {
+                            Map.Entry entry = (Map.Entry)i.next();
+                            if ((Integer)entry.getValue() == 0) {
+                                entry.setValue(10);
+                            }
+                        }
                     }
                     mStreamStates[streamType].mute(null, false);
                     mRingerModeMutedStreams &= ~(1 << streamType);
@@ -988,8 +1017,9 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].mIndex;
-            setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, true, false);
+            int device = getDeviceForStream(streamType);
+            int index = mStreamStates[STREAM_VOLUME_ALIAS[streamType]].getIndex(device, false);
+            setStreamVolumeInt(STREAM_VOLUME_ALIAS[streamType], index, device, true, false);
         }
         return newModeOwnerPid;
     }
@@ -1253,28 +1283,7 @@ public class AudioService extends IAudioService.Stub {
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
             VolumeStreamState streamState = mStreamStates[streamType];
 
-            String settingName = System.VOLUME_SETTINGS[STREAM_VOLUME_ALIAS[streamType]];
-            String lastAudibleSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
-            int index = Settings.System.getInt(mContentResolver,
-                                           settingName,
-                                           AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
-            if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
-                index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
-            } else {
-                index *= 10;
-            }
-            streamState.mIndex = streamState.getValidIndex(index);
-
-            index = (index + 5) / 10;
-            index = Settings.System.getInt(mContentResolver,
-                                            lastAudibleSettingName,
-                                            (index > 0) ? index : AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
-            if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
-                index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
-            } else {
-                index *= 10;
-            }
-            streamState.mLastAudibleIndex = streamState.getValidIndex(index);
+            streamState.readSettings();
 
             // unmute stream that was muted but is not affect by mute anymore
             if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
@@ -1286,7 +1295,7 @@ public class AudioService extends IAudioService.Stub {
             }
             // apply stream volume
             if (streamState.muteCount() == 0) {
-                setStreamVolumeIndex(streamType, streamState.mIndex);
+                streamState.applyAllVolumes();
             }
         }
 
@@ -1877,6 +1886,22 @@ public class AudioService extends IAudioService.Stub {
         return false;
     }
 
+    private int getDeviceForStream(int stream) {
+        int device = AudioSystem.getDevicesForStream(stream);
+        if ((device & (device - 1)) != 0) {
+            // Multiple device selection is either:
+            //  - speaker + one other device: give priority to speaker in this case.
+            //  - one A2DP device + another device: happens with duplicated output. In this case
+            // retain the device on the A2DP output as the other must not correspond to an active
+            // selection if not the speaker.
+            if ((device & AudioSystem.DEVICE_OUT_SPEAKER) != 0) {
+                device = AudioSystem.DEVICE_OUT_SPEAKER;
+            } else {
+                device &= AudioSystem.DEVICE_OUT_ALL_A2DP;
+            }
+        }
+        return device;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Inner classes
@@ -1888,54 +1913,127 @@ public class AudioService extends IAudioService.Stub {
         private String mVolumeIndexSettingName;
         private String mLastAudibleVolumeIndexSettingName;
         private int mIndexMax;
-        private int mIndex;
-        private int mLastAudibleIndex;
-        private ArrayList<VolumeDeathHandler> mDeathHandlers; //handles mute/solo requests client death
+        private final HashMap <Integer, Integer> mIndex = new HashMap <Integer, Integer>();
+        private final HashMap <Integer, Integer> mLastAudibleIndex =
+                                                                new HashMap <Integer, Integer>();
+        private ArrayList<VolumeDeathHandler> mDeathHandlers; //handles mute/solo clients death
 
         private VolumeStreamState(String settingName, int streamType) {
 
-            setVolumeIndexSettingName(settingName);
+            mVolumeIndexSettingName = settingName;
+            mLastAudibleVolumeIndexSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
 
             mStreamType = streamType;
-
-            final ContentResolver cr = mContentResolver;
             mIndexMax = MAX_STREAM_VOLUME[streamType];
-            mIndex = Settings.System.getInt(cr,
-                                            mVolumeIndexSettingName,
-                                            AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
-            mLastAudibleIndex = Settings.System.getInt(cr,
-                                                       mLastAudibleVolumeIndexSettingName,
-                                                       (mIndex > 0) ? mIndex : AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
             AudioSystem.initStreamVolume(streamType, 0, mIndexMax);
             mIndexMax *= 10;
-            mIndex = getValidIndex(10 * mIndex);
-            mLastAudibleIndex = getValidIndex(10 * mLastAudibleIndex);
-            setStreamVolumeIndex(streamType, mIndex);
+
+            readSettings();
+
+            applyAllVolumes();
+
             mDeathHandlers = new ArrayList<VolumeDeathHandler>();
         }
 
-        public void setVolumeIndexSettingName(String settingName) {
-            mVolumeIndexSettingName = settingName;
-            mLastAudibleVolumeIndexSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
+        public String getSettingNameForDevice(boolean lastAudible, int device) {
+            String name = lastAudible ?
+                            mLastAudibleVolumeIndexSettingName :
+                            mVolumeIndexSettingName;
+            String suffix = AudioSystem.getDeviceName(device);
+            if (suffix.isEmpty()) {
+                return name;
+            }
+            return name + "_" + suffix;
         }
 
-        public boolean adjustIndex(int deltaIndex) {
-            return setIndex(mIndex + deltaIndex * 10, true);
+        public void readSettings() {
+            int index = Settings.System.getInt(mContentResolver,
+                            mVolumeIndexSettingName,
+                            AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
+
+            mIndex.clear();
+            mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
+
+            index = Settings.System.getInt(mContentResolver,
+                            mLastAudibleVolumeIndexSettingName,
+                            (index > 0) ? index : AudioManager.DEFAULT_STREAM_VOLUME[mStreamType]);
+            mLastAudibleIndex.clear();
+            mLastAudibleIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, index);
+
+            int remainingDevices = AudioSystem.DEVICE_OUT_ALL;
+            for (int i = 0; remainingDevices != 0; i++) {
+                int device = (1 << i);
+                if ((device & remainingDevices) == 0) {
+                    continue;
+                }
+                remainingDevices &= ~device;
+
+                // retrieve current volume for device
+                String name = getSettingNameForDevice(false, device);
+                index = Settings.System.getInt(mContentResolver, name, -1);
+                if (index == -1) {
+                    continue;
+                }
+                mIndex.put(device, getValidIndex(10 * index));
+
+                // retrieve last audible volume for device
+                name = getSettingNameForDevice(true, device);
+                index = Settings.System.getInt(mContentResolver, name, -1);
+                mLastAudibleIndex.put(device, getValidIndex(10 * index));
+            }
         }
 
-        public boolean setIndex(int index, boolean lastAudible) {
-            int oldIndex = mIndex;
-            mIndex = getValidIndex(index);
+        public void applyDeviceVolume(int device) {
+            AudioSystem.setStreamVolumeIndex(mStreamType,
+                                             (getIndex(device, false  /* lastAudible */) + 5)/10,
+                                             device);
+        }
 
-            if (oldIndex != mIndex) {
+        public void applyAllVolumes() {
+            // apply default volume first: by convention this will reset all
+            // devices volumes in audio policy manager to the supplied value
+            AudioSystem.setStreamVolumeIndex(mStreamType,
+                    (getIndex(AudioSystem.DEVICE_OUT_DEFAULT, false /* lastAudible */) + 5)/10,
+                    AudioSystem.DEVICE_OUT_DEFAULT);
+            // then apply device specific volumes
+            Set set = mIndex.entrySet();
+            Iterator i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
+                int device = ((Integer)entry.getKey()).intValue();
+                if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
+                    AudioSystem.setStreamVolumeIndex(mStreamType,
+                                                     ((Integer)entry.getValue() + 5)/10,
+                                                     device);
+                }
+            }
+        }
+
+        public boolean adjustIndex(int deltaIndex, int device) {
+            return setIndex(getIndex(device,
+                                     false  /* lastAudible */) + deltaIndex * 10,
+                            device,
+                            true  /* lastAudible */);
+        }
+
+        public boolean setIndex(int index, int device, boolean lastAudible) {
+            int oldIndex = getIndex(device, false  /* lastAudible */);
+            index = getValidIndex(index);
+            mIndex.put(device, getValidIndex(index));
+
+            if (oldIndex != index) {
                 if (lastAudible) {
-                    mLastAudibleIndex = mIndex;
+                    mLastAudibleIndex.put(device, index);
                 }
                 // Apply change to all streams using this one as alias
                 int numStreamTypes = AudioSystem.getNumStreamTypes();
                 for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                     if (streamType != mStreamType && STREAM_VOLUME_ALIAS[streamType] == mStreamType) {
-                        mStreamStates[streamType].setIndex(rescaleIndex(mIndex, mStreamType, streamType), lastAudible);
+                        mStreamStates[streamType].setIndex(rescaleIndex(index,
+                                                                        mStreamType,
+                                                                        streamType),
+                                                           device,
+                                                           lastAudible);
                     }
                 }
                 return true;
@@ -1944,12 +2042,29 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
-        public void setLastAudibleIndex(int index) {
-            mLastAudibleIndex = getValidIndex(index);
+        public int getIndex(int device, boolean lastAudible) {
+            HashMap <Integer, Integer> indexes;
+            if (lastAudible) {
+                indexes = mLastAudibleIndex;
+            } else {
+                indexes = mIndex;
+            }
+            Integer index = indexes.get(device);
+            if (index == null) {
+                // there is always an entry for AudioSystem.DEVICE_OUT_DEFAULT
+                index = indexes.get(AudioSystem.DEVICE_OUT_DEFAULT);
+            }
+            return index.intValue();
         }
 
-        public void adjustLastAudibleIndex(int deltaIndex) {
-            setLastAudibleIndex(mLastAudibleIndex + deltaIndex * 10);
+        public void setLastAudibleIndex(int index, int device) {
+            mLastAudibleIndex.put(device, getValidIndex(index));
+        }
+
+        public void adjustLastAudibleIndex(int deltaIndex, int device) {
+            setLastAudibleIndex(getIndex(device,
+                                         true  /* lastAudible */) + deltaIndex * 10,
+                                device);
         }
 
         public int getMaxIndex() {
@@ -1994,10 +2109,20 @@ public class AudioService extends IAudioService.Stub {
                                     mICallback.linkToDeath(this, 0);
                                 }
                                 mDeathHandlers.add(this);
-                                // If the stream is not yet muted by any client, set lvel to 0
+                                // If the stream is not yet muted by any client, set level to 0
                                 if (muteCount() == 0) {
-                                    setIndex(0, false);
-                                    sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, SENDMSG_NOOP, 0, 0,
+                                    Set set = mIndex.entrySet();
+                                    Iterator i = set.iterator();
+                                    while (i.hasNext()) {
+                                        Map.Entry entry = (Map.Entry)i.next();
+                                        int device = ((Integer)entry.getKey()).intValue();
+                                        setIndex(0, device, false /* lastAudible */);
+                                    }
+                                    sendMsg(mAudioHandler,
+                                            MSG_SET_ALL_VOLUMES,
+                                            SENDMSG_NOOP,
+                                            0,
+                                            0,
                                             VolumeStreamState.this, 0);
                                 }
                             } catch (RemoteException e) {
@@ -2026,9 +2151,22 @@ public class AudioService extends IAudioService.Stub {
                                     // If the stream is not muted any more, restore it's volume if
                                     // ringer mode allows it
                                     if (!isStreamAffectedByRingerMode(mStreamType) ||
-                                            getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-                                        setIndex(mLastAudibleIndex, false);
-                                        sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, SENDMSG_NOOP, 0, 0,
+                                            mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+                                        Set set = mIndex.entrySet();
+                                        Iterator i = set.iterator();
+                                        while (i.hasNext()) {
+                                            Map.Entry entry = (Map.Entry)i.next();
+                                            int device = ((Integer)entry.getKey()).intValue();
+                                            setIndex(getIndex(device,
+                                                              true  /* lastAudible */),
+                                                     device,
+                                                     false  /* lastAudible */);
+                                        }
+                                        sendMsg(mAudioHandler,
+                                                MSG_SET_ALL_VOLUMES,
+                                                SENDMSG_NOOP,
+                                                0,
+                                                0,
                                                 VolumeStreamState.this, 0);
                                     }
                                 }
@@ -2107,17 +2245,17 @@ public class AudioService extends IAudioService.Stub {
     /** Handles internal volume messages in separate volume thread. */
     private class AudioHandler extends Handler {
 
-        private void setSystemVolume(VolumeStreamState streamState) {
+        private void setDeviceVolume(VolumeStreamState streamState, int device) {
 
-            // Adjust volume
-            setStreamVolumeIndex(streamState.mStreamType, streamState.mIndex);
+            // Apply volume
+            streamState.applyDeviceVolume(device);
 
             // Apply change to all streams using this one as alias
             int numStreamTypes = AudioSystem.getNumStreamTypes();
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                 if (streamType != streamState.mStreamType &&
-                    STREAM_VOLUME_ALIAS[streamType] == streamState.mStreamType) {
-                    setStreamVolumeIndex(streamType, mStreamStates[streamType].mIndex);
+                        STREAM_VOLUME_ALIAS[streamType] == streamState.mStreamType) {
+                    mStreamStates[streamType].applyDeviceVolume(device);
                 }
             }
 
@@ -2126,21 +2264,39 @@ public class AudioService extends IAudioService.Stub {
                     MSG_PERSIST_VOLUME,
                     SENDMSG_REPLACE,
                     PERSIST_CURRENT|PERSIST_LAST_AUDIBLE,
-                    0,
+                    device,
                     streamState,
                     PERSIST_DELAY);
 
         }
 
+        private void setAllVolumes(VolumeStreamState streamState) {
+
+            // Apply volume
+            streamState.applyAllVolumes();
+
+            // Apply change to all streams using this one as alias
+            int numStreamTypes = AudioSystem.getNumStreamTypes();
+            for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
+                if (streamType != streamState.mStreamType &&
+                        STREAM_VOLUME_ALIAS[streamType] == streamState.mStreamType) {
+                    mStreamStates[streamType].applyAllVolumes();
+                }
+            }
+        }
+
         private void persistVolume(VolumeStreamState streamState,
-                                   int persistType) {
+                                   int persistType,
+                                   int device) {
             if ((persistType & PERSIST_CURRENT) != 0) {
-                System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
-                              (streamState.mIndex + 5)/ 10);
+                System.putInt(mContentResolver,
+                          streamState.getSettingNameForDevice(false /* lastAudible */, device),
+                          (streamState.getIndex(device, false /* lastAudible */) + 5)/ 10);
             }
             if ((persistType & PERSIST_LAST_AUDIBLE) != 0) {
-                System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
-                    (streamState.mLastAudibleIndex + 5) / 10);
+                System.putInt(mContentResolver,
+                        streamState.getSettingNameForDevice(true /* lastAudible */, device),
+                        (streamState.getIndex(device, true  /* lastAudible */) + 5) / 10);
             }
         }
 
@@ -2223,12 +2379,16 @@ public class AudioService extends IAudioService.Stub {
 
             switch (msg.what) {
 
-                case MSG_SET_SYSTEM_VOLUME:
-                    setSystemVolume((VolumeStreamState) msg.obj);
+                case MSG_SET_DEVICE_VOLUME:
+                    setDeviceVolume((VolumeStreamState) msg.obj, msg.arg1);
+                    break;
+
+                case MSG_SET_ALL_VOLUMES:
+                    setAllVolumes((VolumeStreamState) msg.obj);
                     break;
 
                 case MSG_PERSIST_VOLUME:
-                    persistVolume((VolumeStreamState) msg.obj, msg.arg1);
+                    persistVolume((VolumeStreamState) msg.obj, msg.arg1, msg.arg2);
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:
@@ -2264,7 +2424,7 @@ public class AudioService extends IAudioService.Stub {
                     synchronized (mConnectedDevices) {
                         Set set = mConnectedDevices.entrySet();
                         Iterator i = set.iterator();
-                        while(i.hasNext()){
+                        while (i.hasNext()) {
                             Map.Entry device = (Map.Entry)i.next();
                             AudioSystem.setDeviceConnectionState(
                                                             ((Integer)device.getKey()).intValue(),
@@ -2282,15 +2442,10 @@ public class AudioService extends IAudioService.Stub {
                     // Restore stream volumes
                     int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                        int index;
                         VolumeStreamState streamState = mStreamStates[streamType];
                         AudioSystem.initStreamVolume(streamType, 0, (streamState.mIndexMax + 5) / 10);
-                        if (streamState.muteCount() == 0) {
-                            index = streamState.mIndex;
-                        } else {
-                            index = 0;
-                        }
-                        setStreamVolumeIndex(streamType, index);
+
+                        streamState.applyAllVolumes();
                     }
 
                     // Restore ringer mode

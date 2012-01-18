@@ -183,6 +183,7 @@ public class AudioSystem
         }
     }
 
+
     /*
      * AudioPolicyService methods
      */
@@ -202,6 +203,23 @@ public class AudioSystem
     public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
     public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
     public static final int DEVICE_OUT_DEFAULT = 0x8000;
+    public static final int DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE |
+                                              DEVICE_OUT_SPEAKER |
+                                              DEVICE_OUT_WIRED_HEADSET |
+                                              DEVICE_OUT_WIRED_HEADPHONE |
+                                              DEVICE_OUT_BLUETOOTH_SCO |
+                                              DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
+                                              DEVICE_OUT_BLUETOOTH_SCO_CARKIT |
+                                              DEVICE_OUT_BLUETOOTH_A2DP |
+                                              DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                                              DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
+                                              DEVICE_OUT_AUX_DIGITAL |
+                                              DEVICE_OUT_ANLG_DOCK_HEADSET |
+                                              DEVICE_OUT_DGTL_DOCK_HEADSET |
+                                              DEVICE_OUT_DEFAULT);
+    public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
+                                                   DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                                                   DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER);
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = 0x10000;
     public static final int DEVICE_IN_AMBIENT = 0x20000;
@@ -217,6 +235,54 @@ public class AudioSystem
     public static final int DEVICE_STATE_UNAVAILABLE = 0;
     public static final int DEVICE_STATE_AVAILABLE = 1;
     private static final int NUM_DEVICE_STATES = 1;
+
+    public static final String DEVICE_OUT_EARPIECE_NAME = "earpiece";
+    public static final String DEVICE_OUT_SPEAKER_NAME = "speaker";
+    public static final String DEVICE_OUT_WIRED_HEADSET_NAME = "headset";
+    public static final String DEVICE_OUT_WIRED_HEADPHONE_NAME = "headphone";
+    public static final String DEVICE_OUT_BLUETOOTH_SCO_NAME = "bt_sco";
+    public static final String DEVICE_OUT_BLUETOOTH_SCO_HEADSET_NAME = "bt_sco_hs";
+    public static final String DEVICE_OUT_BLUETOOTH_SCO_CARKIT_NAME = "bt_sco_carkit";
+    public static final String DEVICE_OUT_BLUETOOTH_A2DP_NAME = "bt_a2dp";
+    public static final String DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME = "bt_a2dp_hp";
+    public static final String DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME = "bt_a2dp_spk";
+    public static final String DEVICE_OUT_AUX_DIGITAL_NAME = "aux_digital";
+    public static final String DEVICE_OUT_ANLG_DOCK_HEADSET_NAME = "analog_dock";
+    public static final String DEVICE_OUT_DGTL_DOCK_HEADSET_NAME = "digital_dock";
+
+    public static String getDeviceName(int device)
+    {
+        switch(device) {
+        case DEVICE_OUT_EARPIECE:
+            return DEVICE_OUT_EARPIECE_NAME;
+        case DEVICE_OUT_SPEAKER:
+            return DEVICE_OUT_SPEAKER_NAME;
+        case DEVICE_OUT_WIRED_HEADSET:
+            return DEVICE_OUT_WIRED_HEADSET_NAME;
+        case DEVICE_OUT_WIRED_HEADPHONE:
+            return DEVICE_OUT_WIRED_HEADPHONE_NAME;
+        case DEVICE_OUT_BLUETOOTH_SCO:
+            return DEVICE_OUT_BLUETOOTH_SCO_NAME;
+        case DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
+            return DEVICE_OUT_BLUETOOTH_SCO_HEADSET_NAME;
+        case DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
+            return DEVICE_OUT_BLUETOOTH_SCO_CARKIT_NAME;
+        case DEVICE_OUT_BLUETOOTH_A2DP:
+            return DEVICE_OUT_BLUETOOTH_A2DP_NAME;
+        case DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES:
+            return DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES_NAME;
+        case DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER:
+            return DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER_NAME;
+        case DEVICE_OUT_AUX_DIGITAL:
+            return DEVICE_OUT_AUX_DIGITAL_NAME;
+        case DEVICE_OUT_ANLG_DOCK_HEADSET:
+            return DEVICE_OUT_ANLG_DOCK_HEADSET_NAME;
+        case DEVICE_OUT_DGTL_DOCK_HEADSET:
+            return DEVICE_OUT_DGTL_DOCK_HEADSET_NAME;
+        default:
+            return "";
+        }
+    }
 
     // phone state, match audio_mode???
     public static final int PHONE_STATE_OFFCALL = 0;
@@ -251,7 +317,7 @@ public class AudioSystem
     public static native int setForceUse(int usage, int config);
     public static native int getForceUse(int usage);
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
-    public static native int setStreamVolumeIndex(int stream, int index);
-    public static native int getStreamVolumeIndex(int stream);
+    public static native int setStreamVolumeIndex(int stream, int index, int device);
+    public static native int getStreamVolumeIndex(int stream, int device);
     public static native int getDevicesForStream(int stream);
 }
