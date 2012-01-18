@@ -58,11 +58,33 @@ revision number. To determine what revisions you have installed in your SDK
 environment, refer to the "Installed Packages" listing in the Android SDK
 Manager.</p>
 
+<p class="caution"><strong>Important:</strong> To download the new Android
+4.0.x system components from the Android SDK Manager, you must first update the
+SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
+the Android 4.0.x system components will not be available for download.</p>
 
 <div class="toggle-content opened" style="padding-left:1em;">
 
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+    Android {@sdkPlatformVersion}, Revision 2</a> <em>(January 2012)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Maintenance release. SDK Tools r14 or higher is required.
+</dt>
+</dl>
+
+  </div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />
     Android {@sdkPlatformVersion}, Revision 1</a> <em>(December 2011)</em>
   </a></p>
@@ -71,16 +93,11 @@ class="toggle-content-img" alt="" />
 
 <dl>
 <dt>Initial release. SDK Tools r14 or higher is required.
-  <p class="caution"><strong>Important:</strong> To download the new Android
-  4.0.x system components from the Android SDK Manager, you must first update the
-  SDK tools to revision 14 or later and restart the Android SDK Manager. If you do not,
-  the Android 4.0.x system components will not be available for download.</p>
 </dt>
 </dl>
 
   </div>
 </div>
-
 
 <h2 id="api">API Overview</h2>
 
