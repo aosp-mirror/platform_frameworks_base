@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,16 +80,16 @@ public:
     void resize1D(Context *rsc, uint32_t dimX);
     void resize2D(Context *rsc, uint32_t dimX, uint32_t dimY);
 
-    void data(Context *rsc, uint32_t xoff, uint32_t lod, uint32_t count, const void *data, uint32_t sizeBytes);
+    void data(Context *rsc, uint32_t xoff, uint32_t lod, uint32_t count, const void *data, size_t sizeBytes);
     void data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
-                 uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes);
+                 uint32_t w, uint32_t h, const void *data, size_t sizeBytes);
     void data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff, uint32_t lod, RsAllocationCubemapFace face,
-                 uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
+                 uint32_t w, uint32_t h, uint32_t d, const void *data, size_t sizeBytes);
 
     void elementData(Context *rsc, uint32_t x,
-                        const void *data, uint32_t elementOff, uint32_t sizeBytes);
+                     const void *data, uint32_t elementOff, size_t sizeBytes);
     void elementData(Context *rsc, uint32_t x, uint32_t y,
-                        const void *data, uint32_t elementOff, uint32_t sizeBytes);
+                     const void *data, uint32_t elementOff, size_t sizeBytes);
 
     void read(void *data);
 
@@ -138,7 +138,7 @@ private:
 
     uint32_t getPackedSize() const;
     static void writePackedData(const Type *type, uint8_t *dst, const uint8_t *src, bool dstPadded);
-    void unpackVec3Allocation(const void *data, uint32_t dataSize);
+    void unpackVec3Allocation(const void *data, size_t dataSize);
     void packVec3Allocation(OStream *stream) const;
 };
 
