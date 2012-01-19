@@ -35,6 +35,11 @@ struct ThrottledSource : public DataSource {
     virtual status_t getSize(off64_t *size);
     virtual uint32_t flags();
 
+    virtual String8 getMIMEType() const {
+        return mSource->getMIMEType();
+    }
+
+
 private:
     Mutex mLock;
 
