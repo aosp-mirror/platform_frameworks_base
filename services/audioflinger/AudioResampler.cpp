@@ -123,7 +123,7 @@ AudioResampler::AudioResampler(int bitDepth, int inChannelCount,
     if ((bitDepth != 16) ||(inChannelCount < 1) || (inChannelCount > 2)) {
         ALOGE("Unsupported sample format, %d bits, %d channels", bitDepth,
                 inChannelCount);
-        // LOG_ASSERT(0);
+        // ALOG_ASSERT(0);
     }
 
     // initialize common members
@@ -164,7 +164,7 @@ void AudioResamplerOrder1::resample(int32_t* out, size_t outFrameCount,
         AudioBufferProvider* provider) {
 
     // should never happen, but we overflow if it does
-    // LOG_ASSERT(outFrameCount < 32767);
+    // ALOG_ASSERT(outFrameCount < 32767);
 
     // select the appropriate resampler
     switch (mChannelCount) {
@@ -261,7 +261,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
             provider->releaseBuffer(&mBuffer);
 
             // verify that the releaseBuffer resets the buffer frameCount
-            // LOG_ASSERT(mBuffer.frameCount == 0);
+            // ALOG_ASSERT(mBuffer.frameCount == 0);
         }
     }
 
@@ -355,7 +355,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
             provider->releaseBuffer(&mBuffer);
 
             // verify that the releaseBuffer resets the buffer frameCount
-            // LOG_ASSERT(mBuffer.frameCount == 0);
+            // ALOG_ASSERT(mBuffer.frameCount == 0);
         }
     }
 
