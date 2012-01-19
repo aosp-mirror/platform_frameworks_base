@@ -73,7 +73,7 @@ status_t Visualizer::setEnabled(bool enabled)
     if (status == NO_ERROR) {
         if (t != 0) {
             if (enabled) {
-                t->run("AudioTrackThread");
+                t->run("Visualizer");
             } else {
                 t->requestExit();
             }

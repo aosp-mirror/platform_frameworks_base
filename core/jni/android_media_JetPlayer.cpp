@@ -523,7 +523,7 @@ int register_android_media_JetPlayer(JNIEnv *env)
             jetPlayerClass,
             JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME, "I");
     if (javaJetPlayerFields.nativePlayerInJavaObj == NULL) {
-        ALOGE("Can't find AudioTrack.%s", JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME);
+        ALOGE("Can't find JetPlayer.%s", JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME);
         return -1;
     }
 
