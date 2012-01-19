@@ -1,4 +1,4 @@
-page.title=RenderScript
+page.title=Renderscript
 @jd:body
 
   <div id="qv-wrapper">
@@ -6,14 +6,14 @@ page.title=RenderScript
       <h2>In this document</h2>
 
       <ol>
-        <li><a href="#overview">RenderScript System Overview</a></li>
-        <li>
+        <li><a href="#overview">Renderscript Overview</a></li>
+        <li><a href="#native">Renderscript Runtime Layer</a></li>
+        <li><a href="#reflected">Reflected Layer</a>
           <ol>
-            <li><a href="#native">Native RenderScript layer</a></li>
-
-            <li><a href="#reflected">Reflected layer</a></li>
-
-            <li><a href="#framework">Android framework layer</a></li>
+            <li><a href="#func">Functions</a></li>
+            <li><a href="#var">Variables</a></li>
+            <li><a href="#pointer">Pointers</a></li>
+            <li><a href="#struct">Structs</a></li>
           </ol>
         </li>
 
@@ -21,540 +21,329 @@ page.title=RenderScript
           <a href="#mem-allocation">Memory Allocation APIs</a>
         </li>
         <li>
-          <a href="#dynamic">Dynamic Memory Allocations</a>
+          <a href="#memory">Working with Memory</a>
           <ol>
-            <li><a href="#pointers">Declaring pointers</a></li>
+            <li><a href="#allocating-mem">Allocating and binding memory to the Renderscript</a></li>
 
-            <li><a href="#struct-pointer-reflection">How pointers are reflected</a></li>
-
-            <li><a href="#binding">Allocating and binding memory to the RenderScript</a></li>
-
-            <li><a href="#read-write-dynamic">Reading and writing to memory</a></li>
+            <li><a href="#read-write">Reading and writing to memory</a></li>
 
           </ol>
-        </li>
-        <li>
-          <a href="#static">Static Memory Allocations</a>
         </li>
       </ol>
     </div>
   </div>
 
-  <p>RenderScript offers a high performance 3D graphics rendering and compute API at the native
-  level, which you write in the C (C99 standard). The main advantages of RenderScript are:</p>
+  <p>Renderscript offers a high performance 3D graphics rendering and compute API at the native
+  level that you write in C (C99 standard). The main advantages of Renderscript are:</p>
   <ul>
-    <li>Portability: RenderScript is designed to run on many types of devices with different CPU
-    and GPU architectures. It supports all of these architectures without having to target each
-    device, because the code is compiled and cached on the device at runtime.</li>
+    <li>Portability: Renderscript is designed to run on many types of devices with different
+    processor (CPU, GPU, and DSP for instance) architectures. It supports all of these architectures without
+    having to target each device, because the code is compiled and cached on the device
+    at runtime.</li>
 
-    <li>Performance: RenderScript provides similar performance to OpenGL with the NDK while
-    offering the portability of the OpenGL APIs provided by the Android framework ({@link
-    android.opengl}). In addition, it also offers a high performance compute API that is not
-    offered by OpenGL.</li>
+    <li>Performance: Renderscript provides similar performance to OpenGL with the NDK and also
+    provides a high performance compute API that is not offered by OpenGL.</li>
 
-    <li>Usability: RenderScript simplifies development when possible, such as eliminating JNI glue code
+    <li>Usability: Renderscript simplifies development when possible, such as eliminating JNI glue code
     and simplifying mesh setup.</li>
   </ul>
 
   <p>The main disadvantages are:</p>
 
   <ul>
-    <li>Development complexity: RenderScript introduces a new set of APIs that you have to learn.
-    RenderScript also handles memory differently compared to OpenGL with the Android framework APIs
-    or NDK.</li>
+    <li>Development complexity: Renderscript introduces a new set of APIs that you have to learn.
+    Renderscript also allocates memory differently compared to OpenGL with the Android framework APIs.
+    However, these issues are not hard to understand and Renderscript offers many features that
+    make it easier than OpenGL to initialize rendering.</li>
 
-    <li>Debugging visibility: RenderScript can potentially execute (planned feature for later releases)
-    on processors other than the main CPU (such as the GPU), so if this occurs, debugging becomes more difficult. 
+    <li>Debugging visibility: Renderscript can potentially execute (planned feature for later releases)
+    on processors other than the main CPU (such as the GPU), so if this occurs, debugging becomes more difficult.
     </li>
-
-    <li>Less features: RenderScript does not provide as many features as OpenGL such as all the compressed
-    texture formats or GL extensions.</li>
   </ul>
 
-  <p>You need to consider all of the aspects of RenderScript before deciding when to use it. The following list describes
-  general guidelines on when to use OpenGL (framework APIs or NDK) or RenderScript:</p>
-  <ul>
-    <li>If you are doing simple graphics rendering and performance is not critical, you probably want to use the
-  Android framework OpenGL APIs, which still provide adequate performance, to eliminate the added coding and debugging complexity of
-  RenderScript.</li>
 
-  <li>If you want the most flexibility and features while maintaining relatively good debugging
-  support, you probably want to use OpenGL and the NDK. Applications that require this are high end
-  or complicated games, for example.</li>
- 
-  <li>If you want a solution that is portable, has good performance,
-  and you don't need the full feature set of OpenGL, RenderScript is a good solution. If you also
-  need a high performance compute language, then RenderScript offers that as well.
-  Good candidates for RenderScript are graphics intensive UIs that require 3D rendering, live wallpapers,
-  or applications that require intensive mathematical computation.</li>
-  </ul>
-
-  <p>For an example of RenderScript in action, install the RenderScript sample applications that
+  <p>For an example of Renderscript in action, install the Renderscript sample applications that
   are shipped with the SDK in <code>&lt;sdk_root&gt;/samples/android-11/RenderScript</code>.
-  You can also see a typical use of RenderScript with the 3D carousel view in the Android 3.x
+  You can also see a typical use of Renderscript with the 3D carousel view in the Android 3.x
   versions of Google Books and YouTube.</p>
 
-  <h2 id="overview">RenderScript System Overview</h2>
+  <h2 id="overview">Renderscript Overview</h2>
+  <p>The Renderscript runtime operates at the native level and still needs to communicate
+with the Android VM, so the way a Renderscript application is setup is different from a pure VM
+application. An application that uses Renderscript is still a traditional Android application that
+runs in the VM, but you write Renderscript code for the parts of your program that require
+it. Using Renderscript can be as simple as offloading a few math calculations or as complicated as
+rendering an entire 3D game. No matter what you use it for, Renderscript remains platform
+independent, so you do not have to target multiple architectures (for example,
+ARM v5, ARM v7, x86).</p>
 
-  <p>The RenderScript system adopts a control and slave architecture where the low-level native
+  <p>The Renderscript system adopts a control and slave architecture where the low-level Renderscript runtime
   code is controlled by the higher level Android system that runs in a virtual machine (VM). The
-  Android VM still retains all control of memory and lifecycle management and calls the native
-  RenderScript code when necessary. The native code is compiled to intermediate bytecode (LLVM) and
-  packaged inside your application's <code>.apk</code> file. On the device, the bytecode is
-  compiled (just-in-time) to machine code that is further optimized for the device that it is
-  running on. The compiled code on the device is cached, so subsequent uses of the RenderScript
-  enabled application do not recompile the intermediate code. RenderScript has three layers of code
-  to enable communication between the native and Android framework code:</p>
+  Android VM still retains all control of memory management and binds memory that it allocates to
+  the Renderscript runtime, so the Renderscript code can access it. The Android framework makes
+asynchronous calls to Renderscript, and the calls are placed in a message queue and processed
+as soon as possible. Figure 1 shows how the Renderscript system is structured.</p>
+
+   <img id="figure1" src="{@docRoot}images/rs_overview.png" />
+  <p class="img-caption"><strong>Figure 1.</strong> Renderscript system overview</p>
+
+  <p>When using Renderscript, there are three layers of APIs that enable communication between the
+  Renderscript runtime and Android framework code:</p>
 
   <ul>
-    <li>The native RenderScript layer does the intensive computation or graphics rendering. You
-    define your native code in <code>.rs</code> and <code>.rsh</code> files.</li>
+    <li>The Renderscript runtime APIs allow you to do the computation or graphics rendering
+    that is required by your application.</li>
 
-    <li>The reflected layer is a set of classes that are reflected from the native code. It is basically
-    a wrapper around the native code that allows the Android framework to interact with native RenderScripts.
-    The Android build tools automatically generate the classes for this layer during
-    the build process and eliminates the need to write JNI glue code, like with the NDK.</li>
+    <li>The reflected layer APIs are a set of classes that are reflected from your Renderscript
+runtime code. It is basically a wrapper around the Renderscript code that allows the Android
+framework to interact with the Renderscript runtime. The Android build tools automatically generate the
+classes for this layer during the build process. These classes eliminate the need to write JNI glue
+code, like with the NDK.</li>
 
-    <li>The Android framework layer is comprised of the Android framework
-     APIs, which include the {@link android.renderscript} package. This layer gives high level commands
-     like, "rotate the view" or "filter the bitmap", by calling the reflected layer, which in turn calls
-     the native layer. </li>
+    <li>The Android framework APIs, which include the {@link android.renderscript} package, allow you to
+    build your application using traditional Android components such as activities and views. When
+    using Renderscript, this layer calls the reflected layer to access the Renderscript
+    runtime.</li>
   </ul>
 
-  <h3 id="native">Native RenderScript layer</h3>
+ <p></p>
 
-  <p>The native RenderScript layer consists of your RenderScript code, which is compiled and
-  executed in a compact and well defined runtime. Your RenderScript code has access to a limited
-  amount of functions because it cannot access the NDK or standard C functions, since they must be guaranteed to
-  run on a standard CPU. The RenderScript runtime was designed to run on different types of processors,
-  which may not be the CPU, so it cannot guarantee support for standard C libraries. What
-  RenderScript does offer is an API that supports intensive computation and graphics rendering with a collection of math
-  and graphics APIs.</p>
+  <h2 id="native">Renderscript Runtime Layer</h2>
 
-  <p>Some key features of the native RenderScript libraries include:</p>
+  <p>Your Renderscript code is compiled and
+  executed in a compact and well-defined runtime layer. The Renderscript runtime APIs offer support for
+intensive computation and graphics rendering that is portable and automatically scalable to the
+amount of cores available on a processor.
+</p>
+<p class="note"><strong>Note:</strong> The standard C functions in the NDK must be
+  guaranteed to run on a CPU, so Renderscript cannot access these libraries,
+  because Renderscript is designed to run on different types of processors.</p>
+
+<p>You define your Renderscript code in <code>.rs</code>
+  and <code>.rsh</code> files in the <code>src/</code> directory of your Android project. The code
+  is compiled to intermediate bytecode by the
+  <code>llvm</code> compiler that runs as part of an Android build. When your application
+  runs on a device, the bytecode is then compiled (just-in-time) to machine code by another
+  <code>llvm</code> compiler that resides on the device. The machine code is optimized for the
+  device and also cached, so subsequent uses of the Renderscript enabled application does not
+  recompile the bytecode.</p>
+
+  <p>Some key features of the Renderscript runtime libraries include:</p>
 
   <ul>
-    <li>A large collection of math functions with both scalar and vector typed overloaded versions
-    of many common routines. Operations such as adding, multiplying, dot product, and cross product
-    are available.</li>
-
-    <li>Conversion routines for primitive data types and vectors, matrix routines, date and time
-    routines, and graphics routines.</li>
-
-    <li>Logging functions</li>
 
     <li>Graphics rendering functions</li>
 
     <li>Memory allocation request features</li>
 
-    <li>Data types and structures to support the RenderScript system such as Vector types for
+    <li>A large collection of math functions with both scalar and vector typed overloaded versions
+    of many common routines. Operations such as adding, multiplying, dot product, and cross product
+    are available as well as atomic arithmetic and comparison functions.</li>
+
+    <li>Conversion routines for primitive data types and vectors, matrix routines, date and time
+    routines, and graphics routines.</li>
+
+    <li>Data types and structures to support the Renderscript system such as Vector types for
     defining two-, three-, or four-vectors.</li>
+
+    <li>Logging functions</li>
   </ul>
 
-  <p>The RenderScript header files and LLVM front-end libraries are located in the <code>include/</code> and
-  <code>clang-include/</code> directories in the
-  <code>&lt;sdk_root&gt;/platforms/android-11/renderscript/</code> directory of the Android SDK. The
-  headers are automatically included for you, except for the RenderScript graphics specific header file, which
+  <p>See the Renderscript runtime API reference for more information on the available functions. The
+  Renderscript header files are automatically included for you, except for the Renderscript graphics header file, which
   you can include as follows:</p>
-  <pre>
-#include "rs_graphics.rsh"
-</pre>
 
-  <h3 id="reflected">Reflected layer</h3>
+<pre>#include "rs_graphics.rsh"</pre>
+
+  <h2 id="reflected">Reflected Layer</h2>
 
   <p>The reflected layer is a set of classes that the Android build tools generate to allow access
-  to the native RenderScript code from the Android VM. This layer defines entry points for
-  RenderScript functions and variables, so that you can interact with them with the Android
-  framework. This layer also provides methods and constructors that allow you to allocate memory
-  for pointers that are defined in your RenderScript code. The following list describes the major
+  to the Renderscript runtime from the Android framework. This layer also provides methods
+and constructors that allow you to allocate and work with memory for pointers that are defined in
+your Renderscript code. The following list describes the major
   components that are reflected:</p>
 
   <ul>
     <li>Every <code>.rs</code> file that you create is generated into a class named
-    <code>ScriptC_<em>renderscript_filename</em></code> of type {@link
-    android.renderscript.ScriptC}. This is the <code>.java</code> version of your <code>.rs</code>
-    file, which you can call from the Android framework. This class contains the following
-    reflections:
+    <code>project_root/gen/package/name/ScriptC_<em>renderscript_filename</em></code> of
+type {@link android.renderscript.ScriptC}. This file is the <code>.java</code> version of your
+<code>.rs</code> file, which you can call from the Android framework. This class contains the
+following items reflected from the <code>.rs</code> file:
 
       <ul>
-        <li>Non-static functions in your <code>.rs</code> file.</li>
+        <li>Non-static functions</li>
 
-        <li>Non-static, global RenderScript variables. Accessor methods are generated for each
-        variable, so you can read and write the natively declared variables from the Android
-        framework. The <code>get</code> method comes with a one-way communication restriction. The
-        last value that is set from the Android framework is always returned during a call to a
-        <code>get</code> method. If the native RenderScript code changes the value, the change does
-        not propagate back to the Android framework layer.
-        If the global variables are initialized
-        in the native RenderScript code, those values are used to initialize the corresponding
-        values in the Android framework layer. If global variables are marked as
-        <code>const</code>, then a <code>set</code> method is not generated.</li>
-        <li>Global pointers generate a special method named <code>bind_<em>pointer_name</em></code>
-        instead of a <code>set()</code> method. This method allows you to bind the memory that is
-        allocated in the Android VM for the pointer to the native RenderScript (you cannot allocate
-        memory in your <code>.rs</code> file). You can read and write to this memory from both the
-        Android framework and RenderScript code. For more information, see <a href="mem-mgmt">Working
-        with Memory and Data</a></li>
+        <li>Non-static, global Renderscript variables. Accessor methods are generated for each
+        variable, so you can read and write the Renderscript variables from the Android
+        framework. If a global variable is initialized at the Renderscript runtime layer, those
+values are used to initialize the corresponding values in the Android framework layer. If global
+variables are marked as <code>const</code>, then a <code>set</code> method is not
+generated.</p></li>
+
+        <li>Global pointers</li>
       </ul>
     </li>
 
     <li>A <code>struct</code> is reflected into its own class named
-    <code>ScriptField_<em>struct_name</em></code>, which extends {@link
+
+    <code>project_root/gen/package/name/ScriptField_struct_name</em></code>, which extends {@link
     android.renderscript.Script.FieldBase}. This class represents an array of the
     <code>struct</code>, which allows you to allocate memory for one or more instances of this
     <code>struct</code>.</li>
   </ul>
 
-  <h3 id="framework">Android framework layer</h3>
 
-  <p>The Android framework layer consists of the usual Android framework APIs, which include the
-    RenderScript APIs in {@link android.renderscript}. This layer handles things such as the
-    Activity lifecycle and memory management of your application. It issues high level commands to
-    the native RenderScript code through the reflected layer and receives events from the user such
-    as touch and input events and relays them to your RenderScript code, if needed.
-  </p>
+<h3 id="func">Functions</h3>
+<p>Functions are reflected into the script class itself, located in
+<code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. For
+example, if you declare the following function in your Renderscript code:</p>
 
-  <h2 id="mem-allocation">Memory Allocation APIs</h2>
+<pre>
+void touch(float x, float y, float pressure, int id) {
+    if (id >= 10) {
+        return;
+    }
 
-  <p>Before you begin writing your first RenderScript application, you must understand how 
-  memory is allocated for your RenderScript code and how data is shared between the native and VM
-  spaces. RenderScript allows you to access allocated memory in both the native layer
-  and Android system layer. All dynamic and static memory is allocated by the Android VM.
-  The Android VM also does reference counting and garbage collection for you. 
-  You can also explicitly free memory that you no longer need.</p>
-
-  <p class="note"><strong>Note:</strong> To declare temporary memory in your native RenderScript
-  code without allocating it in the Android VM, you can still do things like instantiate a scratch
-  buffer using an array.</p>
-
-  <p>The following classes support the memory management features of RenderScript in the Android
-  VM. You normally do not need to work with these classes directly, because the reflected layer
-  classes provide constructors and methods that set up the memory allocation for you. There are
-  some situations where you would want to use these classes directly to allocate memory on your
-  own, such as loading a bitmap from a resource or when you want to allocate memory for pointers to
-  primitive types.</p>
-
-  <table id="mem-mgmt-table">
-    <tr>
-      <th>Android Object Type</th>
-
-      <th>Description</th>
-    </tr>
-
-    <tr>
-      <td>{@link android.renderscript.Element}</td>
-
-      <td>
-        <p>An element represents one cell of a memory allocation and can have two forms: Basic or
-        Complex.</p>
-
-        <p>A basic element contains a single component of data of any valid RenderScript data type.
-        Examples of basic element data types include a single float value, a float4 vector, or a
-        single RGB-565 color.</p>
-
-        <p>Complex elements contain a list of basic elements and are created from
-        <code>struct</code>s that you declare in your RenderScript code. The most basic primitive
-        type determines the data alignment of the memory. For example, a float4 vector subelement
-        is alligned to <code>sizeof(float)</code> and not <code>sizeof(float4)</code>. The ordering
-        of the elements in memory are the order in which they were added, with each component
-        aligned as necessary.</p>
-      </td>
-    </tr>
-
-    <tr>
-      <td>{@link android.renderscript.Type}</td>
-
-      <td>
-        A type is a memory allocation template and consists of an element and one or more
-        dimensions. It describes the layout of the memory (basically an array of {@link
-        android.renderscript.Element}s) but does not allocate the memory for the data that it
-        describes.
-
-        <p>A type consists of five dimensions: X, Y, Z, LOD (level of detail), and Faces (of a cube
-        map). You can assign the X,Y,Z dimensions to any positive integer value within the
-        constraints of available memory. A single dimension allocation has an X dimension of
-        greater than zero while the Y and Z dimensions are zero to indicate not present. For
-        example, an allocation of x=10, y=1 is considered two dimensional and x=10, y=0 is
-        considered one dimensional. The LOD and Faces dimensions are booleans to indicate present
-        or not present.</p>
-      </td>
-    </tr>
-
-    <tr>
-      <td>{@link android.renderscript.Allocation}</td>
-
-      <td>
-        <p>An allocation provides the memory for applications based on a description of the memory
-        that is represented by a {@link android.renderscript.Type}. Allocated memory can exist in
-        many memory spaces concurrently. If memory is modified in one space, you must explicitly
-        synchronize the memory, so that it is updated in all the other spaces that it exists
-        in.</p>
-
-        <p>Allocation data is uploaded in one of two primary ways: type checked and type unchecked.
-        For simple arrays there are <code>copyFrom()</code> functions that take an array from the
-        Android system and copy it to the native layer memory store. The unchecked variants allow
-        the Android system to copy over arrays of structures because it does not support
-        structures. For example, if there is an allocation that is an array of n floats, the data
-        contained in a float[n] array or a byte[n*4] array can be copied.</p>
-      </td>
-    </tr>
-  </table>
-
-  <h2 id="dynamic">Working with dynamic memory allocations</h2>
-
-  <p>RenderScript has support for pointers, but you must allocate the memory in your Android framework
-  code. When you declare a global pointer in your <code>.rs</code> file, you allocate memory
-  through the appropriate reflected layer class and bind that memory to the native
-  RenderScript layer. You can read and write to this memory from the Android framework layer as well as the
-  RenderScript layer, which offers you the flexibility to modify variables in the most appropriate
-  layer. The following sections show you how to work with pointers, allocate memory for them, and
-  read and write to the memory.</p>
-
-  <h3 id="pointers">Declaring pointers</h3>
-
-  <p>Because RenderScript is written in C99, declaring a pointer is done in a familiar way. You can
-  declare pointers to a <code>struct</code> or a primitive type, but a <code>struct</code> cannot
-  contain pointers or nested arrays. The following code declares a <code>struct</code>, a pointer
-  to that <code>struct</code>, and a pointer of primitive type <code>int32_t</code> in an <code>.rs</code> file:</p>
-  <pre>
-#pragma version(1)
-#pragma rs java_package_name(com.example.renderscript)
-
-...
-
-typedef struct Point {
-      float2 point;
-  } Point_t;
-
-  Point_t *touchPoints;
-  int32_t *intPointer;
-
-...
+    touchPos[id].x = x;
+    touchPos[id].y = y;
+    touchPressure[id] = pressure;
+}
 </pre>
 
-<p>You cannot allocate memory for these pointers in your RenderScript code, but the Android
-build tools generate classes for you that allow you to allocate memory in the Android VM for use by
-your RenderScript code. These classes also let you read and write to the memory. The next section
-describes how these classes are generated through reflection.</p>
+<p>then the following code is generated:</p>
 
-  <h3>How pointers are reflected</h3>
+<pre>
+public void invoke_touch(float x, float y, float pressure, int id) {
+    FieldPacker touch_fp = new FieldPacker(16);
+    touch_fp.addF32(x);
+    touch_fp.addF32(y);
+    touch_fp.addF32(pressure);
+    touch_fp.addI32(id);
+    invoke(mExportFuncIdx_touch, touch_fp);
+}
+</pre>
+<p>
+Functions cannot have a return value, because the Renderscript system is designed to be
+asynchronous. When your Android framework code calls into Renderscript, the call is queued and is
+executed when possible. This restriction allows the Renderscript system to function without constant
+interruption and increases efficiency. If functions were allowed to have return values, the call
+would block until the value was returned.</p>
 
-  <p>Global variables have a getter and setter method generated. A global pointer generates a
-  <code>bind_pointerName()</code> method instead of a set() method. This method allows you to bind
-  the memory that is allocated in the Android VM to the native RenderScript. For example, the two
-  pointers in the previous section generate the following accessor methods in the <code>ScriptC_<em>rs_filename</em></code> file:</p>
+<p>
+If you want the Renderscript code to send a value back to the Android framework, use the
+<code>rsSendToClient()</code> function.
+</p>
+
+<h3 id="var">Variables</h3>
+
+  <p>Variables of supported types are reflected into the script class itself, located in
+<code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. A set of accessor
+methods are generated for each variable. For example, if you declare the following variable in
+your Renderscript code:</p>
+  <pre>uint32_t unsignedInteger = 1;</pre>
+
+  <p>then the following code is generated:</p>
+
+<pre>
+private long mExportVar_unsignedInteger;
+public void set_unsignedInteger(long v){
+    mExportVar_unsignedInteger = v;
+    setVar(mExportVarIdx_unsignedInteger, v);
+}
+
+public long get_unsignedInteger(){
+    return mExportVar_unsignedInteger;
+}
+  </pre>
+
+  <h3 id="pointer">Pointers</h3>
+  <p>Pointers are reflected into the script class itself, located in
+<code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. You
+can declare pointers to a <code>struct</code> or any of the supported Renderscript types, but a
+<code>struct</code> cannot contain pointers or nested arrays. For example, if you declare the
+following pointers to a <code>struct</code> and <code>int32_t</code></p>
+
+<pre>
+typedef struct Point {
+    float2 point;
+} Point_t;
+
+Point_t *touchPoints;
+int32_t *intPointer;
+</pre>
+  <p>then the following code is generated in:</p>
+
   <pre>
-
-    private ScriptField_Point mExportVar_touchPoints;
-    public void bind_touchPoints(ScriptField_Point v) {
-        mExportVar_touchPoints = v;
-        if (v == null) bindAllocation(null, mExportVarIdx_touchPoints);
-        else bindAllocation(v.getAllocation(), mExportVarIdx_touchPoints);
+private ScriptField_Point mExportVar_touchPoints;
+public void bind_touchPoints(ScriptField_Point v) {
+    mExportVar_touchPoints = v;
+    if (v == null) bindAllocation(null, mExportVarIdx_touchPoints);
+    else bindAllocation(v.getAllocation(), mExportVarIdx_touchPoints);
     }
 
     public ScriptField_Point get_touchPoints() {
-        return mExportVar_touchPoints;
+    return mExportVar_touchPoints;
     }
 
     private Allocation mExportVar_intPointer;
     public void bind_intPointer(Allocation v) {
-        mExportVar_intPointer = v;
-        if (v == null) bindAllocation(null, mExportVarIdx_intPointer);
-        else bindAllocation(v, mExportVarIdx_intPointer);
+    mExportVar_intPointer = v;
+    if (v == null) bindAllocation(null, mExportVarIdx_intPointer);
+    else bindAllocation(v, mExportVarIdx_intPointer);
     }
 
     public Allocation get_intPointer() {
         return mExportVar_intPointer;
     }
+  </pre>
 
-</pre>
+<p>A <code>get</code> method and a special method named <code>bind_<em>pointer_name</em></code>
+(instead of a <code>set()</code> method) is generated. This method allows you to bind the memory
+that is allocated in the Android VM to the Renderscript runtime (you cannot allocate
+memory in your <code>.rs</code> file). For more information, see <a href="#memory">Working
+with Allocated Memory</a>.
+</p>
 
-  <h3>Allocating and binding memory to the RenderScript</h3>
-
-  <p>When the build tools generate the reflected layer, you can use the appropriate class
-  (<code>ScriptField_Point</code>, in our example) to allocate memory for a pointer. To do this,
-  you call the constructor for the {@link android.renderscript.Script.FieldBase} class and specify
-  the amount of structures that you want to allocate memory for. To allocate memory for a primitive
-  type pointer, you must build an allocation manually, using the memory management classes
-  described in <a href="#mem-mgmt-table">Table 1</a>. The example below allocates memory for both
-  the <code>intPointer</code> and <code>touchPoints</code> pointer and binds it to the
-  RenderScript:</p>
-  <pre>
-private RenderScriptGL glRenderer;
-private ScriptC_example script;
-private Resources resources;
-
-public void init(RenderScriptGL rs, Resources res) {
-   //get the rendering context and resources from the calling method
-   glRenderer = rs; 
-   resources = res; 
-   
-   //allocate memory for the struct pointer, calling the constructor
-    ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2); 
-    
-   //Create an element manually and allocate memory for the int pointer 
-    intPointer = Allocation.createSized(glRenderer, Element.I32(glRenderer), 2); 
-    
-    //create an instance of the RenderScript, pointing it to the bytecode resource
-    mScript = new ScriptC_example(glRenderer, resources, R.raw.example); 
-    
-    // bind the struct and int pointers to the RenderScript
-    mScript.bind_touchPoints(touchPoints); 
-    script.bind_intPointer(intPointer);
-    
-    //bind the RenderScript to the rendering context
-    glRenderer.bindRootScript(script);
-}
-</pre>
-
-  <h3>Reading and writing to memory</h3>
-
-  <p>Although you have to allocate memory within the Android VM, you can work with the memory both
-  in your native RenderScript code and in your Android code. Once memory is bound, the native
-  RenderScript can read and write to the memory directly. You can also just use the accessor
-  methods in the reflected classes to access the memory. If you modify memory in the Android
-  framework, it gets automatically synchronized to the native layer. If you modify memory in the <code>.rs</code>
-  file, these changes do not get propagated back to the Android framework.
-  For example, you can modify the struct in your Android code like this:</p>
-  <pre>
-int index = 0;
-boolean copyNow = true;
-Float2 point = new Float2(0.0f, 0.0f);
-touchPoints.set_point(index, point, copyNow);
-</pre>then read it in your native RenderScript code like this:
-  <pre>
-rsDebug("Printing out a Point", touchPoints[0].point.x, touchPoints[0].point.y);
-</pre>
-
-  <h2>Working with statically allocated memory</h2>
-
-  <p>Non-static, global primitives and structs that you declare in your RenderScript are easier to work with,
-  because the memory is statically allocated at compile time. Accessor methods to set and get these
-  variables are generated when the Android build tools generate the reflected layer classes. You
-  can get and set these variables using the provided accessor methods.
- <p class="note"><strong>Note:</strong> The <code>get</code> method comes with a one-way communication restriction. The last value
-  that is set from the Android framework is always returned during a call to a <code>get</code>
-  method. If the native RenderScript code changes the value, the change does not propagate back to
-  the Android framework layer. If the global variables are initialized in the native RenderScript
-  code, those values are used to initialize the corresponding values in the Android framework
-  layer. If global variables are marked as <code>const</code>, then a <code>set</code> method is
-  not generated.</p>
-  </p>
-
-  <p>For example, if you declare the following primitive in your RenderScript code:</p>
-  <pre>
-  uint32_t unsignedInteger = 1;
-  
-</pre>
-<p>then the following code is generated in <code>ScriptC_<em>script_name</em>.java</code>:</p>
-  <pre>
- private final static int mExportVarIdx_unsignedInteger = 9;
-    private long mExportVar_unsignedInteger;
-    public void set_unsignedInteger(long v) {
-        mExportVar_unsignedInteger = v;
-        setVar(mExportVarIdx_unsignedInteger, v);
-    }
-
-    public long get_unsignedInteger() {
-        return mExportVar_unsignedInteger;
-    }
-</pre>
-
-  <p class="note"><strong>Note:</strong> The mExportVarIdx_unsignedInteger variable represents the
-  index of the <code>unsignedInteger</code>'s in an array of statically allocated primitives. You do
-  not need to work with or be aware of this index.</p>
-  
-  <p>For a <code>struct</code>, the Android build tools generate a class named
-  <code>&lt;project_root&gt;/gen/com/example/renderscript/ScriptField_struct_name</code>. This
-  class represents an array of the <code>struct</code> and allows you to allocate memory for a
-  specified number of <code>struct</code>s. This class defines:</p>
-
-  <ul>
-    <li>Overloaded constructors that allow you to allocate memory. The
-    <code>ScriptField_<em>struct_name</em>(RenderScript rs, int count)</code> constructor allows
-    you to define the number of structures that you want to allocate memory for with the
-    <code>count</code> parameter. The <code>ScriptField_<em>struct_name</em>(RenderScript rs, int
-    count, int usages)</code> constructor defines an extra parameter, <code>usages</code>, that
-    lets you specify the memory space of this memory allocation. There are four memory space
-    possibilities:
-
-      <ul>
-        <li>{@link android.renderscript.Allocation#USAGE_SCRIPT}: Allocates in the script memory
-        space. This is the default memory space if you do not specify a memory space.</li>
-
-        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE}: Allocates in the
-        texture memory space of the GPU.</li>
-
-        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_VERTEX}: Allocates in the vertex
-        memory space of the GPU.</li>
-
-        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_CONSTANTS}: Allocates in the
-        constants memory space of the GPU that is used by the various program objects.</li>
-      </ul>
-
-      <p>You can specify one or all of these memory spaces by OR'ing them together. Doing so notifies
-      the RenderScript runtime that you intend on accessing the data in the specified memory spaces. The following
-      example allocates memory for a custom data type in both the script and vertex memory spaces:</p>
+  <h3 id="struct">Structs</h3>
+  <p>Structs are reflected into their own classes, located in
+    <code>&lt;project_root&gt;/gen/com/example/renderscript/ScriptField_struct_name</code>. This
+    class represents an array of the <code>struct</code> and allows you to allocate memory for a
+    specified number of <code>struct</code>s. For example, if you declare the following struct:</p>
 <pre>
-ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2,
-Allocation.USAGE_SCRIPT | Allocation.USAGE_GRAPHICS_VERTEX);
+typedef struct Point {
+float2 point;
+} Point_t;
 </pre>
 
-      <p>If you modify the memory in one memory space and want to push the updates to the rest of
-      the memory spaces, call <code>rsgAllocationSyncAll()</code> in your RenderScript code to
-      synchronize the memory.</p>
-    </li>
-
-    <li>A static nested class, <code>Item</code>, allows you to create an instance of the
-    <code>struct</code>, in the form of an object. This is useful if it makes more sense to work
-    with the <code>struct</code> in your Android code. When you are done manipulating the object,
-    you can push the object to the allocated memory by calling <code>set(Item i, int index, boolean
-    copyNow)</code> and setting the <code>Item</code> to the desired position in the array. The
-    native RenderScript code automatically has access to the newly written memory.
-
-    <li>Accessor methods to get and set the values of each field in a struct. Each of these
-    accessor methods have an <code>index</code> parameter to specify the <code>struct</code> in the
-    array that you want to read or write to. Each setter method also has a <code>copyNow</code>
-    parameter that specifies whether or not to immediately sync this memory to the native
-    RenderScript layer. To sync any memory that has not been synced, call <code>copyAll()</code>.</li>
-
-    <li>The createElement() method creates an object that describes the memory layout of the struct.</li>
-
-    <li>resize() works much like a <code>realloc</code>, allowing you to expand previously
-    allocated memory, maintaining the current values that were previously set.</li>
-
-    <li>copyAll() synchronizes memory that was set on the framework level to the native level. When you call
-    a set accessor method on a member, there is an optional <code>copyNow</code> boolean parameter that you can specify. Specifying
-    <code>true</code> synchronizes the memory when you call the method. If you specify false, you can call <code>copyAll()</code>
-    once, and it synchronizes memory for the all the properties that are not synchronized.</li>
-  </ul>
-
-  <p>The following example shows the reflected class, <code>ScriptField_Point.java</code> that is
-  generated from the Point <code>struct</code>.</p>
-  <pre>
-package com.example.renderscript;
+<p>then the following code is generated in <code>ScriptField_Point.java</code>:
+<pre>
+package com.example.android.rs.hellocompute;
 
 import android.renderscript.*;
 import android.content.res.Resources;
 
-
+  /**
+  * @hide
+  */
 public class ScriptField_Point extends android.renderscript.Script.FieldBase {
-    static public class Item {
-        public static final int sizeof = 8;
 
-        Float2 point;
+    static public class Item {
+        public static final int sizeof = 12;
+
+        Float2 position;
+        float size;
 
         Item() {
-            point = new Float2();
+            position = new Float2();
         }
-
     }
 
     private Item mItemArray[];
     private FieldPacker mIOBuffer;
     public static Element createElement(RenderScript rs) {
         Element.Builder eb = new Element.Builder(rs);
-        eb.add(Element.F32_2(rs), "point");
+        eb.add(Element.F32_2(rs), "position");
+        eb.add(Element.F32(rs), "size");
         return eb.create();
     }
 
@@ -573,9 +362,11 @@ public class ScriptField_Point extends android.renderscript.Script.FieldBase {
     }
 
     private void copyToArray(Item i, int index) {
-        if (mIOBuffer == null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count */);
+        if (mIOBuffer == null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count
+        */);
         mIOBuffer.reset(index * Item.sizeof);
-        mIOBuffer.addF32(i.point);
+        mIOBuffer.addF32(i.position);
+        mIOBuffer.addF32(i.size);
     }
 
     public void set(Item i, int index, boolean copyNow) {
@@ -585,7 +376,6 @@ public class ScriptField_Point extends android.renderscript.Script.FieldBase {
             copyToArray(i, index);
             mAllocation.setFromFieldPacker(index, mIOBuffer);
         }
-
     }
 
     public Item get(int index) {
@@ -593,24 +383,42 @@ public class ScriptField_Point extends android.renderscript.Script.FieldBase {
         return mItemArray[index];
     }
 
-    public void set_point(int index, Float2 v, boolean copyNow) {
-        if (mIOBuffer == null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count */)fnati;
+    public void set_position(int index, Float2 v, boolean copyNow) {
+        if (mIOBuffer == null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count */);
         if (mItemArray == null) mItemArray = new Item[getType().getX() /* count */];
         if (mItemArray[index] == null) mItemArray[index] = new Item();
-        mItemArray[index].point = v;
-        if (copyNow)  {
+        mItemArray[index].position = v;
+        if (copyNow) {
             mIOBuffer.reset(index * Item.sizeof);
             mIOBuffer.addF32(v);
             FieldPacker fp = new FieldPacker(8);
             fp.addF32(v);
             mAllocation.setFromFieldPacker(index, 0, fp);
         }
-
     }
 
-    public Float2 get_point(int index) {
+    public void set_size(int index, float v, boolean copyNow) {
+        if (mIOBuffer == null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count */);
+        if (mItemArray == null) mItemArray = new Item[getType().getX() /* count */];
+        if (mItemArray[index] == null) mItemArray[index] = new Item();
+        mItemArray[index].size = v;
+        if (copyNow)  {
+            mIOBuffer.reset(index * Item.sizeof + 8);
+            mIOBuffer.addF32(v);
+            FieldPacker fp = new FieldPacker(4);
+            fp.addF32(v);
+            mAllocation.setFromFieldPacker(index, 1, fp);
+        }
+    }
+
+    public Float2 get_position(int index) {
         if (mItemArray == null) return null;
-        return mItemArray[index].point;
+        return mItemArray[index].position;
+    }
+
+    public float get_size(int index) {
+        if (mItemArray == null) return 0;
+        return mItemArray[index].size;
     }
 
     public void copyAll() {
@@ -627,13 +435,361 @@ public class ScriptField_Point extends android.renderscript.Script.FieldBase {
             System.arraycopy(mItemArray, 0, ni, 0, copySize);
             mItemArray = ni;
         }
-
         mAllocation.resize(newSize);
         if (mIOBuffer != null) mIOBuffer = new FieldPacker(Item.sizeof * getType().getX()/* count */);
     }
-
 }
 </pre>
 
-</body>
-</html>
+<p>The generated code is provided to you as a convenience to allocate memory for structs requested
+by the Renderscript runtime and to interact with <code>struct</code>s
+in memory. Each <code>struct</code>'s class defines the following methods and constructors:</p>
+
+  <ul>
+    <li>Overloaded constructors that allow you to allocate memory. The
+      <code>ScriptField_<em>struct_name</em>(RenderScript rs, int count)</code> constructor allows
+      you to define the number of structures that you want to allocate memory for with the
+      <code>count</code> parameter. The <code>ScriptField_<em>struct_name</em>(RenderScript rs, int
+        count, int usages)</code> constructor defines an extra parameter, <code>usages</code>, that
+      lets you specify the memory space of this memory allocation. There are four memory space
+      possibilities:
+
+      <ul>
+        <li>{@link android.renderscript.Allocation#USAGE_SCRIPT}: Allocates in the script memory
+          space. This is the default memory space if you do not specify a memory space.</li>
+
+        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE}: Allocates in the
+          texture memory space of the GPU.</li>
+
+        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_VERTEX}: Allocates in the vertex
+          memory space of the GPU.</li>
+
+        <li>{@link android.renderscript.Allocation#USAGE_GRAPHICS_CONSTANTS}: Allocates in the
+          constants memory space of the GPU that is used by the various program objects.</li>
+      </ul>
+
+      <p>You can specify multiple memory spaces by using the bitwise <code>OR</code> operator. Doing so
+        notifies the Renderscript runtime that you intend on accessing the data in the
+        specified memory spaces. The following example allocates memory for a custom data type
+        in both the script and vertex memory spaces:</p>
+      <pre>
+        ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2,
+        Allocation.USAGE_SCRIPT | Allocation.USAGE_GRAPHICS_VERTEX);
+      </pre>
+
+      <p>If you modify the memory in one memory space and want to push the updates to the rest of
+        the memory spaces, call <code>rsgAllocationSyncAll()</code> in your Renderscript code to
+        synchronize the memory.</p>
+    </li>
+
+    <li>A static nested class, <code>Item</code>, allows you to create an instance of the
+      <code>struct</code>, in the form of an object. This nested class is useful if it makes more sense to work
+      with the <code>struct</code> in your Android code. When you are done manipulating the object,
+      you can push the object to the allocated memory by calling <code>set(Item i, int index,
+        boolean copyNow)</code> and setting the <code>Item</code> to the desired position in
+the array. The Renderscript runtime automatically has access to the newly written memory.
+
+      <li>Accessor methods to get and set the values of each field in a struct. Each of these
+        accessor methods have an <code>index</code> parameter to specify the <code>struct</code> in
+        the array that you want to read or write to. Each setter method also has a
+<code>copyNow</code> parameter that specifies whether or not to immediately sync this memory
+to the Renderscript runtime. To sync any memory that has not been synced, call
+        <code>copyAll()</code>.</li>
+
+      <li>The <code>createElement()</code> method creates a description of the struct in memory. This
+      description is used to allocate memory consisting of one or many elements.</li>
+
+      <li><code>resize()</code> works much like a <code>realloc()</code> in C, allowing you to
+expand previously allocated memory, maintaining the current values that were previously
+created.</li>
+
+      <li><code>copyAll()</code> synchronizes memory that was set on the framework level to the
+Renderscript runtime. When you call a set accessor method on a member, there is an optional
+<code>copyNow</code> boolean parameter that you can specify. Specifying
+        <code>true</code> synchronizes the memory when you call the method. If you specify false,
+        you can call <code>copyAll()</code> once, and it synchronizes memory for all the
+properties that are not yet synchronized.</li>
+    </ul>
+
+  <h2 id="mem-allocation">Memory Allocation APIs</h2>
+
+ <p>Applications that use Renderscript still run in the Android VM. The actual Renderscript code, however, runs natively and
+  needs access to the memory allocated in the Android VM. To accomplish this, you must
+  attach the memory that is allocated in the VM to the Renderscript runtime. This
+process, called binding, allows the Renderscript runtime to seamlessly work with memory that it
+requests but cannot explicitly allocate. The end result is essentially the same as if you had
+called <code>malloc</code> in C. The added benefit is that the Android VM can carry out garbage collection as well as
+share memory with the Renderscript runtime layer. Binding is only necessary for dynamically allocated memory. Statically
+allocated memory is automatically created for your Renderscript code at compile time. See <a href="#figure1">Figure 1</a>
+for more information on how memory allocation occurs.
+</p>
+
+  <p>To support this memory allocation system, there are a set of APIs that allow the Android VM to
+allocate memory and offer similar functionality to a <code>malloc</code> call. These classes
+essentially describe how memory should be allocated and also carry out the allocation. To better
+understand how these classes work, it is useful to think of them in relation to a simple
+<code>malloc</code> call that can look like this: </p>
+
+  <pre>array = (int *)malloc(sizeof(int)*10);</pre>
+
+  <p>The <code>malloc</code> call can be broken up into two parts: the size of the memory being allocated (<code>sizeof(int)</code>),
+  along with how many units of that memory should be allocated (10). The Android framework provides classes for these two parts as
+  well as a class to represent <code>malloc</code> itself.</p>
+
+  <p>The {@link android.renderscript.Element} class represents the (<code>sizeof(int)</code>) portion
+  of the <code>malloc</code> call and encapsulates one cell of a memory allocation, such as a single
+  float value or a struct. The {@link android.renderscript.Type} class encapsulates the {@link android.renderscript.Element}
+  and the amount of elements to allocate (10 in our example). You can think of a {@link android.renderscript.Type} as
+  an array of {@link android.renderscript.Element}s. The {@link android.renderscript.Allocation} class does the actual
+  memory allocation based on a given {@link android.renderscript.Type} and represents the actual allocated memory.</p>
+
+  <p>In most situations, you do not need to call these memory allocation APIs directly. The reflected layer
+  classes generate code to use these APIs automatically and all you need to do to allocate memory is call a
+  constructor that is declared in one of the reflected layer classes and then bind
+  the resulting memory {@link android.renderscript.Allocation} to the Renderscript.
+  There are some situations where you would want to use these classes directly to allocate memory on your
+  own, such as loading a bitmap from a resource or when you want to allocate memory for pointers to
+  primitive types. You can see how to do this in the
+  <a href="#allocating-mem">Allocating and binding memory to the Renderscript</a> section.
+  The following table describes the three memory management classes in more detail:</p>
+
+  <table id="mem-mgmt-table">
+    <tr>
+      <th>Android Object Type</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td>{@link android.renderscript.Element}</td>
+
+      <td>
+        <p>An element describes one cell of a memory allocation and can have two forms: basic or
+        complex.</p>
+
+        <p>A basic element contains a single component of data of any valid Renderscript data type.
+        Examples of basic element data types include a single <code>float</code> value, a <code>float4</code> vector, or a
+        single RGB-565 color.</p>
+
+        <p>Complex elements contain a list of basic elements and are created from
+        <code>struct</code>s that you declare in your Renderscript code. For instance an allocation
+        can contain multiple <code>struct</code>s arranged in order in memory. Each struct is considered as its
+        own element, rather than each data type within that struct.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>{@link android.renderscript.Type}</td>
+
+      <td>
+        <p>A type is a memory allocation template and consists of an element and one or more
+        dimensions. It describes the layout of the memory (basically an array of {@link
+        android.renderscript.Element}s) but does not allocate the memory for the data that it
+        describes.</p>
+
+        <p>A type consists of five dimensions: X, Y, Z, LOD (level of detail), and Faces (of a cube
+        map). You can assign the X,Y,Z dimensions to any positive integer value within the
+        constraints of available memory. A single dimension allocation has an X dimension of
+        greater than zero while the Y and Z dimensions are zero to indicate not present. For
+        example, an allocation of x=10, y=1 is considered two dimensional and x=10, y=0 is
+        considered one dimensional. The LOD and Faces dimensions are booleans to indicate present
+        or not present.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>{@link android.renderscript.Allocation}</td>
+
+      <td>
+        <p>An allocation provides the memory for applications based on a description of the memory
+        that is represented by a {@link android.renderscript.Type}. Allocated memory can exist in
+        many memory spaces concurrently. If memory is modified in one space, you must explicitly
+        synchronize the memory, so that it is updated in all the other spaces in which it exists.
+        </p>
+
+        <p>Allocation data is uploaded in one of two primary ways: type checked and type unchecked.
+        For simple arrays there are <code>copyFrom()</code> functions that take an array from the
+        Android system and copy it to the native layer memory store. The unchecked variants allow
+        the Android system to copy over arrays of structures because it does not support
+        structures. For example, if there is an allocation that is an array of n floats, the data
+        contained in a float[n] array or a <code>byte[n*4]</code> array can be copied.</p>
+      </td>
+    </tr>
+  </table>
+
+  <h2 id="memory">Working with Memory</h2>
+
+<p>Non-static, global variables that you declare in your Renderscript are allocated memory at compile time.
+You can work with these variables directly in your Renderscript code without having to allocate
+memory for them at the Android framework level. The Android framework layer also has access to these variables
+with the provided accessor methods that are generated in the reflected layer classes. If these variables are
+initialized at the Renderscript runtime layer, those values are used to initialize the corresponding
+values in the Android framework layer. If global variables are marked as const, then a <code>set</code> method is
+not generated.</p>
+
+
+<p class="note"><strong>Note:</strong> If you are using certain Renderscript structures that contain pointers, such as
+<code>rs_program_fragment</code> and <code>rs_allocation</code>, you have to obtain an object of the
+corresponding Android framework class first and then call the <code>set</code> method for that
+structure to bind the memory to the Renderscript runtime. You cannot directly manipulate these structures
+at the Renderscript runtime layer. Keep in mind that user-defined structures
+cannot contain pointers, so this restriction only applies to certain structures that are provided by Renderscript. 
+</p>
+
+<p>Renderscript also has support for pointers, but you must explicitly allocate the memory in your
+Android framework code. When you declare a global pointer in your <code>.rs</code> file, you
+allocate memory through the appropriate reflected layer class and bind that memory to the native
+Renderscript layer. You can interact with this memory from the Android framework layer as well as
+the Renderscript layer, which offers you the flexibility to modify variables in the most
+appropriate layer.</p>
+
+
+
+  <h3 id="allocating-mem">Allocating and binding dynamic memory to the Renderscript</h3>
+
+  <p>To allocate dynamic memory, you need to call the constructor of a
+  {@link android.renderscript.Script.FieldBase} class, which is the most common way. An alternative is to create an
+  {@link android.renderscript.Allocation} manually, which is required for things such as primitive type pointers. You should
+  use a {@link android.renderscript.Script.FieldBase} class constructor whenever available for simplicity.
+  After obtaining a memory allocation, call the reflected <code>bind</code> method of the pointer to bind the allocated memory to the
+  Renderscript runtime.</p>
+  <p>The example below allocates memory for both a primitive type pointer,
+   <code>intPointer</code>, and a pointer to a struct, <code>touchPoints</code>. It also binds the memory to the
+  Renderscript:</p>
+  <pre>
+private RenderScriptGL glRenderer;
+private ScriptC_example script;
+private Resources resources;
+
+public void init(RenderScriptGL rs, Resources res) {
+    //get the rendering context and resources from the calling method
+    glRenderer = rs;
+    resources = res;
+
+    //allocate memory for the struct pointer, calling the constructor
+    ScriptField_Point touchPoints = new ScriptField_Point(glRenderer, 2);
+
+    //Create an element manually and allocate memory for the int pointer
+    intPointer = Allocation.createSized(glRenderer, Element.I32(glRenderer), 2);
+
+    //create an instance of the Renderscript, pointing it to the bytecode resource
+    mScript = new ScriptC_example(glRenderer, resources, R.raw.example);
+
+    //bind the struct and int pointers to the Renderscript
+    mScript.bind_touchPoints(touchPoints);
+    script.bind_intPointer(intPointer);
+
+   ...
+}
+</pre>
+
+  <h3>Reading and writing to memory</h3>
+  <p>You can read and write to statically and dynamically allocated memory both at the Renderscript runtime
+  and Android framework layer.</p>
+
+<p>Statically allocated memory comes with a one-way communication restriction
+at the Renderscript runtime level. When Renderscript code changes the value of a variable, it is not
+communicated back to the Android framework layer for efficiency purposes. The last value
+that is set from the Android framework is always returned during a call to a <code>get</code>
+method. However, when Android framework code modifies a variable, that change can be communicated to
+the Renderscript runtime automatically or synchronized at a later time. If you need to send data
+from the Renderscript runtime to the Android framework layer, you can use the <code>rsSendToClient()</code> function
+to overcome this limitation.
+</p>
+<p>When working with dynamically allocated memory, any changes at the Renderscript runtime layer are propagated
+back to the Android framework layer if you modified the memory allocation using its associated pointer.
+Modifying an object at the Android framework layer immediately propagates that change back to the Renderscript
+runtime layer.</p>
+
+  <h4>Reading and writing to global variables</h4>
+
+  <p>Reading and writing to global variables is a straightforward process. You can use the accessor methods
+  at the Android framework level or set them directly in the Renderscript code. Keep in mind that any
+  changes that you make in your Renderscript code are not propagated back to the Android framework layer.</p>
+
+  <p>For example, given the following struct declared in a file named <code>rsfile.rs</code>:</p>
+<pre>
+typedef struct Point {
+    int x;
+    int y;
+} Point_t;
+
+Point_t point;
+
+</pre>
+<p>You can assign values to the struct like this directly in <code>rsfile.rs</code>. These values are not
+propagated back to the Android framework level:</p>
+<pre>
+point.x = 1;
+point.y = 1;
+</pre>
+
+<p>You can assign values to the struct at the Android framework layer like this. These values are 
+propagated back to the Renderscript runtime level:</p>
+<pre>
+ScriptC_rsfile mScript;
+
+...
+
+Item i = new ScriptField_Point.Item();
+i.x = 1;
+i.y = 1;
+mScript.set_point(i);
+</pre>
+
+<p>You can read the values in your Renderscript code like this:</p>
+
+<pre>
+rsDebug("Printing out a Point", point.x, point.y);
+</pre>
+
+<p>You can read the values in the Android framework layer with the following code. Keep in mind that this
+code only returns a value if one was set at the Android framework level. You will get a null pointer
+exception if you only set the value at the Renderscript runtime level:</p>
+
+<pre>
+Log.i("TAGNAME", "Printing out a Point: " + mScript.get_point().x + " " + mScript.get_point().y);
+System.out.println(point.get_x() + " " + point.get_y());
+</pre>
+
+<h4>Reading and writing global pointers</h4>
+
+<p>Assuming that memory has been allocated in the Android framework level and bound to the Renderscript runtime,
+you can read and write memory from the Android framework level by using the <code>get</code> and <code>set</code> methods for that pointer.
+In the Renderscript runtime layer, you can read and write to memory with pointers as normal and the changes are propagated
+back to the Android framework layer, unlike with statically allocated memory.</p>
+
+<p>For example, given the following pointer to a <code>struct</code> in a file named <code>rsfile.rs</code>:</p>
+<pre>
+typedef struct Point {
+    int x;
+    int y;
+} Point_t;
+
+Point_t *point;
+</pre>
+
+<p>Assuming you already allocated memory at the Android framework layer, you can access values in
+the <code>struct</code> as normal. Any changes you make to the struct via its pointer variable
+are automatically available to the Android framework layer:</p>
+
+<pre>
+point[index].x = 1;
+point[index].y = 1;
+</pre>
+
+<p>You can read and write values to the pointer at the Android framework layer as well:
+<pre>
+ScriptField_Point p = new ScriptField_Point(mRS, 1);
+    Item i = new ScriptField_Point.Item();
+    i.x=100;
+    i.y = 100;
+    p.set(i, 0, true);
+    mScript.bind_point(p);
+
+    points.get_x(0);            //read x and y from index 0
+    points.get_x(0);
+</pre>
+
+<p>Once memory is already bound, you do not have to rebind the memory to the Renderscript
+runtime every time you make a change to a value.</p>

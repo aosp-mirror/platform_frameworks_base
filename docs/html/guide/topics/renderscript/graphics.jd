@@ -1,6 +1,7 @@
-page.title=3D Graphics
-parent.title=RenderScript 
+page.title=Graphics
+parent.title=Renderscript
 parent.link=index.html
+
 @jd:body
 
   <div id="qv-wrapper">
@@ -11,16 +12,16 @@ parent.link=index.html
         <li>
           <a href="#creating-graphics-rs">Creating a Graphics Renderscript</a>
           <ol>
-            <li><a href="#creating-native">Creating the native Renderscript file</a></li>
+            <li><a href="#creating-native">Creating the Renderscript file</a></li>
             <li><a href="#creating-entry">Creating the Renderscript entry point class</a></li>
-            <li><a href="#creating-view">Creating the surface view</a></li>
-            <li><a href="#creating-activity">Creating the activity</a></li>
+            <li><a href="#creating-view">Creating the view class</a></li>
+            <li><a href="#creating-activity">Creating the activity class</a></li>
           </ol>
         </li>
         <li>
           <a href="#drawing">Drawing</a>
           <ol>
-            <li><a href="#drawing-rsg">Drawing using the rsgDraw functions</a></li>
+            <li><a href="#drawing-rsg">Simple drawing</a></li>
             <li><a href="#drawing-mesh">Drawing with a mesh</a></li>
           </ol>
         </li>
@@ -31,6 +32,9 @@ parent.link=index.html
             <li><a href="#shader-sampler">Defining a sampler</a></li>
           </ol>
         </li>
+        <li>
+          <a href="#fbo">Rendering to a Framebuffer Object</a>
+        </li>
       </ol>
 
       <h2>Related Samples</h2>
@@ -40,8 +44,9 @@ parent.link=index.html
 
         <li><a href="{@docRoot}resources/samples/RenderScript/Fountain/index.html">Fountain</a></li>
 
-        <li><a href="{@docRoot}resources/samples/RenderScript/HelloWorld/index.html">Hello
-        World</a></li>
+        <li><a href="{@docRoot}resources/samples/RenderScript/FountainFbo/index.html">FountainFbo</a></li>        
+
+        <li><a href="{@docRoot}resources/samples/RenderScript/HelloWorld/index.html">Hello World</a></li>
 
         <li><a
 href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samples</a></li>
@@ -49,310 +54,476 @@ href="{@docRoot}resources/samples/RenderScript/MiscSamples/index.html">Misc Samp
     </div>
   </div>
 
-  <p>RenderScript provides a number of graphics APIs for 3D rendering, both at the Android
-  framework level as well as at the native level. For instance, the Android framework APIs let you
+  <p>Renderscript provides a number of graphics APIs for rendering, both at the Android
+  framework level as well as at the Renderscript runtime level. For instance, the Android framework APIs let you
   create meshes and define shaders to customize the graphical rendering pipeline. The native
-  RenderScript graphics APIs lets you draw the actual meshes to render your scene. In general, you
-  will need to be familiar with APIs to appropriately render 3D graphics on an Android-powered
-  device.</p>
+  Renderscript graphics APIs let you draw the actual meshes to render your scene. You need to
+  be familiar with both APIs to appropriately render graphics on an Android-powered device.</p>
 
-  <h2 id="creating-graphics-rs">Creating a Graphics RenderScript</h2>
+  <h2 id="creating-graphics-rs">Creating a Graphics Renderscript</h2>
 
-  <p>Because of the various layers of code when writing a RenderScript application, it is useful to
-  create the following files for a scene that you want to render:</p>
+  <p>Renderscript applications require various layers of code, so it is useful to create the following
+  files to help keep your application organized:</p>
 
-  <ul>
-    <li>The native RenderScript <code>.rs</code> file. This file contains the logic to do the
-    graphics rendering.</li>
+  <dl>
+    <dt>The Renderscript <code>.rs</code> file</dt>
 
-    <li>The RenderScript entry point class that allows your view to interact with the code defined
-    in the <code>.rs</code> file. This class contains a RenderScript object(instance of
+    <dd>This file contains the logic to do the graphics rendering.</dd>
+
+    <dt>The Renderscript entry point <code>.java</code> class</dt>
+
+    <dd>This class allows the view class to interact with the code defined in the <code>.rs</code>
+    file. This class contains a Renderscript object (instance of
     <code>ScriptC_<em>renderscript_file</em></code>), which allows your Android framework code to
-    call the native RenderScript code. This class also creates the {@link
-    android.renderscript.RenderScriptGL} context object, which contains the current rendering state
-    of the RenderScript such as programs (vertex and fragment shaders, for example) that you want
-    to define and bind to the graphics pipeline. The context object attaches to the RenderScript
-    object (instance of <code><em>ScriptC_renderscript_file</em></code>) that does the rendering.
-    Our example names this class <code>HelloWorldRS</code>.</li>
+    call the Renderscript code. In general, this class does much of the setup for Renderscript
+    such as shader and mesh building and memory allocation and binding. The SDK samples follow the
+    convention of naming this file ActivityRS.java,
+    where Activity is the name of your main activity class.</dd>
 
-    <li>Create a class that extends {@link android.renderscript.RSSurfaceView} to provide a surface
-    to render on. If you want to implement callbacks from events inherited from {@link
+    <dt>The view <code>.java</code> class</dt>
+
+    <dd>This class extends {@link android.renderscript.RSSurfaceView} or {@link
+    android.renderscript.RSTextureView} to provide a surface to render on. A {@link
+    android.renderscript.RSSurfaceView} consumes a whole window, but a {@link
+    android.renderscript.RSTextureView} allows you to draw Renderscript graphics inside of a
+    view and add it to a {@link android.view.ViewGroup} alongside
+    other views. In this class, you create a {@link android.renderscript.RenderScriptGL} context object
+    with a call to {@link android.renderscript.RSSurfaceView#createRenderScriptGL
+    RSSurfaceView.createRenderscriptGL()} or {@link android.renderscript.RSTextureView#createRenderScriptGL
+    RSTextureView.createRenderscriptGL()}. The {@link android.renderscript.RenderScriptGL} context object
+    contains information about the current rendering state of Renderscript such as the vertex and
+    fragment shaders. You pass this context object to the Renderscript entry point class, so that
+    class can modify the rendering context if needed and bind the Renderscript code to the context. Once bound,
+    the view class can use the Renderscript code to display graphics.
+    The view class should also implement callbacks for events inherited from {@link
     android.view.View}, such as {@link android.view.View#onTouchEvent onTouchEvent()} and {@link
-    android.view.View#onKeyDown onKeyDown()}, do so in this class as well.</li>
+    android.view.View#onKeyDown onKeyDown()} if you want to detect these types of user interactions.
+    The SDK samples follow the convention of naming this file ActivityView.java,
+    where Activity is the name of your main activity class</dd>
 
-    <li>Create a class that is the main Activity class, like you would with any Android
-    application. This class sets your {@link android.renderscript.RSSurfaceView} as the content
-    view for this Activity.</li>
-  </ul>
+    <dt>The activity <code>.java</code> class</dt>
 
-  <p>The following sections describe how to implement these three classes by using the HelloWorld
-  RenderScript sample that is provided in the SDK as a guide (some code has been modified from its
-  original form for simplicity).</p>
+    <dd>This class is the main activity class and sets your {@link android.renderscript.RSSurfaceView} as the main content
+    view for this activity or uses the {@link android.renderscript.RSTextureView} alongside other views.</dd>
+  </dl>
+  <p>Figure 1 describes how these classes interact with one another in a graphics Renderscript:</p>
+  
+  <img src="{@docRoot}images/rs_graphics.png">
+  <p class="img-caption"><strong>Figure 1.</strong> Graphics Renderscript overview</p>
 
-  <h3 id="creating-native">Creating the native RenderScript file</h3>
 
-  <p>Your native RenderScript code resides in a <code>.rs</code> file in the
-  <code>&lt;project_root&gt;/src/</code> directory. You can also define <code>.rsh</code> header
-  files. This code contains the logic to render your graphics and declares all necessary variables
+  <p>The following sections describe how to create an application that uses a graphics Renderscript by using
+  the <a href="{@docRoot}resources/samples/RenderScript/Fountain/index.html">Renderscript Fountain
+  sample</a> that is provided in the SDK as a guide (some code has been modified from its original
+  form for simplicity).</p>
+
+  <h3 id="creating-native">Creating the Renderscript file</h3>
+
+  <p>Your Renderscript code resides in <code>.rs</code> and <code>.rsh</code> (headers) files in the
+  <code>&lt;project_root&gt;/src/</code> directory. This code contains the logic to render your
+  graphics and declares all other necessary items such as variables, structs,
   and pointers. Every graphics <code>.rs</code> file generally contains the following items:</p>
 
   <ul>
-    <li>A pragma (<code>#pragma rs java_package_name(<em>package.name</em>)</code>) that declares
-    the package name of the <code>.java</code> reflection of this RenderScript.</li>
+    <li>A pragma declaration (<code>#pragma rs java_package_name(<em>package.name</em>)</code>) that declares
+    the package name of the <code>.java</code> reflection of this Renderscript.</li>
 
-    <li>A pragma (<code>#pragma version(1)</code>) that declares the version of RenderScript that
+    <li>A pragma declaration (<code>#pragma version(1)</code>) that declares the version of Renderscript that
     you are using (1 is the only value for now).</li>
 
-    <li>A <code>#include</code> of the rs_graphics.rsh header file.</li>
+    <li>A <code>#include "rs_graphics.rsh"</code> declaration.</li>
 
-    <li>A <code>root()</code> function. This is the main worker function for your RenderScript and
-    calls RenderScript graphics APIs to draw meshes to the surface. This function is called every
-    time a frame refresh occurs, which is specified as its return value. A <code>0</code> specified
-    for the return value says to only render the frame when a property of the scene that you are
+    <li>A <code>root()</code> function. This is the main worker function for your Renderscript and
+    calls Renderscript graphics functions to render scenes. This function is called every time a
+    frame refresh occurs, which is specified as its return value. A <code>0</code> (zero) specified for
+    the return value says to only render the frame when a property of the scene that you are
     rendering changes. A non-zero positive integer specifies the refresh rate of the frame in
     milliseconds.
 
-      <p class="note"><strong>Note:</strong> The RenderScript runtime makes its best effort to
+      <p class="note"><strong>Note:</strong> The Renderscript runtime makes its best effort to
       refresh the frame at the specified rate. For example, if you are creating a live wallpaper
-      and set the return value to 50, the runtime renders the wallpaper at 20fps if it has just
-      enough or more resources to do so, and renders as fast as it can if it does not.</p>
-      
-      <p>For more
-      information on using the RenderScript graphics functions, see the <a href=
+      and set the return value to 20, the Renderscript runtime renders the wallpaper at 20fps if it has just
+      enough or more resources to do so. It renders as fast as it can if not enough resources
+      are available.</p>
+
+      <p>For more information on using the Renderscript graphics functions, see the <a href=
       "#drawing">Drawing</a> section.</p>
     </li>
 
-    <li>An <code>init()</code> function. This allows you to do any initialization of your
-    RenderScript before the <code>root()</code> function runs, such as initializing variables. This
-    function runs once and is called automatically when the RenderScript starts, before anything
-    else in your RenderScript. Creating this function is optional.</li>
+    <li>An <code>init()</code> function. This allows you to do initialization of your
+    Renderscript before the <code>root()</code> function runs, such as assigning values to variables. This
+    function runs once and is called automatically when the Renderscript starts, before anything
+    else in your Renderscript. Creating this function is optional.</li>
 
-    <li>Any variables, pointers, and structures that you wish to use in your RenderScript code (can
+    <li>Any variables, pointers, and structures that you wish to use in your Renderscript code (can
     be declared in <code>.rsh</code> files if desired)</li>
   </ul>
 
-  <p>The following code shows how the <code>helloworld.rs</code> file is implemented:</p>
+  <p>The following code shows how the <code>fountain.rs</code> file is implemented:</p>
   <pre>
 #pragma version(1)
 
 // Tell which java package name the reflected files should belong to
-#pragma rs java_package_name(com.android.rs.helloworld)
+#pragma rs java_package_name(com.example.android.rs.fountain)
 
-// Built-in header with graphics APIs
+//declare shader binding
+#pragma stateFragment(parent)
+
+// header with graphics APIs, must include explicitly
 #include "rs_graphics.rsh"
 
-// gTouchX and gTouchY are variables that are reflected for use
-// by the Android framework API. This RenderScript uses them to be notified of touch events.
-int gTouchX;
-int gTouchY;
+static int newPart = 0;
 
-// This is invoked automatically when the script is created and initializes the variables
-// in the Android framework layer as well.
-void init() {
-    gTouchX = 50.0f;
-    gTouchY = 50.0f;
+// the mesh to render
+rs_mesh partMesh;
+
+// the point representing where a particle is rendered
+typedef struct __attribute__((packed, aligned(4))) Point {
+    float2 delta;
+    float2 position;
+    uchar4 color;
+} Point_t;
+Point_t *point;
+
+// main worker function that renders particles onto the screen
+int root() {
+    float dt = min(rsGetDt(), 0.1f);
+    rsgClearColor(0.f, 0.f, 0.f, 1.f);
+    const float height = rsgGetHeight();
+    const int size = rsAllocationGetDimX(rsGetAllocation(point));
+    float dy2 = dt * (10.f);
+    Point_t * p = point;
+    for (int ct=0; ct &lt; size; ct++) {
+        p-&gt;delta.y += dy2;
+        p-&gt;position += p-&gt;delta;
+        if ((p-&gt;position.y &gt; height) &amp;&amp; (p-&gt;delta.y &gt; 0)) {
+            p-&gt;delta.y *= -0.3f;
+        }
+        p++;
+    }
+
+    rsgDrawMesh(partMesh);
+    return 1;
 }
 
-int root(int launchID) {
+// adds particles to the screen to render
+static float4 partColor[10];
+void addParticles(int rate, float x, float y, int index, bool newColor)
+{
+    if (newColor) {
+        partColor[index].x = rsRand(0.5f, 1.0f);
+        partColor[index].y = rsRand(1.0f);
+        partColor[index].z = rsRand(1.0f);
+    }
+    float rMax = ((float)rate) * 0.02f;
+    int size = rsAllocationGetDimX(rsGetAllocation(point));
+    uchar4 c = rsPackColorTo8888(partColor[index]);
 
-    // Clear the background color
-    rsgClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    // Tell the runtime what the font color should be
-    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-    // Introuduce ourselves to the world by drawing a greeting
-    // at the position user touched on the screen
-    rsgDrawText("Hello World!", gTouchX, gTouchY);
-
-    // Return value tells RS roughly how often to redraw
-    // in this case 20 ms
-    return 20;
+    Point_t * np = &amp;point[newPart];
+    float2 p = {x, y};
+    while (rate--) {
+        float angle = rsRand(3.14f * 2.f);
+        float len = rsRand(rMax);
+        np-&gt;delta.x = len * sin(angle);
+        np-&gt;delta.y = len * cos(angle);
+        np-&gt;position = p;
+        np-&gt;color = c;
+        newPart++;
+        np++;
+        if (newPart &gt;= size) {
+            newPart = 0;
+            np = &amp;point[newPart];
+        }
+    }
 }
 </pre>
 
-  <h3 id="creating-entry">Creating the RenderScript entry point class</h3>
+  <h3 id="creating-entry">Creating the Renderscript entry point class</h3>
 
-  <p>When you create a RenderScript (<code>.rs</code>) file, it is helpful to create a
-  corresponding Android framework class that is an entry point into the <code>.rs</code> file. In
-  this entry point class, you create a RenderScript object by instantiating a
-  <code>ScriptC_<em>rs_filename</em></code> and binding it to the RenderScript context. The
-  RenderScript object is attached to the RenderScript bytecode, which is platform-independent and
-  gets compiled on the device when the RenderScript application runs. Both the
-  <code>ScriptC_<em>rs_filename</em></code> class and bytecode is generated by the Android build
-  tools and is packaged with the <code>.apk</code> file. The bytecode file is located in the
-  <code>&lt;project_root&gt;/res/raw/</code> directory and is named <code>rs_filename.bc</code>.
-  You refer to the bytecode as a resource (<code>R.raw.<em>rs_filename</em></code>). when creating
-  the RenderScript object..</p>
+  <p>When you create a Renderscript (<code>.rs</code>) file, it is helpful to create a
+  corresponding Android framework class that is an entry point into the <code>.rs</code> file.
+  The most important thing this class does is receive a {@link android.renderscript.RenderScriptGL} rendering context
+  object from the <a href="#creating-view">view class</a> and binds the actual Renderscript
+  code to the rendering context. This notifies your view class of the code that it needs
+  to render graphics.
+  </p>
 
-  <p>You then bind the RenderScript object to the RenderScript context, so that the surface view
-  knows what code to use to render graphics. The following code shows how the
-  <code>HelloWorldRS</code> class is implemented:</p>
+  <p>In addition, this class should contain all of the things needed to set up Renderscript.
+  Some important things that you need to do in this class are:</p>
+
+  <ul>
+    <li>Create a Renderscript object 
+  <code>ScriptC_<em>rs_filename</em></code>. The Renderscript object is attached to the Renderscript bytecode, which is platform-independent and
+  gets compiled on the device when the Renderscript application runs. The bytecode is referenced
+  as a raw resource and is passed into the constructor for the Renderscript object.
+  For example, this is how the <a href="{@docRoot}resources/samples/RenderScript/Fountain/index.html">Fountain</a>
+  sample creates the Renderscript object:
   <pre>
-package com.android.rs.helloworld;
+  RenderScriptGL rs;  //obtained from the view class
+  Resources res;      //obtained from the view class
+  ...
+  ScriptC_fountain mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain);
+  </pre>
+  </li>
+  <li>Allocate any necessary memory and bind it to your Renderscript code via the Renderscript object.</li>
+  <li>Build any necessary meshes and bind them to the Renderscript code via the Renderscript object.</li>
+  <li>Create any necessary programs and bind them to the Renderscript code via the Renderscript object.</li>
+  </ul>
+
+  <p>The following code shows how the <a href=
+  "{@docRoot}resources/samples/RenderScript/Fountain/src/com/example/android/rs/fountain/FountainRS.html">
+  FountainRS</a> class is implemented:</p>
+  <pre>
+package com.example.android.rs.fountain;
 
 import android.content.res.Resources;
 import android.renderscript.*;
+import android.util.Log;
 
-public class HelloWorldRS {
-    //context and resources are obtained from RSSurfaceView, which calls init()
+public class FountainRS {
+    public static final int PART_COUNT = 50000;
+
+    public FountainRS() {
+    }
+
+    /**
+     * This provides us with the Renderscript context and resources
+     * that allow us to create the Renderscript object
+     */
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    //Declare the RenderScript object
-    private ScriptC_helloworld mScript;
+    // Renderscript object
+    private ScriptC_fountain mScript;
 
-    public HelloWorldRS() {
-    }
-
-    /**
-     * This provides us with the RenderScript context and resources
-     * that allow us to create the RenderScript object
-     */
+    // Called by the view class to initialize the Renderscript context and renderer
     public void init(RenderScriptGL rs, Resources res) {
         mRS = rs;
         mRes = res;
-        initRS();
-    }
-    /**
-     * Calls native RenderScript functions (set_gTouchX and set_gTouchY)
-     * through the reflected layer class ScriptC_helloworld to pass in
-     * touch point data.
-     */
-    public void onActionDown(int x, int y) {
-        mScript.set_gTouchX(x);
-        mScript.set_gTouchY(y);
-    }
-    /**
-     * Binds the RenderScript object to the RenderScript context
-     */
-    private void initRS() {
-        //create the RenderScript object
-        mScript = new ScriptC_helloworld(mRS, mRes, R.raw.helloworld);
-        //bind the RenderScript object to the RenderScript context
+
+        /**
+         * Create a shader and bind to the Renderscript context
+         */
+        ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(rs);
+        pfb.setVaryingColor(true);
+        rs.bindProgramFragment(pfb.create());
+
+        /**
+         * Allocate memory for the particles to render and create the mesh to draw
+         */
+        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+        Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
+        smb.addVertexAllocation(points.getAllocation());
+        smb.addIndexSetType(Mesh.Primitive.POINT);
+        Mesh sm = smb.create();
+
+       /**
+        * Create and bind the Renderscript object to the Renderscript context
+        */
+        mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain);
+        mScript.set_partMesh(sm);
+        mScript.bind_point(points);
         mRS.bindRootScript(mScript);
     }
-}
 
+    boolean holdingColor[] = new boolean[10];
+
+    /**
+     * Calls Renderscript functions (invoke_addParticles)
+     * via the Renderscript object to add particles to render
+     * based on where a user touches the screen.
+     */
+    public void newTouchPosition(float x, float y, float pressure, int id) {
+        if (id &gt;= holdingColor.length) {
+            return;
+        }
+        int rate = (int)(pressure * pressure * 500.f);
+        if (rate &gt; 500) {
+            rate = 500;
+        }
+        if (rate &gt; 0) {
+            mScript.invoke_addParticles(rate, x, y, id, !holdingColor[id]);
+            holdingColor[id] = true;
+        } else {
+            holdingColor[id] = false;
+        }
+
+    }
+}
 </pre>
 
-  <h3 id="creating-view">Creating the surface view</h3>
 
-  <p>To create a surface view to render graphics on, create a class that extends {@link
-  android.renderscript.RSSurfaceView}. This class also creates a RenderScript context object
-  ({@link android.renderscript.RenderScriptGL} and passes it to the Rendscript entry point class to
-  bind the two. The following code shows how the <code>HelloWorldView</code> class is
-  implemented:</p>
+  <h3 id="creating-view">Creating the view class</h3>
+
+
+  <p>To display graphics, you need a view to render on. Create a class that extends {@link
+  android.renderscript.RSSurfaceView} or {@link android.renderscript.RSTextureView}. This class
+  allows you to create a {@link android.renderscript.RenderScriptGL} context object by calling and
+  pass it to the Rendscript entry point class to bind the two. Once bound, the content is aware
+  of the code that it needs to use to render graphics with. If your Renderscript code
+  depends on any type of information that the view is aware of, such as touches from the user,
+  you can also use this class to relay that information to the Renderscript entry point class.
+  The following code shows how the <code>FountainView</code> class is implemented:</p>
   <pre>
-package com.android.rs.helloworld;
+package com.example.android.rs.fountain;
 
-import android.renderscript.RSSurfaceView;
+import android.renderscript.RSTextureView;
 import android.renderscript.RenderScriptGL;
 import android.content.Context;
 import android.view.MotionEvent;
 
-public class HelloWorldView extends RSSurfaceView {
-    // RenderScript context
-    private RenderScriptGL mRS;
-    // RenderScript entry point object that does the rendering
-    private HelloWorldRS mRender;
+public class FountainView extends RSTextureView {
 
-    public HelloWorldView(Context context) {
+    public FountainView(Context context) {
         super(context);
-        initRS();
     }
+    // Renderscript context
+    private RenderScriptGL mRS;
+    // Renderscript entry point object that calls Renderscript code
+    private FountainRS mRender;
 
-    private void initRS() {
+    /**
+     * Create Renderscript context and initialize Renderscript entry point
+     */
+    &#064;Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        android.util.Log.e("rs", "onAttachedToWindow");
         if (mRS == null) {
-            // Initialize RenderScript with default surface characteristics.
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-            //Create the RenderScript context
             mRS = createRenderScriptGL(sc);
-            // Create an instance of the RenderScript entry point class
-            mRender = new HelloWorldRS();
-            // Call the entry point class to bind it to this context
+            mRender = new FountainRS();
             mRender.init(mRS, getResources());
         }
     }
 
-    /**
-     * Rebind everything when the window becomes attached
-     */
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        initRS();
-    }
-
-    /**
-     * Stop rendering when window becomes detached
-     */
+    &#064;Override
     protected void onDetachedFromWindow() {
-        // Handle the system event and clean up
-        mRender = null;
+        super.onDetachedFromWindow();
+        android.util.Log.e("rs", "onDetachedFromWindow");
         if (mRS != null) {
             mRS = null;
             destroyRenderScriptGL();
         }
     }
 
-    /**
-     * Use callbacks to relay data to RenderScript entry point class
-     */
-    public boolean onTouchEvent(MotionEvent ev) {
-        // Pass touch events from the system to the rendering script
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mRender.onActionDown((int)ev.getX(), (int)ev.getY());
-            return true;
-        }
 
-        return false;
+    /**
+     * Use callbacks to relay data to Renderscript entry point class
+     */
+    &#064;Override
+    public boolean onTouchEvent(MotionEvent ev)
+    {
+        int act = ev.getActionMasked();
+        if (act == ev.ACTION_UP) {
+            mRender.newTouchPosition(0, 0, 0, ev.getPointerId(0));
+            return false;
+        } else if (act == MotionEvent.ACTION_POINTER_UP) {
+            // only one pointer going up, we can get the index like this
+            int pointerIndex = ev.getActionIndex();
+            int pointerId = ev.getPointerId(pointerIndex);
+            mRender.newTouchPosition(0, 0, 0, pointerId);
+        }
+        int count = ev.getHistorySize();
+        int pcount = ev.getPointerCount();
+
+        for (int p=0; p &lt; pcount; p++) {
+            int id = ev.getPointerId(p);
+            mRender.newTouchPosition(ev.getX(p),
+                                     ev.getY(p),
+                                     ev.getPressure(p),
+                                     id);
+
+            for (int i=0; i &lt; count; i++) {
+                mRender.newTouchPosition(ev.getHistoricalX(p, i),
+                                         ev.getHistoricalY(p, i),
+                                         ev.getHistoricalPressure(p, i),
+                                         id);
+            }
+        }
+        return true;
     }
 }
-
 </pre>
 
-  <h3 id="creating-activity">Creating the Activity</h3>
+  <h3 id="creating-activity">Creating the activity class</h3>
 
-  <p>Applications that use RenderScript still adhere to activity lifecyle, and are part of the same
-  view hierarchy as traditional Android applications, which is handled by the Android VM. This
-  Activity class sets its view to be the {@link android.renderscript.RSSurfaceView} and handles
-  lifecycle callback events appropriately. The following code shows how the <code>HelloWorld</code>
-  class is implemented:</p>
+  <p>Applications that use Renderscript still behave like normal Android applications, so you
+   need an activity class that handles activity lifecycle callback events appropriately. The activity class
+   also sets your {@link android.renderscript.RSSurfaceView} view class to be the main content view of the
+   activity or uses your {@link android.renderscript.RSTextureView}
+  in a {@link android.view.ViewGroup} alongside other views.</p>
+
+  <p>The following code shows how the <a href="{@docRoot}resources/samples/RenderScript/Fountain/index.html">Fountain</a>
+  sample declares its activity class:</p>
   <pre>
-public class HelloWorldActivity extends Activity {
+package com.example.android.rs.fountain;
 
-    //Custom view to use with RenderScript
-    private HelloWorldView view;
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
 
+public class Fountain extends Activity {
+
+    private static final String LOG_TAG = "libRS_jni";
+    private static final boolean DEBUG  = false;
+    private static final boolean LOG_ENABLED = false;
+
+    private FountainView mView;
+
+    &#064;Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        // Create surface view and set it as the content of our Activity
-        mView = new HelloWorldView(this);
-        setContentView(view);
+
+        // Create our Preview view and set it as 
+        // the content of our activity
+        mView = new FountainView(this);
+        setContentView(mView);
     }
 
+    &#064;Override
     protected void onResume() {
-        // Ideally an app should implement onResume() and onPause()
-        // to take appropriate action when the activity loses focus
+        Log.e("rs", "onResume");
+
+        // Ideally a game should implement onResume() and onPause()
+        // to take appropriate action when the activity looses focus
         super.onResume();
-        view.resume();
+        mView.resume();
     }
 
+    &#064;Override
     protected void onPause() {
-        // Ideally an app should implement onResume() and onPause()
-        // to take appropriate action when the activity loses focus
+        Log.e("rs", "onPause");
+
+        // Ideally a game should implement onResume() and onPause()
+        // to take appropriate action when the activity looses focus
         super.onPause();
-        view.pause();
+        mView.pause();
+
+    }
+
+    static void log(String message) {
+        if (LOG_ENABLED) {
+            Log.v(LOG_TAG, message);
+        }
     }
 }
 </pre>
+
+<p>Now that you have an idea of what is involved in a Renderscript graphics application, you can
+start building your own. It might be easiest to begin with one of the
+<a href="{@docRoot}resources/samples/RenderScript/index.html">Renderscript samples</a> as a starting
+point if this is your first time using Renderscript.</p>
 
   <h2 id="drawing">Drawing</h2>
   <p>The following sections describe how to use the graphics functions to draw with Renderscript.</p>
-  <h3 id="drawing-rsg">Drawing using the rsgDraw functions</h3>
 
-  <p>The native RenderScript APIs provide a few convenient functions to easily draw a polygon to
-  the screen. You call these in your <code>root()</code> function to have them render to the
-  surface view. These functions are available for simple drawing and should not be used for complex
-  graphics rendering:</p>
+  <h3 id="drawing-rsg">Simple drawing</h3>
+
+  <p>The native Renderscript APIs provide a few convenient functions to easily draw a polygon or text to
+  the screen. You call these in your <code>root()</code> function to have them render to the {@link
+  android.renderscript.RSSurfaceView} or {@link android.renderscript.RSTextureView}. These functions are
+  available for simple drawing and should not be used for complex graphics rendering:</p>
 
   <ul>
     <li><code>rsgDrawRect()</code>: Sets up a mesh and draws a rectangle to the screen. It uses the
@@ -360,31 +531,32 @@ public class HelloWorldActivity extends Activity {
 
     <li><code>rsgDrawQuad()</code>: Sets up a mesh and draws a quadrilateral to the screen.</li>
 
-    <li><code>rsgDrawQuadTexCoords()</code>: Sets up a mesh and draws a textured quadrilateral to
-    the screen.</li>
+    <li><code>rsgDrawQuadTexCoords()</code>: Sets up a mesh and draws a quadrilateral to the screen
+    using the provided coordinates of a texture.</li>
+
+    <li><code>rsgDrawText()</code>: Draws specified text to the screen. Use <code>rsgFontColor()</code>
+    to set the color of the text.</li>
   </ul>
 
   <h3 id="drawing-mesh">Drawing with a mesh</h3>
 
-  <p>When you want to draw complex shapes and textures to the screen, instantiate a {@link
-  android.renderscript.Mesh} and draw it to the screen with <code>rsgDrawMesh()</code>. A {@link
+  <p>When you want to render complex scenes to the screen, instantiate a {@link
+  android.renderscript.Mesh} and draw it with <code>rsgDrawMesh()</code>. A {@link
   android.renderscript.Mesh} is a collection of allocations that represent vertex data (positions,
-  normals, texture coordinates) and index data such as triangles and lines. You can build a Mesh in
-  three different ways:</p>
+  normals, texture coordinates) and index data that provides information on how to draw triangles
+  and lines with the provided vertex data. You can build a Mesh in three different ways:</p>
 
   <ul>
     <li>Build the mesh with the {@link android.renderscript.Mesh.TriangleMeshBuilder} class, which
-    allows you to specify a set of vertices and indices for each triangle that you want to draw.
-    The downside of doing it this way is there is no way to specify the vertices in your native
-    RenderScript code.</li>
+    allows you to specify a set of vertices and indices for each triangle that you want to draw.</li>
 
     <li>Build the mesh using an {@link android.renderscript.Allocation} or a set of {@link
     android.renderscript.Allocation}s with the {@link android.renderscript.Mesh.AllocationBuilder}
-    class. This allows you to build a mesh with vertices already stored in memory, which allows you
-    to set the vertices in native or Android code.</li>
+    class. This approach allows you to build a mesh with vertices already stored in memory, which allows you
+    to specify the vertices in Renderscript or Android framework code.</li>
 
-    <li>Build the mesh with the {@link android.renderscript.Mesh.Builder} class. This is a
-    convenience method for when you know what data types you want to use to build your mesh, but
+    <li>Build the mesh with the {@link android.renderscript.Mesh.Builder} class. You should use
+    this convenience method when you know the data types you want to use to build your mesh, but
     don't want to make separate memory allocations like with {@link
     android.renderscript.Mesh.AllocationBuilder}. You can specify the types that you want and this
     mesh builder automatically creates the memory allocations for you.</li>
@@ -421,7 +593,7 @@ Mesh smP = smb.create();
 script.set_mesh(smP);
 </pre>
 
-  <p>In your native RenderScript code, draw the built mesh to the screen:</p>
+  <p>In your Renderscript code, draw the built mesh to the screen:</p>
   <pre>
 rs_mesh mesh;
 ...
@@ -435,18 +607,18 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
 }
 </pre>
 
-  <h2 id="shaders">Shaders</h2>
+  <h2 id="shader">Programs</h2>
 
   <p>You can attach four program objects to the {@link android.renderscript.RenderScriptGL} context
   to customize the rendering pipeline. For example, you can create vertex and fragment shaders in
-  GLSL or build a raster program object with provided methods without writing GLSL code. The four
-  program objects mirror a traditional graphical rendering pipeline:</p>
+  GLSL or build a raster program object that controls culling. The four programs mirror a
+  traditional graphical rendering pipeline:</p>
 
   <table>
     <tr>
       <th>Android Object Type</th>
 
-      <th>RenderScript Native Type</th>
+      <th>Renderscript Native Type</th>
 
       <th>Description</th>
     </tr>
@@ -457,17 +629,17 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
       <td>rs_program_vertex</td>
 
       <td>
-        <p>The RenderScript vertex program, also known as a vertex shader, describes the stage in
+        <p>The Renderscript vertex program, also known as a vertex shader, describes the stage in
         the graphics pipeline responsible for manipulating geometric data in a user-defined way.
-        The object is constructed by providing RenderScript with the following data:</p>
+        The object is constructed by providing Renderscript with the following data:</p>
 
         <ul>
-          <li>An Element describing its varying inputs or attributes</li>
+          <li>An {@link android.renderscript.Element} describing its varying inputs or attributes</li>
 
           <li>GLSL shader string that defines the body of the program</li>
 
-          <li>a Type that describes the layout of an Allocation containing constant or uniform
-          inputs</li>
+          <li>a {@link android.renderscript.Type} that describes the layout of an
+          Allocation containing constant or uniform inputs</li>
         </ul>
 
         <p>Once the program is created, bind it to the {@link android.renderscript.RenderScriptGL}
@@ -475,22 +647,29 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
         bindProgramVertex()}. It is then used for all subsequent draw calls until you bind a new
         program. If the program has constant inputs, the user needs to bind an allocation
         containing those inputs. The allocation's type must match the one provided during creation.
-        The RenderScript library then does all the necessary plumbing to send those constants to
-        the graphics hardware. Varying inputs to the shader, such as position, normal, and texture
-        coordinates are matched by name between the input Element and the Mesh object being drawn.
-        The signatures don't have to be exact or in any strict order. As long as the input name in
-        the shader matches a channel name and size available on the mesh, the run-time would take
-        care of connecting the two. Unlike OpenGL, there is no need to link the vertex and fragment
-        programs.</p>
+        </p>
 
-        <p>To bind shader constructs to the Program, declare a struct containing the necessary
-        shader constants in your native RenderScript code. This struct is generated into a
-        reflected class that you can use as a constant input element during the Program's creation.
-        It is an easy way to create an instance of this struct as an allocation. You would then
-        bind this Allocation to the Program and the RenderScript system sends the data that is
-        contained in the struct to the hardware when necessary. To update shader constants, you
-        change the values in the Allocation and notify the native RenderScript code of the
-        change.</p>
+        <p>The Renderscript runtime then does all the necessary plumbing to send those constants to
+        the graphics hardware. Varying inputs to the shader, such as position, normal, and texture
+        coordinates are matched by name between the input {@link android.renderscript.Element}
+        and the mesh object that is being drawn. The signatures don't have to be exact or in any
+        strict order. As long as the input name in the shader matches a channel name and size
+        available on the mesh, the Renderscript runtime handles connecting the two. Unlike OpenGL
+        there is no need to link the vertex and fragment programs.</p>
+
+        <p>To bind shader constants to the program, declare a <code>struct</code> that contains the necessary
+        shader constants in your Renderscript code. This <code>struct</code> is generated into a
+        reflected class that you can use as a constant input element during the program's creation.
+        It is an easy way to create an instance of this <code>struct</code> as an allocation. You would then
+        bind this {@link android.renderscript.Allocation} to the program and the
+        Renderscript runtime sends the data that is contained in the <code>struct</code> to the hardware
+        when necessary. To update shader constants, you change the values in the
+        {@link android.renderscript.Allocation} and notify the Renderscript
+        code of the change.</p>
+
+        <p>The {@link android.renderscript.ProgramVertexFixedFunction.Builder} class also
+        lets you build a simple vertex shader without writing GLSL code.
+        </p>
       </td>
     </tr>
 
@@ -500,26 +679,33 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
       <td>rs_program_fragment</td>
 
       <td>
-        <p>The RenderScript fragment program, also known as the fragment shader, is responsible for
+        <p>The Renderscript fragment program, also known as a fragment shader, is responsible for
         manipulating pixel data in a user-defined way. It's constructed from a GLSL shader string
-        containing the program body, textures inputs, and a Type object describing the constants
-        used by the program. Like the vertex programs, when an allocation with constant input
+        containing the program body, texture inputs, and a {@link android.renderscript.Type}
+        object that describes the constants
+        used by the program. Like the vertex programs, when an {@link android.renderscript.Allocation}
+        with constant input
         values is bound to the shader, its values are sent to the graphics program automatically.
-        Note that the values inside the allocation are not explicitly tracked. If they change
-        between two draw calls using the same program object, notify the runtime of that change by
-        calling rsgAllocationSyncAll so it could send the new values to hardware. Communication
+        Note that the values inside the {@link android.renderscript.Allocation} are not explicitly tracked.
+        If they change between two draw calls using the same program object, notify the runtime of that change by
+        calling <code>rsgAllocationSyncAll()</code>, so it can send the new values to hardware. Communication
         between the vertex and fragment programs is handled internally in the GLSL code. For
-        example, if the fragment program is expecting a varying input called varTex0, the GLSL code
+        example, if the fragment program is expecting a varying input called <code>varTex0</code>, the GLSL code
         inside the program vertex must provide it.</p>
 
-        <p>To bind shader constants to this program, declare a struct containing the necessary
-        shader constants in your native RenderScript code. This struct is generated into a
-        reflected class that you can use as a constant input element during the Program's creation.
-        It is an easy way to create an instance of this struct as an allocation. You would then
-        bind this Allocation to the Program and the RenderScript system sends the data that is
-        contained in the struct to the hardware when necessary. To update shader constants, you
-        change the values in the Allocation and notify the native RenderScript code of the
-        change.</p>
+        <p>To bind shader constructs to the program, declare a <code>struct</code> that contains the necessary
+        shader constants in your Renderscript code. This <code>struct</code> is generated into a
+        reflected class that you can use as a constant input element during the program's creation.
+        It is an easy way to create an instance of this <code>struct</code> as an allocation. You would then
+        bind this {@link android.renderscript.Allocation} to the program and the
+        Renderscript runtime sends the data that is contained in the <code>struct</code> to the hardware
+        when necessary. To update shader constants, you change the values in the
+        {@link android.renderscript.Allocation} and notify the Renderscript
+        code of the change.</p>
+
+        <p>The {@link android.renderscript.ProgramFragmentFixedFunction.Builder} class also
+        lets you build a simple fragment shader without writing GLSL code.
+        </p>
       </td>
     </tr>
 
@@ -528,7 +714,7 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
 
       <td>rs_program_store</td>
 
-      <td>The RenderScript ProgramStore contains a set of parameters that control how the graphics
+      <td>The Renderscript store program contains a set of parameters that control how the graphics
       hardware writes to the framebuffer. It could be used to enable and disable depth writes and
       testing, setup various blending modes for effects like transparency and define write masks
       for color components.</td>
@@ -539,12 +725,12 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
 
       <td>rs_program_raster</td>
 
-      <td>Program raster is primarily used to specify whether point sprites are enabled and to
+      <td>The Renderscript raster program is primarily used to specify whether point sprites are enabled and to
       control the culling mode. By default back faces are culled.</td>
     </tr>
   </table>
 
-  <p>The following example defines a vertex shader in GLSL and binds it to the RenderScript:</p>
+  <p>The following example defines a vertex shader in GLSL and binds it to a Renderscript context object:</p>
   <pre>
     private RenderScriptGL glRenderer;      //rendering context
     private ScriptField_Point mPoints;      //vertices
@@ -567,49 +753,37 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
         ProgramVertex pvs = sb.create();
         pvs.bindConstants(mVpConsts.getAllocation(), 0);
         glRenderer.bindProgramVertex(pvs);
-
-
 </pre>
+
 
   <p>The <a href=
   "{@docRoot}resources/samples/RenderScript/MiscSamples/src/com/example/android/rs/miscsamples/RsRenderStatesRS.html">
   RsRenderStatesRS</a> sample has many examples on how to create a shader without writing GLSL.</p>
 
-  <h3 id="shader-bindings">Shader bindings</h3>
+  <h3 id="shader-bindings">Program bindings</h3>
 
-  <p>You can also set four pragmas that control the shaders' default bindings to the {@link
+  <p>You can also declare four pragmas that control default program bindings to the {@link
   android.renderscript.RenderScriptGL} context when the script is executing:</p>
 
   <ul>
-    <li>stateVertex</li>
+    <li><code>stateVertex</code></li>
 
-    <li>stateFragment</li>
+    <li><code>stateFragment</code></li>
 
-    <li>stateRaster</li>
+    <li><code>stateRaster</code></li>
 
-    <li>stateStore</li>
+    <li><code>stateStore</code></li>
   </ul>
 
   <p>The possible values for each pragma are <code>parent</code> or <code>default</code>. Using
-  <code>default</code> binds the shaders to the graphical context with the system defaults. The
-  default shader is defined below:</p>
-  <pre>
-("varying vec4 varColor;\n");
-("varying vec2 varTex0;\n");
-("void main() {\n");
-(" gl_Position = UNI_MVP * ATTRIB_position;\n");
-(" gl_PointSize = 1.0;\n");
-(" varColor = ATTRIB_color;\n");
-(" varTex0 = ATTRIB_texture0;\n");
-("}\n");
-</pre>
+  <code>default</code> binds the shaders to the graphical context with the system defaults.</p>
 
   <p>Using <code>parent</code> binds the shaders in the same manner as it is bound in the calling
   script. If this is the root script, the parent state is taken from the bind points that are set
   by the {@link android.renderscript.RenderScriptGL} bind methods.</p>
 
-  <p>For example, you can define this at the top of your native graphics RenderScript code to have
-  the Vertex and Store shaders inherent the bind properties from their parent scripts:</p>
+  <p>For example, you can define this at the top of your graphics Renderscript code to have
+  the vertex and store programs inherent the bind properties from their parent scripts:</p>
   <pre>
 #pragma stateVertex(parent)
 #pragma stateStore(parent)
@@ -618,18 +792,202 @@ return 0; //specify a non zero, positive integer to specify the frame refresh.
   <h3 id="shader-sampler">Defining a sampler</h3>
 
   <p>A {@link android.renderscript.Sampler} object defines how data is extracted from textures.
-  Samplers are bound to Program objects (currently only a Fragment Program) alongside the texture
-  whose sampling they control. These objects are used to specify such things as edge clamping
-  behavior, whether mip-maps are used, and the amount of anisotropy required. There might be
-  situations where hardware does not support the desired behavior of the sampler. In these cases,
-  the runtime attempts to provide the closest possible approximation. For example, the user
-  requested 16x anisotropy, but only 8x was set because it's the best available on the
-  hardware.</p>
+  Samplers are bound to a {@link android.renderscript.ProgramFragment} alongside the texture
+  whose sampling they control. These
+  objects are used to specify such things as edge clamping behavior, whether mip-maps are used, and
+  the amount of anisotropy required. There might be situations where hardware does not support the
+  desired behavior of the sampler. In these cases, the Renderscript runtime attempts to provide the
+  closest possible approximation. For example, the user requested 16x anisotropy, but only 8x was
+  set because it's the best available on the hardware.</p>
 
   <p>The <a href=
   "{@docRoot}resources/samples/RenderScript/MiscSamples/src/com/example/android/rs/miscsamples/RsRenderStatesRS.html">
   RsRenderStatesRS</a> sample has many examples on how to create a sampler and bind it to a
   Fragment program.</p>
-  
-</body>
-</html>
+
+
+
+<h2 id="fbo">Rendering to a Framebuffer Object</h2>
+
+<p>Framebuffer objects allow you to render offscreen instead of in the default onscreen
+framebuffer. This approach might be useful for situations where you need to post-process a texture before
+rendering it to the screen, or when you want to composite two scenes in one such as rendering a rear-view
+mirror of a car. There are two buffers associated with a framebuffer object: a color buffer
+and a depth buffer. The color buffer (required) contains the actual pixel data of the scene
+that you are rendering, and the depth buffer (optional) contains the values necessary to figure
+out what vertices are drawn depending on their z-values.</p>
+
+<p>In general, you need to do the following to render to a framebuffer object:</p>
+
+<ul>
+  <li>Create {@link android.renderscript.Allocation} objects for the color buffer and
+  depth buffer (if needed). Specify the {@link
+  android.renderscript.Allocation#USAGE_GRAPHICS_RENDER_TARGET} usage attribute for these
+  allocations to notify the Renderscript runtime to use these allocations for the framebuffer
+  object. For the color buffer allocation, you most likely need to declare the {@link
+  android.renderscript.Allocation#USAGE_GRAPHICS_TEXTURE} usage attribute
+  to use the color buffer as a texture, which is the most common use of the framebuffer object.</li>
+
+  <li>Tell the Renderscript runtime to render to the framebuffer object instead of the default
+  framebuffer by calling <code>rsgBindColorTarget()</code> and passing it the color buffer
+  allocation. If applicable, call <code>rsgBindDepthTarget()</code> passing in the depth buffer
+  allocation as well.</li>
+
+  <li>Render your scene normally with the <code>rsgDraw</code> functions. The scene will be
+  rendered into the color buffer instead of the default onscreen framebuffer.</li>
+
+  <li>When done, tell the Renderscript runtime stop rendering to the color buffer and back
+  to the default framebuffer by calling <code>rsgClearAllRenderTargets()</code>.</li>
+
+  <li>Create a fragment shader and bind a the color buffer to it as a texture.</li>
+
+  <li>Render your scene to the default framebuffer. The texture will be used according
+  to the way you setup your fragment shader.</li>
+</ul>
+
+<p>The following example shows you how to render to a framebuffer object by modifying the
+<a href="{@docRoot}guide/resources/renderscript/Fountain/">Fountain</a> Renderscript sample. The end
+result is the <a href="{@docRoot}guide/resources/renderscript/FountainFBO/">FountainFBO</a> sample.
+The modifications render the exact same scene into a framebuffer object as it does the default
+framebuffer. The framebuffer object is then rendered into the default framebuffer in a small
+area at the top left corner of the screen.</p>
+
+<ol>
+  <li>Modify <code>fountain.rs</code> and add the following global variables. This creates setter
+  methods when this file is reflected into a <code>.java</code> file, allowing you to allocate
+  memory in your Android framework code and binding it to the Renderscript runtime.
+<pre>
+//allocation for color buffer
+rs_allocation gColorBuffer;
+//fragment shader for rendering without a texture (used for rendering to framebuffer object)
+rs_program_fragment gProgramFragment;
+//fragment shader for rendering with a texture (used for rendering to default framebuffer)
+rs_program_fragment gTextureProgramFragment;
+</pre>
+  </li>
+
+  <li>Modify the root function of <code>fountain.rs</code> to look like the following code. The
+  modifications are commented:
+<pre>
+int root() {
+    float dt = min(rsGetDt(), 0.1f);
+    rsgClearColor(0.f, 0.f, 0.f, 1.f);
+    const float height = rsgGetHeight();
+    const int size = rsAllocationGetDimX(rsGetAllocation(point));
+    float dy2 = dt * (10.f);
+    Point_t * p = point;
+    for (int ct=0; ct < size; ct++) {
+        p->delta.y += dy2;
+        p->position += p->delta;
+        if ((p->position.y > height) && (p->delta.y > 0)) {
+            p->delta.y *= -0.3f;
+        }
+        p++;
+    }
+    //Tell Renderscript runtime to render to the frame buffer object
+    rsgBindColorTarget(gColorBuffer, 0);
+    //Begin rendering on a white background
+    rsgClearColor(1.f, 1.f, 1.f, 1.f);
+    rsgDrawMesh(partMesh);
+
+    //When done, tell Renderscript runtime to stop rendering to framebuffer object
+    rsgClearAllRenderTargets();
+
+    //Bind a new fragment shader that declares the framebuffer object to be used as a texture
+    rsgBindProgramFragment(gTextureProgramFragment);
+
+    //Bind the framebuffer object to the fragment shader at slot 0 as a texture
+    rsgBindTexture(gTextureProgramFragment, 0, gColorBuffer);
+    //Draw a quad using the framebuffer object as the texture
+    float startX = 10, startY = 10;
+    float s = 256;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 1,
+                         startX, startY + s, 0, 0, 0,
+                         startX + s, startY + s, 0, 1, 0,
+                         startX + s, startY, 0, 1, 1);
+
+    //Rebind the original fragment shader to render as normal
+    rsgBindProgramFragment(gProgramFragment);
+
+    //Render the main scene
+    rsgDrawMesh(partMesh);
+
+    return 1;
+}
+</pre>
+  </li>
+
+  <li>In the <code>FountainRS.java</code> file, modify the <code>init()</code> method to look
+  like the following code. The modifications are commented:
+
+<pre>
+/* Add necessary members */
+private ScriptC_fountainfbo mScript;
+private Allocation mColorBuffer;
+private ProgramFragment mProgramFragment;
+private ProgramFragment mTextureProgramFragment;
+
+public void init(RenderScriptGL rs, Resources res) {
+    mRS = rs;
+    mRes = res;
+
+    ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+
+    Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
+    smb.addVertexAllocation(points.getAllocation());
+    smb.addIndexSetType(Mesh.Primitive.POINT);
+    Mesh sm = smb.create();
+
+    mScript = new ScriptC_fountainfbo(mRS, mRes, R.raw.fountainfbo);
+    mScript.set_partMesh(sm);
+    mScript.bind_point(points);
+
+    ProgramFragmentFixedFunction.Builder pfb = new ProgramFragmentFixedFunction.Builder(rs);
+    pfb.setVaryingColor(true);
+    mProgramFragment = pfb.create();
+    mScript.set_gProgramFragment(mProgramFragment);
+
+    /* Second fragment shader to use a texture (framebuffer object) to draw with */
+    pfb.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+        ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
+
+    /* Set the fragment shader in the Renderscript runtime */
+    mTextureProgramFragment = pfb.create();
+    mScript.set_gTextureProgramFragment(mTextureProgramFragment);
+
+    /* Create the allocation for the color buffer */
+    Type.Builder colorBuilder = new Type.Builder(mRS, Element.RGBA_8888(mRS));
+    colorBuilder.setX(256).setY(256);
+    mColorBuffer = Allocation.createTyped(mRS, colorBuilder.create(),
+    Allocation.USAGE_GRAPHICS_TEXTURE |
+    Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+
+    /* Set the allocation in the Renderscript runtime */
+    mScript.set_gColorBuffer(mColorBuffer);
+
+    mRS.bindRootScript(mScript);
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> This sample doesn't use a depth buffer, but the following code
+shows you how to declare an example depth buffer if you need to use
+one for your application. The depth buffer must have the same dimensions as the color buffer:
+
+<pre>
+Allocation mDepthBuffer;
+
+...
+
+Type.Builder b = new Type.Builder(mRS, Element.createPixel(mRS, DataType.UNSIGNED_16,
+    DataKind.PIXEL_DEPTH));
+b.setX(256).setY(256);
+mDepthBuffer = Allocation.createTyped(mRS, b.create(),
+Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+
+</pre>
+</p>
+</li>
+
+  <li>Run and use the sample. The smaller, white quad on the top-left corner is using the
+  framebuffer object as a texture, which renders the same scene as the main rendering.</li>
+</ol>
