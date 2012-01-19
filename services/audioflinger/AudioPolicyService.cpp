@@ -47,7 +47,7 @@ static const char kDeadlockedString[] = "AudioPolicyService may be deadlocked\n"
 static const char kCmdDeadlockedString[] = "AudioPolicyService command thread may be deadlocked\n";
 
 static const int kDumpLockRetries = 50;
-static const int kDumpLockSleep = 20000;
+static const int kDumpLockSleepUs = 20000;
 
 static bool checkPermission() {
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
@@ -563,7 +563,7 @@ static bool tryLock(Mutex& mutex)
             locked = true;
             break;
         }
-        usleep(kDumpLockSleep);
+        usleep(kDumpLockSleepUs);
     }
     return locked;
 }
