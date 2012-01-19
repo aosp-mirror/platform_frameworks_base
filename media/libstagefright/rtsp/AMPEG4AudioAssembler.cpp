@@ -196,7 +196,7 @@ static status_t parseAudioSpecificConfig(ABitReader *bits, sp<ABuffer> *asc) {
 
         unsigned syncExtensionType = bits->getBits(11);
         if (syncExtensionType == 0x2b7) {
-            LOGI("found syncExtension");
+            ALOGI("found syncExtension");
 
             CHECK_EQ(parseAudioObjectType(bits, &extensionAudioObjectType),
                      (status_t)OK);
@@ -217,7 +217,7 @@ static status_t parseAudioSpecificConfig(ABitReader *bits, sp<ABuffer> *asc) {
                 // Apparently an extension is always considered an even
                 // multiple of 8 bits long.
 
-                LOGI("Skipping %d bits after sync extension",
+                ALOGI("Skipping %d bits after sync extension",
                      8 - (numBitsInExtension & 7));
 
                 bits->skipBits(8 - (numBitsInExtension & 7));
@@ -424,7 +424,7 @@ sp<ABuffer> AMPEG4AudioAssembler::removeLATMFraming(const sp<ABuffer> &buffer) {
     }
 
     if (offset < buffer->size()) {
-        LOGI("ignoring %d bytes of trailing data", buffer->size() - offset);
+        ALOGI("ignoring %d bytes of trailing data", buffer->size() - offset);
     }
     CHECK_LE(offset, buffer->size());
 

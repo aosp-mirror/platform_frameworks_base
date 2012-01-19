@@ -551,7 +551,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
         if (mNeedToReopenDevices) {
             mNeedToReopenDevices = false;
 
-            LOGI("Reopening all input devices due to a configuration change.");
+            ALOGI("Reopening all input devices due to a configuration change.");
 
             closeAllDevicesLocked();
             mNeedToScanDevices = true;
@@ -865,7 +865,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     for (size_t i = 0; i < mExcludedDevices.size(); i++) {
         const String8& item = mExcludedDevices.itemAt(i);
         if (identifier.name == item) {
-            LOGI("ignoring event id %s driver %s\n", devicePath, item.string());
+            ALOGI("ignoring event id %s driver %s\n", devicePath, item.string());
             close(fd);
             return -1;
         }
@@ -919,16 +919,16 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
     Device* device = new Device(fd, deviceId, String8(devicePath), identifier);
 
 #if 0
-    LOGI("add device %d: %s\n", deviceId, devicePath);
-    LOGI("  bus:       %04x\n"
+    ALOGI("add device %d: %s\n", deviceId, devicePath);
+    ALOGI("  bus:       %04x\n"
          "  vendor     %04x\n"
          "  product    %04x\n"
          "  version    %04x\n",
         identifier.bus, identifier.vendor, identifier.product, identifier.version);
-    LOGI("  name:      \"%s\"\n", identifier.name.string());
-    LOGI("  location:  \"%s\"\n", identifier.location.string());
-    LOGI("  unique id: \"%s\"\n", identifier.uniqueId.string());
-    LOGI("  driver:    v%d.%d.%d\n",
+    ALOGI("  name:      \"%s\"\n", identifier.name.string());
+    ALOGI("  location:  \"%s\"\n", identifier.location.string());
+    ALOGI("  unique id: \"%s\"\n", identifier.uniqueId.string());
+    ALOGI("  driver:    v%d.%d.%d\n",
         driverVersion >> 16, (driverVersion >> 8) & 0xff, driverVersion & 0xff);
 #endif
 
@@ -1077,7 +1077,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
         return -1;
     }
 
-    LOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
+    ALOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
             "configuration='%s', keyLayout='%s', keyCharacterMap='%s', builtinKeyboard=%s",
          deviceId, fd, devicePath, device->identifier.name.string(),
          device->classes,
@@ -1170,7 +1170,7 @@ void EventHub::closeAllDevicesLocked() {
 }
 
 void EventHub::closeDeviceLocked(Device* device) {
-    LOGI("Removed device: path=%s name=%s id=%d fd=%d classes=0x%x\n",
+    ALOGI("Removed device: path=%s name=%s id=%d fd=%d classes=0x%x\n",
          device->path.string(), device->identifier.name.string(), device->id,
          device->fd, device->classes);
 
@@ -1202,7 +1202,7 @@ void EventHub::closeDeviceLocked(Device* device) {
         // Unlink the device from the opening devices list then delete it.
         // We don't need to tell the client that the device was closed because
         // it does not even know it was opened in the first place.
-        LOGI("Device %s was immediately closed after opening.", device->path.string());
+        ALOGI("Device %s was immediately closed after opening.", device->path.string());
         if (pred) {
             pred->next = device->next;
         } else {
@@ -1248,7 +1248,7 @@ status_t EventHub::readNotifyLocked() {
             if(event->mask & IN_CREATE) {
                 openDeviceLocked(devname);
             } else {
-                LOGI("Removing device '%s' due to inotify event\n", devname);
+                ALOGI("Removing device '%s' due to inotify event\n", devname);
                 closeDeviceByPathLocked(devname);
             }
         }

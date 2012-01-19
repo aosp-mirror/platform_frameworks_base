@@ -704,7 +704,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         /* accept "all" to mean "all classes and packages" */
         if (strcmp(enableAssertBuf+4, "all") == 0)
             enableAssertBuf[3] = '\0';
-        LOGI("Assertions enabled: '%s'\n", enableAssertBuf);
+        ALOGI("Assertions enabled: '%s'\n", enableAssertBuf);
         opt.optionString = enableAssertBuf;
         mOptions.add(opt);
     } else {
@@ -712,7 +712,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     if (jniOptsBuf[10] != '\0') {
-        LOGI("JNI options: '%s'\n", jniOptsBuf);
+        ALOGI("JNI options: '%s'\n", jniOptsBuf);
         opt.optionString = jniOptsBuf;
         mOptions.add(opt);
     }
@@ -943,7 +943,7 @@ static int javaAttachThread(const char* threadName, JNIEnv** pEnv)
 
     result = vm->AttachCurrentThread(pEnv, (void*) &args);
     if (result != JNI_OK)
-        LOGI("NOTE: attach of thread '%s' failed\n", threadName);
+        ALOGI("NOTE: attach of thread '%s' failed\n", threadName);
 
     return result;
 }

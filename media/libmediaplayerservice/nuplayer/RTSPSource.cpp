@@ -226,7 +226,7 @@ void NuPlayer::RTSPSource::onMessageReceived(const sp<AMessage> &msg) {
             int32_t damaged;
             if (accessUnit->meta()->findInt32("damaged", &damaged)
                     && damaged) {
-                LOGI("dropping damaged access unit.");
+                ALOGI("dropping damaged access unit.");
                 break;
             }
 

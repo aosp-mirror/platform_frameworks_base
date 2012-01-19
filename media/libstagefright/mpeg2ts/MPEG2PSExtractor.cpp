@@ -315,7 +315,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
             unsigned descriptor_tag = br.getBits(8);
             unsigned descriptor_length = br.getBits(8);
 
-            LOGI("found descriptor tag 0x%02x of length %u",
+            ALOGI("found descriptor tag 0x%02x of length %u",
                  descriptor_tag, descriptor_length);
 
             if (offset + 2 + descriptor_length > program_stream_info_length) {
@@ -338,7 +338,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
             unsigned stream_type = br.getBits(8);
             unsigned elementary_stream_id = br.getBits(8);
 
-            LOGI("elementary stream id 0x%02x has stream type 0x%02x",
+            ALOGI("elementary stream id 0x%02x has stream type 0x%02x",
                  elementary_stream_id, stream_type);
 
             mStreamTypeByESID.add(elementary_stream_id, stream_type);
@@ -409,7 +409,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
             CHECK_EQ(br.getBits(1), 1u);
 
             ALOGV("PTS = %llu", PTS);
-            // LOGI("PTS = %.2f secs", PTS / 90000.0f);
+            // ALOGI("PTS = %.2f secs", PTS / 90000.0f);
 
             optional_bytes_remaining -= 5;
 
@@ -568,7 +568,7 @@ MPEG2PSExtractor::Track::Track(
     if (supported) {
         mQueue = new ElementaryStreamQueue(mode);
     } else {
-        LOGI("unsupported stream ID 0x%02x", stream_id);
+        ALOGI("unsupported stream ID 0x%02x", stream_id);
     }
 }
 

@@ -62,7 +62,7 @@
 // Macros for including the SurfaceTexture name in log messages
 #define ST_LOGV(x, ...) ALOGV("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGD(x, ...) ALOGD("[%s] "x, mName.string(), ##__VA_ARGS__)
-#define ST_LOGI(x, ...) LOGI("[%s] "x, mName.string(), ##__VA_ARGS__)
+#define ST_LOGI(x, ...) ALOGI("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGW(x, ...) LOGW("[%s] "x, mName.string(), ##__VA_ARGS__)
 #define ST_LOGE(x, ...) LOGE("[%s] "x, mName.string(), ##__VA_ARGS__)
 

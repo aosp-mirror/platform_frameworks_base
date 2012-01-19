@@ -159,7 +159,7 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             printf("access unit complete size=%d\tntp-time=0x%016llx\n",
                    accessUnit->size(), ntpTime);
 #else
-            LOGI("access unit complete, size=%d, ntp-time=%llu",
+            ALOGI("access unit complete, size=%d, ntp-time=%llu",
                  accessUnit->size(), ntpTime);
             hexdump(accessUnit->data(), accessUnit->size());
 #endif
@@ -170,7 +170,7 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             CHECK(!memcmp("\x00\x00\x00\x01", accessUnit->data(), 4));
             unsigned x = accessUnit->data()[4];
 
-            LOGI("access unit complete: nalType=0x%02x, nalRefIdc=0x%02x",
+            ALOGI("access unit complete: nalType=0x%02x, nalRefIdc=0x%02x",
                  x & 0x1f, (x & 0x60) >> 5);
 #endif
 
@@ -181,7 +181,7 @@ void ARTPSession::onMessageReceived(const sp<AMessage> &msg) {
             int32_t damaged;
             if (accessUnit->meta()->findInt32("damaged", &damaged)
                     && damaged != 0) {
-                LOGI("ignoring damaged AU");
+                ALOGI("ignoring damaged AU");
             } else
 #endif
             {

@@ -686,7 +686,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
             return;
         }
 
-        LOGI("Setting pointer speed to %d.", speed);
+        ALOGI("Setting pointer speed to %d.", speed);
         mLocked.pointerSpeed = speed;
     } // release lock
 
@@ -702,7 +702,7 @@ void NativeInputManager::setShowTouches(bool enabled) {
             return;
         }
 
-        LOGI("Setting show touches feature to %s.", enabled ? "enabled" : "disabled");
+        ALOGI("Setting show touches feature to %s.", enabled ? "enabled" : "disabled");
         mLocked.showTouches = enabled;
     } // release lock
 

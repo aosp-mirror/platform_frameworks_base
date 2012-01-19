@@ -168,7 +168,7 @@ status_t M3UParser::parse(const void *_data, size_t size) {
             line.setTo(&data[offset], offsetLF - offset);
         }
 
-        // LOGI("#%s#", line.c_str());
+        // ALOGI("#%s#", line.c_str());
 
         if (line.empty()) {
             offset = offsetLF + 1;

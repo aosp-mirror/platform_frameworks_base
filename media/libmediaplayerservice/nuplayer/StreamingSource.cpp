@@ -58,7 +58,7 @@ status_t NuPlayer::StreamingSource::feedMoreTSData() {
         ssize_t n = mStreamListener->read(buffer, sizeof(buffer), &extra);
 
         if (n == 0) {
-            LOGI("input data EOS reached.");
+            ALOGI("input data EOS reached.");
             mTSParser->signalEOS(ERROR_END_OF_STREAM);
             mFinalResult = ERROR_END_OF_STREAM;
             break;

@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.nobootanimation", value, "0");
     int noBootAnimation = atoi(value);
-    LOGI_IF(noBootAnimation,  "boot animation disabled");
+    ALOGI_IF(noBootAnimation,  "boot animation disabled");
     if (!noBootAnimation) {
 
         sp<ProcessState> proc(ProcessState::self());

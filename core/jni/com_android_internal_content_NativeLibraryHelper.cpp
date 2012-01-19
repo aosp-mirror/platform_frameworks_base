@@ -216,18 +216,18 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 
     if (strlcpy(localTmpFileName + nativeLibPath.size(), TMP_FILE_PATTERN,
                     TMP_FILE_PATTERN_LEN - nativeLibPath.size()) != TMP_FILE_PATTERN_LEN) {
-        LOGI("Couldn't allocate temporary file name for library");
+        ALOGI("Couldn't allocate temporary file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     int fd = mkstemp(localTmpFileName);
     if (fd < 0) {
-        LOGI("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGI("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     if (!zipFile->uncompressEntry(zipEntry, fd)) {
-        LOGI("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
+        ALOGI("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
         close(fd);
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
@@ -241,7 +241,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     times[1].tv_sec = modTime;
     times[0].tv_usec = times[1].tv_usec = 0;
     if (utimes(localTmpFileName, times) < 0) {
-        LOGI("Couldn't change modification time on %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGI("Couldn't change modification time on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
@@ -249,14 +249,14 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     // Set the mode to 755
     static const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |  S_IXGRP | S_IROTH | S_IXOTH;
     if (chmod(localTmpFileName, mode) < 0) {
-        LOGI("Couldn't change permissions on %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGI("Couldn't change permissions on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     // Finally, rename it to the final name.
     if (rename(localTmpFileName, localFileName) < 0) {
-        LOGI("Couldn't rename %s to %s: %s\n", localTmpFileName, localFileName, strerror(errno));
+        ALOGI("Couldn't rename %s to %s: %s\n", localTmpFileName, localFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
@@ -276,7 +276,7 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
     ZipFileRO zipFile;
 
     if (zipFile.open(filePath.c_str()) != NO_ERROR) {
-        LOGI("Couldn't open APK %s\n", filePath.c_str());
+        ALOGI("Couldn't open APK %s\n", filePath.c_str());
         return INSTALL_FAILED_INVALID_APK;
     }
 

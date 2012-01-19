@@ -207,7 +207,7 @@ status_t NativeInputQueue::unregisterInputChannel(JNIEnv* env, jobject inputChan
         connection->inputHandlerObjGlobal = NULL;
 
         if (connection->messageInProgress) {
-            LOGI("Sending finished signal for input channel '%s' since it is being unregistered "
+            ALOGI("Sending finished signal for input channel '%s' since it is being unregistered "
                     "while an input message is still in progress.",
                     connection->getInputChannelName());
             connection->messageInProgress = false;
@@ -244,7 +244,7 @@ status_t NativeInputQueue::finished(JNIEnv* env, jlong finishedToken,
         ssize_t connectionIndex = mConnectionsByReceiveFd.indexOfKey(receiveFd);
         if (connectionIndex < 0) {
             if (! ignoreSpuriousFinish) {
-                LOGI("Ignoring finish signal on channel that is no longer registered.");
+                ALOGI("Ignoring finish signal on channel that is no longer registered.");
             }
             return DEAD_OBJECT;
         }
@@ -252,7 +252,7 @@ status_t NativeInputQueue::finished(JNIEnv* env, jlong finishedToken,
         sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
         if (connectionId != connection->id) {
             if (! ignoreSpuriousFinish) {
-                LOGI("Ignoring finish signal on channel that is no longer registered.");
+                ALOGI("Ignoring finish signal on channel that is no longer registered.");
             }
             return DEAD_OBJECT;
         }
