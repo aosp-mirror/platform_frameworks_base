@@ -1,0 +1,611 @@
+page.title=Wi-Fi Direct
+
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#api">API Overview</a></li>
+        <li><a href="#creating-br">Creating a Broadcast Receiver for Wi-Fi Direct Intents</a></li>
+
+        <li>
+          <a href="#creating-app">Creating a Wi-Fi Direct Application</a>
+
+          <ol>
+            <li><a href="#setup">Initial setup</a></li>
+
+            <li><a href="#discovering">Discovering peers</a></li>
+
+            <li><a href="#connecting">Connecting to peers</a></li>
+
+            <li><a href="#transferring">Transferring data</a></li>
+          </ol>
+        </li>
+      </ol>
+      <h2>Related Samples</h2>
+      <ol>
+        <li><a href="{@docRoot}resources/samples/WiFiDirectDemo/index.html">Wi-Fi Direct Demo</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>Wi-Fi Direct allows Android 4.0 (API level 14) or later devices with the appropriate hardware
+  to connect directly to each other via Wi-Fi without an intermediate access point.
+  Using these APIs, you can discover and connect to other devices when each device supports Wi-Fi Direct,
+  then communicate over a speedy connection across distances much longer than a Bluetooth connection.
+  This is useful for applications that share data among users, such as a multiplayer game or
+  a photo sharing application.</p>
+
+  <p>The Wi-Fi Direct APIs consist of the following main parts:</p>
+
+  <ul>
+    <li>Methods that allow you to discover, request, and connect to peers are defined
+    in the {@link android.net.wifi.p2p.WifiP2pManager} class.</li>
+
+    <li>Listeners that allow you to be notified of the success or failure of {@link
+    android.net.wifi.p2p.WifiP2pManager} method calls. When calling {@link
+    android.net.wifi.p2p.WifiP2pManager} methods, each method can receive a specific listener
+    passed in as a parameter.</li>
+
+    <li>Intents that notify you of specific events detected by the Wi-Fi Direct framework,
+    such as a dropped connection or a newly discovered peer.</li>
+  </ul>
+
+  <p>You often use these three main components of the APIs together. For example, you can
+  provide a {@link android.net.wifi.p2p.WifiP2pManager.ActionListener} to a call to {@link
+  android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}, so that you can be
+  notified with the {@link android.net.wifi.p2p.WifiP2pManager.ActionListener#onSuccess
+  ActionListener.onSuccess()} and {@link android.net.wifi.p2p.WifiP2pManager.ActionListener#onFailure
+  ActionListener.onFailure()}
+  methods. A {@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION} intent is
+  also broadcast if the {@link android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}
+  method discovers that the peers list has changed.</p>
+  
+  <h2 id="api">API Overview</h2>
+
+<p>The {@link android.net.wifi.p2p.WifiP2pManager} class provides methods to allow you to interact with
+  the Wi-Fi hardware on your device to do things like discover and connect to peers. The following actions
+  are available:</p>
+
+<p class="table-caption"><strong>Table 1.</strong>Wi-Fi Direct Methods</p>
+
+   <table>
+        <tr>
+          <th>Method</th>
+          <th>Description</th>
+        </tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</td>
+	  <td>Registers the application with the Wi-Fi framework. This must be called before calling any other Wi-Fi Direct method.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#connect connect()}</td>
+	  <td>Starts a peer-to-peer connection with a device with the specified configuration.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#cancelConnect cancelConnect()}</td>
+	  <td>Cancels any ongoing peer-to-peer group negotiation.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#requestConnectionInfo requestConnectInfo()}</td>
+	  <td>Requests a device's connection information.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#createGroup createGroup()}</td>
+	  <td>Creates a peer-to-peer group with the current device as the group owner.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#removeGroup removeGroup()}</td>
+	  <td>Removes the current peer-to-peer group.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#requestGroupInfo requestGroupInfo()}</td>
+	  <td>Requests peer-to-peer group information.</td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}</td>
+	  <td>Initiates peer discovery </td>
+	</tr>
+
+	<tr>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()}</td>
+	  <td>Requests the current list of discovered peers.</td>
+	</tr>
+  </table>
+
+
+ <p>{@link android.net.wifi.p2p.WifiP2pManager} methods let you pass in a listener,
+  so that the Wi-Fi Direct framework can notify your
+  activity of the status of a call. The available listener interfaces and the
+  corresponding {@link android.net.wifi.p2p.WifiP2pManager} method calls that use the listeners
+  are described in the following table:</p>
+
+ <p class="table-caption"><strong>Table 2.</strong> Wi-Fi Direct Listeners</p>
+ 
+ <table>
+    <tr>
+      <th>Listener interface</th>
+      <th>Associated actions</th>
+    </tr>
+    <tr>
+    <td>{@link android.net.wifi.p2p.WifiP2pManager.ActionListener}</td>
+    <td>{@link android.net.wifi.p2p.WifiP2pManager#connect connect()}, {@link
+    android.net.wifi.p2p.WifiP2pManager#cancelConnect cancelConnect()}, {@link
+    android.net.wifi.p2p.WifiP2pManager#createGroup createGroup()}, {@link
+    android.net.wifi.p2p.WifiP2pManager#removeGroup removeGroup()}, and {@link
+    android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}</td>
+    </tr>
+
+    <tr>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager.ChannelListener}</td>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</td>
+    </tr>
+
+    <tr>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener}</td>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager#requestConnectionInfo requestConnectInfo()}</td>
+    </tr>
+
+    <tr>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager.GroupInfoListener}</td>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager#requestGroupInfo requestGroupInfo()}</td>
+    </tr>
+
+    <tr>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager.PeerListListener}</td>
+      <td>{@link android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()}</td>
+    </tr>
+  </table>
+
+<p>The Wi-Fi Direct APIs define intents that are broadcast when certain Wi-Fi Direct events happen,
+  such as when a new peer is discovered or when a device's Wi-Fi state changes. You can register
+  to receive these intents in your application by <a href="#creating-br">creating a broadcast
+  receiver</a> that handles these intents:</p>
+
+<p class="table-caption"><strong>Table 3.</strong> Wi-Fi Direct Intents</p>
+
+    <table>
+    <tr>
+      <th>Intent</th>
+      <th>Description</th>
+    </tr>
+      <tr>
+        <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_CONNECTION_CHANGED_ACTION}</td>
+        <td>Broadcast when the state of the device's Wi-Fi connection changes.</td>
+      </tr>
+      <tr>
+        <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION}</td>
+        <td>Broadcast when you call {@link
+    android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}. You
+    usually want to call {@link android.net.wifi.p2p.WifiP2pManager.PeerListListener#requestPeers
+    requestPeers()} to get an updated list of peers if you handle this intent in your
+    application.</td>
+      </tr>
+      <tr>
+        <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION}</td>
+        <td>Broadcast when Wi-Fi Direct is enabled or disabled on the device.</td>
+      </tr>
+      <tr>
+        <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_THIS_DEVICE_CHANGED_ACTION}</td>
+        <td>Broadcast when a device's details have changed, such as the device's name.</td>
+      </tr>
+    </table>
+
+
+
+  <h2 id="creating-br">Creating a Broadcast Receiver for Wi-Fi Direct Intents</h2>
+
+  <p>A broadcast receiver allows you to receive intents broadcast by the Android system,
+  so that your application can respond to events that you are interested in. The basic steps
+  for creating a broadcast receiver to handle Wi-Fi Direct intents are as follows:</p>
+
+  <ol>
+    <li>Create a class that extends the {@link android.content.BroadcastReceiver} class. For the
+    class' constructor, you most likely want to have parameters for the {@link
+    android.net.wifi.p2p.WifiP2pManager}, {@link android.net.wifi.p2p.WifiP2pManager.Channel}, and
+    the activity that this broadcast receiver will be registered in. This allows the broadcast
+    receiver to send updates to the activity as well as have access to the Wi-Fi hardware and a
+    communication channel if needed.</li>
+
+    <li>In the broadcast receiver, check for the intents that you are interested in
+    <code>{@link android.content.BroadcastReceiver#onReceive onReceive()}</code>.
+    Carry out any necessary actions depending on the intent that is
+    received. For example, if the broadcast receiver receives a {@link
+    android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION} intent, you can call the
+    {@link android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()} method to get a list of
+    the currently discovered peers.</li>
+  </ol>
+
+  <p>The following code shows you how to create a typical broadcast receiver. The broadcast
+  receiver takes a {@link android.net.wifi.p2p.WifiP2pManager} object and an activity as
+  arguments and uses these two classes to appropriately carry out the needed actions when the
+  broadcast receiver receives an intent:</p>
+
+<pre>
+/**
+ * A BroadcastReceiver that notifies of important Wi-Fi p2p events.
+ */
+public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
+
+    private WifiP2pManager manager;
+    private Channel channel;
+    private MyWiFiActivity activity;
+
+    public WiFiDirectBroadcastReceiver(WifiP2pManager manager, Channel channel,
+            MyWifiActivity activity) {
+        super();
+        this.manager = manager;
+        this.channel = channel;
+        this.activity = activity;
+    }
+
+    &#064;Override
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+
+        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+            // Check to see if Wi-Fi is enabled and notify appropriate activity
+        } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+            // Call WifiP2pManager.requestPeers() to get a list of current peers
+        } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
+            // Respond to new connection or disconnections
+        } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
+            // Respond to this device's wifi state changing
+        }
+    }
+}
+</pre>
+
+  <h2 id="creating-app">Creating a Wi-Fi Direct Application</h2>
+
+  <p>Creating a Wi-Fi Direct application involves creating and registering a
+  broadcast receiver for your application, discovering peers, connecting to a peer, and
+  transferring data to a peer. The following sections describe how to do this.</p>
+
+  <h3 id="setup">Initial setup</h3>
+  <p>Before using the Wi-Fi Direct APIs, you must ensure that your application can access
+  the hardware and that the device supports the Wi-Fi Direct protocol. If Wi-Fi Direct is supported,
+  you can obtain an instance of {@link android.net.wifi.p2p.WifiP2pManager}, create and register
+  your broadcast receiver, and begin using the Wi-Fi Direct APIs.</p>
+  <ol>
+    <li>
+      <p>Request permission to use the Wi-Fi hardware on the device and also declare
+      your application to have the correct minimum SDK version in the Android manifest:</p>
+      <pre>
+&lt;uses-sdk android:minSdkVersion="14" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /&gt;
+&lt;uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /&gt;
+&lt;uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /&gt;
+&lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+</pre>
+    </li>
+
+    <li>Check to see if Wi-Fi Direct is on and supported. A good place to check this is in your
+    broadcast receiver when it receives the {@link
+    android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_STATE_CHANGED_ACTION} intent. Notify your
+    activity of the Wi-Fi Direct state and react accordingly:
+<pre>
+&#064;Override
+public void onReceive(Context context, Intent intent) {
+    ...
+    String action = intent.getAction();
+    if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+        int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+        if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+            // Wifi Direct is enabled
+        } else {
+            // Wi-Fi Direct is not enabled
+        }
+    }
+    ...
+}
+</pre>
+    </li>
+
+    <li>In your activity's {@link android.app.Activity#onCreate onCreate()} method, obtain an instance of {@link
+    android.net.wifi.p2p.WifiP2pManager} and register your application with the Wi-Fi Direct
+    framework by calling {@link android.net.wifi.p2p.WifiP2pManager#initialize initialize()}. This
+    method returns a {@link android.net.wifi.p2p.WifiP2pManager.Channel}, which is used to connect
+    your application to the Wi-Fi Direct framework. You should also create an instance of your
+    broadcast receiver with the {@link
+    android.net.wifi.p2p.WifiP2pManager} and {@link android.net.wifi.p2p.WifiP2pManager.Channel}
+    objects along with a reference to your activity. This allows your broadcast receiver to notify
+    your activity of interesting events and update it accordingly. It also lets you manipulate the device's
+    Wi-Fi state if necessary:
+<pre>
+WifiP2pManager mManager;
+Channel mChannel;
+BroadcastReceiver mReceiver;
+...
+&#064;Override
+protected void onCreate(Bundle savedInstanceState){
+    ...
+    mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+    mChannel = mManager.initialize(this, getMainLooper(), null);
+    Receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+    ...
+}
+</pre>
+    </li>
+
+    <li>Create an intent filter and add the same intents that your
+    broadcast receiver checks for:
+      <pre>
+IntentFilter mIntentFilter;
+...
+&#064;Override
+protected void onCreate(Bundle savedInstanceState){
+    ...
+    mIntentFilter = new IntentFilter();
+    mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+    mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+    mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+    mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+    ...
+}
+</pre>
+    </li>
+
+    <li>Register the broadcast receiver in the {@link android.app.Activity#onResume()} method
+    of your activity and unregister it in the {@link android.app.Activity#onPause()} method of your activity:
+      <pre>
+/* register the broadcast receiver with the intent values to be matched */
+&#064;Override
+protected void onResume() {
+    super.onResume();
+    registerReceiver(receiver, intentFilter);
+}
+/* unregister the broadcast receiver */
+&#064;Override
+protected void onPause() {
+    super.onPause();
+    unregisterReceiver(receiver);
+}
+</pre>
+
+      <p>When you have obtained a {@link android.net.wifi.p2p.WifiP2pManager.Channel} and
+      set up a broadcast receiver, your application can make Wi-Fi Direct method calls and receive
+      Wi-Fi Direct intents.</p>
+    </li>
+
+    <p>You can now implement your application and use the Wi-Fi Direct features by calling the
+    methods in {@link android.net.wifi.p2p.WifiP2pManager}. The next sections describe how to do common actions
+    such as discovering and connecting to peers.</p>
+  </ol>
+
+  <h3 id="discovering">Discovering peers</h3>
+
+  <p>To discover peers that are available to connect to, call {@link
+  android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()} to detect
+  available peers that are in range. The call to this function is asynchronous and a success or
+  failure is communicated to your application with {@link
+  android.net.wifi.p2p.WifiP2pManager.ActionListener#onSuccess onSuccess()} and {@link
+  android.net.wifi.p2p.WifiP2pManager.ActionListener#onFailure onFailure()} if you created a 
+  {@link android.net.wifi.p2p.WifiP2pManager.ActionListener}. The
+  {@link android.net.wifi.p2p.WifiP2pManager.ActionListener#onSuccess onSuccess()} method only notifies you
+  that the discovery process succeeded and does not provide any information about the actual peers
+  that it discovered, if any:</p>
+  <pre>
+manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+    &#064;Override
+    public void onSuccess() {
+        ...
+    }
+
+    &#064;Override
+    public void onFailure(int reasonCode) {
+        ...
+    }
+});
+
+</pre>
+
+<p>If the discovery process succeeds and detects peers, the system broadcasts the {@link
+  android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION} intent, which you can listen
+  for in a broadcast receiver to obtain a list of peers. When your application receives the {@link
+  android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION} intent, you can request a
+  list of the discovered peers with {@link
+  android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()}. The following code shows how to set this up:</p>
+  <pre>
+PeerListListener myPeerListListener;
+...
+if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+
+    // request available peers from the wifi p2p manager. This is an
+    // asynchronous call and the calling activity is notified with a
+    // callback on PeerListListener.onPeersAvailable()
+    if (manager != null) {
+        manager.requestPeers(channel, myPeerListListener);
+    }
+}
+</pre>
+
+  <p>The {@link android.net.wifi.p2p.WifiP2pManager#requestPeers requestPeers()} method is also
+  asynchronous and can notify your activity when a list of peers is available with {@link
+  android.net.wifi.p2p.WifiP2pManager.PeerListListener#onPeersAvailable onPeersAvailable()}, which is defined in the
+  the {@link android.net.wifi.p2p.WifiP2pManager.PeerListListener} interface. The {@link
+  android.net.wifi.p2p.WifiP2pManager.PeerListListener#onPeersAvailable onPeersAvailable()} method
+  provides you with an {@link android.net.wifi.p2p.WifiP2pDeviceList}, which you can iterate
+  through to find the peer that you want to connect to.</p>
+
+  <h3 id="connecting">Connecting to peers</h3>
+
+  <p>When you have figured out the device that you want to connect to after obtaining a list of
+  possible peers, call the {@link android.net.wifi.p2p.WifiP2pManager#connect connect()} method to
+  connect to the device. This method call requires a {@link android.net.wifi.p2p.WifiP2pConfig}
+  object that contains the information of the device to connect to.
+  You can be notified of a connection success or failure through the {@link
+  android.net.wifi.p2p.WifiP2pManager.ActionListener}. The following code
+  shows you how to create a connection to a desired device:</p>
+  <pre>
+//obtain a peer from the WifiP2pDeviceList
+WifiP2pDevice device;
+WifiP2pConfig config = new WifiP2pConfig();
+config.deviceAddress = device.deviceAddress;
+manager.connect(channel, config, new ActionListener() {
+
+    &#064;Override
+    public void onSuccess() {
+        //success logic
+    }
+
+    &#064;Override
+    public void onFailure(int reason) {
+        //failure logic
+    }
+});
+
+</pre>
+
+
+  <h3 id="transferring">Transferring data</h3>
+  <p>Once a connection is established, you can transfer data between the devices with
+  sockets. The basic steps of transferring data are as follows:</p>
+
+  <ol>
+    <li>Create a {@link java.net.ServerSocket}. This socket waits for a connection from a client on a specified
+    port and blocks until it happens, so do this in a background thread.</li>
+
+    <li>Create a client {@link java.net.Socket}. The client uses the IP address and port of
+    the server socket to connect to the server device.</li>
+
+    <li>Send data from the client to the server. When the client
+    socket successfully connects to the server socket, you can send data from the client to the server
+    with byte streams. </li>
+
+    <li>The server socket waits for a client connection (with the {@link java.net.ServerSocket#accept()} method). This
+    call blocks until a client connects, so call this is another thread. When a connection happens, the server device can receive
+    the data from the client. Carry out any actions with this data, such as saving it to a file
+    or presenting it to the user.</li>
+  </ol>
+
+  <p>The following example, modified from the <a href=
+  "{@docRoot}resources/samples/WifiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample, shows you how
+  to create this client-server socket communication and transfer JPEG images from a client
+  to a server with a service. For a complete working example, compile and run the <a href=
+  "{@docRoot}resources/samples/WifiDirectDemo/index.html">Wi-Fi Direct Demo</a> sample.</p>
+<pre>
+public static class FileServerAsyncTask extends AsyncTask<Void, Void, String> {
+
+    private Context context;
+    private TextView statusText;
+
+    public FileServerAsyncTask(Context context, View statusText) {
+        this.context = context;
+        this.statusText = (TextView) statusText;
+    }
+
+    &#064;Override
+    protected String doInBackground(Void... params) {
+        try {
+
+            /**
+             * Create a server socket and wait for client connections. This
+             * call blocks until a connection is accepted from a client
+             */
+            ServerSocket serverSocket = new ServerSocket(8888);
+            Socket client = serverSocket.accept();
+
+            /**
+             * If this code is reached, a client has connected and transferred data
+             * Save the input stream from the client as a JPEG file
+             */
+            final File f = new File(Environment.getExternalStorageDirectory() + "/"
+                    + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
+                    + ".jpg");
+
+            File dirs = new File(f.getParent());
+            if (!dirs.exists())
+                dirs.mkdirs();
+            f.createNewFile();
+            InputStream inputstream = client.getInputStream();
+            copyFile(inputstream, new FileOutputStream(f));
+            serverSocket.close();
+            return f.getAbsolutePath();
+        } catch (IOException e) {
+            Log.e(WiFiDirectActivity.TAG, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Start activity that can handle the JPEG image
+     */
+    &#064;Override
+    protected void onPostExecute(String result) {
+        if (result != null) {
+            statusText.setText("File copied - " + result);
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+            context.startActivity(intent);
+        }
+    }
+}
+</pre>
+
+  <p>On the client, connect to the server socket with a client socket and transfer data. This example
+  transfers a JPEG file on the client device's file system.</p>
+
+<pre>
+Context context = this.getApplicationContext();
+String host;
+int port;
+int len;
+Socket socket = new Socket();
+byte buf[]  = new byte[1024];
+...
+try {
+    /**
+     * Create a client socket with the host,
+     * port, and timeout information.
+     */
+    socket.bind(null);
+    socket.connect((new InetSocketAddress(host, port)), 500);
+
+    /**
+     * Create a byte stream from a JPEG file and pipe it to the output stream
+     * of the socket. This data will be retrieved by the server device.
+     */
+    OutputStream outputStream = socket.getOutputStream();
+    ContentResolver cr = context.getContentResolver();
+    InputStream inputStream = null;
+    inputStream = cr.openInputStream(Uri.parse("path/to/picture.jpg"));
+    while ((len = inputStream.read(buf)) != -1) {
+        outputStream.write(buf, 0, len);
+    }
+    outputStream.close();
+    inputStream.close();
+} catch (FileNotFoundException e) {
+    //catch logic
+} catch (IOException e) {
+    //catch logic
+}
+
+/**
+ * Clean up any open sockets when done
+ * transferring or if an exception occurred.
+ */
+finally {
+    if (socket != null) {
+        if (socket.isConnected()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                //catch logic
+            }
+        }
+    }
+}
+</pre>
