@@ -62,16 +62,23 @@ struct audio_track_cblk_t
     // are in the same line of data cache.
                 Mutex       lock;           // sizeof(int)
                 Condition   cv;             // sizeof(int)
+
+                // next 4 are offsets within "buffers"
     volatile    uint32_t    user;
     volatile    uint32_t    server;
                 uint32_t    userBase;
                 uint32_t    serverBase;
+
+                // if there is a shared buffer, "buffers" is the value of pointer() for the shared
+                // buffer, otherwise "buffers" points immediately after the control block
                 void*       buffers;
                 uint32_t    frameCount;
+
                 // Cache line boundary
+
                 uint32_t    loopStart;
-                uint32_t    loopEnd;
-                int         loopCount;
+                uint32_t    loopEnd;        // read-only for server, read/write for client
+                int         loopCount;      // read/write for client
 
                 // Channel volumes are fixed point U4.12, so 0x1000 means 1.0.
                 // Left channel is in [0:15], right channel is in [16:31].
@@ -82,29 +89,39 @@ private:
 public:
 
                 uint32_t    sampleRate;
+
                 // NOTE: audio_track_cblk_t::frameSize is not equal to AudioTrack::frameSize() for
                 // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
                 // 16 bit because data is converted to 16 bit before being stored in buffer
 
+                // read-only for client, server writes once at initialization and is then read-only
                 uint8_t     frameSize;       // would normally be size_t, but 8 bits is plenty
+
+                // never used
                 uint8_t     pad1;
+
+                // used by client only
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
 
-                uint16_t    waitTimeMs;      // Cumulated wait time
+                uint16_t    waitTimeMs;      // Cumulated wait time, used by client only
 private:
+                // client write-only, server read-only
                 uint16_t    mSendLevel;      // Fixed point U4.12 so 0x1000 means 1.0
 public:
     volatile    int32_t     flags;
 
                 // Cache line boundary (32 bytes)
 
+                // Since the control block is always located in shared memory, this constructor
+                // is only used for placement new().  It is never used for regular new() or stack.
                             audio_track_cblk_t();
-                uint32_t    stepUser(uint32_t frameCount);
-                bool        stepServer(uint32_t frameCount);
+                uint32_t    stepUser(uint32_t frameCount);      // called by client only, where
+                // client includes regular AudioTrack and AudioFlinger::PlaybackThread::OutputTrack
+                bool        stepServer(uint32_t frameCount);    // called by server only
                 void*       buffer(uint32_t offset) const;
                 uint32_t    framesAvailable();
                 uint32_t    framesAvailable_l();
-                uint32_t    framesReady();
+                uint32_t    framesReady();                      // called by server only
                 bool        tryLock();
 
                 // No barriers on the following operations, so the ordering of loads/stores

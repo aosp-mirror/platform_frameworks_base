@@ -46,12 +46,12 @@ public:
 
     /* Stop a track. If set, the callback will cease being called and
      * obtainBuffer will return an error. Buffers that are already released 
-     * will be processed, unless flush() is called.
+     * will continue to be processed, unless/until flush() is called.
      */
     virtual void        stop() = 0;
 
-    /* Flush a stopped track. All pending buffers are discarded.
-     * This function has no effect if the track is not stopped.
+    /* Flush a stopped or paused track. All pending/released buffers are discarded.
+     * This function has no effect if the track is not stopped or paused.
      */
     virtual void        flush() = 0;
 
@@ -62,7 +62,7 @@ public:
     
     /* Pause a track. If set, the callback will cease being called and
      * obtainBuffer will return an error. Buffers that are already released 
-     * will be processed, unless flush() is called.
+     * will continue to be processed, unless/until flush() is called.
      */
     virtual void        pause() = 0;
 

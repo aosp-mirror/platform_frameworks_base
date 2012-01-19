@@ -791,7 +791,7 @@ const unsigned char /*tone_type*/ ToneGenerator::sToneMappingTable[NUM_REGIONS-1
 //        generators, instantiates output audio track.
 //
 //    Input:
-//        streamType:        Type of stream used for tone playback (enum AudioTrack::stream_type)
+//        streamType:        Type of stream used for tone playback
 //        volume:            volume applied to tone (0.0 to 1.0)
 //
 //    Output:

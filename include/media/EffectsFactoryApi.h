@@ -87,7 +87,7 @@ int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor);
 //    Description:    Creates an effect engine of the specified type and returns an
 //          effect control interface on this engine. The function will allocate the
 //          resources for an instance of the requested effect engine and return
-//          a handler on the effect control interface.
+//          a handle on the effect control interface.
 //
 //    Input:
 //          pEffectUuid:    pointer to the effect uuid.
@@ -115,17 +115,17 @@ int EffectCreate(const effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t io
 //
 //    Function:       EffectRelease
 //
-//    Description:    Releases the effect engine whose handler is given as argument.
+//    Description:    Releases the effect engine whose handle is given as argument.
 //          All resources allocated to this particular instance of the effect are
 //          released.
 //
 //    Input:
-//          handle:    handler on the effect interface to be released.
+//          handle:    handle on the effect interface to be released.
 //
 //    Output:
 //        returned value:    0          successful operation.
 //                          -ENODEV     factory failed to initialize
-//                          -EINVAL     invalid interface handler
+//                          -EINVAL     invalid interface handle
 //
 ////////////////////////////////////////////////////////////////////////////////
 int EffectRelease(effect_handle_t handle);

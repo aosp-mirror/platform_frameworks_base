@@ -66,7 +66,7 @@ public:
             ssize_t         indexOfKey(const KEY& key) const;
 
     /*!
-     * modifing the array
+     * modifying the array
      */
 
             VALUE&          editValueFor(const KEY& key);

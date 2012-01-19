@@ -1,4 +1,4 @@
-/* //device/extlibs/pv/android/IAudioTrack.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
