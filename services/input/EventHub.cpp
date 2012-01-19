@@ -156,8 +156,6 @@ EventHub::EventHub(void) :
         mPendingEventCount(0), mPendingEventIndex(0), mPendingINotify(false) {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 
-    mNumCpus = sysconf(_SC_NPROCESSORS_ONLN);
-
     mEpollFd = epoll_create(EPOLL_SIZE_HINT);
     LOG_ALWAYS_FATAL_IF(mEpollFd < 0, "Could not create epoll instance.  errno=%d", errno);
 
@@ -775,19 +773,6 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
         } else {
             // Some events occurred.
             mPendingEventCount = size_t(pollResult);
-
-            // On an SMP system, it is possible for the framework to read input events
-            // faster than the kernel input device driver can produce a complete packet.
-            // Because poll() wakes up as soon as the first input event becomes available,
-            // the framework will often end up reading one event at a time until the
-            // packet is complete.  Instead of one call to read() returning 71 events,
-            // it could take 71 calls to read() each returning 1 event.
-            //
-            // Sleep for a short period of time after waking up from the poll() to give
-            // the kernel time to finish writing the entire packet of input events.
-            if (mNumCpus > 1) {
-                usleep(250);
-            }
         }
     }
 
