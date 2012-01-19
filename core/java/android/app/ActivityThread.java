@@ -486,7 +486,6 @@ public final class ActivityThread {
         private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%21s %8d";
         private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
-        private static final String TWO_COUNT_COLUMNS_DB = "%21s %8d %21s %8d";
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         // Formatting for checkin service - update version if row format changes
@@ -867,7 +866,6 @@ public final class ActivityThread {
             int binderProxyObjectCount = Debug.getBinderProxyObjectCount();
             int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
             long openSslSocketCount = Debug.countInstancesOfClass(OpenSSLSocketImpl.class);
-            long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
             // For checkin, we print one long comma-separated list of values
@@ -935,9 +933,9 @@ public final class ActivityThread {
                 pw.print(openSslSocketCount); pw.print(',');
 
                 // SQL
-                pw.print(sqliteAllocated); pw.print(',');
                 pw.print(stats.memoryUsed / 1024); pw.print(',');
-                pw.print(stats.pageCacheOverflo / 1024); pw.print(',');
+                pw.print(stats.memoryUsed / 1024); pw.print(',');
+                pw.print(stats.pageCacheOverflow / 1024); pw.print(',');
                 pw.print(stats.largestMemAlloc / 1024);
                 for (int i = 0; i < stats.dbStats.size(); i++) {
                     DbStats dbStats = stats.dbStats.get(i);
@@ -1003,10 +1001,9 @@ public final class ActivityThread {
             // SQLite mem info
             pw.println(" ");
             pw.println(" SQL");
-            printRow(pw, TWO_COUNT_COLUMNS_DB, "heap:", sqliteAllocated, "MEMORY_USED:",
-                    stats.memoryUsed / 1024);
-            printRow(pw, TWO_COUNT_COLUMNS_DB, "PAGECACHE_OVERFLOW:",
-                    stats.pageCacheOverflo / 1024, "MALLOC_SIZE:", stats.largestMemAlloc / 1024);
+            printRow(pw, ONE_COUNT_COLUMN, "MEMORY_USED:", stats.memoryUsed / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS, "PAGECACHE_OVERFLOW:",
+                    stats.pageCacheOverflow / 1024, "MALLOC_SIZE:", stats.largestMemAlloc / 1024);
             pw.println(" ");
             int N = stats.dbStats.size();
             if (N > 0) {

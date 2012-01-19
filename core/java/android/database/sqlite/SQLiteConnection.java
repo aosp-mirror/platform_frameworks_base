@@ -84,6 +84,7 @@ import java.util.regex.Pattern;
  */
 public final class SQLiteConnection {
     private static final String TAG = "SQLiteConnection";
+    private static final boolean DEBUG = false;
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -668,11 +669,12 @@ public final class SQLiteConnection {
                 // When remove() is called, the cache will invoke its entryRemoved() callback,
                 // which will in turn call finalizePreparedStatement() to finalize and
                 // recycle the statement.
-                if (SQLiteDebug.DEBUG_SQL_CACHE) {
-                    Log.v(TAG, "Could not reset prepared statement due to an exception.  "
+                if (DEBUG) {
+                    Log.d(TAG, "Could not reset prepared statement due to an exception.  "
                             + "Removing it from the cache.  SQL: "
                             + trimSqlForDisplay(statement.mSql), ex);
                 }
+
                 mPreparedStatementCache.remove(statement.mSql);
             }
         } else {
@@ -995,7 +997,7 @@ public final class SQLiteConnection {
     }
 
     private static final class OperationLog {
-        private static final int MAX_RECENT_OPERATIONS = 10;
+        private static final int MAX_RECENT_OPERATIONS = 20;
         private static final int COOKIE_GENERATION_SHIFT = 8;
         private static final int COOKIE_INDEX_MASK = 0xff;
 
