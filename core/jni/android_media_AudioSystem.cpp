@@ -28,7 +28,6 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include <media/AudioSystem.h>
-#include <media/AudioTrack.h>
 
 #include <system/audio.h>
 #include <system/audio_policy.h>

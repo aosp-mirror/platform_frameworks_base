@@ -30,7 +30,7 @@
 #include <gui/SurfaceTextureClient.h>
 
 #include <media/mediaplayer.h>
-#include <media/AudioTrack.h>
+#include <media/AudioSystem.h>
 
 #include <surfaceflinger/Surface.h>
 
