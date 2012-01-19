@@ -269,7 +269,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                         mStackTrace);
                 }
                 close();
-                SQLiteDebug.notifyActiveCursorFinalized();
             }
         } finally {
             super.finalize();
