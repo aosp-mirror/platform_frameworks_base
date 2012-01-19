@@ -160,7 +160,7 @@ struct id3_header {
             success = removeUnsynchronizationV2_4(true /* iTunesHack */);
 
             if (success) {
-                LOGV("Had to apply the iTunes hack to parse this ID3 tag");
+                ALOGV("Had to apply the iTunes hack to parse this ID3 tag");
             }
         }
 
@@ -174,7 +174,7 @@ struct id3_header {
             return false;
         }
     } else if (header.flags & 0x80) {
-        LOGV("removing unsynchronization");
+        ALOGV("removing unsynchronization");
 
         removeUnsynchronization();
     }
@@ -219,7 +219,7 @@ struct id3_header {
             }
 
             if (extendedFlags & 0x8000) {
-                LOGV("have crc");
+                ALOGV("have crc");
             }
         }
     } else if (header.version_major == 4 && (header.flags & 0x40)) {
@@ -580,7 +580,7 @@ void ID3::Iterator::findFrame() {
             mFrameSize += 6;
 
             if (mOffset + mFrameSize > mParent.mSize) {
-                LOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
+                ALOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
                      mOffset, mFrameSize, mParent.mSize - mOffset - 6);
                 return;
             }
@@ -621,7 +621,7 @@ void ID3::Iterator::findFrame() {
             mFrameSize = 10 + baseSize;
 
             if (mOffset + mFrameSize > mParent.mSize) {
-                LOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
+                ALOGV("partial frame at offset %d (size = %d, bytes-remaining = %d)",
                      mOffset, mFrameSize, mParent.mSize - mOffset - 10);
                 return;
             }
@@ -634,7 +634,7 @@ void ID3::Iterator::findFrame() {
                 // Per-frame unsynchronization and data-length indicator
                 // have already been taken care of.
 
-                LOGV("Skipping unsupported frame (compression, encryption "
+                ALOGV("Skipping unsupported frame (compression, encryption "
                      "or per-frame unsynchronization flagged");
 
                 mOffset += mFrameSize;

@@ -450,7 +450,7 @@ void rsdScriptSetGlobalVar(const Context *dc, const Script *script,
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {
-        //LOGV("Calling setVar on slot = %i which is null", slot);
+        //ALOGV("Calling setVar on slot = %i which is null", slot);
         return;
     }
 
@@ -464,7 +464,7 @@ void rsdScriptSetGlobalBind(const Context *dc, const Script *script, uint32_t sl
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {
-        //LOGV("Calling setVar on slot = %i which is null", slot);
+        //ALOGV("Calling setVar on slot = %i which is null", slot);
         return;
     }
 
@@ -478,7 +478,7 @@ void rsdScriptSetGlobalObj(const Context *dc, const Script *script, uint32_t slo
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {
-        //LOGV("Calling setVar on slot = %i which is null", slot);
+        //ALOGV("Calling setVar on slot = %i which is null", slot);
         return;
     }
 

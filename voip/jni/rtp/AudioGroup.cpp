@@ -269,7 +269,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
         mTick += skipped * mInterval;
         mSequence += skipped;
         mTimestamp += skipped * mSampleCount;
-        LOGV("stream[%d] skips %d packets", mSocket, skipped);
+        ALOGV("stream[%d] skips %d packets", mSocket, skipped);
     }
 
     tick = mTick;
@@ -334,7 +334,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
         memset(samples, 0, sizeof(samples));
 
         if (mMode != RECEIVE_ONLY) {
-            LOGV("stream[%d] no data", mSocket);
+            ALOGV("stream[%d] no data", mSocket);
         }
     }
 
@@ -350,7 +350,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     buffer[2] = mSsrc;
     int length = mCodec->encode(&buffer[3], samples);
     if (length <= 0) {
-        LOGV("stream[%d] encoder error", mSocket);
+        ALOGV("stream[%d] encoder error", mSocket);
         return;
     }
     sendto(mSocket, buffer, length + 12, MSG_DONTWAIT, (sockaddr *)&mRemote,
@@ -386,7 +386,7 @@ void AudioStream::decode(int tick)
         mLatencyScore = score;
         mLatencyTimer = tick;
     } else if (tick - mLatencyTimer >= MEASURE_PERIOD) {
-        LOGV("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
+        ALOGV("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
         mBufferTail -= mLatencyScore;
         mLatencyScore = -1;
     }
@@ -394,7 +394,7 @@ void AudioStream::decode(int tick)
     int count = (BUFFER_SIZE - (mBufferTail - mBufferHead)) * mSampleRate;
     if (count < mSampleCount) {
         // Buffer overflow. Drop the packet.
-        LOGV("stream[%d] buffer overflow", mSocket);
+        ALOGV("stream[%d] buffer overflow", mSocket);
         recv(mSocket, &c, 1, MSG_DONTWAIT);
         return;
     }
@@ -417,7 +417,7 @@ void AudioStream::decode(int tick)
         // reliable but at least they can be used to identify duplicates?
         if (length < 12 || length > (int)sizeof(buffer) ||
             (ntohl(*(uint32_t *)buffer) & 0xC07F0000) != mCodecMagic) {
-            LOGV("stream[%d] malformed packet", mSocket);
+            ALOGV("stream[%d] malformed packet", mSocket);
             return;
         }
         int offset = 12 + ((buffer[0] & 0x0F) << 2);
@@ -438,13 +438,13 @@ void AudioStream::decode(int tick)
         count = length;
     }
     if (count <= 0) {
-        LOGV("stream[%d] decoder error", mSocket);
+        ALOGV("stream[%d] decoder error", mSocket);
         return;
     }
 
     if (tick - mBufferTail > 0) {
         // Buffer underrun. Reset the jitter buffer.
-        LOGV("stream[%d] buffer underrun", mSocket);
+        ALOGV("stream[%d] buffer underrun", mSocket);
         if (mBufferTail - mBufferHead <= 0) {
             mBufferHead = tick + mInterval;
             mBufferTail = mBufferHead;
@@ -913,7 +913,7 @@ bool AudioGroup::DeviceThread::threadLoop()
 
         if (mode != MUTED) {
             if (echo != NULL) {
-                LOGV("echo->run()");
+                ALOGV("echo->run()");
                 echo->run(output, input);
             }
             send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);

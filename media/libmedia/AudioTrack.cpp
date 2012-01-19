@@ -121,7 +121,7 @@ AudioTrack::AudioTrack(
 
 AudioTrack::~AudioTrack()
 {
-    LOGV_IF(mSharedBuffer != 0, "Destructor sharedBuffer: %p", mSharedBuffer->pointer());
+    ALOGV_IF(mSharedBuffer != 0, "Destructor sharedBuffer: %p", mSharedBuffer->pointer());
 
     if (mStatus == NO_ERROR) {
         // Make sure that callback function exits in the case where
@@ -153,7 +153,7 @@ status_t AudioTrack::set(
         int sessionId)
 {
 
-    LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
+    ALOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
     AutoMutex lock(mLock);
     if (mAudioTrack != 0) {
@@ -319,7 +319,7 @@ void AudioTrack::start()
     sp<AudioTrackThread> t = mAudioTrackThread;
     status_t status = NO_ERROR;
 
-    LOGV("start %p", this);
+    ALOGV("start %p", this);
     if (t != 0) {
         if (t->exitPending()) {
             if (t->requestExitAndWait() == WOULD_BLOCK) {
@@ -351,7 +351,7 @@ void AudioTrack::start()
             setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
         }
 
-        LOGV("start %p before lock cblk %p", this, mCblk);
+        ALOGV("start %p before lock cblk %p", this, mCblk);
         if (!(cblk->flags & CBLK_INVALID_MSK)) {
             cblk->lock.unlock();
             status = mAudioTrack->start();
@@ -365,7 +365,7 @@ void AudioTrack::start()
         }
         cblk->lock.unlock();
         if (status != NO_ERROR) {
-            LOGV("start() failed");
+            ALOGV("start() failed");
             mActive = 0;
             if (t != 0) {
                 t->requestExit();
@@ -384,7 +384,7 @@ void AudioTrack::stop()
 {
     sp<AudioTrackThread> t = mAudioTrackThread;
 
-    LOGV("stop %p", this);
+    ALOGV("stop %p", this);
     if (t != 0) {
         t->mLock.lock();
     }
@@ -431,7 +431,7 @@ void AudioTrack::flush()
 // must be called with mLock held
 void AudioTrack::flush_l()
 {
-    LOGV("flush");
+    ALOGV("flush");
 
     // clear playback marker and periodic update counter
     mMarkerPosition = 0;
@@ -449,7 +449,7 @@ void AudioTrack::flush_l()
 
 void AudioTrack::pause()
 {
-    LOGV("pause");
+    ALOGV("pause");
     AutoMutex lock(mLock);
     if (mActive == 1) {
         mActive = 0;
@@ -496,7 +496,7 @@ void AudioTrack::getVolume(float* left, float* right)
 
 status_t AudioTrack::setAuxEffectSendLevel(float level)
 {
-    LOGV("setAuxEffectSendLevel(%f)", level);
+    ALOGV("setAuxEffectSendLevel(%f)", level);
     if (level > 1.0f) {
         return BAD_VALUE;
     }
@@ -696,7 +696,7 @@ int AudioTrack::getSessionId()
 
 status_t AudioTrack::attachAuxEffect(int effectId)
 {
-    LOGV("attachAuxEffect(%d)", effectId);
+    ALOGV("attachAuxEffect(%d)", effectId);
     status_t status = mAudioTrack->attachAuxEffect(effectId);
     if (status == NO_ERROR) {
         mAuxEffectId = effectId;
@@ -852,7 +852,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         while (framesAvail == 0) {
             active = mActive;
             if (UNLIKELY(!active)) {
-                LOGV("Not active and NO_MORE_BUFFERS");
+                ALOGV("Not active and NO_MORE_BUFFERS");
                 cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
             }
@@ -966,7 +966,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
         return BAD_VALUE;
     }
 
-    LOGV("write %p: %d bytes, mActive=%d", this, userSize, mActive);
+    ALOGV("write %p: %d bytes, mActive=%d", this, userSize, mActive);
 
     // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
     // while we are accessing the cblk
@@ -1036,7 +1036,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
     // Manage underrun callback
     if (mActive && (cblk->framesAvailable() == cblk->frameCount)) {
-        LOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        ALOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
         if (!(android_atomic_or(CBLK_UNDERRUN_ON, &cblk->flags) & CBLK_UNDERRUN_MSK)) {
             mCbf(EVENT_UNDERRUN, mUserData, 0);
             if (cblk->server == cblk->frameCount) {
@@ -1247,7 +1247,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
             cblk->lock.unlock();
         }
     }
-    LOGV("restoreTrack_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
+    ALOGV("restoreTrack_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
          result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
 
     if (result == NO_ERROR) {

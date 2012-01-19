@@ -43,7 +43,7 @@
 
 #ifdef DRM_OMA_FL_ENGINE_DEBUG
 #define LOG_NDEBUG 0
-#define LOG_VERBOSE(...) LOGV(__VA_ARGS__)
+#define LOG_VERBOSE(...) ALOGV(__VA_ARGS__)
 #else
 #define LOG_VERBOSE(...)
 #endif

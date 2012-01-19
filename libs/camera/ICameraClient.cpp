@@ -41,7 +41,7 @@ public:
     // generic callback from camera service to app
     void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
     {
-        LOGV("notifyCallback");
+        ALOGV("notifyCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt32(msgType);
@@ -54,7 +54,7 @@ public:
     void dataCallback(int32_t msgType, const sp<IMemory>& imageData,
                       camera_frame_metadata_t *metadata)
     {
-        LOGV("dataCallback");
+        ALOGV("dataCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt32(msgType);
@@ -69,7 +69,7 @@ public:
     // generic data callback from camera service to app with image data
     void dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& imageData)
     {
-        LOGV("dataCallback");
+        ALOGV("dataCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt64(timestamp);
@@ -88,7 +88,7 @@ status_t BnCameraClient::onTransact(
 {
     switch(code) {
         case NOTIFY_CALLBACK: {
-            LOGV("NOTIFY_CALLBACK");
+            ALOGV("NOTIFY_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             int32_t msgType = data.readInt32();
             int32_t ext1 = data.readInt32();
@@ -97,7 +97,7 @@ status_t BnCameraClient::onTransact(
             return NO_ERROR;
         } break;
         case DATA_CALLBACK: {
-            LOGV("DATA_CALLBACK");
+            ALOGV("DATA_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             int32_t msgType = data.readInt32();
             sp<IMemory> imageData = interface_cast<IMemory>(data.readStrongBinder());
@@ -113,7 +113,7 @@ status_t BnCameraClient::onTransact(
             return NO_ERROR;
         } break;
         case DATA_CALLBACK_TIMESTAMP: {
-            LOGV("DATA_CALLBACK_TIMESTAMP");
+            ALOGV("DATA_CALLBACK_TIMESTAMP");
             CHECK_INTERFACE(ICameraClient, data, reply);
             nsecs_t timestamp = data.readInt64();
             int32_t msgType = data.readInt32();

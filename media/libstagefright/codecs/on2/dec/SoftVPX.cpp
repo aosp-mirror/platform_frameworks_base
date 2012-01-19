@@ -126,7 +126,7 @@ static int GetCPUCoreCount() {
     cpuCoreCount = sysconf(_SC_NPROC_ONLN);
 #endif
     CHECK(cpuCoreCount >= 1);
-    LOGV("Number of CPU cores: %d", cpuCoreCount);
+    ALOGV("Number of CPU cores: %d", cpuCoreCount);
     return cpuCoreCount;
 }
 

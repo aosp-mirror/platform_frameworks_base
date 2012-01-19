@@ -93,7 +93,7 @@ void Visualizer_reset(VisualizerContext *pContext)
 
 int Visualizer_configure(VisualizerContext *pContext, effect_config_t *pConfig)
 {
-    LOGV("Visualizer_configure start");
+    ALOGV("Visualizer_configure start");
 
     if (pConfig->inputCfg.samplingRate != pConfig->outputCfg.samplingRate) return -EINVAL;
     if (pConfig->inputCfg.channels != pConfig->outputCfg.channels) return -EINVAL;
@@ -201,7 +201,7 @@ int VisualizerLib_Create(effect_uuid_t *uuid,
 
     pContext->mState = VISUALIZER_STATE_INITIALIZED;
 
-    LOGV("VisualizerLib_Create %p", pContext);
+    ALOGV("VisualizerLib_Create %p", pContext);
 
     return 0;
 
@@ -210,7 +210,7 @@ int VisualizerLib_Create(effect_uuid_t *uuid,
 int VisualizerLib_Release(effect_handle_t handle) {
     VisualizerContext * pContext = (VisualizerContext *)handle;
 
-    LOGV("VisualizerLib_Release %p", handle);
+    ALOGV("VisualizerLib_Release %p", handle);
     if (pContext == NULL) {
         return -EINVAL;
     }
@@ -224,7 +224,7 @@ int VisualizerLib_GetDescriptor(effect_uuid_t       *uuid,
                                 effect_descriptor_t *pDescriptor) {
 
     if (pDescriptor == NULL || uuid == NULL){
-        LOGV("VisualizerLib_GetDescriptor() called with NULL pointer");
+        ALOGV("VisualizerLib_GetDescriptor() called with NULL pointer");
         return -EINVAL;
     }
 
@@ -328,7 +328,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         return -EINVAL;
     }
 
-//    LOGV("Visualizer_command command %d cmdSize %d",cmdCode, cmdSize);
+//    ALOGV("Visualizer_command command %d cmdSize %d",cmdCode, cmdSize);
 
     switch (cmdCode) {
     case EFFECT_CMD_INIT:
@@ -356,7 +356,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
             return -ENOSYS;
         }
         pContext->mState = VISUALIZER_STATE_ACTIVE;
-        LOGV("EFFECT_CMD_ENABLE() OK");
+        ALOGV("EFFECT_CMD_ENABLE() OK");
         *(int *)pReplyData = 0;
         break;
     case EFFECT_CMD_DISABLE:
@@ -367,7 +367,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
             return -ENOSYS;
         }
         pContext->mState = VISUALIZER_STATE_INITIALIZED;
-        LOGV("EFFECT_CMD_DISABLE() OK");
+        ALOGV("EFFECT_CMD_DISABLE() OK");
         *(int *)pReplyData = 0;
         break;
     case EFFECT_CMD_GET_PARAM: {
@@ -386,7 +386,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
             p->status = -EINVAL;
             break;
         }
-        LOGV("get mCaptureSize = %d", pContext->mCaptureSize);
+        ALOGV("get mCaptureSize = %d", pContext->mCaptureSize);
         *((uint32_t *)p->data + 1) = pContext->mCaptureSize;
         p->vsize = sizeof(uint32_t);
         *replySize += sizeof(uint32_t);
@@ -406,7 +406,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
             break;;
         }
         pContext->mCaptureSize = *((uint32_t *)p->data + 1);
-        LOGV("set mCaptureSize = %d", pContext->mCaptureSize);
+        ALOGV("set mCaptureSize = %d", pContext->mCaptureSize);
         } break;
     case EFFECT_CMD_SET_DEVICE:
     case EFFECT_CMD_SET_VOLUME:
@@ -416,7 +416,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
 
     case VISUALIZER_CMD_CAPTURE:
         if (pReplyData == NULL || *replySize != pContext->mCaptureSize) {
-            LOGV("VISUALIZER_CMD_CAPTURE() error *replySize %d pContext->mCaptureSize %d",
+            ALOGV("VISUALIZER_CMD_CAPTURE() error *replySize %d pContext->mCaptureSize %d",
                     *replySize, pContext->mCaptureSize);
             return -EINVAL;
         }
@@ -459,7 +459,7 @@ int Visualizer_getDescriptor(effect_handle_t   self,
     VisualizerContext * pContext = (VisualizerContext *) self;
 
     if (pContext == NULL || pDescriptor == NULL) {
-        LOGV("Visualizer_getDescriptor() invalid param");
+        ALOGV("Visualizer_getDescriptor() invalid param");
         return -EINVAL;
     }
 

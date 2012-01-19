@@ -346,7 +346,7 @@ void VectorImpl::release_storage()
 
 void* VectorImpl::_grow(size_t where, size_t amount)
 {
-//    LOGV("_grow(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
+//    ALOGV("_grow(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
 //        this, (int)where, (int)amount, (int)mCount, (int)capacity());
 
     LOG_ASSERT(where <= mCount,
@@ -356,7 +356,7 @@ void* VectorImpl::_grow(size_t where, size_t amount)
     const size_t new_size = mCount + amount;
     if (capacity() < new_size) {
         const size_t new_capacity = max(kMinVectorCapacity, ((new_size*3)+1)/2);
-//        LOGV("grow vector %p, new_capacity=%d", this, (int)new_capacity);
+//        ALOGV("grow vector %p, new_capacity=%d", this, (int)new_capacity);
         if ((mStorage) &&
             (mCount==where) &&
             (mFlags & HAS_TRIVIAL_COPY) &&
@@ -399,7 +399,7 @@ void VectorImpl::_shrink(size_t where, size_t amount)
     if (!mStorage)
         return;
 
-//    LOGV("_shrink(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
+//    ALOGV("_shrink(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
 //        this, (int)where, (int)amount, (int)mCount, (int)capacity());
 
     LOG_ASSERT(where + amount <= mCount,
@@ -409,7 +409,7 @@ void VectorImpl::_shrink(size_t where, size_t amount)
     const size_t new_size = mCount - amount;
     if (new_size*3 < capacity()) {
         const size_t new_capacity = max(kMinVectorCapacity, new_size*2);
-//        LOGV("shrink vector %p, new_capacity=%d", this, (int)new_capacity);
+//        ALOGV("shrink vector %p, new_capacity=%d", this, (int)new_capacity);
         if ((where == new_size) &&
             (mFlags & HAS_TRIVIAL_COPY) &&
             (mFlags & HAS_TRIVIAL_DTOR))

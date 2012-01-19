@@ -235,7 +235,7 @@ status_t AMRWriter::threadFunc() {
             mResumed = false;
         }
         timestampUs -= previousPausedDurationUs;
-        LOGV("time stamp: %lld, previous paused duration: %lld",
+        ALOGV("time stamp: %lld, previous paused duration: %lld",
                 timestampUs, previousPausedDurationUs);
         if (timestampUs > maxTimestampUs) {
             maxTimestampUs = timestampUs;

@@ -50,13 +50,13 @@ SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
                 mNumFramesReceived(0),
                 mNumFramesEncoded(0),
                 mFirstFrameTimestamp(0) {
-    LOGV("SurfaceMediaSource::SurfaceMediaSource");
+    ALOGV("SurfaceMediaSource::SurfaceMediaSource");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
 }
 
 SurfaceMediaSource::~SurfaceMediaSource() {
-    LOGV("SurfaceMediaSource::~SurfaceMediaSource");
+    ALOGV("SurfaceMediaSource::~SurfaceMediaSource");
     if (!mStopped) {
         stop();
     }
@@ -108,7 +108,7 @@ status_t SurfaceMediaSource::setBufferCountServer(int bufferCount) {
 }
 
 status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
-    LOGV("SurfaceMediaSource::setBufferCount");
+    ALOGV("SurfaceMediaSource::setBufferCount");
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount is larger than the number of buffer slots");
         return BAD_VALUE;
@@ -150,7 +150,7 @@ status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
 }
 
 status_t SurfaceMediaSource::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
-    LOGV("SurfaceMediaSource::requestBuffer");
+    ALOGV("SurfaceMediaSource::requestBuffer");
     Mutex::Autolock lock(mMutex);
     if (slot < 0 || mBufferCount <= slot) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
@@ -164,7 +164,7 @@ status_t SurfaceMediaSource::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
 
 status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                                             uint32_t format, uint32_t usage) {
-    LOGV("dequeueBuffer");
+    ALOGV("dequeueBuffer");
     Mutex::Autolock lock(mMutex);
 
     // Check for the buffer size- the client should just use the
@@ -215,7 +215,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                         (mServerBufferCount < minBufferCountNeeded))) {
             // wait for the FIFO to drain
             while (!mQueue.isEmpty()) {
-                LOGV("Waiting for the FIFO to drain");
+                ALOGV("Waiting for the FIFO to drain");
                 mDequeueCondition.wait(mMutex);
             }
             if (mStopped) {
@@ -293,7 +293,7 @@ status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         // for for some buffers to be consumed
         tryAgain = mSynchronousMode && (foundSync == INVALID_BUFFER_SLOT);
         if (tryAgain) {
-            LOGV("Waiting..In synchronous mode and no buffer to dequeue");
+            ALOGV("Waiting..In synchronous mode and no buffer to dequeue");
             mDequeueCondition.wait(mMutex);
         }
         if (mStopped) {
@@ -384,7 +384,7 @@ status_t SurfaceMediaSource::setSynchronousMode(bool enabled) {
 
 status_t SurfaceMediaSource::connect(int api,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
-    LOGV("SurfaceMediaSource::connect");
+    ALOGV("SurfaceMediaSource::connect");
     Mutex::Autolock lock(mMutex);
 
     if (mStopped) {
@@ -425,7 +425,7 @@ status_t SurfaceMediaSource::connect(int api,
 // that need not be required since the thread supplying the
 // frames is separate than the one calling stop.
 status_t SurfaceMediaSource::disconnect(int api) {
-    LOGV("SurfaceMediaSource::disconnect");
+    ALOGV("SurfaceMediaSource::disconnect");
     Mutex::Autolock lock(mMutex);
 
     if (mStopped) {
@@ -457,7 +457,7 @@ status_t SurfaceMediaSource::disconnect(int api) {
 
 status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
-    LOGV("queueBuffer");
+    ALOGV("queueBuffer");
 
     Mutex::Autolock lock(mMutex);
     *outWidth = mDefaultWidth;
@@ -497,7 +497,7 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
     if (mSynchronousMode) {
         // in synchronous mode we queue all buffers in a FIFO
         mQueue.push_back(bufIndex);
-        LOGV("Client queued buf# %d @slot: %d, Q size = %d, handle = %p, timestamp = %lld",
+        ALOGV("Client queued buf# %d @slot: %d, Q size = %d, handle = %p, timestamp = %lld",
             mNumFramesReceived, bufIndex, mQueue.size(),
             mSlots[bufIndex].mGraphicBuffer->handle, timestamp);
     } else {
@@ -536,7 +536,7 @@ status_t SurfaceMediaSource::queueBuffer(int bufIndex, int64_t timestamp,
 // wait to hear from StageFrightRecorder to set the buffer FREE
 // Make sure this is called when the mutex is locked
 status_t SurfaceMediaSource::onFrameReceivedLocked() {
-    LOGV("On Frame Received locked");
+    ALOGV("On Frame Received locked");
     // Signal the encoder that a new frame has arrived
     mFrameAvailableCondition.signal();
 
@@ -556,7 +556,7 @@ status_t SurfaceMediaSource::onFrameReceivedLocked() {
 
 
 void SurfaceMediaSource::cancelBuffer(int bufIndex) {
-    LOGV("SurfaceMediaSource::cancelBuffer");
+    ALOGV("SurfaceMediaSource::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     if (bufIndex < 0 || bufIndex >= mBufferCount) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
@@ -572,7 +572,7 @@ void SurfaceMediaSource::cancelBuffer(int bufIndex) {
 }
 
 nsecs_t SurfaceMediaSource::getTimestamp() {
-    LOGV("SurfaceMediaSource::getTimestamp");
+    ALOGV("SurfaceMediaSource::getTimestamp");
     Mutex::Autolock lock(mMutex);
     return mCurrentTimestamp;
 }
@@ -580,13 +580,13 @@ nsecs_t SurfaceMediaSource::getTimestamp() {
 
 void SurfaceMediaSource::setFrameAvailableListener(
         const sp<FrameAvailableListener>& listener) {
-    LOGV("SurfaceMediaSource::setFrameAvailableListener");
+    ALOGV("SurfaceMediaSource::setFrameAvailableListener");
     Mutex::Autolock lock(mMutex);
     mFrameAvailableListener = listener;
 }
 
 void SurfaceMediaSource::freeAllBuffersLocked() {
-    LOGV("freeAllBuffersLocked");
+    ALOGV("freeAllBuffersLocked");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mGraphicBuffer = 0;
         mSlots[i].mBufferState = BufferSlot::FREE;
@@ -600,7 +600,7 @@ sp<GraphicBuffer> SurfaceMediaSource::getCurrentBuffer() const {
 
 int SurfaceMediaSource::query(int what, int* outValue)
 {
-    LOGV("query");
+    ALOGV("query");
     Mutex::Autolock lock(mMutex);
     int value;
     switch (what) {
@@ -691,7 +691,7 @@ status_t SurfaceMediaSource::setFrameRate(int32_t fps)
 }
 
 bool SurfaceMediaSource::isMetaDataStoredInVideoBuffers() const {
-    LOGV("isMetaDataStoredInVideoBuffers");
+    ALOGV("isMetaDataStoredInVideoBuffers");
     return true;
 }
 
@@ -702,7 +702,7 @@ int32_t SurfaceMediaSource::getFrameRate( ) const {
 
 status_t SurfaceMediaSource::start(MetaData *params)
 {
-    LOGV("started!");
+    ALOGV("started!");
 
     mStartTimeNs = 0;
     int64_t startTimeUs;
@@ -716,7 +716,7 @@ status_t SurfaceMediaSource::start(MetaData *params)
 
 status_t SurfaceMediaSource::stop()
 {
-    LOGV("Stop");
+    ALOGV("Stop");
 
     Mutex::Autolock lock(mMutex);
     // TODO: Add waiting on mFrameCompletedCondition here?
@@ -731,7 +731,7 @@ status_t SurfaceMediaSource::stop()
 
 sp<MetaData> SurfaceMediaSource::getFormat()
 {
-    LOGV("getFormat");
+    ALOGV("getFormat");
     Mutex::Autolock autoLock(mMutex);
     sp<MetaData> meta = new MetaData;
 
@@ -753,20 +753,20 @@ status_t SurfaceMediaSource::read( MediaBuffer **buffer,
 {
     Mutex::Autolock autoLock(mMutex) ;
 
-    LOGV("Read. Size of queued buffer: %d", mQueue.size());
+    ALOGV("Read. Size of queued buffer: %d", mQueue.size());
     *buffer = NULL;
 
     // If the recording has started and the queue is empty, then just
     // wait here till the frames come in from the client side
     while (!mStopped && mQueue.empty()) {
-        LOGV("NO FRAMES! Recorder waiting for FrameAvailableCondition");
+        ALOGV("NO FRAMES! Recorder waiting for FrameAvailableCondition");
         mFrameAvailableCondition.wait(mMutex);
     }
 
     // If the loop was exited as a result of stopping the recording,
     // it is OK
     if (mStopped) {
-        LOGV("Read: SurfaceMediaSource is stopped. Returning ERROR_END_OF_STREAM.");
+        ALOGV("Read: SurfaceMediaSource is stopped. Returning ERROR_END_OF_STREAM.");
         return ERROR_END_OF_STREAM;
     }
 
@@ -787,7 +787,7 @@ status_t SurfaceMediaSource::read( MediaBuffer **buffer,
     (*buffer)->setObserver(this);
     (*buffer)->add_ref();
     (*buffer)->meta_data()->setInt64(kKeyTime, mCurrentTimestamp / 1000);
-    LOGV("Frames encoded = %d, timestamp = %lld, time diff = %lld",
+    ALOGV("Frames encoded = %d, timestamp = %lld, time diff = %lld",
             mNumFramesEncoded, mCurrentTimestamp / 1000,
             mCurrentTimestamp / 1000 - prevTimeStamp / 1000);
 
@@ -806,7 +806,7 @@ status_t SurfaceMediaSource::read( MediaBuffer **buffer,
 // --------------------------------------------------------------
 // Note: Call only when you have the lock
 void SurfaceMediaSource::passMetadataBufferLocked(MediaBuffer **buffer) {
-    LOGV("passMetadataBuffer");
+    ALOGV("passMetadataBuffer");
     // MediaBuffer allocates and owns this data
     MediaBuffer *tempBuffer =
         new MediaBuffer(4 + sizeof(buffer_handle_t));
@@ -820,18 +820,18 @@ void SurfaceMediaSource::passMetadataBufferLocked(MediaBuffer **buffer) {
     memcpy(data + 4, &(mCurrentBuf->handle), sizeof(buffer_handle_t));
     *buffer = tempBuffer;
 
-    LOGV("handle = %p, , offset = %d, length = %d",
+    ALOGV("handle = %p, , offset = %d, length = %d",
             mCurrentBuf->handle, (*buffer)->range_length(), (*buffer)->range_offset());
 }
 
 void SurfaceMediaSource::signalBufferReturned(MediaBuffer *buffer) {
-    LOGV("signalBufferReturned");
+    ALOGV("signalBufferReturned");
 
     bool foundBuffer = false;
     Mutex::Autolock autoLock(mMutex);
 
     if (mStopped) {
-        LOGV("signalBufferReturned: mStopped = true! Nothing to do!");
+        ALOGV("signalBufferReturned: mStopped = true! Nothing to do!");
         return;
     }
 
@@ -840,7 +840,7 @@ void SurfaceMediaSource::signalBufferReturned(MediaBuffer *buffer) {
             continue;
         }
         if (checkBufferMatchesSlot(id, buffer)) {
-            LOGV("Slot %d returned, matches handle = %p", id,
+            ALOGV("Slot %d returned, matches handle = %p", id,
                     mSlots[id].mGraphicBuffer->handle);
             mSlots[id].mBufferState = BufferSlot::FREE;
             buffer->setObserver(0);
@@ -858,7 +858,7 @@ void SurfaceMediaSource::signalBufferReturned(MediaBuffer *buffer) {
 }
 
 bool SurfaceMediaSource::checkBufferMatchesSlot(int slot, MediaBuffer *buffer) {
-    LOGV("Check if Buffer matches slot");
+    ALOGV("Check if Buffer matches slot");
     // need to convert to char* for pointer arithmetic and then
     // copy the byte stream into our handle
     buffer_handle_t bufferHandle ;
