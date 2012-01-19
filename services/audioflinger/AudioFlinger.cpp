@@ -331,7 +331,7 @@ static bool tryLock(Mutex& mutex)
 
 status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
 {
-    if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
+    if (!checkCallingPermission(String16("android.permission.DUMP"))) {
         dumpPermissionDenial(fd, args);
     } else {
         // get state of hardware lock
@@ -1962,7 +1962,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     ALOGV("MixerThread %p TID %d waking up\n", this, gettid());
                     acquireWakeLock_l();
 
-                    if (mMasterMute == false) {
+                    if (!mMasterMute) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
@@ -2659,7 +2659,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     ALOGV("DirectOutputThread %p TID %d waking up in active mode\n", this, gettid());
                     acquireWakeLock_l();
 
-                    if (mMasterMute == false) {
+                    if (!mMasterMute) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
@@ -3054,7 +3054,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     ALOGV("DuplicatingThread %p TID %d waking up\n", this, gettid());
                     acquireWakeLock_l();
 
-                    if (mMasterMute == false) {
+                    if (!mMasterMute) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
