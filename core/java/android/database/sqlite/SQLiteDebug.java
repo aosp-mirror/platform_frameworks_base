@@ -190,9 +190,17 @@ public final class SQLiteDebug {
     /**
      * Dumps detailed information about all databases used by the process.
      * @param printer The printer for dumping database state.
+     * @param args Command-line arguments supplied to dumpsys dbinfo
      */
     public static void dump(Printer printer, String[] args) {
-        SQLiteDatabase.dumpAll(printer);
+        boolean verbose = false;
+        for (String arg : args) {
+            if (arg.equals("-v")) {
+                verbose = true;
+            }
+        }
+
+        SQLiteDatabase.dumpAll(printer, verbose);
     }
 
     /**
