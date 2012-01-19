@@ -64,12 +64,12 @@ FileMap::~FileMap(void)
     }
 #ifdef HAVE_POSIX_FILEMAP    
     if (mBasePtr && munmap(mBasePtr, mBaseLength) != 0) {
-        LOGD("munmap(%p, %d) failed\n", mBasePtr, (int) mBaseLength);
+        ALOGD("munmap(%p, %d) failed\n", mBasePtr, (int) mBaseLength);
     }
 #endif
 #ifdef HAVE_WIN32_FILEMAP
     if (mBasePtr && UnmapViewOfFile(mBasePtr) == 0) {
-        LOGD("UnmapViewOfFile(%p) failed, error = %ld\n", mBasePtr, 
+        ALOGD("UnmapViewOfFile(%p) failed, error = %ld\n", mBasePtr,
               GetLastError() );
     }
     if (mFileMapping != INVALID_HANDLE_VALUE) {

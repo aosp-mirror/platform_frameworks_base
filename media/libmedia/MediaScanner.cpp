@@ -135,7 +135,7 @@ MediaScanResult MediaScanner::doProcessDirectory(
     struct dirent* entry;
 
     if (shouldSkipDirectory(path)) {
-      LOGD("Skipping: %s", path);
+      ALOGD("Skipping: %s", path);
       return MEDIA_SCAN_RESULT_OK;
     }
 
@@ -199,7 +199,7 @@ MediaScanResult MediaScanner::doProcessDirectoryEntry(
                 type = DT_DIR;
             }
         } else {
-            LOGD("stat() failed for %s: %s", path, strerror(errno) );
+            ALOGD("stat() failed for %s: %s", path, strerror(errno) );
         }
     }
     if (type == DT_DIR) {

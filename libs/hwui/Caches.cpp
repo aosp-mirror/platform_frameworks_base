@@ -37,7 +37,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 #if DEBUG_CACHE_FLUSH
-    #define FLUSH_LOGD(...) LOGD(__VA_ARGS__)
+    #define FLUSH_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define FLUSH_LOGD(...)
 #endif
@@ -58,7 +58,7 @@ Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
     init();
 
     mDebugLevel = readDebugLevel();
-    LOGD("Enabling debug mode %d", mDebugLevel);
+    ALOGD("Enabling debug mode %d", mDebugLevel);
 
 #if RENDER_LAYERS_AS_REGIONS
     INIT_LOGD("Layers will be composited as regions");
@@ -108,7 +108,7 @@ void Caches::terminate() {
 void Caches::dumpMemoryUsage() {
     String8 stringLog;
     dumpMemoryUsage(stringLog);
-    LOGD("%s", stringLog.string());
+    ALOGD("%s", stringLog.string());
 }
 
 void Caches::dumpMemoryUsage(String8 &log) {

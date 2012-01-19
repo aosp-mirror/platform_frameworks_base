@@ -254,7 +254,7 @@ static void getSupportedVideoSizes(
     *isSetVideoSizeSupported = true;
     params.getSupportedVideoSizes(sizes);
     if (sizes.size() == 0) {
-        LOGD("Camera does not support setVideoSize()");
+        ALOGD("Camera does not support setVideoSize()");
         params.getSupportedPreviewSizes(sizes);
         *isSetVideoSizeSupported = false;
     }
@@ -633,7 +633,7 @@ void CameraSource::releaseCamera() {
 }
 
 status_t CameraSource::stop() {
-    LOGD("stop: E");
+    ALOGD("stop: E");
     Mutex::Autolock autoLock(mLock);
     mStarted = false;
     mFrameAvailableCondition.signal();
@@ -670,7 +670,7 @@ status_t CameraSource::stop() {
     }
 
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
-    LOGD("stop: X");
+    ALOGD("stop: X");
     return OK;
 }
 

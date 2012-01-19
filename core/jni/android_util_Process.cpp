@@ -205,9 +205,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     }
 
     if (grp == ANDROID_TGROUP_BG_NONINTERACT) {
-        LOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
+        ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
     } else {
-        LOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
+        ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
     }
 #endif
     sprintf(proc_path, "/proc/%d/task", pid);

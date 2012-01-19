@@ -85,11 +85,11 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     }
 
 #if 0
-    LOGD("chunk header:");
-    LOGD("  headerSize=%d", flattenedHeader.headerSize);
-    LOGD("  version=0x%08x", flattenedHeader.version);
-    LOGD("  dataSize=%d", flattenedHeader.dataSize);
-    LOGD("  nameLength=%d", flattenedHeader.nameLength);
+    ALOGD("chunk header:");
+    ALOGD("  headerSize=%d", flattenedHeader.headerSize);
+    ALOGD("  version=0x%08x", flattenedHeader.version);
+    ALOGD("  dataSize=%d", flattenedHeader.dataSize);
+    ALOGD("  nameLength=%d", flattenedHeader.nameLength);
 #endif
 
     if (flattenedHeader.dataSize < 0 || flattenedHeader.nameLength < 0 ||

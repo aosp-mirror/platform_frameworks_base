@@ -48,7 +48,7 @@ int openContentProviderFile(const String16& uri)
                 }
             } else {
                 // An exception was thrown back; fall through to return failure
-                LOGD("openContentUri(%s) caught exception %d\n",
+                ALOGD("openContentUri(%s) caught exception %d\n",
                         String8(uri).string(), exceptionCode);
             }
         }

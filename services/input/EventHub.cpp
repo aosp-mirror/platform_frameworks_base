@@ -1097,7 +1097,7 @@ void EventHub::loadConfigurationLocked(Device* device) {
     device->configurationFile = getInputDeviceConfigurationFilePathByDeviceIdentifier(
             device->identifier, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_CONFIGURATION);
     if (device->configurationFile.isEmpty()) {
-        LOGD("No input device configuration file found for device '%s'.",
+        ALOGD("No input device configuration file found for device '%s'.",
                 device->identifier.name.string());
     } else {
         status_t status = PropertyMap::load(device->configurationFile,

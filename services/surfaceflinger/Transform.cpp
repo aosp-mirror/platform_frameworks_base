@@ -344,10 +344,10 @@ void Transform::dump(const char* name) const
     if (mType&TRANSLATE)
         type.append("TRANSLATE ");
 
-    LOGD("%s 0x%08x (%s, %s)", name, mType, flags.string(), type.string());
-    LOGD("%.4f  %.4f  %.4f", m[0][0], m[1][0], m[2][0]);
-    LOGD("%.4f  %.4f  %.4f", m[0][1], m[1][1], m[2][1]);
-    LOGD("%.4f  %.4f  %.4f", m[0][2], m[1][2], m[2][2]);
+    ALOGD("%s 0x%08x (%s, %s)", name, mType, flags.string(), type.string());
+    ALOGD("%.4f  %.4f  %.4f", m[0][0], m[1][0], m[2][0]);
+    ALOGD("%.4f  %.4f  %.4f", m[0][1], m[1][1], m[2][1]);
+    ALOGD("%.4f  %.4f  %.4f", m[0][2], m[1][2], m[2][2]);
 }
 
 // ---------------------------------------------------------------------------

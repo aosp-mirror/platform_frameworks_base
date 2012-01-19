@@ -855,7 +855,7 @@ bool debug_no_encrypt() {
     property_get("debug.bt.no_encrypt", value, "");
     if (!strncmp("true", value, PROPERTY_VALUE_MAX) ||
         !strncmp("1", value, PROPERTY_VALUE_MAX)) {
-        LOGD("mandatory bluetooth encryption disabled");
+        ALOGD("mandatory bluetooth encryption disabled");
         return true;
     } else {
         return false;

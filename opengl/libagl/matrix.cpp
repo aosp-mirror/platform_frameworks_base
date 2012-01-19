@@ -217,9 +217,9 @@ void mvui_transform_t::picker()
 void transform_t::dump(const char* what)
 {
     GLfixed const * const m = matrix.m;
-    LOGD("%s:", what);
+    ALOGD("%s:", what);
     for (int i=0 ; i<4 ; i++)
-        LOGD("[%08x %08x %08x %08x] [%f %f %f %f]\n",
+        ALOGD("[%08x %08x %08x %08x] [%f %f %f %f]\n",
             m[I(0,i)], m[I(1,i)], m[I(2,i)], m[I(3,i)],
             fixedToFloat(m[I(0,i)]),
             fixedToFloat(m[I(1,i)]), 
@@ -273,11 +273,11 @@ void matrixf_t::multiply(matrixf_t& r, const matrixf_t& lhs, const matrixf_t& rh
 }
 
 void matrixf_t::dump(const char* what) {
-    LOGD("%s", what);
-    LOGD("[ %9f %9f %9f %9f ]", m[I(0,0)], m[I(1,0)], m[I(2,0)], m[I(3,0)]);
-    LOGD("[ %9f %9f %9f %9f ]", m[I(0,1)], m[I(1,1)], m[I(2,1)], m[I(3,1)]);
-    LOGD("[ %9f %9f %9f %9f ]", m[I(0,2)], m[I(1,2)], m[I(2,2)], m[I(3,2)]);
-    LOGD("[ %9f %9f %9f %9f ]", m[I(0,3)], m[I(1,3)], m[I(2,3)], m[I(3,3)]);
+    ALOGD("%s", what);
+    ALOGD("[ %9f %9f %9f %9f ]", m[I(0,0)], m[I(1,0)], m[I(2,0)], m[I(3,0)]);
+    ALOGD("[ %9f %9f %9f %9f ]", m[I(0,1)], m[I(1,1)], m[I(2,1)], m[I(3,1)]);
+    ALOGD("[ %9f %9f %9f %9f ]", m[I(0,2)], m[I(1,2)], m[I(2,2)], m[I(3,2)]);
+    ALOGD("[ %9f %9f %9f %9f ]", m[I(0,3)], m[I(1,3)], m[I(2,3)], m[I(3,3)]);
 }
 
 void matrixf_t::loadIdentity() {

@@ -118,7 +118,7 @@ String8 Tokenizer::peekRemainderOfLine() const {
 
 String8 Tokenizer::nextToken(const char* delimiters) {
 #if DEBUG_TOKENIZER
-    LOGD("nextToken");
+    ALOGD("nextToken");
 #endif
     const char* end = getEnd();
     const char* tokenStart = mCurrent;
@@ -134,7 +134,7 @@ String8 Tokenizer::nextToken(const char* delimiters) {
 
 void Tokenizer::nextLine() {
 #if DEBUG_TOKENIZER
-    LOGD("nextLine");
+    ALOGD("nextLine");
 #endif
     const char* end = getEnd();
     while (mCurrent != end) {
@@ -148,7 +148,7 @@ void Tokenizer::nextLine() {
 
 void Tokenizer::skipDelimiters(const char* delimiters) {
 #if DEBUG_TOKENIZER
-    LOGD("skipDelimiters");
+    ALOGD("skipDelimiters");
 #endif
     const char* end = getEnd();
     while (mCurrent != end) {

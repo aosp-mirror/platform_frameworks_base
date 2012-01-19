@@ -201,7 +201,7 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
 
 status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
 {
-    LOGD("setMetadataFilter");
+    ALOGD("setMetadataFilter");
     Mutex::Autolock lock(mLock);
     if (mPlayer == NULL) {
         return NO_INIT;
@@ -211,7 +211,7 @@ status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
 
 status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *metadata)
 {
-    LOGD("getMetadata");
+    ALOGD("getMetadata");
     Mutex::Autolock lock(mLock);
     if (mPlayer == NULL) {
         return NO_INIT;

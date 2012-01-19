@@ -47,12 +47,12 @@ void TextLayoutCache::init() {
 
     mDebugLevel = readRtlDebugLevel();
     mDebugEnabled = mDebugLevel & kRtlDebugCaches;
-    LOGD("Using debug level: %d - Debug Enabled: %d", mDebugLevel, mDebugEnabled);
+    ALOGD("Using debug level: %d - Debug Enabled: %d", mDebugLevel, mDebugEnabled);
 
     mCacheStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
     if (mDebugEnabled) {
-        LOGD("Initialization is done - Start time: %lld", mCacheStartTime);
+        ALOGD("Initialization is done - Start time: %lld", mCacheStartTime);
     }
 
     mInitialized = true;
@@ -89,7 +89,7 @@ void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheVal
         size_t totalSizeToDelete = text.getSize() + desc->getSize();
         mSize -= totalSizeToDelete;
         if (mDebugEnabled) {
-            LOGD("Cache value deleted, size = %d", totalSizeToDelete);
+            ALOGD("Cache value deleted, size = %d", totalSizeToDelete);
         }
         desc.clear();
     }
@@ -138,7 +138,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             // Cleanup to make some room if needed
             if (mSize + size > mMaxSize) {
                 if (mDebugEnabled) {
-                    LOGD("Need to clean some entries for making some room for a new entry");
+                    ALOGD("Need to clean some entries for making some room for a new entry");
                 }
                 while (mSize + size > mMaxSize) {
                     // This will call the callback
@@ -157,7 +157,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 // Update timing information for statistics
                 value->setElapsedTime(endTime - startTime);
 
-                LOGD("CACHE MISS: Added entry with "
+                ALOGD("CACHE MISS: Added entry with "
                         "count=%d, entry size %d bytes, remaining space %d bytes"
                         " - Compute time in nanos: %d - Text='%s' ",
                         count, size, mMaxSize - mSize, value->getElapsedTime(),
@@ -165,7 +165,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             }
         } else {
             if (mDebugEnabled) {
-                LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
+                ALOGD("CACHE MISS: Calculated but not storing entry because it is too big "
                         "with start=%d count=%d contextCount=%d, "
                         "entry size %d bytes, remaining space %d bytes"
                         " - Compute time in nanos: %lld - Text='%s'",
@@ -184,7 +184,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
             if (value->getElapsedTime() > 0) {
                 float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
                         / ((float)value->getElapsedTime()));
-                LOGD("CACHE HIT #%d with start=%d count=%d contextCount=%d"
+                ALOGD("CACHE HIT #%d with start=%d count=%d contextCount=%d"
                         "- Compute time in nanos: %d - "
                         "Cache get time in nanos: %lld - Gain in percent: %2.2f - Text='%s' ",
                         mCacheHitCount, start, count, contextCount,
@@ -202,17 +202,17 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
 void TextLayoutCache::dumpCacheStats() {
     float remainingPercent = 100 * ((mMaxSize - mSize) / ((float)mMaxSize));
     float timeRunningInSec = (systemTime(SYSTEM_TIME_MONOTONIC) - mCacheStartTime) / 1000000000;
-    LOGD("------------------------------------------------");
-    LOGD("Cache stats");
-    LOGD("------------------------------------------------");
-    LOGD("pid       : %d", getpid());
-    LOGD("running   : %.0f seconds", timeRunningInSec);
-    LOGD("entries   : %d", mCache.size());
-    LOGD("size      : %d bytes", mMaxSize);
-    LOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);
-    LOGD("hits      : %d", mCacheHitCount);
-    LOGD("saved     : %lld milliseconds", mNanosecondsSaved / 1000000);
-    LOGD("------------------------------------------------");
+    ALOGD("------------------------------------------------");
+    ALOGD("Cache stats");
+    ALOGD("------------------------------------------------");
+    ALOGD("pid       : %d", getpid());
+    ALOGD("running   : %.0f seconds", timeRunningInSec);
+    ALOGD("entries   : %d", mCache.size());
+    ALOGD("size      : %d bytes", mMaxSize);
+    ALOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);
+    ALOGD("hits      : %d", mCacheHitCount);
+    ALOGD("saved     : %lld milliseconds", mNanosecondsSaved / 1000000);
+    ALOGD("------------------------------------------------");
 }
 
 /**
@@ -320,7 +320,7 @@ void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars,
     computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
             &mAdvances, &mTotalAdvance, &mGlyphs);
 #if DEBUG_ADVANCES
-    LOGD("Advances - start=%d, count=%d, countextCount=%d, totalAdvance=%f", start, count,
+    ALOGD("Advances - start=%d, count=%d, countextCount=%d, totalAdvance=%f", start, count,
             contextCount, mTotalAdvance);
 #endif
 }
@@ -435,14 +435,14 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
             if (bidi) {
                 UErrorCode status = U_ZERO_ERROR;
 #if DEBUG_GLYPHS
-                LOGD("computeValuesWithHarfbuzz -- bidiReq=%d", bidiReq);
+                ALOGD("computeValuesWithHarfbuzz -- bidiReq=%d", bidiReq);
 #endif
                 ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
                 if (U_SUCCESS(status)) {
                     int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
                     ssize_t rc = ubidi_countRuns(bidi, &status);
 #if DEBUG_GLYPHS
-                    LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
+                    ALOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d",
                             dirFlags, rc, paraDir);
 #endif
                     if (U_SUCCESS(status) && rc == 1) {
@@ -490,7 +490,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                             isRTL = (runDir == UBIDI_RTL);
                             jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
-                            LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
+                            ALOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
                                     startRun, lengthRun, isRTL);
 #endif
                             computeRunValuesWithHarfbuzz(shaperItem, paint,
@@ -516,7 +516,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
         // Default single run case
         if (useSingleRun){
 #if DEBUG_GLYPHS
-            LOGD("computeValuesWithHarfbuzz -- Using a SINGLE Run "
+            ALOGD("computeValuesWithHarfbuzz -- Using a SINGLE Run "
                     "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
             computeRunValuesWithHarfbuzz(shaperItem, paint,
@@ -528,14 +528,14 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
         freeShaperItem(shaperItem);
 
 #if DEBUG_GLYPHS
-        LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", outGlyphs->size());
+        ALOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", outGlyphs->size());
 #endif
 }
 
 static void logGlyphs(HB_ShaperItem shaperItem) {
-    LOGD("Got glyphs - count=%d", shaperItem.num_glyphs);
+    ALOGD("Got glyphs - count=%d", shaperItem.num_glyphs);
     for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
-        LOGD("      glyph[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
+        ALOGD("      glyph[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
                 HBFixedToFloat(shaperItem.offsets[i].x),
                 HBFixedToFloat(shaperItem.offsets[i].y));
     }
@@ -553,17 +553,17 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperIte
     shapeRun(shaperItem, start, count, isRTL);
 
 #if DEBUG_GLYPHS
-    LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
+    ALOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
             shaperItem.kerning_applied);
-    LOGD("         -- string= '%s'", String8(shaperItem.string + start, count).string());
-    LOGD("         -- isDevKernText=%d", paint->isDevKernText());
+    ALOGD("         -- string= '%s'", String8(shaperItem.string + start, count).string());
+    ALOGD("         -- isDevKernText=%d", paint->isDevKernText());
 
     logGlyphs(shaperItem);
 #endif
 
     if (shaperItem.advances == NULL || shaperItem.num_glyphs == 0) {
 #if DEBUG_GLYPHS
-    LOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
+    ALOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
 #endif
         outAdvances->insertAt(0, outAdvances->size(), count);
         *outTotalAdvance = 0;
@@ -589,7 +589,7 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperIte
 
 #if DEBUG_ADVANCES
     for (size_t i = 0; i < count; i++) {
-        LOGD("hb-adv[%d] = %f - log_clusters = %d - total = %f", i,
+        ALOGD("hb-adv[%d] = %f - log_clusters = %d - total = %f", i,
                 (*outAdvances)[i], shaperItem.log_clusters[i], totalAdvance);
     }
 #endif
@@ -600,7 +600,7 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(HB_ShaperItem& shaperIte
         for (size_t i = 0; i < countGlyphs; i++) {
             jchar glyph = (jchar) shaperItem.glyphs[(!isRTL) ? i : countGlyphs - 1 - i];
 #if DEBUG_GLYPHS
-            LOGD("HARFBUZZ  -- glyph[%d]=%d", i, glyph);
+            ALOGD("HARFBUZZ  -- glyph[%d]=%d", i, glyph);
 #endif
             outGlyphs->add(glyph);
         }

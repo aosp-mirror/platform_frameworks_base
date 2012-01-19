@@ -66,7 +66,7 @@
 #define DEBUG_DISPLAY_LIST 0
 
 #if DEBUG_INIT
-    #define INIT_LOGD(...) LOGD(__VA_ARGS__)
+    #define INIT_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define INIT_LOGD(...)
 #endif

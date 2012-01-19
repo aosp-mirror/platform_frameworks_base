@@ -216,7 +216,7 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
         layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
 
         if (glGetError() != GL_NO_ERROR) {
-            LOGD("Could not allocate texture for layer (fbo=%d %dx%d)",
+            ALOGD("Could not allocate texture for layer (fbo=%d %dx%d)",
                     fbo, width, height);
 
             glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
@@ -439,7 +439,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 error:
 #if DEBUG_OPENGL
         if (error != GL_NO_ERROR) {
-            LOGD("GL error while copying layer into bitmap = 0x%x", error);
+            ALOGD("GL error while copying layer into bitmap = 0x%x", error);
         }
 #endif
 

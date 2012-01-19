@@ -97,30 +97,30 @@ public:
 
 static void TraceGLShaderSource(GLuint shader, GLsizei count,
     const GLchar** string, const GLint* length) {
-    LOGD("const char* shaderSrc[] = {");
+    ALOGD("const char* shaderSrc[] = {");
     for (GLsizei i = 0; i < count; i++) {
         const char* comma = i < count-1 ? "," : "";
         const GLchar* s = string[i];
         if (length) {
             GLint len = length[i];
-            LOGD("    \"%*s\"%s", len, s, comma);
+            ALOGD("    \"%*s\"%s", len, s, comma);
         } else {
-            LOGD("    \"%s\"%s", s, comma);
+            ALOGD("    \"%s\"%s", s, comma);
         }
     }
-    LOGD("};");
+    ALOGD("};");
     if (length) {
-        LOGD("const GLint* shaderLength[] = {");
+        ALOGD("const GLint* shaderLength[] = {");
         for (GLsizei i = 0; i < count; i++) {
             const char* comma = i < count-1 ? "," : "";
             GLint len = length[i];
-            LOGD("    \"%d\"%s", len, comma);
+            ALOGD("    \"%d\"%s", len, comma);
         }
-        LOGD("};");
-        LOGD("glShaderSource(%u, %u, shaderSrc, shaderLength);",
+        ALOGD("};");
+        ALOGD("glShaderSource(%u, %u, shaderSrc, shaderLength);",
             shader, count);
     } else {
-        LOGD("glShaderSource(%u, %u, shaderSrc, (const GLint*) 0);",
+        ALOGD("glShaderSource(%u, %u, shaderSrc, (const GLint*) 0);",
             shader, count);
     }
 }
@@ -131,7 +131,7 @@ static void TraceValue(int elementCount, char type,
     GLsizei count = chunkCount * chunkSize;
     bool isFloat = type == 'f';
     const char* typeString = isFloat ? "GLfloat" : "GLint";
-    LOGD("const %s value[] = {", typeString);
+    ALOGD("const %s value[] = {", typeString);
     for (GLsizei i = 0; i < count; i++) {
         StringBuilder builder;
         builder.append("    ");
@@ -152,25 +152,25 @@ static void TraceValue(int elementCount, char type,
                 value = (void*) (((GLint*) value) + 1);
             }
         }
-        LOGD("%s", builder.getString());
+        ALOGD("%s", builder.getString());
         if (chunkSize > 1 && i < count-1
                 && (i % chunkSize) == (chunkSize-1)) {
-            LOGD("%s", ""); // Print a blank line.
+            ALOGD("%s", ""); // Print a blank line.
         }
     }
-    LOGD("};");
+    ALOGD("};");
 }
 
 static void TraceUniformv(int elementCount, char type,
         GLuint location, GLsizei count, const void* value) {
     TraceValue(elementCount, type, count, 1, value);
-    LOGD("glUniform%d%c(%u, %u, value);", elementCount, type, location, count);
+    ALOGD("glUniform%d%c(%u, %u, value);", elementCount, type, location, count);
 }
 
 static void TraceUniformMatrix(int matrixSideLength,
         GLuint location, GLsizei count, GLboolean transpose, const void* value) {
     TraceValue(matrixSideLength, 'f', count, matrixSideLength, value);
-    LOGD("glUniformMatrix%dfv(%u, %u, %s, value);", matrixSideLength, location, count,
+    ALOGD("glUniformMatrix%dfv(%u, %u, %s, value);", matrixSideLength, location, count,
             GLbooleanToString(transpose));
 }
 
@@ -310,7 +310,7 @@ static void TraceGL(const char* name, int numArgs, ...) {
         }
     }
     builder.append(");");
-    LOGD("%s", builder.getString());
+    ALOGD("%s", builder.getString());
     va_end(argp);
 }
 
