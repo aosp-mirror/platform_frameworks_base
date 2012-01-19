@@ -360,6 +360,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/nfc/advanced-nfc.html">Advanced NFC</a></li>
         </ul>
       </li>
+      <li><a href="<?cs var:toroot?>guide/topics/wireless/wifip2p.html">
+            <span class="en">WiFi Direct</span></a> <span class="new">new!</span>
+          </li>
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
             <span class="en">USB</span></a>
