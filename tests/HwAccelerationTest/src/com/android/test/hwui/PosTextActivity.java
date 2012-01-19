@@ -58,8 +58,21 @@ public class PosTextActivity extends Activity {
             canvas.drawRGB(255, 255, 255);
             
             canvas.save();
+
+            canvas.drawLine(100.0f, 0.0f, 100.0f, getHeight(), mLargePaint);
+            
             canvas.translate(100.0f, 100.0f);
+            mLargePaint.setTextAlign(Paint.Align.LEFT);
             canvas.drawPosText(mText, mPos, mLargePaint);
+
+            canvas.translate(0.0f, 50.0f);
+            mLargePaint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawPosText(mText, mPos, mLargePaint);
+
+            canvas.translate(0.0f, 50.0f);
+            mLargePaint.setTextAlign(Paint.Align.RIGHT);
+            canvas.drawPosText(mText, mPos, mLargePaint);
+
             canvas.restore();
         }
     }

@@ -94,7 +94,8 @@ void Font::invalidateTextureCache(CacheTextureLine *cacheLine) {
     }
 }
 
-void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds) {
+void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
+        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop;
 
@@ -115,7 +116,8 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds
     }
 }
 
-void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
+void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
+        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop + glyph->mBitmapHeight;
 
@@ -133,8 +135,8 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y) {
             nPenX, nPenY - height, u1, v1, glyph->mCachedTextureLine->mCacheTexture);
 }
 
-void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
-        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
+        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
     int nPenX = x + glyph->mBitmapLeft;
     int nPenY = y + glyph->mBitmapTop;
 
@@ -181,11 +183,17 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
         int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     if (bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
         render(paint, text, start, len, numGlyphs, x, y, BITMAP, bitmap,
-                bitmapW, bitmapH, NULL);
+                bitmapW, bitmapH, NULL, NULL);
     } else {
         render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
-                0, 0, NULL);
+                0, 0, NULL, NULL);
     }
+}
+
+void Font::render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+            int numGlyphs, int x, int y, const float* positions) {
+    render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
+            0, 0, NULL, positions);
 }
 
 void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
@@ -195,62 +203,95 @@ void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t le
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
-    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
+    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, NULL);
 }
 
 #define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
 
 void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
-        uint32_t bitmapW, uint32_t bitmapH,Rect *bounds) {
+        uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
 
-    float penX = x;
-    int penY = y;
-    int glyphsLeft = 1;
-    if (numGlyphs > 0) {
-        glyphsLeft = numGlyphs;
-    }
-
-    SkFixed prevRsbDelta = 0;
-    penX += 0.5f;
+    int glyphsCount = 0;
 
     text += start;
 
-    while (glyphsLeft > 0) {
-        glyph_t glyph = GET_GLYPH(text);
+    static RenderGlyph gRenderGlyph[] = {
+            &android::uirenderer::Font::drawCachedGlyph,
+            &android::uirenderer::Font::drawCachedGlyphBitmap,
+            &android::uirenderer::Font::measureCachedGlyph
+    };
+    RenderGlyph render = gRenderGlyph[mode];
 
-        // Reached the end of the string
-        if (IS_END_OF_STRING(glyph)) {
-            break;
-        }
+    if (positions == NULL) {
+        SkFixed prevRsbDelta = 0;
 
-        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
-        penX += SkFixedToFloat(SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta));
-        prevRsbDelta = cachedGlyph->mRsbDelta;
+        float penX = x;
+        int penY = y;
 
-        // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
-        if (cachedGlyph->mIsValid) {
-            switch(mode) {
-            case FRAMEBUFFER:
-                drawCachedGlyph(cachedGlyph, (int) floorf(penX), penY);
-                break;
-            case BITMAP:
-                drawCachedGlyph(cachedGlyph, (int) floorf(penX), penY, bitmap, bitmapW, bitmapH);
-                break;
-            case MEASURE:
-                measureCachedGlyph(cachedGlyph, (int) floorf(penX), penY, bounds);
+        penX += 0.5f;
+
+        while (glyphsCount < numGlyphs) {
+            glyph_t glyph = GET_GLYPH(text);
+
+            // Reached the end of the string
+            if (IS_END_OF_STRING(glyph)) {
                 break;
             }
+
+            CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
+            penX += SkFixedToFloat(SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta));
+            prevRsbDelta = cachedGlyph->mRsbDelta;
+
+            // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
+            if (cachedGlyph->mIsValid) {
+                (*this.*render)(cachedGlyph, (int) floorf(penX), penY,
+                        bitmap, bitmapW, bitmapH, bounds, positions);
+            }
+
+            penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
+
+            glyphsCount++;
         }
+    } else {
+        const SkPaint::Align align = paint->getTextAlign();
 
-        penX += SkFixedToFloat(cachedGlyph->mAdvanceX);
+        // This is for renderPosText()
+        while (glyphsCount < numGlyphs) {
+            glyph_t glyph = GET_GLYPH(text);
 
-        // If we were given a specific number of glyphs, decrement
-        if (numGlyphs > 0) {
-            glyphsLeft--;
+            // Reached the end of the string
+            if (IS_END_OF_STRING(glyph)) {
+                break;
+            }
+
+            CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
+
+            // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
+            if (cachedGlyph->mIsValid) {
+                int penX = x + positions[(glyphsCount << 1)];
+                int penY = y + positions[(glyphsCount << 1) + 1];
+
+                switch (align) {
+                    case SkPaint::kRight_Align:
+                        penX -= SkFixedToFloat(cachedGlyph->mAdvanceX);
+                        penY -= SkFixedToFloat(cachedGlyph->mAdvanceY);
+                        break;
+                    case SkPaint::kCenter_Align:
+                        penX -= SkFixedToFloat(cachedGlyph->mAdvanceX >> 1);
+                        penY -= SkFixedToFloat(cachedGlyph->mAdvanceY >> 1);
+                    default:
+                        break;
+                }
+
+                (*this.*render)(cachedGlyph, penX, penY,
+                        bitmap, bitmapW, bitmapH, bounds, positions);
+            }
+
+            glyphsCount++;
         }
     }
 }
@@ -866,21 +907,15 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     return image;
 }
 
-bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, Rect* bounds) {
+void FontRenderer::initRender(const Rect* clip, Rect* bounds) {
     checkInit();
-
-    if (!mCurrentFont) {
-        ALOGE("No font set");
-        return false;
-    }
 
     mDrawn = false;
     mBounds = bounds;
     mClip = clip;
+}
 
-    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y);
-
+void FontRenderer::finishRender() {
     mBounds = NULL;
     mClip = NULL;
 
@@ -888,6 +923,33 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+}
+
+bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, Rect* bounds) {
+    if (!mCurrentFont) {
+        ALOGE("No font set");
+        return false;
+    }
+
+    initRender(clip, bounds);
+    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y);
+    finishRender();
+
+    return mDrawn;
+}
+
+bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
+        const float* positions, Rect* bounds) {
+    if (!mCurrentFont) {
+        ALOGE("No font set");
+        return false;
+    }
+
+    initRender(clip, bounds);
+    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y, positions);
+    finishRender();
 
     return mDrawn;
 }
