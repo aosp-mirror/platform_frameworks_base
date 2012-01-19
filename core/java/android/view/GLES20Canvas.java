@@ -908,17 +908,17 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPicture(Picture picture) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
     public void drawPicture(Picture picture, Rect dst) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
     public void drawPicture(Picture picture, RectF dst) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override

@@ -123,7 +123,11 @@ public class Picture {
     }
 
     protected void finalize() throws Throwable {
-        nativeDestructor(mNativePicture);
+        try {
+            nativeDestructor(mNativePicture);
+        } finally {
+            super.finalize();
+        }
     }
     
     /*package*/ final int ni() {
