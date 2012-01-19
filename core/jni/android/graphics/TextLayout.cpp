@@ -78,7 +78,7 @@ int TextLayout::shapeRtlText(const jchar* context, jsize start, jsize count, jsi
             }
         }
         count = end;
-        // LOG(LOG_INFO, "CSRTL", "start %d count %d ccount %d\n", start, count, contextCount);
+        // ALOG(LOG_INFO, "CSRTL", "start %d count %d ccount %d\n", start, count, contextCount);
         ubidi_writeReverse(buffer, count, shaped, count, UBIDI_DO_MIRRORING | UBIDI_OUTPUT_REVERSE
                            | UBIDI_KEEP_BASE_COMBINING, &status);
         if (U_SUCCESS(status)) {
@@ -125,7 +125,7 @@ jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int& dir, j
 
             int rc = ubidi_countRuns(bidi, &status);
             if (U_SUCCESS(status)) {
-                // LOG(LOG_INFO, "LAYOUT", "para bidiReq=%d dir=%d rc=%d\n", bidiReq, dir, rc);
+                // ALOG(LOG_INFO, "LAYOUT", "para bidiReq=%d dir=%d rc=%d\n", bidiReq, dir, rc);
 
                 int32_t slen = 0;
                 for (int i = 0; i < rc; ++i) {
@@ -164,7 +164,7 @@ bool TextLayout::prepareText(SkPaint* paint, const jchar* text, jsize len, jint 
         UErrorCode status = U_ZERO_ERROR;
         len = layoutLine(text, len, bidiFlags, dir, buffer, status); // might change len, dir
         if (!U_SUCCESS(status)) {
-            LOG(LOG_WARN, "LAYOUT", "drawText error %d\n", status);
+            ALOG(LOG_WARN, "LAYOUT", "drawText error %d\n", status);
             free(buffer);
             return false; // can't render
         }
