@@ -298,11 +298,6 @@ public interface WindowManagerPolicy {
         boolean isDisplayedLw();
 
         /**
-         * Is this window considered to be gone for purposes of layout?
-         */
-        boolean isGoneForLayoutLw();
-
-        /**
          * Returns true if this window has been shown on screen at some time in 
          * the past.  Must be called with the window manager lock held.
          * 

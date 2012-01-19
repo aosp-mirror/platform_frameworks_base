@@ -2336,7 +2336,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
         if (mTopFullscreenOpaqueWindowState == null &&
-                win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
+                win.isVisibleOrBehindKeyguardLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             }
@@ -2391,7 +2391,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // case though.
                 if (topIsFullscreen) {
                     if (mStatusBarCanHide) {
-                        if (DEBUG_LAYOUT) Log.v(TAG, "** HIDING status bar");
+                        if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
                         if (mStatusBar.hideLw(true)) {
                             changes |= FINISH_LAYOUT_REDO_LAYOUT;
 
@@ -2407,7 +2407,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Log.v(TAG, "Preventing status bar from hiding by policy");
                     }
                 } else {
-                    if (DEBUG_LAYOUT) Log.v(TAG, "** SHOWING status bar: top is not fullscreen");
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar: top is not fullscreen");
                     if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
             }

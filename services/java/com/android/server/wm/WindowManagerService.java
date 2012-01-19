@@ -7391,11 +7391,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int N = mWindows.size();
         int i;
 
-        if (DEBUG_LAYOUT) {
-            Slog.v(TAG, "-------------------------------------");
-            Slog.v(TAG, "performLayout: needed="
-                    + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
-        }
+        if (DEBUG_LAYOUT) Slog.v(TAG, "performLayout: needed="
+                + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
         
         mPolicy.beginLayoutLw(dw, dh, mRotation);
 
@@ -7412,20 +7409,19 @@ public class WindowManagerService extends IWindowManager.Stub
             // Don't do layout of a window if it is not visible, or
             // soon won't be visible, to avoid wasting time and funky
             // changes while a window is animating away.
-            final boolean gone = win.isGoneForLayoutLw();
+            final AppWindowToken atoken = win.mAppToken;
+            final boolean gone = win.mViewVisibility == View.GONE
+                    || !win.mRelayoutCalled
+                    || (atoken == null && win.mRootToken.hidden)
+                    || (atoken != null && atoken.hiddenRequested)
+                    || win.mAttachedHidden
+                    || win.mExiting || win.mDestroying;
 
             if (DEBUG_LAYOUT && !win.mLayoutAttached) {
-                Slog.v(TAG, "1ST PASS " + win
+                Slog.v(TAG, "First pass " + win
                         + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
                         + " mLayoutAttached=" + win.mLayoutAttached);
-                final AppWindowToken atoken = win.mAppToken;
-                if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
-                        + win.mViewVisibility + " mRelayoutCalled="
-                        + win.mRelayoutCalled + " hidden="
-                        + win.mRootToken.hidden + " hiddenRequested="
-                        + (atoken != null && atoken.hiddenRequested)
-                        + " mAttachedHidden=" + win.mAttachedHidden);
-                else Slog.v(TAG, "  VIS: mViewVisibility="
+                if (gone) Slog.v(TAG, "  (mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
@@ -7447,7 +7443,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
                     win.mLayoutSeq = seq;
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
+                    if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
                             + win.mFrame + " mContainingFrame="
                             + win.mContainingFrame + " mDisplayFrame="
                             + win.mDisplayFrame);
@@ -7465,7 +7461,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState win = mWindows.get(i);
 
             if (win.mLayoutAttached) {
-                if (DEBUG_LAYOUT) Slog.v(TAG, "2ND PASS " + win
+                if (DEBUG_LAYOUT) Slog.v(TAG, "Second pass " + win
                         + " mHaveFrame=" + win.mHaveFrame
                         + " mViewVisibility=" + win.mViewVisibility
                         + " mRelayoutCalled=" + win.mRelayoutCalled);
@@ -7483,7 +7479,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
                     win.mLayoutSeq = seq;
-                    if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame="
+                    if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
                             + win.mFrame + " mContainingFrame="
                             + win.mContainingFrame + " mDisplayFrame="
                             + win.mDisplayFrame);
