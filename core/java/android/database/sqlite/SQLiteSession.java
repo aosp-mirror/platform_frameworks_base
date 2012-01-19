@@ -150,6 +150,12 @@ import android.os.ParcelFileDescriptor;
  * A query that works well on 100 rows may struggle with 10,000.</li>
  * </ul>
  *
+ * <h2>Reentrance</h2>
+ * <p>
+ * This class must tolerate reentrant execution of SQLite operations because
+ * triggers may call custom SQLite functions that perform additional queries.
+ * </p>
+ *
  * TODO: Support timeouts on all possibly blocking operations.
  *
  * @hide
@@ -159,6 +165,7 @@ public final class SQLiteSession {
 
     private SQLiteConnection mConnection;
     private int mConnectionFlags;
+    private int mConnectionUseCount;
     private Transaction mTransactionPool;
     private Transaction mTransactionStack;
 
@@ -289,7 +296,9 @@ public final class SQLiteSession {
 
     private void beginTransactionUnchecked(int transactionMode,
             SQLiteTransactionListener transactionListener, int connectionFlags) {
-        acquireConnectionIfNoTransaction(null, connectionFlags); // might throw
+        if (mTransactionStack == null) {
+            acquireConnection(null, connectionFlags); // might throw
+        }
         try {
             // Set up the transaction such that we can back out safely
             // in case we fail part way.
@@ -325,7 +334,9 @@ public final class SQLiteSession {
             transaction.mParent = mTransactionStack;
             mTransactionStack = transaction;
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            if (mTransactionStack == null) {
+                releaseConnection(); // might throw
+            }
         }
     }
 
@@ -408,7 +419,7 @@ public final class SQLiteSession {
                     mConnection.execute("ROLLBACK;", null); // might throw
                 }
             } finally {
-                releaseConnectionIfNoTransaction(); // might throw
+                releaseConnection(); // might throw
             }
         }
 
@@ -534,11 +545,11 @@ public final class SQLiteSession {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             mConnection.prepare(sql, outStatementInfo); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -562,11 +573,11 @@ public final class SQLiteSession {
             return;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             mConnection.execute(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -592,11 +603,11 @@ public final class SQLiteSession {
             return 0;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForLong(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -622,11 +633,11 @@ public final class SQLiteSession {
             return null;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForString(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -655,11 +666,11 @@ public final class SQLiteSession {
             return null;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForBlobFileDescriptor(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -685,11 +696,11 @@ public final class SQLiteSession {
             return 0;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForChangedRowCount(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -715,11 +726,11 @@ public final class SQLiteSession {
             return 0;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForLastInsertedRowId(sql, bindArgs); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -760,12 +771,12 @@ public final class SQLiteSession {
             return 0;
         }
 
-        acquireConnectionIfNoTransaction(sql, connectionFlags); // might throw
+        acquireConnection(sql, connectionFlags); // might throw
         try {
             return mConnection.executeForCursorWindow(sql, bindArgs,
                     window, startPos, requiredPos, countAllRows); // might throw
         } finally {
-            releaseConnectionIfNoTransaction(); // might throw
+            releaseConnection(); // might throw
         }
     }
 
@@ -807,16 +818,19 @@ public final class SQLiteSession {
         return false;
     }
 
-    private void acquireConnectionIfNoTransaction(String sql, int connectionFlags) {
-        if (mTransactionStack == null) {
-            assert mConnection == null;
+    private void acquireConnection(String sql, int connectionFlags) {
+        if (mConnection == null) {
+            assert mConnectionUseCount == 0;
             mConnection = mConnectionPool.acquireConnection(sql, connectionFlags); // might throw
             mConnectionFlags = connectionFlags;
         }
+        mConnectionUseCount += 1;
     }
 
-    private void releaseConnectionIfNoTransaction() {
-        if (mTransactionStack == null && mConnection != null) {
+    private void releaseConnection() {
+        assert mConnection != null;
+        assert mConnectionUseCount > 0;
+        if (--mConnectionUseCount == 0) {
             try {
                 mConnectionPool.releaseConnection(mConnection); // might throw
             } finally {

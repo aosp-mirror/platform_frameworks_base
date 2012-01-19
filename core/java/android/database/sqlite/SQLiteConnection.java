@@ -74,6 +74,12 @@ import java.util.regex.Pattern;
  * queues.
  * </p>
  *
+ * <h2>Reentrance</h2>
+ * <p>
+ * This class must tolerate reentrant execution of SQLite operations because
+ * triggers may call custom SQLite functions that perform additional queries.
+ * </p>
+ *
  * @hide
  */
 public final class SQLiteConnection {
@@ -205,13 +211,13 @@ public final class SQLiteConnection {
         }
 
         if (mConnectionPtr != 0) {
-            mRecentOperations.beginOperation("close", null, null);
+            final int cookie = mRecentOperations.beginOperation("close", null, null);
             try {
                 mPreparedStatementCache.evictAll();
                 nativeClose(mConnectionPtr);
                 mConnectionPtr = 0;
             } finally {
-                mRecentOperations.endOperation();
+                mRecentOperations.endOperation(cookie);
             }
         }
     }
@@ -304,9 +310,9 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("prepare", sql, null);
+        final int cookie = mRecentOperations.beginOperation("prepare", sql, null);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 if (outStatementInfo != null) {
                     outStatementInfo.numParameters = statement.mNumParameters;
@@ -328,10 +334,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -349,9 +355,9 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("execute", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("execute", sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -361,10 +367,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -384,9 +390,9 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("executeForLong", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForLong", sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -396,10 +402,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -419,9 +425,9 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("executeForString", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForString", sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -431,10 +437,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -456,9 +462,10 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("executeForBlobFileDescriptor", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForBlobFileDescriptor",
+                sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -470,10 +477,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -493,9 +500,10 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("executeForChangedRowCount", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForChangedRowCount",
+                sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -506,10 +514,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -529,9 +537,10 @@ public final class SQLiteConnection {
             throw new IllegalArgumentException("sql must not be null.");
         }
 
-        mRecentOperations.beginOperation("executeForLastInsertedRowId", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForLastInsertedRowId",
+                sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -542,10 +551,10 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            mRecentOperations.endOperation();
+            mRecentOperations.endOperation(cookie);
         }
     }
 
@@ -581,9 +590,10 @@ public final class SQLiteConnection {
         int actualPos = -1;
         int countedRows = -1;
         int filledRows = -1;
-        mRecentOperations.beginOperation("executeForCursorWindow", sql, bindArgs);
+        final int cookie = mRecentOperations.beginOperation("executeForCursorWindow",
+                sql, bindArgs);
         try {
-            PreparedStatement statement = acquirePreparedStatement(sql);
+            final PreparedStatement statement = acquirePreparedStatement(sql);
             try {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
@@ -600,11 +610,11 @@ public final class SQLiteConnection {
                 releasePreparedStatement(statement);
             }
         } catch (RuntimeException ex) {
-            mRecentOperations.failOperation(ex);
+            mRecentOperations.failOperation(cookie, ex);
             throw ex;
         } finally {
-            if (mRecentOperations.endOperationDeferLog()) {
-                mRecentOperations.logOperation("window='" + window
+            if (mRecentOperations.endOperationDeferLog(cookie)) {
+                mRecentOperations.logOperation(cookie, "window='" + window
                         + "', startPos=" + startPos
                         + ", actualPos=" + actualPos
                         + ", filledRows=" + filledRows
@@ -615,8 +625,15 @@ public final class SQLiteConnection {
 
     private PreparedStatement acquirePreparedStatement(String sql) {
         PreparedStatement statement = mPreparedStatementCache.get(sql);
+        boolean skipCache = false;
         if (statement != null) {
-            return statement;
+            if (!statement.mInUse) {
+                return statement;
+            }
+            // The statement is already in the cache but is in use (this statement appears
+            // to be not only re-entrant but recursive!).  So prepare a new copy of the
+            // statement but do not cache it.
+            skipCache = true;
         }
 
         final int statementPtr = nativePrepareStatement(mConnectionPtr, sql);
@@ -625,7 +642,7 @@ public final class SQLiteConnection {
             final int type = DatabaseUtils.getSqlStatementType(sql);
             final boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
             statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly);
-            if (isCacheable(type)) {
+            if (!skipCache && isCacheable(type)) {
                 mPreparedStatementCache.put(sql, statement);
                 statement.mInCache = true;
             }
@@ -637,18 +654,20 @@ public final class SQLiteConnection {
             }
             throw ex;
         }
+        statement.mInUse = true;
         return statement;
     }
 
     private void releasePreparedStatement(PreparedStatement statement) {
+        statement.mInUse = false;
         if (statement.mInCache) {
             try {
                 nativeResetStatementAndClearBindings(mConnectionPtr, statement.mStatementPtr);
             } catch (SQLiteException ex) {
-                // The statement could not be reset due to an error.
-                // The entryRemoved() callback for the cache will recursively call
-                // releasePreparedStatement() again, but this time mInCache will be false
-                // so the statement will be finalized and recycled.
+                // The statement could not be reset due to an error.  Remove it from the cache.
+                // When remove() is called, the cache will invoke its entryRemoved() callback,
+                // which will in turn call finalizePreparedStatement() to finalize and
+                // recycle the statement.
                 if (SQLiteDebug.DEBUG_SQL_CACHE) {
                     Log.v(TAG, "Could not reset prepared statement due to an exception.  "
                             + "Removing it from the cache.  SQL: "
@@ -657,9 +676,13 @@ public final class SQLiteConnection {
                 mPreparedStatementCache.remove(statement.mSql);
             }
         } else {
-            nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
-            recyclePreparedStatement(statement);
+            finalizePreparedStatement(statement);
         }
+    }
+
+    private void finalizePreparedStatement(PreparedStatement statement) {
+        nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
+        recyclePreparedStatement(statement);
     }
 
     private void bindArguments(PreparedStatement statement, Object[] bindArgs) {
@@ -735,9 +758,10 @@ public final class SQLiteConnection {
      * Dumps debugging information about this connection.
      *
      * @param printer The printer to receive the dump, not null.
+     * @param verbose True to dump more verbose information.
      */
-    public void dump(Printer printer) {
-        dumpUnsafe(printer);
+    public void dump(Printer printer, boolean verbose) {
+        dumpUnsafe(printer, verbose);
     }
 
     /**
@@ -752,15 +776,21 @@ public final class SQLiteConnection {
      * it should not crash.  This is ok as it is only used for diagnostic purposes.
      *
      * @param printer The printer to receive the dump, not null.
+     * @param verbose True to dump more verbose information.
      */
-    void dumpUnsafe(Printer printer) {
+    void dumpUnsafe(Printer printer, boolean verbose) {
         printer.println("Connection #" + mConnectionId + ":");
+        if (verbose) {
+            printer.println("  connectionPtr: 0x" + Integer.toHexString(mConnectionPtr));
+        }
         printer.println("  isPrimaryConnection: " + mIsPrimaryConnection);
-        printer.println("  connectionPtr: 0x" + Integer.toHexString(mConnectionPtr));
         printer.println("  onlyAllowReadOnlyOperations: " + mOnlyAllowReadOnlyOperations);
 
         mRecentOperations.dump(printer);
-        mPreparedStatementCache.dump(printer);
+
+        if (verbose) {
+            mPreparedStatementCache.dump(printer);
+        }
     }
 
     /**
@@ -917,6 +947,12 @@ public final class SQLiteConnection {
 
         // True if the statement is in the cache.
         public boolean mInCache;
+
+        // True if the statement is in use (currently executing).
+        // We need this flag because due to the use of custom functions in triggers, it's
+        // possible for SQLite calls to be re-entrant.  Consequently we need to prevent
+        // in use statements from being finalized until they are no longer in use.
+        public boolean mInUse;
     }
 
     private final class PreparedStatementCache
@@ -929,7 +965,9 @@ public final class SQLiteConnection {
         protected void entryRemoved(boolean evicted, String key,
                 PreparedStatement oldValue, PreparedStatement newValue) {
             oldValue.mInCache = false;
-            releasePreparedStatement(oldValue);
+            if (!oldValue.mInUse) {
+                finalizePreparedStatement(oldValue);
+            }
         }
 
         public void dump(Printer printer) {
@@ -958,11 +996,14 @@ public final class SQLiteConnection {
 
     private static final class OperationLog {
         private static final int MAX_RECENT_OPERATIONS = 10;
+        private static final int COOKIE_GENERATION_SHIFT = 8;
+        private static final int COOKIE_INDEX_MASK = 0xff;
 
         private final Operation[] mOperations = new Operation[MAX_RECENT_OPERATIONS];
         private int mIndex;
+        private int mGeneration;
 
-        public void beginOperation(String kind, String sql, Object[] bindArgs) {
+        public int beginOperation(String kind, String sql, Object[] bindArgs) {
             synchronized (mOperations) {
                 final int index = (mIndex + 1) % MAX_RECENT_OPERATIONS;
                 Operation operation = mOperations[index];
@@ -995,53 +1036,71 @@ public final class SQLiteConnection {
                         }
                     }
                 }
+                operation.mCookie = newOperationCookieLocked(index);
                 mIndex = index;
+                return operation.mCookie;
             }
         }
 
-        public void failOperation(Exception ex) {
+        public void failOperation(int cookie, Exception ex) {
             synchronized (mOperations) {
-                final Operation operation =  mOperations[mIndex];
-                operation.mException = ex;
-            }
-        }
-
-        public boolean endOperationDeferLog() {
-            synchronized (mOperations) {
-                return endOperationDeferLogLocked();
-            }
-        }
-
-        private boolean endOperationDeferLogLocked() {
-            final Operation operation =  mOperations[mIndex];
-            operation.mEndTime = System.currentTimeMillis();
-            operation.mFinished = true;
-            return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
-                            operation.mEndTime - operation.mStartTime);
-        }
-
-        public void endOperation() {
-            synchronized (mOperations) {
-                if (endOperationDeferLogLocked()) {
-                    logOperationLocked(null);
+                final Operation operation = getOperationLocked(cookie);
+                if (operation != null) {
+                    operation.mException = ex;
                 }
             }
         }
 
-        public void logOperation(String detail) {
+        public void endOperation(int cookie) {
             synchronized (mOperations) {
-                logOperationLocked(detail);
+                if (endOperationDeferLogLocked(cookie)) {
+                    logOperationLocked(cookie, null);
+                }
             }
         }
 
-        private void logOperationLocked(String detail) {
-            final Operation operation =  mOperations[mIndex];
+        public boolean endOperationDeferLog(int cookie) {
+            synchronized (mOperations) {
+                return endOperationDeferLogLocked(cookie);
+            }
+        }
+
+        public void logOperation(int cookie, String detail) {
+            synchronized (mOperations) {
+                logOperationLocked(cookie, detail);
+            }
+        }
+
+        private boolean endOperationDeferLogLocked(int cookie) {
+            final Operation operation = getOperationLocked(cookie);
+            if (operation != null) {
+                operation.mEndTime = System.currentTimeMillis();
+                operation.mFinished = true;
+                return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
+                                operation.mEndTime - operation.mStartTime);
+            }
+            return false;
+        }
+
+        private void logOperationLocked(int cookie, String detail) {
+            final Operation operation = getOperationLocked(cookie);
             StringBuilder msg = new StringBuilder();
             operation.describe(msg);
             if (detail != null) {
                 msg.append(", ").append(detail);
             }
             Log.d(TAG, msg.toString());
+        }
+
+        private int newOperationCookieLocked(int index) {
+            final int generation = mGeneration++;
+            return generation << COOKIE_GENERATION_SHIFT | index;
+        }
+
+        private Operation getOperationLocked(int cookie) {
+            final int index = cookie & COOKIE_INDEX_MASK;
+            final Operation operation = mOperations[index];
+            return operation.mCookie == cookie ? operation : null;
         }
 
         public String describeCurrentOperation() {
@@ -1097,6 +1156,7 @@ public final class SQLiteConnection {
         public ArrayList<Object> mBindArgs;
         public boolean mFinished;
         public Exception mException;
+        public int mCookie;
 
         public void describe(StringBuilder msg) {
             msg.append(mKind);

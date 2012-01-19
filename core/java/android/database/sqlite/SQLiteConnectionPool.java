@@ -833,8 +833,9 @@ public final class SQLiteConnectionPool implements Closeable {
      * Dumps debugging information about this connection pool.
      *
      * @param printer The printer to receive the dump, not null.
+     * @param verbose True to dump more verbose information.
      */
-    public void dump(Printer printer) {
+    public void dump(Printer printer, boolean verbose) {
         Printer indentedPrinter = PrefixPrinter.create(printer, "    ");
         synchronized (mLock) {
             printer.println("Connection pool for " + mConfiguration.path + ":");
@@ -843,7 +844,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
             printer.println("  Available primary connection:");
             if (mAvailablePrimaryConnection != null) {
-                mAvailablePrimaryConnection.dump(indentedPrinter);
+                mAvailablePrimaryConnection.dump(indentedPrinter, verbose);
             } else {
                 indentedPrinter.println("<none>");
             }
@@ -852,7 +853,7 @@ public final class SQLiteConnectionPool implements Closeable {
             if (!mAvailableNonPrimaryConnections.isEmpty()) {
                 final int count = mAvailableNonPrimaryConnections.size();
                 for (int i = 0; i < count; i++) {
-                    mAvailableNonPrimaryConnections.get(i).dump(indentedPrinter);
+                    mAvailableNonPrimaryConnections.get(i).dump(indentedPrinter, verbose);
                 }
             } else {
                 indentedPrinter.println("<none>");
@@ -863,7 +864,7 @@ public final class SQLiteConnectionPool implements Closeable {
                 for (Map.Entry<SQLiteConnection, Boolean> entry :
                         mAcquiredConnections.entrySet()) {
                     final SQLiteConnection connection = entry.getKey();
-                    connection.dumpUnsafe(indentedPrinter);
+                    connection.dumpUnsafe(indentedPrinter, verbose);
                     indentedPrinter.println("  Pending reconfiguration: " + entry.getValue());
                 }
             } else {
