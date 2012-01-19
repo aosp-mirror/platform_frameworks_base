@@ -22,7 +22,6 @@
 
 #include <media/IAudioFlinger.h>
 #include <media/IAudioRecord.h>
-#include <media/AudioTrack.h>
 
 #include <utils/RefBase.h>
 #include <utils/Errors.h>
@@ -33,6 +32,8 @@
 #include <system/audio.h>
 
 namespace android {
+
+class audio_track_cblk_t;
 
 // ----------------------------------------------------------------------------
 

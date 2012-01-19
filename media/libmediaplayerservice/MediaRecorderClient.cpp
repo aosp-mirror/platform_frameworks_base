@@ -33,8 +33,6 @@
 
 #include <utils/String16.h>
 
-#include <media/AudioTrack.h>
-
 #include <system/audio.h>
 
 #include "MediaRecorderClient.h"
