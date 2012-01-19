@@ -136,7 +136,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private static final String INTENT_DATA_STALL_ALARM =
         "com.android.internal.telephony.gprs-data-stall";
 
-    static final Uri PREFERAPN_URI = Uri.parse("content://telephony/carriers/preferapn");
+    static final Uri PREFERAPN_NO_UPDATE_URI =
+                        Uri.parse("content://telephony/carriers/preferapn_no_update");
     static final String APN_ID = "apn_id";
     private boolean canSetPreferApn = false;
 
@@ -2342,26 +2343,30 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private void setPreferredApn(int pos) {
         if (!canSetPreferApn) {
+            log("setPreferredApn: X !canSEtPreferApn");
             return;
         }
 
+        log("setPreferredApn: delete");
         ContentResolver resolver = mPhone.getContext().getContentResolver();
-        resolver.delete(PREFERAPN_URI, null, null);
+        resolver.delete(PREFERAPN_NO_UPDATE_URI, null, null);
 
         if (pos >= 0) {
+            log("setPreferredApn: insert");
             ContentValues values = new ContentValues();
             values.put(APN_ID, pos);
-            resolver.insert(PREFERAPN_URI, values);
+            resolver.insert(PREFERAPN_NO_UPDATE_URI, values);
         }
     }
 
     private ApnSetting getPreferredApn() {
         if (mAllApns.isEmpty()) {
+            log("getPreferredApn: X not found mAllApns.isEmpty");
             return null;
         }
 
         Cursor cursor = mPhone.getContext().getContentResolver().query(
-                PREFERAPN_URI, new String[] { "_id", "name", "apn" },
+                PREFERAPN_NO_UPDATE_URI, new String[] { "_id", "name", "apn" },
                 null, null, Telephony.Carriers.DEFAULT_SORT_ORDER);
 
         if (cursor != null) {
@@ -2376,6 +2381,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             pos = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID));
             for(ApnSetting p:mAllApns) {
                 if (p.id == pos && p.canHandleType(mRequestedApnType)) {
+                    log("getPreferredApn: X found apnSetting" + p);
                     cursor.close();
                     return p;
                 }
@@ -2386,6 +2392,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             cursor.close();
         }
 
+        log("getPreferredApn: X not found");
         return null;
     }
 
