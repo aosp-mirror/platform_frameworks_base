@@ -357,7 +357,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
 
-    private final int mSquaredTouchSlopDistance;
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     private boolean mCreatedWithASelection = false;
 
@@ -443,15 +442,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         this(context, null);
     }
 
-    public TextView(Context context,
-                    AttributeSet attrs) {
+    public TextView(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.textViewStyle);
     }
 
     @SuppressWarnings("deprecation")
-    public TextView(Context context,
-                    AttributeSet attrs,
-                    int defStyle) {
+    public TextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mText = "";
 
@@ -1134,10 +1130,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setLongClickable(longClickable);
 
         prepareCursorControllers();
-
-        final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
-        final int touchSlop = viewConfiguration.getScaledTouchSlop();
-        mSquaredTouchSlopDistance = touchSlop * touchSlop;
     }
 
     private void setTypefaceByIndex(int typefaceIndex, int styleIndex) {
@@ -3202,8 +3194,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int n = mFilters.length;
         for (int i = 0; i < n; i++) {
-            CharSequence out = mFilters[i].filter(text, 0, text.length(),
-                                                  EMPTY_SPANNED, 0, 0);
+            CharSequence out = mFilters[i].filter(text, 0, text.length(), EMPTY_SPANNED, 0, 0);
             if (out != null) {
                 text = out;
             }
@@ -5619,11 +5610,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyUp(keyCode, event);
     }
 
-    @Override public boolean onCheckIsTextEditor() {
+    @Override
+    public boolean onCheckIsTextEditor() {
         return mInputType != EditorInfo.TYPE_NULL;
     }
 
-    @Override public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (onCheckIsTextEditor() && isEnabled()) {
             if (mInputMethodState == null) {
                 mInputMethodState = new InputMethodState();
@@ -9246,7 +9239,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean vibrate = true;
 
         if (super.performLongClick()) {
-            mDiscardNextActionUp = true;
             handled = true;
         }
 
@@ -10799,7 +10791,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final float deltaX = mDownPositionX - ev.getRawX();
                         final float deltaY = mDownPositionY - ev.getRawY();
                         final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                        if (distanceSquared < mSquaredTouchSlopDistance) {
+
+                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(
+                                TextView.this.getContext());
+                        final int touchSlop = viewConfiguration.getScaledTouchSlop();
+
+                        if (distanceSquared < touchSlop * touchSlop) {
                             if (mActionPopupWindow != null && mActionPopupWindow.isShowing()) {
                                 // Tapping on the handle dismisses the displayed action popup
                                 mActionPopupWindow.hide();
@@ -11013,7 +11010,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Double tap detection
         private long mPreviousTapUpTime = 0;
-        private float mPreviousTapPositionX, mPreviousTapPositionY;
+        private float mDownPositionX, mDownPositionY;
+        private boolean mGestureStayedInTapRegion;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -11076,20 +11074,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mMinTouchOffset = mMaxTouchOffset = getOffsetForPosition(x, y);
 
                     // Double tap detection
-                    long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
-                    if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
-                            isPositionOnText(x, y)) {
-                        final float deltaX = x - mPreviousTapPositionX;
-                        final float deltaY = y - mPreviousTapPositionY;
-                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                        if (distanceSquared < mSquaredTouchSlopDistance) {
-                            startSelectionActionMode();
-                            mDiscardNextActionUp = true;
+                    if (mGestureStayedInTapRegion) {
+                        long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
+                        if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                            final float deltaX = x - mDownPositionX;
+                            final float deltaY = y - mDownPositionY;
+                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+                            ViewConfiguration viewConfiguration = ViewConfiguration.get(
+                                    TextView.this.getContext());
+                            int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
+                            boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
+
+                            if (stayedInArea && isPositionOnText(x, y)) {
+                                startSelectionActionMode();
+                                mDiscardNextActionUp = true;
+                            }
                         }
                     }
 
-                    mPreviousTapPositionX = x;
-                    mPreviousTapPositionY = y;
+                    mDownPositionX = x;
+                    mDownPositionY = y;
+                    mGestureStayedInTapRegion = true;
                     break;
 
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -11099,6 +11105,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (mContext.getPackageManager().hasSystemFeature(
                             PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
                         updateMinAndMaxOffsets(event);
+                    }
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    if (mGestureStayedInTapRegion) {
+                        final float deltaX = event.getX() - mDownPositionX;
+                        final float deltaY = event.getY() - mDownPositionY;
+                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(
+                                TextView.this.getContext());
+                        int doubleTapTouchSlop = viewConfiguration.getScaledDoubleTapTouchSlop();
+
+                        if (distanceSquared > doubleTapTouchSlop * doubleTapTouchSlop) {
+                            mGestureStayedInTapRegion = false;
+                        }
                     }
                     break;
 
