@@ -19,12 +19,21 @@ package com.android.smoketest;
 import com.android.internal.os.RuntimeInit;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.content.Context;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This smoke test is designed to quickly sniff for any error conditions
@@ -32,53 +41,125 @@ import java.util.List;
  */
 public class ProcessErrorsTest extends AndroidTestCase {
     
-    private final String TAG = "ProcessErrorsTest";
+    private static final String TAG = "ProcessErrorsTest";
     
     protected ActivityManager mActivityManager;
+    protected PackageManager mPackageManager;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mActivityManager = (ActivityManager) 
+        mActivityManager = (ActivityManager)
                 getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        mPackageManager = getContext().getPackageManager();
     }
 
     public void testSetUpConditions() throws Exception {
         assertNotNull(mActivityManager);
+        assertNotNull(mPackageManager);
     }
 
     public void testNoProcessErrors() throws Exception {
-        List<ActivityManager.ProcessErrorStateInfo> errList;        
+        final String reportMsg = checkForProcessErrors();
+        if (reportMsg != null) {
+            Log.w(TAG, reportMsg);
+        }
+
+        // report a non-empty list back to the test framework
+        assertNull(reportMsg, reportMsg);
+    }
+
+    private String checkForProcessErrors() throws Exception {
+        List<ProcessErrorStateInfo> errList;
         errList = mActivityManager.getProcessesInErrorState();
         
         // note: this contains information about each process that is currently in an error
         // condition.  if the list is empty (null) then "we're good".  
         
         // if the list is non-empty, then it's useful to report the contents of the list
-        // we'll put a copy in the log, and we'll report it back to the framework via the assert.
         final String reportMsg = reportListContents(errList);
-        if (reportMsg != null) {
-            Log.w(TAG, reportMsg);
-        }
-        
-        // report a non-empty list back to the test framework
-        assertNull(reportMsg, errList);
+        return reportMsg;
     }
-    
+
+    /**
+     * A test that runs all Launcher-launchable activities and verifies that no ANRs or crashes
+     * happened while doing so.
+     * <p />
+     * FIXME: Doesn't detect multiple crashing apps properly, since the crash dialog for the
+     * FIXME: first app doesn't go away.
+     */
+    public void testRunAllActivities() throws Exception {
+        final Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        final Intent launchable = new Intent(Intent.ACTION_MAIN);
+        launchable.addCategory(Intent.CATEGORY_LAUNCHER);
+        final List<ResolveInfo> activities = mPackageManager.queryIntentActivities(launchable, 0);
+        final Set<ProcessError> errSet = new HashSet<ProcessError>();
+
+        for (ResolveInfo info : activities) {
+            Log.i(TAG, String.format("Got %s/%s", info.activityInfo.packageName,
+                    info.activityInfo.name));
+
+            // build an Intent to launch the app
+            final ComponentName component = new ComponentName(info.activityInfo.packageName,
+                    info.activityInfo.name);
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setComponent(component);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            // launch app, and wait 7 seconds for it to start/settle
+            getContext().startActivity(intent);
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+
+            // See if there are any errors
+            Collection<ProcessErrorStateInfo> procs = mActivityManager.getProcessesInErrorState();
+            if (procs != null) {
+                errSet.addAll(ProcessError.fromCollection(procs));
+            }
+
+            // Send the "home" intent and wait 2 seconds for us to get there
+            getContext().startActivity(home);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+
+        if (!errSet.isEmpty()) {
+            fail(String.format("Got %d errors: %s", errSet.size(),
+                    reportWrappedListContents(errSet)));
+        }
+    }
+
+    private String reportWrappedListContents(Collection<ProcessError> errList) {
+        List<ProcessErrorStateInfo> newList = new ArrayList<ProcessErrorStateInfo>(errList.size());
+        for (ProcessError err : errList) {
+            newList.add(err.info);
+        }
+        return reportListContents(newList);
+    }
+
     /**
      * This helper function will dump the actual error reports.
      * 
      * @param errList The error report containing one or more error records.
      * @return Returns a string containing all of the errors.
      */
-    private String reportListContents(List<ActivityManager.ProcessErrorStateInfo> errList) {
+    private String reportListContents(Collection<ProcessErrorStateInfo> errList) {
         if (errList == null) return null;
 
         StringBuilder builder = new StringBuilder();
 
-        Iterator<ActivityManager.ProcessErrorStateInfo> iter = errList.iterator();
+        Iterator<ProcessErrorStateInfo> iter = errList.iterator();
         while (iter.hasNext()) {
-            ActivityManager.ProcessErrorStateInfo entry = iter.next();
+            ProcessErrorStateInfo entry = iter.next();
 
             String condition;
             switch (entry.condition) {
@@ -96,8 +177,77 @@ public class ProcessErrorsTest extends AndroidTestCase {
             builder.append("Process error ").append(condition).append(" ");
             builder.append(" ").append(entry.shortMsg);
             builder.append(" detected in ").append(entry.processName).append(" ").append(entry.tag);
+            builder.append("\n");
         }
         return builder.toString();
     }
-    
+
+    /**
+     * A {@link ProcessErrorStateInfo} wrapper class that hashes how we want (so that equivalent
+     * crashes are considered equal).
+     */
+    private static class ProcessError {
+        public final ProcessErrorStateInfo info;
+
+        public ProcessError(ProcessErrorStateInfo newInfo) {
+            info = newInfo;
+        }
+
+        public static Collection<ProcessError> fromCollection(Collection<ProcessErrorStateInfo> in)
+                {
+            List<ProcessError> out = new ArrayList<ProcessError>(in.size());
+            for (ProcessErrorStateInfo info : in) {
+                out.add(new ProcessError(info));
+            }
+            return out;
+        }
+
+        private boolean strEquals(String a, String b) {
+            if ((a == null) && (b == null)) {
+                return true;
+            } else if ((a == null) || (b == null)) {
+                return false;
+            } else {
+                return a.equals(b);
+            }
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null) return false;
+            if (!(other instanceof ProcessError)) return false;
+            ProcessError peOther = (ProcessError) other;
+
+            return (info.condition == peOther.info.condition)
+                    && strEquals(info.longMsg, peOther.info.longMsg)
+                    && (info.pid == peOther.info.pid)
+                    && strEquals(info.processName, peOther.info.processName)
+                    && strEquals(info.shortMsg, peOther.info.shortMsg)
+                    && strEquals(info.stackTrace, peOther.info.stackTrace)
+                    && strEquals(info.tag, peOther.info.tag)
+                    && (info.uid == peOther.info.uid);
+        }
+
+        private int hash(Object obj) {
+            if (obj == null) {
+                return 13;
+            } else {
+                return obj.hashCode();
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            int code = 17;
+            code += info.condition;
+            code *= hash(info.longMsg);
+            code += info.pid;
+            code *= hash(info.processName);
+            code *= hash(info.shortMsg);
+            code *= hash(info.stackTrace);
+            code *= hash(info.tag);
+            code += info.uid;
+            return code;
+        }
+    }
 }
