@@ -151,6 +151,10 @@ public:
     void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, uint8_t *bitmap = NULL,
             uint32_t bitmapW = 0, uint32_t bitmapH = 0);
+
+    void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+            int numGlyphs, int x, int y, const float* positions);
+
     /**
      * Creates a new font associated with the specified font state.
      */
@@ -160,6 +164,8 @@ public:
 
 protected:
     friend class FontRenderer;
+    typedef void (Font::*RenderGlyph)(CachedGlyphInfo*, int, int, uint8_t*,
+            uint32_t, uint32_t, Rect*, const float*);
 
     enum RenderMode {
         FRAMEBUFFER,
@@ -169,7 +175,7 @@ protected:
 
     void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
-            uint32_t bitmapW, uint32_t bitmapH, Rect *bounds);
+            uint32_t bitmapW, uint32_t bitmapH, Rect *bounds, const float* positions);
 
     void measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
             int numGlyphs, Rect *bounds);
@@ -183,11 +189,17 @@ protected:
     void invalidateTextureCache(CacheTextureLine *cacheLine = NULL);
 
     CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph);
-    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
-    void measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds);
-    void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
-    void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
-            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
+    void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo* glyph);
+
+    void measureCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
+            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+            Rect* bounds, const float* pos);
+    void drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
+            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+            Rect* bounds, const float* pos);
+    void drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
+            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
+            Rect* bounds, const float* pos);
 
     CachedGlyphInfo* getCachedGlyph(SkPaint* paint, glyph_t textUnit);
 
@@ -226,8 +238,12 @@ public:
     }
 
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
+    // bounds is an out parameter
     bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, Rect* bounds);
+    // bounds is an out parameter
+    bool renderPosText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
+            uint32_t len, int numGlyphs, int x, int y, const float* positions, Rect* bounds);
 
     struct DropShadow {
         DropShadow() { };
@@ -297,6 +313,8 @@ protected:
     void initVertexArrayBuffers();
 
     void checkInit();
+    void initRender(const Rect* clip, Rect* bounds);
+    void finishRender();
 
     String16 mLatinPrecache;
     void precacheLatin(SkPaint* paint);
