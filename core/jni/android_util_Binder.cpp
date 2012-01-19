@@ -203,7 +203,7 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         gLogOffsets.mClass, gLogOffsets.mLogE, tagstr, msgstr, excep);
     if (env->ExceptionCheck()) {
         /* attempting to log the failure has failed */
-        LOGW("Failed trying to log exception, msg='%s'\n", msg);
+        ALOGW("Failed trying to log exception, msg='%s'\n", msg);
         env->ExceptionClear();
     }
 
@@ -463,11 +463,11 @@ public:
                     (jstring) env->CallObjectMethod(objClassRef.get(), gClassOffsets.mGetName));
             ScopedUtfChars nameUtf(env, nameRef.get());
             if (nameUtf.c_str() != NULL) {
-                LOGW("BinderProxy is being destroyed but the application did not call "
+                ALOGW("BinderProxy is being destroyed but the application did not call "
                         "unlinkToDeath to unlink all of its death recipients beforehand.  "
                         "Releasing leaked death recipient: %s", nameUtf.c_str());
             } else {
-                LOGW("BinderProxy being destroyed; unable to get DR object name");
+                ALOGW("BinderProxy being destroyed; unable to get DR object name");
                 env->ExceptionClear();
             }
         }
@@ -630,7 +630,7 @@ sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj)
             env->GetIntField(obj, gBinderProxyOffsets.mObject);
     }
 
-    LOGW("ibinderForJavaObject: %p is not a Binder object", obj);
+    ALOGW("ibinderForJavaObject: %p is not a Binder object", obj);
     return NULL;
 }
 
@@ -976,7 +976,7 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
     jint len = strlen(str);
     int space_needed = 1 + sizeof(len) + len;
     if (end - *pos < space_needed) {
-        LOGW("not enough space for string. remain=%d; needed=%d",
+        ALOGW("not enough space for string. remain=%d; needed=%d",
              (end - *pos), space_needed);
         return false;
     }
@@ -992,7 +992,7 @@ static bool push_eventlog_string(char** pos, const char* end, const char* str) {
 static bool push_eventlog_int(char** pos, const char* end, jint val) {
     int space_needed = 1 + sizeof(val);
     if (end - *pos < space_needed) {
-        LOGW("not enough space for int.  remain=%d; needed=%d",
+        ALOGW("not enough space for int.  remain=%d; needed=%d",
              (end - *pos), space_needed);
         return false;
     }
@@ -1117,7 +1117,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
     IBinder* target = (IBinder*)
         env->GetIntField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
-        LOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
+        ALOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
         assert(false);
     }
 
@@ -1149,7 +1149,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
     IBinder* target = (IBinder*)
         env->GetIntField(obj, gBinderProxyOffsets.mObject);
     if (target == NULL) {
-        LOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
+        ALOGW("Binder has been finalized when calling linkToDeath() with recip=%p)\n", recipient);
         return JNI_FALSE;
     }
 

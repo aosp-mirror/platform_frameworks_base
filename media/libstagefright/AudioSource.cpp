@@ -37,7 +37,7 @@ static void AudioRecordCallbackFunction(int event, void *user, void *info) {
             break;
         }
         case AudioRecord::EVENT_OVERRUN: {
-            LOGW("AudioRecord reported overrun!");
+            ALOGW("AudioRecord reported overrun!");
             break;
         }
         default:
@@ -259,7 +259,7 @@ status_t AudioSource::dataCallbackTimestamp(
     ALOGV("dataCallbackTimestamp: %lld us", timeUs);
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
-        LOGW("Spurious callback from AudioRecord. Drop the audio data.");
+        ALOGW("Spurious callback from AudioRecord. Drop the audio data.");
         return OK;
     }
 
@@ -301,7 +301,7 @@ status_t AudioSource::dataCallbackTimestamp(
                     audioBuffer.i16, audioBuffer.size);
     } else {
         if (audioBuffer.size == 0) {
-            LOGW("Nothing is available from AudioRecord callback buffer");
+            ALOGW("Nothing is available from AudioRecord callback buffer");
             buffer->release();
             return OK;
         }

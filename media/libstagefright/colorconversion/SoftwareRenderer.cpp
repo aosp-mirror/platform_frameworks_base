@@ -135,7 +135,7 @@ void SoftwareRenderer::render(
     ANativeWindowBuffer *buf;
     int err;
     if ((err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf)) != 0) {
-        LOGW("Surface::dequeueBuffer returned error %d", err);
+        ALOGW("Surface::dequeueBuffer returned error %d", err);
         return;
     }
 
@@ -225,7 +225,7 @@ void SoftwareRenderer::render(
     CHECK_EQ(0, mapper.unlock(buf->handle));
 
     if ((err = mNativeWindow->queueBuffer(mNativeWindow.get(), buf)) != 0) {
-        LOGW("Surface::queueBuffer returned error %d", err);
+        ALOGW("Surface::queueBuffer returned error %d", err);
     }
     buf = NULL;
 }

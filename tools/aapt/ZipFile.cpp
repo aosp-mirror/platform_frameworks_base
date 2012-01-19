@@ -603,7 +603,7 @@ status_t ZipFile::add(const ZipFile* pSourceZip, const ZipEntry* pSourceEntry,
     if (copyPartialFpToFp(mZipFp, pSourceZip->mZipFp, copyLen, NULL)
         != NO_ERROR)
     {
-        LOGW("copy of '%s' failed\n", pEntry->mCDE.mFileName);
+        ALOGW("copy of '%s' failed\n", pEntry->mCDE.mFileName);
         result = UNKNOWN_ERROR;
         goto bail;
     }
@@ -931,7 +931,7 @@ status_t ZipFile::flush(void)
      * of wasted space at the end of the file.  Remove it now.
      */
     if (ftruncate(fileno(mZipFp), ftell(mZipFp)) != 0) {
-        LOGW("ftruncate failed %ld: %s\n", ftell(mZipFp), strerror(errno));
+        ALOGW("ftruncate failed %ld: %s\n", ftell(mZipFp), strerror(errno));
         // not fatal
     }
 

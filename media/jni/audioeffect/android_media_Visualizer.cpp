@@ -113,7 +113,7 @@ static void captureCallback(void* user,
             callbackInfo->visualizer_class);
 
     if (!user || !env) {
-        LOGW("captureCallback error user %p, env %p", user, env);
+        ALOGW("captureCallback error user %p, env %p", user, env);
         return;
     }
 

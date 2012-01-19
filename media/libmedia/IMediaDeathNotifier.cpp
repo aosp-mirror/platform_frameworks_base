@@ -44,7 +44,7 @@ IMediaDeathNotifier::getMediaPlayerService()
             if (binder != 0) {
                 break;
              }
-             LOGW("Media player service not published, waiting...");
+             ALOGW("Media player service not published, waiting...");
              usleep(500000); // 0.5 s
         } while(true);
 
@@ -76,7 +76,7 @@ IMediaDeathNotifier::removeObitRecipient(const wp<IMediaDeathNotifier>& recipien
 
 void
 IMediaDeathNotifier::DeathNotifier::binderDied(const wp<IBinder>& who) {
-    LOGW("media server died");
+    ALOGW("media server died");
 
     // Need to do this with the lock held
     SortedVector< wp<IMediaDeathNotifier> > list;

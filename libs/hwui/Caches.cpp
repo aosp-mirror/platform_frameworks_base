@@ -50,7 +50,7 @@ Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
     GLint maxTextureUnits;
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
-        LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
+        ALOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
     }
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);

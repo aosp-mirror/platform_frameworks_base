@@ -125,7 +125,7 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
 
     if (!texture) {
         if (bitmap->width() > mMaxTextureSize || bitmap->height() > mMaxTextureSize) {
-            LOGW("Bitmap too large to be uploaded into a texture");
+            ALOGW("Bitmap too large to be uploaded into a texture");
             return NULL;
         }
 
@@ -244,7 +244,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         texture->blend = !bitmap->isOpaque();
         break;
     default:
-        LOGW("Unsupported bitmap config: %d", bitmap->getConfig());
+        ALOGW("Unsupported bitmap config: %d", bitmap->getConfig());
         break;
     }
 

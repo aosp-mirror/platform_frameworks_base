@@ -165,7 +165,7 @@ extern "C" int EffectCreate(effect_uuid_t *uuid,
 
     ret = Equalizer_init(pContext);
     if (ret < 0) {
-        LOGW("EffectLibCreateEffect() init failed");
+        ALOGW("EffectLibCreateEffect() init failed");
         delete pContext;
         return ret;
     }
@@ -710,7 +710,7 @@ extern "C" int Equalizer_command(effect_handle_t self, uint32_t cmdCode, uint32_
     case EFFECT_CMD_SET_AUDIO_MODE:
         break;
     default:
-        LOGW("Equalizer_command invalid command %d",cmdCode);
+        ALOGW("Equalizer_command invalid command %d",cmdCode);
         return -EINVAL;
     }
 
