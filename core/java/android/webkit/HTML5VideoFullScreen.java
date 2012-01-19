@@ -198,6 +198,10 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         // Call into the native to ask for the state, if still in play mode,
         // this will trigger the video to play.
         mProxy.dispatchOnRestoreState();
+
+        if (getStartWhenPrepared()) {
+            mPlayer.start();
+        }
     }
 
     public boolean fullScreenExited() {
