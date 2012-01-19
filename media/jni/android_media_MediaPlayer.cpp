@@ -80,7 +80,7 @@ JNIMediaPlayerListener::JNIMediaPlayerListener(JNIEnv* env, jobject thiz, jobjec
     // that posts events to the application thread.
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaPlayer");
+        ALOGE("Can't find android/media/MediaPlayer");
         jniThrowException(env, "java/lang/Exception", NULL);
         return;
     }
@@ -405,7 +405,7 @@ android_media_MediaPlayer_getVideoWidth(JNIEnv *env, jobject thiz)
     }
     int w;
     if (0 != mp->getVideoWidth(&w)) {
-        LOGE("getVideoWidth failed");
+        ALOGE("getVideoWidth failed");
         w = 0;
     }
     ALOGV("getVideoWidth: %d", w);
@@ -422,7 +422,7 @@ android_media_MediaPlayer_getVideoHeight(JNIEnv *env, jobject thiz)
     }
     int h;
     if (0 != mp->getVideoHeight(&h)) {
-        LOGE("getVideoHeight failed");
+        ALOGE("getVideoHeight failed");
         h = 0;
     }
     ALOGV("getVideoHeight: %d", h);
@@ -826,58 +826,58 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     jint result = -1;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        LOGE("ERROR: GetEnv failed\n");
+        ALOGE("ERROR: GetEnv failed\n");
         goto bail;
     }
     assert(env != NULL);
 
     if (register_android_media_MediaPlayer(env) < 0) {
-        LOGE("ERROR: MediaPlayer native registration failed\n");
+        ALOGE("ERROR: MediaPlayer native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_MediaRecorder(env) < 0) {
-        LOGE("ERROR: MediaRecorder native registration failed\n");
+        ALOGE("ERROR: MediaRecorder native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_MediaScanner(env) < 0) {
-        LOGE("ERROR: MediaScanner native registration failed\n");
+        ALOGE("ERROR: MediaScanner native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_MediaMetadataRetriever(env) < 0) {
-        LOGE("ERROR: MediaMetadataRetriever native registration failed\n");
+        ALOGE("ERROR: MediaMetadataRetriever native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_AmrInputStream(env) < 0) {
-        LOGE("ERROR: AmrInputStream native registration failed\n");
+        ALOGE("ERROR: AmrInputStream native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_ResampleInputStream(env) < 0) {
-        LOGE("ERROR: ResampleInputStream native registration failed\n");
+        ALOGE("ERROR: ResampleInputStream native registration failed\n");
         goto bail;
     }
 
     if (register_android_media_MediaProfiles(env) < 0) {
-        LOGE("ERROR: MediaProfiles native registration failed");
+        ALOGE("ERROR: MediaProfiles native registration failed");
         goto bail;
     }
 
     if (register_android_mtp_MtpDatabase(env) < 0) {
-        LOGE("ERROR: MtpDatabase native registration failed");
+        ALOGE("ERROR: MtpDatabase native registration failed");
         goto bail;
     }
 
     if (register_android_mtp_MtpDevice(env) < 0) {
-        LOGE("ERROR: MtpDevice native registration failed");
+        ALOGE("ERROR: MtpDevice native registration failed");
         goto bail;
     }
 
     if (register_android_mtp_MtpServer(env) < 0) {
-        LOGE("ERROR: MtpServer native registration failed");
+        ALOGE("ERROR: MtpServer native registration failed");
         goto bail;
     }
 

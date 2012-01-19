@@ -26,7 +26,7 @@ static uint32_t gHeight = 0;
 static void checkGlError(const char* op) {
     for (GLint error = glGetError(); error; error
             = glGetError()) {
-        LOGE("after %s() glError (0x%x)\n", op, error);
+        ALOGE("after %s() glError (0x%x)\n", op, error);
     }
 }
 
@@ -44,7 +44,7 @@ GLuint loadShader(GLenum shaderType, const char* pSource) {
                 char* buf = (char*) malloc(infoLen);
                 if (buf) {
                     glGetShaderInfoLog(shader, infoLen, NULL, buf);
-                    LOGE("Could not compile shader %d:\n%s\n", shaderType, buf);
+                    ALOGE("Could not compile shader %d:\n%s\n", shaderType, buf);
                     free(buf);
                 }
                 glDeleteShader(shader);
@@ -94,7 +94,7 @@ GLuint createProgram(const char* pVertexSource, const char* pFragmentSource) {
                 char* buf = (char*) malloc(bufLength);
                 if (buf) {
                     glGetProgramInfoLog(program, bufLength, NULL, buf);
-                    LOGE("Could not link program:\n%s\n", buf);
+                    ALOGE("Could not link program:\n%s\n", buf);
                     free(buf);
                 }
             }

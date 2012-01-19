@@ -204,14 +204,14 @@ void ObjectBase::zeroAllUserRef(Context *rsc) {
     // This operation can be slow, only to be called during context cleanup.
     const ObjectBase * o = rsc->mObjHead;
     while (o) {
-        //LOGE("o %p", o);
+        //ALOGE("o %p", o);
         if (o->zeroUserRef()) {
             // deleted the object and possibly others, restart from head.
             o = rsc->mObjHead;
-            //LOGE("o head %p", o);
+            //ALOGE("o head %p", o);
         } else {
             o = o->mNext;
-            //LOGE("o next %p", o);
+            //ALOGE("o next %p", o);
         }
     }
 

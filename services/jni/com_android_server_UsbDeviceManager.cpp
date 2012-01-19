@@ -42,7 +42,7 @@ static struct parcel_file_descriptor_offsets_t
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
+        ALOGE("An exception was thrown by callback '%s'.", methodName);
         LOGE_EX(env);
         env->ExceptionClear();
     }
@@ -66,7 +66,7 @@ static jobjectArray android_server_UsbDeviceManager_getAccessoryStrings(JNIEnv *
 {
     int fd = open(DRIVER_NAME, O_RDWR);
     if (fd < 0) {
-        LOGE("could not open %s", DRIVER_NAME);
+        ALOGE("could not open %s", DRIVER_NAME);
         return NULL;
     }
     jclass stringClass = env->FindClass("java/lang/String");
@@ -88,7 +88,7 @@ static jobject android_server_UsbDeviceManager_openAccessory(JNIEnv *env, jobjec
 {
     int fd = open(DRIVER_NAME, O_RDWR);
     if (fd < 0) {
-        LOGE("could not open %s", DRIVER_NAME);
+        ALOGE("could not open %s", DRIVER_NAME);
         return NULL;
     }
     jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
@@ -103,7 +103,7 @@ static jboolean android_server_UsbDeviceManager_isStartRequested(JNIEnv *env, jo
 {
     int fd = open(DRIVER_NAME, O_RDWR);
     if (fd < 0) {
-        LOGE("could not open %s", DRIVER_NAME);
+        ALOGE("could not open %s", DRIVER_NAME);
         return false;
     }
     int result = ioctl(fd, ACCESSORY_IS_START_REQUESTED);
@@ -125,7 +125,7 @@ int register_android_server_UsbDeviceManager(JNIEnv *env)
 {
     jclass clazz = env->FindClass("com/android/server/usb/UsbDeviceManager");
     if (clazz == NULL) {
-        LOGE("Can't find com/android/server/usb/UsbDeviceManager");
+        ALOGE("Can't find com/android/server/usb/UsbDeviceManager");
         return -1;
     }
 

@@ -115,7 +115,7 @@ float rsrGetDt(Context *rsc, Script *sc) {
 //////////////////////////////////////////////////////////////////////////////
 
 void rsrSetObject(const Context *rsc, const Script *sc, ObjectBase **dst, ObjectBase * src) {
-    //LOGE("rsiSetObject  %p,%p  %p", vdst, *vdst, vsrc);
+    //ALOGE("rsiSetObject  %p,%p  %p", vdst, *vdst, vsrc);
     if (src) {
         CHECK_OBJ(src);
         src->incSysRef();
@@ -128,7 +128,7 @@ void rsrSetObject(const Context *rsc, const Script *sc, ObjectBase **dst, Object
 }
 
 void rsrClearObject(const Context *rsc, const Script *sc, ObjectBase **dst) {
-    //LOGE("rsiClearObject  %p,%p", vdst, *vdst);
+    //ALOGE("rsiClearObject  %p,%p", vdst, *vdst);
     if (dst[0]) {
         CHECK_OBJ(dst[0]);
         dst[0]->decSysRef();
@@ -142,12 +142,12 @@ bool rsrIsObject(const Context *rsc, const Script *sc, const ObjectBase *src) {
 
 
 uint32_t rsrToClient(Context *rsc, Script *sc, int cmdID, void *data, int len) {
-    //LOGE("SC_toClient %i %i %i", cmdID, len);
+    //ALOGE("SC_toClient %i %i %i", cmdID, len);
     return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, false);
 }
 
 uint32_t rsrToClientBlocking(Context *rsc, Script *sc, int cmdID, void *data, int len) {
-    //LOGE("SC_toClientBlocking %i %i", cmdID, len);
+    //ALOGE("SC_toClientBlocking %i %i", cmdID, len);
     return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, true);
 }
 

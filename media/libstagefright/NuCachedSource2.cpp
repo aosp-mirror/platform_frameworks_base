@@ -317,7 +317,7 @@ void NuCachedSource2::fetchInternal() {
     Mutex::Autolock autoLock(mLock);
 
     if (n < 0) {
-        LOGE("source returned error %ld, %d retries left", n, mNumRetriesLeft);
+        ALOGE("source returned error %ld, %d retries left", n, mNumRetriesLeft);
         mFinalStatus = n;
         mCache->releasePage(page);
     } else if (n == 0) {
@@ -634,7 +634,7 @@ void NuCachedSource2::updateCacheParamsFromString(const char *s) {
 
     if (sscanf(s, "%ld/%ld/%d",
                &lowwaterMarkKb, &highwaterMarkKb, &keepAliveSecs) != 3) {
-        LOGE("Failed to parse cache parameters from '%s'.", s);
+        ALOGE("Failed to parse cache parameters from '%s'.", s);
         return;
     }
 
@@ -651,7 +651,7 @@ void NuCachedSource2::updateCacheParamsFromString(const char *s) {
     }
 
     if (mLowwaterThresholdBytes >= mHighwaterThresholdBytes) {
-        LOGE("Illegal low/highwater marks specified, reverting to defaults.");
+        ALOGE("Illegal low/highwater marks specified, reverting to defaults.");
 
         mLowwaterThresholdBytes = kDefaultLowWaterThreshold;
         mHighwaterThresholdBytes = kDefaultHighWaterThreshold;

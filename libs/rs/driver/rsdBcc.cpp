@@ -69,7 +69,7 @@ bool rsdScriptInit(const Context *rsc,
                      uint8_t const *bitcode,
                      size_t bitcodeSize,
                      uint32_t flags) {
-    //LOGE("rsdScriptCreate %p %p %p %p %i %i %p", rsc, resName, cacheDir, bitcode, bitcodeSize, flags, lookupFunc);
+    //ALOGE("rsdScriptCreate %p %p %p %p %i %i %p", rsc, resName, cacheDir, bitcode, bitcodeSize, flags, lookupFunc);
 
     pthread_mutex_lock(&rsdgInitMutex);
     char *cachePath = NULL;
@@ -93,14 +93,14 @@ bool rsdScriptInit(const Context *rsc,
     drv->ME = new bcinfo::MetadataExtractor((const char*)drv->mScriptText,
                                             drv->mScriptTextLength);
     if (!drv->ME->extract()) {
-      LOGE("bcinfo: failed to read script metadata");
+      ALOGE("bcinfo: failed to read script metadata");
       goto error;
     }
 
-    //LOGE("mBccScript %p", script->mBccScript);
+    //ALOGE("mBccScript %p", script->mBccScript);
 
     if (bccRegisterSymbolCallback(drv->mBccScript, &rsdLookupRuntimeStub, script) != 0) {
-        LOGE("bcc: FAILS to register symbol callback");
+        ALOGE("bcc: FAILS to register symbol callback");
         goto error;
     }
 
@@ -108,17 +108,17 @@ bool rsdScriptInit(const Context *rsc,
                   resName,
                   (char const *)drv->mScriptText,
                   drv->mScriptTextLength, 0) != 0) {
-        LOGE("bcc: FAILS to read bitcode");
+        ALOGE("bcc: FAILS to read bitcode");
         goto error;
     }
 
     if (bccLinkFile(drv->mBccScript, "/system/lib/libclcore.bc", 0) != 0) {
-        LOGE("bcc: FAILS to link bitcode");
+        ALOGE("bcc: FAILS to link bitcode");
         goto error;
     }
 
     if (bccPrepareExecutable(drv->mBccScript, cacheDir, resName, 0) != 0) {
-        LOGE("bcc: FAILS to prepare executable");
+        ALOGE("bcc: FAILS to prepare executable");
         goto error;
     }
 
@@ -236,8 +236,8 @@ static void wc_xy(void *usr, uint32_t idx) {
             return;
         }
 
-        //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
-        //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
+        //ALOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
+        //ALOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
         for (p.y = yStart; p.y < yEnd; p.y++) {
             uint32_t offset = mtls->dimX * p.y;
             p.out = mtls->ptrOut + (mtls->eStrideOut * offset);
@@ -267,8 +267,8 @@ static void wc_x(void *usr, uint32_t idx) {
             return;
         }
 
-        //LOGE("usr slice %i idx %i, x %i,%i", slice, idx, xStart, xEnd);
-        //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
+        //ALOGE("usr slice %i idx %i, x %i,%i", slice, idx, xStart, xEnd);
+        //ALOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
 
         p.out = mtls->ptrOut + (mtls->eStrideOut * xStart);
         p.in = mtls->ptrIn + (mtls->eStrideIn * xStart);
@@ -374,7 +374,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
             rsdLaunchThreads(mrsc, wc_x, &mtls);
         }
 
-        //LOGE("launch 1");
+        //ALOGE("launch 1");
     } else {
         RsForEachStubParamStruct p;
         memset(&p, 0, sizeof(p));
@@ -382,7 +382,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
         p.usr_len = mtls.usrLen;
         uint32_t sig = mtls.sig;
 
-        //LOGE("launch 3");
+        //ALOGE("launch 3");
         outer_foreach_t fn = dc->mForEachLaunch[sig];
         for (p.ar[0] = mtls.arrayStart; p.ar[0] < mtls.arrayEnd; p.ar[0]++) {
             for (p.z = mtls.zStart; p.z < mtls.zEnd; p.z++) {
@@ -434,7 +434,7 @@ void rsdScriptInvokeFunction(const Context *dc, Script *script,
                             const void *params,
                             size_t paramLength) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
-    //LOGE("invoke %p %p %i %p %i", dc, script, slot, params, paramLength);
+    //ALOGE("invoke %p %p %i %p %i", dc, script, slot, params, paramLength);
 
     Script * oldTLS = setTLS(script);
     ((void (*)(const void *, uint32_t))
@@ -446,7 +446,7 @@ void rsdScriptSetGlobalVar(const Context *dc, const Script *script,
                            uint32_t slot, void *data, size_t dataLength) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
     //rsAssert(!script->mFieldIsObject[slot]);
-    //LOGE("setGlobalVar %p %p %i %p %i", dc, script, slot, data, dataLength);
+    //ALOGE("setGlobalVar %p %p %i %p %i", dc, script, slot, data, dataLength);
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {
@@ -460,7 +460,7 @@ void rsdScriptSetGlobalVar(const Context *dc, const Script *script,
 void rsdScriptSetGlobalBind(const Context *dc, const Script *script, uint32_t slot, void *data) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
     //rsAssert(!script->mFieldIsObject[slot]);
-    //LOGE("setGlobalBind %p %p %i %p", dc, script, slot, data);
+    //ALOGE("setGlobalBind %p %p %i %p", dc, script, slot, data);
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {
@@ -474,7 +474,7 @@ void rsdScriptSetGlobalBind(const Context *dc, const Script *script, uint32_t sl
 void rsdScriptSetGlobalObj(const Context *dc, const Script *script, uint32_t slot, ObjectBase *data) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
     //rsAssert(script->mFieldIsObject[slot]);
-    //LOGE("setGlobalObj %p %p %i %p", dc, script, slot, data);
+    //ALOGE("setGlobalObj %p %p %i %p", dc, script, slot, data);
 
     int32_t *destPtr = ((int32_t **)drv->mFieldAddress)[slot];
     if (!destPtr) {

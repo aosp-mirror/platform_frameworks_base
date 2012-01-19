@@ -508,19 +508,19 @@ status_t Sample::doLoad()
         mFd = -1;
     }
     if (p == 0) {
-        LOGE("Unable to load sample: %s", mUrl);
+        ALOGE("Unable to load sample: %s", mUrl);
         return -1;
     }
     ALOGV("pointer = %p, size = %u, sampleRate = %u, numChannels = %d",
             p->pointer(), p->size(), sampleRate, numChannels);
 
     if (sampleRate > kMaxSampleRate) {
-       LOGE("Sample rate (%u) out of range", sampleRate);
+       ALOGE("Sample rate (%u) out of range", sampleRate);
        return - 1;
     }
 
     if ((numChannels < 1) || (numChannels > 2)) {
-        LOGE("Sample channel count (%d) out of range", numChannels);
+        ALOGE("Sample channel count (%d) out of range", numChannels);
         return - 1;
     }
 
@@ -616,7 +616,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         oldTrack = mAudioTrack;
         status = newTrack->initCheck();
         if (status != NO_ERROR) {
-            LOGE("Error creating AudioTrack");
+            ALOGE("Error creating AudioTrack");
             goto exit;
         }
         ALOGV("setVolume %p", newTrack);

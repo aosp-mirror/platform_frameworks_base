@@ -53,7 +53,7 @@ static const int kDumpLockSleep = 20000;
 static bool checkPermission() {
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
-    if (!ok) LOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
+    if (!ok) ALOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
     return ok;
 }
 
@@ -84,18 +84,18 @@ AudioPolicyService::AudioPolicyService()
         return;
 
     rc = audio_policy_dev_open(module, &mpAudioPolicyDev);
-    LOGE_IF(rc, "couldn't open audio policy device (%s)", strerror(-rc));
+    ALOGE_IF(rc, "couldn't open audio policy device (%s)", strerror(-rc));
     if (rc)
         return;
 
     rc = mpAudioPolicyDev->create_audio_policy(mpAudioPolicyDev, &aps_ops, this,
                                                &mpAudioPolicy);
-    LOGE_IF(rc, "couldn't create audio policy (%s)", strerror(-rc));
+    ALOGE_IF(rc, "couldn't create audio policy (%s)", strerror(-rc));
     if (rc)
         return;
 
     rc = mpAudioPolicy->init_check(mpAudioPolicy);
-    LOGE_IF(rc, "couldn't init_check the audio policy (%s)", strerror(-rc));
+    ALOGE_IF(rc, "couldn't init_check the audio policy (%s)", strerror(-rc));
     if (rc)
         return;
 
@@ -1028,9 +1028,9 @@ int AudioPolicyService::startTone(audio_policy_tone_t tone,
                                   audio_stream_type_t stream)
 {
     if (tone != AUDIO_POLICY_TONE_IN_CALL_NOTIFICATION)
-        LOGE("startTone: illegal tone requested (%d)", tone);
+        ALOGE("startTone: illegal tone requested (%d)", tone);
     if (stream != AUDIO_STREAM_VOICE_CALL)
-        LOGE("startTone: illegal stream (%d) requested for tone %d", stream,
+        ALOGE("startTone: illegal stream (%d) requested for tone %d", stream,
              tone);
     mTonePlaybackThread->startToneCommand(ToneGenerator::TONE_SUP_CALL_WAITING,
                                           AUDIO_STREAM_VOICE_CALL);

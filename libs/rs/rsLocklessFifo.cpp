@@ -45,12 +45,12 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes) {
     // Add room for a buffer reset command
     mBuffer = static_cast<uint8_t *>(malloc(sizeInBytes + 4));
     if (!mBuffer) {
-        LOGE("LocklessFifo allocation failure");
+        ALOGE("LocklessFifo allocation failure");
         return false;
     }
 
     if (!mSignalToControl.init() || !mSignalToWorker.init()) {
-        LOGE("Signal setup failed");
+        ALOGE("Signal setup failed");
         free(mBuffer);
         return false;
     }

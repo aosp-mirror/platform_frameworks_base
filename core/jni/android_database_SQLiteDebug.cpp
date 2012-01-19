@@ -201,25 +201,25 @@ int register_android_database_SQLiteDebug(JNIEnv *env)
 
     clazz = env->FindClass("android/database/sqlite/SQLiteDebug$PagerStats");
     if (clazz == NULL) {
-        LOGE("Can't find android/database/sqlite/SQLiteDebug$PagerStats");
+        ALOGE("Can't find android/database/sqlite/SQLiteDebug$PagerStats");
         return -1;
     }
 
     gMemoryUsedField = env->GetFieldID(clazz, "memoryUsed", "I");
     if (gMemoryUsedField == NULL) {
-        LOGE("Can't find memoryUsed");
+        ALOGE("Can't find memoryUsed");
         return -1;
     }
 
     gLargestMemAllocField = env->GetFieldID(clazz, "largestMemAlloc", "I");
     if (gLargestMemAllocField == NULL) {
-        LOGE("Can't find largestMemAlloc");
+        ALOGE("Can't find largestMemAlloc");
         return -1;
     }
 
     gPageCacheOverfloField = env->GetFieldID(clazz, "pageCacheOverflo", "I");
     if (gPageCacheOverfloField == NULL) {
-        LOGE("Can't find pageCacheOverflo");
+        ALOGE("Can't find pageCacheOverflo");
         return -1;
     }
 

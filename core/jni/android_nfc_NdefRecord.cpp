@@ -60,7 +60,7 @@ static jbyteArray android_nfc_NdefRecord_generate(
             &record_size);
 
     if (status) {
-        LOGE("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
+        ALOGE("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
         goto end;
     }
     TRACE("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
@@ -107,7 +107,7 @@ static jint android_nfc_NdefRecord_parseNdefRecord(JNIEnv *e, jobject o,
     TRACE("phFriNfc_NdefRecord_Parse()");
     status = phFriNfc_NdefRecord_Parse(&record, (uint8_t *)raw_record);
     if (status) {
-        LOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+        ALOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
         goto clean_and_return;
     }
     TRACE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);

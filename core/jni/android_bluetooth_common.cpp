@@ -101,7 +101,7 @@ jfieldID get_field(JNIEnv *env, jclass clazz, const char *member,
                    const char *mtype) {
     jfieldID field = env->GetFieldID(clazz, member, mtype);
     if (field == NULL) {
-        LOGE("Can't find member %s", member);
+        ALOGE("Can't find member %s", member);
     }
     return field;
 }
@@ -158,13 +158,13 @@ static dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
     msg = dbus_message_new_method_call(BLUEZ_DBUS_BASE_IFC, path, ifc, func);
 
     if (msg == NULL) {
-        LOGE("Could not allocate D-Bus message object!");
+        ALOGE("Could not allocate D-Bus message object!");
         goto done;
     }
 
     /* append arguments */
     if (!dbus_message_append_args_valist(msg, first_arg_type, args)) {
-        LOGE("Could not append argument to method call!");
+        ALOGE("Could not append argument to method call!");
         goto done;
     }
 
@@ -219,7 +219,7 @@ dbus_bool_t dbus_func_args_async(JNIEnv *env,
     return ret;
 }
 
-// If err is NULL, then any errors will be LOGE'd, and free'd and the reply
+// If err is NULL, then any errors will be ALOGE'd, and free'd and the reply
 // will be NULL.
 // If err is not NULL, then it is assumed that dbus_error_init was already
 // called, and error's will be returned to the caller without logging. The
@@ -248,13 +248,13 @@ DBusMessage * dbus_func_args_timeout_valist(JNIEnv *env,
     msg = dbus_message_new_method_call(BLUEZ_DBUS_BASE_IFC, path, ifc, func);
 
     if (msg == NULL) {
-        LOGE("Could not allocate D-Bus message object!");
+        ALOGE("Could not allocate D-Bus message object!");
         goto done;
     }
 
     /* append arguments */
     if (!dbus_message_append_args_valist(msg, first_arg_type, args)) {
-        LOGE("Could not append argument to method call!");
+        ALOGE("Could not append argument to method call!");
         goto done;
     }
 
@@ -587,7 +587,7 @@ int get_property(DBusMessageIter iter, Properties *properties,
     dbus_message_iter_recurse(&iter, &prop_val);
     type = properties[*prop_index].type;
     if (dbus_message_iter_get_arg_type(&prop_val) != type) {
-        LOGE("Property type mismatch in get_property: %d, expected:%d, index:%d",
+        ALOGE("Property type mismatch in get_property: %d, expected:%d, index:%d",
              dbus_message_iter_get_arg_type(&prop_val), type, *prop_index);
         return -1;
     }

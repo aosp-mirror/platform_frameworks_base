@@ -298,11 +298,11 @@ void BpMemoryHeap::assertReallyMapped() const
         uint32_t flags = reply.readInt32();
         uint32_t offset = reply.readInt32();
 
-        LOGE_IF(err, "binder=%p transaction failed fd=%d, size=%ld, err=%d (%s)",
+        ALOGE_IF(err, "binder=%p transaction failed fd=%d, size=%ld, err=%d (%s)",
                 asBinder().get(), parcel_fd, size, err, strerror(-err));
 
         int fd = dup( parcel_fd );
-        LOGE_IF(fd==-1, "cannot dup fd=%d, size=%ld, err=%d (%s)",
+        ALOGE_IF(fd==-1, "cannot dup fd=%d, size=%ld, err=%d (%s)",
                 parcel_fd, size, err, strerror(errno));
 
         int access = PROT_READ;
@@ -315,7 +315,7 @@ void BpMemoryHeap::assertReallyMapped() const
             mRealHeap = true;
             mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
             if (mBase == MAP_FAILED) {
-                LOGE("cannot map BpMemoryHeap (binder=%p), size=%ld, fd=%d (%s)",
+                ALOGE("cannot map BpMemoryHeap (binder=%p), size=%ld, fd=%d (%s)",
                         asBinder().get(), size, fd, strerror(errno));
                 close(fd);
             } else {
@@ -446,7 +446,7 @@ void HeapCache::free_heap(const wp<IBinder>& binder)
                 mHeapCache.removeItemsAt(i);
             }
         } else {
-            LOGE("free_heap binder=%p not found!!!", binder.unsafe_get());
+            ALOGE("free_heap binder=%p not found!!!", binder.unsafe_get());
         }
     }
 }

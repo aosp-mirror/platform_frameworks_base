@@ -138,7 +138,7 @@ status_t SoftVPX::initDecoder() {
     cfg.threads = GetCPUCoreCount();
     if ((vpx_err = vpx_codec_dec_init(
                 (vpx_codec_ctx_t *)mCtx, &vpx_codec_vp8_dx_algo, &cfg, 0))) {
-        LOGE("on2 decoder failed to initialize. (%d)", vpx_err);
+        ALOGE("on2 decoder failed to initialize. (%d)", vpx_err);
         return UNKNOWN_ERROR;
     }
 
@@ -254,7 +254,7 @@ void SoftVPX::onQueueFilled(OMX_U32 portIndex) {
                     inHeader->nFilledLen,
                     NULL,
                     0)) {
-            LOGE("on2 decoder failed to decode frame.");
+            ALOGE("on2 decoder failed to decode frame.");
 
             notify(OMX_EventError, OMX_ErrorUndefined, 0, NULL);
             return;

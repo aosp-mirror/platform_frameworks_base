@@ -112,14 +112,14 @@ bool unmarshallFilter(const Parcel& p,
     int32_t val;
     if (p.readInt32(&val) != OK)
     {
-        LOGE("Failed to read filter's length");
+        ALOGE("Failed to read filter's length");
         *status = NOT_ENOUGH_DATA;
         return false;
     }
 
     if( val > kMaxFilterSize || val < 0)
     {
-        LOGE("Invalid filter len %d", val);
+        ALOGE("Invalid filter len %d", val);
         *status = BAD_VALUE;
         return false;
     }
@@ -134,7 +134,7 @@ bool unmarshallFilter(const Parcel& p,
 
     if (p.dataAvail() < size)
     {
-        LOGE("Filter too short expected %d but got %d", size, p.dataAvail());
+        ALOGE("Filter too short expected %d but got %d", size, p.dataAvail());
         *status = NOT_ENOUGH_DATA;
         return false;
     }
@@ -144,7 +144,7 @@ bool unmarshallFilter(const Parcel& p,
 
     if (NULL == data)
     {
-        LOGE("Filter had no data");
+        ALOGE("Filter had no data");
         *status = BAD_VALUE;
         return false;
     }
@@ -184,7 +184,7 @@ static bool checkPermission(const char* permissionString) {
 #endif
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16(permissionString));
-    if (!ok) LOGE("Request requires %s", permissionString);
+    if (!ok) ALOGE("Request requires %s", permissionString);
     return ok;
 }
 
@@ -630,7 +630,7 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             p = new TestPlayerStub();
             break;
         default:
-            LOGE("Unknown player type: %d", playerType);
+            ALOGE("Unknown player type: %d", playerType);
             return NULL;
     }
     if (p != NULL) {
@@ -641,7 +641,7 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         }
     }
     if (p == NULL) {
-        LOGE("Failed to create player object");
+        ALOGE("Failed to create player object");
     }
     return p;
 }
@@ -688,7 +688,7 @@ status_t MediaPlayerService::Client::setDataSource(
         int fd = android::openContentProviderFile(url16);
         if (fd < 0)
         {
-            LOGE("Couldn't open fd for %s", url);
+            ALOGE("Couldn't open fd for %s", url);
             return UNKNOWN_ERROR;
         }
         setDataSource(fd, 0, 0x7fffffffffLL); // this sets mStatus
@@ -713,7 +713,7 @@ status_t MediaPlayerService::Client::setDataSource(
         if (mStatus == NO_ERROR) {
             mPlayer = p;
         } else {
-            LOGE("  error: %d", mStatus);
+            ALOGE("  error: %d", mStatus);
         }
         return mStatus;
     }
@@ -725,7 +725,7 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     struct stat sb;
     int ret = fstat(fd, &sb);
     if (ret != 0) {
-        LOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
+        ALOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
         return UNKNOWN_ERROR;
     }
 
@@ -736,7 +736,7 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     ALOGV("st_size = %llu", sb.st_size);
 
     if (offset >= sb.st_size) {
-        LOGE("offset error");
+        ALOGE("offset error");
         ::close(fd);
         return UNKNOWN_ERROR;
     }
@@ -821,7 +821,7 @@ status_t MediaPlayerService::Client::setVideoSurfaceTexture(
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
-            LOGE("setVideoSurfaceTexture failed: %d", err);
+            ALOGE("setVideoSurfaceTexture failed: %d", err);
             // Note that we must do the reset before disconnecting from the ANW.
             // Otherwise queue/dequeue calls could be made on the disconnected
             // ANW, which may result in errors.
@@ -905,7 +905,7 @@ status_t MediaPlayerService::Client::getMetadata(
 
     if (status != OK) {
         metadata.resetParcel();
-        LOGE("getMetadata failed %d", status);
+        ALOGE("getMetadata failed %d", status);
         return status;
     }
 
@@ -975,7 +975,7 @@ status_t MediaPlayerService::Client::getCurrentPosition(int *msec)
     if (ret == NO_ERROR) {
         ALOGV("[%d] getCurrentPosition = %d", mConnId, *msec);
     } else {
-        LOGE("getCurrentPosition returned %d", ret);
+        ALOGE("getCurrentPosition returned %d", ret);
     }
     return ret;
 }
@@ -989,7 +989,7 @@ status_t MediaPlayerService::Client::getDuration(int *msec)
     if (ret == NO_ERROR) {
         ALOGV("[%d] getDuration = %d", mConnId, *msec);
     } else {
-        LOGE("getDuration returned %d", ret);
+        ALOGE("getDuration returned %d", ret);
     }
     return ret;
 }
@@ -1394,7 +1394,7 @@ status_t MediaPlayerService::AudioOutput::open(
     }
 
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
-        LOGE("Unable to create audio track");
+        ALOGE("Unable to create audio track");
         delete t;
         return NO_INIT;
     }
@@ -1652,7 +1652,7 @@ ssize_t MediaPlayerService::AudioCache::write(const void* buffer, size_t size)
     p += mSize;
     ALOGV("memcpy(%p, %p, %u)", p, buffer, size);
     if (mSize + size > mHeap->getSize()) {
-        LOGE("Heap size overflow! req size: %d, max size: %d", (mSize + size), mHeap->getSize());
+        ALOGE("Heap size overflow! req size: %d, max size: %d", (mSize + size), mHeap->getSize());
         size = mHeap->getSize() - mSize;
     }
     memcpy(p, buffer, size);
@@ -1687,7 +1687,7 @@ void MediaPlayerService::AudioCache::notify(
     switch (msg)
     {
     case MEDIA_ERROR:
-        LOGE("Error %d, %d occurred", ext1, ext2);
+        ALOGE("Error %d, %d occurred", ext1, ext2);
         p->mError = ext1;
         break;
     case MEDIA_PREPARED:
@@ -1807,7 +1807,7 @@ void MediaPlayerService::addBatteryData(uint32_t params)
         info.refCount = 0;
 
         if (mBatteryData.add(uid, info) == NO_MEMORY) {
-            LOGE("Battery track error: no memory for new app");
+            ALOGE("Battery track error: no memory for new app");
             return;
         }
     }
@@ -1828,7 +1828,7 @@ void MediaPlayerService::addBatteryData(uint32_t params)
             ALOGW("Battery track warning: refCount is already 0");
             return;
         } else if (info.refCount < 0) {
-            LOGE("Battery track error: refCount < 0");
+            ALOGE("Battery track error: refCount < 0");
             mBatteryData.removeItem(uid);
             return;
         }

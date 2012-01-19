@@ -135,7 +135,7 @@ bool Metadata::checkKey(int key)
 {
     if (key < FIRST_SYSTEM_ID ||
         (LAST_SYSTEM_ID < key && key < FIRST_CUSTOM_ID)) {
-        LOGE("Bad key %d", key);
+        ALOGE("Bad key %d", key);
         return false;
     }
     size_t curr = mData->dataPosition();
@@ -152,7 +152,7 @@ bool Metadata::checkKey(int key)
             break;
         }
         if (mData->readInt32() == key) {
-            LOGE("Key exists already %d", key);
+            ALOGE("Key exists already %d", key);
             error = true;
             break;
         }

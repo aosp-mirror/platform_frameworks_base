@@ -120,7 +120,7 @@ static float SC_min_f32(float v, float v2) {
 }
 
 static float SC_mix_f32(float start, float stop, float amount) {
-    //LOGE("lerpf %f  %f  %f", start, stop, amount);
+    //ALOGE("lerpf %f  %f  %f", start, stop, amount);
     return start + (stop - start) * amount;
 }
 

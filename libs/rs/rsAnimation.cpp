@@ -126,7 +126,7 @@ RsAnimation rsi_AnimationCreate(Context *rsc,
                                 RsAnimationInterpolation interp,
                                 RsAnimationEdge pre,
                                 RsAnimationEdge post) {
-    //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
+    //ALOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
     Animation *a = NULL;//Animation::create(rsc, inValues, outValues, valueCount, interp, pre, post);
     if (a != NULL) {
         a->incUserRef();

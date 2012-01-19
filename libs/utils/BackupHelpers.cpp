@@ -232,7 +232,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
     lseek(fd, 0, SEEK_SET);
 
     if (sizeof(metadata) != 16) {
-        LOGE("ERROR: metadata block is the wrong size!");
+        ALOGE("ERROR: metadata block is the wrong size!");
     }
 
     bytesLeft = fileSize + sizeof(metadata);
@@ -280,7 +280,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
                 }
             }
         }
-        LOGE("write_update_file size mismatch for %s. expected=%d actual=%d."
+        ALOGE("write_update_file size mismatch for %s. expected=%d actual=%d."
                 " You aren't doing proper locking!", realFilename, fileSize, fileSize-bytesLeft);
     }
 
@@ -525,7 +525,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     struct stat64 s;
     if (lstat64(filepath.string(), &s) != 0) {
         err = errno;
-        LOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.string());
+        ALOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.string());
         return err;
     }
 
@@ -540,7 +540,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     int fd = open(filepath.string(), O_RDONLY);
     if (fd < 0) {
         err = errno;
-        LOGE("Error %d (%s) from open(%s)", err, strerror(err), filepath.string());
+        ALOGE("Error %d (%s) from open(%s)", err, strerror(err), filepath.string());
         return err;
     }
 
@@ -551,7 +551,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     char* paxData = buf + 1024;
 
     if (buf == NULL) {
-        LOGE("Out of mem allocating transfer buffer");
+        ALOGE("Out of mem allocating transfer buffer");
         err = ENOMEM;
         goto cleanup;
     }
@@ -688,11 +688,11 @@ int write_tarfile(const String8& packageName, const String8& domain,
             ssize_t nRead = read(fd, buf, toRead);
             if (nRead < 0) {
                 err = errno;
-                LOGE("Unable to read file [%s], err=%d (%s)", filepath.string(),
+                ALOGE("Unable to read file [%s], err=%d (%s)", filepath.string(),
                         err, strerror(err));
                 break;
             } else if (nRead == 0) {
-                LOGE("EOF but expect %lld more bytes in [%s]", (long long) toWrite,
+                ALOGE("EOF but expect %lld more bytes in [%s]", (long long) toWrite,
                         filepath.string());
                 err = EIO;
                 break;

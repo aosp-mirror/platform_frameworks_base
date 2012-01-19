@@ -570,7 +570,7 @@ template<class Entry>
 void ShapeCache<Entry>::generateTexture(SkBitmap& bitmap, Texture* texture) {
     SkAutoLockPixels alp(bitmap);
     if (!bitmap.readyToDraw()) {
-        LOGE("Cannot generate texture from bitmap");
+        ALOGE("Cannot generate texture from bitmap");
         return;
     }
 

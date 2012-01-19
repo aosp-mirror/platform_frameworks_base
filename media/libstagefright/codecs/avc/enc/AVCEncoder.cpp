@@ -41,7 +41,7 @@ static status_t ConvertOmxAvcProfileToAvcSpecProfile(
             *pvProfile = AVC_BASELINE;
             return OK;
         default:
-            LOGE("Unsupported omx profile: %d", omxProfile);
+            ALOGE("Unsupported omx profile: %d", omxProfile);
     }
     return BAD_VALUE;
 }
@@ -100,7 +100,7 @@ static status_t ConvertOmxAvcLevelToAvcSpecLevel(
             level = AVC_LEVEL5_1;
             break;
         default:
-            LOGE("Unknown omx level: %d", omxLevel);
+            ALOGE("Unknown omx level: %d", omxLevel);
             return BAD_VALUE;
     }
     *pvLevel = level;
@@ -214,7 +214,7 @@ status_t AVCEncoder::initCheck(const sp<MetaData>& meta) {
     CHECK(meta->findInt32(kKeyColorFormat, &mVideoColorFormat));
     if (mVideoColorFormat != OMX_COLOR_FormatYUV420Planar) {
         if (mVideoColorFormat != OMX_COLOR_FormatYUV420SemiPlanar) {
-            LOGE("Color format %d is not supported", mVideoColorFormat);
+            ALOGE("Color format %d is not supported", mVideoColorFormat);
             return BAD_VALUE;
         }
         // Allocate spare buffer only when color conversion is needed.
@@ -226,7 +226,7 @@ status_t AVCEncoder::initCheck(const sp<MetaData>& meta) {
 
     // XXX: Remove this restriction
     if (mVideoWidth % 16 != 0 || mVideoHeight % 16 != 0) {
-        LOGE("Video frame size %dx%d must be a multiple of 16",
+        ALOGE("Video frame size %dx%d must be a multiple of 16",
             mVideoWidth, mVideoHeight);
         return BAD_VALUE;
     }
@@ -343,7 +343,7 @@ status_t AVCEncoder::start(MetaData *params) {
     AVCEnc_Status err;
     err = PVAVCEncInitialize(mHandle, mEncParams, NULL, NULL);
     if (err != AVCENC_SUCCESS) {
-        LOGE("Failed to initialize the encoder: %d", err);
+        ALOGE("Failed to initialize the encoder: %d", err);
         return UNKNOWN_ERROR;
     }
 
@@ -461,7 +461,7 @@ status_t AVCEncoder::read(
                     *out = outputBuffer;
                     return OK;
                 default:
-                    LOGE("Nal type (%d) other than SPS/PPS is unexpected", type);
+                    ALOGE("Nal type (%d) other than SPS/PPS is unexpected", type);
                     return UNKNOWN_ERROR;
             }
         }
@@ -476,7 +476,7 @@ status_t AVCEncoder::read(
         status_t err = mSource->read(&mInputBuffer, options);
         if (err != OK) {
             if (err != ERROR_END_OF_STREAM) {
-                LOGE("Failed to read input video frame: %d", err);
+                ALOGE("Failed to read input video frame: %d", err);
             }
             outputBuffer->release();
             return err;

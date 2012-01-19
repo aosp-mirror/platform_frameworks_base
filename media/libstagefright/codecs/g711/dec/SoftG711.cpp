@@ -210,7 +210,7 @@ void SoftG711::onQueueFilled(OMX_U32 portIndex) {
         }
 
         if (inHeader->nFilledLen > kMaxNumSamplesPerFrame) {
-            LOGE("input buffer too large (%ld).", inHeader->nFilledLen);
+            ALOGE("input buffer too large (%ld).", inHeader->nFilledLen);
 
             notify(OMX_EventError, OMX_ErrorUndefined, 0, NULL);
             mSignalledError = true;

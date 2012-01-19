@@ -57,7 +57,7 @@ static MediaScanResult HandleMIDI(
     // get the library configuration and do sanity check
     const S_EAS_LIB_CONFIG* pLibConfig = EAS_Config();
     if ((pLibConfig == NULL) || (LIB_VERSION != pLibConfig->libVersion)) {
-        LOGE("EAS library/header mismatch\n");
+        ALOGE("EAS library/header mismatch\n");
         return MEDIA_SCAN_RESULT_ERROR;
     }
     EAS_I32 temp;

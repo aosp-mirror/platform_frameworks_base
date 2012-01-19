@@ -142,11 +142,11 @@ void rsrDrawQuadTexCoords(Context *rsc, Script *sc,
         return;
     }
 
-    //LOGE("Quad");
-    //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
-    //LOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
-    //LOGE("%4.2f, %4.2f, %4.2f", x3, y3, z3);
-    //LOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
+    //ALOGE("Quad");
+    //ALOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
+    //ALOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
+    //ALOGE("%4.2f, %4.2f, %4.2f", x3, y3, z3);
+    //ALOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
 
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
@@ -191,7 +191,7 @@ void rsrDrawSpriteScreenspace(Context *rsc, Script *sc,
 }
 
 void rsrDrawRect(Context *rsc, Script *sc, float x1, float y1, float x2, float y2, float z) {
-    //LOGE("SC_drawRect %f,%f  %f,%f  %f", x1, y1, x2, y2, z);
+    //ALOGE("SC_drawRect %f,%f  %f,%f  %f", x1, y1, x2, y2, z);
     rsrDrawQuad(rsc, sc, x1, y2, z, x2, y2, z, x2, y1, z, x1, y1, z);
 }
 

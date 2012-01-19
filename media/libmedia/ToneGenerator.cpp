@@ -805,7 +805,7 @@ ToneGenerator::ToneGenerator(int streamType, float volume, bool threadCanCallJav
     mState = TONE_IDLE;
 
     if (AudioSystem::getOutputSamplingRate(&mSamplingRate, streamType) != NO_ERROR) {
-        LOGE("Unable to marshal AudioFlinger");
+        ALOGE("Unable to marshal AudioFlinger");
         return;
     }
     mThreadCanCallJava = threadCanCallJava;
@@ -906,7 +906,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
         ALOGV("Start waiting for previous tone to stop");
         lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
         if (lStatus != NO_ERROR) {
-            LOGE("--- start wait for stop timed out, status %d", lStatus);
+            ALOGE("--- start wait for stop timed out, status %d", lStatus);
             mState = TONE_IDLE;
             mLock.unlock();
             return lResult;
@@ -925,7 +925,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
                 ALOGV("Wait for start callback");
                 lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
                 if (lStatus != NO_ERROR) {
-                    LOGE("--- Immediate start timed out, status %d", lStatus);
+                    ALOGE("--- Immediate start timed out, status %d", lStatus);
                     mState = TONE_IDLE;
                     lResult = false;
                 }
@@ -943,7 +943,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
             }
             ALOGV("cond received");
         } else {
-            LOGE("--- Delayed start timed out, status %d", lStatus);
+            ALOGE("--- Delayed start timed out, status %d", lStatus);
             mState = TONE_IDLE;
         }
     }
@@ -979,7 +979,7 @@ void ToneGenerator::stopTone() {
         if (lStatus == NO_ERROR) {
             ALOGV("track stop complete, time %d", (unsigned int)(systemTime()/1000000));
         } else {
-            LOGE("--- Stop timed out");
+            ALOGE("--- Stop timed out");
             mState = TONE_IDLE;
             mpAudioTrack->stop();
         }
@@ -1018,7 +1018,7 @@ bool ToneGenerator::initAudioTrack() {
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack = new AudioTrack();
     if (mpAudioTrack == 0) {
-        LOGE("AudioTrack allocation failed");
+        ALOGE("AudioTrack allocation failed");
         goto initAudioTrack_exit;
     }
     ALOGV("Create Track: %p\n", mpAudioTrack);
@@ -1036,7 +1036,7 @@ bool ToneGenerator::initAudioTrack() {
                       mThreadCanCallJava);
 
     if (mpAudioTrack->initCheck() != NO_ERROR) {
-        LOGE("AudioTrack->initCheck failed");
+        ALOGE("AudioTrack->initCheck failed");
         goto initAudioTrack_exit;
     }
 

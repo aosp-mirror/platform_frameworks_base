@@ -133,7 +133,7 @@ public:
         const char* randomDevice = "/dev/urandom";
         mRandom = ::open(randomDevice, O_RDONLY);
         if (mRandom == -1) {
-            LOGE("open: %s: %s", randomDevice, strerror(errno));
+            ALOGE("open: %s: %s", randomDevice, strerror(errno));
             return false;
         }
         return true;
@@ -754,11 +754,11 @@ static ResponseCode process(KeyStore* keyStore, int sock, uid_t uid, int8_t code
 int main(int argc, char* argv[]) {
     int controlSocket = android_get_control_socket("keystore");
     if (argc < 2) {
-        LOGE("A directory must be specified!");
+        ALOGE("A directory must be specified!");
         return 1;
     }
     if (chdir(argv[1]) == -1) {
-        LOGE("chdir: %s: %s", argv[1], strerror(errno));
+        ALOGE("chdir: %s: %s", argv[1], strerror(errno));
         return 1;
     }
 
@@ -767,7 +767,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     if (listen(controlSocket, 3) == -1) {
-        LOGE("listen: %s", strerror(errno));
+        ALOGE("listen: %s", strerror(errno));
         return 1;
     }
 
@@ -805,6 +805,6 @@ int main(int argc, char* argv[]) {
         }
         close(sock);
     }
-    LOGE("accept: %s", strerror(errno));
+    ALOGE("accept: %s", strerror(errno));
     return 1;
 }

@@ -53,7 +53,7 @@ android_hardware_UsbDeviceConnection_open(JNIEnv *env, jobject thiz, jstring dev
     if (device) {
         env->SetIntField(thiz, field_context, (int)device);
     } else {
-        LOGE("usb_device_open failed for %s", deviceNameStr);
+        ALOGE("usb_device_open failed for %s", deviceNameStr);
         close(fd);
     }
 
@@ -77,7 +77,7 @@ android_hardware_UsbDeviceConnection_get_fd(JNIEnv *env, jobject thiz)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_get_fd");
+        ALOGE("device is closed in native_get_fd");
         return -1;
     }
     return usb_device_get_fd(device);
@@ -110,7 +110,7 @@ android_hardware_UsbDeviceConnection_claim_interface(JNIEnv *env, jobject thiz,
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_claim_interface");
+        ALOGE("device is closed in native_claim_interface");
         return -1;
     }
 
@@ -128,7 +128,7 @@ android_hardware_UsbDeviceConnection_release_interface(JNIEnv *env, jobject thiz
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_release_interface");
+        ALOGE("device is closed in native_release_interface");
         return -1;
     }
     int ret = usb_device_release_interface(device, interfaceID);
@@ -146,7 +146,7 @@ android_hardware_UsbDeviceConnection_control_request(JNIEnv *env, jobject thiz,
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_control_request");
+        ALOGE("device is closed in native_control_request");
         return -1;
     }
 
@@ -174,7 +174,7 @@ android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_control_request");
+        ALOGE("device is closed in native_control_request");
         return -1;
     }
 
@@ -200,7 +200,7 @@ android_hardware_UsbDeviceConnection_request_wait(JNIEnv *env, jobject thiz)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_request_wait");
+        ALOGE("device is closed in native_request_wait");
         return NULL;
     }
 
@@ -216,7 +216,7 @@ android_hardware_UsbDeviceConnection_get_serial(JNIEnv *env, jobject thiz)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        LOGE("device is closed in native_request_wait");
+        ALOGE("device is closed in native_request_wait");
         return NULL;
     }
     char* serial = usb_device_get_serial(device);
@@ -249,12 +249,12 @@ int register_android_hardware_UsbDeviceConnection(JNIEnv *env)
 {
     jclass clazz = env->FindClass("android/hardware/usb/UsbDeviceConnection");
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/usb/UsbDeviceConnection");
+        ALOGE("Can't find android/hardware/usb/UsbDeviceConnection");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (field_context == NULL) {
-        LOGE("Can't find UsbDeviceConnection.mNativeContext");
+        ALOGE("Can't find UsbDeviceConnection.mNativeContext");
         return -1;
     }
 

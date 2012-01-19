@@ -47,7 +47,7 @@ HWComposer::HWComposer(const sp<SurfaceFlinger>& flinger)
     ALOGW_IF(err, "%s module not found", HWC_HARDWARE_MODULE_ID);
     if (err == 0) {
         err = hwc_open(mModule, &mHwc);
-        LOGE_IF(err, "%s device failed to initialize (%s)",
+        ALOGE_IF(err, "%s device failed to initialize (%s)",
                 HWC_HARDWARE_COMPOSER, strerror(-err));
         if (err == 0) {
             if (mHwc->registerProcs) {
