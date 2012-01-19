@@ -49,14 +49,6 @@ struct fields_t {
     jmethodID postNativeEventInJava; //... event post callback method
     int       PCM16;                 //...  format constants
     int       PCM8;                  //...  format constants
-    int       STREAM_VOICE_CALL;     //...  stream type constants
-    int       STREAM_SYSTEM;         //...  stream type constants
-    int       STREAM_RING;           //...  stream type constants
-    int       STREAM_MUSIC;          //...  stream type constants
-    int       STREAM_ALARM;          //...  stream type constants
-    int       STREAM_NOTIFICATION;   //...  stream type constants
-    int       STREAM_BLUETOOTH_SCO;  //...  stream type constants
-    int       STREAM_DTMF;           //...  stream type constants
     int       MODE_STREAM;           //...  memory mode
     int       MODE_STATIC;           //...  memory mode
     jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
@@ -197,23 +189,18 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     
     // check the stream type
     audio_stream_type_t atStreamType;
-    if (streamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        atStreamType = AUDIO_STREAM_VOICE_CALL;
-    } else if (streamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        atStreamType = AUDIO_STREAM_SYSTEM;
-    } else if (streamType == javaAudioTrackFields.STREAM_RING) {
-        atStreamType = AUDIO_STREAM_RING;
-    } else if (streamType == javaAudioTrackFields.STREAM_MUSIC) {
-        atStreamType = AUDIO_STREAM_MUSIC;
-    } else if (streamType == javaAudioTrackFields.STREAM_ALARM) {
-        atStreamType = AUDIO_STREAM_ALARM;
-    } else if (streamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        atStreamType = AUDIO_STREAM_NOTIFICATION;
-    } else if (streamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        atStreamType = AUDIO_STREAM_BLUETOOTH_SCO;
-    } else if (streamType == javaAudioTrackFields.STREAM_DTMF) {
-        atStreamType = AUDIO_STREAM_DTMF;
-    } else {
+    switch (streamType) {
+    case AUDIO_STREAM_VOICE_CALL:
+    case AUDIO_STREAM_SYSTEM:
+    case AUDIO_STREAM_RING:
+    case AUDIO_STREAM_MUSIC:
+    case AUDIO_STREAM_ALARM:
+    case AUDIO_STREAM_NOTIFICATION:
+    case AUDIO_STREAM_BLUETOOTH_SCO:
+    case AUDIO_STREAM_DTMF:
+        atStreamType = (audio_stream_type_t) streamType;
+        break;
+    default:
         ALOGE("Error creating AudioTrack: unknown stream type.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
     }
@@ -764,24 +751,20 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
     // convert the stream type from Java to native value
     // FIXME: code duplication with android_media_AudioTrack_native_setup()
     audio_stream_type_t nativeStreamType;
-    if (javaStreamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        nativeStreamType = AUDIO_STREAM_VOICE_CALL;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        nativeStreamType = AUDIO_STREAM_SYSTEM;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_RING) {
-        nativeStreamType = AUDIO_STREAM_RING;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_MUSIC) {
-        nativeStreamType = AUDIO_STREAM_MUSIC;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_ALARM) {
-        nativeStreamType = AUDIO_STREAM_ALARM;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        nativeStreamType = AUDIO_STREAM_NOTIFICATION;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        nativeStreamType = AUDIO_STREAM_BLUETOOTH_SCO;
-    } else if (javaStreamType == javaAudioTrackFields.STREAM_DTMF) {
-        nativeStreamType = AUDIO_STREAM_DTMF;
-    } else {
+    switch (javaStreamType) {
+    case AUDIO_STREAM_VOICE_CALL:
+    case AUDIO_STREAM_SYSTEM:
+    case AUDIO_STREAM_RING:
+    case AUDIO_STREAM_MUSIC:
+    case AUDIO_STREAM_ALARM:
+    case AUDIO_STREAM_NOTIFICATION:
+    case AUDIO_STREAM_BLUETOOTH_SCO:
+    case AUDIO_STREAM_DTMF:
+        nativeStreamType = (audio_stream_type_t) javaStreamType;
+        break;
+    default:
         nativeStreamType = AUDIO_STREAM_DEFAULT;
+        break;
     }
 
     if (AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType) != NO_ERROR) {
@@ -987,41 +970,6 @@ int register_android_media_AudioTrack(JNIEnv *env)
         return -1;
     }
  
-    // Get the stream types from the AudioManager class
-    jclass audioManagerClass = NULL;
-    audioManagerClass = env->FindClass(JAVA_AUDIOMANAGER_CLASS_NAME);
-    if (audioManagerClass == NULL) {
-       ALOGE("Can't find %s", JAVA_AUDIOMANAGER_CLASS_NAME);
-       return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_VOICE_CALL_NAME, &(javaAudioTrackFields.STREAM_VOICE_CALL))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_MUSIC_NAME, &(javaAudioTrackFields.STREAM_MUSIC))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_SYSTEM_NAME, &(javaAudioTrackFields.STREAM_SYSTEM))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_RING_NAME, &(javaAudioTrackFields.STREAM_RING))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_ALARM_NAME, &(javaAudioTrackFields.STREAM_ALARM))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_NOTIFICATION_NAME, &(javaAudioTrackFields.STREAM_NOTIFICATION))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME, &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))
-          || !android_media_getIntConstantFromClass(env, audioManagerClass,
-               JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_DTMF_NAME, &(javaAudioTrackFields.STREAM_DTMF))) {
-       // error log performed in android_media_getIntConstantFromClass()
-       return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
