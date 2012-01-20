@@ -728,7 +728,7 @@ public class WindowManagerService extends IWindowManager.Stub
             //Looper.myLooper().setMessageLogging(new LogPrinter(
             //        Log.VERBOSE, "WindowManagerPolicy", Log.LOG_ID_SYSTEM));
             android.os.Process.setThreadPriority(
-                    android.os.Process.THREAD_PRIORITY_FOREGROUND);
+                    android.os.Process.THREAD_PRIORITY_DISPLAY);
             android.os.Process.setCanSelfBackground(false);
             mPolicy.init(mContext, mService, mService, mPM);
 
