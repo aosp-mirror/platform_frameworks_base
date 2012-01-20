@@ -350,13 +350,26 @@ uint32_t DisplayHardware::getPageFlipCount() const {
 }
 
 // this needs to be thread safe
-nsecs_t DisplayHardware::waitForVSync() const {
+nsecs_t DisplayHardware::waitForRefresh() const {
     nsecs_t timestamp;
     if (mVSync.wait(&timestamp) < 0) {
         // vsync not supported!
         usleep( getDelayToNextVSyncUs(&timestamp) );
     }
+    mLastHwVSync = timestamp; // FIXME: Not thread safe
     return timestamp;
+}
+
+nsecs_t DisplayHardware::getRefreshTimestamp() const {
+    // this returns the last refresh timestamp.
+    // if the last one is not available, we estimate it based on
+    // the refresh period and whatever closest timestamp we have.
+    nsecs_t now = systemTime();
+    return now - ((now - mLastHwVSync) %  mRefreshPeriod);
+}
+
+nsecs_t DisplayHardware::getRefreshPeriod() const {
+    return mRefreshPeriod;
 }
 
 int32_t DisplayHardware::getDelayToNextVSyncUs(nsecs_t* timestamp) const {

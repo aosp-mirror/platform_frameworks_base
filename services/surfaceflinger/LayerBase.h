@@ -211,6 +211,7 @@ public:
     /** always call base class first */
     virtual void dump(String8& result, char* scratch, size_t size) const;
     virtual void shortDump(String8& result, char* scratch, size_t size) const;
+    virtual void dumpStats(String8& result, char* buffer, size_t SIZE) const;
 
 
     enum { // flags for doTransaction()

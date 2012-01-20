@@ -431,7 +431,7 @@ bool SurfaceFlinger::threadLoop()
     } else {
         // pretend we did the post
         hw.compositionComplete();
-        hw.waitForVSync();
+        hw.waitForRefresh();
     }
     return true;
 }
@@ -1469,14 +1469,6 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 IPCThreadState::self()->getCallingUid());
         result.append(buffer);
     } else {
-
-        // figure out if we're stuck somewhere
-        const nsecs_t now = systemTime();
-        const nsecs_t inSwapBuffers(mDebugInSwapBuffers);
-        const nsecs_t inTransaction(mDebugInTransaction);
-        nsecs_t inSwapBuffersDuration = (inSwapBuffers) ? now-inSwapBuffers : 0;
-        nsecs_t inTransactionDuration = (inTransaction) ? now-inTransaction : 0;
-
         // Try to get the main lock, but don't insist if we can't
         // (this would indicate SF is stuck, but we want to be able to
         // print something in dumpsys).
@@ -1492,110 +1484,19 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
-        /*
-         * Dump the visible layer list
-         */
-        const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
-        const size_t count = currentLayers.size();
-        snprintf(buffer, SIZE, "Visible layers (count = %d)\n", count);
-        result.append(buffer);
-        for (size_t i=0 ; i<count ; i++) {
-            const sp<LayerBase>& layer(currentLayers[i]);
-            layer->dump(result, buffer, SIZE);
-            const Layer::State& s(layer->drawingState());
-            s.transparentRegion.dump(result, "transparentRegion");
-            layer->transparentRegionScreen.dump(result, "transparentRegionScreen");
-            layer->visibleRegionScreen.dump(result, "visibleRegionScreen");
+        bool dumpAll = true;
+        size_t index = 0;
+        if (args.size()) {
+            dumpAll = false;
+            if (args[index] == String16("--latency")) {
+                index++;
+                dumpStatsLocked(args, index, result, buffer, SIZE);
+            }
         }
 
-        /*
-         * Dump the layers in the purgatory
-         */
-
-        const size_t purgatorySize = mLayerPurgatory.size();
-        snprintf(buffer, SIZE, "Purgatory state (%d entries)\n", purgatorySize);
-        result.append(buffer);
-        for (size_t i=0 ; i<purgatorySize ; i++) {
-            const sp<LayerBase>& layer(mLayerPurgatory.itemAt(i));
-            layer->shortDump(result, buffer, SIZE);
+        if (dumpAll) {
+            dumpAllLocked(result, buffer, SIZE);
         }
-
-        /*
-         * Dump SurfaceFlinger global state
-         */
-
-        snprintf(buffer, SIZE, "SurfaceFlinger global state:\n");
-        result.append(buffer);
-
-        const GLExtensions& extensions(GLExtensions::getInstance());
-        snprintf(buffer, SIZE, "GLES: %s, %s, %s\n",
-                extensions.getVendor(),
-                extensions.getRenderer(),
-                extensions.getVersion());
-        result.append(buffer);
-
-        snprintf(buffer, SIZE, "EGL : %s\n",
-                eglQueryString(graphicPlane(0).getEGLDisplay(),
-                        EGL_VERSION_HW_ANDROID));
-        result.append(buffer);
-
-        snprintf(buffer, SIZE, "EXTS: %s\n", extensions.getExtension());
-        result.append(buffer);
-
-        mWormholeRegion.dump(result, "WormholeRegion");
-        const DisplayHardware& hw(graphicPlane(0).displayHardware());
-        snprintf(buffer, SIZE,
-                "  orientation=%d, canDraw=%d\n",
-                mCurrentState.orientation, hw.canDraw());
-        result.append(buffer);
-        snprintf(buffer, SIZE,
-                "  last eglSwapBuffers() time: %f us\n"
-                "  last transaction time     : %f us\n"
-                "  refresh-rate              : %f fps\n"
-                "  x-dpi                     : %f\n"
-                "  y-dpi                     : %f\n",
-                mLastSwapBufferTime/1000.0,
-                mLastTransactionTime/1000.0,
-                hw.getRefreshRate(),
-                hw.getDpiX(),
-                hw.getDpiY());
-        result.append(buffer);
-
-        if (inSwapBuffersDuration || !locked) {
-            snprintf(buffer, SIZE, "  eglSwapBuffers time: %f us\n",
-                    inSwapBuffersDuration/1000.0);
-            result.append(buffer);
-        }
-
-        if (inTransactionDuration || !locked) {
-            snprintf(buffer, SIZE, "  transaction time: %f us\n",
-                    inTransactionDuration/1000.0);
-            result.append(buffer);
-        }
-
-        /*
-         * VSYNC state
-         */
-        mEventThread->dump(result, buffer, SIZE);
-
-        /*
-         * Dump HWComposer state
-         */
-        HWComposer& hwc(hw.getHwComposer());
-        snprintf(buffer, SIZE, "h/w composer state:\n");
-        result.append(buffer);
-        snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
-                hwc.initCheck()==NO_ERROR ? "present" : "not present",
-                (mDebugDisableHWC || mDebugRegion) ? "disabled" : "enabled");
-        result.append(buffer);
-        hwc.dump(result, buffer, SIZE, mVisibleLayersSortedByZ);
-
-        /*
-         * Dump gralloc state
-         */
-        const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
-        alloc.dump(result);
-        hw.dump(result);
 
         if (locked) {
             mStateLock.unlock();
@@ -1603,6 +1504,137 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
     }
     write(fd, result.string(), result.size());
     return NO_ERROR;
+}
+
+void SurfaceFlinger::dumpStatsLocked(const Vector<String16>& args, size_t& index,
+        String8& result, char* buffer, size_t SIZE) const
+{
+    String8 name;
+    if (index < args.size()) {
+        name = String8(args[index]);
+        index++;
+    }
+
+    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    const size_t count = currentLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        if (name.isEmpty()) {
+            snprintf(buffer, SIZE, "%s\n", layer->getName().string());
+            result.append(buffer);
+        }
+        if (name.isEmpty() || (name == layer->getName())) {
+            layer->dumpStats(result, buffer, SIZE);
+        }
+    }
+}
+
+void SurfaceFlinger::dumpAllLocked(
+        String8& result, char* buffer, size_t SIZE) const
+{
+    // figure out if we're stuck somewhere
+    const nsecs_t now = systemTime();
+    const nsecs_t inSwapBuffers(mDebugInSwapBuffers);
+    const nsecs_t inTransaction(mDebugInTransaction);
+    nsecs_t inSwapBuffersDuration = (inSwapBuffers) ? now-inSwapBuffers : 0;
+    nsecs_t inTransactionDuration = (inTransaction) ? now-inTransaction : 0;
+
+    /*
+     * Dump the visible layer list
+     */
+    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    const size_t count = currentLayers.size();
+    snprintf(buffer, SIZE, "Visible layers (count = %d)\n", count);
+    result.append(buffer);
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        layer->dump(result, buffer, SIZE);
+    }
+
+    /*
+     * Dump the layers in the purgatory
+     */
+
+    const size_t purgatorySize = mLayerPurgatory.size();
+    snprintf(buffer, SIZE, "Purgatory state (%d entries)\n", purgatorySize);
+    result.append(buffer);
+    for (size_t i=0 ; i<purgatorySize ; i++) {
+        const sp<LayerBase>& layer(mLayerPurgatory.itemAt(i));
+        layer->shortDump(result, buffer, SIZE);
+    }
+
+    /*
+     * Dump SurfaceFlinger global state
+     */
+
+    snprintf(buffer, SIZE, "SurfaceFlinger global state:\n");
+    result.append(buffer);
+
+    const GLExtensions& extensions(GLExtensions::getInstance());
+    snprintf(buffer, SIZE, "GLES: %s, %s, %s\n",
+            extensions.getVendor(),
+            extensions.getRenderer(),
+            extensions.getVersion());
+    result.append(buffer);
+
+    snprintf(buffer, SIZE, "EGL : %s\n",
+            eglQueryString(graphicPlane(0).getEGLDisplay(),
+                    EGL_VERSION_HW_ANDROID));
+    result.append(buffer);
+
+    snprintf(buffer, SIZE, "EXTS: %s\n", extensions.getExtension());
+    result.append(buffer);
+
+    mWormholeRegion.dump(result, "WormholeRegion");
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    snprintf(buffer, SIZE,
+            "  orientation=%d, canDraw=%d\n",
+            mCurrentState.orientation, hw.canDraw());
+    result.append(buffer);
+    snprintf(buffer, SIZE,
+            "  last eglSwapBuffers() time: %f us\n"
+            "  last transaction time     : %f us\n"
+            "  refresh-rate              : %f fps\n"
+            "  x-dpi                     : %f\n"
+            "  y-dpi                     : %f\n",
+            mLastSwapBufferTime/1000.0,
+            mLastTransactionTime/1000.0,
+            hw.getRefreshRate(),
+            hw.getDpiX(),
+            hw.getDpiY());
+    result.append(buffer);
+
+    snprintf(buffer, SIZE, "  eglSwapBuffers time: %f us\n",
+            inSwapBuffersDuration/1000.0);
+    result.append(buffer);
+
+    snprintf(buffer, SIZE, "  transaction time: %f us\n",
+            inTransactionDuration/1000.0);
+    result.append(buffer);
+
+    /*
+     * VSYNC state
+     */
+    mEventThread->dump(result, buffer, SIZE);
+
+    /*
+     * Dump HWComposer state
+     */
+    HWComposer& hwc(hw.getHwComposer());
+    snprintf(buffer, SIZE, "h/w composer state:\n");
+    result.append(buffer);
+    snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
+            hwc.initCheck()==NO_ERROR ? "present" : "not present",
+                    (mDebugDisableHWC || mDebugRegion) ? "disabled" : "enabled");
+    result.append(buffer);
+    hwc.dump(result, buffer, SIZE, mVisibleLayersSortedByZ);
+
+    /*
+     * Dump gralloc state
+     */
+    const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
+    alloc.dump(result);
+    hw.dump(result);
 }
 
 status_t SurfaceFlinger::onTransact(

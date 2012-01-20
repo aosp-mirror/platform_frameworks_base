@@ -38,6 +38,7 @@
 #include "Layer.h"
 #include "SurfaceFlinger.h"
 #include "SurfaceTextureLayer.h"
+#include <math.h>
 
 #define DEBUG_RESIZE    0
 
@@ -54,6 +55,8 @@ Layer::Layer(SurfaceFlinger* flinger,
         mCurrentTransform(0),
         mCurrentScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
         mCurrentOpacity(true),
+        mFrameLatencyNeeded(false),
+        mFrameLatencyOffset(0),
         mFormat(PIXEL_FORMAT_NONE),
         mGLExtensions(GLExtensions::getInstance()),
         mOpaqueLayer(true),
@@ -63,19 +66,14 @@ Layer::Layer(SurfaceFlinger* flinger,
 {
     mCurrentCrop.makeInvalid();
     glGenTextures(1, &mTextureName);
-
-    mFrameLatencyNeeded = false;
-    mFrameLatencyOffset = 0;
-    for (int i = 0; i < 128; i++) {
-        mFrameLatencies[i] = 0;
-    }
 }
 
 void Layer::onLayerDisplayed() {
     if (mFrameLatencyNeeded) {
-        int64_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-        mFrameLatencies[mFrameLatencyOffset] = now -
-                mSurfaceTexture->getTimestamp();
+        const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        mFrameStats[mFrameLatencyOffset].timestamp = mSurfaceTexture->getTimestamp();
+        mFrameStats[mFrameLatencyOffset].set = systemTime();
+        mFrameStats[mFrameLatencyOffset].vsync = hw.getRefreshTimestamp();
         mFrameLatencyOffset = (mFrameLatencyOffset + 1) % 128;
         mFrameLatencyNeeded = false;
     }
@@ -555,21 +553,31 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 
     result.append(buffer);
 
-    const int64_t* l = mFrameLatencies;
-    int o = mFrameLatencyOffset;
-    for (int i = 0; i < 128; i += 8) {
-        snprintf(buffer, SIZE,
-                "      "
-                "% 12lld % 12lld % 12lld % 12lld "
-                "% 12lld % 12lld % 12lld % 12lld\n",
-                l[(o+i+0)%128], l[(o+i+1)%128], l[(o+i+2)%128], l[(o+i+3)%128],
-                l[(o+i+4)%128], l[(o+i+5)%128], l[(o+i+6)%128], l[(o+i+7)%128]);
-        result.append(buffer);
-    }
+    LayerBase::dumpStats(result, buffer, SIZE);
 
     if (mSurfaceTexture != 0) {
         mSurfaceTexture->dump(result, "            ", buffer, SIZE);
     }
+}
+
+void Layer::dumpStats(String8& result, char* buffer, size_t SIZE) const
+{
+    LayerBaseClient::dumpStats(result, buffer, SIZE);
+    const size_t o = mFrameLatencyOffset;
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const nsecs_t period = hw.getRefreshPeriod();
+    result.appendFormat("%lld\n", period);
+    for (size_t i=0 ; i<128 ; i++) {
+        const size_t index = (o+i) % 128;
+        const nsecs_t time_app   = mFrameStats[index].timestamp;
+        const nsecs_t time_set   = mFrameStats[index].set;
+        const nsecs_t time_vsync = mFrameStats[index].vsync;
+        result.appendFormat("%lld\t%lld\t%lld\n",
+                time_app,
+                time_vsync,
+                time_set);
+    }
+    result.append("\n");
 }
 
 uint32_t Layer::getEffectiveUsage(uint32_t usage) const
