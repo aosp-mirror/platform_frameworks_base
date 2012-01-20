@@ -26,7 +26,6 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libstagefright \
     libcamera_client \
-    libsqlite \
     libmtp \
     libusbhost \
     libexif
