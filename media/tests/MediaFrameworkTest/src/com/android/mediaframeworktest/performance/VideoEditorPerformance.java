@@ -931,7 +931,6 @@ public class VideoEditorPerformance extends
     /**
      *To test ThumbnailList for H264
      */
-    // TODO : TC_PRF_12
     @LargeTest
     public void testThumbnailH264NonIFrame() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
@@ -962,7 +961,6 @@ public class VideoEditorPerformance extends
     /**
      *To test ThumbnailList for H264
      */
-    // TODO : TC_PRF_13
     @LargeTest
     public void testThumbnailH264AnIFrame() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
