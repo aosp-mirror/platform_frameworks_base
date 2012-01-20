@@ -339,7 +339,7 @@ audio_io_handle_t AudioPolicyService::getInput(int inputSource,
         sp<AudioEffect> fx = new AudioEffect(NULL, &effect->mUuid, -1, 0, 0, audioSession, input);
         status_t status = fx->initCheck();
         if (status != NO_ERROR && status != ALREADY_EXISTS) {
-            LOGW("Failed to create Fx %s on input %d", effect->mName, input);
+            ALOGW("Failed to create Fx %s on input %d", effect->mName, input);
             // fx goes out of scope and strong ref on AudioEffect is released
             continue;
         }
@@ -534,7 +534,7 @@ status_t AudioPolicyService::queryDefaultPreProcessing(int audioSession,
 }
 
 void AudioPolicyService::binderDied(const wp<IBinder>& who) {
-    LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
+    ALOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
             IPCThreadState::self()->getCallingPid());
 }
 
@@ -727,7 +727,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     delete data;
                     }break;
                 default:
-                    LOGW("AudioCommandThread() unknown command %d", command->mCommand);
+                    ALOGW("AudioCommandThread() unknown command %d", command->mCommand);
                 }
                 delete command;
                 waitTime = INT64_MAX;
@@ -1135,7 +1135,7 @@ size_t AudioPolicyService::readParamValue(cnode *node,
         ALOGV("readParamValue() reading string %s", param + *curSize - len);
         return len;
     }
-    LOGW("readParamValue() unknown param type %s", node->name);
+    ALOGW("readParamValue() unknown param type %s", node->name);
     return 0;
 }
 
@@ -1156,7 +1156,7 @@ effect_param_t *AudioPolicyService::loadEffectParameter(cnode *root)
             // Note: that a pair of random strings is read as 0 0
             int *ptr = (int *)fx_param->data;
             int *ptr2 = (int *)((char *)param + sizeof(effect_param_t));
-            LOGW("loadEffectParameter() ptr %p ptr2 %p", ptr, ptr2);
+            ALOGW("loadEffectParameter() ptr %p ptr2 %p", ptr, ptr2);
             *ptr++ = atoi(param->name);
             *ptr = atoi(param->value);
             fx_param->psize = sizeof(int);
@@ -1165,7 +1165,7 @@ effect_param_t *AudioPolicyService::loadEffectParameter(cnode *root)
         }
     }
     if (param == NULL || value == NULL) {
-        LOGW("loadEffectParameter() invalid parameter description %s", root->name);
+        ALOGW("loadEffectParameter() invalid parameter description %s", root->name);
         goto error;
     }
 
@@ -1224,7 +1224,7 @@ AudioPolicyService::InputSourceDesc *AudioPolicyService::loadInputSource(
 {
     cnode *node = root->first_child;
     if (node == NULL) {
-        LOGW("loadInputSource() empty element %s", root->name);
+        ALOGW("loadInputSource() empty element %s", root->name);
         return NULL;
     }
     InputSourceDesc *source = new InputSourceDesc();
@@ -1248,7 +1248,7 @@ AudioPolicyService::InputSourceDesc *AudioPolicyService::loadInputSource(
         node = node->next;
     }
     if (source->mEffects.size() == 0) {
-        LOGW("loadInputSource() no valid effects found in source %s", root->name);
+        ALOGW("loadInputSource() no valid effects found in source %s", root->name);
         delete source;
         return NULL;
     }
@@ -1265,7 +1265,7 @@ status_t AudioPolicyService::loadInputSources(cnode *root, const Vector <EffectD
     while (node) {
         audio_source_t source = inputSourceNameToEnum(node->name);
         if (source == AUDIO_SOURCE_CNT) {
-            LOGW("loadInputSources() invalid input source %s", node->name);
+            ALOGW("loadInputSources() invalid input source %s", node->name);
             node = node->next;
             continue;
         }
@@ -1289,7 +1289,7 @@ AudioPolicyService::EffectDesc *AudioPolicyService::loadEffect(cnode *root)
     }
     effect_uuid_t uuid;
     if (AudioEffect::stringToGuid(node->value, &uuid) != NO_ERROR) {
-        LOGW("loadEffect() invalid uuid %s", node->value);
+        ALOGW("loadEffect() invalid uuid %s", node->value);
         return NULL;
     }
     EffectDesc *effect = new EffectDesc();
@@ -1355,7 +1355,7 @@ static audio_io_handle_t aps_open_output(void *service,
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {
-        LOGW("%s: could not get AudioFlinger", __func__);
+        ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
 
@@ -1369,7 +1369,7 @@ static audio_io_handle_t aps_open_dup_output(void *service,
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {
-        LOGW("%s: could not get AudioFlinger", __func__);
+        ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
     return af->openDuplicateOutput(output1, output2);
@@ -1388,7 +1388,7 @@ static int aps_suspend_output(void *service, audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {
-        LOGW("%s: could not get AudioFlinger", __func__);
+        ALOGW("%s: could not get AudioFlinger", __func__);
         return PERMISSION_DENIED;
     }
 
@@ -1399,7 +1399,7 @@ static int aps_restore_output(void *service, audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {
-        LOGW("%s: could not get AudioFlinger", __func__);
+        ALOGW("%s: could not get AudioFlinger", __func__);
         return PERMISSION_DENIED;
     }
 
@@ -1415,7 +1415,7 @@ static audio_io_handle_t aps_open_input(void *service,
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {
-        LOGW("%s: could not get AudioFlinger", __func__);
+        ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
 

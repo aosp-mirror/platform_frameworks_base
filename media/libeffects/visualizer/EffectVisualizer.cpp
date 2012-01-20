@@ -192,7 +192,7 @@ int VisualizerLib_Create(effect_uuid_t *uuid,
 
     ret = Visualizer_init(pContext);
     if (ret < 0) {
-        LOGW("VisualizerLib_Create() init failed");
+        ALOGW("VisualizerLib_Create() init failed");
         delete pContext;
         return ret;
     }
@@ -445,7 +445,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         break;
 
     default:
-        LOGW("Visualizer_command invalid command %d",cmdCode);
+        ALOGW("Visualizer_command invalid command %d",cmdCode);
         return -EINVAL;
     }
 

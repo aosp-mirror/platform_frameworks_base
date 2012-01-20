@@ -1068,7 +1068,7 @@ static void throwInputChannelNotInitialized(JNIEnv* env) {
 
 static void android_server_InputManager_handleInputChannelDisposed(JNIEnv* env,
         jobject inputChannelObj, const sp<InputChannel>& inputChannel, void* data) {
-    LOGW("Input channel object '%s' was disposed without first being unregistered with "
+    ALOGW("Input channel object '%s' was disposed without first being unregistered with "
             "the input manager!", inputChannel->getName().string());
 
     if (gNativeInputManager != NULL) {

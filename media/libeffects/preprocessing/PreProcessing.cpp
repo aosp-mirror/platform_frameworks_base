@@ -240,7 +240,7 @@ int  AgcCreate(preproc_effect_t *effect)
     webrtc::GainControl *agc = effect->session->apm->gain_control();
     ALOGV("AgcCreate got agc %p", agc);
     if (agc == NULL) {
-        LOGW("AgcCreate Error");
+        ALOGW("AgcCreate Error");
         return -ENOMEM;
     }
     effect->engine = static_cast<preproc_fx_handle_t>(agc);
@@ -280,7 +280,7 @@ int AgcGetParameter(preproc_effect_t *effect,
         break;
 
     default:
-        LOGW("AgcGetParameter() unknown param %08x", param);
+        ALOGW("AgcGetParameter() unknown param %08x", param);
         status = -EINVAL;
         break;
     }
@@ -305,7 +305,7 @@ int AgcGetParameter(preproc_effect_t *effect,
         pProperties->limiterEnabled = (bool)agc->is_limiter_enabled();
         break;
     default:
-        LOGW("AgcGetParameter() unknown param %d", param);
+        ALOGW("AgcGetParameter() unknown param %d", param);
         status = -EINVAL;
         break;
     }
@@ -344,7 +344,7 @@ int AgcSetParameter (preproc_effect_t *effect, void *pParam, void *pValue)
         status = agc->enable_limiter(pProperties->limiterEnabled);
         break;
     default:
-        LOGW("AgcSetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
+        ALOGW("AgcSetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
         status = -EINVAL;
         break;
     }
@@ -403,7 +403,7 @@ int  AecCreate(preproc_effect_t *effect)
     webrtc::EchoControlMobile *aec = effect->session->apm->echo_control_mobile();
     ALOGV("AecCreate got aec %p", aec);
     if (aec == NULL) {
-        LOGW("AgcCreate Error");
+        ALOGW("AgcCreate Error");
         return -ENOMEM;
     }
     effect->engine = static_cast<preproc_fx_handle_t>(aec);
@@ -429,7 +429,7 @@ int AecGetParameter(preproc_effect_t     *effect,
         ALOGV("AecGetParameter() echo delay %d us", *(uint32_t *)pValue);
         break;
     default:
-        LOGW("AecGetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
+        ALOGW("AecGetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
         status = -EINVAL;
         break;
     }
@@ -449,7 +449,7 @@ int AecSetParameter (preproc_effect_t *effect, void *pParam, void *pValue)
         ALOGV("AecSetParameter() echo delay %d us, status %d", value, status);
         break;
     default:
-        LOGW("AecSetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
+        ALOGW("AecSetParameter() unknown param %08x value %08x", param, *(uint32_t *)pValue);
         status = -EINVAL;
         break;
     }
@@ -522,7 +522,7 @@ int  NsCreate(preproc_effect_t *effect)
     webrtc::NoiseSuppression *ns = effect->session->apm->noise_suppression();
     ALOGV("NsCreate got ns %p", ns);
     if (ns == NULL) {
-        LOGW("AgcCreate Error");
+        ALOGW("AgcCreate Error");
         return -ENOMEM;
     }
     effect->engine = static_cast<preproc_fx_handle_t>(ns);
@@ -730,7 +730,7 @@ extern "C" int Session_CreateEffect(preproc_session_t *session,
     if (session->createdMsk == 0) {
         session->apm = webrtc::AudioProcessing::Create(session->io);
         if (session->apm == NULL) {
-            LOGW("Session_CreateEffect could not get apm engine");
+            ALOGW("Session_CreateEffect could not get apm engine");
             goto error;
         }
         session->apm->set_sample_rate_hz(kPreprocDefaultSr);
@@ -738,12 +738,12 @@ extern "C" int Session_CreateEffect(preproc_session_t *session,
         session->apm->set_num_reverse_channels(kPreProcDefaultCnl);
         session->procFrame = new webrtc::AudioFrame();
         if (session->procFrame == NULL) {
-            LOGW("Session_CreateEffect could not allocate audio frame");
+            ALOGW("Session_CreateEffect could not allocate audio frame");
             goto error;
         }
         session->revFrame = new webrtc::AudioFrame();
         if (session->revFrame == NULL) {
-            LOGW("Session_CreateEffect could not allocate reverse audio frame");
+            ALOGW("Session_CreateEffect could not allocate reverse audio frame");
             goto error;
         }
         session->apmSamplingRate = kPreprocDefaultSr;
@@ -794,7 +794,7 @@ error:
 int Session_ReleaseEffect(preproc_session_t *session,
                           preproc_effect_t *fx)
 {
-    LOGW_IF(Effect_Release(fx) != 0, " Effect_Release() failed for proc ID %d", fx->procId);
+    ALOGW_IF(Effect_Release(fx) != 0, " Effect_Release() failed for proc ID %d", fx->procId);
     session->createdMsk &= ~(1<<fx->procId);
     if (session->createdMsk == 0) {
         webrtc::AudioProcessing::Destroy(session->apm);
@@ -904,7 +904,7 @@ int Session_SetConfig(preproc_session_t *session, effect_config_t *config)
                                                     RESAMPLER_QUALITY,
                                                     &error);
         if (session->inResampler == NULL) {
-            LOGW("Session_SetConfig Cannot create speex resampler: %s",
+            ALOGW("Session_SetConfig Cannot create speex resampler: %s",
                  speex_resampler_strerror(error));
             return -EINVAL;
         }
@@ -914,7 +914,7 @@ int Session_SetConfig(preproc_session_t *session, effect_config_t *config)
                                                     RESAMPLER_QUALITY,
                                                     &error);
         if (session->outResampler == NULL) {
-            LOGW("Session_SetConfig Cannot create speex resampler: %s",
+            ALOGW("Session_SetConfig Cannot create speex resampler: %s",
                  speex_resampler_strerror(error));
             speex_resampler_destroy(session->inResampler);
             session->inResampler = NULL;
@@ -926,7 +926,7 @@ int Session_SetConfig(preproc_session_t *session, effect_config_t *config)
                                                     RESAMPLER_QUALITY,
                                                     &error);
         if (session->revResampler == NULL) {
-            LOGW("Session_SetConfig Cannot create speex resampler: %s",
+            ALOGW("Session_SetConfig Cannot create speex resampler: %s",
                  speex_resampler_strerror(error));
             speex_resampler_destroy(session->inResampler);
             session->inResampler = NULL;
@@ -1081,7 +1081,7 @@ int PreProcessingFx_Process(effect_handle_t     self,
 
     if (inBuffer == NULL  || inBuffer->raw == NULL  ||
             outBuffer == NULL || outBuffer->raw == NULL){
-        LOGW("PreProcessingFx_Process() ERROR bad pointer");
+        ALOGW("PreProcessingFx_Process() ERROR bad pointer");
         return -EINVAL;
     }
 
@@ -1398,13 +1398,13 @@ int PreProcessingFx_ProcessReverse(effect_handle_t     self,
     int    status = 0;
 
     if (effect == NULL){
-        LOGW("PreProcessingFx_ProcessReverse() ERROR effect == NULL");
+        ALOGW("PreProcessingFx_ProcessReverse() ERROR effect == NULL");
         return -EINVAL;
     }
     preproc_session_t * session = (preproc_session_t *)effect->session;
 
     if (inBuffer == NULL  || inBuffer->raw == NULL){
-        LOGW("PreProcessingFx_ProcessReverse() ERROR bad pointer");
+        ALOGW("PreProcessingFx_ProcessReverse() ERROR bad pointer");
         return -EINVAL;
     }
 
@@ -1540,14 +1540,14 @@ int PreProcessingLib_Create(effect_uuid_t       *uuid,
     }
     desc =  PreProc_GetDescriptor(uuid);
     if (desc == NULL) {
-        LOGW("EffectCreate: fx not found uuid: %08x", uuid->timeLow);
+        ALOGW("EffectCreate: fx not found uuid: %08x", uuid->timeLow);
         return -EINVAL;
     }
     procId = UuidToProcId(&desc->type);
 
     session = PreProc_GetSession(procId, sessionId, ioId);
     if (session == NULL) {
-        LOGW("EffectCreate: no more session available");
+        ALOGW("EffectCreate: no more session available");
         return -EINVAL;
     }
 

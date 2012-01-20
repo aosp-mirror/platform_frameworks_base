@@ -44,7 +44,7 @@ HWComposer::HWComposer(const sp<SurfaceFlinger>& flinger)
       mDpy(EGL_NO_DISPLAY), mSur(EGL_NO_SURFACE)
 {
     int err = hw_get_module(HWC_HARDWARE_MODULE_ID, &mModule);
-    LOGW_IF(err, "%s module not found", HWC_HARDWARE_MODULE_ID);
+    ALOGW_IF(err, "%s module not found", HWC_HARDWARE_MODULE_ID);
     if (err == 0) {
         err = hwc_open(mModule, &mHwc);
         LOGE_IF(err, "%s device failed to initialize (%s)",

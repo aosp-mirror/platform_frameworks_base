@@ -371,7 +371,7 @@ void SoftMPEG4::onQueueFilled(OMX_U32 portIndex) {
                     mHandle, vol_data, &vol_size, 1, mWidth, mHeight, mode);
 
             if (!success) {
-                LOGW("PVInitVideoDecoder failed. Unsupported content?");
+                ALOGW("PVInitVideoDecoder failed. Unsupported content?");
 
                 notify(OMX_EventError, OMX_ErrorUndefined, 0, NULL);
                 mSignalledError = true;

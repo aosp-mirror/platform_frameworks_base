@@ -279,7 +279,7 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_ha
     ret = init();
 
     if (ret < 0) {
-        LOGW("EffectCreate() init error: %d", ret);
+        ALOGW("EffectCreate() init error: %d", ret);
         return ret;
     }
 
@@ -293,7 +293,7 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_ha
     // create effect in library
     ret = l->desc->create_effect(uuid, sessionId, ioId, &itfe);
     if (ret != 0) {
-        LOGW("EffectCreate() library %s: could not create fx %s, error %d", l->name, d->name, ret);
+        ALOGW("EffectCreate() library %s: could not create fx %s, error %d", l->name, d->name, ret);
         goto exit;
     }
 
@@ -359,7 +359,7 @@ int EffectRelease(effect_handle_t handle)
 
     // release effect in library
     if (fx->lib == NULL) {
-        LOGW("EffectRelease() fx %p library already unloaded", handle);
+        ALOGW("EffectRelease() fx %p library already unloaded", handle);
     } else {
         pthread_mutex_lock(&fx->lib->lock);
         fx->lib->desc->release_effect(fx->subItfe);
@@ -456,24 +456,24 @@ int loadLibrary(cnode *root, const char *name)
 
     hdl = dlopen(node->value, RTLD_NOW);
     if (hdl == NULL) {
-        LOGW("loadLibrary() failed to open %s", node->value);
+        ALOGW("loadLibrary() failed to open %s", node->value);
         goto error;
     }
 
     desc = (audio_effect_library_t *)dlsym(hdl, AUDIO_EFFECT_LIBRARY_INFO_SYM_AS_STR);
     if (desc == NULL) {
-        LOGW("loadLibrary() could not find symbol %s", AUDIO_EFFECT_LIBRARY_INFO_SYM_AS_STR);
+        ALOGW("loadLibrary() could not find symbol %s", AUDIO_EFFECT_LIBRARY_INFO_SYM_AS_STR);
         goto error;
     }
 
     if (AUDIO_EFFECT_LIBRARY_TAG != desc->tag) {
-        LOGW("getLibrary() bad tag %08x in lib info struct", desc->tag);
+        ALOGW("getLibrary() bad tag %08x in lib info struct", desc->tag);
         goto error;
     }
 
     if (EFFECT_API_VERSION_MAJOR(desc->version) !=
             EFFECT_API_VERSION_MAJOR(EFFECT_LIBRARY_API_VERSION)) {
-        LOGW("loadLibrary() bad lib version %08x", desc->version);
+        ALOGW("loadLibrary() bad lib version %08x", desc->version);
         goto error;
     }
 
@@ -534,7 +534,7 @@ int loadEffect(cnode *root)
 
     l = getLibrary(node->value);
     if (l == NULL) {
-        LOGW("loadEffect() could not get library %s", node->value);
+        ALOGW("loadEffect() could not get library %s", node->value);
         return -EINVAL;
     }
 
@@ -543,7 +543,7 @@ int loadEffect(cnode *root)
         return -EINVAL;
     }
     if (stringToUuid(node->value, &uuid) != 0) {
-        LOGW("loadEffect() invalid uuid %s", node->value);
+        ALOGW("loadEffect() invalid uuid %s", node->value);
         return -EINVAL;
     }
 
@@ -551,7 +551,7 @@ int loadEffect(cnode *root)
     if (l->desc->get_descriptor(&uuid, d) != 0) {
         char s[40];
         uuidToString(&uuid, s, 40);
-        LOGW("Error querying effect %s on lib %s", s, l->name);
+        ALOGW("Error querying effect %s on lib %s", s, l->name);
         free(d);
         return -EINVAL;
     }
@@ -562,7 +562,7 @@ int loadEffect(cnode *root)
 #endif
     if (EFFECT_API_VERSION_MAJOR(d->apiVersion) !=
             EFFECT_API_VERSION_MAJOR(EFFECT_CONTROL_API_VERSION)) {
-        LOGW("Bad API version %08x on lib %s", d->apiVersion, l->name);
+        ALOGW("Bad API version %08x on lib %s", d->apiVersion, l->name);
         free(d);
         return -EINVAL;
     }

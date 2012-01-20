@@ -950,7 +950,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
     mLock.unlock();
 
     ALOGV_IF(lResult, "Tone started, time %d\n", (unsigned int)(systemTime()/1000000));
-    LOGW_IF(!lResult, "Tone start failed!!!, time %d\n", (unsigned int)(systemTime()/1000000));
+    ALOGW_IF(!lResult, "Tone start failed!!!, time %d\n", (unsigned int)(systemTime()/1000000));
 
     return lResult;
 }
@@ -1261,7 +1261,7 @@ audioCallback_EndLoop:
                 // must reload lpToneDesc as prepareWave() may change mpToneDesc
                 lpToneDesc = lpToneGen->mpToneDesc;
             } else {
-                LOGW("Cbk restarting prepareWave() failed\n");
+                ALOGW("Cbk restarting prepareWave() failed\n");
                 lpToneGen->mState = TONE_IDLE;
                 lpToneGen->mpAudioTrack->stop();
                 // Force loop exit

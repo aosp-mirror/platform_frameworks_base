@@ -69,20 +69,20 @@ int setCurrentTimeMillis(int64_t millis)
 #ifdef HAVE_ANDROID_OS
     fd = open("/dev/alarm", O_RDWR);
     if(fd < 0) {
-        LOGW("Unable to open alarm driver: %s\n", strerror(errno));
+        ALOGW("Unable to open alarm driver: %s\n", strerror(errno));
         return -1;
     }
     ts.tv_sec = tv.tv_sec;
     ts.tv_nsec = tv.tv_usec * 1000;
     res = ioctl(fd, ANDROID_ALARM_SET_RTC, &ts);
     if(res < 0) {
-        LOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
+        ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
         ret = -1;
     }
     close(fd);
 #else
     if (settimeofday(&tv, NULL) != 0) {
-        LOGW("Unable to set clock to %d.%d: %s\n",
+        ALOGW("Unable to set clock to %d.%d: %s\n",
             (int) tv.tv_sec, (int) tv.tv_usec, strerror(errno));
         ret = -1;
     }

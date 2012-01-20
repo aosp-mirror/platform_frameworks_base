@@ -397,7 +397,7 @@ static void blockSigpipe()
     sigemptyset(&mask);
     sigaddset(&mask, SIGPIPE);
     if (sigprocmask(SIG_BLOCK, &mask, NULL) != 0)
-        LOGW("WARNING: SIGPIPE not blocked\n");
+        ALOGW("WARNING: SIGPIPE not blocked\n");
 }
 
 /*
@@ -890,9 +890,9 @@ void AndroidRuntime::start(const char* className, const char* options)
 
     ALOGD("Shutting down VM\n");
     if (mJavaVM->DetachCurrentThread() != JNI_OK)
-        LOGW("Warning: unable to detach main thread\n");
+        ALOGW("Warning: unable to detach main thread\n");
     if (mJavaVM->DestroyJavaVM() != 0)
-        LOGW("Warning: VM did not shut down cleanly\n");
+        ALOGW("Warning: VM did not shut down cleanly\n");
 }
 
 void AndroidRuntime::onExit(int code)

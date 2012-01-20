@@ -101,7 +101,7 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
     
     err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
 
-    LOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
+    ALOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
             w, h, format, usage, err, strerror(-err));
     
     if (err == NO_ERROR) {
@@ -132,7 +132,7 @@ status_t GraphicBufferAllocator::free(buffer_handle_t handle)
 
     err = mAllocDev->free(mAllocDev, handle);
 
-    LOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
+    ALOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);

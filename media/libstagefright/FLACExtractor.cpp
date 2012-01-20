@@ -366,7 +366,7 @@ void FLACParser::metadataCallback(const FLAC__StreamMetadata *metadata)
         }
         break;
     default:
-        LOGW("FLACParser::metadataCallback unexpected type %u", metadata->type);
+        ALOGW("FLACParser::metadataCallback unexpected type %u", metadata->type);
         break;
     }
 }

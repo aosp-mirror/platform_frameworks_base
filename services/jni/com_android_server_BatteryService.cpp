@@ -93,7 +93,7 @@ static jint getBatteryStatus(const char* status)
         case 'U': return gConstants.statusUnknown;          // Unknown
             
         default: {
-            LOGW("Unknown battery status '%s'", status);
+            ALOGW("Unknown battery status '%s'", status);
             return gConstants.statusUnknown;
         }
     }
@@ -111,7 +111,7 @@ static jint getBatteryHealth(const char* status)
             } else if (strcmp(status, "Over voltage") == 0) {
                 return gConstants.healthOverVoltage;
             }
-            LOGW("Unknown battery health[1] '%s'", status);
+            ALOGW("Unknown battery health[1] '%s'", status);
             return gConstants.healthUnknown;
         }
         
@@ -125,7 +125,7 @@ static jint getBatteryHealth(const char* status)
         }
             
         default: {
-            LOGW("Unknown battery health[2] '%s'", status);
+            ALOGW("Unknown battery health[2] '%s'", status);
             return gConstants.healthUnknown;
         }
     }
