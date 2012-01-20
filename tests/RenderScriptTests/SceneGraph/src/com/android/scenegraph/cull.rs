@@ -62,7 +62,7 @@ static bool frustumCulled(SgRenderable *obj, SgCamera *cam) {
 }
 
 
-void root(const rs_allocation *v_in, rs_allocation *v_out, const void *usrData) {
+void root(rs_allocation *v_out, const void *usrData) {
 
     SgRenderable *drawable = (SgRenderable *)rsGetElementAt(*v_out, 0);
     const SgCamera *camera = (const SgCamera*)usrData;

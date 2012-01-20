@@ -19,6 +19,7 @@ package com.android.scenegraph;
 import java.lang.Math;
 
 import com.android.scenegraph.SceneManager;
+import com.android.scenegraph.TextureBase;
 
 import android.content.res.Resources;
 import android.renderscript.*;
@@ -27,14 +28,14 @@ import android.util.Log;
 /**
  * @hide
  */
-public class Texture2D extends TextureBase {
+public class TextureCube extends TextureBase {
     String mFileName;
     String mFileDir;
 
-    public Texture2D() {
+    public TextureCube() {
     }
 
-    public Texture2D(Allocation tex) {
+    public TextureCube(Allocation tex) {
         setTexture(tex);
     }
 
@@ -60,7 +61,7 @@ public class Texture2D extends TextureBase {
         }
 
         String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        mRsTexture = SceneManager.loadTexture2D(mFileDir + shortName, rs, res);
+        mRsTexture = SceneManager.loadCubemap(mFileDir + shortName, rs, res);
 
         return mRsTexture;
     }

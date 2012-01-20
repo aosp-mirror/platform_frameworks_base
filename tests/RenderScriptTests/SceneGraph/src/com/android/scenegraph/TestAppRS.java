@@ -23,6 +23,8 @@ import java.util.Vector;
 
 import com.android.scenegraph.SceneManager;
 import com.android.scenegraph.SceneManager.SceneLoadedCallback;
+import com.android.scenegraph.VertexShader;
+import com.android.scenegraph.VertexShader.Builder;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -62,16 +64,18 @@ public class TestAppRS {
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    private ProgramFragment mPF_Paint;
-    private ProgramFragment mPF_Lights;
-    private ProgramFragment mPF_Aluminum;
-    private ProgramFragment mPF_Plastic;
-    private ProgramFragment mPF_Diffuse;
-    private ProgramFragment mPF_Texture;
     ScriptField_FShaderParams_s mFsConst;
     ScriptField_FShaderLightParams_s mFsConst2;
-    private ProgramVertex mPV_Paint;
     ScriptField_VShaderParams_s mVsConst;
+
+    // Shaders
+    private FragmentShader mPaintF;
+    private FragmentShader mLightsF;
+    private FragmentShader mAluminumF;
+    private FragmentShader mPlasticF;
+    private FragmentShader mDiffuseF;
+    private FragmentShader mTextureF;
+    private VertexShader mPaintV;
 
     private Allocation mDefaultCube;
     private Allocation mAllocPV;
@@ -150,12 +154,12 @@ public class TestAppRS {
         protected void onPostExecute(Boolean result) {
             if (tempEnv != null) {
                 mEnvCube = tempEnv;
-                mPF_Paint.bindTexture(mEnvCube, 1);
+                mPaintF.mProgram.bindTexture(mEnvCube, 1);
             }
 
             if (tempDiff != null) {
                 mDiffCube = tempDiff;
-                mPF_Aluminum.bindTexture(mDiffCube, 1);
+                mAluminumF.mProgram.bindTexture(mDiffCube, 1);
             }
         }
     }
@@ -174,48 +178,47 @@ public class TestAppRS {
         mTouchHandler.onActionMove(x, y);
     }
 
-    ProgramFragment createFromResource(int id, boolean addCubemap) {
-        ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst.getAllocation().getType());
+    FragmentShader createFromResource(int id, boolean addCubemap) {
+        FragmentShader.Builder fb = new FragmentShader.Builder(mRS);
+        fb.setShaderConst(mFsConst.getAllocation().getType());
         fb.setShader(mRes, id);
-        fb.addTexture(TextureType.TEXTURE_2D);
+        fb.addTexture(TextureType.TEXTURE_2D, "diffuse");
         if (addCubemap) {
-            fb.addTexture(TextureType.TEXTURE_CUBE);
+            fb.addTexture(TextureType.TEXTURE_CUBE, "reflection");
         }
-        ProgramFragment pf = fb.create();
-        pf.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
+        FragmentShader pf = fb.create();
+        pf.mProgram.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
         if (addCubemap) {
-            pf.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
+            pf.mProgram.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
         }
         return pf;
     }
 
-    // All the custom shaders used to render the scene are initialized here
-    // This includes stuff like plastic, car paint, etc.
     private void initPaintShaders() {
-        ProgramVertex.Builder vb = new ProgramVertex.Builder(mRS);
-        mVsConst = new ScriptField_VShaderParams_s(mRS, 1);
-        vb.addConstant(mVsConst.getAllocation().getType());
+        ScriptField_VObjectParams_s objConst = new ScriptField_VObjectParams_s(mRS, 1);
+        ScriptField_VSParams_s shaderConst = new ScriptField_VSParams_s(mRS, 1);
+
+        VertexShader.Builder vb = new VertexShader.Builder(mRS);
         vb.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
         vb.setShader(mRes, R.raw.shader2v);
-        mPV_Paint = vb.create();
+        vb.setObjectConst(objConst.getAllocation().getType());
+        vb.setShaderConst(shaderConst.getAllocation().getType());
+        mPaintV = vb.create();
 
         mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
         mFsConst2 = new ScriptField_FShaderLightParams_s(mRS, 1);
 
-        mPF_Paint = createFromResource(R.raw.paintf, true);
-        mPF_Aluminum = createFromResource(R.raw.metal, true);
+        mPaintF = createFromResource(R.raw.paintf, true);
+        mAluminumF = createFromResource(R.raw.metal, true);
 
-        mPF_Plastic = createFromResource(R.raw.plastic, false);
-        mPF_Diffuse = createFromResource(R.raw.diffuse, false);
-        mPF_Texture = createFromResource(R.raw.texture, false);
+        mPlasticF = createFromResource(R.raw.plastic, false);
+        mDiffuseF = createFromResource(R.raw.diffuse, false);
+        mTextureF = createFromResource(R.raw.texture, false);
 
-        ProgramFragment.Builder fb = new ProgramFragment.Builder(mRS);
-        fb.addConstant(mFsConst2.getAllocation().getType());
+        FragmentShader.Builder fb = new FragmentShader.Builder(mRS);
+        fb.setObjectConst(mFsConst2.getAllocation().getType());
         fb.setShader(mRes, R.raw.plastic_lights);
-        mPF_Lights = fb.create();
-
-        FullscreenBlur.initShaders(mRes, mRS);
+        mLightsF = fb.create();
     }
 
     void initRenderPasses() {
@@ -242,18 +245,27 @@ public class TestAppRS {
         }
     }
 
+    private void addShadersToScene() {
+        mActiveScene.appendShader(mPaintF);
+        mActiveScene.appendShader(mLightsF);
+        mActiveScene.appendShader(mAluminumF);
+        mActiveScene.appendShader(mPlasticF);
+        mActiveScene.appendShader(mDiffuseF);
+        mActiveScene.appendShader(mTextureF);
+        mActiveScene.appendShader(mPaintV);
+    }
+
     public void prepareToRender(Scene s) {
         mSceneManager.setActiveScene(s);
         mActiveScene = s;
-        RenderState plastic = new RenderState(mPV_Paint, mPF_Plastic, null, null);
-        RenderState diffuse = new RenderState(mPV_Paint, mPF_Diffuse, null, null);
-        RenderState paint = new RenderState(mPV_Paint, mPF_Paint, null, null);
-        RenderState aluminum = new RenderState(mPV_Paint, mPF_Aluminum, null, null);
-        RenderState lights = new RenderState(mPV_Paint, mPF_Lights, null, null);
-        RenderState glassTransp = new RenderState(mPV_Paint,
-                                                  mPF_Paint,
-                                                  ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS),
-                                                  null);
+        addShadersToScene();
+        RenderState plastic = new RenderState(mPaintV, mPlasticF, null, null);
+        RenderState diffuse = new RenderState(mPaintV, mDiffuseF, null, null);
+        RenderState paint = new RenderState(mPaintV, mPaintF, null, null);
+        RenderState aluminum = new RenderState(mPaintV, mAluminumF, null, null);
+        RenderState lights = new RenderState(mPaintV, mLightsF, null, null);
+        RenderState glassTransp = new RenderState(mPaintV, mPaintF,
+                                                  ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS), null);
 
         initRenderPasses();
 
@@ -275,7 +287,7 @@ public class TestAppRS {
 
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
-            RenderState texState = new RenderState(mPV_Paint, mPF_Texture, null, null);
+            RenderState texState = new RenderState(mPaintV, mTextureF, null, null);
             plane.setRenderState(texState);
             plane.setVisible(mRS, !mUseBlur);
         }
@@ -297,8 +309,8 @@ public class TestAppRS {
 
         Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.defaultcube);
         mDefaultCube = Allocation.createCubemapFromBitmap(mRS, b);
-        mPF_Paint.bindTexture(mDefaultCube, 1);
-        mPF_Aluminum.bindTexture(mDefaultCube, 1);
+        mPaintF.mProgram.bindTexture(mDefaultCube, 1);
+        mAluminumF.mProgram.bindTexture(mDefaultCube, 1);
 
         // Reflection maps from SD card
         new ImageLoaderTask().execute();

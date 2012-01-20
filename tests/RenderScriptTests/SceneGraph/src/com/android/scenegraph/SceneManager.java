@@ -47,10 +47,12 @@ import android.view.SurfaceHolder;
 public class SceneManager extends SceneGraphBase {
 
     ScriptC_render mRenderLoop;
-    ScriptC_camera mCameraScript;
-    ScriptC_light mLightScript;
-    ScriptC_params mParamsScript;
-    ScriptC_cull mCullScript;
+    ScriptC mCameraScript;
+    ScriptC mLightScript;
+    ScriptC mObjectParamsScript;
+    ScriptC mFragmentParamsScript;
+    ScriptC mVertexParamsScript;
+    ScriptC mCullScript;
     ScriptC_transform mTransformScript;
 
     RenderScriptGL mRS;
@@ -221,14 +223,18 @@ public class SceneManager extends SceneGraphBase {
 
         mCameraScript = new ScriptC_camera(rs, res, R.raw.camera);
         mLightScript = new ScriptC_light(rs, res, R.raw.light);
-        mParamsScript = new ScriptC_params(rs, res, R.raw.params);
+        mObjectParamsScript = new ScriptC_object_params(rs, res, R.raw.object_params);
+        mFragmentParamsScript = new ScriptC_object_params(rs, res, R.raw.fragment_params);
+        mVertexParamsScript = new ScriptC_object_params(rs, res, R.raw.vertex_params);
         mCullScript = new ScriptC_cull(rs, res, R.raw.cull);
 
         mRenderLoop = new ScriptC_render(rs, res, R.raw.render);
         mRenderLoop.set_gTransformScript(mTransformScript);
         mRenderLoop.set_gCameraScript(mCameraScript);
         mRenderLoop.set_gLightScript(mLightScript);
-        mRenderLoop.set_gParamsScript(mParamsScript);
+        mRenderLoop.set_gObjectParamsScript(mObjectParamsScript);
+        mRenderLoop.set_gFragmentParamsScript(mFragmentParamsScript);
+        mRenderLoop.set_gVertexParamsScript(mVertexParamsScript);
         mRenderLoop.set_gCullScript(mCullScript);
 
         Allocation checker = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.checker,

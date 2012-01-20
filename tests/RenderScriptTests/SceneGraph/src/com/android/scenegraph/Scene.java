@@ -56,6 +56,8 @@ public class Scene extends SceneGraphBase {
     ArrayList<RenderPass> mRenderPasses;
     ArrayList<LightBase> mLights;
     ArrayList<Camera> mCameras;
+    ArrayList<FragmentShader> mFragmentShaders;
+    ArrayList<VertexShader> mVertexShaders;
     ArrayList<RenderableBase> mRenderables;
     HashMap<String, RenderableBase> mRenderableMap;
     ArrayList<Texture2D> mTextures;
@@ -74,6 +76,8 @@ public class Scene extends SceneGraphBase {
         mRenderPasses = new ArrayList<RenderPass>();
         mLights = new ArrayList<LightBase>();
         mCameras = new ArrayList<Camera>();
+        mFragmentShaders = new ArrayList<FragmentShader>();
+        mVertexShaders = new ArrayList<VertexShader>();
         mRenderables = new ArrayList<RenderableBase>();
         mRenderableMap = new HashMap<String, RenderableBase>();
         mRenderableMeshMap = new HashMap<String, ArrayList<Renderable> >();
@@ -110,6 +114,14 @@ public class Scene extends SceneGraphBase {
 
     public void appendCamera(Camera c) {
         mCameras.add(c);
+    }
+
+    public void appendShader(FragmentShader f) {
+        mFragmentShaders.add(f);
+    }
+
+    public void appendShader(VertexShader v) {
+        mVertexShaders.add(v);
     }
 
     public ArrayList<Camera> getCameras() {
@@ -211,6 +223,44 @@ public class Scene extends SceneGraphBase {
         }
     }
 
+    private void addDrawables(RenderScriptGL rs, Resources res, SceneManager sceneManager) {
+        Allocation drawableData = Allocation.createSized(rs,
+                                                         Element.ALLOCATION(rs),
+                                                         mRenderables.size());
+        Allocation[] drawableAllocs = new Allocation[mRenderables.size()];
+        for (int i = 0; i < mRenderables.size(); i ++) {
+            Renderable dI = (Renderable)mRenderables.get(i);
+            dI.sceneIndex = i;
+            addToMeshMap(dI);
+            drawableAllocs[i] = dI.getRsField(rs, res).getAllocation();
+        }
+        drawableData.copyFrom(drawableAllocs);
+        sceneManager.mRenderLoop.set_gRenderableObjects(drawableData);
+
+        initRenderPassRS(rs, sceneManager);
+    }
+
+    private void addShaders(RenderScriptGL rs, Resources res, SceneManager sceneManager) {
+        Allocation shaderData = Allocation.createSized(rs, Element.ALLOCATION(rs),
+                                                       mVertexShaders.size());
+        Allocation[] shaderAllocs = new Allocation[mVertexShaders.size()];
+        for (int i = 0; i < mVertexShaders.size(); i ++) {
+            VertexShader sI = mVertexShaders.get(i);
+            shaderAllocs[i] = sI.getRSData(rs).getAllocation();
+        }
+        shaderData.copyFrom(shaderAllocs);
+        sceneManager.mRenderLoop.set_gVertexShaders(shaderData);
+
+        shaderData = Allocation.createSized(rs, Element.ALLOCATION(rs), mFragmentShaders.size());
+        shaderAllocs = new Allocation[mFragmentShaders.size()];
+        for (int i = 0; i < mFragmentShaders.size(); i ++) {
+            FragmentShader sI = mFragmentShaders.get(i);
+            shaderAllocs[i] = sI.getRSData(rs).getAllocation();
+        }
+        shaderData.copyFrom(shaderAllocs);
+        sceneManager.mRenderLoop.set_gFragmentShaders(shaderData);
+    }
+
     public void initRS(RenderScriptGL rs, Resources res, SceneManager sceneManager) {
         mRS = rs;
         mRes = res;
@@ -226,23 +276,11 @@ public class Scene extends SceneGraphBase {
         Log.v(TIMER_TAG, "Script init time: " + (end - start));
 
         start = System.currentTimeMillis();
-        Allocation drawableData = Allocation.createSized(rs,
-                                                         Element.ALLOCATION(rs),
-                                                         mRenderables.size());
-        Allocation[] drawableAllocs = new Allocation[mRenderables.size()];
-        for (int i = 0; i < mRenderables.size(); i ++) {
-            Renderable dI = (Renderable)mRenderables.get(i);
-            dI.sceneIndex = i;
-            addToMeshMap(dI);
-            drawableAllocs[i] = dI.getRsField(rs, res).getAllocation();
-        }
-        drawableData.copyFrom(drawableAllocs);
-        sceneManager.mRenderLoop.set_gRenderableObjects(drawableData);
-
-        initRenderPassRS(rs, sceneManager);
-
+        addDrawables(rs, res, sceneManager);
         end = System.currentTimeMillis();
         Log.v(TIMER_TAG, "Renderable init time: " + (end - start));
+
+        addShaders(rs, res, sceneManager);
 
         Allocation opaqueBuffer = Allocation.createSized(rs, Element.U32(rs), mRenderables.size());
         Allocation transparentBuffer = Allocation.createSized(rs,

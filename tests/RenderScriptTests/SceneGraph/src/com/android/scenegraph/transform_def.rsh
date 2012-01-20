@@ -16,6 +16,9 @@
 
 #pragma rs java_package_name(com.android.scenegraph)
 
+#ifndef _TRANSFORM_DEF_
+#define _TRANSFORM_DEF_
+
 #include "rs_graphics.rsh"
 
 #define TRANSFORM_NONE 0
@@ -61,9 +64,29 @@ typedef struct __attribute__((packed, aligned(4))) SgTransform {
     rs_allocation name;
 } SgTransform;
 
+typedef struct VertexShader_s {
+    rs_program_vertex program;
+    // Buffer with vertex constant data
+    rs_allocation shaderConst;
+    // ShaderParam's that populate data
+    rs_allocation shaderConstParams;
+    // location of the per object constants on the buffer
+    int objectConstIndex;
+} SgVertexShader;
+
+typedef struct FragmentShader_s {
+    rs_program_fragment program;
+    // Buffer with vertex constant data
+    rs_allocation shaderConst;
+    // ShaderParam's that populate data
+    rs_allocation shaderConstParams;
+    // location of the per object constants on the buffer
+    int objectConstIndex;
+} SgFragmentShader;
+
 typedef struct RenderState_s {
-    rs_program_vertex pv;
-    rs_program_fragment pf;
+    rs_allocation pv; // VertexShader struct
+    rs_allocation pf; // FragmentShader struct
     rs_program_store ps;
     rs_program_raster pr;
 } SgRenderState;
@@ -223,3 +246,5 @@ static void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *
     rsDebug("Vec Z", vec->z);
     *pnt = cam->position.xyz;
 }
+
+#endif // _TRANSFORM_DEF_
