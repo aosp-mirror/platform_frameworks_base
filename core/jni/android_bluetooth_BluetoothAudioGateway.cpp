@@ -127,7 +127,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
-        LOGE("%s: out of memory!", __FUNCTION__);
+        ALOGE("%s: out of memory!", __FUNCTION__);
         return;
     }
 
@@ -166,7 +166,7 @@ static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
 static int set_nb(int sk, bool nb) {
     int flags = fcntl(sk, F_GETFL);
     if (flags < 0) {
-        LOGE("Can't get socket flags with fcntl(): %s (%d)",
+        ALOGE("Can't get socket flags with fcntl(): %s (%d)",
              strerror(errno), errno);
         close(sk);
         return -1;
@@ -175,7 +175,7 @@ static int set_nb(int sk, bool nb) {
     if (nb) flags |= O_NONBLOCK;
     int status = fcntl(sk, F_SETFL, flags);
     if (status < 0) {
-        LOGE("Can't set socket to nonblocking mode with fcntl(): %s (%d)",
+        ALOGE("Can't set socket to nonblocking mode with fcntl(): %s (%d)",
              strerror(errno), errno);
         close(sk);
         return -1;
@@ -198,7 +198,7 @@ static int do_accept(JNIEnv* env, jobject object, int ag_fd,
     int alen = sizeof(raddr);
     int nsk = accept(ag_fd, (struct sockaddr *) &raddr, &alen);
     if (nsk < 0) {
-        LOGE("Error on accept from socket fd %d: %s (%d).",
+        ALOGE("Error on accept from socket fd %d: %s (%d).",
              ag_fd,
              strerror(errno),
              errno);
@@ -244,7 +244,7 @@ static inline int on_accept_set_fields(JNIEnv* env, jobject object,
              ag_fd,
              FD_ISSET(ag_fd, &rset));
         if (ag_fd >= 0 && !FD_ISSET(ag_fd, &rset)) {
-            LOGE("WTF???");
+            ALOGE("WTF???");
             return -1;
         }
     }
@@ -271,7 +271,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         int len = sizeof(tv);
         if (getsockopt(nat->hf_ag_rfcomm_channel,
                        SOL_SOCKET, SO_RCVTIMEO, &tv, &len) < 0) {
-            LOGE("getsockopt(%d, SOL_SOCKET, SO_RCVTIMEO): %s (%d)",
+            ALOGE("getsockopt(%d, SOL_SOCKET, SO_RCVTIMEO): %s (%d)",
                  nat->hf_ag_rfcomm_channel,
                  strerror(errno),
                  errno);
@@ -284,7 +284,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
             tv.tv_usec = 1000 * (timeout_ms % 1000);
             if (setsockopt(nat->hf_ag_rfcomm_channel,
                            SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-                LOGE("setsockopt(%d, SOL_SOCKET, SO_RCVTIMEO): %s (%d)",
+                ALOGE("setsockopt(%d, SOL_SOCKET, SO_RCVTIMEO): %s (%d)",
                      nat->hf_ag_rfcomm_channel,
                      strerror(errno),
                      errno);
@@ -322,7 +322,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         FD_SET(nat->hs_ag_rfcomm_sock, &rset);
     }
     if (cnt == 0) {
-        LOGE("Neither HF nor HS listening sockets are open!");
+        ALOGE("Neither HF nor HS listening sockets are open!");
         return JNI_FALSE;
     }
 
@@ -348,7 +348,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
 
     if (n <= 0) {
         if (n < 0)  {
-            LOGE("listening select() on RFCOMM sockets: %s (%d)",
+            ALOGE("listening select() on RFCOMM sockets: %s (%d)",
                  strerror(errno),
                  errno);
         }
@@ -388,13 +388,13 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
         cnt++;
     }
     if (cnt == 0) {
-        LOGE("Neither HF nor HS listening sockets are open!");
+        ALOGE("Neither HF nor HS listening sockets are open!");
         return JNI_FALSE;
     }
     n = poll(fds, cnt, timeout_ms);
     if (n <= 0) {
         if (n < 0)  {
-            LOGE("listening poll() on RFCOMM sockets: %s (%d)",
+            ALOGE("listening poll() on RFCOMM sockets: %s (%d)",
                  strerror(errno),
                  errno);
         }
@@ -475,7 +475,7 @@ static int setup_listening_socket(int dev, int channel) {
 
     sk = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (sk < 0) {
-        LOGE("Can't create RFCOMM socket");
+        ALOGE("Can't create RFCOMM socket");
         return -1;
     }
 
@@ -486,7 +486,7 @@ static int setup_listening_socket(int dev, int channel) {
     }
 
     if (lm && setsockopt(sk, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0) {
-        LOGE("Can't set RFCOMM link mode");
+        ALOGE("Can't set RFCOMM link mode");
         close(sk);
         return -1;
     }
@@ -497,7 +497,7 @@ static int setup_listening_socket(int dev, int channel) {
     laddr.rc_channel = channel;
 
     if (bind(sk, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
-        LOGE("Can't bind RFCOMM socket");
+        ALOGE("Can't bind RFCOMM socket");
         close(sk);
         return -1;
     }
@@ -517,14 +517,14 @@ static void tearDownListeningSocketsNative(JNIEnv *env, jobject object) {
 
     if (nat->hf_ag_rfcomm_sock > 0) {
         if (close(nat->hf_ag_rfcomm_sock) < 0) {
-            LOGE("Could not close HF server socket: %s (%d)\n",
+            ALOGE("Could not close HF server socket: %s (%d)\n",
                  strerror(errno), errno);
         }
         nat->hf_ag_rfcomm_sock = -1;
     }
     if (nat->hs_ag_rfcomm_sock > 0) {
         if (close(nat->hs_ag_rfcomm_sock) < 0) {
-            LOGE("Could not close HS server socket: %s (%d)\n",
+            ALOGE("Could not close HS server socket: %s (%d)\n",
                  strerror(errno), errno);
         }
         nat->hs_ag_rfcomm_sock = -1;

@@ -441,7 +441,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
                 if (extPos != NULL) {
                     *extPos = '\0';
                 } else {
-                    LOGE("ERROR the overlay file is incorrect");
+                    ALOGE("ERROR the overlay file is incorrect");
                 }
 
                 strcat(pContext->mOverlayFileName, ".png");
@@ -518,7 +518,7 @@ static M4OSA_ERR checkClipVideoProfileAndLevel(M4DECODER_VideoDecoders *pDecoder
              // For these case we do not check the profile and level
              return M4NO_ERROR;
         default :
-            LOGE("checkClipVideoProfileAndLevel unsupport Video format %ld", format);
+            ALOGE("checkClipVideoProfileAndLevel unsupport Video format %ld", format);
             break;
     }
 
@@ -971,7 +971,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         if (extPos != NULL) {
             *extPos = '\0';
         } else {
-            LOGE("ERROR the overlay file is incorrect");
+            ALOGE("ERROR the overlay file is incorrect");
         }
 
         strcat(tmpOverlayFilename, ".png");
@@ -1510,7 +1510,7 @@ static int removeAlphafromRGB8888 (
 
     M4OSA_UInt8 *pTmpData = (M4OSA_UInt8*) M4OSA_32bitAlignedMalloc(frameSize_argb, M4VS, (M4OSA_Char*)"Image argb data");
     if (pTmpData == M4OSA_NULL) {
-        LOGE("Failed to allocate memory for Image clip");
+        ALOGE("Failed to allocate memory for Image clip");
         return M4ERR_ALLOC;
     }
 
@@ -1520,7 +1520,7 @@ static int removeAlphafromRGB8888 (
 
     if ((lerr != M4NO_ERROR) || (lImageFileFp == M4OSA_NULL))
     {
-        LOGE("removeAlphafromRGB8888: Can not open the file ");
+        ALOGE("removeAlphafromRGB8888: Can not open the file ");
         free(pTmpData);
         return M4ERR_FILE_NOT_FOUND;
     }
@@ -1529,7 +1529,7 @@ static int removeAlphafromRGB8888 (
     lerr = M4OSA_fileReadData(lImageFileFp, (M4OSA_MemAddr8)pTmpData, &frameSize_argb);
     if (lerr != M4NO_ERROR)
     {
-        LOGE("removeAlphafromRGB8888: can not read the data ");
+        ALOGE("removeAlphafromRGB8888: can not read the data ");
         M4OSA_fileReadClose(lImageFileFp);
         free(pTmpData);
         return lerr;
@@ -1545,7 +1545,7 @@ static int removeAlphafromRGB8888 (
 
     if (pFramingCtx->FramingRgb == M4OSA_NULL)
     {
-        LOGE("Failed to allocate memory for Image clip");
+        ALOGE("Failed to allocate memory for Image clip");
         free(pTmpData);
         return M4ERR_ALLOC;
     }
@@ -2904,7 +2904,7 @@ M4OSA_ERR videoEditor_processClip(
                 // Other states are unexpected
                 else {
                     result = M4ERR_STATE;
-                    LOGE("videoEditor_processClip ITEM %d State ERROR 0x%x",
+                    ALOGE("videoEditor_processClip ITEM %d State ERROR 0x%x",
                         unuseditemID, (unsigned int) result);
                 }
             }
@@ -2916,13 +2916,13 @@ M4OSA_ERR videoEditor_processClip(
                 pContext->state = errorState;
 
                 // Log the result.
-                LOGE("videoEditor_processClip ITEM %d Processing ERROR 0x%x",
+                ALOGE("videoEditor_processClip ITEM %d Processing ERROR 0x%x",
                     unuseditemID, (unsigned int) result);
             }
     }
 
     // Return the error result
-    LOGE("videoEditor_processClip ITEM %d END 0x%x", unuseditemID, (unsigned int) result);
+    ALOGE("videoEditor_processClip ITEM %d END 0x%x", unuseditemID, (unsigned int) result);
     return result;
 }
 /*+ PROGRESS CB */

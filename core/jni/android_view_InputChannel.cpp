@@ -202,17 +202,17 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
             int32_t parcelAshmemFd = parcel->readFileDescriptor();
             int32_t ashmemFd = dup(parcelAshmemFd);
             if (ashmemFd < 0) {
-                LOGE("Error %d dup ashmem fd %d.", errno, parcelAshmemFd);
+                ALOGE("Error %d dup ashmem fd %d.", errno, parcelAshmemFd);
             }
             int32_t parcelReceivePipeFd = parcel->readFileDescriptor();
             int32_t receivePipeFd = dup(parcelReceivePipeFd);
             if (receivePipeFd < 0) {
-                LOGE("Error %d dup receive pipe fd %d.", errno, parcelReceivePipeFd);
+                ALOGE("Error %d dup receive pipe fd %d.", errno, parcelReceivePipeFd);
             }
             int32_t parcelSendPipeFd = parcel->readFileDescriptor();
             int32_t sendPipeFd = dup(parcelSendPipeFd);
             if (sendPipeFd < 0) {
-                LOGE("Error %d dup send pipe fd %d.", errno, parcelSendPipeFd);
+                ALOGE("Error %d dup send pipe fd %d.", errno, parcelSendPipeFd);
             }
             if (ashmemFd < 0 || receivePipeFd < 0 || sendPipeFd < 0) {
                 if (ashmemFd >= 0) ::close(ashmemFd);

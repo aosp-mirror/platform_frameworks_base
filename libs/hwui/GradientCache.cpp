@@ -154,7 +154,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
 void GradientCache::generateTexture(SkBitmap* bitmap, Texture* texture) {
     SkAutoLockPixels autoLock(*bitmap);
     if (!bitmap->readyToDraw()) {
-        LOGE("Cannot generate texture from shader");
+        ALOGE("Cannot generate texture from shader");
         return;
     }
 

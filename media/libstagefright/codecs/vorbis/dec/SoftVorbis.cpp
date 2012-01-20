@@ -360,7 +360,7 @@ void SoftVorbis::onQueueFilled(OMX_U32 portIndex) {
                     kMaxNumSamplesPerBuffer);
 
             if (numFrames < 0) {
-                LOGE("vorbis_dsp_pcmout returned %d", numFrames);
+                ALOGE("vorbis_dsp_pcmout returned %d", numFrames);
                 numFrames = 0;
             }
         }

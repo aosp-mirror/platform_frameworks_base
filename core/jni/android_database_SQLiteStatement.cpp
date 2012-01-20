@@ -169,7 +169,7 @@ static jobject create_ashmem_region_with_data(JNIEnv * env,
     // Create ashmem area
     int fd = ashmem_create_region(NULL, length);
     if (fd < 0) {
-        LOGE("ashmem_create_region failed: %s", strerror(errno));
+        ALOGE("ashmem_create_region failed: %s", strerror(errno));
         jniThrowIOException(env, errno);
         return NULL;
     }
@@ -179,7 +179,7 @@ static jobject create_ashmem_region_with_data(JNIEnv * env,
         void * ashmem_ptr =
                 mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (ashmem_ptr == MAP_FAILED) {
-            LOGE("mmap failed: %s", strerror(errno));
+            ALOGE("mmap failed: %s", strerror(errno));
             jniThrowIOException(env, errno);
             close(fd);
             return NULL;
@@ -190,7 +190,7 @@ static jobject create_ashmem_region_with_data(JNIEnv * env,
 
         // munmap ashmem area
         if (munmap(ashmem_ptr, length) < 0) {
-            LOGE("munmap failed: %s", strerror(errno));
+            ALOGE("munmap failed: %s", strerror(errno));
             jniThrowIOException(env, errno);
             close(fd);
             return NULL;
@@ -199,7 +199,7 @@ static jobject create_ashmem_region_with_data(JNIEnv * env,
 
     // Make ashmem area read-only
     if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
-        LOGE("ashmem_set_prot_region failed: %s", strerror(errno));
+        ALOGE("ashmem_set_prot_region failed: %s", strerror(errno));
         jniThrowIOException(env, errno);
         close(fd);
         return NULL;
@@ -267,7 +267,7 @@ int register_android_database_SQLiteStatement(JNIEnv * env)
 
     clazz = env->FindClass("android/database/sqlite/SQLiteStatement");
     if (clazz == NULL) {
-        LOGE("Can't find android/database/sqlite/SQLiteStatement");
+        ALOGE("Can't find android/database/sqlite/SQLiteStatement");
         return -1;
     }
 
@@ -275,7 +275,7 @@ int register_android_database_SQLiteStatement(JNIEnv * env)
     gStatementField = env->GetFieldID(clazz, "nStatement", "I");
 
     if (gHandleField == NULL || gStatementField == NULL) {
-        LOGE("Error locating fields");
+        ALOGE("Error locating fields");
         return -1;
     }
 

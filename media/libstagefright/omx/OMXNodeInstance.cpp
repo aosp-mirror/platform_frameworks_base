@@ -150,7 +150,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
                    && state != OMX_StateIdle
                    && state != OMX_StateInvalid) {
                 if (++iteration > kMaxNumIterations) {
-                    LOGE("component failed to enter Idle state, aborting.");
+                    ALOGE("component failed to enter Idle state, aborting.");
                     state = OMX_StateInvalid;
                     break;
                 }
@@ -179,7 +179,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
                    && state != OMX_StateLoaded
                    && state != OMX_StateInvalid) {
                 if (++iteration > kMaxNumIterations) {
-                    LOGE("component failed to enter Loaded state, aborting.");
+                    ALOGE("component failed to enter Loaded state, aborting.");
                     state = OMX_StateInvalid;
                     break;
                 }
@@ -209,7 +209,7 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
     mHandle = NULL;
 
     if (err != OMX_ErrorNone) {
-        LOGE("FreeHandle FAILED with error 0x%08x.", err);
+        ALOGE("FreeHandle FAILED with error 0x%08x.", err);
     }
 
     mOwner->invalidateNodeID(mNodeID);
@@ -285,7 +285,7 @@ status_t OMXNodeInstance::enableGraphicBuffers(
             &index);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex failed");
+        ALOGE("OMX_GetExtensionIndex failed");
 
         return StatusFromOMXError(err);
     }
@@ -302,7 +302,7 @@ status_t OMXNodeInstance::enableGraphicBuffers(
     err = OMX_SetParameter(mHandle, index, &params);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_EnableAndroidNativeBuffers failed with error %d (0x%08x)",
+        ALOGE("OMX_EnableAndroidNativeBuffers failed with error %d (0x%08x)",
                 err, err);
 
         return UNKNOWN_ERROR;
@@ -323,7 +323,7 @@ status_t OMXNodeInstance::getGraphicBufferUsage(
             &index);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex failed");
+        ALOGE("OMX_GetExtensionIndex failed");
 
         return StatusFromOMXError(err);
     }
@@ -340,7 +340,7 @@ status_t OMXNodeInstance::getGraphicBufferUsage(
     err = OMX_GetParameter(mHandle, index, &params);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetAndroidNativeBufferUsage failed with error %d (0x%08x)",
+        ALOGE("OMX_GetAndroidNativeBufferUsage failed with error %d (0x%08x)",
                 err, err);
         return UNKNOWN_ERROR;
     }
@@ -361,7 +361,7 @@ status_t OMXNodeInstance::storeMetaDataInBuffers(
 
     OMX_ERRORTYPE err = OMX_GetExtensionIndex(mHandle, name, &index);
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex %s failed", name);
+        ALOGE("OMX_GetExtensionIndex %s failed", name);
         return StatusFromOMXError(err);
     }
 
@@ -375,7 +375,7 @@ status_t OMXNodeInstance::storeMetaDataInBuffers(
     params.nPortIndex = portIndex;
     params.bStoreMetaData = enable;
     if ((err = OMX_SetParameter(mHandle, index, &params)) != OMX_ErrorNone) {
-        LOGE("OMX_SetParameter() failed for StoreMetaDataInBuffers: 0x%08x", err);
+        ALOGE("OMX_SetParameter() failed for StoreMetaDataInBuffers: 0x%08x", err);
         return UNKNOWN_ERROR;
     }
     return err;
@@ -395,7 +395,7 @@ status_t OMXNodeInstance::useBuffer(
             params->size(), static_cast<OMX_U8 *>(params->pointer()));
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
+        ALOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
 
         delete buffer_meta;
         buffer_meta = NULL;
@@ -429,7 +429,7 @@ status_t OMXNodeInstance::useGraphicBuffer2_l(
     OMX_ERRORTYPE err = OMX_GetParameter(mHandle, OMX_IndexParamPortDefinition, &def);
     if (err != OMX_ErrorNone)
     {
-        LOGE("%s::%d:Error getting OMX_IndexParamPortDefinition", __FUNCTION__, __LINE__);
+        ALOGE("%s::%d:Error getting OMX_IndexParamPortDefinition", __FUNCTION__, __LINE__);
         return err;
     }
 
@@ -448,7 +448,7 @@ status_t OMXNodeInstance::useGraphicBuffer2_l(
             bufferHandle);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
+        ALOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
         delete bufferMeta;
         bufferMeta = NULL;
         *buffer = 0;
@@ -488,7 +488,7 @@ status_t OMXNodeInstance::useGraphicBuffer(
             &index);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_GetExtensionIndex failed");
+        ALOGE("OMX_GetExtensionIndex failed");
 
         return StatusFromOMXError(err);
     }
@@ -510,7 +510,7 @@ status_t OMXNodeInstance::useGraphicBuffer(
     err = OMX_SetParameter(mHandle, index, &params);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_UseAndroidNativeBuffer failed with error %d (0x%08x)", err,
+        ALOGE("OMX_UseAndroidNativeBuffer failed with error %d (0x%08x)", err,
                 err);
 
         delete bufferMeta;
@@ -543,7 +543,7 @@ status_t OMXNodeInstance::allocateBuffer(
             mHandle, &header, portIndex, buffer_meta, size);
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_AllocateBuffer failed with error %d (0x%08x)", err, err);
+        ALOGE("OMX_AllocateBuffer failed with error %d (0x%08x)", err, err);
 
         delete buffer_meta;
         buffer_meta = NULL;
@@ -576,7 +576,7 @@ status_t OMXNodeInstance::allocateBufferWithBackup(
             mHandle, &header, portIndex, buffer_meta, params->size());
 
     if (err != OMX_ErrorNone) {
-        LOGE("OMX_AllocateBuffer failed with error %d (0x%08x)", err, err);
+        ALOGE("OMX_AllocateBuffer failed with error %d (0x%08x)", err, err);
 
         delete buffer_meta;
         buffer_meta = NULL;
@@ -672,7 +672,7 @@ void OMXNodeInstance::onMessage(const omx_message &msg) {
 }
 
 void OMXNodeInstance::onObserverDied(OMXMaster *master) {
-    LOGE("!!! Observer died. Quickly, do something, ... anything...");
+    ALOGE("!!! Observer died. Quickly, do something, ... anything...");
 
     // Try to force shutdown of the node and hope for the best.
     freeNode(master);

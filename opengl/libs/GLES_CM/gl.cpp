@@ -132,7 +132,7 @@ GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
     
         #define CHECK_GL_ERRORS(_api) \
             do { GLint err = glGetError(); \
-                LOGE_IF(err != GL_NO_ERROR, "%s failed (0x%04X)", #_api, err); \
+                ALOGE_IF(err != GL_NO_ERROR, "%s failed (0x%04X)", #_api, err); \
             } while(false);
 
     #else

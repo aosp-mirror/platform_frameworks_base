@@ -179,7 +179,7 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
     sp<M3UParser> playlist = fetchPlaylist(url.c_str(), &dummy);
 
     if (playlist == NULL) {
-        LOGE("unable to fetch master playlist '%s'.", url.c_str());
+        ALOGE("unable to fetch master playlist '%s'.", url.c_str());
 
         mDataSource->queueEOS(ERROR_IO);
         return;
@@ -336,7 +336,7 @@ sp<M3UParser> LiveSession::fetchPlaylist(const char *url, bool *unchanged) {
         new M3UParser(url, buffer->data(), buffer->size());
 
     if (playlist->initCheck() != OK) {
-        LOGE("failed to parse .m3u8 playlist");
+        ALOGE("failed to parse .m3u8 playlist");
 
         return NULL;
     }
@@ -507,7 +507,7 @@ rinse_repeat:
                 // We succeeded in fetching the playlist, but it was
                 // unchanged from the last time we tried.
             } else {
-                LOGE("failed to load playlist at url '%s'", url.c_str());
+                ALOGE("failed to load playlist at url '%s'", url.c_str());
                 mDataSource->queueEOS(ERROR_IO);
                 return;
             }
@@ -635,7 +635,7 @@ rinse_repeat:
 
             // fall through
         } else {
-            LOGE("Cannot find sequence number %d in playlist "
+            ALOGE("Cannot find sequence number %d in playlist "
                  "(contains %d - %d)",
                  mSeqNumber, firstSeqNumberInPlaylist,
                  firstSeqNumberInPlaylist + mPlaylist->size() - 1);
@@ -662,7 +662,7 @@ rinse_repeat:
     sp<ABuffer> buffer;
     status_t err = fetchFile(uri.c_str(), &buffer);
     if (err != OK) {
-        LOGE("failed to fetch .ts segment at url '%s'", uri.c_str());
+        ALOGE("failed to fetch .ts segment at url '%s'", uri.c_str());
         mDataSource->queueEOS(err);
         return;
     }
@@ -672,7 +672,7 @@ rinse_repeat:
     err = decryptBuffer(mSeqNumber - firstSeqNumberInPlaylist, buffer);
 
     if (err != OK) {
-        LOGE("decryptBuffer failed w/ error %d", err);
+        ALOGE("decryptBuffer failed w/ error %d", err);
 
         mDataSource->queueEOS(err);
         return;
@@ -681,7 +681,7 @@ rinse_repeat:
     if (buffer->size() == 0 || buffer->data()[0] != 0x47) {
         // Not a transport stream???
 
-        LOGE("This doesn't look like a transport stream...");
+        ALOGE("This doesn't look like a transport stream...");
 
         mBandwidthItems.removeAt(bandwidthIndex);
 
@@ -765,13 +765,13 @@ status_t LiveSession::decryptBuffer(
     if (method == "NONE") {
         return OK;
     } else if (!(method == "AES-128")) {
-        LOGE("Unsupported cipher method '%s'", method.c_str());
+        ALOGE("Unsupported cipher method '%s'", method.c_str());
         return ERROR_UNSUPPORTED;
     }
 
     AString keyURI;
     if (!itemMeta->findString("cipher-uri", &keyURI)) {
-        LOGE("Missing key uri");
+        ALOGE("Missing key uri");
         return ERROR_MALFORMED;
     }
 
@@ -813,7 +813,7 @@ status_t LiveSession::decryptBuffer(
         }
 
         if (err != OK) {
-            LOGE("failed to fetch cipher key from '%s'.", keyURI.c_str());
+            ALOGE("failed to fetch cipher key from '%s'.", keyURI.c_str());
             return ERROR_IO;
         }
 
@@ -822,7 +822,7 @@ status_t LiveSession::decryptBuffer(
 
     AES_KEY aes_key;
     if (AES_set_decrypt_key(key->data(), 128, &aes_key) != 0) {
-        LOGE("failed to set AES decryption key.");
+        ALOGE("failed to set AES decryption key.");
         return UNKNOWN_ERROR;
     }
 
@@ -832,7 +832,7 @@ status_t LiveSession::decryptBuffer(
     if (itemMeta->findString("cipher-iv", &iv)) {
         if ((!iv.startsWith("0x") && !iv.startsWith("0X"))
                 || iv.size() != 16 * 2 + 2) {
-            LOGE("malformed cipher IV '%s'.", iv.c_str());
+            ALOGE("malformed cipher IV '%s'.", iv.c_str());
             return ERROR_MALFORMED;
         }
 
@@ -841,7 +841,7 @@ status_t LiveSession::decryptBuffer(
             char c1 = tolower(iv.c_str()[2 + 2 * i]);
             char c2 = tolower(iv.c_str()[3 + 2 * i]);
             if (!isxdigit(c1) || !isxdigit(c2)) {
-                LOGE("malformed cipher IV '%s'.", iv.c_str());
+                ALOGE("malformed cipher IV '%s'.", iv.c_str());
                 return ERROR_MALFORMED;
             }
             uint8_t nibble1 = isdigit(c1) ? c1 - '0' : c1 - 'a' + 10;

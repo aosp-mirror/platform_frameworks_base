@@ -132,7 +132,7 @@ struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
         status_t err = mNativeWindow->queueBuffer(
                 mNativeWindow.get(), buffer->graphicBuffer().get());
         if (err != 0) {
-            LOGE("queueBuffer failed with error %s (%d)", strerror(-err),
+            ALOGE("queueBuffer failed with error %s (%d)", strerror(-err),
                     -err);
             return;
         }
@@ -1192,7 +1192,7 @@ status_t AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
     status_t err = initVideoDecoder();
 
     if (err != OK) {
-        LOGE("failed to reinstantiate video decoder after surface change.");
+        ALOGE("failed to reinstantiate video decoder after surface change.");
         return err;
     }
 
@@ -1683,7 +1683,7 @@ void AwesomePlayer::onVideoEvent() {
     if (mAudioPlayer != NULL && !(mFlags & (AUDIO_RUNNING | SEEK_PREVIEW))) {
         status_t err = startAudioPlayer_l();
         if (err != OK) {
-            LOGE("Starting the audio player failed w/ err %d", err);
+            ALOGE("Starting the audio player failed w/ err %d", err);
             return;
         }
     }

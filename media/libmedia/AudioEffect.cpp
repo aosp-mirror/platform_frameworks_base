@@ -107,7 +107,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
 
     const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
     if (audioFlinger == 0) {
-        LOGE("set(): Could not get audioflinger");
+        ALOGE("set(): Could not get audioflinger");
         return NO_INIT;
     }
 
@@ -138,7 +138,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
             mIEffectClient, priority, io, mSessionId, &mStatus, &mId, &enabled);
 
     if (iEffect == 0 || (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS)) {
-        LOGE("set(): AudioFlinger could not create effect, status: %d", mStatus);
+        ALOGE("set(): AudioFlinger could not create effect, status: %d", mStatus);
         return mStatus;
     }
 
@@ -148,7 +148,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     cblk = iEffect->getCblk();
     if (cblk == 0) {
         mStatus = NO_INIT;
-        LOGE("Could not get control block");
+        ALOGE("Could not get control block");
         return mStatus;
     }
 

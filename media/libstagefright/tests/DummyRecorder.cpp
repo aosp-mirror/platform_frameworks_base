@@ -47,7 +47,7 @@ status_t DummyRecorder::start() {
     pthread_attr_destroy(&attr);
 
     if (err) {
-        LOGE("Error creating thread!");
+        ALOGE("Error creating thread!");
         return -ENODEV;
     }
     return OK;

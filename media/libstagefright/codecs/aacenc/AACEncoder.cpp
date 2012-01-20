@@ -53,7 +53,7 @@ status_t AACEncoder::initCheck() {
     CHECK(mApiHandle);
 
     if (VO_ERR_NONE != voGetAACEncAPI(mApiHandle)) {
-        LOGE("Failed to get api handle");
+        ALOGE("Failed to get api handle");
         return UNKNOWN_ERROR;
     }
 
@@ -70,11 +70,11 @@ status_t AACEncoder::initCheck() {
     userData.memflag = VO_IMF_USERMEMOPERATOR;
     userData.memData = (VO_PTR) mMemOperator;
     if (VO_ERR_NONE != mApiHandle->Init(&mEncoderHandle, VO_AUDIO_CodingAAC, &userData)) {
-        LOGE("Failed to init AAC encoder");
+        ALOGE("Failed to init AAC encoder");
         return UNKNOWN_ERROR;
     }
     if (OK != setAudioSpecificConfigData()) {
-        LOGE("Failed to configure AAC encoder");
+        ALOGE("Failed to configure AAC encoder");
         return UNKNOWN_ERROR;
     }
 
@@ -86,7 +86,7 @@ status_t AACEncoder::initCheck() {
     params.nChannels = mChannels;
     params.adtsUsed = 0;  // We add adts header in the file writer if needed.
     if (VO_ERR_NONE != mApiHandle->SetParam(mEncoderHandle, VO_PID_AAC_ENCPARAM,  &params)) {
-        LOGE("Failed to set AAC encoder parameters");
+        ALOGE("Failed to set AAC encoder parameters");
         return UNKNOWN_ERROR;
     }
 
@@ -106,7 +106,7 @@ static status_t getSampleRateTableIndex(int32_t sampleRate, int32_t &index) {
         }
     }
 
-    LOGE("Sampling rate %d bps is not supported", sampleRate);
+    ALOGE("Sampling rate %d bps is not supported", sampleRate);
     return UNKNOWN_ERROR;
 }
 
@@ -117,7 +117,7 @@ status_t AACEncoder::setAudioSpecificConfigData() {
     int32_t index;
     CHECK_EQ(OK, getSampleRateTableIndex(mSampleRate, index));
     if (mChannels > 2 || mChannels <= 0) {
-        LOGE("Unsupported number of channels(%d)", mChannels);
+        ALOGE("Unsupported number of channels(%d)", mChannels);
         return UNKNOWN_ERROR;
     }
 
@@ -153,7 +153,7 @@ status_t AACEncoder::start(MetaData *params) {
 
     status_t err = mSource->start(params);
     if (err != OK) {
-         LOGE("AudioSource is not available");
+         ALOGE("AudioSource is not available");
         return err;
     }
 

@@ -139,13 +139,13 @@ void Program::initMemberVars() {
 void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot) {
     if (alloc != NULL) {
         if (slot >= mHal.state.constantsCount) {
-            LOGE("Attempt to bind alloc at slot %u, on shader id %u, but const count is %u",
+            ALOGE("Attempt to bind alloc at slot %u, on shader id %u, but const count is %u",
                  slot, (uint32_t)this, mHal.state.constantsCount);
             rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");
             return;
         }
         if (alloc->getType() != mConstantTypes[slot].get()) {
-            LOGE("Attempt to bind alloc at slot %u, on shader id %u, but types mismatch",
+            ALOGE("Attempt to bind alloc at slot %u, on shader id %u, but types mismatch",
                  slot, (uint32_t)this);
             rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");
             return;
@@ -167,13 +167,13 @@ void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot) {
 
 void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a) {
     if (slot >= mHal.state.texturesCount) {
-        LOGE("Attempt to bind texture to slot %u but tex count is %u", slot, mHal.state.texturesCount);
+        ALOGE("Attempt to bind texture to slot %u but tex count is %u", slot, mHal.state.texturesCount);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind texture");
         return;
     }
 
     if (a && a->getType()->getDimFaces() && mHal.state.textureTargets[slot] != RS_TEXTURE_CUBE) {
-        LOGE("Attempt to bind cubemap to slot %u but 2d texture needed", slot);
+        ALOGE("Attempt to bind cubemap to slot %u but 2d texture needed", slot);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind cubemap to 2d texture slot");
         return;
     }
@@ -186,7 +186,7 @@ void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a) {
 
 void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s) {
     if (slot >= mHal.state.texturesCount) {
-        LOGE("Attempt to bind sampler to slot %u but tex count is %u", slot, mHal.state.texturesCount);
+        ALOGE("Attempt to bind sampler to slot %u but tex count is %u", slot, mHal.state.texturesCount);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind sampler");
         return;
     }

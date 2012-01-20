@@ -91,7 +91,7 @@ MtpProperty::MtpProperty(MtpPropertyCode propCode,
                 mDefaultValue.u.u64 = defaultValue;
                 break;
             default:
-                LOGE("unknown type %04X in MtpProperty::MtpProperty", type);
+                ALOGE("unknown type %04X in MtpProperty::MtpProperty", type);
         }
     }
 }
@@ -267,7 +267,7 @@ void MtpProperty::setFormRange(int min, int max, int step) {
             mStepSize.u.u64 = step;
             break;
         default:
-            LOGE("unsupported type for MtpProperty::setRange");
+            ALOGE("unsupported type for MtpProperty::setRange");
             break;
     }
 }
@@ -306,7 +306,7 @@ void MtpProperty::setFormEnum(const int* values, int count) {
                     mEnumValues[i].u.u64 = value;
                     break;
                 default:
-                    LOGE("unsupported type for MtpProperty::setEnum");
+                    ALOGE("unsupported type for MtpProperty::setEnum");
                     break;
         }
     }
@@ -402,7 +402,7 @@ void MtpProperty::print(MtpPropertyValue& value, MtpString& buffer) {
             buffer.appendFormat("%s", value.str);
             break;
         default:
-            LOGE("unsupported type for MtpProperty::print\n");
+            ALOGE("unsupported type for MtpProperty::print\n");
             break;
     }
 }
@@ -456,7 +456,7 @@ void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {
             value.str = strdup(stringBuffer);
             break;
         default:
-            LOGE("unknown type %04X in MtpProperty::readValue", mType);
+            ALOGE("unknown type %04X in MtpProperty::readValue", mType);
     }
 }
 
@@ -511,7 +511,7 @@ void MtpProperty::writeValue(MtpDataPacket& packet, MtpPropertyValue& value) {
                 packet.putEmptyString();
             break;
         default:
-            LOGE("unknown type %04X in MtpProperty::writeValue", mType);
+            ALOGE("unknown type %04X in MtpProperty::writeValue", mType);
     }
 }
 

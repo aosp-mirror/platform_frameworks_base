@@ -108,7 +108,7 @@ bool FileMap::create(const char* origFileName, int fd, off64_t offset, size_t le
     mFileHandle  = (HANDLE) _get_osfhandle(fd);
     mFileMapping = CreateFileMapping( mFileHandle, NULL, protect, 0, 0, NULL);
     if (mFileMapping == NULL) {
-        LOGE("CreateFileMapping(%p, %lx) failed with error %ld\n",
+        ALOGE("CreateFileMapping(%p, %lx) failed with error %ld\n",
               mFileHandle, protect, GetLastError() );
         return false;
     }
@@ -123,7 +123,7 @@ bool FileMap::create(const char* origFileName, int fd, off64_t offset, size_t le
                               (DWORD)(adjOffset),
                               adjLength );
     if (mBasePtr == NULL) {
-        LOGE("MapViewOfFile(%ld, %ld) failed with error %ld\n",
+        ALOGE("MapViewOfFile(%ld, %ld) failed with error %ld\n",
               adjOffset, adjLength, GetLastError() );
         CloseHandle(mFileMapping);
         mFileMapping = INVALID_HANDLE_VALUE;
@@ -147,7 +147,7 @@ bool FileMap::create(const char* origFileName, int fd, off64_t offset, size_t le
 #if NOT_USING_KLIBC
         mPageSize = sysconf(_SC_PAGESIZE);
         if (mPageSize == -1) {
-            LOGE("could not get _SC_PAGESIZE\n");
+            ALOGE("could not get _SC_PAGESIZE\n");
             return false;
         }
 #else
@@ -175,7 +175,7 @@ try_again:
     		goto try_again;
     	}
     
-        LOGE("mmap(%ld,%ld) failed: %s\n",
+        ALOGE("mmap(%ld,%ld) failed: %s\n",
             (long) adjOffset, (long) adjLength, strerror(errno));
         return false;
     }

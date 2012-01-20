@@ -140,7 +140,7 @@ bool CameraSourceTimeLapse::trySettingVideoSize(
         if (mCamera->setParameters(params.flatten()) == OK) {
             isSuccessful = true;
         } else {
-            LOGE("Failed to set preview size to %dx%d", width, height);
+            ALOGE("Failed to set preview size to %dx%d", width, height);
             isSuccessful = false;
         }
     }

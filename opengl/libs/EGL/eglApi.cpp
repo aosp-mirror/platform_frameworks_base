@@ -353,7 +353,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
         EGLint format;
 
         if (native_window_api_connect(window, NATIVE_WINDOW_API_EGL) != OK) {
-            LOGE("EGLNativeWindowType %p already connected to another API",
+            ALOGE("EGLNativeWindowType %p already connected to another API",
                     window);
             return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
         }
@@ -364,7 +364,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
             if (format != 0) {
                 int err = native_window_set_buffers_format(window, format);
                 if (err != 0) {
-                    LOGE("error setting native window pixel format: %s (%d)",
+                    ALOGE("error setting native window pixel format: %s (%d)",
                             strerror(-err), err);
                     native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL);
                     return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
@@ -670,7 +670,7 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             egl_tls_t::setContext(EGL_NO_CONTEXT);
         }
     } else {
-        // this will LOGE the error
+        // this will ALOGE the error
         result = setError(c->cnx->egl.eglGetError(), EGL_FALSE);
     }
     return result;
@@ -882,7 +882,7 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
         addr = sGLExtentionMap.valueFor(name);
         const int slot = sGLExtentionSlot;
 
-        LOGE_IF(slot >= MAX_NUMBER_OF_GL_EXTENSIONS,
+        ALOGE_IF(slot >= MAX_NUMBER_OF_GL_EXTENSIONS,
                 "no more slots for eglGetProcAddress(\"%s\")",
                 procname);
 

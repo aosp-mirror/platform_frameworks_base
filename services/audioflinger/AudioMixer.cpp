@@ -1099,7 +1099,7 @@ void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
         // been enabled for mixing.
         if (in == NULL || ((unsigned long)in & 3)) {
             memset(out, 0, numFrames*MAX_NUM_CHANNELS*sizeof(int16_t));
-            LOGE_IF(((unsigned long)in & 3), "process stereo track: input buffer alignment pb: buffer %p track %d, channels %d, needs %08x",
+            ALOGE_IF(((unsigned long)in & 3), "process stereo track: input buffer alignment pb: buffer %p track %d, channels %d, needs %08x",
                     in, i, t.channelCount, t.needs);
             return;
         }

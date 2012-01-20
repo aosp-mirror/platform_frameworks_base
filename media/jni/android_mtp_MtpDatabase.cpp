@@ -174,7 +174,7 @@ public:
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
+        ALOGE("An exception was thrown by callback '%s'.", methodName);
         LOGE_EX(env);
         env->ExceptionClear();
     }
@@ -439,7 +439,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
                 break;
              }
             default:
-                LOGE("unsupported type in getObjectPropertyValue\n");
+                ALOGE("unsupported type in getObjectPropertyValue\n");
                 result = MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
         }
 out:
@@ -508,7 +508,7 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
             break;
          }
         default:
-            LOGE("unsupported type in getObjectPropertyValue\n");
+            ALOGE("unsupported type in getObjectPropertyValue\n");
             return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
     }
 
@@ -579,7 +579,7 @@ MtpResponseCode MyMtpDatabase::getDevicePropertyValue(MtpDeviceProperty property
             break;
          }
         default:
-            LOGE("unsupported type in getDevicePropertyValue\n");
+            ALOGE("unsupported type in getDevicePropertyValue\n");
             return MTP_RESPONSE_INVALID_DEVICE_PROP_FORMAT;
     }
 
@@ -631,7 +631,7 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property
             break;
          }
         default:
-            LOGE("unsupported type in setDevicePropertyValue\n");
+            ALOGE("unsupported type in setDevicePropertyValue\n");
             return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
     }
 
@@ -724,7 +724,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
                     break;
                 }
                 default:
-                    LOGE("bad or unsupported data type in MyMtpDatabase::getObjectPropertyList");
+                    ALOGE("bad or unsupported data type in MyMtpDatabase::getObjectPropertyList");
                     break;
             }
         }
@@ -957,7 +957,7 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
     int count = references->size();
     jintArray array = env->NewIntArray(count);
     if (!array) {
-        LOGE("out of memory in setObjectReferences");
+        ALOGE("out of memory in setObjectReferences");
         return false;
     }
     jint* handles = env->GetIntArrayElements(array, 0);
@@ -1044,7 +1044,7 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
                     result->setDefaultValue(str);
                 env->ReleaseCharArrayElements(mStringBuffer, str, 0);
             } else {
-                LOGE("unable to read device property, response: %04X", ret);
+                ALOGE("unable to read device property, response: %04X", ret);
             }
             break;
     }
@@ -1113,151 +1113,151 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
 
     clazz = env->FindClass("android/mtp/MtpDatabase");
     if (clazz == NULL) {
-        LOGE("Can't find android/mtp/MtpDatabase");
+        ALOGE("Can't find android/mtp/MtpDatabase");
         return -1;
     }
     method_beginSendObject = env->GetMethodID(clazz, "beginSendObject", "(Ljava/lang/String;IIIJJ)I");
     if (method_beginSendObject == NULL) {
-        LOGE("Can't find beginSendObject");
+        ALOGE("Can't find beginSendObject");
         return -1;
     }
     method_endSendObject = env->GetMethodID(clazz, "endSendObject", "(Ljava/lang/String;IIZ)V");
     if (method_endSendObject == NULL) {
-        LOGE("Can't find endSendObject");
+        ALOGE("Can't find endSendObject");
         return -1;
     }
     method_getObjectList = env->GetMethodID(clazz, "getObjectList", "(III)[I");
     if (method_getObjectList == NULL) {
-        LOGE("Can't find getObjectList");
+        ALOGE("Can't find getObjectList");
         return -1;
     }
     method_getNumObjects = env->GetMethodID(clazz, "getNumObjects", "(III)I");
     if (method_getNumObjects == NULL) {
-        LOGE("Can't find getNumObjects");
+        ALOGE("Can't find getNumObjects");
         return -1;
     }
     method_getSupportedPlaybackFormats = env->GetMethodID(clazz, "getSupportedPlaybackFormats", "()[I");
     if (method_getSupportedPlaybackFormats == NULL) {
-        LOGE("Can't find getSupportedPlaybackFormats");
+        ALOGE("Can't find getSupportedPlaybackFormats");
         return -1;
     }
     method_getSupportedCaptureFormats = env->GetMethodID(clazz, "getSupportedCaptureFormats", "()[I");
     if (method_getSupportedCaptureFormats == NULL) {
-        LOGE("Can't find getSupportedCaptureFormats");
+        ALOGE("Can't find getSupportedCaptureFormats");
         return -1;
     }
     method_getSupportedObjectProperties = env->GetMethodID(clazz, "getSupportedObjectProperties", "(I)[I");
     if (method_getSupportedObjectProperties == NULL) {
-        LOGE("Can't find getSupportedObjectProperties");
+        ALOGE("Can't find getSupportedObjectProperties");
         return -1;
     }
     method_getSupportedDeviceProperties = env->GetMethodID(clazz, "getSupportedDeviceProperties", "()[I");
     if (method_getSupportedDeviceProperties == NULL) {
-        LOGE("Can't find getSupportedDeviceProperties");
+        ALOGE("Can't find getSupportedDeviceProperties");
         return -1;
     }
     method_setObjectProperty = env->GetMethodID(clazz, "setObjectProperty", "(IIJLjava/lang/String;)I");
     if (method_setObjectProperty == NULL) {
-        LOGE("Can't find setObjectProperty");
+        ALOGE("Can't find setObjectProperty");
         return -1;
     }
     method_getDeviceProperty = env->GetMethodID(clazz, "getDeviceProperty", "(I[J[C)I");
     if (method_getDeviceProperty == NULL) {
-        LOGE("Can't find getDeviceProperty");
+        ALOGE("Can't find getDeviceProperty");
         return -1;
     }
     method_setDeviceProperty = env->GetMethodID(clazz, "setDeviceProperty", "(IJLjava/lang/String;)I");
     if (method_setDeviceProperty == NULL) {
-        LOGE("Can't find setDeviceProperty");
+        ALOGE("Can't find setDeviceProperty");
         return -1;
     }
     method_getObjectPropertyList = env->GetMethodID(clazz, "getObjectPropertyList",
             "(JIJII)Landroid/mtp/MtpPropertyList;");
     if (method_getObjectPropertyList == NULL) {
-        LOGE("Can't find getObjectPropertyList");
+        ALOGE("Can't find getObjectPropertyList");
         return -1;
     }
     method_getObjectInfo = env->GetMethodID(clazz, "getObjectInfo", "(I[I[C[J)Z");
     if (method_getObjectInfo == NULL) {
-        LOGE("Can't find getObjectInfo");
+        ALOGE("Can't find getObjectInfo");
         return -1;
     }
     method_getObjectFilePath = env->GetMethodID(clazz, "getObjectFilePath", "(I[C[J)I");
     if (method_getObjectFilePath == NULL) {
-        LOGE("Can't find getObjectFilePath");
+        ALOGE("Can't find getObjectFilePath");
         return -1;
     }
     method_deleteFile = env->GetMethodID(clazz, "deleteFile", "(I)I");
     if (method_deleteFile == NULL) {
-        LOGE("Can't find deleteFile");
+        ALOGE("Can't find deleteFile");
         return -1;
     }
     method_getObjectReferences = env->GetMethodID(clazz, "getObjectReferences", "(I)[I");
     if (method_getObjectReferences == NULL) {
-        LOGE("Can't find getObjectReferences");
+        ALOGE("Can't find getObjectReferences");
         return -1;
     }
     method_setObjectReferences = env->GetMethodID(clazz, "setObjectReferences", "(I[I)I");
     if (method_setObjectReferences == NULL) {
-        LOGE("Can't find setObjectReferences");
+        ALOGE("Can't find setObjectReferences");
         return -1;
     }
     method_sessionStarted = env->GetMethodID(clazz, "sessionStarted", "()V");
     if (method_sessionStarted == NULL) {
-        LOGE("Can't find sessionStarted");
+        ALOGE("Can't find sessionStarted");
         return -1;
     }
     method_sessionEnded = env->GetMethodID(clazz, "sessionEnded", "()V");
     if (method_sessionEnded == NULL) {
-        LOGE("Can't find sessionEnded");
+        ALOGE("Can't find sessionEnded");
         return -1;
     }
 
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (field_context == NULL) {
-        LOGE("Can't find MtpDatabase.mNativeContext");
+        ALOGE("Can't find MtpDatabase.mNativeContext");
         return -1;
     }
 
     // now set up fields for MtpPropertyList class
     clazz = env->FindClass("android/mtp/MtpPropertyList");
     if (clazz == NULL) {
-        LOGE("Can't find android/mtp/MtpPropertyList");
+        ALOGE("Can't find android/mtp/MtpPropertyList");
         return -1;
     }
     field_mCount = env->GetFieldID(clazz, "mCount", "I");
     if (field_mCount == NULL) {
-        LOGE("Can't find MtpPropertyList.mCount");
+        ALOGE("Can't find MtpPropertyList.mCount");
         return -1;
     }
     field_mResult = env->GetFieldID(clazz, "mResult", "I");
     if (field_mResult == NULL) {
-        LOGE("Can't find MtpPropertyList.mResult");
+        ALOGE("Can't find MtpPropertyList.mResult");
         return -1;
     }
     field_mObjectHandles = env->GetFieldID(clazz, "mObjectHandles", "[I");
     if (field_mObjectHandles == NULL) {
-        LOGE("Can't find MtpPropertyList.mObjectHandles");
+        ALOGE("Can't find MtpPropertyList.mObjectHandles");
         return -1;
     }
     field_mPropertyCodes = env->GetFieldID(clazz, "mPropertyCodes", "[I");
     if (field_mPropertyCodes == NULL) {
-        LOGE("Can't find MtpPropertyList.mPropertyCodes");
+        ALOGE("Can't find MtpPropertyList.mPropertyCodes");
         return -1;
     }
     field_mDataTypes = env->GetFieldID(clazz, "mDataTypes", "[I");
     if (field_mDataTypes == NULL) {
-        LOGE("Can't find MtpPropertyList.mDataTypes");
+        ALOGE("Can't find MtpPropertyList.mDataTypes");
         return -1;
     }
     field_mLongValues = env->GetFieldID(clazz, "mLongValues", "[J");
     if (field_mLongValues == NULL) {
-        LOGE("Can't find MtpPropertyList.mLongValues");
+        ALOGE("Can't find MtpPropertyList.mLongValues");
         return -1;
     }
     field_mStringValues = env->GetFieldID(clazz, "mStringValues", "[Ljava/lang/String;");
     if (field_mStringValues == NULL) {
-        LOGE("Can't find MtpPropertyList.mStringValues");
+        ALOGE("Can't find MtpPropertyList.mStringValues");
         return -1;
     }
 

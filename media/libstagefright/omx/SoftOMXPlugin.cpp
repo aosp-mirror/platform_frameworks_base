@@ -72,7 +72,7 @@ OMX_ERRORTYPE SoftOMXPlugin::makeComponentInstance(
         void *libHandle = dlopen(libName.c_str(), RTLD_NOW);
 
         if (libHandle == NULL) {
-            LOGE("unable to dlopen %s", libName.c_str());
+            ALOGE("unable to dlopen %s", libName.c_str());
 
             return OMX_ErrorComponentNotFound;
         }

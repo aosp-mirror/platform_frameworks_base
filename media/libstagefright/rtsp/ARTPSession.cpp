@@ -53,24 +53,24 @@ status_t ARTPSession::setup(const sp<ASessionDescription> &desc) {
         if (!mDesc->findAttribute(i, "c=", &connection)) {
             // No per-stream connection information, try global fallback.
             if (!mDesc->findAttribute(0, "c=", &connection)) {
-                LOGE("Unable to find connection attribute.");
+                ALOGE("Unable to find connection attribute.");
                 return mInitCheck;
             }
         }
         if (!(connection == "IN IP4 127.0.0.1")) {
-            LOGE("We only support localhost connections for now.");
+            ALOGE("We only support localhost connections for now.");
             return mInitCheck;
         }
 
         unsigned port;
         if (!validateMediaFormat(i, &port) || (port & 1) != 0) {
-            LOGE("Invalid media format.");
+            ALOGE("Invalid media format.");
             return mInitCheck;
         }
 
         sp<APacketSource> source = new APacketSource(mDesc, i);
         if (source->initCheck() != OK) {
-            LOGE("Unsupported format.");
+            ALOGE("Unsupported format.");
             return mInitCheck;
         }
 

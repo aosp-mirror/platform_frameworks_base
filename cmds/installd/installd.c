@@ -157,11 +157,11 @@ static int readx(int s, void *_buf, int count)
         r = read(s, buf + n, count - n);
         if (r < 0) {
             if (errno == EINTR) continue;
-            LOGE("read error: %s\n", strerror(errno));
+            ALOGE("read error: %s\n", strerror(errno));
             return -1;
         }
         if (r == 0) {
-            LOGE("eof\n");
+            ALOGE("eof\n");
             return -1; /* EOF */
         }
         n += r;
@@ -178,7 +178,7 @@ static int writex(int s, const void *_buf, int count)
         r = write(s, buf + n, count - n);
         if (r < 0) {
             if (errno == EINTR) continue;
-            LOGE("write error: %s\n", strerror(errno));
+            ALOGE("write error: %s\n", strerror(errno));
             return -1;
         }
         n += r;
@@ -213,7 +213,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
             n++;
             arg[n] = cmd;
             if (n == TOKEN_MAX) {
-                LOGE("too many arguments\n");
+                ALOGE("too many arguments\n");
                 goto done;
             }
         }
@@ -223,7 +223,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
     for (i = 0; i < sizeof(cmds) / sizeof(cmds[0]); i++) {
         if (!strcmp(cmds[i].name,arg[0])) {
             if (n != cmds[i].numargs) {
-                LOGE("%s requires %d arguments (%d given)\n",
+                ALOGE("%s requires %d arguments (%d given)\n",
                      cmds[i].name, cmds[i].numargs, n);
             } else {
                 ret = cmds[i].func(arg + 1, reply);
@@ -231,7 +231,7 @@ static int execute(int s, char cmd[BUFFER_MAX])
             goto done;
         }
     }
-    LOGE("unsupported command '%s'\n", arg[0]);
+    ALOGE("unsupported command '%s'\n", arg[0]);
 
 done:
     if (reply[0]) {
@@ -290,7 +290,7 @@ int initialize_globals() {
 
     android_system_dirs.dirs = calloc(android_system_dirs.count, sizeof(dir_rec_t));
     if (android_system_dirs.dirs == NULL) {
-        LOGE("Couldn't allocate array for dirs; aborting\n");
+        ALOGE("Couldn't allocate array for dirs; aborting\n");
         return -1;
     }
 
@@ -351,22 +351,22 @@ int main(const int argc, const char *argv[]) {
     int lsocket, s, count;
 
     if (initialize_globals() < 0) {
-        LOGE("Could not initialize globals; exiting.\n");
+        ALOGE("Could not initialize globals; exiting.\n");
         exit(1);
     }
 
     if (initialize_directories() < 0) {
-        LOGE("Could not create directories; exiting.\n");
+        ALOGE("Could not create directories; exiting.\n");
         exit(1);
     }
 
     lsocket = android_get_control_socket(SOCKET_PATH);
     if (lsocket < 0) {
-        LOGE("Failed to get socket from environment: %s\n", strerror(errno));
+        ALOGE("Failed to get socket from environment: %s\n", strerror(errno));
         exit(1);
     }
     if (listen(lsocket, 5)) {
-        LOGE("Listen on socket failed: %s\n", strerror(errno));
+        ALOGE("Listen on socket failed: %s\n", strerror(errno));
         exit(1);
     }
     fcntl(lsocket, F_SETFD, FD_CLOEXEC);
@@ -375,7 +375,7 @@ int main(const int argc, const char *argv[]) {
         alen = sizeof(addr);
         s = accept(lsocket, &addr, &alen);
         if (s < 0) {
-            LOGE("Accept failed: %s\n", strerror(errno));
+            ALOGE("Accept failed: %s\n", strerror(errno));
             continue;
         }
         fcntl(s, F_SETFD, FD_CLOEXEC);
@@ -384,15 +384,15 @@ int main(const int argc, const char *argv[]) {
         for (;;) {
             unsigned short count;
             if (readx(s, &count, sizeof(count))) {
-                LOGE("failed to read size\n");
+                ALOGE("failed to read size\n");
                 break;
             }
             if ((count < 1) || (count >= BUFFER_MAX)) {
-                LOGE("invalid size %d\n", count);
+                ALOGE("invalid size %d\n", count);
                 break;
             }
             if (readx(s, buf, count)) {
-                LOGE("failed to read command\n");
+                ALOGE("failed to read command\n");
                 break;
             }
             buf[count] = 0;

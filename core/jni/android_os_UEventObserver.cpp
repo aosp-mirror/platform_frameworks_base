@@ -59,7 +59,7 @@ int register_android_os_UEventObserver(JNIEnv *env)
 
     clazz = env->FindClass("android/os/UEventObserver");
     if (clazz == NULL) {
-        LOGE("Can't find android/os/UEventObserver");
+        ALOGE("Can't find android/os/UEventObserver");
         return -1;
     }
 

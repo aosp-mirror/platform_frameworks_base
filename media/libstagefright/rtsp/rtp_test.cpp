@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            LOGE("decoder returned error 0x%08x", err);
+            ALOGE("decoder returned error 0x%08x", err);
             break;
         }
 
