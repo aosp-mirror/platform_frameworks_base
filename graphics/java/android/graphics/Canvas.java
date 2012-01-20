@@ -522,9 +522,8 @@ public class Canvas {
     /**
      * Return a new matrix with a copy of the canvas' current transformation
      * matrix.
-     *
-     * @Deprecated
      */
+    @Deprecated
     public final Matrix getMatrix() {
         Matrix m = new Matrix();
         //noinspection deprecation
