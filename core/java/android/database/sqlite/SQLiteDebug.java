@@ -29,6 +29,8 @@ import android.util.Printer;
  * {@hide}
  */
 public final class SQLiteDebug {
+    private static native void nativeGetPagerStats(PagerStats stats);
+
     /**
      * Controls the printing of informational SQL log messages.
      */
@@ -73,7 +75,7 @@ public final class SQLiteDebug {
     /**
      * Contains statistics about the active pagers in the current process.
      *
-     * @see #getPagerStats(PagerStats)
+     * @see #nativeGetPagerStats(PagerStats)
      */
     public static class PagerStats {
         /** the current amount of memory checked out by sqlite using sqlite3_malloc().
@@ -136,7 +138,8 @@ public final class SQLiteDebug {
      */
     public static PagerStats getDatabaseInfo() {
         PagerStats stats = new PagerStats();
-        getPagerStats(stats);
+        SQLiteGlobal.initializeOnce();
+        nativeGetPagerStats(stats);
         stats.dbStats = SQLiteDatabase.getDbStats();
         return stats;
     }
@@ -156,9 +159,4 @@ public final class SQLiteDebug {
 
         SQLiteDatabase.dumpAll(printer, verbose);
     }
-
-    /**
-     * Gathers statistics about all pagers in the current process.
-     */
-    public static native void getPagerStats(PagerStats stats);
 }
