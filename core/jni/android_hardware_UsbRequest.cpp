@@ -42,7 +42,7 @@ static jboolean
 android_hardware_UsbRequest_init(JNIEnv *env, jobject thiz, jobject java_device,
         jint ep_address, jint ep_attributes, jint ep_max_packet_size, jint ep_interval)
 {
-    LOGD("init\n");
+    ALOGD("init\n");
 
     struct usb_device* device = get_device_from_object(env, java_device);
     if (!device) {
@@ -68,7 +68,7 @@ android_hardware_UsbRequest_init(JNIEnv *env, jobject thiz, jobject java_device,
 static void
 android_hardware_UsbRequest_close(JNIEnv *env, jobject thiz)
 {
-    LOGD("close\n");
+    ALOGD("close\n");
     struct usb_request* request = get_request_from_object(env, thiz);
     if (request) {
         usb_request_free(request);

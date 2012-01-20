@@ -34,7 +34,7 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_EXTENSIONS
-    #define EXT_LOGD(...) LOGD(__VA_ARGS__)
+    #define EXT_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define EXT_LOGD(...)
 #endif
@@ -87,7 +87,7 @@ public:
     }
 
     void dump() {
-        LOGD("Supported extensions:\n%s", mExtensions);
+        ALOGD("Supported extensions:\n%s", mExtensions);
     }
 
 private:

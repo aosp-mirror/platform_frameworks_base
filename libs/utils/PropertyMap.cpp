@@ -135,7 +135,7 @@ status_t PropertyMap::load(const String8& filename, PropertyMap** outMap) {
             status = parser.parse();
 #if DEBUG_PARSER_PERFORMANCE
             nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            LOGD("Parsed property file '%s' %d lines in %0.3fms.",
+            ALOGD("Parsed property file '%s' %d lines in %0.3fms.",
                     tokenizer->getFilename().string(), tokenizer->getLineNumber(),
                     elapsedTime / 1000000.0);
 #endif
@@ -163,7 +163,7 @@ PropertyMap::Parser::~Parser() {
 status_t PropertyMap::Parser::parse() {
     while (!mTokenizer->isEof()) {
 #if DEBUG_PARSER
-        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+        ALOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
                 mTokenizer->peekRemainderOfLine().string());
 #endif
 

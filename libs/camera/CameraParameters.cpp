@@ -449,12 +449,12 @@ const char *CameraParameters::getPictureFormat() const
 
 void CameraParameters::dump() const
 {
-    LOGD("dump: mMap.size = %d", mMap.size());
+    ALOGD("dump: mMap.size = %d", mMap.size());
     for (size_t i = 0; i < mMap.size(); i++) {
         String8 k, v;
         k = mMap.keyAt(i);
         v = mMap.valueAt(i);
-        LOGD("%s: %s\n", k.string(), v.string());
+        ALOGD("%s: %s\n", k.string(), v.string());
     }
 }
 

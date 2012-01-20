@@ -70,7 +70,7 @@ void CameraHardwareStub::initHeapLocked()
 
     int preview_width, preview_height;
     mParameters.getPreviewSize(&preview_width, &preview_height);
-    LOGD("initHeapLocked: preview size=%dx%d", preview_width, preview_height);
+    ALOGD("initHeapLocked: preview size=%dx%d", preview_width, preview_height);
 
     // Note that we enforce yuv420sp in setParameters().
     int how_big = preview_width * preview_height * 3 / 2;

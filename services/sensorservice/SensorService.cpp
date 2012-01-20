@@ -65,7 +65,7 @@ SensorService::SensorService()
 
 void SensorService::onFirstRef()
 {
-    LOGD("nuSensorService starting...");
+    ALOGD("nuSensorService starting...");
 
     SensorDevice& dev(SensorDevice::getInstance());
 
@@ -222,7 +222,7 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
 
 bool SensorService::threadLoop()
 {
-    LOGD("nuSensorService thread starting...");
+    ALOGD("nuSensorService thread starting...");
 
     const size_t numEventMax = 16 * (1 + mVirtualSensorList.size());
     sensors_event_t buffer[numEventMax];
@@ -363,11 +363,11 @@ void SensorService::cleanupConnection(SensorEventConnection* c)
     Mutex::Autolock _l(mLock);
     const wp<SensorEventConnection> connection(c);
     size_t size = mActiveSensors.size();
-    LOGD_IF(DEBUG_CONNECTIONS, "%d active sensors", size);
+    ALOGD_IF(DEBUG_CONNECTIONS, "%d active sensors", size);
     for (size_t i=0 ; i<size ; ) {
         int handle = mActiveSensors.keyAt(i);
         if (c->hasSensor(handle)) {
-            LOGD_IF(DEBUG_CONNECTIONS, "%i: disabling handle=0x%08x", i, handle);
+            ALOGD_IF(DEBUG_CONNECTIONS, "%i: disabling handle=0x%08x", i, handle);
             SensorInterface* sensor = mSensorMap.valueFor( handle );
             LOGE_IF(!sensor, "mSensorMap[handle=0x%08x] is null!", handle);
             if (sensor) {
@@ -376,12 +376,12 @@ void SensorService::cleanupConnection(SensorEventConnection* c)
         }
         SensorRecord* rec = mActiveSensors.valueAt(i);
         LOGE_IF(!rec, "mActiveSensors[%d] is null (handle=0x%08x)!", i, handle);
-        LOGD_IF(DEBUG_CONNECTIONS,
+        ALOGD_IF(DEBUG_CONNECTIONS,
                 "removing connection %p for sensor[%d].handle=0x%08x",
                 c, i, handle);
 
         if (rec && rec->removeConnection(connection)) {
-            LOGD_IF(DEBUG_CONNECTIONS, "... and it was the last connection");
+            ALOGD_IF(DEBUG_CONNECTIONS, "... and it was the last connection");
             mActiveSensors.removeItemsAt(i, 1);
             mActiveVirtualSensors.removeItem(handle);
             delete rec;
@@ -528,7 +528,7 @@ SensorService::SensorEventConnection::SensorEventConnection(
 
 SensorService::SensorEventConnection::~SensorEventConnection()
 {
-    LOGD_IF(DEBUG_CONNECTIONS, "~SensorEventConnection(%p)", this);
+    ALOGD_IF(DEBUG_CONNECTIONS, "~SensorEventConnection(%p)", this);
     mService->cleanupConnection(this);
 }
 

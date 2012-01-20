@@ -49,7 +49,7 @@ static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv* env, jo
         LOGE("Unable to set kernel timezone to %d: %s\n", minswest, strerror(errno));
         return -1;
     } else {
-        LOGD("Kernel timezone updated to %d minutes west of GMT\n", minswest);
+        ALOGD("Kernel timezone updated to %d minutes west of GMT\n", minswest);
     }
 
     return 0;

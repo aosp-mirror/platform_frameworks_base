@@ -210,7 +210,7 @@ Asset::~Asset(void)
     offset = ftell(fp);
     fclose(fp);
     if (!scanResult) {
-        LOGD("File '%s' is not in gzip format\n", fileName);
+        ALOGD("File '%s' is not in gzip format\n", fileName);
         ::close(fd);
         return NULL;
     }
@@ -384,12 +384,12 @@ status_t _FileAsset::openChunk(const char* fileName, int fd, off64_t offset, siz
     fileLength = lseek64(fd, 0, SEEK_END);
     if (fileLength == (off64_t) -1) {
         // probably a bad file descriptor
-        LOGD("failed lseek (errno=%d)\n", errno);
+        ALOGD("failed lseek (errno=%d)\n", errno);
         return UNKNOWN_ERROR;
     }
 
     if ((off64_t) (offset + length) > fileLength) {
-        LOGD("start (%ld) + len (%ld) > end (%ld)\n",
+        ALOGD("start (%ld) + len (%ld) > end (%ld)\n",
             (long) offset, (long) length, (long) fileLength);
         return BAD_INDEX;
     }

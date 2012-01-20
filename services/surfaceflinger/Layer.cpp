@@ -350,7 +350,7 @@ uint32_t Layer::doTransaction(uint32_t flags)
 
     if (sizeChanged) {
         // the size changed, we need to ask our client to request a new buffer
-        LOGD_IF(DEBUG_RESIZE,
+        ALOGD_IF(DEBUG_RESIZE,
                 "doTransaction: "
                 "resize (layer=%p), requested (%dx%d), drawing (%d,%d), "
                 "scalingMode=%d",
@@ -485,7 +485,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
                 recomputeVisibleRegions = true;
             }
 
-            LOGD_IF(DEBUG_RESIZE,
+            ALOGD_IF(DEBUG_RESIZE,
                     "lockPageFlip : "
                     "       (layer=%p), buffer (%ux%u, tr=%02x), "
                     "requested (%dx%d)",
