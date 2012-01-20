@@ -850,9 +850,28 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // Connection is still there. Try to clean up.
                 if (dcac != null) {
                     if (apnContext.getState() != State.DISCONNECTING) {
-                        if (DBG) log("cleanUpConnection: tearing down");
+                        boolean disconnectAll = false;
+                        if (Phone.APN_TYPE_DUN.equals(apnContext.getApnType())) {
+                            ApnSetting dunSetting = fetchDunApn();
+                            if (dunSetting != null &&
+                                    dunSetting.equals(apnContext.getApnSetting())) {
+                                if (DBG) log("tearing down dedicated DUN connection");
+                                // we need to tear it down - we brought it up just for dun and
+                                // other people are camped on it and now dun is done.  We need
+                                // to stop using it and let the normal apn list get used to find
+                                // connections for the remaining desired connections
+                                disconnectAll = true;
+                            }
+                        }
+                        if (DBG) {
+                            log("cleanUpConnection: tearing down" + (disconnectAll ? " all" :""));
+                        }
                         Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
-                        apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
+                        if (disconnectAll) {
+                            apnContext.getDataConnection().tearDownAll(apnContext.getReason(), msg);
+                        } else {
+                            apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
+                        }
                         apnContext.setState(State.DISCONNECTING);
                     }
                 } else {
@@ -2228,7 +2247,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         RetryManager rm = new RetryManager();
         int id = mUniqueIdGenerator.getAndIncrement();
-        GsmDataConnection conn = GsmDataConnection.makeDataConnection(mPhone, id, rm);
+        GsmDataConnection conn = GsmDataConnection.makeDataConnection(mPhone, id, rm, this);
         mDataConnections.put(id, conn);
         DataConnectionAc dcac = new DataConnectionAc(conn, LOG_TAG);
         int status = dcac.fullyConnectSync(mPhone.getContext(), this, conn.getHandler());

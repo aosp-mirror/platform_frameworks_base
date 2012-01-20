@@ -794,7 +794,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
 
             int id = mUniqueIdGenerator.getAndIncrement();
-            dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone, id, rm);
+            dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone, id, rm, this);
             mDataConnections.put(id, dataConn);
             DataConnectionAc dcac = new DataConnectionAc(dataConn, LOG_TAG);
             int status = dcac.fullyConnectSync(mPhone.getContext(), this, dataConn.getHandler());

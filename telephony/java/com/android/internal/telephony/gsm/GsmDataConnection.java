@@ -22,6 +22,7 @@ import android.util.Patterns;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.RILConstants;
@@ -37,8 +38,9 @@ public class GsmDataConnection extends DataConnection {
     //***** Instance Variables
     protected int mProfileId = RILConstants.DATA_PROFILE_DEFAULT;
     //***** Constructor
-    private GsmDataConnection(PhoneBase phone, String name, int id, RetryManager rm) {
-        super(phone, name, id, rm);
+    private GsmDataConnection(PhoneBase phone, String name, int id, RetryManager rm,
+            DataConnectionTracker dct) {
+        super(phone, name, id, rm, dct);
     }
 
     /**
@@ -49,11 +51,12 @@ public class GsmDataConnection extends DataConnection {
      * @param rm the RetryManager
      * @return GsmDataConnection that was created.
      */
-    static GsmDataConnection makeDataConnection(PhoneBase phone, int id, RetryManager rm) {
+    static GsmDataConnection makeDataConnection(PhoneBase phone, int id, RetryManager rm,
+            DataConnectionTracker dct) {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDC-" + mCount, id, rm);
+        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDC-" + mCount, id, rm, dct);
         gsmDc.start();
         if (DBG) gsmDc.log("Made " + gsmDc.getName());
         return gsmDc;
