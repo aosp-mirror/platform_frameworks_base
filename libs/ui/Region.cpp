@@ -272,7 +272,7 @@ public:
     }
     
     virtual void operator()(const Rect& rect) {
-        //LOGD(">>> %3d, %3d, %3d, %3d", 
+        //ALOGD(">>> %3d, %3d, %3d, %3d",
         //        rect.left, rect.top, rect.right, rect.bottom);
         if (span.size()) {
             if (cur->top != rect.top) {
@@ -457,14 +457,14 @@ void Region::boolean_operation(int op, Region& dst,
     }
     
     if(!same) {
-        LOGD("---\nregion boolean %s failed", name);
+        ALOGD("---\nregion boolean %s failed", name);
         lhs.dump("lhs");
         rhs.dump("rhs");
         dst.dump("dst");
-        LOGD("should be");
+        ALOGD("should be");
         SkRegion::Iterator it(sk_dst);
         while (!it.done()) {
-            LOGD("    [%3d, %3d, %3d, %3d]",
+            ALOGD("    [%3d, %3d, %3d, %3d]",
                 it.rect().fLeft,
                 it.rect().fTop,
                 it.rect().fRight,
@@ -647,9 +647,9 @@ void Region::dump(const char* what, uint32_t flags) const
     (void)flags;
     const_iterator head = begin();
     const_iterator const tail = end();
-    LOGD("  Region %s (this=%p, count=%d)\n", what, this, tail-head);
+    ALOGD("  Region %s (this=%p, count=%d)\n", what, this, tail-head);
     while (head != tail) {
-        LOGD("    [%3d, %3d, %3d, %3d]\n",
+        ALOGD("    [%3d, %3d, %3d, %3d]\n",
                 head->left, head->top, head->right, head->bottom);
         head++;
     }

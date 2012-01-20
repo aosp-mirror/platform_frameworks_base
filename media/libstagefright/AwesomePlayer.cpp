@@ -2260,7 +2260,7 @@ status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
 status_t AwesomePlayer::setCacheStatCollectFreq(const Parcel &request) {
     if (mCachedSource != NULL) {
         int32_t freqMs = request.readInt32();
-        LOGD("Request to keep cache stats in the past %d ms",
+        ALOGD("Request to keep cache stats in the past %d ms",
             freqMs);
         return mCachedSource->setCacheStatCollectFreq(freqMs);
     }

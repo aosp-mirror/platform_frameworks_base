@@ -263,7 +263,7 @@ private:
             return (left>=right || top>=bottom);
         }
         void dump(char const* what) {
-            LOGD("%s { %5d, %5d, w=%5d, h=%5d }", 
+            ALOGD("%s { %5d, %5d, w=%5d, h=%5d }",
                     what, left, top, right-left, bottom-top);
         }
         

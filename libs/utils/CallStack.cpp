@@ -328,7 +328,7 @@ void CallStack::dump(const char* prefix) const
      * get very deep. So we request function names of each frame individually.
      */
     for (int i=0; i<int(mCount); i++) {
-        LOGD("%s", toStringSingleLevel(prefix, i).string());
+        ALOGD("%s", toStringSingleLevel(prefix, i).string());
     }
 }
 

@@ -439,7 +439,7 @@ static jint native_addCustomFunction(JNIEnv* env, jobject object,
     sqlite3 * handle = (sqlite3 *)env->GetIntField(object, offset_db_handle);
     char const *nameStr = env->GetStringUTFChars(name, NULL);
     jobject ref = env->NewGlobalRef(function);
-    LOGD_IF(DEBUG_JNI, "native_addCustomFunction %s ref: %p", nameStr, ref);
+    ALOGD_IF(DEBUG_JNI, "native_addCustomFunction %s ref: %p", nameStr, ref);
     int err = sqlite3_create_function(handle, nameStr, numArgs, SQLITE_UTF8,
             (void *)ref, custom_function_callback, NULL, NULL);
     env->ReleaseStringUTFChars(name, nameStr);
@@ -456,7 +456,7 @@ static jint native_addCustomFunction(JNIEnv* env, jobject object,
 
 static void native_releaseCustomFunction(JNIEnv* env, jobject object, jint ref)
 {
-    LOGD_IF(DEBUG_JNI, "native_releaseCustomFunction %d", ref);
+    ALOGD_IF(DEBUG_JNI, "native_releaseCustomFunction %d", ref);
     env->DeleteGlobalRef((jobject)ref);
 }
 

@@ -539,7 +539,7 @@ status_t MPEG4Writer::pause() {
 }
 
 void MPEG4Writer::stopWriterThread() {
-    LOGD("Stopping writer thread");
+    ALOGD("Stopping writer thread");
     if (!mWriterThreadStarted) {
         return;
     }
@@ -554,7 +554,7 @@ void MPEG4Writer::stopWriterThread() {
     void *dummy;
     pthread_join(mThread, &dummy);
     mWriterThreadStarted = false;
-    LOGD("Writer thread stopped");
+    ALOGD("Writer thread stopped");
 }
 
 /*
@@ -650,7 +650,7 @@ status_t MPEG4Writer::stop() {
     }
 
     if (mTracks.size() > 1) {
-        LOGD("Duration from tracks range is [%lld, %lld] us",
+        ALOGD("Duration from tracks range is [%lld, %lld] us",
             minDurationUs, maxDurationUs);
     }
 
@@ -1338,7 +1338,7 @@ void MPEG4Writer::writeAllChunks() {
     sendSessionSummary();
 
     mChunkInfos.clear();
-    LOGD("%d chunks are written in the last batch", outstandingChunks);
+    ALOGD("%d chunks are written in the last batch", outstandingChunks);
 }
 
 bool MPEG4Writer::findChunkToWrite(Chunk *chunk) {
@@ -1523,7 +1523,7 @@ status_t MPEG4Writer::Track::pause() {
 }
 
 status_t MPEG4Writer::Track::stop() {
-    LOGD("Stopping %s track", mIsAudio? "Audio": "Video");
+    ALOGD("Stopping %s track", mIsAudio? "Audio": "Video");
     if (!mStarted) {
         LOGE("Stop() called but track is not started");
         return ERROR_END_OF_STREAM;
@@ -1539,7 +1539,7 @@ status_t MPEG4Writer::Track::stop() {
 
     status_t err = (status_t) dummy;
 
-    LOGD("Stopping %s track source", mIsAudio? "Audio": "Video");
+    ALOGD("Stopping %s track source", mIsAudio? "Audio": "Video");
     {
         status_t status = mSource->stop();
         if (err == OK && status != OK && status != ERROR_END_OF_STREAM) {
@@ -1547,7 +1547,7 @@ status_t MPEG4Writer::Track::stop() {
         }
     }
 
-    LOGD("%s track stopped", mIsAudio? "Audio": "Video");
+    ALOGD("%s track stopped", mIsAudio? "Audio": "Video");
     return err;
 }
 

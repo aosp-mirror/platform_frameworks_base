@@ -40,7 +40,7 @@ namespace uirenderer {
 
 // Debug
 #if DEBUG_SHAPES
-    #define SHAPE_LOGD(...) LOGD(__VA_ARGS__)
+    #define SHAPE_LOGD(...) ALOGD(__VA_ARGS__)
 #else
     #define SHAPE_LOGD(...)
 #endif
@@ -481,7 +481,7 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
         SHAPE_LOGD("ShapeCache::callback: delete %s: name, size, mSize = %d, %d, %d",
                 mName, texture->id, size, mSize);
         if (mDebugEnabled) {
-            LOGD("Shape %s deleted, size = %d", mName, size);
+            ALOGD("Shape %s deleted, size = %d", mName, size);
         }
 
         glDeleteTextures(1, &texture->id);
@@ -551,7 +551,7 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
         SHAPE_LOGD("ShapeCache::get: create %s: name, size, mSize = %d, %d, %d",
                 mName, texture->id, size, mSize);
         if (mDebugEnabled) {
-            LOGD("Shape %s created, size = %d", mName, size);
+            ALOGD("Shape %s created, size = %d", mName, size);
         }
         mCache.put(entry, texture);
     } else {

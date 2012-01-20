@@ -878,7 +878,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
             return MTP_RESPONSE_OBJECT_TOO_LARGE;
     }
 
-LOGD("path: %s parent: %d storageID: %08X", (const char*)path, parent, storageID);
+    ALOGD("path: %s parent: %d storageID: %08X", (const char*)path, parent, storageID);
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);
     if (handle == kInvalidObjectHandle) {
@@ -1104,7 +1104,7 @@ MtpResponseCode MtpServer::doSendPartialObject() {
 
     // can't start writing past the end of the file
     if (offset > edit->mSize) {
-        LOGD("writing past end of object, offset: %lld, edit->mSize: %lld", offset, edit->mSize);
+        ALOGD("writing past end of object, offset: %lld, edit->mSize: %lld", offset, edit->mSize);
         return MTP_RESPONSE_GENERAL_ERROR;
     }
 

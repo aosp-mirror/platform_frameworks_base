@@ -107,7 +107,7 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
 
 static void set_capabilities_callback(uint32_t capabilities)
 {
-    LOGD("set_capabilities_callback: %ld\n", capabilities);
+    ALOGD("set_capabilities_callback: %ld\n", capabilities);
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -182,7 +182,7 @@ AGpsCallbacks sAGpsCallbacks = {
 
 static void gps_ni_notify_callback(GpsNiNotification *notification)
 {
-    LOGD("gps_ni_notify_callback\n");
+    ALOGD("gps_ni_notify_callback\n");
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jstring requestor_id = env->NewStringUTF(notification->requestor_id);
     jstring text = env->NewStringUTF(notification->text);

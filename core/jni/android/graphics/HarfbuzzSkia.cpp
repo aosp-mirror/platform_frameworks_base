@@ -98,7 +98,7 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
     for (unsigned i = 0; i < numGlyphs; ++i) {
         advances[i] = SkScalarToHBFixed(scalarAdvances[i]);
 #if DEBUG_ADVANCES
-        LOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
+        ALOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
 #endif
     }
     delete glyphs16;
