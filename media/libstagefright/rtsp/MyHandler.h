@@ -122,6 +122,7 @@ struct MyHandler : public AHandler {
           mSetupTracksSuccessful(false),
           mSeekPending(false),
           mFirstAccessUnit(true),
+          mAllTracksHaveTime(false),
           mNTPAnchorUs(-1),
           mMediaAnchorUs(-1),
           mLastMediaTimeUs(0),
@@ -723,6 +724,7 @@ struct MyHandler : public AHandler {
                 mSetupTracksSuccessful = false;
                 mSeekPending = false;
                 mFirstAccessUnit = true;
+                mAllTracksHaveTime = false;
                 mNTPAnchorUs = -1;
                 mMediaAnchorUs = -1;
                 mNumAccessUnitsReceived = 0;
@@ -930,6 +932,7 @@ struct MyHandler : public AHandler {
                     info->mNTPAnchorUs = -1;
                 }
 
+                mAllTracksHaveTime = false;
                 mNTPAnchorUs = -1;
 
                 int64_t timeUs;
@@ -1036,6 +1039,14 @@ struct MyHandler : public AHandler {
                     } else {
                         ALOGW("Never received any data, disconnecting.");
                         (new AMessage('abor', id()))->post();
+                    }
+                } else {
+                    if (!mAllTracksHaveTime) {
+                        ALOGW("We received some RTCP packets, but time "
+                              "could not be established on all tracks, now "
+                              "using fake timestamps");
+
+                        fakeTimestamps();
                     }
                 }
                 break;
@@ -1211,6 +1222,7 @@ private:
     bool mSeekPending;
     bool mFirstAccessUnit;
 
+    bool mAllTracksHaveTime;
     int64_t mNTPAnchorUs;
     int64_t mMediaAnchorUs;
     int64_t mLastMediaTimeUs;
@@ -1357,6 +1369,7 @@ private:
     }
 
     void fakeTimestamps() {
+        mNTPAnchorUs = -1ll;
         for (size_t i = 0; i < mTracks.size(); ++i) {
             onTimeUpdate(i, 0, 0ll);
         }
@@ -1376,6 +1389,21 @@ private:
         if (mNTPAnchorUs < 0) {
             mNTPAnchorUs = ntpTimeUs;
             mMediaAnchorUs = mLastMediaTimeUs;
+        }
+
+        if (!mAllTracksHaveTime) {
+            bool allTracksHaveTime = true;
+            for (size_t i = 0; i < mTracks.size(); ++i) {
+                TrackInfo *track = &mTracks.editItemAt(i);
+                if (track->mNTPAnchorUs < 0) {
+                    allTracksHaveTime = false;
+                    break;
+                }
+            }
+            if (allTracksHaveTime) {
+                mAllTracksHaveTime = true;
+                ALOGI("Time now established for all tracks.");
+            }
         }
     }
 
@@ -1403,7 +1431,7 @@ private:
 
         TrackInfo *track = &mTracks.editItemAt(trackIndex);
 
-        if (mNTPAnchorUs < 0 || mMediaAnchorUs < 0 || track->mNTPAnchorUs < 0) {
+        if (!mAllTracksHaveTime) {
             ALOGV("storing accessUnit, no time established yet");
             track->mPackets.push_back(accessUnit);
             return;
