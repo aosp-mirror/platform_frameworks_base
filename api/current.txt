@@ -7981,8 +7981,8 @@ package android.graphics {
     method public void drawPoint(float, float, android.graphics.Paint);
     method public void drawPoints(float[], int, int, android.graphics.Paint);
     method public void drawPoints(float[], android.graphics.Paint);
-    method public void drawPosText(char[], int, int, float[], android.graphics.Paint);
-    method public void drawPosText(java.lang.String, float[], android.graphics.Paint);
+    method public deprecated void drawPosText(char[], int, int, float[], android.graphics.Paint);
+    method public deprecated void drawPosText(java.lang.String, float[], android.graphics.Paint);
     method public void drawRGB(int, int, int);
     method public void drawRect(android.graphics.RectF, android.graphics.Paint);
     method public void drawRect(android.graphics.Rect, android.graphics.Paint);
@@ -8000,7 +8000,7 @@ package android.graphics {
     method public int getDensity();
     method public android.graphics.DrawFilter getDrawFilter();
     method public int getHeight();
-    method public void getMatrix(android.graphics.Matrix);
+    method public deprecated void getMatrix(android.graphics.Matrix);
     method public final android.graphics.Matrix getMatrix();
     method public int getMaximumBitmapHeight();
     method public int getMaximumBitmapWidth();
@@ -8331,7 +8331,7 @@ package android.graphics {
     method public final boolean isDither();
     method public final boolean isFakeBoldText();
     method public final boolean isFilterBitmap();
-    method public final boolean isLinearText();
+    method public final deprecated boolean isLinearText();
     method public final boolean isStrikeThruText();
     method public final boolean isSubpixelText();
     method public final boolean isUnderlineText();
@@ -8351,7 +8351,7 @@ package android.graphics {
     method public void setFilterBitmap(boolean);
     method public void setFlags(int);
     method public void setHinting(int);
-    method public void setLinearText(boolean);
+    method public deprecated void setLinearText(boolean);
     method public android.graphics.MaskFilter setMaskFilter(android.graphics.MaskFilter);
     method public android.graphics.PathEffect setPathEffect(android.graphics.PathEffect);
     method public android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);

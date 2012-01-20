@@ -908,12 +908,20 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPicture(Picture picture) {
+        if (picture.createdFromStream) {
+            return;
+        }
+
         picture.endRecording();
         // TODO: Implement rendering
     }
 
     @Override
     public void drawPicture(Picture picture, Rect dst) {
+        if (picture.createdFromStream) {
+            return;
+        }
+
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
@@ -925,6 +933,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPicture(Picture picture, RectF dst) {
+        if (picture.createdFromStream) {
+            return;
+        }
+
         save();
         translate(dst.left, dst.top);
         if (picture.getWidth() > 0 && picture.getHeight() > 0) {
