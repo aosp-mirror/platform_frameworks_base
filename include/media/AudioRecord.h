@@ -68,7 +68,7 @@ public:
         };
         uint32_t    flags;
         int         channelCount;
-        int         format;
+        audio_format_t format;
         size_t      frameCount;
         size_t      size;
         union {
@@ -112,7 +112,7 @@ public:
 
      static status_t getMinFrameCount(int* frameCount,
                                       uint32_t sampleRate,
-                                      int format,
+                                      audio_format_t format,
                                       int channelCount);
 
     /* Constructs an uninitialized AudioRecord. No connection with
@@ -151,7 +151,7 @@ public:
 
                         AudioRecord(int inputSource,
                                     uint32_t sampleRate = 0,
-                                    int format          = 0,
+                                    audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                                     int frameCount      = 0,
                                     uint32_t flags      = 0,
@@ -177,7 +177,7 @@ public:
      * */
             status_t    set(int inputSource     = 0,
                             uint32_t sampleRate = 0,
-                            int format          = 0,
+                            audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
@@ -203,7 +203,7 @@ public:
 
    /* getters, see constructor */
 
-            int         format() const;
+            audio_format_t format() const;
             int         channelCount() const;
             int         channels() const;
             uint32_t    frameCount() const;
@@ -349,7 +349,7 @@ private:
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
             status_t openRecord_l(uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -365,7 +365,7 @@ private:
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
-    uint32_t                mFormat;
+    audio_format_t          mFormat;
     uint8_t                 mChannelCount;
     uint8_t                 mInputSource;
     uint8_t                 mReserved[2];

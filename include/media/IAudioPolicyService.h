@@ -50,7 +50,7 @@ public:
     virtual audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage) = 0;
     virtual audio_io_handle_t getOutput(audio_stream_type_t stream,
                                         uint32_t samplingRate = 0,
-                                        uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                        audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                         uint32_t channels = 0,
                                         audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_INDIRECT) = 0;
     virtual status_t startOutput(audio_io_handle_t output,
@@ -62,7 +62,7 @@ public:
     virtual void releaseOutput(audio_io_handle_t output) = 0;
     virtual audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
-                                    uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                    audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = 0,
                                     audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0,
                                     int audioSession = 0) = 0;

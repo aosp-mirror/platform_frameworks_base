@@ -147,7 +147,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     }
 
     int bytesPerSample = audioFormat==javaAudioRecordFields.PCM16 ? 2 : 1;
-    int format = audioFormat==javaAudioRecordFields.PCM16 ? 
+    audio_format_t format = audioFormat==javaAudioRecordFields.PCM16 ?
             AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
 
     if (buffSizeInBytes == 0) {

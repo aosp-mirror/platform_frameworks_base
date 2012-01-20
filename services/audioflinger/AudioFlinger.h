@@ -72,7 +72,7 @@ public:
                                 pid_t pid,
                                 audio_stream_type_t streamType,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -83,7 +83,7 @@ public:
 
     virtual     uint32_t    sampleRate(int output) const;
     virtual     int         channelCount(int output) const;
-    virtual     uint32_t    format(int output) const;
+    virtual     audio_format_t format(int output) const;
     virtual     size_t      frameCount(int output) const;
     virtual     uint32_t    latency(int output) const;
 
@@ -109,12 +109,12 @@ public:
 
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
-    virtual     size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
+    virtual     size_t      getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount);
     virtual     unsigned int  getInputFramesLost(int ioHandle);
 
     virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
-                                    uint32_t *pFormat,
+                                    audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     uint32_t flags);
@@ -129,7 +129,7 @@ public:
 
     virtual int openInput(uint32_t *pDevices,
                             uint32_t *pSamplingRate,
-                            uint32_t *pFormat,
+                            audio_format_t *pFormat,
                             uint32_t *pChannels,
                             uint32_t acoustics);
 
@@ -189,7 +189,7 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                uint32_t format,
+                                audio_format_t format,
                                 uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
@@ -315,7 +315,7 @@ private:
                                 TrackBase(const wp<ThreadBase>& thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
-                                        uint32_t format,
+                                        audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount,
                                         uint32_t flags,
@@ -343,7 +343,7 @@ private:
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer) = 0;
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
 
-            uint32_t format() const {
+            audio_format_t format() const {
                 return mFormat;
             }
 
@@ -376,7 +376,7 @@ private:
             // we don't really need a lock for these
             int                 mState;
             int                 mClientTid;
-            uint32_t            mFormat;
+            audio_format_t      mFormat;
             uint32_t            mFlags;
             int                 mSessionId;
             uint8_t             mChannelCount;
@@ -410,7 +410,7 @@ private:
                     int         type() const { return mType; }
                     uint32_t    sampleRate() const;
                     int         channelCount() const;
-                    uint32_t    format() const;
+                    audio_format_t format() const;
                     size_t      frameCount() const;
                     void        wakeUp()    { mWaitWorkCV.broadcast(); }
                     void        exit();
@@ -537,7 +537,7 @@ private:
                     uint32_t                mChannelMask;
                     uint16_t                mChannelCount;
                     size_t                  mFrameSize;
-                    uint32_t                mFormat;
+                    audio_format_t          mFormat;
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
@@ -575,7 +575,7 @@ private:
                                         const sp<Client>& client,
                                         audio_stream_type_t streamType,
                                         uint32_t sampleRate,
-                                        uint32_t format,
+                                        audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount,
                                         const sp<IMemory>& sharedBuffer,
@@ -660,7 +660,7 @@ private:
                                 OutputTrack(  const wp<ThreadBase>& thread,
                                         DuplicatingThread *sourceThread,
                                         uint32_t sampleRate,
-                                        uint32_t format,
+                                        audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount);
                                 ~OutputTrack();
@@ -715,7 +715,7 @@ private:
                                     const sp<AudioFlinger::Client>& client,
                                     audio_stream_type_t streamType,
                                     uint32_t sampleRate,
-                                    uint32_t format,
+                                    audio_format_t format,
                                     uint32_t channelMask,
                                     int frameCount,
                                     const sp<IMemory>& sharedBuffer,
@@ -935,7 +935,7 @@ private:
                                 RecordTrack(const wp<ThreadBase>& thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
-                                        uint32_t format,
+                                        audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount,
                                         uint32_t flags,
@@ -979,7 +979,7 @@ private:
                 sp<AudioFlinger::RecordThread::RecordTrack>  createRecordTrack_l(
                         const sp<AudioFlinger::Client>& client,
                         uint32_t sampleRate,
-                        int format,
+                        audio_format_t format,
                         int channelMask,
                         int frameCount,
                         uint32_t flags,
