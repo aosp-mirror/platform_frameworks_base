@@ -535,7 +535,7 @@ EventHub::Device* EventHub::getDeviceByPathLocked(const char* devicePath) const 
 }
 
 size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
-    LOG_ASSERT(bufferSize >= 1);
+    ALOG_ASSERT(bufferSize >= 1);
 
     AutoMutex _l(mLock);
 
