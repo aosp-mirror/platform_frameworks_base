@@ -888,7 +888,9 @@ public class NetworkController extends BroadcastReceiver {
         String mobileLabel = "";
         int N;
 
-        if (mDataConnected) {
+        if (!mHasMobileDataFeature) {
+            mDataSignalIconId = mPhoneSignalIconId = 0;
+        } else if (mDataConnected) {
             mobileLabel = mNetworkName;
             if (DEBUG) {
                 mobileLabel += "yyyyYYYYyyyyYYYY";
@@ -1029,8 +1031,13 @@ public class NetworkController extends BroadcastReceiver {
             N = mPhoneSignalIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mPhoneSignalIconViews.get(i);
-                v.setImageResource(mPhoneSignalIconId);
-                v.setContentDescription(mContentDescriptionPhoneSignal);
+                if (mPhoneSignalIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mPhoneSignalIconId);
+                    v.setContentDescription(mContentDescriptionPhoneSignal);
+                }
             }
         }
 
@@ -1136,14 +1143,24 @@ public class NetworkController extends BroadcastReceiver {
         N = mWifiLabelViews.size();
         for (int i=0; i<N; i++) {
             TextView v = mWifiLabelViews.get(i);
-            v.setText(wifiLabel);
+            if ("".equals(wifiLabel)) {
+                v.setVisibility(View.GONE);
+            } else {
+                v.setVisibility(View.VISIBLE);
+                v.setText(wifiLabel);
+            }
         }
         
         // mobile label
         N = mMobileLabelViews.size();
         for (int i=0; i<N; i++) {
             TextView v = mMobileLabelViews.get(i);
-            v.setText(mobileLabel);
+            if ("".equals(mobileLabel)) {
+                v.setVisibility(View.GONE);
+            } else {
+                v.setVisibility(View.VISIBLE);
+                v.setText(mobileLabel);
+            }
         }
     }
 
