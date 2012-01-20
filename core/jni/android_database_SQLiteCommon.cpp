@@ -109,9 +109,6 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
         case SQLITE_MISMATCH:
            exceptionClass = "android/database/sqlite/SQLiteDatatypeMismatchException";
            break;
-        case SQLITE_UNCLOSED:
-           exceptionClass = "android/database/sqlite/SQLiteUnfinalizedObjectsException";
-           break;
         default:
            exceptionClass = "android/database/sqlite/SQLiteException";
            break;
