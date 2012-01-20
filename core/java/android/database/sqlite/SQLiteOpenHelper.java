@@ -81,7 +81,8 @@ public abstract class SQLiteOpenHelper {
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
-     *     {@link #onUpgrade} will be used to upgrade the database
+     *     {@link #onUpgrade} will be used to upgrade the database; if the database is
+     *     newer, {@link #onDowngrade} will be used to downgrade the database
      * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
      * corruption.
      */
@@ -100,7 +101,7 @@ public abstract class SQLiteOpenHelper {
     }
 
     /**
-     * Return the name of the SQLite database being opened, as given tp
+     * Return the name of the SQLite database being opened, as given to
      * the constructor.
      */
     public String getDatabaseName() {
@@ -297,7 +298,7 @@ public abstract class SQLiteOpenHelper {
     public abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
 
     /**
-     * Called when the database needs to be downgraded. This is stricly similar to
+     * Called when the database needs to be downgraded. This is strictly similar to
      * onUpgrade() method, but is called whenever current version is newer than requested one.
      * However, this method is not abstract, so it is not mandatory for a customer to
      * implement it. If not overridden, default implementation will reject downgrade and
