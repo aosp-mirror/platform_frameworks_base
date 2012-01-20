@@ -55,7 +55,7 @@ void SoundPoolThread::quit() {
         mCondition.signal();
         mCondition.wait(mLock);
     }
-    LOGV("return from quit");
+    ALOGV("return from quit");
 }
 
 SoundPoolThread::SoundPoolThread(SoundPool* soundPool) :
@@ -73,19 +73,19 @@ SoundPoolThread::~SoundPoolThread()
 }
 
 int SoundPoolThread::beginThread(void* arg) {
-    LOGV("beginThread");
+    ALOGV("beginThread");
     SoundPoolThread* soundPoolThread = (SoundPoolThread*)arg;
     return soundPoolThread->run();
 }
 
 int SoundPoolThread::run() {
-    LOGV("run");
+    ALOGV("run");
     for (;;) {
         SoundPoolMsg msg = read();
-        LOGV("Got message m=%d, mData=%d", msg.mMessageType, msg.mData);
+        ALOGV("Got message m=%d, mData=%d", msg.mMessageType, msg.mData);
         switch (msg.mMessageType) {
         case SoundPoolMsg::KILL:
-            LOGV("goodbye");
+            ALOGV("goodbye");
             return NO_ERROR;
         case SoundPoolMsg::LOAD_SAMPLE:
             doLoadSample(msg.mData);

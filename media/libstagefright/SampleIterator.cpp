@@ -52,7 +52,7 @@ void SampleIterator::reset() {
 }
 
 status_t SampleIterator::seekTo(uint32_t sampleIndex) {
-    LOGV("seekTo(%d)", sampleIndex);
+    ALOGV("seekTo(%d)", sampleIndex);
 
     if (sampleIndex >= mTable->mNumSampleSizes) {
         return ERROR_END_OF_STREAM;

@@ -367,7 +367,7 @@ void SoftVorbis::onQueueFilled(OMX_U32 portIndex) {
 
         if (mNumFramesLeftOnPage >= 0) {
             if (numFrames > mNumFramesLeftOnPage) {
-                LOGV("discarding %d frames at end of page",
+                ALOGV("discarding %d frames at end of page",
                      numFrames - mNumFramesLeftOnPage);
                 numFrames = mNumFramesLeftOnPage;
             }

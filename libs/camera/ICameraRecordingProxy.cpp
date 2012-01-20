@@ -42,7 +42,7 @@ public:
 
     status_t startRecording(const sp<ICameraRecordingProxyListener>& listener)
     {
-        LOGV("startRecording");
+        ALOGV("startRecording");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraRecordingProxy::getInterfaceDescriptor());
         data.writeStrongBinder(listener->asBinder());
@@ -52,7 +52,7 @@ public:
 
     void stopRecording()
     {
-        LOGV("stopRecording");
+        ALOGV("stopRecording");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraRecordingProxy::getInterfaceDescriptor());
         remote()->transact(STOP_RECORDING, data, &reply);
@@ -60,7 +60,7 @@ public:
 
     void releaseRecordingFrame(const sp<IMemory>& mem)
     {
-        LOGV("releaseRecordingFrame");
+        ALOGV("releaseRecordingFrame");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraRecordingProxy::getInterfaceDescriptor());
         data.writeStrongBinder(mem->asBinder());
@@ -77,7 +77,7 @@ status_t BnCameraRecordingProxy::onTransact(
 {
     switch(code) {
         case START_RECORDING: {
-            LOGV("START_RECORDING");
+            ALOGV("START_RECORDING");
             CHECK_INTERFACE(ICameraRecordingProxy, data, reply);
             sp<ICameraRecordingProxyListener> listener =
                 interface_cast<ICameraRecordingProxyListener>(data.readStrongBinder());
@@ -85,13 +85,13 @@ status_t BnCameraRecordingProxy::onTransact(
             return NO_ERROR;
         } break;
         case STOP_RECORDING: {
-            LOGV("STOP_RECORDING");
+            ALOGV("STOP_RECORDING");
             CHECK_INTERFACE(ICameraRecordingProxy, data, reply);
             stopRecording();
             return NO_ERROR;
         } break;
         case RELEASE_RECORDING_FRAME: {
-            LOGV("RELEASE_RECORDING_FRAME");
+            ALOGV("RELEASE_RECORDING_FRAME");
             CHECK_INTERFACE(ICameraRecordingProxy, data, reply);
             sp<IMemory> mem = interface_cast<IMemory>(data.readStrongBinder());
             releaseRecordingFrame(mem);

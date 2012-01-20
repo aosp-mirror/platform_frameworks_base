@@ -180,7 +180,7 @@ again:
 #endif
 
 static void classInitNative(JNIEnv* env, jclass clazz) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     field_mNativeData = get_field(env, clazz, "mNativeData", "I");
     field_mAddress = get_field(env, clazz, "mAddress", "Ljava/lang/String;");
@@ -191,7 +191,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 
 static void initializeNativeDataNative(JNIEnv* env, jobject object,
                                        jint socketFd) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
@@ -213,7 +213,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object,
 }
 
 static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat =
         (native_data_t *)env->GetIntField(object, field_mNativeData);
@@ -226,7 +226,7 @@ static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
 
 static jboolean connectNative(JNIEnv *env, jobject obj)
 {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     int lm;
     struct sockaddr_rc addr;
@@ -278,13 +278,13 @@ static jboolean connectNative(JNIEnv *env, jobject obj)
 }
 
 static jint connectAsyncNative(JNIEnv *env, jobject obj) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     struct sockaddr_rc addr;
     native_data_t *nat = get_native_data(env, obj);
 
     if (nat->rfcomm_connected) {
-        LOGV("RFCOMM socket is already connected or connection is in progress.");
+        ALOGV("RFCOMM socket is already connected or connection is in progress.");
         return 0;
     }
 
@@ -357,7 +357,7 @@ static jint connectAsyncNative(JNIEnv *env, jobject obj) {
 
 static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
                                            jint timeout_ms) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     struct sockaddr_rc addr;
     native_data_t *nat = get_native_data(env, obj);
@@ -403,7 +403,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
 
         if (timeout_ms > 0) {
             jint remaining = to.tv_sec*1000 + to.tv_usec/1000;
-            LOGV("Remaining time %ldms", (long)remaining);
+            ALOGV("Remaining time %ldms", (long)remaining);
             env->SetIntField(obj, field_mTimeoutRemainingMs,
                              remaining);
         }
@@ -419,7 +419,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
         }
         /* n must be equal to 1 and either rset or wset must have the
            file descriptor set. */
-        LOGV("select() returned %d.", n);
+        ALOGV("select() returned %d.", n);
         if (FD_ISSET(nat->rfcomm_sock, &rset) ||
             FD_ISSET(nat->rfcomm_sock, &wset))
         {
@@ -463,7 +463,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
 }
 
 static void disconnectNative(JNIEnv *env, jobject obj) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, obj);
     if (nat->rfcomm_sock >= 0) {
@@ -494,7 +494,7 @@ static void pretty_log_urc(const char *urc) {
             }
         }
     }
-    IF_LOGV() ALOG(LOG_VERBOSE, "Bluetooth AT sent", "%s", buf);
+    IF_ALOGV() ALOG(LOG_VERBOSE, "Bluetooth AT sent", "%s", buf);
 
     free(buf);
 }

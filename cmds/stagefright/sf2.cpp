@@ -500,7 +500,7 @@ private:
                 break;  // Don't coalesce
             }
 
-            LOGV("coalesced %d input buffers", n);
+            ALOGV("coalesced %d input buffers", n);
 
             if (outBuffer->size() == 0) {
                 CHECK_NE(mFinalResult, (status_t)OK);

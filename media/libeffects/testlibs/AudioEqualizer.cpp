@@ -39,7 +39,7 @@ AudioEqualizer * AudioEqualizer::CreateInstance(void * pMem, int nBands,
                                                 int nChannels, int sampleRate,
                                                 const PresetConfig * presets,
                                                 int nPresets) {
-    LOGV("AudioEqualizer::CreateInstance(pMem=%p, nBands=%d, nChannels=%d, "
+    ALOGV("AudioEqualizer::CreateInstance(pMem=%p, nBands=%d, nChannels=%d, "
          "sampleRate=%d, nPresets=%d)",
          pMem, nBands, nChannels, sampleRate, nPresets);
     assert(nBands >= 2);
@@ -56,7 +56,7 @@ AudioEqualizer * AudioEqualizer::CreateInstance(void * pMem, int nBands,
 }
 
 void AudioEqualizer::configure(int nChannels, int sampleRate) {
-    LOGV("AudioEqualizer::configure(nChannels=%d, sampleRate=%d)", nChannels,
+    ALOGV("AudioEqualizer::configure(nChannels=%d, sampleRate=%d)", nChannels,
          sampleRate);
     mpLowShelf->configure(nChannels, sampleRate);
     for (int i = 0; i < mNumPeaking; ++i) {
@@ -66,7 +66,7 @@ void AudioEqualizer::configure(int nChannels, int sampleRate) {
 }
 
 void AudioEqualizer::clear() {
-    LOGV("AudioEqualizer::clear()");
+    ALOGV("AudioEqualizer::clear()");
     mpLowShelf->clear();
     for (int i = 0; i < mNumPeaking; ++i) {
         mpPeakingFilters[i].clear();
@@ -75,14 +75,14 @@ void AudioEqualizer::clear() {
 }
 
 void AudioEqualizer::free() {
-    LOGV("AudioEqualizer::free()");
+    ALOGV("AudioEqualizer::free()");
     if (mpMem != NULL) {
         ::free(mpMem);
     }
 }
 
 void AudioEqualizer::reset() {
-    LOGV("AudioEqualizer::reset()");
+    ALOGV("AudioEqualizer::reset()");
     const int32_t bottom = Effects_log2(kMinFreq);
     const int32_t top = Effects_log2(mSampleRate * 500);
     const int32_t jump = (top - bottom) / (mNumPeaking + 2);
@@ -103,7 +103,7 @@ void AudioEqualizer::reset() {
 }
 
 void AudioEqualizer::setGain(int band, int32_t millibel) {
-    LOGV("AudioEqualizer::setGain(band=%d, millibel=%d)", band, millibel);
+    ALOGV("AudioEqualizer::setGain(band=%d, millibel=%d)", band, millibel);
     assert(band >= 0 && band < mNumPeaking + 2);
     if (band == 0) {
         mpLowShelf->setGain(millibel);
@@ -116,7 +116,7 @@ void AudioEqualizer::setGain(int band, int32_t millibel) {
 }
 
 void AudioEqualizer::setFrequency(int band, uint32_t millihertz) {
-    LOGV("AudioEqualizer::setFrequency(band=%d, millihertz=%d)", band,
+    ALOGV("AudioEqualizer::setFrequency(band=%d, millihertz=%d)", band,
          millihertz);
     assert(band >= 0 && band < mNumPeaking + 2);
     if (band == 0) {
@@ -130,7 +130,7 @@ void AudioEqualizer::setFrequency(int band, uint32_t millihertz) {
 }
 
 void AudioEqualizer::setBandwidth(int band, uint32_t cents) {
-    LOGV("AudioEqualizer::setBandwidth(band=%d, cents=%d)", band, cents);
+    ALOGV("AudioEqualizer::setBandwidth(band=%d, cents=%d)", band, cents);
     assert(band >= 0 && band < mNumPeaking + 2);
     if (band > 0 && band < mNumPeaking + 1) {
         mpPeakingFilters[band - 1].setBandwidth(cents);
@@ -201,7 +201,7 @@ int AudioEqualizer::getPreset() const {
 }
 
 void AudioEqualizer::setPreset(int preset) {
-    LOGV("AudioEqualizer::setPreset(preset=%d)", preset);
+    ALOGV("AudioEqualizer::setPreset(preset=%d)", preset);
     assert(preset < mNumPresets && preset >= 0);
     const PresetConfig &presetCfg = mpPresets[preset];
     for (int band = 0; band < (mNumPeaking + 2); ++band) {
@@ -214,7 +214,7 @@ void AudioEqualizer::setPreset(int preset) {
 }
 
 void AudioEqualizer::commit(bool immediate) {
-    LOGV("AudioEqualizer::commit(immediate=%d)", immediate);
+    ALOGV("AudioEqualizer::commit(immediate=%d)", immediate);
     mpLowShelf->commit(immediate);
     for (int i = 0; i < mNumPeaking; ++i) {
         mpPeakingFilters[i].commit(immediate);
@@ -225,7 +225,7 @@ void AudioEqualizer::commit(bool immediate) {
 void AudioEqualizer::process(const audio_sample_t * pIn,
                              audio_sample_t * pOut,
                              int frameCount) {
-//    LOGV("AudioEqualizer::process(frameCount=%d)", frameCount);
+//    ALOGV("AudioEqualizer::process(frameCount=%d)", frameCount);
     mpLowShelf->process(pIn, pOut, frameCount);
     for (int i = 0; i < mNumPeaking; ++i) {
         mpPeakingFilters[i].process(pIn, pOut, frameCount);
@@ -234,7 +234,7 @@ void AudioEqualizer::process(const audio_sample_t * pIn,
 }
 
 void AudioEqualizer::enable(bool immediate) {
-    LOGV("AudioEqualizer::enable(immediate=%d)", immediate);
+    ALOGV("AudioEqualizer::enable(immediate=%d)", immediate);
     mpLowShelf->enable(immediate);
     for (int i = 0; i < mNumPeaking; ++i) {
         mpPeakingFilters[i].enable(immediate);
@@ -243,7 +243,7 @@ void AudioEqualizer::enable(bool immediate) {
 }
 
 void AudioEqualizer::disable(bool immediate) {
-    LOGV("AudioEqualizer::disable(immediate=%d)", immediate);
+    ALOGV("AudioEqualizer::disable(immediate=%d)", immediate);
     mpLowShelf->disable(immediate);
     for (int i = 0; i < mNumPeaking; ++i) {
         mpPeakingFilters[i].disable(immediate);

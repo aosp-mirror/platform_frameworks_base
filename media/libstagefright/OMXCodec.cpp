@@ -180,7 +180,7 @@ static const CodecInfo kEncoderInfo[] = {
 #undef OPTIONAL
 
 #define CODEC_LOGI(x, ...) LOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
-#define CODEC_LOGV(x, ...) LOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
+#define CODEC_LOGV(x, ...) ALOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGE(x, ...) LOGE("[%s] "x, mComponentName, ##__VA_ARGS__)
 
 struct OMXCodecObserver : public BnOMXObserver {
@@ -467,13 +467,13 @@ sp<MediaSource> OMXCodec::Create(
                 InstantiateSoftwareEncoder(componentName, source, meta);
 
             if (softwareCodec != NULL) {
-                LOGV("Successfully allocated software codec '%s'", componentName);
+                ALOGV("Successfully allocated software codec '%s'", componentName);
 
                 return softwareCodec;
             }
         }
 
-        LOGV("Attempting to allocate OMX node '%s'", componentName);
+        ALOGV("Attempting to allocate OMX node '%s'", componentName);
 
         uint32_t quirks = getComponentQuirks(componentNameBase, createEncoder);
 
@@ -494,7 +494,7 @@ sp<MediaSource> OMXCodec::Create(
 
         status_t err = omx->allocateNode(componentName, observer, &node);
         if (err == OK) {
-            LOGV("Successfully allocated OMX node '%s'", componentName);
+            ALOGV("Successfully allocated OMX node '%s'", componentName);
 
             sp<OMXCodec> codec = new OMXCodec(
                     omx, node, quirks, flags,
@@ -513,7 +513,7 @@ sp<MediaSource> OMXCodec::Create(
                 return codec;
             }
 
-            LOGV("Failed to configure codec '%s'", componentName);
+            ALOGV("Failed to configure codec '%s'", componentName);
         }
     }
 
@@ -600,7 +600,7 @@ status_t OMXCodec::parseAVCCodecSpecificData(
 }
 
 status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
-    LOGV("configureCodec protected=%d",
+    ALOGV("configureCodec protected=%d",
          (mFlags & kEnableGrallocUsageProtected) ? 1 : 0);
 
     if (!(mFlags & kIgnoreCodecSpecificData)) {
@@ -904,7 +904,7 @@ static size_t getFrameSize(
 
 status_t OMXCodec::findTargetColorFormat(
         const sp<MetaData>& meta, OMX_COLOR_FORMATTYPE *colorFormat) {
-    LOGV("findTargetColorFormat");
+    ALOGV("findTargetColorFormat");
     CHECK(mIsEncoder);
 
     *colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
@@ -924,7 +924,7 @@ status_t OMXCodec::findTargetColorFormat(
 
 status_t OMXCodec::isColorFormatSupported(
         OMX_COLOR_FORMATTYPE colorFormat, int portIndex) {
-    LOGV("isColorFormatSupported: %d", static_cast<int>(colorFormat));
+    ALOGV("isColorFormatSupported: %d", static_cast<int>(colorFormat));
 
     // Enumerate all the color formats supported by
     // the omx component to see whether the given
@@ -1890,7 +1890,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         }
     }
 
-    LOGV("native_window_set_usage usage=0x%lx", usage);
+    ALOGV("native_window_set_usage usage=0x%lx", usage);
     err = native_window_set_usage(
             mNativeWindow.get(), usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
     if (err != 0) {
@@ -2568,7 +2568,7 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
                         // The scale is in 16.16 format.
                         // scale 1.0 = 0x010000. When there is no
                         // need to change the display, skip it.
-                        LOGV("Get OMX_IndexConfigScale: 0x%lx/0x%lx",
+                        ALOGV("Get OMX_IndexConfigScale: 0x%lx/0x%lx",
                                 scale.xWidth, scale.xHeight);
 
                         if (scale.xWidth != 0x010000) {
@@ -3296,7 +3296,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
     }
 
     if (n > 1) {
-        LOGV("coalesced %d frames into one input buffer", n);
+        ALOGV("coalesced %d frames into one input buffer", n);
     }
 
     OMX_U32 flags = OMX_BUFFERFLAG_ENDOFFRAME;
@@ -4466,14 +4466,14 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                 inputFormat->findInt32(kKeySampleRate, &sampleRate);
 
                 if ((OMX_U32)numChannels != params.nChannels) {
-                    LOGV("Codec outputs a different number of channels than "
+                    ALOGV("Codec outputs a different number of channels than "
                          "the input stream contains (contains %d channels, "
                          "codec outputs %ld channels).",
                          numChannels, params.nChannels);
                 }
 
                 if (sampleRate != (int32_t)params.nSamplingRate) {
-                    LOGV("Codec outputs at different sampling rate than "
+                    ALOGV("Codec outputs at different sampling rate than "
                          "what the input stream contains (contains data at "
                          "%d Hz, codec outputs %lu Hz)",
                          sampleRate, params.nSamplingRate);

@@ -260,7 +260,7 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
         if (bufferRemaining == 0) {
             bufferRemaining = 32768;
 
-            LOGV("increasing download buffer to %d bytes",
+            ALOGV("increasing download buffer to %d bytes",
                  buffer->size() + bufferRemaining);
 
             sp<ABuffer> copy = new ABuffer(buffer->size() + bufferRemaining);
@@ -321,7 +321,7 @@ sp<M3UParser> LiveSession::fetchPlaylist(const char *url, bool *unchanged) {
 
         *unchanged = true;
 
-        LOGV("Playlist unchanged, refresh state is now %d",
+        ALOGV("Playlist unchanged, refresh state is now %d",
              (int)mRefreshState);
 
         return NULL;
@@ -357,9 +357,9 @@ size_t LiveSession::getBandwidthIndex() {
     int32_t bandwidthBps;
     if (mHTTPDataSource != NULL
             && mHTTPDataSource->estimateBandwidth(&bandwidthBps)) {
-        LOGV("bandwidth estimated at %.2f kbps", bandwidthBps / 1024.0f);
+        ALOGV("bandwidth estimated at %.2f kbps", bandwidthBps / 1024.0f);
     } else {
-        LOGV("no bandwidth estimate.");
+        ALOGV("no bandwidth estimate.");
         return 0;  // Pick the lowest bandwidth stream by default.
     }
 
@@ -369,7 +369,7 @@ size_t LiveSession::getBandwidthIndex() {
         long maxBw = strtoul(value, &end, 10);
         if (end > value && *end == '\0') {
             if (maxBw > 0 && bandwidthBps > maxBw) {
-                LOGV("bandwidth capped to %ld bps", maxBw);
+                ALOGV("bandwidth capped to %ld bps", maxBw);
                 bandwidthBps = maxBw;
             }
         }

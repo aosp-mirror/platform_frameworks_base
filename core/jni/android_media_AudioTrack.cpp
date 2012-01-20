@@ -170,7 +170,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         jint streamType, jint sampleRateInHertz, jint javaChannelMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession)
 {
-    LOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
+    ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
         sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
     int afSampleRate;
     int afFrameCount;
@@ -230,7 +230,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // in android_media_AudioTrack_native_write()
     if ((audioFormat == javaAudioTrackFields.PCM8) 
         && (memoryMode == javaAudioTrackFields.MODE_STATIC)) {
-        LOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
+        ALOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
             buff size of %dbytes, switching to 16bit, buff size of %dbytes",
             buffSizeInBytes, 2*buffSizeInBytes);
         audioFormat = javaAudioTrackFields.PCM16;
@@ -341,7 +341,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     env->SetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (int)lpTrack);
     
     // save the JNI resources so we can free them later
-    //LOGV("storing lpJniStorage: %x\n", (int)lpJniStorage);
+    //ALOGV("storing lpJniStorage: %x\n", (int)lpJniStorage);
     env->SetIntField(thiz, javaAudioTrackFields.jniData, (int)lpJniStorage);
 
     return AUDIOTRACK_SUCCESS;
@@ -444,13 +444,13 @@ android_media_AudioTrack_set_volume(JNIEnv *env, jobject thiz, jfloat leftVol, j
 
 // ----------------------------------------------------------------------------
 static void android_media_AudioTrack_native_finalize(JNIEnv *env,  jobject thiz) {
-    //LOGV("android_media_AudioTrack_native_finalize jobject: %x\n", (int)thiz);
+    //ALOGV("android_media_AudioTrack_native_finalize jobject: %x\n", (int)thiz);
        
     // delete the AudioTrack object
     AudioTrack *lpTrack = (AudioTrack *)env->GetIntField(
         thiz, javaAudioTrackFields.nativeTrackInJavaObj);
     if (lpTrack) {
-        //LOGV("deleting lpTrack: %x\n", (int)lpTrack);
+        //ALOGV("deleting lpTrack: %x\n", (int)lpTrack);
         lpTrack->stop();
         delete lpTrack;
     }
@@ -462,7 +462,7 @@ static void android_media_AudioTrack_native_finalize(JNIEnv *env,  jobject thiz)
         // delete global refs created in native_setup
         env->DeleteGlobalRef(pJniStorage->mCallbackData.audioTrack_class);
         env->DeleteGlobalRef(pJniStorage->mCallbackData.audioTrack_ref);
-        //LOGV("deleting pJniStorage: %x\n", (int)pJniStorage);
+        //ALOGV("deleting pJniStorage: %x\n", (int)pJniStorage);
         delete pJniStorage;
     }
 }
@@ -525,7 +525,7 @@ static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
                                                   jint javaAudioFormat) {
     jbyte* cAudioData = NULL;
     AudioTrack *lpTrack = NULL;
-    //LOGV("android_media_AudioTrack_native_write(offset=%d, sizeInBytes=%d) called",
+    //ALOGV("android_media_AudioTrack_native_write(offset=%d, sizeInBytes=%d) called",
     //    offsetInBytes, sizeInBytes);
     
     // get the audio track to load with samples
@@ -556,7 +556,7 @@ static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
 
     env->ReleaseByteArrayElements(javaAudioData, cAudioData, 0);
 
-    //LOGV("write wrote %d (tried %d) bytes in the native AudioTrack with offset %d",
+    //ALOGV("write wrote %d (tried %d) bytes in the native AudioTrack with offset %d",
     //     (int)written, (int)(sizeInBytes), (int)offsetInBytes);
     return written;
 }

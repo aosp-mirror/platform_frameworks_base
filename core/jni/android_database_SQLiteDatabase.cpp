@@ -89,7 +89,7 @@ static void registerLoggingFunc(const char *path) {
         return;
     }
 
-    LOGV("Registering sqlite logging func \n");
+    ALOGV("Registering sqlite logging func \n");
     int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, (void *)createStr(path, 0));
     if (err != SQLITE_OK) {
         LOGW("sqlite returned error = %d when trying to register logging func.\n", err);
@@ -170,7 +170,7 @@ static void dbopen(JNIEnv* env, jobject object, jstring pathString, jint flags)
         goto done;
     }
 
-    LOGV("Opened '%s' - %p\n", path8, handle);
+    ALOGV("Opened '%s' - %p\n", path8, handle);
     env->SetIntField(object, offset_db_handle, (int) handle);
     handle = NULL;  // The caller owns the handle now.
 
@@ -236,10 +236,10 @@ static void dbclose(JNIEnv* env, jobject object)
         if (traceFuncArg != NULL) {
             free(traceFuncArg);
         }
-        LOGV("Closing database: handle=%p\n", handle);
+        ALOGV("Closing database: handle=%p\n", handle);
         int result = sqlite3_close(handle);
         if (result == SQLITE_OK) {
-            LOGV("Closed %p\n", handle);
+            ALOGV("Closed %p\n", handle);
             env->SetIntField(object, offset_db_handle, 0);
         } else {
             // This can happen if sub-objects aren't closed first.  Make sure the caller knows.

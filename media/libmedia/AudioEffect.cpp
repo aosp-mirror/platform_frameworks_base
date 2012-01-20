@@ -69,7 +69,7 @@ AudioEffect::AudioEffect(const char *typeStr,
     effect_uuid_t uuid;
     effect_uuid_t *pUuid = NULL;
 
-    LOGV("Constructor string\n - type: %s\n - uuid: %s", typeStr, uuidStr);
+    ALOGV("Constructor string\n - type: %s\n - uuid: %s", typeStr, uuidStr);
 
     if (typeStr != NULL) {
         if (stringToGuid(typeStr, &type) == NO_ERROR) {
@@ -98,7 +98,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     sp<IMemory> cblk;
     int enabled;
 
-    LOGV("set %p mUserData: %p uuid: %p timeLow %08x", this, user, type, type ? type->timeLow : 0);
+    ALOGV("set %p mUserData: %p uuid: %p timeLow %08x", this, user, type, type ? type->timeLow : 0);
 
     if (mIEffect != 0) {
         LOGW("Effect already in use");
@@ -159,7 +159,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     mCblk->buffer = (uint8_t *)mCblk + bufOffset;
 
     iEffect->asBinder()->linkToDeath(mIEffectClient);
-    LOGV("set() %p OK effect: %s id: %d status %d enabled %d, ", this, mDescriptor.name, mId, mStatus, mEnabled);
+    ALOGV("set() %p OK effect: %s id: %d status %d enabled %d, ", this, mDescriptor.name, mId, mStatus, mEnabled);
 
     return mStatus;
 }
@@ -167,7 +167,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
 
 AudioEffect::~AudioEffect()
 {
-    LOGV("Destructor %p", this);
+    ALOGV("Destructor %p", this);
 
     if (mStatus == NO_ERROR || mStatus == ALREADY_EXISTS) {
         if (mIEffect != NULL) {
@@ -210,10 +210,10 @@ status_t AudioEffect::setEnabled(bool enabled)
     AutoMutex lock(mLock);
     if (enabled != mEnabled) {
         if (enabled) {
-            LOGV("enable %p", this);
+            ALOGV("enable %p", this);
             status = mIEffect->enable();
         } else {
-            LOGV("disable %p", this);
+            ALOGV("disable %p", this);
             status = mIEffect->disable();
         }
         if (status == NO_ERROR) {
@@ -230,7 +230,7 @@ status_t AudioEffect::command(uint32_t cmdCode,
                               void *replyData)
 {
     if (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS) {
-        LOGV("command() bad status %d", mStatus);
+        ALOGV("command() bad status %d", mStatus);
         return INVALID_OPERATION;
     }
 
@@ -273,7 +273,7 @@ status_t AudioEffect::setParameter(effect_param_t *param)
     uint32_t size = sizeof(int);
     uint32_t psize = ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
 
-    LOGV("setParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
+    ALOGV("setParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
 
     return mIEffect->command(EFFECT_CMD_SET_PARAM, sizeof (effect_param_t) + psize, param, &size, &param->status);
 }
@@ -328,7 +328,7 @@ status_t AudioEffect::getParameter(effect_param_t *param)
         return BAD_VALUE;
     }
 
-    LOGV("getParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
+    ALOGV("getParameter: param: %d, param2: %d", *(int *)param->data, (param->psize == 8) ? *((int *)param->data + 1): -1);
 
     uint32_t psize = sizeof(effect_param_t) + ((param->psize - 1) / sizeof(int) + 1) * sizeof(int) + param->vsize;
 
@@ -353,7 +353,7 @@ void AudioEffect::binderDied()
 
 void AudioEffect::controlStatusChanged(bool controlGranted)
 {
-    LOGV("controlStatusChanged %p control %d callback %p mUserData %p", this, controlGranted, mCbf, mUserData);
+    ALOGV("controlStatusChanged %p control %d callback %p mUserData %p", this, controlGranted, mCbf, mUserData);
     if (controlGranted) {
         if (mStatus == ALREADY_EXISTS) {
             mStatus = NO_ERROR;
@@ -370,7 +370,7 @@ void AudioEffect::controlStatusChanged(bool controlGranted)
 
 void AudioEffect::enableStatusChanged(bool enabled)
 {
-    LOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
+    ALOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
     if (mStatus == ALREADY_EXISTS) {
         mEnabled = enabled;
         if (mCbf) {

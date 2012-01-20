@@ -153,12 +153,12 @@ bool MtpServer::hasStorage(MtpStorageID id) {
 void MtpServer::run() {
     int fd = mFD;
 
-    LOGV("MtpServer::run fd: %d\n", fd);
+    ALOGV("MtpServer::run fd: %d\n", fd);
 
     while (1) {
         int ret = mRequest.read(fd);
         if (ret < 0) {
-            LOGV("request read returned %d, errno: %d", ret, errno);
+            ALOGV("request read returned %d, errno: %d", ret, errno);
             if (errno == ECANCELED) {
                 // return to top of loop and wait for next command
                 continue;
@@ -168,7 +168,7 @@ void MtpServer::run() {
         MtpOperationCode operation = mRequest.getOperationCode();
         MtpTransactionID transaction = mRequest.getTransactionID();
 
-        LOGV("operation: %s", MtpDebug::getOperationCodeName(operation));
+        ALOGV("operation: %s", MtpDebug::getOperationCodeName(operation));
         mRequest.dump();
 
         // FIXME need to generalize this
@@ -186,7 +186,7 @@ void MtpServer::run() {
                 }
                 break;
             }
-            LOGV("received data:");
+            ALOGV("received data:");
             mData.dump();
         } else {
             mData.reset();
@@ -196,7 +196,7 @@ void MtpServer::run() {
             if (!dataIn && mData.hasData()) {
                 mData.setOperationCode(operation);
                 mData.setTransactionID(transaction);
-                LOGV("sending data:");
+                ALOGV("sending data:");
                 mData.dump();
                 ret = mData.write(fd);
                 if (ret < 0) {
@@ -210,7 +210,7 @@ void MtpServer::run() {
             }
 
             mResponse.setTransactionID(transaction);
-            LOGV("sending response %04X", mResponse.getResponseCode());
+            ALOGV("sending response %04X", mResponse.getResponseCode());
             ret = mResponse.write(fd);
             mResponse.dump();
             if (ret < 0) {
@@ -222,7 +222,7 @@ void MtpServer::run() {
                 break;
             }
         } else {
-            LOGV("skipping response\n");
+            ALOGV("skipping response\n");
         }
     }
 
@@ -242,22 +242,22 @@ void MtpServer::run() {
 }
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
-    LOGV("sendObjectAdded %d\n", handle);
+    ALOGV("sendObjectAdded %d\n", handle);
     sendEvent(MTP_EVENT_OBJECT_ADDED, handle);
 }
 
 void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
-    LOGV("sendObjectRemoved %d\n", handle);
+    ALOGV("sendObjectRemoved %d\n", handle);
     sendEvent(MTP_EVENT_OBJECT_REMOVED, handle);
 }
 
 void MtpServer::sendStoreAdded(MtpStorageID id) {
-    LOGV("sendStoreAdded %08X\n", id);
+    ALOGV("sendStoreAdded %08X\n", id);
     sendEvent(MTP_EVENT_STORE_ADDED, id);
 }
 
 void MtpServer::sendStoreRemoved(MtpStorageID id) {
-    LOGV("sendStoreRemoved %08X\n", id);
+    ALOGV("sendStoreRemoved %08X\n", id);
     sendEvent(MTP_EVENT_STORE_REMOVED, id);
 }
 
@@ -267,7 +267,7 @@ void MtpServer::sendEvent(MtpEventCode code, uint32_t param1) {
         mEvent.setTransactionID(mRequest.getTransactionID());
         mEvent.setParameter(1, param1);
         int ret = mEvent.write(mFD);
-        LOGV("mEvent.write returned %d\n", ret);
+        ALOGV("mEvent.write returned %d\n", ret);
     }
 }
 
@@ -614,7 +614,7 @@ MtpResponseCode MtpServer::doGetObjectPropValue() {
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
-    LOGV("GetObjectPropValue %d %s\n", handle,
+    ALOGV("GetObjectPropValue %d %s\n", handle,
             MtpDebug::getObjectPropCodeName(property));
 
     return mDatabase->getObjectPropertyValue(handle, property, mData);
@@ -625,7 +625,7 @@ MtpResponseCode MtpServer::doSetObjectPropValue() {
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
-    LOGV("SetObjectPropValue %d %s\n", handle,
+    ALOGV("SetObjectPropValue %d %s\n", handle,
             MtpDebug::getObjectPropCodeName(property));
 
     return mDatabase->setObjectPropertyValue(handle, property, mData);
@@ -633,7 +633,7 @@ MtpResponseCode MtpServer::doSetObjectPropValue() {
 
 MtpResponseCode MtpServer::doGetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGV("GetDevicePropValue %s\n",
+    ALOGV("GetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->getDevicePropertyValue(property, mData);
@@ -641,7 +641,7 @@ MtpResponseCode MtpServer::doGetDevicePropValue() {
 
 MtpResponseCode MtpServer::doSetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGV("SetDevicePropValue %s\n",
+    ALOGV("SetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->setDevicePropertyValue(property, mData);
@@ -649,7 +649,7 @@ MtpResponseCode MtpServer::doSetDevicePropValue() {
 
 MtpResponseCode MtpServer::doResetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGV("ResetDevicePropValue %s\n",
+    ALOGV("ResetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->resetDeviceProperty(property);
@@ -665,7 +665,7 @@ MtpResponseCode MtpServer::doGetObjectPropList() {
     uint32_t property = mRequest.getParameter(3);
     int groupCode = mRequest.getParameter(4);
     int depth = mRequest.getParameter(5);
-   LOGV("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
+   ALOGV("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
             handle, MtpDebug::getFormatCodeName(format),
             MtpDebug::getObjectPropCodeName(property), groupCode, depth);
 
@@ -736,7 +736,7 @@ MtpResponseCode MtpServer::doGetObject() {
 
     // then transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE_WITH_HEADER, (unsigned long)&mfr);
-    LOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
+    ALOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
     close(mfr.fd);
     if (ret < 0) {
         if (errno == ECANCELED)
@@ -802,7 +802,7 @@ MtpResponseCode MtpServer::doGetPartialObject(MtpOperationCode operation) {
 
     // transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE_WITH_HEADER, (unsigned long)&mfr);
-    LOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
+    ALOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
     close(mfr.fd);
     if (ret < 0) {
         if (errno == ECANCELED)
@@ -857,7 +857,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     mData.getString(modified);     // date modified
     // keywords follow
 
-    LOGV("name: %s format: %04X\n", (const char *)name, format);
+    ALOGV("name: %s format: %04X\n", (const char *)name, format);
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
@@ -954,10 +954,10 @@ MtpResponseCode MtpServer::doSendObject() {
             mfr.length = mSendObjectFileSize - initialData;
         }
 
-        LOGV("receiving %s\n", (const char *)mSendObjectFilePath);
+        ALOGV("receiving %s\n", (const char *)mSendObjectFilePath);
         // transfer the file
         ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
-        LOGV("MTP_RECEIVE_FILE returned %d\n", ret);
+        ALOGV("MTP_RECEIVE_FILE returned %d\n", ret);
     }
     close(mfr.fd);
 
@@ -1052,7 +1052,7 @@ MtpResponseCode MtpServer::doDeleteObject() {
     int64_t fileLength;
     int result = mDatabase->getObjectFilePath(handle, filePath, fileLength, format);
     if (result == MTP_RESPONSE_OK) {
-        LOGV("deleting %s", (const char *)filePath);
+        ALOGV("deleting %s", (const char *)filePath);
         result = mDatabase->deleteFile(handle);
         // Don't delete the actual files unless the database deletion is allowed
         if (result == MTP_RESPONSE_OK) {
@@ -1066,7 +1066,7 @@ MtpResponseCode MtpServer::doDeleteObject() {
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
     MtpObjectProperty propCode = mRequest.getParameter(1);
     MtpObjectFormat format = mRequest.getParameter(2);
-    LOGV("GetObjectPropDesc %s %s\n", MtpDebug::getObjectPropCodeName(propCode),
+    ALOGV("GetObjectPropDesc %s %s\n", MtpDebug::getObjectPropCodeName(propCode),
                                         MtpDebug::getFormatCodeName(format));
     MtpProperty* property = mDatabase->getObjectPropertyDesc(propCode, format);
     if (!property)
@@ -1078,7 +1078,7 @@ MtpResponseCode MtpServer::doGetObjectPropDesc() {
 
 MtpResponseCode MtpServer::doGetDevicePropDesc() {
     MtpDeviceProperty propCode = mRequest.getParameter(1);
-    LOGV("GetDevicePropDesc %s\n", MtpDebug::getDevicePropCodeName(propCode));
+    ALOGV("GetDevicePropDesc %s\n", MtpDebug::getDevicePropCodeName(propCode));
     MtpProperty* property = mDatabase->getDevicePropertyDesc(propCode);
     if (!property)
         return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
@@ -1109,7 +1109,7 @@ MtpResponseCode MtpServer::doSendPartialObject() {
     }
 
     const char* filePath = (const char *)edit->mPath;
-    LOGV("receiving partial %s %lld %lld\n", filePath, offset, length);
+    ALOGV("receiving partial %s %lld %lld\n", filePath, offset, length);
 
     // read the header, and possibly some data
     int ret = mData.read(mFD);
@@ -1131,7 +1131,7 @@ MtpResponseCode MtpServer::doSendPartialObject() {
 
         // transfer the file
         ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
-        LOGV("MTP_RECEIVE_FILE returned %d", ret);
+        ALOGV("MTP_RECEIVE_FILE returned %d", ret);
     }
     if (ret < 0) {
         mResponse.setParameter(1, 0);

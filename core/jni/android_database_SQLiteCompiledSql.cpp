@@ -66,7 +66,7 @@ sqlite3_stmt * compile(JNIEnv* env, jobject object,
 
     if (err == SQLITE_OK) {
         // Store the statement in the Java object for future calls
-        LOGV("Prepared statement %p on %p", statement, handle);
+        ALOGV("Prepared statement %p on %p", statement, handle);
         env->SetIntField(object, gStatementField, (int)statement);
         return statement;
     } else {

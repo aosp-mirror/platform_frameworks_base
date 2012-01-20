@@ -3192,7 +3192,7 @@ void InputDispatcher::setInjectionResultLocked(EventEntry* entry, int32_t inject
             // Log the outcome since the injector did not wait for the injection result.
             switch (injectionResult) {
             case INPUT_EVENT_INJECTION_SUCCEEDED:
-                LOGV("Asynchronous input event injection succeeded.");
+                ALOGV("Asynchronous input event injection succeeded.");
                 break;
             case INPUT_EVENT_INJECTION_FAILED:
                 LOGW("Asynchronous input event injection failed.");

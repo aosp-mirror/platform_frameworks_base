@@ -342,7 +342,7 @@ struct MyHandler : public AHandler {
             return false;
         }
 
-        LOGV("successfully poked holes.");
+        ALOGV("successfully poked holes.");
 
         return true;
     }
@@ -840,7 +840,7 @@ struct MyHandler : public AHandler {
                 CHECK(msg->findSize("track-index", &trackIndex));
 
                 if (trackIndex >= mTracks.size()) {
-                    LOGV("late packets ignored.");
+                    ALOGV("late packets ignored.");
                     break;
                 }
 
@@ -863,12 +863,12 @@ struct MyHandler : public AHandler {
                 uint32_t seqNum = (uint32_t)accessUnit->int32Data();
 
                 if (mSeekPending) {
-                    LOGV("we're seeking, dropping stale packet.");
+                    ALOGV("we're seeking, dropping stale packet.");
                     break;
                 }
 
                 if (seqNum < track->mFirstSeqNumInSegment) {
-                    LOGV("dropping stale access-unit (%d < %d)",
+                    ALOGV("dropping stale access-unit (%d < %d)",
                          seqNum, track->mFirstSeqNumInSegment);
                     break;
                 }
@@ -981,7 +981,7 @@ struct MyHandler : public AHandler {
                         ssize_t i = response->mHeaders.indexOfKey("rtp-info");
                         CHECK_GE(i, 0);
 
-                        LOGV("rtp-info: %s", response->mHeaders.valueAt(i).c_str());
+                        ALOGV("rtp-info: %s", response->mHeaders.valueAt(i).c_str());
 
                         LOGI("seek completed.");
                     }
@@ -1092,7 +1092,7 @@ struct MyHandler : public AHandler {
         }
 
         AString range = response->mHeaders.valueAt(i);
-        LOGV("Range: %s", range.c_str());
+        ALOGV("Range: %s", range.c_str());
 
         AString val;
         CHECK(GetAttribute(range.c_str(), "npt", &val));
@@ -1116,7 +1116,7 @@ struct MyHandler : public AHandler {
         for (List<AString>::iterator it = streamInfos.begin();
              it != streamInfos.end(); ++it) {
             (*it).trim();
-            LOGV("streamInfo[%d] = %s", n, (*it).c_str());
+            ALOGV("streamInfo[%d] = %s", n, (*it).c_str());
 
             CHECK(GetAttribute((*it).c_str(), "url", &val));
 
@@ -1140,7 +1140,7 @@ struct MyHandler : public AHandler {
 
             uint32_t rtpTime = strtoul(val.c_str(), &end, 10);
 
-            LOGV("track #%d: rtpTime=%u <=> npt=%.2f", n, rtpTime, npt1);
+            ALOGV("track #%d: rtpTime=%u <=> npt=%.2f", n, rtpTime, npt1);
 
             info->mNormalPlayTimeRTP = rtpTime;
             info->mNormalPlayTimeUs = (int64_t)(npt1 * 1E6);
@@ -1272,7 +1272,7 @@ private:
 
         info->mTimeScale = timescale;
 
-        LOGV("track #%d URL=%s", mTracks.size(), trackURL.c_str());
+        ALOGV("track #%d URL=%s", mTracks.size(), trackURL.c_str());
 
         AString request = "SETUP ";
         request.append(trackURL);
@@ -1363,7 +1363,7 @@ private:
     }
 
     void onTimeUpdate(int32_t trackIndex, uint32_t rtpTime, uint64_t ntpTime) {
-        LOGV("onTimeUpdate track %d, rtpTime = 0x%08x, ntpTime = 0x%016llx",
+        ALOGV("onTimeUpdate track %d, rtpTime = 0x%08x, ntpTime = 0x%016llx",
              trackIndex, rtpTime, ntpTime);
 
         int64_t ntpTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
@@ -1381,7 +1381,7 @@ private:
 
     void onAccessUnitComplete(
             int32_t trackIndex, const sp<ABuffer> &accessUnit) {
-        LOGV("onAccessUnitComplete track %d", trackIndex);
+        ALOGV("onAccessUnitComplete track %d", trackIndex);
 
         if (mFirstAccessUnit) {
             sp<AMessage> msg = mNotify->dup();
@@ -1404,7 +1404,7 @@ private:
         TrackInfo *track = &mTracks.editItemAt(trackIndex);
 
         if (mNTPAnchorUs < 0 || mMediaAnchorUs < 0 || track->mNTPAnchorUs < 0) {
-            LOGV("storing accessUnit, no time established yet");
+            ALOGV("storing accessUnit, no time established yet");
             track->mPackets.push_back(accessUnit);
             return;
         }
@@ -1443,11 +1443,11 @@ private:
         }
 
         if (mediaTimeUs < 0) {
-            LOGV("dropping early accessUnit.");
+            ALOGV("dropping early accessUnit.");
             return false;
         }
 
-        LOGV("track %d rtpTime=%d mediaTimeUs = %lld us (%.2f secs)",
+        ALOGV("track %d rtpTime=%d mediaTimeUs = %lld us (%.2f secs)",
              trackIndex, rtpTime, mediaTimeUs, mediaTimeUs / 1E6);
 
         accessUnit->meta()->setInt64("timeUs", mediaTimeUs);

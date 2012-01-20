@@ -90,7 +90,7 @@ static int setup_listening_socket(int dev, int channel);
 #endif
 
 static void classInitNative(JNIEnv* env, jclass clazz) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
 
     /* in */
@@ -123,7 +123,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 }
 
 static void initializeNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
@@ -138,8 +138,8 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
         env->GetIntField(object, field_mHandsfreeAgRfcommChannel);
     nat->hs_ag_rfcomm_channel =
         env->GetIntField(object, field_mHeadsetAgRfcommChannel);
-    LOGV("HF RFCOMM channel = %d.", nat->hf_ag_rfcomm_channel);
-    LOGV("HS RFCOMM channel = %d.", nat->hs_ag_rfcomm_channel);
+    ALOGV("HF RFCOMM channel = %d.", nat->hf_ag_rfcomm_channel);
+    ALOGV("HS RFCOMM channel = %d.", nat->hs_ag_rfcomm_channel);
 
     /* Set the default values of these to -1. */
     env->SetIntField(object, field_mConnectingHeadsetRfcommChannel, -1);
@@ -151,7 +151,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
 }
 
 static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
@@ -256,7 +256,7 @@ static inline int on_accept_set_fields(JNIEnv* env, jobject object,
 
 static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
                                               jint timeout_ms) {
-//    LOGV("%s", __FUNCTION__);
+//    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
 
     env->SetIntField(object, field_mTimeoutRemainingMs, timeout_ms);
@@ -445,7 +445,7 @@ static jboolean waitForHandsfreeConnectNative(JNIEnv* env, jobject object,
 }
 
 static jboolean setUpListeningSocketsNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
 
@@ -511,7 +511,7 @@ static int setup_listening_socket(int dev, int channel) {
     private native void tearDownListeningSocketsNative();
 */
 static void tearDownListeningSocketsNative(JNIEnv *env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
 

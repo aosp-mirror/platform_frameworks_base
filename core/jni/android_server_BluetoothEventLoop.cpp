@@ -91,7 +91,7 @@ native_data_t *get_EventLoop_native_data(JNIEnv *env, jobject object) {
 
 #endif
 static void classInitNative(JNIEnv* env, jclass clazz) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
 #ifdef HAVE_BLUETOOTH
     method_onPropertyChanged = env->GetMethodID(clazz, "onPropertyChanged",
@@ -157,7 +157,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 }
 
 static void initializeNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
@@ -185,7 +185,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
 }
 
 static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat =
             (native_data_t *)env->GetIntField(object, field_mNativeData);
@@ -226,7 +226,7 @@ static short dbus_flags_to_unix_events(unsigned int flags) {
 }
 
 static jboolean setUpEventLoop(native_data_t *nat) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     if (nat != NULL && nat->conn != NULL) {
         dbus_threads_init_default();
@@ -414,7 +414,7 @@ static int register_agent(native_data_t *nat,
 }
 
 static void tearDownEventLoop(native_data_t *nat) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
     if (nat != NULL && nat->conn != NULL) {
 
         DBusMessage *msg, *reply;
@@ -576,12 +576,12 @@ static void handleWatchAdd(native_data_t *nat) {
     for (int y = 0; y<nat->pollMemberCount; y++) {
         if ((nat->pollData[y].fd == newFD) &&
                 (nat->pollData[y].events == events)) {
-            LOGV("DBusWatch duplicate add");
+            ALOGV("DBusWatch duplicate add");
             return;
         }
     }
     if (nat->pollMemberCount == nat->pollDataSize) {
-        LOGV("Bluetooth EventLoop poll struct growing");
+        ALOGV("Bluetooth EventLoop poll struct growing");
         struct pollfd *temp = (struct pollfd *)malloc(
                 sizeof(struct pollfd) * (nat->pollMemberCount+1));
         if (!temp) {
@@ -848,11 +848,11 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
     nat = (native_data_t *)data;
     nat->vm->GetEnv((void**)&env, nat->envVer);
     if (dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_SIGNAL) {
-        LOGV("%s: not interested (not a signal).", __FUNCTION__);
+        ALOGV("%s: not interested (not a signal).", __FUNCTION__);
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
 
-    LOGV("%s: Received signal %s:%s from %s", __FUNCTION__,
+    ALOGV("%s: Received signal %s:%s from %s", __FUNCTION__,
         dbus_message_get_interface(msg), dbus_message_get_member(msg),
         dbus_message_get_path(msg));
 
@@ -884,7 +884,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         if (dbus_message_get_args(msg, &err,
                                   DBUS_TYPE_STRING, &c_address,
                                   DBUS_TYPE_INVALID)) {
-            LOGV("... address = %s", c_address);
+            ALOGV("... address = %s", c_address);
             env->CallVoidMethod(nat->me, method_onDeviceDisappeared,
                                 env->NewStringUTF(c_address));
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
@@ -896,7 +896,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         if (dbus_message_get_args(msg, &err,
                                   DBUS_TYPE_OBJECT_PATH, &c_object_path,
                                   DBUS_TYPE_INVALID)) {
-            LOGV("... address = %s", c_object_path);
+            ALOGV("... address = %s", c_object_path);
             env->CallVoidMethod(nat->me,
                                 method_onDeviceCreated,
                                 env->NewStringUTF(c_object_path));
@@ -909,7 +909,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         if (dbus_message_get_args(msg, &err,
                                  DBUS_TYPE_OBJECT_PATH, &c_object_path,
                                  DBUS_TYPE_INVALID)) {
-           LOGV("... Object Path = %s", c_object_path);
+           ALOGV("... Object Path = %s", c_object_path);
            env->CallVoidMethod(nat->me,
                                method_onDeviceRemoved,
                                env->NewStringUTF(c_object_path));
@@ -1094,7 +1094,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
     native_data_t *nat = (native_data_t *)data;
     JNIEnv *env;
     if (dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_METHOD_CALL) {
-        LOGV("%s: not interested (not a method call).", __FUNCTION__);
+        ALOGV("%s: not interested (not a method call).", __FUNCTION__);
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
     LOGI("%s: Received method %s:%s", __FUNCTION__,
@@ -1130,8 +1130,8 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
             goto failure;
         }
 
-        LOGV("... object_path = %s", object_path);
-        LOGV("... uuid = %s", uuid);
+        ALOGV("... object_path = %s", object_path);
+        ALOGV("... uuid = %s", uuid);
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
         env->CallVoidMethod(nat->me, method_onAgentAuthorize,
@@ -1149,7 +1149,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
             goto failure;
         }
 
-        LOGV("... object_path = %s", object_path);
+        ALOGV("... object_path = %s", object_path);
 
         bool available =
             env->CallBooleanMethod(nat->me, method_onAgentOutOfBandDataAvailable,
@@ -1284,7 +1284,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         dbus_message_unref(reply);
         goto success;
     } else {
-        LOGV("%s:%s is ignored", dbus_message_get_interface(msg), dbus_message_get_member(msg));
+        ALOGV("%s:%s is ignored", dbus_message_get_interface(msg), dbus_message_get_member(msg));
     }
 
 failure:
@@ -1302,7 +1302,7 @@ success:
 #ifdef HAVE_BLUETOOTH
 
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *address = (const char *)user;
@@ -1313,45 +1313,45 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
 
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
-    LOGV("... address = %s", address);
+    ALOGV("... address = %s", address);
 
     jint result = BOND_RESULT_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
         if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) {
             // Pins did not match, or remote device did not respond to pin
             // request in time
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_FAILED;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationRejected")) {
             // We rejected pairing, or the remote side rejected pairing. This
             // happens if either side presses 'cancel' at the pairing dialog.
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_REJECTED;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationCanceled")) {
             // Not sure if this happens
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_CANCELED;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.ConnectionAttemptFailed")) {
             // Other device is not responding at all
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_REMOTE_DEVICE_DOWN;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AlreadyExists")) {
             // already bonded
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_SUCCESS;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress") &&
                    !strcmp(err.message, "Bonding in progress")) {
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             goto done;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.InProgress") &&
                    !strcmp(err.message, "Discover in progress")) {
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_DISCOVERY_IN_PROGRESS;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.RepeatedAttempts")) {
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_REPEATED_ATTEMPTS;
         } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationTimeout")) {
-            LOGV("... error = %s (%s)\n", err.name, err.message);
+            ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_TIMEOUT;
         } else {
             LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
@@ -1371,7 +1371,7 @@ done:
 }
 
 void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *address= (const char *)user;
@@ -1380,7 +1380,7 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
     JNIEnv *env;
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
-    LOGV("... Address = %s", address);
+    ALOGV("... Address = %s", address);
 
     jint result = CREATE_DEVICE_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
@@ -1401,7 +1401,7 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
@@ -1410,7 +1410,7 @@ void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
     JNIEnv *env;
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
-    LOGV("... Device Path = %s", path);
+    ALOGV("... Device Path = %s", path);
 
     bool result = JNI_TRUE;
     if (dbus_set_error_from_message(&err, msg)) {
@@ -1427,7 +1427,7 @@ void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onGetDeviceServiceChannelResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     const char *address = (const char *) user;
     native_data_t *nat = (native_data_t *) n;
@@ -1439,7 +1439,7 @@ void onGetDeviceServiceChannelResult(DBusMessage *msg, void *user, void *n) {
 
     jint channel = -2;
 
-    LOGV("... address = %s", address);
+    ALOGV("... address = %s", address);
 
     if (dbus_set_error_from_message(&err, msg) ||
         !dbus_message_get_args(msg, &err,
@@ -1460,7 +1460,7 @@ done:
 }
 
 void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
@@ -1488,7 +1488,7 @@ void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
         LOG_AND_FREE_DBUS_ERROR(&err);
     }
 
-    LOGV("... Device Path = %s, result = %d", path, result);
+    ALOGV("... Device Path = %s, result = %d", path, result);
     jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
                         method_onInputDeviceConnectionResult,
@@ -1499,7 +1499,7 @@ void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
@@ -1527,7 +1527,7 @@ void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
         LOG_AND_FREE_DBUS_ERROR(&err);
     }
 
-    LOGV("... Pan Device Path = %s, result = %d", path, result);
+    ALOGV("... Pan Device Path = %s, result = %d", path, result);
     jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
                         method_onPanDeviceConnectionResult,
@@ -1538,7 +1538,7 @@ void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onHealthDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
-    LOGV("%s", __FUNCTION__);
+    ALOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     DBusError err;
@@ -1563,7 +1563,7 @@ void onHealthDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
     }
 
     jint code = *(int *) user;
-    LOGV("... Health Device Code = %d, result = %d", code, result);
+    ALOGV("... Health Device Code = %d, result = %d", code, result);
     env->CallVoidMethod(nat->me,
                         method_onHealthDeviceConnectionResult,
                         code,

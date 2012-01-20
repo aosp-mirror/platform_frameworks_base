@@ -68,7 +68,7 @@ void rsdProgramVertexDestroy(const Context *rsc, const ProgramVertex *pv) {
     if(pv->mHal.drv) {
         drv = (RsdShader*)pv->mHal.drv;
         if (rsc->props.mLogShaders) {
-            LOGV("Destroying vertex shader with ID %u", drv->getShaderID());
+            ALOGV("Destroying vertex shader with ID %u", drv->getShaderID());
         }
         if (drv->getShaderID()) {
             dc->gl.shaderCache->cleanupVertex(drv->getShaderID());
@@ -99,7 +99,7 @@ void rsdProgramFragmentDestroy(const Context *rsc, const ProgramFragment *pf) {
     if(pf->mHal.drv) {
         drv = (RsdShader*)pf->mHal.drv;
         if (rsc->props.mLogShaders) {
-            LOGV("Destroying fragment shader with ID %u", drv->getShaderID());
+            ALOGV("Destroying fragment shader with ID %u", drv->getShaderID());
         }
         if (drv->getShaderID()) {
             dc->gl.shaderCache->cleanupFragment(drv->getShaderID());

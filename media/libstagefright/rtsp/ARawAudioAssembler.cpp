@@ -77,7 +77,7 @@ ARTPAssembler::AssemblyStatus ARawAudioAssembler::addPacket(
         mNextExpectedSeqNoValid = true;
         mNextExpectedSeqNo = (uint32_t)buffer->int32Data();
     } else if ((uint32_t)buffer->int32Data() != mNextExpectedSeqNo) {
-        LOGV("Not the sequence number I expected");
+        ALOGV("Not the sequence number I expected");
 
         return WRONG_SEQUENCE_NUMBER;
     }
@@ -88,7 +88,7 @@ ARTPAssembler::AssemblyStatus ARawAudioAssembler::addPacket(
         queue->erase(queue->begin());
         ++mNextExpectedSeqNo;
 
-        LOGV("raw audio packet too short.");
+        ALOGV("raw audio packet too short.");
 
         return MALFORMED_PACKET;
     }

@@ -119,7 +119,7 @@ void FindAVCDimensions(
             cropUnitY = subHeightC * (2 - frame_mbs_only_flag);
         }
 
-        LOGV("frame_crop = (%u, %u, %u, %u), cropUnitX = %u, cropUnitY = %u",
+        ALOGV("frame_crop = (%u, %u, %u, %u), cropUnitX = %u, cropUnitY = %u",
              frame_crop_left_offset, frame_crop_right_offset,
              frame_crop_top_offset, frame_crop_bottom_offset,
              cropUnitX, cropUnitY);
