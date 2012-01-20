@@ -494,7 +494,7 @@ static void pretty_log_urc(const char *urc) {
             }
         }
     }
-    IF_LOGV() LOG(LOG_VERBOSE, "Bluetooth AT sent", "%s", buf);
+    IF_LOGV() ALOG(LOG_VERBOSE, "Bluetooth AT sent", "%s", buf);
 
     free(buf);
 }
