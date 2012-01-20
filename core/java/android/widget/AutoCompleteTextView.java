@@ -1085,10 +1085,11 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
                 for (int i = 0; i < count; i++) {
                     if (adapter.isEnabled(i)) {
-                        realCount++;
                         Object item = adapter.getItem(i);
                         long id = adapter.getItemId(i);
-                        completions[i] = new CompletionInfo(id, i, convertSelectionToString(item));
+                        completions[realCount] = new CompletionInfo(id, realCount,
+                                convertSelectionToString(item));
+                        realCount++;
                     }
                 }
                 
