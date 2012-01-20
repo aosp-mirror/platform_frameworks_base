@@ -169,7 +169,7 @@ status_t AudioPolicyService::setDeviceConnectionState(audio_devices_t device,
         return BAD_VALUE;
     }
 
-    LOGV("setDeviceConnectionState() tid %d", gettid());
+    ALOGV("setDeviceConnectionState() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     return mpAudioPolicy->set_device_connection_state(mpAudioPolicy, device,
                                                       state, device_address);
@@ -198,7 +198,7 @@ status_t AudioPolicyService::setPhoneState(int state)
         return BAD_VALUE;
     }
 
-    LOGV("setPhoneState() tid %d", gettid());
+    ALOGV("setPhoneState() tid %d", gettid());
 
     // TODO: check if it is more appropriate to do it in platform specific policy manager
     AudioSystem::setMode(state);
@@ -236,7 +236,7 @@ status_t AudioPolicyService::setForceUse(audio_policy_force_use_t usage,
     if (config < 0 || config >= AUDIO_POLICY_FORCE_CFG_CNT) {
         return BAD_VALUE;
     }
-    LOGV("setForceUse() tid %d", gettid());
+    ALOGV("setForceUse() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     mpAudioPolicy->set_force_use(mpAudioPolicy, usage, config);
     return NO_ERROR;
@@ -262,7 +262,7 @@ audio_io_handle_t AudioPolicyService::getOutput(audio_stream_type_t stream,
     if (mpAudioPolicy == NULL) {
         return 0;
     }
-    LOGV("getOutput() tid %d", gettid());
+    ALOGV("getOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     return mpAudioPolicy->get_output(mpAudioPolicy, stream, samplingRate, format, channels, flags);
 }
@@ -274,7 +274,7 @@ status_t AudioPolicyService::startOutput(audio_io_handle_t output,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    LOGV("startOutput() tid %d", gettid());
+    ALOGV("startOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     return mpAudioPolicy->start_output(mpAudioPolicy, output, stream, session);
 }
@@ -286,7 +286,7 @@ status_t AudioPolicyService::stopOutput(audio_io_handle_t output,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    LOGV("stopOutput() tid %d", gettid());
+    ALOGV("stopOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     return mpAudioPolicy->stop_output(mpAudioPolicy, output, stream, session);
 }
@@ -296,7 +296,7 @@ void AudioPolicyService::releaseOutput(audio_io_handle_t output)
     if (mpAudioPolicy == NULL) {
         return;
     }
-    LOGV("releaseOutput() tid %d", gettid());
+    ALOGV("releaseOutput() tid %d", gettid());
     Mutex::Autolock _l(mLock);
     mpAudioPolicy->release_output(mpAudioPolicy, output);
 }
@@ -672,7 +672,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                 case START_TONE: {
                     mLock.unlock();
                     ToneData *data = (ToneData *)command->mParam;
-                    LOGV("AudioCommandThread() processing start tone %d on stream %d",
+                    ALOGV("AudioCommandThread() processing start tone %d on stream %d",
                             data->mType, data->mStream);
                     if (mpToneGenerator != NULL)
                         delete mpToneGenerator;
@@ -683,7 +683,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     }break;
                 case STOP_TONE: {
                     mLock.unlock();
-                    LOGV("AudioCommandThread() processing stop tone");
+                    ALOGV("AudioCommandThread() processing stop tone");
                     if (mpToneGenerator != NULL) {
                         mpToneGenerator->stopTone();
                         delete mpToneGenerator;
@@ -693,7 +693,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     }break;
                 case SET_VOLUME: {
                     VolumeData *data = (VolumeData *)command->mParam;
-                    LOGV("AudioCommandThread() processing set volume stream %d, \
+                    ALOGV("AudioCommandThread() processing set volume stream %d, \
                             volume %f, output %d", data->mStream, data->mVolume, data->mIO);
                     command->mStatus = AudioSystem::setStreamVolume(data->mStream,
                                                                     data->mVolume,
@@ -706,7 +706,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     }break;
                 case SET_PARAMETERS: {
                      ParametersData *data = (ParametersData *)command->mParam;
-                     LOGV("AudioCommandThread() processing set parameters string %s, io %d",
+                     ALOGV("AudioCommandThread() processing set parameters string %s, io %d",
                              data->mKeyValuePairs.string(), data->mIO);
                      command->mStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
                      if (command->mWaitStatus) {
@@ -717,7 +717,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                      }break;
                 case SET_VOICE_VOLUME: {
                     VoiceVolumeData *data = (VoiceVolumeData *)command->mParam;
-                    LOGV("AudioCommandThread() processing set voice volume volume %f",
+                    ALOGV("AudioCommandThread() processing set voice volume volume %f",
                             data->mVolume);
                     command->mStatus = AudioSystem::setVoiceVolume(data->mVolume);
                     if (command->mWaitStatus) {
@@ -740,9 +740,9 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
         if (mName != "" && mAudioCommands.isEmpty()) {
             release_wake_lock(mName.string());
         }
-        LOGV("AudioCommandThread() going to sleep");
+        ALOGV("AudioCommandThread() going to sleep");
         mWaitWorkCV.waitRelative(mLock, waitTime);
-        LOGV("AudioCommandThread() waking up");
+        ALOGV("AudioCommandThread() waking up");
     }
     mLock.unlock();
     return false;
@@ -793,7 +793,7 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
     command->mWaitStatus = false;
     Mutex::Autolock _l(mLock);
     insertCommand_l(command);
-    LOGV("AudioCommandThread() adding tone start type %d, stream %d", type, stream);
+    ALOGV("AudioCommandThread() adding tone start type %d, stream %d", type, stream);
     mWaitWorkCV.signal();
 }
 
@@ -805,7 +805,7 @@ void AudioPolicyService::AudioCommandThread::stopToneCommand()
     command->mWaitStatus = false;
     Mutex::Autolock _l(mLock);
     insertCommand_l(command);
-    LOGV("AudioCommandThread() adding tone stop");
+    ALOGV("AudioCommandThread() adding tone stop");
     mWaitWorkCV.signal();
 }
 
@@ -830,7 +830,7 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream,
     }
     Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
-    LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d",
+    ALOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d",
             stream, volume, output);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
@@ -860,7 +860,7 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
     }
     Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
-    LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d",
+    ALOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d",
             keyValuePairs, ioHandle, delayMs);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
@@ -887,7 +887,7 @@ status_t AudioPolicyService::AudioCommandThread::voiceVolumeCommand(float volume
     }
     Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
-    LOGV("AudioCommandThread() adding set voice volume volume %f", volume);
+    ALOGV("AudioCommandThread() adding set voice volume volume %f", volume);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
         command->mCond.wait(mLock);
@@ -922,7 +922,7 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
             ParametersData *data = (ParametersData *)command->mParam;
             ParametersData *data2 = (ParametersData *)command2->mParam;
             if (data->mIO != data2->mIO) break;
-            LOGV("Comparing parameter command %s to new command %s",
+            ALOGV("Comparing parameter command %s to new command %s",
                     data2->mKeyValuePairs.string(), data->mKeyValuePairs.string());
             AudioParameter param = AudioParameter(data->mKeyValuePairs);
             AudioParameter param2 = AudioParameter(data2->mKeyValuePairs);
@@ -936,7 +936,7 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
                   param2.getAt(k, key2, value2);
                   if (key2 == key) {
                       param2.remove(key2);
-                      LOGV("Filtering out parameter %s", key2.string());
+                      ALOGV("Filtering out parameter %s", key2.string());
                       break;
                   }
                }
@@ -955,7 +955,7 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
             VolumeData *data2 = (VolumeData *)command2->mParam;
             if (data->mIO != data2->mIO) break;
             if (data->mStream != data2->mStream) break;
-            LOGV("Filtering out volume command on output %d for stream %d",
+            ALOGV("Filtering out volume command on output %d for stream %d",
                     data->mIO, data->mStream);
             removedCommands.add(command2);
         } break;
@@ -971,7 +971,7 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
         // removed commands always have time stamps greater than current command
         for (size_t k = i + 1; k < mAudioCommands.size(); k++) {
             if (mAudioCommands[k] == removedCommands[j]) {
-                LOGV("suppressing command: %d", mAudioCommands[k]->mCommand);
+                ALOGV("suppressing command: %d", mAudioCommands[k]->mCommand);
                 mAudioCommands.removeAt(k);
                 break;
             }
@@ -980,14 +980,14 @@ void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *comma
     removedCommands.clear();
 
     // insert command at the right place according to its time stamp
-    LOGV("inserting command: %d at index %d, num commands %d",
+    ALOGV("inserting command: %d at index %d, num commands %d",
             command->mCommand, (int)i+1, mAudioCommands.size());
     mAudioCommands.insertAt(command, i + 1);
 }
 
 void AudioPolicyService::AudioCommandThread::exit()
 {
-    LOGV("AudioCommandThread::exit");
+    ALOGV("AudioCommandThread::exit");
     {
         AutoMutex _l(mLock);
         requestExit();
@@ -1069,7 +1069,7 @@ audio_source_t AudioPolicyService::inputSourceNameToEnum(const char *name)
     int i;
     for (i = AUDIO_SOURCE_MIC; i < AUDIO_SOURCE_CNT; i++) {
         if (strcmp(name, kInputSourceNames[i - AUDIO_SOURCE_MIC]) == 0) {
-            LOGV("inputSourceNameToEnum found source %s %d", name, i);
+            ALOGV("inputSourceNameToEnum found source %s %d", name, i);
             break;
         }
     }
@@ -1102,17 +1102,17 @@ size_t AudioPolicyService::readParamValue(cnode *node,
     if (strncmp(node->name, SHORT_TAG, sizeof(SHORT_TAG) + 1) == 0) {
         size_t pos = growParamSize(param, sizeof(short), curSize, totSize);
         *(short *)((char *)param + pos) = (short)atoi(node->value);
-        LOGV("readParamValue() reading short %d", *(short *)((char *)param + pos));
+        ALOGV("readParamValue() reading short %d", *(short *)((char *)param + pos));
         return sizeof(short);
     } else if (strncmp(node->name, INT_TAG, sizeof(INT_TAG) + 1) == 0) {
         size_t pos = growParamSize(param, sizeof(int), curSize, totSize);
         *(int *)((char *)param + pos) = atoi(node->value);
-        LOGV("readParamValue() reading int %d", *(int *)((char *)param + pos));
+        ALOGV("readParamValue() reading int %d", *(int *)((char *)param + pos));
         return sizeof(int);
     } else if (strncmp(node->name, FLOAT_TAG, sizeof(FLOAT_TAG) + 1) == 0) {
         size_t pos = growParamSize(param, sizeof(float), curSize, totSize);
         *(float *)((char *)param + pos) = (float)atof(node->value);
-        LOGV("readParamValue() reading float %f",*(float *)((char *)param + pos));
+        ALOGV("readParamValue() reading float %f",*(float *)((char *)param + pos));
         return sizeof(float);
     } else if (strncmp(node->name, BOOL_TAG, sizeof(BOOL_TAG) + 1) == 0) {
         size_t pos = growParamSize(param, sizeof(bool), curSize, totSize);
@@ -1121,7 +1121,7 @@ size_t AudioPolicyService::readParamValue(cnode *node,
         } else {
             *(bool *)((char *)param + pos) = true;
         }
-        LOGV("readParamValue() reading bool %s",*(bool *)((char *)param + pos) ? "true" : "false");
+        ALOGV("readParamValue() reading bool %s",*(bool *)((char *)param + pos) ? "true" : "false");
         return sizeof(bool);
     } else if (strncmp(node->name, STRING_TAG, sizeof(STRING_TAG) + 1) == 0) {
         size_t len = strnlen(node->value, EFFECT_STRING_LEN_MAX);
@@ -1132,7 +1132,7 @@ size_t AudioPolicyService::readParamValue(cnode *node,
         strncpy(param + *curSize, node->value, len);
         *curSize += len;
         param[*curSize] = '\0';
-        LOGV("readParamValue() reading string %s", param + *curSize - len);
+        ALOGV("readParamValue() reading string %s", param + *curSize - len);
         return len;
     }
     LOGW("readParamValue() unknown param type %s", node->name);
@@ -1172,7 +1172,7 @@ effect_param_t *AudioPolicyService::loadEffectParameter(cnode *root)
     fx_param->psize = 0;
     param = param->first_child;
     while (param) {
-        LOGV("loadEffectParameter() reading param of type %s", param->name);
+        ALOGV("loadEffectParameter() reading param of type %s", param->name);
         size_t size = readParamValue(param, (char *)fx_param, &curSize, &totSize);
         if (size == 0) {
             goto error;
@@ -1187,7 +1187,7 @@ effect_param_t *AudioPolicyService::loadEffectParameter(cnode *root)
     fx_param->vsize = 0;
     value = value->first_child;
     while (value) {
-        LOGV("loadEffectParameter() reading value of type %s", value->name);
+        ALOGV("loadEffectParameter() reading value of type %s", value->name);
         size_t size = readParamValue(value, (char *)fx_param, &curSize, &totSize);
         if (size == 0) {
             goto error;
@@ -1207,7 +1207,7 @@ void AudioPolicyService::loadEffectParameters(cnode *root, Vector <effect_param_
 {
     cnode *node = root->first_child;
     while (node) {
-        LOGV("loadEffectParameters() loading param %s", node->name);
+        ALOGV("loadEffectParameters() loading param %s", node->name);
         effect_param_t *param = loadEffectParameter(node);
         if (param == NULL) {
             node = node->next;
@@ -1232,18 +1232,18 @@ AudioPolicyService::InputSourceDesc *AudioPolicyService::loadInputSource(
         size_t i;
         for (i = 0; i < effects.size(); i++) {
             if (strncmp(effects[i]->mName, node->name, EFFECT_STRING_LEN_MAX) == 0) {
-                LOGV("loadInputSource() found effect %s in list", node->name);
+                ALOGV("loadInputSource() found effect %s in list", node->name);
                 break;
             }
         }
         if (i == effects.size()) {
-            LOGV("loadInputSource() effect %s not in list", node->name);
+            ALOGV("loadInputSource() effect %s not in list", node->name);
             node = node->next;
             continue;
         }
         EffectDesc *effect = new EffectDesc(*effects[i]);
         loadEffectParameters(node, effect->mParams);
-        LOGV("loadInputSource() adding effect %s uuid %08x", effect->mName, effect->mUuid.timeLow);
+        ALOGV("loadInputSource() adding effect %s uuid %08x", effect->mName, effect->mUuid.timeLow);
         source->mEffects.add(effect);
         node = node->next;
     }
@@ -1269,7 +1269,7 @@ status_t AudioPolicyService::loadInputSources(cnode *root, const Vector <EffectD
             node = node->next;
             continue;
         }
-        LOGV("loadInputSources() loading input source %s", node->name);
+        ALOGV("loadInputSources() loading input source %s", node->name);
         InputSourceDesc *desc = loadInputSource(node, effects);
         if (desc == NULL) {
             node = node->next;
@@ -1307,7 +1307,7 @@ status_t AudioPolicyService::loadEffects(cnode *root, Vector <EffectDesc *>& eff
     }
     node = node->first_child;
     while (node) {
-        LOGV("loadEffects() loading effect %s", node->name);
+        ALOGV("loadEffects() loading effect %s", node->name);
         EffectDesc *effect = loadEffect(node);
         if (effect == NULL) {
             node = node->next;

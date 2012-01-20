@@ -78,11 +78,11 @@ DrmMetadata::KeyIterator DrmMetadata::keyIterator() {
 DrmMetadata::KeyIterator::KeyIterator(const DrmMetadata::KeyIterator& keyIterator) :
     mDrmMetadata(keyIterator.mDrmMetadata),
     mIndex(keyIterator.mIndex) {
-    LOGV("DrmMetadata::KeyIterator::KeyIterator");
+    ALOGV("DrmMetadata::KeyIterator::KeyIterator");
 }
 
 DrmMetadata::KeyIterator& DrmMetadata::KeyIterator::operator=(const DrmMetadata::KeyIterator& keyIterator) {
-    LOGV("DrmMetadata::KeyIterator::operator=");
+    ALOGV("DrmMetadata::KeyIterator::operator=");
     mDrmMetadata = keyIterator.mDrmMetadata;
     mIndex = keyIterator.mIndex;
     return *this;
@@ -96,11 +96,11 @@ DrmMetadata::Iterator DrmMetadata::iterator() {
 DrmMetadata::Iterator::Iterator(const DrmMetadata::Iterator& iterator) :
     mDrmMetadata(iterator.mDrmMetadata),
     mIndex(iterator.mIndex) {
-    LOGV("DrmMetadata::Iterator::Iterator");
+    ALOGV("DrmMetadata::Iterator::Iterator");
 }
 
 DrmMetadata::Iterator& DrmMetadata::Iterator::operator=(const DrmMetadata::Iterator& iterator) {
-    LOGV("DrmMetadata::Iterator::operator=");
+    ALOGV("DrmMetadata::Iterator::operator=");
     mDrmMetadata = iterator.mDrmMetadata;
     mIndex = iterator.mIndex;
     return *this;

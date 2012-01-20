@@ -176,7 +176,7 @@ int CameraHardwareStub::previewThread()
         uint8_t *frame = ((uint8_t *)base) + offset;
         fakeCamera->getNextFrameAsYuv420(frame);
 
-        //LOGV("previewThread: generated frame to buffer %d", mCurrentPreviewFrame);
+        //ALOGV("previewThread: generated frame to buffer %d", mCurrentPreviewFrame);
 
         // Notify the client of a new frame.
         if (mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME)

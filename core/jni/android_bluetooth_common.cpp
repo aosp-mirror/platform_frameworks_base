@@ -464,7 +464,7 @@ jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply) {
         jclass stringClass;
         jstring classNameStr;
 
-        //LOGV("%s: there are %d elements in string array!", __FUNCTION__, len);
+        //ALOGV("%s: there are %d elements in string array!", __FUNCTION__, len);
 
         stringClass = env->FindClass("java/lang/String");
         strArray = env->NewObjectArray(len, stringClass, NULL);
@@ -490,7 +490,7 @@ jbyteArray dbus_returns_array_of_bytes(JNIEnv *env, DBusMessage *reply) {
     if (dbus_message_get_args(reply, &err,
                               DBUS_TYPE_ARRAY, DBUS_TYPE_BYTE, &list, &len,
                               DBUS_TYPE_INVALID)) {
-        //LOGV("%s: there are %d elements in byte array!", __FUNCTION__, len);
+        //ALOGV("%s: there are %d elements in byte array!", __FUNCTION__, len);
         byteArray = env->NewByteArray(len);
         if (byteArray)
             env->SetByteArrayRegion(byteArray, 0, len, list);

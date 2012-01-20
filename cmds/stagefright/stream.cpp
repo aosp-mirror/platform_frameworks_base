@@ -308,7 +308,7 @@ int main(int argc, char **argv) {
     ssize_t displayWidth = composerClient->getDisplayWidth(0);
     ssize_t displayHeight = composerClient->getDisplayHeight(0);
 
-    LOGV("display is %d x %d\n", displayWidth, displayHeight);
+    ALOGV("display is %d x %d\n", displayWidth, displayHeight);
 
     sp<SurfaceControl> control =
         composerClient->createSurface(

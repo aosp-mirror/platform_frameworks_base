@@ -317,9 +317,9 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
          * AAC+/eAAC+ until the first data frame is decoded.
          */
         if (decoderErr == MP4AUDEC_SUCCESS && mInputBufferCount <= 2) {
-            LOGV("audio/extended audio object type: %d + %d",
+            ALOGV("audio/extended audio object type: %d + %d",
                 mConfig->audioObjectType, mConfig->extendedAudioObjectType);
-            LOGV("aac+ upsampling factor: %d desired channels: %d",
+            ALOGV("aac+ upsampling factor: %d desired channels: %d",
                 mConfig->aacPlusUpsamplingFactor, mConfig->desiredChannels);
 
             if (mInputBufferCount == 1) {

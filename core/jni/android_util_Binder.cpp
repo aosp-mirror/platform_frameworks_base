@@ -45,14 +45,14 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
-//#undef LOGV
-//#define LOGV(...) fprintf(stderr, __VA_ARGS__)
+//#undef ALOGV
+//#define ALOGV(...) fprintf(stderr, __VA_ARGS__)
 
 #define DEBUG_DEATH 0
 #if DEBUG_DEATH
 #define LOGDEATH LOGD
 #else
-#define LOGDEATH LOGV
+#define LOGDEATH ALOGV
 #endif
 
 using namespace android;
@@ -169,7 +169,7 @@ static void incRefsCreated(JNIEnv* env)
         env->CallStaticVoidMethod(gBinderInternalOffsets.mClass,
                 gBinderInternalOffsets.mForceGc);
     } else {
-        LOGV("Now have %d binder ops", old);
+        ALOGV("Now have %d binder ops", old);
     }
 }
 
@@ -249,7 +249,7 @@ public:
     JavaBBinder(JNIEnv* env, jobject object)
         : mVM(jnienv_to_javavm(env)), mObject(env->NewGlobalRef(object))
     {
-        LOGV("Creating JavaBBinder %p\n", this);
+        ALOGV("Creating JavaBBinder %p\n", this);
         android_atomic_inc(&gNumLocalRefs);
         incRefsCreated(env);
     }
@@ -267,7 +267,7 @@ public:
 protected:
     virtual ~JavaBBinder()
     {
-        LOGV("Destroying JavaBBinder %p\n", this);
+        ALOGV("Destroying JavaBBinder %p\n", this);
         android_atomic_dec(&gNumLocalRefs);
         JNIEnv* env = javavm_to_jnienv(mVM);
         env->DeleteGlobalRef(mObject);
@@ -278,7 +278,7 @@ protected:
     {
         JNIEnv* env = javavm_to_jnienv(mVM);
 
-        LOGV("onTransact() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
+        ALOGV("onTransact() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
 
         IPCThreadState* thread_state = IPCThreadState::self();
         const int strict_policy_before = thread_state->getStrictModePolicy();
@@ -349,7 +349,7 @@ public:
         if (b == NULL) {
             b = new JavaBBinder(env, obj);
             mBinder = b;
-            LOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%d\n",
+            ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%d\n",
                  b.get(), b->getWeakRefs(), obj, b->getWeakRefs()->getWeakCount());
         }
 
@@ -579,7 +579,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     if (object != NULL) {
         jobject res = env->CallObjectMethod(object, gWeakReferenceOffsets.mGet);
         if (res != NULL) {
-            LOGV("objectForBinder %p: found existing %p!\n", val.get(), res);
+            ALOGV("objectForBinder %p: found existing %p!\n", val.get(), res);
             return res;
         }
         LOGDEATH("Proxy object %p of IBinder %p no longer in working set!!!", object, val.get());
@@ -780,7 +780,7 @@ static void android_os_Binder_init(JNIEnv* env, jobject obj)
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return;
     }
-    LOGV("Java Binder %p: acquiring first ref on holder %p", obj, jbh);
+    ALOGV("Java Binder %p: acquiring first ref on holder %p", obj, jbh);
     jbh->incStrong((void*)android_os_Binder_init);
     env->SetIntField(obj, gBinderOffsets.mObject, (int)jbh);
 }
@@ -791,7 +791,7 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
         env->GetIntField(obj, gBinderOffsets.mObject);
     if (jbh != NULL) {
         env->SetIntField(obj, gBinderOffsets.mObject, 0);
-        LOGV("Java Binder %p: removing ref on holder %p", obj, jbh);
+        ALOGV("Java Binder %p: removing ref on holder %p", obj, jbh);
         jbh->decStrong((void*)android_os_Binder_init);
     } else {
         // Encountering an uninitialized binder is harmless.  All it means is that
@@ -800,7 +800,7 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
         // For example, a Binder subclass constructor might have thrown an exception before
         // it could delegate to its superclass's constructor.  Consequently init() would
         // not have been called and the holder pointer would remain NULL.
-        LOGV("Java Binder %p: ignoring uninitialized binder", obj);
+        ALOGV("Java Binder %p: ignoring uninitialized binder", obj);
     }
 }
 
@@ -889,7 +889,7 @@ static void android_os_BinderInternal_disableBackgroundScheduling(JNIEnv* env,
 
 static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
 {
-    LOGV("Gc has executed, clearing binder ops");
+    ALOGV("Gc has executed, clearing binder ops");
     android_atomic_and(0, &gNumRefsCreated);
 }
 
@@ -1078,7 +1078,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    LOGV("Java code calling transact on %p in Java object %p with code %d\n",
+    ALOGV("Java code calling transact on %p in Java object %p with code %d\n",
             target, obj, code);
 
     // Only log the binder call duration for things on the Java-level main thread.

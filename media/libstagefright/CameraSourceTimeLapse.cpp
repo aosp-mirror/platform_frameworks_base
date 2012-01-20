@@ -90,7 +90,7 @@ CameraSourceTimeLapse::~CameraSourceTimeLapse() {
 }
 
 void CameraSourceTimeLapse::startQuickReadReturns() {
-    LOGV("startQuickReadReturns");
+    ALOGV("startQuickReadReturns");
     Mutex::Autolock autoLock(mQuickStopLock);
 
     // Enable quick stop mode.
@@ -105,7 +105,7 @@ void CameraSourceTimeLapse::startQuickReadReturns() {
 bool CameraSourceTimeLapse::trySettingVideoSize(
         int32_t width, int32_t height) {
 
-    LOGV("trySettingVideoSize");
+    ALOGV("trySettingVideoSize");
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
 
@@ -131,7 +131,7 @@ bool CameraSourceTimeLapse::trySettingVideoSize(
 
     bool isSuccessful = false;
     if (videoSizeSupported) {
-        LOGV("Video size (%d, %d) is supported", width, height);
+        ALOGV("Video size (%d, %d) is supported", width, height);
         if (videoOutputSupported) {
             params.setVideoSize(width, height);
         } else {
@@ -150,7 +150,7 @@ bool CameraSourceTimeLapse::trySettingVideoSize(
 }
 
 void CameraSourceTimeLapse::signalBufferReturned(MediaBuffer* buffer) {
-    LOGV("signalBufferReturned");
+    ALOGV("signalBufferReturned");
     Mutex::Autolock autoLock(mQuickStopLock);
     if (mQuickStop && (buffer == mLastReadBufferCopy)) {
         buffer->setObserver(NULL);
@@ -165,7 +165,7 @@ void createMediaBufferCopy(
         int64_t frameTime,
         MediaBuffer **newBuffer) {
 
-    LOGV("createMediaBufferCopy");
+    ALOGV("createMediaBufferCopy");
     size_t sourceSize = sourceBuffer.size();
     void* sourcePointer = sourceBuffer.data();
 
@@ -176,7 +176,7 @@ void createMediaBufferCopy(
 }
 
 void CameraSourceTimeLapse::fillLastReadBufferCopy(MediaBuffer& sourceBuffer) {
-    LOGV("fillLastReadBufferCopy");
+    ALOGV("fillLastReadBufferCopy");
     int64_t frameTime;
     CHECK(sourceBuffer.meta_data()->findInt64(kKeyTime, &frameTime));
     createMediaBufferCopy(sourceBuffer, frameTime, &mLastReadBufferCopy);
@@ -186,7 +186,7 @@ void CameraSourceTimeLapse::fillLastReadBufferCopy(MediaBuffer& sourceBuffer) {
 
 status_t CameraSourceTimeLapse::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    LOGV("read");
+    ALOGV("read");
     if (mLastReadBufferCopy == NULL) {
         mLastReadStatus = CameraSource::read(buffer, options);
 
@@ -205,7 +205,7 @@ status_t CameraSourceTimeLapse::read(
 }
 
 void CameraSourceTimeLapse::stopCameraRecording() {
-    LOGV("stopCameraRecording");
+    ALOGV("stopCameraRecording");
     CameraSource::stopCameraRecording();
     if (mLastReadBufferCopy) {
         mLastReadBufferCopy->release();
@@ -216,7 +216,7 @@ void CameraSourceTimeLapse::stopCameraRecording() {
 sp<IMemory> CameraSourceTimeLapse::createIMemoryCopy(
         const sp<IMemory> &source_data) {
 
-    LOGV("createIMemoryCopy");
+    ALOGV("createIMemoryCopy");
     size_t source_size = source_data->size();
     void* source_pointer = source_data->pointer();
 
@@ -227,7 +227,7 @@ sp<IMemory> CameraSourceTimeLapse::createIMemoryCopy(
 }
 
 bool CameraSourceTimeLapse::skipCurrentFrame(int64_t timestampUs) {
-    LOGV("skipCurrentFrame");
+    ALOGV("skipCurrentFrame");
     if (mSkipCurrentFrame) {
         mSkipCurrentFrame = false;
         return true;
@@ -237,11 +237,11 @@ bool CameraSourceTimeLapse::skipCurrentFrame(int64_t timestampUs) {
 }
 
 bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
-    LOGV("skipFrameAndModifyTimeStamp");
+    ALOGV("skipFrameAndModifyTimeStamp");
     if (mLastTimeLapseFrameRealTimestampUs == 0) {
         // First time lapse frame. Initialize mLastTimeLapseFrameRealTimestampUs
         // to current time (timestampUs) and save frame data.
-        LOGV("dataCallbackTimestamp timelapse: initial frame");
+        ALOGV("dataCallbackTimestamp timelapse: initial frame");
 
         mLastTimeLapseFrameRealTimestampUs = *timestampUs;
         return false;
@@ -253,7 +253,7 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
         // mForceRead may be set to true by startQuickReadReturns(). In that
         // case don't skip this frame.
         if (mForceRead) {
-            LOGV("dataCallbackTimestamp timelapse: forced read");
+            ALOGV("dataCallbackTimestamp timelapse: forced read");
             mForceRead = false;
             *timestampUs =
                 mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
@@ -275,14 +275,14 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
         // Skip all frames from last encoded frame until
         // sufficient time (mTimeBetweenFrameCaptureUs) has passed.
         // Tell the camera to release its recording frame and return.
-        LOGV("dataCallbackTimestamp timelapse: skipping intermediate frame");
+        ALOGV("dataCallbackTimestamp timelapse: skipping intermediate frame");
         return true;
     } else {
         // Desired frame has arrived after mTimeBetweenFrameCaptureUs time:
         // - Reset mLastTimeLapseFrameRealTimestampUs to current time.
         // - Artificially modify timestampUs to be one frame time (1/framerate) ahead
         // of the last encoded frame's time stamp.
-        LOGV("dataCallbackTimestamp timelapse: got timelapse frame");
+        ALOGV("dataCallbackTimestamp timelapse: got timelapse frame");
 
         mLastTimeLapseFrameRealTimestampUs = *timestampUs;
         *timestampUs = mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
@@ -293,7 +293,7 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
 
 void CameraSourceTimeLapse::dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data) {
-    LOGV("dataCallbackTimestamp");
+    ALOGV("dataCallbackTimestamp");
     mSkipCurrentFrame = skipFrameAndModifyTimeStamp(&timestampUs);
     CameraSource::dataCallbackTimestamp(timestampUs, msgType, data);
 }

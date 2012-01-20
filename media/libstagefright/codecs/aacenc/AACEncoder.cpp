@@ -111,7 +111,7 @@ static status_t getSampleRateTableIndex(int32_t sampleRate, int32_t &index) {
 }
 
 status_t AACEncoder::setAudioSpecificConfigData() {
-    LOGV("setAudioSpecificConfigData: %d hz, %d bps, and %d channels",
+    ALOGV("setAudioSpecificConfigData: %d hz, %d bps, and %d channels",
          mSampleRate, mBitRate, mChannels);
 
     int32_t index;

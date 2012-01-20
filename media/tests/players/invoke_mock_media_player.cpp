@@ -59,7 +59,7 @@ class Player: public MediaPlayerBase
     virtual status_t    setDataSource(
             const char *url,
             const KeyedVector<String8, String8> *) {
-        LOGV("setDataSource %s", url);
+        ALOGV("setDataSource %s", url);
         mTest = TEST_UNKNOWN;
         if (strncmp(url, kPing, strlen(kPing)) == 0) {
             mTest = PING;

@@ -307,8 +307,8 @@ void Matrix4x4::vectorMultiply(float *out, const float *in) const {
 }
 
 void Matrix4x4::logv(const char *s) const {
-    LOGV("%s {%f, %f, %f, %f",  s, m[0], m[4], m[8], m[12]);
-    LOGV("%s  %f, %f, %f, %f",  s, m[1], m[5], m[9], m[13]);
-    LOGV("%s  %f, %f, %f, %f",  s, m[2], m[6], m[10], m[14]);
-    LOGV("%s  %f, %f, %f, %f}", s, m[3], m[7], m[11], m[15]);
+    ALOGV("%s {%f, %f, %f, %f",  s, m[0], m[4], m[8], m[12]);
+    ALOGV("%s  %f, %f, %f, %f",  s, m[1], m[5], m[9], m[13]);
+    ALOGV("%s  %f, %f, %f, %f",  s, m[2], m[6], m[10], m[14]);
+    ALOGV("%s  %f, %f, %f, %f}", s, m[3], m[7], m[11], m[15]);
 }

@@ -101,7 +101,7 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
 {
     if (lstat64(filePath, st) < 0) {
         // File is not found or cannot be read.
-        LOGV("Couldn't stat %s, copying: %s\n", filePath, strerror(errno));
+        ALOGV("Couldn't stat %s, copying: %s\n", filePath, strerror(errno));
         return true;
     }
 
@@ -115,13 +115,13 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
 
     // For some reason, bionic doesn't define st_mtime as time_t
     if (time_t(st->st_mtime) != modifiedTime) {
-        LOGV("mod time doesn't match: %ld vs. %ld\n", st->st_mtime, modifiedTime);
+        ALOGV("mod time doesn't match: %ld vs. %ld\n", st->st_mtime, modifiedTime);
         return true;
     }
 
     int fd = TEMP_FAILURE_RETRY(open(filePath, O_RDONLY));
     if (fd < 0) {
-        LOGV("Couldn't open file %s: %s", filePath, strerror(errno));
+        ALOGV("Couldn't open file %s: %s", filePath, strerror(errno));
         return true;
     }
 
@@ -133,7 +133,7 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
     }
     close(fd);
 
-    LOGV("%s: crc = %lx, zipCrc = %lx\n", filePath, crc, zipCrc);
+    ALOGV("%s: crc = %lx, zipCrc = %lx\n", filePath, crc, zipCrc);
 
     if (crc != zipCrc) {
         return true;
@@ -261,7 +261,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
-    LOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
+    ALOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
 
     return INSTALL_SUCCEEDED;
 }
@@ -315,11 +315,11 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
         const char* cpuAbiOffset = fileName + APK_LIB_LEN;
         const size_t cpuAbiRegionSize = lastSlash - cpuAbiOffset;
 
-        LOGV("Comparing ABIs %s and %s versus %s\n", cpuAbi.c_str(), cpuAbi2.c_str(), cpuAbiOffset);
+        ALOGV("Comparing ABIs %s and %s versus %s\n", cpuAbi.c_str(), cpuAbi2.c_str(), cpuAbiOffset);
         if (cpuAbi.size() == cpuAbiRegionSize
                 && *(cpuAbiOffset + cpuAbi.size()) == '/'
                 && !strncmp(cpuAbiOffset, cpuAbi.c_str(), cpuAbiRegionSize)) {
-            LOGV("Using primary ABI %s\n", cpuAbi.c_str());
+            ALOGV("Using primary ABI %s\n", cpuAbi.c_str());
             hasPrimaryAbi = true;
         } else if (cpuAbi2.size() == cpuAbiRegionSize
                 && *(cpuAbiOffset + cpuAbi2.size()) == '/'
@@ -330,13 +330,13 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
              * only use the primary ABI.
              */
             if (hasPrimaryAbi) {
-                LOGV("Already saw primary ABI, skipping secondary ABI %s\n", cpuAbi2.c_str());
+                ALOGV("Already saw primary ABI, skipping secondary ABI %s\n", cpuAbi2.c_str());
                 continue;
             } else {
-                LOGV("Using secondary ABI %s\n", cpuAbi2.c_str());
+                ALOGV("Using secondary ABI %s\n", cpuAbi2.c_str());
             }
         } else {
-            LOGV("abi didn't match anything: %s (end at %zd)\n", cpuAbiOffset, cpuAbiRegionSize);
+            ALOGV("abi didn't match anything: %s (end at %zd)\n", cpuAbiOffset, cpuAbiRegionSize);
             continue;
         }
 
@@ -349,7 +349,7 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
             install_status_t ret = callFunc(env, callArg, &zipFile, entry, lastSlash + 1);
 
             if (ret != INSTALL_SUCCEEDED) {
-                LOGV("Failure for entry %s", lastSlash + 1);
+                ALOGV("Failure for entry %s", lastSlash + 1);
                 return ret;
             }
         }

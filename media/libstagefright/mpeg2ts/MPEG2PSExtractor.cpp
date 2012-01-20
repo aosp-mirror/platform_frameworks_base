@@ -274,10 +274,10 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
 
     unsigned packet_startcode_prefix = br.getBits(24);
 
-    LOGV("packet_startcode_prefix = 0x%08x", packet_startcode_prefix);
+    ALOGV("packet_startcode_prefix = 0x%08x", packet_startcode_prefix);
 
     if (packet_startcode_prefix != 1) {
-        LOGV("Supposedly payload_unit_start=1 unit does not start "
+        ALOGV("Supposedly payload_unit_start=1 unit does not start "
              "with startcode.");
 
         return ERROR_MALFORMED;
@@ -286,7 +286,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
     CHECK_EQ(packet_startcode_prefix, 0x000001u);
 
     unsigned stream_id = br.getBits(8);
-    LOGV("stream_id = 0x%02x", stream_id);
+    ALOGV("stream_id = 0x%02x", stream_id);
 
     /* unsigned PES_packet_length = */br.getBits(16);
 
@@ -372,25 +372,25 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
         /* unsigned original_or_copy = */br.getBits(1);
 
         unsigned PTS_DTS_flags = br.getBits(2);
-        LOGV("PTS_DTS_flags = %u", PTS_DTS_flags);
+        ALOGV("PTS_DTS_flags = %u", PTS_DTS_flags);
 
         unsigned ESCR_flag = br.getBits(1);
-        LOGV("ESCR_flag = %u", ESCR_flag);
+        ALOGV("ESCR_flag = %u", ESCR_flag);
 
         unsigned ES_rate_flag = br.getBits(1);
-        LOGV("ES_rate_flag = %u", ES_rate_flag);
+        ALOGV("ES_rate_flag = %u", ES_rate_flag);
 
         unsigned DSM_trick_mode_flag = br.getBits(1);
-        LOGV("DSM_trick_mode_flag = %u", DSM_trick_mode_flag);
+        ALOGV("DSM_trick_mode_flag = %u", DSM_trick_mode_flag);
 
         unsigned additional_copy_info_flag = br.getBits(1);
-        LOGV("additional_copy_info_flag = %u", additional_copy_info_flag);
+        ALOGV("additional_copy_info_flag = %u", additional_copy_info_flag);
 
         /* unsigned PES_CRC_flag = */br.getBits(1);
         /* PES_extension_flag = */br.getBits(1);
 
         unsigned PES_header_data_length = br.getBits(8);
-        LOGV("PES_header_data_length = %u", PES_header_data_length);
+        ALOGV("PES_header_data_length = %u", PES_header_data_length);
 
         unsigned optional_bytes_remaining = PES_header_data_length;
 
@@ -408,7 +408,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
             PTS |= br.getBits(15);
             CHECK_EQ(br.getBits(1), 1u);
 
-            LOGV("PTS = %llu", PTS);
+            ALOGV("PTS = %llu", PTS);
             // LOGI("PTS = %.2f secs", PTS / 90000.0f);
 
             optional_bytes_remaining -= 5;
@@ -425,7 +425,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
                 DTS |= br.getBits(15);
                 CHECK_EQ(br.getBits(1), 1u);
 
-                LOGV("DTS = %llu", DTS);
+                ALOGV("DTS = %llu", DTS);
 
                 optional_bytes_remaining -= 5;
             }
@@ -443,7 +443,7 @@ ssize_t MPEG2PSExtractor::dequeuePES() {
             ESCR |= br.getBits(15);
             CHECK_EQ(br.getBits(1), 1u);
 
-            LOGV("ESCR = %llu", ESCR);
+            ALOGV("ESCR = %llu", ESCR);
             /* unsigned ESCR_extension = */br.getBits(9);
 
             CHECK_EQ(br.getBits(1), 1u);
@@ -650,7 +650,7 @@ status_t MPEG2PSExtractor::Track::appendPESData(
             sp<MetaData> meta = mQueue->getFormat();
 
             if (meta != NULL) {
-                LOGV("Stream ID 0x%02x now has data.", mStreamID);
+                ALOGV("Stream ID 0x%02x now has data.", mStreamID);
 
                 mSource = new AnotherPacketSource(meta);
                 mSource->queueAccessUnit(accessUnit);

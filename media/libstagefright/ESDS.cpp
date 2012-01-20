@@ -91,7 +91,7 @@ status_t ESDS::skipDescriptorHeader(
     }
     while (more);
 
-    LOGV("tag=0x%02x data_size=%d", *tag, *data_size);
+    ALOGV("tag=0x%02x data_size=%d", *tag, *data_size);
 
     if (*data_size > size) {
         return ERROR_MALFORMED;

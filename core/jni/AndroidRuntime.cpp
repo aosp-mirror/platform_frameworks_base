@@ -708,7 +708,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = enableAssertBuf;
         mOptions.add(opt);
     } else {
-        LOGV("Assertions disabled\n");
+        ALOGV("Assertions disabled\n");
     }
 
     if (jniOptsBuf[10] != '\0') {
@@ -897,7 +897,7 @@ void AndroidRuntime::start(const char* className, const char* options)
 
 void AndroidRuntime::onExit(int code)
 {
-    LOGV("AndroidRuntime onExit calling exit(%d)", code);
+    ALOGV("AndroidRuntime onExit calling exit(%d)", code);
     exit(code);
 }
 
@@ -1217,7 +1217,7 @@ static const RegJNIRec gRegJNI[] = {
      */
     androidSetCreateThreadFunc((android_create_thread_fn) javaCreateThreadEtc);
 
-    LOGV("--- registering native functions ---\n");
+    ALOGV("--- registering native functions ---\n");
 
     /*
      * Every "register" function calls one or more things that return

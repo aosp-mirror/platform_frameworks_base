@@ -69,7 +69,7 @@ namespace android {
 
 static void printToLogFunc(void* cookie, const char* txt)
 {
-    LOGV("%s", txt);
+    ALOGV("%s", txt);
 }
 
 // Standard C isspace() is only required to look at the low byte of its input, so
@@ -1867,7 +1867,7 @@ status_t ResTable::add(const void* data, size_t size, void* cookie,
     const bool notDeviceEndian = htods(0xf0) != 0xf0;
 
     LOAD_TABLE_NOISY(
-        LOGV("Adding resources to ResTable: data=%p, size=0x%x, cookie=%p, asset=%p, copy=%d "
+        ALOGV("Adding resources to ResTable: data=%p, size=0x%x, cookie=%p, asset=%p, copy=%d "
              "idmap=%p\n", data, size, cookie, asset, copyData, idmap));
     
     if (copyData || notDeviceEndian) {
@@ -2122,7 +2122,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
                                           resID, &overlayResID);
             if (retval == NO_ERROR && overlayResID != 0x0) {
                 // for this loop iteration, this is the type and entry we really want
-                LOGV("resource map 0x%08x -> 0x%08x\n", resID, overlayResID);
+                ALOGV("resource map 0x%08x -> 0x%08x\n", resID, overlayResID);
                 T = Res_GETTYPE(overlayResID);
                 E = Res_GETENTRY(overlayResID);
             } else {
@@ -2401,7 +2401,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
                                           resID, &overlayResID);
             if (retval == NO_ERROR && overlayResID != 0x0) {
                 // for this loop iteration, this is the type and entry we really want
-                LOGV("resource map 0x%08x -> 0x%08x\n", resID, overlayResID);
+                ALOGV("resource map 0x%08x -> 0x%08x\n", resID, overlayResID);
                 T = Res_GETTYPE(overlayResID);
                 E = Res_GETENTRY(overlayResID);
             } else {
@@ -2413,9 +2413,9 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         const ResTable_type* type;
         const ResTable_entry* entry;
         const Type* typeClass;
-        LOGV("Getting entry pkg=%p, t=%d, e=%d\n", package, T, E);
+        ALOGV("Getting entry pkg=%p, t=%d, e=%d\n", package, T, E);
         ssize_t offset = getEntry(package, T, E, &mParams, &type, &entry, &typeClass);
-        LOGV("Resulting offset=%d\n", offset);
+        ALOGV("Resulting offset=%d\n", offset);
         if (offset <= 0) {
             // No {entry, appropriate config} pair found in package. If this
             // package is an overlay package (ip != 0), this simply means the
@@ -3898,9 +3898,9 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
 void ResTable::getLocales(Vector<String8>* locales) const
 {
     Vector<ResTable_config> configs;
-    LOGV("calling getConfigurations");
+    ALOGV("calling getConfigurations");
     getConfigurations(&configs);
-    LOGV("called getConfigurations size=%d", (int)configs.size());
+    ALOGV("called getConfigurations size=%d", (int)configs.size());
     const size_t I = configs.size();
     for (size_t i=0; i<I; i++) {
         char locale[6];
@@ -3924,13 +3924,13 @@ ssize_t ResTable::getEntry(
     const ResTable_type** outType, const ResTable_entry** outEntry,
     const Type** outTypeClass) const
 {
-    LOGV("Getting entry from package %p\n", package);
+    ALOGV("Getting entry from package %p\n", package);
     const ResTable_package* const pkg = package->package;
 
     const Type* allTypes = package->getType(typeIndex);
-    LOGV("allTypes=%p\n", allTypes);
+    ALOGV("allTypes=%p\n", allTypes);
     if (allTypes == NULL) {
-        LOGV("Skipping entry type index 0x%02x because type is NULL!\n", typeIndex);
+        ALOGV("Skipping entry type index 0x%02x because type is NULL!\n", typeIndex);
         return 0;
     }
 
