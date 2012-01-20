@@ -528,6 +528,7 @@ public class Paint {
      *
      * @return true if the lineartext bit is set in the paint's flags
      */
+    @Deprecated
     public final boolean isLinearText() {
         return (getFlags() & LINEAR_TEXT_FLAG) != 0;
     }
@@ -538,6 +539,7 @@ public class Paint {
      * @param linearText true to set the linearText bit in the paint's flags,
      *                   false to clear it.
      */
+    @Deprecated
     public native void setLinearText(boolean linearText);
 
     /**
