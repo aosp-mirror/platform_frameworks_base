@@ -106,7 +106,7 @@ SurfaceFlinger::SurfaceFlinger()
 
 void SurfaceFlinger::init()
 {
-    LOGI("SurfaceFlinger is starting");
+    ALOGI("SurfaceFlinger is starting");
 
     // debugging stuff...
     char value[PROPERTY_VALUE_MAX];
@@ -123,9 +123,9 @@ void SurfaceFlinger::init()
         DdmConnection::start(getServiceName());
     }
 
-    LOGI_IF(mDebugRegion,       "showupdates enabled");
-    LOGI_IF(mDebugBackground,   "showbackground enabled");
-    LOGI_IF(mDebugDDMS,         "DDMS debugging enabled");
+    ALOGI_IF(mDebugRegion,       "showupdates enabled");
+    ALOGI_IF(mDebugBackground,   "showbackground enabled");
+    ALOGI_IF(mDebugDDMS,         "DDMS debugging enabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
@@ -172,7 +172,7 @@ void SurfaceFlinger::bootFinished()
 {
     const nsecs_t now = systemTime();
     const nsecs_t duration = now - mBootTime;
-    LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
+    ALOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
     mBootFinished = true;
 
     // wait patiently for the window manager death
@@ -211,7 +211,7 @@ static inline uint16_t pack565(int r, int g, int b) {
 
 status_t SurfaceFlinger::readyToRun()
 {
-    LOGI(   "SurfaceFlinger's main thread ready to run. "
+    ALOGI(   "SurfaceFlinger's main thread ready to run. "
             "Initializing graphics H/W...");
 
     // we only support one display currently

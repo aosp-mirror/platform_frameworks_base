@@ -1097,7 +1097,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         ALOGV("%s: not interested (not a method call).", __FUNCTION__);
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
-    LOGI("%s: Received method %s:%s", __FUNCTION__,
+    ALOGI("%s: Received method %s:%s", __FUNCTION__,
          dbus_message_get_interface(msg), dbus_message_get_member(msg));
 
     if (nat == NULL) return DBUS_HANDLER_RESULT_HANDLED;

@@ -282,7 +282,7 @@ status_t ATSParser::Program::parseProgramMap(ABitReader *br) {
         ssize_t index = mStreams.indexOfKey(info.mPID);
 
         if (index >= 0 && mStreams.editValueAt(index)->type() != info.mType) {
-            LOGI("uh oh. stream PIDs have changed.");
+            ALOGI("uh oh. stream PIDs have changed.");
             PIDsChanged = true;
             break;
         }
@@ -290,18 +290,18 @@ status_t ATSParser::Program::parseProgramMap(ABitReader *br) {
 
     if (PIDsChanged) {
 #if 0
-        LOGI("before:");
+        ALOGI("before:");
         for (size_t i = 0; i < mStreams.size(); ++i) {
             sp<Stream> stream = mStreams.editValueAt(i);
 
-            LOGI("PID 0x%08x => type 0x%02x", stream->pid(), stream->type());
+            ALOGI("PID 0x%08x => type 0x%02x", stream->pid(), stream->type());
         }
 
-        LOGI("after:");
+        ALOGI("after:");
         for (size_t i = 0; i < infos.size(); ++i) {
             StreamInfo &info = infos.editItemAt(i);
 
-            LOGI("PID 0x%08x => type 0x%02x", info.mPID, info.mType);
+            ALOGI("PID 0x%08x => type 0x%02x", info.mPID, info.mType);
         }
 #endif
 
@@ -340,7 +340,7 @@ status_t ATSParser::Program::parseProgramMap(ABitReader *br) {
         }
 
         if (!success) {
-            LOGI("Stream PIDs changed and we cannot recover.");
+            ALOGI("Stream PIDs changed and we cannot recover.");
             return ERROR_MALFORMED;
         }
     }
@@ -475,7 +475,7 @@ status_t ATSParser::Stream::parse(
         // Increment in multiples of 64K.
         neededSize = (neededSize + 65535) & ~65535;
 
-        LOGI("resizing buffer to %d bytes", neededSize);
+        ALOGI("resizing buffer to %d bytes", neededSize);
 
         sp<ABuffer> newBuffer = new ABuffer(neededSize);
         memcpy(newBuffer->data(), mBuffer->data(), mBuffer->size());
@@ -634,7 +634,7 @@ status_t ATSParser::Stream::parsePES(ABitReader *br) {
             CHECK_EQ(br->getBits(1), 1u);
 
             ALOGV("PTS = %llu", PTS);
-            // LOGI("PTS = %.2f secs", PTS / 90000.0f);
+            // ALOGI("PTS = %.2f secs", PTS / 90000.0f);
 
             optional_bytes_remaining -= 5;
 
@@ -968,7 +968,7 @@ status_t ATSParser::parseTS(ABitReader *br) {
     unsigned continuity_counter = br->getBits(4);
     ALOGV("continuity_counter = %u", continuity_counter);
 
-    // LOGI("PID = 0x%04x, continuity_counter = %u", PID, continuity_counter);
+    // ALOGI("PID = 0x%04x, continuity_counter = %u", PID, continuity_counter);
 
     if (adaptation_field_control == 2 || adaptation_field_control == 3) {
         parseAdaptationField(br);

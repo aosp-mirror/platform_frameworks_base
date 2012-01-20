@@ -210,7 +210,7 @@ bool ZipFileRO::mapCentralDirectory(void)
 
     ssize_t actual = TEMP_FAILURE_RETRY(read(mFd, scanBuf, sizeof(int32_t)));
     if (actual != (ssize_t) sizeof(int32_t)) {
-        LOGI("couldn't read first signature from zip archive: %s", strerror(errno));
+        ALOGI("couldn't read first signature from zip archive: %s", strerror(errno));
         free(scanBuf);
         return false;
     }
@@ -218,7 +218,7 @@ bool ZipFileRO::mapCentralDirectory(void)
     {
         unsigned int header = get4LE(scanBuf);
         if (header == kEOCDSignature) {
-            LOGI("Found Zip archive, but it looks empty\n");
+            ALOGI("Found Zip archive, but it looks empty\n");
             free(scanBuf);
             return false;
         } else if (header != kLFHSignature) {
@@ -761,7 +761,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
                 (ZD_TYPE) actual, (ZD_TYPE) uncompLen);
             goto unmap;
         } else {
-            LOGI("+++ successful write\n");
+            ALOGI("+++ successful write\n");
         }
     } else {
         if (!inflateBuffer(fd, ptr, uncompLen, compLen))

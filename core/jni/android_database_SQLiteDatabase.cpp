@@ -79,7 +79,7 @@ static void sqlLogger(void *databaseName, int iErrCode, const char *zMsg) {
     // skip printing this message if it is due to certain types of errors
     if (iErrCode == 0 || iErrCode == SQLITE_CONSTRAINT) return;
     // print databasename, errorcode and msg
-    LOGI("sqlite returned: error code = %d, msg = %s, db=%s\n", iErrCode, zMsg, databaseName);
+    ALOGI("sqlite returned: error code = %d, msg = %s, db=%s\n", iErrCode, zMsg, databaseName);
 }
 
 // register the logging func on sqlite. needs to be done BEFORE any sqlite3 func is called.
@@ -197,7 +197,7 @@ static char *getDatabaseName(JNIEnv* env, sqlite3 * handle, jstring databaseName
 }
 
 static void sqlTrace(void *databaseName, const char *sql) {
-    LOGI("sql_statement|%s|%s\n", (char *)databaseName, sql);
+    ALOGI("sql_statement|%s|%s\n", (char *)databaseName, sql);
 }
 
 /* public native void enableSqlTracing(); */
@@ -209,7 +209,7 @@ static void enableSqlTracing(JNIEnv* env, jobject object, jstring databaseName, 
 
 static void sqlProfile(void *databaseName, const char *sql, sqlite3_uint64 tm) {
     double d = tm/1000000.0;
-    LOGI("elapsedTime4Sql|%s|%.3f ms|%s\n", (char *)databaseName, d, sql);
+    ALOGI("elapsedTime4Sql|%s|%.3f ms|%s\n", (char *)databaseName, d, sql);
 }
 
 /* public native void enableSqlProfiling(); */

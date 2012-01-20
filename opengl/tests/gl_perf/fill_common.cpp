@@ -132,7 +132,7 @@ static void endTimer(int count) {
     } else {
         printf("%s, %f, %f\n", gCurrentTestName, mpps, dc60);
     }
-    LOGI("%s, %f, %f\r\n", gCurrentTestName, mpps, dc60);
+    ALOGI("%s, %f, %f\r\n", gCurrentTestName, mpps, dc60);
 }
 
 

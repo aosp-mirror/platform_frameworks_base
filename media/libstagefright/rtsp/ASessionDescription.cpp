@@ -80,7 +80,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
             return false;
         }
 
-        LOGI("%s", line.c_str());
+        ALOGI("%s", line.c_str());
 
         switch (line.c_str()[0]) {
             case 'v':
