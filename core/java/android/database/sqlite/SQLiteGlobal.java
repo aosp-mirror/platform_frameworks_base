@@ -22,42 +22,25 @@ import android.os.StatFs;
  * Provides access to SQLite functions that affect all database connection,
  * such as memory management.
  *
+ * The native code associated with SQLiteGlobal is also sets global configuration options
+ * using sqlite3_config() then calls sqlite3_initialize() to ensure that the SQLite
+ * library is properly initialized exactly once before any other framework or application
+ * code has a chance to run.
+ *
+ * Verbose SQLite logging is enabled if the "log.tag.SQLiteLog" property is set to "V".
+ * (per {@link SQLiteDebug#DEBUG_SQL_LOG}).
+ *
  * @hide
  */
 public final class SQLiteGlobal {
     private static final String TAG = "SQLiteGlobal";
 
     private static final Object sLock = new Object();
-    private static boolean sInitialized;
-    private static int sSoftHeapLimit;
     private static int sDefaultPageSize;
 
-    private static native void nativeConfig(boolean verboseLog, int softHeapLimit);
-    private static native int nativeReleaseMemory(int bytesToFree);
+    private static native int nativeReleaseMemory();
 
     private SQLiteGlobal() {
-    }
-
-    /**
-     * Initializes global SQLite settings the first time it is called.
-     * Should be called before opening the first (or any) database.
-     * Does nothing on repeated subsequent calls.
-     */
-    public static void initializeOnce() {
-        synchronized (sLock) {
-            if (!sInitialized) {
-                sInitialized = true;
-
-                // Limit to 8MB for now.  This is 4 times the maximum cursor window
-                // size, as has been used by the original code in SQLiteDatabase for
-                // a long time.
-                // TODO: We really do need to test whether this helps or hurts us.
-                sSoftHeapLimit = 8 * 1024 * 1024;
-
-                // Configure SQLite.
-                nativeConfig(SQLiteDebug.DEBUG_SQL_LOG, sSoftHeapLimit);
-            }
-        }
     }
 
     /**
@@ -67,12 +50,7 @@ public final class SQLiteGlobal {
      * @return The number of bytes that were freed.
      */
     public static int releaseMemory() {
-        synchronized (sLock) {
-            if (!sInitialized) {
-                return 0;
-            }
-            return nativeReleaseMemory(sSoftHeapLimit);
-        }
+        return nativeReleaseMemory();
     }
 
     /**

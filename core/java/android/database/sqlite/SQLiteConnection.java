@@ -194,8 +194,6 @@ public final class SQLiteConnection {
     }
 
     private void open() {
-        SQLiteGlobal.initializeOnce();
-
         mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
                 mConfiguration.label,
                 SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
