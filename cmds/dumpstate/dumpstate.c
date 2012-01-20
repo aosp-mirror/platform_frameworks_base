@@ -84,9 +84,9 @@ static void dumpstate() {
     dump_file("BUDDYINFO", "/proc/buddyinfo");
 
     if (screenshot_path[0]) {
-        LOGI("taking screenshot\n");
+        ALOGI("taking screenshot\n");
         run_command(NULL, 5, "su", "root", "screenshot", screenshot_path, NULL);
-        LOGI("wrote screenshot: %s\n", screenshot_path);
+        ALOGI("wrote screenshot: %s\n", screenshot_path);
     }
 
     run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
     int use_socket = 0;
     int do_fb = 0;
 
-    LOGI("begin\n");
+    ALOGI("begin\n");
 
     /* set as high priority, and protect from OOM killer */
     setpriority(PRIO_PROCESS, 0, -20);
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "rename(%s, %s): %s\n", tmp_path, path, strerror(errno));
     }
 
-    LOGI("done\n");
+    ALOGI("done\n");
 
     return 0;
 }

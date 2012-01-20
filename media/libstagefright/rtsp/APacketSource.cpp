@@ -193,7 +193,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(
 
         if (i == 0) {
             FindAVCDimensions(nal, width, height);
-            LOGI("dimensions %dx%d", *width, *height);
+            ALOGI("dimensions %dx%d", *width, *height);
         }
     }
 
@@ -371,7 +371,7 @@ static sp<ABuffer> MakeMPEG4VideoCodecSpecificData(
         return NULL;
     }
 
-    LOGI("VOL dimensions = %dx%d", *width, *height);
+    ALOGI("VOL dimensions = %dx%d", *width, *height);
 
     size_t len1 = config->size() + GetSizeWidth(config->size()) + 1;
     size_t len2 = len1 + GetSizeWidth(len1) + 1 + 13;

@@ -18,7 +18,7 @@ GLfloat background;
 
 static void printGLString(const char *name, GLenum s) {
     const char *v = (const char *) glGetString(s);
-    LOGI("GL %s = %s\n", name, v);
+    ALOGI("GL %s = %s\n", name, v);
 }
 
 static void gluLookAt(float eyeX, float eyeY, float eyeZ,

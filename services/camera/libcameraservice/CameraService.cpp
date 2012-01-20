@@ -73,7 +73,7 @@ static CameraService *gCameraService;
 CameraService::CameraService()
 :mSoundRef(0), mModule(0)
 {
-    LOGI("CameraService started (pid=%d)", getpid());
+    ALOGI("CameraService started (pid=%d)", getpid());
     gCameraService = this;
 }
 
@@ -153,7 +153,7 @@ sp<ICamera> CameraService::connect(
     property_get("sys.secpolicy.camera.disabled", value, "0");
     if (strcmp(value, "1") == 0) {
         // Camera is disabled by DevicePolicyManager.
-        LOGI("Camera is disabled. connect X (pid %d) rejected", callingPid);
+        ALOGI("Camera is disabled. connect X (pid %d) rejected", callingPid);
         return NULL;
     }
 

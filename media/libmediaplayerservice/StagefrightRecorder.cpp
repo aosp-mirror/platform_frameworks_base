@@ -1131,7 +1131,7 @@ void StagefrightRecorder::setDefaultProfileIfNecessary() {
         audioSampleRate == mSampleRate &&
         audioChannels == mAudioChannels) {
         if (videoCodec == VIDEO_ENCODER_H264) {
-            LOGI("Force to use AVC baseline profile");
+            ALOGI("Force to use AVC baseline profile");
             setParamVideoEncoderProfile(OMX_VIDEO_AVCProfileBaseline);
         }
     }
@@ -1268,7 +1268,7 @@ status_t StagefrightRecorder::setupSurfaceMediaSource() {
         int32_t frameRate = 0;
         CHECK (mSurfaceMediaSource->getFormat()->findInt32(
                                         kKeyFrameRate, &frameRate));
-        LOGI("Frame rate is not explicitly set. Use the current frame "
+        ALOGI("Frame rate is not explicitly set. Use the current frame "
              "rate (%d fps)", frameRate);
         mFrameRate = frameRate;
     } else {
@@ -1319,7 +1319,7 @@ status_t StagefrightRecorder::setupCameraSource(
         int32_t frameRate = 0;
         CHECK ((*cameraSource)->getFormat()->findInt32(
                     kKeyFrameRate, &frameRate));
-        LOGI("Frame rate is not explicitly set. Use the current frame "
+        ALOGI("Frame rate is not explicitly set. Use the current frame "
              "rate (%d fps)", frameRate);
         mFrameRate = frameRate;
     }

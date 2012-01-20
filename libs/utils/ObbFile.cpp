@@ -179,14 +179,14 @@ bool ObbFile::parseObbFile(int fd)
     actual = TEMP_FAILURE_RETRY(read(fd, scanBuf, footerSize));
     // readAmount is guaranteed to be less than kMaxBufSize
     if (actual != (ssize_t)footerSize) {
-        LOGI("couldn't read ObbFile footer: %s\n", strerror(errno));
+        ALOGI("couldn't read ObbFile footer: %s\n", strerror(errno));
         free(scanBuf);
         return false;
     }
 
 #ifdef DEBUG
     for (int i = 0; i < footerSize; ++i) {
-        LOGI("char: 0x%02x\n", scanBuf[i]);
+        ALOGI("char: 0x%02x\n", scanBuf[i]);
     }
 #endif
 
@@ -217,7 +217,7 @@ bool ObbFile::parseObbFile(int fd)
     free(scanBuf);
 
 #ifdef DEBUG
-    LOGI("Obb scan succeeded: packageName=%s, version=%d\n", mPackageName.string(), mVersion);
+    ALOGI("Obb scan succeeded: packageName=%s, version=%d\n", mPackageName.string(), mVersion);
 #endif
 
     return true;

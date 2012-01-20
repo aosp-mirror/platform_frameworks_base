@@ -493,7 +493,7 @@ void IPCThreadState::joinThreadPool(bool isMain)
 
 void IPCThreadState::stopProcess(bool immediate)
 {
-    //LOGI("**** STOPPING PROCESS");
+    //ALOGI("**** STOPPING PROCESS");
     flushCommands();
     int fd = mProcess->mDriverFD;
     mProcess->mDriverFD = -1;
@@ -530,9 +530,9 @@ status_t IPCThreadState::transact(int32_t handle,
     if ((flags & TF_ONE_WAY) == 0) {
         #if 0
         if (code == 4) { // relayout
-            LOGI(">>>>>> CALLING transaction 4");
+            ALOGI(">>>>>> CALLING transaction 4");
         } else {
-            LOGI(">>>>>> CALLING transaction %d", code);
+            ALOGI(">>>>>> CALLING transaction %d", code);
         }
         #endif
         if (reply) {
@@ -543,9 +543,9 @@ status_t IPCThreadState::transact(int32_t handle,
         }
         #if 0
         if (code == 4) { // relayout
-            LOGI("<<<<<< RETURNING transaction 4");
+            ALOGI("<<<<<< RETURNING transaction 4");
         } else {
-            LOGI("<<<<<< RETURNING transaction %d", code);
+            ALOGI("<<<<<< RETURNING transaction %d", code);
         }
         #endif
         
@@ -1009,7 +1009,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
                 }
             }
 
-            //LOGI(">>>> TRANSACT from pid %d uid %d\n", mCallingPid, mCallingUid);
+            //ALOGI(">>>> TRANSACT from pid %d uid %d\n", mCallingPid, mCallingUid);
             
             Parcel reply;
             IF_LOG_TRANSACTIONS() {
@@ -1033,7 +1033,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
                 if (error < NO_ERROR) reply.setError(error);
             }
             
-            //LOGI("<<<< TRANSACT from pid %d restore pid %d uid %d\n",
+            //ALOGI("<<<< TRANSACT from pid %d restore pid %d uid %d\n",
             //     mCallingPid, origPid, origUid);
             
             if ((tr.flags & TF_ONE_WAY) == 0) {
@@ -1110,7 +1110,7 @@ void IPCThreadState::freeBuffer(Parcel* parcel, const uint8_t* data, size_t data
                                 const size_t* objects, size_t objectsSize,
                                 void* cookie)
 {
-    //LOGI("Freeing parcel %p", &parcel);
+    //ALOGI("Freeing parcel %p", &parcel);
     IF_LOG_COMMANDS() {
         alog << "Writing BC_FREE_BUFFER for " << data << endl;
     }

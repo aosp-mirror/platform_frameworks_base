@@ -88,7 +88,7 @@ public:
 
     ~CameraHardwareInterface()
     {
-        LOGI("Destroying camera %s", mName.string());
+        ALOGI("Destroying camera %s", mName.string());
         if(mDevice) {
             int rc = mDevice->common.close(&mDevice->common);
             if (rc != OK)
@@ -98,7 +98,7 @@ public:
 
     status_t initialize(hw_module_t *module)
     {
-        LOGI("Opening camera %s", mName.string());
+        ALOGI("Opening camera %s", mName.string());
         int rc = module->methods->open(module, mName.string(),
                                        (hw_device_t **)&mDevice);
         if (rc != OK) {

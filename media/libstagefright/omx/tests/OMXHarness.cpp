@@ -571,7 +571,7 @@ status_t Harness::testSeek(
     const char *mime = GetMimeFromComponentRole(componentRole);
 
     if (!mime) {
-        LOGI("Cannot perform seek test with this componentRole (%s)",
+        ALOGI("Cannot perform seek test with this componentRole (%s)",
              componentRole);
 
         return OK;
@@ -597,7 +597,7 @@ status_t Harness::testSeek(
     int64_t durationUs;
     CHECK(source->getFormat()->findInt64(kKeyDuration, &durationUs));
 
-    LOGI("stream duration is %lld us (%.2f secs)",
+    ALOGI("stream duration is %lld us (%.2f secs)",
          durationUs, durationUs / 1E6);
 
     static const int32_t kNumIterations = 5000;
@@ -617,19 +617,19 @@ status_t Harness::testSeek(
 
             requestedSeekTimeUs = -1;
 
-            LOGI("requesting linear read");
+            ALOGI("requesting linear read");
         } else {
             if (i == 0 || r < 0.55) {
                 // 5% chance of seeking beyond end of stream.
 
                 requestedSeekTimeUs = durationUs;
 
-                LOGI("requesting seek beyond EOF");
+                ALOGI("requesting seek beyond EOF");
             } else {
                 requestedSeekTimeUs =
                     (int64_t)(uniform_rand() * durationUs);
 
-                LOGI("requesting seek to %lld us (%.2f secs)",
+                ALOGI("requesting seek to %lld us (%.2f secs)",
                      requestedSeekTimeUs, requestedSeekTimeUs / 1E6);
             }
 
@@ -649,7 +649,7 @@ status_t Harness::testSeek(
                 buffer = NULL;
             }
 
-            LOGI("nearest keyframe is at %lld us (%.2f secs)",
+            ALOGI("nearest keyframe is at %lld us (%.2f secs)",
                  actualSeekTimeUs, actualSeekTimeUs / 1E6);
         }
 
@@ -733,7 +733,7 @@ status_t Harness::testSeek(
 status_t Harness::test(
         const char *componentName, const char *componentRole) {
     printf("testing %s [%s] ... ", componentName, componentRole);
-    LOGI("testing %s [%s].", componentName, componentRole);
+    ALOGI("testing %s [%s].", componentName, componentRole);
 
     status_t err1 = testStateTransitions(componentName, componentRole);
     status_t err2 = testSeek(componentName, componentRole);

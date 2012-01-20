@@ -431,7 +431,7 @@ status_t MP3Source::read(
             int32_t bitrate;
             if (!mMeta->findInt32(kKeyBitRate, &bitrate)) {
                 // bitrate is in bits/sec.
-                LOGI("no bitrate");
+                ALOGI("no bitrate");
 
                 return ERROR_UNSUPPORTED;
             }

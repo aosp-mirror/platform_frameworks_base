@@ -189,7 +189,7 @@ int free_cache(int64_t free_size)
     avail = disk_free();
     if (avail < 0) return -1;
 
-    LOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
+    ALOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
     if (avail >= free_size) return 0;
 
     if (create_persona_path(datadir, 0)) {
