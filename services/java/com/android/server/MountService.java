@@ -1169,7 +1169,7 @@ class MountService extends IMountService.Stub
          * amount of containers we'd ever expect to have. This keeps an
          * "asec list" from blocking a thread repeatedly.
          */
-        mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG);
+        mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG, 25);
         mReady = false;
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();
@@ -2429,6 +2429,10 @@ class MountService extends IMountService.Stub
                 pw.println(v.toString());
             }
         }
+
+        pw.println();
+        pw.println("  mConnection:");
+        mConnector.dump(fd, pw, args);
     }
 
     /** {@inheritDoc} */
