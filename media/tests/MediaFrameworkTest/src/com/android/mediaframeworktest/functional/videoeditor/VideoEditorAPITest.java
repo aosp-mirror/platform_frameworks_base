@@ -88,7 +88,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test Creation of Media Video Item.
      */
-    // TODO : remove TC_API_001
     @LargeTest
     public void testMediaVideoItem() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -130,7 +129,6 @@ public class VideoEditorAPITest extends
      * To test creation of Media Video Item with Set Extract Boundaries With Get
      * the Begin and End Time.
      */
-    // TODO : remove TC_API_002
     @LargeTest
     public void testMediaVideoItemExtractBoundaries() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -199,7 +197,6 @@ public class VideoEditorAPITest extends
     /**
      * To test creation of Media Video Item with Set and Get rendering Mode
      */
-    // TODO : remove TC_API_003
     @LargeTest
     public void testMediaVideoItemRenderingModes() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -238,12 +235,10 @@ public class VideoEditorAPITest extends
             mediaVideoItem1.getRenderingMode());
     }
 
-    /** Test Case  TC_API_004 is removed */
 
     /**
      * To Test the Media Video API : Set Audio Volume, Get Audio Volume and Mute
      */
-    // TODO : remove TC_API_005
     @LargeTest
     public void testMediaVideoItemAudioFeatures() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -301,7 +296,6 @@ public class VideoEditorAPITest extends
      * extractAudioWaveFormData
      */
 
-    // TODO : remove TC_API_006
     @LargeTest
     public void testMediaVideoItemGetWaveformData() throws Exception {
 
@@ -343,7 +337,6 @@ public class VideoEditorAPITest extends
      * To Test the Media Video API : Get Effect, GetAllEffects, remove Effect
      */
 
-    // TODO : remove TC_API_007
     @LargeTest
     public void testMediaVideoItemEffect() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -384,7 +377,6 @@ public class VideoEditorAPITest extends
      * To Test the Media Video API : Get Before and after transition
      */
 
-    // TODO : remove TC_API_008
     @LargeTest
     public void testMediaVideoItemTransitions() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -431,7 +423,6 @@ public class VideoEditorAPITest extends
      *
      */
 
-    // TODO : remove TC_API_009
     @LargeTest
     public void testMediaVideoItemOverlays() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -474,7 +465,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test Creation of Media Image Item.
      */
-    // TODO : remove TC_API_010
     @LargeTest
     public void testMediaImageItem() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -511,7 +501,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Media Image API : Get and Set rendering Mode
      */
-    // TODO : remove TC_API_011
     @LargeTest
     public void testMediaImageItemRenderingModes() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -554,7 +543,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Media Image API : GetHeight and GetWidth
      */
-    // TODO : remove TC_API_012
     @LargeTest
     public void testMediaImageItemHeightWidth() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -576,7 +564,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Media Image API : Scaled Height and Scaled GetWidth
      */
-    // TODO : remove TC_API_013
     @LargeTest
     public void testMediaImageItemScaledHeightWidth() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -597,7 +584,6 @@ public class VideoEditorAPITest extends
      * To Test the Media Image API : Get Effect, GetAllEffects, remove Effect
      */
 
-    // TODO : remove TC_API_014
     @LargeTest
     public void testMediaImageItemEffect() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -637,7 +623,6 @@ public class VideoEditorAPITest extends
      * To Test the Media Image API : Get Before and after transition
      */
 
-    // TODO : remove TC_API_015
     @LargeTest
     public void testMediaImageItemTransitions() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -685,7 +670,6 @@ public class VideoEditorAPITest extends
      * Overlay
      */
 
-    // TODO : remove TC_API_016
     @LargeTest
     public void testMediaImageItemOverlays() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -729,7 +713,6 @@ public class VideoEditorAPITest extends
      * To test creation of Audio Track
      */
 
-    // TODO : remove TC_API_017
     @LargeTest
     public void testAudioTrack() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -756,7 +739,6 @@ public class VideoEditorAPITest extends
     /**
      * To test creation of Audio Track with set extract boundaries
      */
-    // TODO : remove TC_API_018
     @LargeTest
     public void testAudioTrackExtractBoundaries() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -824,7 +806,6 @@ public class VideoEditorAPITest extends
     /**
      * To test creation of Audio Track with set Start Time and Get Time
      */
-    // TODO : remove TC_API_019
     @LargeTest
     public void testAudioTrackSetGetTime() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -840,7 +821,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Audio Track API: Enable Ducking
      */
-    // TODO : remove TC_API_020
     @LargeTest
     public void testAudioTrackEnableDucking() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -910,7 +890,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Audio Track API: Looping
      */
-    // TODO : remove TC_API_021
     @LargeTest
     public void testAudioTrackLooping() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -928,7 +907,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Audio Track API:Extract waveform data
      */
-    // TODO : remove TC_API_022
 
     @LargeTest
     public void testAudioTrackWaveFormData() throws Exception {
@@ -984,7 +962,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Audio Track API: Mute
      */
-    // TODO : remove TC_API_023
     @LargeTest
     public void testAudioTrackMute() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -1001,7 +978,6 @@ public class VideoEditorAPITest extends
     /**
      * To Test the Audio Track API: Get Volume and Set Volume
      */
-    // TODO : remove TC_API_024
     @LargeTest
     public void testAudioTrackGetSetVolume() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -1042,7 +1018,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect Color.
      */
-    // TODO : remove TC_API_025
     @LargeTest
     public void testAllEffects() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -1206,7 +1181,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect Color : Set duration and Get Duration
      */
-    // TODO : remove TC_API_026
     @LargeTest
     public void testEffectSetgetDuration() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -1246,7 +1220,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect Color : UNDEFINED color param value
      */
-    // TODO : remove TC_API_027
     @LargeTest
     public void testEffectUndefinedColorParam() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -1269,7 +1242,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect Color : with Invalid StartTime and Duration
      */
-    // TODO : remove TC_API_028
     @LargeTest
     public void testEffectInvalidStartTimeAndDuration() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -1315,7 +1287,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect : with NULL Media Item
      */
-    // TODO : remove TC_API_034
     @LargeTest
     public void testEffectNullMediaItem() throws Exception {
         boolean flagForException = false;
@@ -1331,7 +1302,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Effect : KenBurn Effect
      */
-    // TODO : remove TC_API_035
     @LargeTest
     public void testEffectKenBurn() throws Exception {
         // Test ken burn effect using a JPEG file.
@@ -1375,7 +1345,6 @@ public class VideoEditorAPITest extends
      * To test KenBurnEffect : Set StartRect and EndRect
      */
 
-    // TODO : remove TC_API_036
     @LargeTest
     public void testEffectKenBurnSet() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -1443,7 +1412,6 @@ public class VideoEditorAPITest extends
      * SPEED_UP/SPEED_DOWN/LINEAR/MIDDLE_SLOW/MIDDLE_FAST
      */
 
-    // TODO : remove TC_API_037
     @LargeTest
     public void testTransitionFadeBlack() throws Exception {
 
@@ -1591,7 +1559,6 @@ public class VideoEditorAPITest extends
      * SPEED_UP/SPEED_DOWN/LINEAR/MIDDLE_SLOW/MIDDLE_FAST
      */
 
-    // TODO : remove TC_API_038
     @LargeTest
     public void testTransitionCrossFade() throws Exception {
 
@@ -1742,7 +1709,6 @@ public class VideoEditorAPITest extends
      * ,DIRECTION_BOTTOM_OUT_TOP_IN
      */
 
-    // TODO : remove TC_API_039
     @LargeTest
     public void testTransitionSliding() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -1932,7 +1898,6 @@ public class VideoEditorAPITest extends
      * SPEED_UP/SPEED_DOWN/LINEAR/MIDDLE_SLOW/MIDDLE_FAST
      */
 
-    // TODO : remove TC_API_040
     @LargeTest
     public void testTransitionAlpha() throws Exception {
 
@@ -2111,7 +2076,6 @@ public class VideoEditorAPITest extends
      * To test Frame Overlay for Media Video Item
      */
 
-    // TODO : remove TC_API_041
     @LargeTest
     public void testFrameOverlayVideoItem() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -2147,7 +2111,6 @@ public class VideoEditorAPITest extends
      * Duration
      */
 
-    // TODO : remove TC_API_042
     @LargeTest
     public void testFrameOverlaySetAndGet() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -2193,7 +2156,6 @@ public class VideoEditorAPITest extends
      * Duration
      */
 
-    // TODO : remove TC_API_043
     @LargeTest
     public void testFrameOverlayInvalidTime() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -2242,7 +2204,6 @@ public class VideoEditorAPITest extends
     /**
      * To test Frame Overlay for Media Image Item
      */
-    // TODO : remove TC_API_045
     @LargeTest
     public void testFrameOverlayImageItem() throws Exception {
         final String imageItemFilename1 = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -2278,7 +2239,6 @@ public class VideoEditorAPITest extends
      * Duration
      */
 
-    // TODO : remove TC_API_046
     @LargeTest
     public void testFrameOverlaySetAndGetImage() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -2321,7 +2281,6 @@ public class VideoEditorAPITest extends
      * Duration
      */
 
-    // TODO : remove TC_API_047
     @LargeTest
     public void testFrameOverlayInvalidTimeImage() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -2370,7 +2329,6 @@ public class VideoEditorAPITest extends
      * To Test Frame Overlay Media Image Item :JPG File
      */
 
-    // TODO : remove TC_API_048
     @LargeTest
     public void testFrameOverlayJPGImage() throws Exception {
 
@@ -2392,7 +2350,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_049
     @LargeTest
     public void testVideoEditorAPI() throws Exception {
 
@@ -2555,7 +2512,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_050
     @LargeTest
     public void testVideoLessThanAudio() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH
@@ -2583,7 +2539,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_051
     @LargeTest
     public void testVideoContentHD() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH
@@ -2609,7 +2564,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_052
     @LargeTest
     public void testRemoveAudioTrack() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -2638,7 +2592,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_053
     @LargeTest
     public void testAudioDuckingDisable() throws Exception {
         final String audioFileName = INPUT_FILE_PATH +
@@ -2653,8 +2606,6 @@ public class VideoEditorAPITest extends
     }
 
 
-    // TODO : remove TC_API_054
-    /** This test case is added with Test case ID TC_API_010 */
 
       /**
      * To test: Need a basic test case for the get value for TransitionAlpha
@@ -2662,7 +2613,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_055
     @LargeTest
     public void testTransitionAlphaBasic() throws Exception {
 
@@ -2700,7 +2650,6 @@ public class VideoEditorAPITest extends
      *
      * @throws Exception
      */
-    // TODO : remove TC_API_056
     @LargeTest
     public void testNullAPIs() throws Exception {
 

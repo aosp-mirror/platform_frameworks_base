@@ -91,7 +91,6 @@ public class VideoEditorExportTest extends
     /**
      * To Test export : Merge and Trim different types of Video and Image files
      */
-    // TODO :remove TC_EXP_001
     @LargeTest
     public void testExportMergeTrim() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH
@@ -173,7 +172,6 @@ public class VideoEditorExportTest extends
     /**
      *To Test export : With Effect and Overlays on Different Media Items
      */
-    // TODO :remove TC_EXP_002
     @LargeTest
     public void testExportEffectOverlay() throws Exception {
           final String videoItemFilename1 = INPUT_FILE_PATH
@@ -301,7 +299,6 @@ public class VideoEditorExportTest extends
     /**
      * To test export : with Image with KenBurnEffect
      */
-    // TODO : remove TC_EXP_003
     @LargeTest
     public void testExportEffectKenBurn() throws Exception {
         final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -359,7 +356,6 @@ public class VideoEditorExportTest extends
     /**
      * To Test Export : With Video and Image and An Audio BackGround Track
      */
-    // TODO : remove TC_EXP_004
     @LargeTest
     public void testExportAudio() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -420,7 +416,6 @@ public class VideoEditorExportTest extends
     /**
      *To Test export : With Transition on Different Media Items
      */
-    // TODO :remove TC_EXP_005
     @LargeTest
     public void testExportTransition() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH
@@ -540,7 +535,6 @@ public class VideoEditorExportTest extends
      *
      * @throws Exception
      */
-    // TODO :remove TC_EXP_006
     @LargeTest
     public void testExportWithoutMediaItems() throws Exception {
         boolean flagForException = false;
@@ -566,7 +560,6 @@ public class VideoEditorExportTest extends
      *
      * @throws Exception
      */
-    // TODO :remove TC_EXP_007
     @LargeTest
     public void testExportWithoutMediaItemsAddRemove() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -621,7 +614,6 @@ public class VideoEditorExportTest extends
      *
      * @throws Exception
      */
-    // TODO :remove TC_EXP_008
     @LargeTest
     public void testExportMMS() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH
