@@ -22,14 +22,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.LocalLog;
 import android.util.Slog;
 
 import com.google.android.collect.Lists;
 
+import java.nio.charset.Charsets;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charsets;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -45,6 +48,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     private String mSocket;
     private OutputStream mOutputStream;
+    private LocalLog mLocalLog;
 
     private final BlockingQueue<NativeDaemonEvent> mResponseQueue;
 
@@ -57,11 +61,12 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private final int BUFFER_SIZE = 4096;
 
     NativeDaemonConnector(INativeDaemonConnectorCallbacks callbacks, String socket,
-            int responseQueueSize, String logTag) {
+            int responseQueueSize, String logTag, int maxLogSize) {
         mCallbacks = callbacks;
         mSocket = socket;
         mResponseQueue = new LinkedBlockingQueue<NativeDaemonEvent>(responseQueueSize);
         TAG = logTag != null ? logTag : "NativeDaemonConnector";
+        mLocalLog = new LocalLog(maxLogSize);
     }
 
     @Override
@@ -125,7 +130,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     if (buffer[i] == 0) {
                         final String rawEvent = new String(
                                 buffer, start, i - start, Charsets.UTF_8);
-                        if (LOGD) Slog.d(TAG, "RCV <- " + rawEvent);
+                        log("RCV <- {" + rawEvent + "}");
 
                         try {
                             final NativeDaemonEvent event = NativeDaemonEvent.parseRawEvent(
@@ -208,7 +213,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         }
 
         final String unterminated = builder.toString();
-        if (LOGD) Slog.d(TAG, "SND -> " + unterminated);
+        log("SND -> {" + unterminated + "}");
 
         builder.append('\0');
 
@@ -431,5 +436,14 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     /** {@inheritDoc} */
     public void monitor() {
         synchronized (mDaemonLock) { }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mLocalLog.dump(fd, pw, args);
+    }
+
+    private void log(String logstring) {
+        if (LOGD) Slog.d(TAG, logstring);
+        mLocalLog.log(logstring);
     }
 }

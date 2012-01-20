@@ -163,7 +163,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), "netd", 10, NETD_TAG);
+                new NetdCallbackReceiver(), "netd", 10, NETD_TAG, 50);
         mThread = new Thread(mConnector, NETD_TAG);
 
         // Add ourself to the Watchdog monitors.
@@ -1264,6 +1264,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
+
+        pw.println("NetworkManagementService NativeDaemonConnector Log:");
+        mConnector.dump(fd, pw, args);
+        pw.println();
 
         pw.print("Bandwidth control enabled: "); pw.println(mBandwidthControlEnabled);
 
