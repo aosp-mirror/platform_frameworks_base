@@ -801,7 +801,7 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         thread = checkPlaybackThread_l(ioHandle);
         if (thread == NULL) {
             thread = checkRecordThread_l(ioHandle);
-        } else if (thread.get() == primaryPlaybackThread_l()) {
+        } else if (thread == primaryPlaybackThread_l()) {
             // indicate output device change to all input threads for pre processing
             AudioParameter param = AudioParameter(keyValuePairs);
             int value;
@@ -5760,7 +5760,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::ThreadBase::createEffect_l(
             effect = chain->getEffectFromDesc_l(desc);
         }
 
-        ALOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
+        ALOGV("createEffect_l() got effect %p on chain %p", effect.get(), chain.get());
 
         if (effect == 0) {
             int id = mAudioFlinger->nextUniqueId();
