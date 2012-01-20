@@ -2144,8 +2144,6 @@ public class Paint {
     private static native void native_setTextAlign(int native_object,
                                                    int align);
 
-    private static native float native_getFontMetrics(int native_paint,
-                                                      FontMetrics metrics);
     private static native int native_getTextWidths(int native_object,
                             char[] text, int index, int count, float[] widths);
     private static native int native_getTextWidths(int native_object,
