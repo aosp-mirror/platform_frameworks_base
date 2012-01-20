@@ -138,7 +138,6 @@ public final class SQLiteDebug {
      */
     public static PagerStats getDatabaseInfo() {
         PagerStats stats = new PagerStats();
-        SQLiteGlobal.initializeOnce();
         nativeGetPagerStats(stats);
         stats.dbStats = SQLiteDatabase.getDbStats();
         return stats;
