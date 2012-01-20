@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cat;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,10 +114,10 @@ class ComprehensionTlv {
      */
     public static ComprehensionTlv decode(byte[] data, int startIndex)
             throws ResultException {
-        try {
-            int curIndex = startIndex;
-            int endIndex = data.length;
+        int curIndex = startIndex;
+        int endIndex = data.length;
 
+        try {
             /* tag */
             int tag;
             boolean cr; // Comprehension required flag
@@ -124,9 +126,11 @@ class ComprehensionTlv {
             case 0:
             case 0xff:
             case 0x80:
-                // for error handling
-                // these one make exception while decoding the abnormal command.
-                // (in case of Ghana MTN simcard , JDI simcard)
+                Log.d("CAT     ", "decode: unexpected first tag byte=" + Integer.toHexString(temp) +
+                        ", startIndex=" + startIndex + " curIndex=" + curIndex +
+                        " endIndex=" + endIndex);
+                // Return null which will stop decoding, this has occurred
+                // with Ghana MTN simcard and JDI simcard.
                 return null;
 
             case 0x7f: // tag is in three-byte format
@@ -153,7 +157,10 @@ class ComprehensionTlv {
                 length = data[curIndex++] & 0xff;
                 if (length < 0x80) {
                     throw new ResultException(
-                            ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                            ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                            "length < 0x80 length=" + Integer.toHexString(length) +
+                            " startIndex=" + startIndex + " curIndex=" + curIndex +
+                            " endIndex=" + endIndex);
                 }
             } else if (temp == 0x82) {
                 length = ((data[curIndex] & 0xff) << 8)
@@ -161,7 +168,10 @@ class ComprehensionTlv {
                 curIndex += 2;
                 if (length < 0x100) {
                     throw new ResultException(
-                            ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                            ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                            "two byte length < 0x100 length=" + Integer.toHexString(length) +
+                            " startIndex=" + startIndex + " curIndex=" + curIndex +
+                            " endIndex=" + endIndex);
                 }
             } else if (temp == 0x83) {
                 length = ((data[curIndex] & 0xff) << 16)
@@ -170,16 +180,25 @@ class ComprehensionTlv {
                 curIndex += 3;
                 if (length < 0x10000) {
                     throw new ResultException(
-                            ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                            ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                            "three byte length < 0x10000 length=0x" + Integer.toHexString(length) +
+                            " startIndex=" + startIndex + " curIndex=" + curIndex +
+                            " endIndex=" + endIndex);
                 }
             } else {
-                throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                        "Bad length modifer=" + temp +
+                        " startIndex=" + startIndex + " curIndex=" + curIndex +
+                        " endIndex=" + endIndex);
+
             }
 
             return new ComprehensionTlv(tag, cr, length, data, curIndex);
 
         } catch (IndexOutOfBoundsException e) {
-            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                    "IndexOutOfBoundsException" + " startIndex=" + startIndex +
+                    " curIndex=" + curIndex + " endIndex=" + endIndex);
         }
     }
 }

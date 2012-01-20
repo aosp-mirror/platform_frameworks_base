@@ -34,6 +34,11 @@ class CommandParams {
     }
 
     boolean setIcon(Bitmap icon) { return true; }
+
+    @Override
+    public String toString() {
+        return cmdDet.toString();
+    }
 }
 
 class DisplayTextParams extends CommandParams {

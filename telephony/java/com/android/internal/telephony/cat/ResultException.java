@@ -25,6 +25,7 @@ package com.android.internal.telephony.cat;
 public class ResultException extends CatException {
     private ResultCode mResult;
     private int mAdditionalInfo;
+    private String mExplanation;
 
     public ResultException(ResultCode result) {
         super();
@@ -48,18 +49,28 @@ public class ResultException extends CatException {
 
         mResult = result;
         mAdditionalInfo = -1;
+        mExplanation = "";
+    }
+
+    public ResultException(ResultCode result, String explanation) {
+        this(result);
+        mExplanation = explanation;
     }
 
     public ResultException(ResultCode result, int additionalInfo) {
-        super();
+        this(result);
 
         if (additionalInfo < 0) {
             throw new AssertionError(
                     "Additional info must be greater than zero!");
         }
 
-        mResult = result;
         mAdditionalInfo = additionalInfo;
+    }
+
+    public ResultException(ResultCode result, int additionalInfo, String explanation) {
+        this(result, additionalInfo);
+        mExplanation = explanation;
     }
 
     public ResultCode result() {
@@ -72,5 +83,15 @@ public class ResultException extends CatException {
 
     public int additionalInfo() {
         return mAdditionalInfo;
+    }
+
+    public String explanation() {
+        return mExplanation;
+    }
+
+    @Override
+    public String toString() {
+        return "result=" + mResult + " additionalInfo=" + mAdditionalInfo +
+                " explantion=" + mExplanation;
     }
 }
