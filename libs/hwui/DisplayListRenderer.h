@@ -422,7 +422,7 @@ private:
             return;
         }
 
-        SkPaint* paintCopy =  mPaintMap.valueFor(paint);
+        SkPaint* paintCopy = mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
             paintCopy = new SkPaint(*paint);
             mPaintMap.add(paint, paintCopy);

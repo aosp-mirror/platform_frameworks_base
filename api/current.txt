@@ -8001,7 +8001,7 @@ package android.graphics {
     method public android.graphics.DrawFilter getDrawFilter();
     method public int getHeight();
     method public deprecated void getMatrix(android.graphics.Matrix);
-    method public final android.graphics.Matrix getMatrix();
+    method public final deprecated android.graphics.Matrix getMatrix();
     method public int getMaximumBitmapHeight();
     method public int getMaximumBitmapWidth();
     method public int getSaveCount();
