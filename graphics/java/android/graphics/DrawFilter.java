@@ -28,7 +28,11 @@ public class DrawFilter {
     /* package */ int mNativeInt;    // pointer to native object
 
     protected void finalize() throws Throwable {
-        nativeDestructor(mNativeInt);
+        try {
+            nativeDestructor(mNativeInt);
+        } finally {
+            super.finalize();
+        }
     }
     
     private static native void nativeDestructor(int nativeDrawFilter);
