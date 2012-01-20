@@ -8920,14 +8920,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             wordIterator.setCharSequence(mText, minOffset, maxOffset);
 
             selectionStart = wordIterator.getBeginning(minOffset);
-            if (selectionStart == BreakIterator.DONE) return false;
-
             selectionEnd = wordIterator.getEnd(maxOffset);
-            if (selectionEnd == BreakIterator.DONE) return false;
 
-            if (selectionStart == selectionEnd) {
+            if (selectionStart == BreakIterator.DONE || selectionEnd == BreakIterator.DONE ||
+                    selectionStart == selectionEnd) {
                 // Possible when the word iterator does not properly handle the text's language
-                long range = getCharRange(selectionStart);
+                long range = getCharRange(minOffset);
                 selectionStart = extractRangeStartFromLong(range);
                 selectionEnd = extractRangeEndFromLong(range);
             }
