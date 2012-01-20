@@ -207,19 +207,6 @@ status_t AudioPolicyService::setPhoneState(audio_mode_t state)
     return NO_ERROR;
 }
 
-status_t AudioPolicyService::setRingerMode(uint32_t mode, uint32_t mask)
-{
-    if (mpAudioPolicy == NULL) {
-        return NO_INIT;
-    }
-    if (!checkPermission()) {
-        return PERMISSION_DENIED;
-    }
-
-    mpAudioPolicy->set_ringer_mode(mpAudioPolicy, mode, mask);
-    return NO_ERROR;
-}
-
 status_t AudioPolicyService::setForceUse(audio_policy_force_use_t usage,
                                          audio_policy_forced_cfg_t config)
 {
