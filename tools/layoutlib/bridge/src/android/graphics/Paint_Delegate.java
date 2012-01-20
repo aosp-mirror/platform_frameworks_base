@@ -904,17 +904,6 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static float native_getFontMetrics(int native_paint, FontMetrics metrics) {
-        // get the delegate from the native int.
-        Paint_Delegate delegate = sManager.getDelegate(native_paint);
-        if (delegate == null) {
-            return 0.f;
-        }
-
-        return delegate.getFontMetrics(metrics);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
             int count, float[] widths) {
         // get the delegate from the native int.
