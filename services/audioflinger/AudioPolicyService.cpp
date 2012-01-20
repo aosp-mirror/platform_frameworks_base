@@ -1362,7 +1362,7 @@ static audio_io_handle_t aps_open_output(void *service,
                                              audio_policy_output_flags_t flags)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL) {
+    if (af == 0) {
         ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
@@ -1376,7 +1376,7 @@ static audio_io_handle_t aps_open_dup_output(void *service,
                                                  audio_io_handle_t output2)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL) {
+    if (af == 0) {
         ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
@@ -1386,7 +1386,7 @@ static audio_io_handle_t aps_open_dup_output(void *service,
 static int aps_close_output(void *service, audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL)
+    if (af == 0)
         return PERMISSION_DENIED;
 
     return af->closeOutput(output);
@@ -1395,7 +1395,7 @@ static int aps_close_output(void *service, audio_io_handle_t output)
 static int aps_suspend_output(void *service, audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL) {
+    if (af == 0) {
         ALOGW("%s: could not get AudioFlinger", __func__);
         return PERMISSION_DENIED;
     }
@@ -1406,7 +1406,7 @@ static int aps_suspend_output(void *service, audio_io_handle_t output)
 static int aps_restore_output(void *service, audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL) {
+    if (af == 0) {
         ALOGW("%s: could not get AudioFlinger", __func__);
         return PERMISSION_DENIED;
     }
@@ -1422,7 +1422,7 @@ static audio_io_handle_t aps_open_input(void *service,
                                             audio_in_acoustics_t acoustics)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL) {
+    if (af == 0) {
         ALOGW("%s: could not get AudioFlinger", __func__);
         return 0;
     }
@@ -1434,7 +1434,7 @@ static audio_io_handle_t aps_open_input(void *service,
 static int aps_close_input(void *service, audio_io_handle_t input)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL)
+    if (af == 0)
         return PERMISSION_DENIED;
 
     return af->closeInput(input);
@@ -1444,7 +1444,7 @@ static int aps_set_stream_output(void *service, audio_stream_type_t stream,
                                      audio_io_handle_t output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL)
+    if (af == 0)
         return PERMISSION_DENIED;
 
     return af->setStreamOutput(stream, output);
@@ -1455,7 +1455,7 @@ static int aps_move_effects(void *service, int session,
                                 audio_io_handle_t dst_output)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
-    if (af == NULL)
+    if (af == 0)
         return PERMISSION_DENIED;
 
     return af->moveEffects(session, (int)src_output, (int)dst_output);
