@@ -141,7 +141,7 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
         const sp<MediaSource>& source, SkBitmap* bm) {
     status_t rt = decoder->start();
     if (rt != OK) {
-        LOGE("Cannot start OMX Decoder!");
+        ALOGE("Cannot start OMX Decoder!");
         return false;
     }
     int64_t startTime = getNowUs();

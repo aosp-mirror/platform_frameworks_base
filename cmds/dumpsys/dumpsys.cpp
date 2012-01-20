@@ -31,7 +31,7 @@ int main(int argc, char* const argv[])
     sp<IServiceManager> sm = defaultServiceManager();
     fflush(stdout);
     if (sm == NULL) {
-		LOGE("Unable to get default service manager!");
+		ALOGE("Unable to get default service manager!");
         aerr << "dumpsys: Unable to get default service manager!" << endl;
         return 20;
     }

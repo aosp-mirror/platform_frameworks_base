@@ -169,7 +169,7 @@ JNIOnInfoListener::JNIOnInfoListener(JNIEnv* env, jobject thiz, jobject weak_thi
     jclass clazz = env->GetObjectClass(thiz);
 
     if (clazz == NULL) {
-        LOGE("Can't find android/drm/DrmManagerClient");
+        ALOGE("Can't find android/drm/DrmManagerClient");
         jniThrowException(env, "java/lang/Exception", NULL);
         return;
     }

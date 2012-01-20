@@ -217,7 +217,7 @@ bool MCameraClient::test(OP op, int v1, int v2) {
 
 void MCameraClient::assertTest(OP op, int v1, int v2) {
     if (!test(op, v1, v2)) {
-        LOGE("assertTest failed: op=%d, v1=%d, v2=%d", op, v1, v2);
+        ALOGE("assertTest failed: op=%d, v1=%d, v2=%d", op, v1, v2);
         ASSERT(0);
     }
 }

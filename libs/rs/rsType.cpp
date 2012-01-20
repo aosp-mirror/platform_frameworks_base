@@ -167,7 +167,7 @@ Type *Type::createFromStream(Context *rsc, IStream *stream) {
     // First make sure we are reading the correct object
     RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
     if (classID != RS_A3D_CLASS_ID_TYPE) {
-        LOGE("type loading skipped due to invalid class id\n");
+        ALOGE("type loading skipped due to invalid class id\n");
         return NULL;
     }
 

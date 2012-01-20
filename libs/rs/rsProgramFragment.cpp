@@ -38,12 +38,12 @@ ProgramFragment::~ProgramFragment() {
 
 void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a) {
     if (isUserProgram()) {
-        LOGE("Attempting to set fixed function emulation color on user program");
+        ALOGE("Attempting to set fixed function emulation color on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot  set fixed function emulation color on user program");
         return;
     }
     if (mHal.state.constants[0] == NULL) {
-        LOGE("Unable to set fixed function emulation color because allocation is missing");
+        ALOGE("Unable to set fixed function emulation color because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Unable to set fixed function emulation color because allocation is missing");
         return;
     }
@@ -63,7 +63,7 @@ void ProgramFragment::setup(Context *rsc, ProgramFragmentState *state) {
 
     for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
         if (!mHal.state.textures[ct]) {
-            LOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
+            ALOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
             continue;
         }
@@ -131,7 +131,7 @@ RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc, const char * shaderTex
                              size_t paramLength) {
     ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
     pf->incUserRef();
-    //LOGE("rsi_ProgramFragmentCreate %p", pf);
+    //ALOGE("rsi_ProgramFragmentCreate %p", pf);
     return pf;
 }
 

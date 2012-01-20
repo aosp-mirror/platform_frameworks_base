@@ -80,7 +80,7 @@ status_t AMRWBEncoder::initCheck() {
     CHECK(mApiHandle);
 
     if (VO_ERR_NONE != voGetAMRWBEncAPI(mApiHandle)) {
-        LOGE("Failed to get api handle");
+        ALOGE("Failed to get api handle");
         return UNKNOWN_ERROR;
     }
 
@@ -97,20 +97,20 @@ status_t AMRWBEncoder::initCheck() {
     userData.memflag = VO_IMF_USERMEMOPERATOR;
     userData.memData = (VO_PTR) mMemOperator;
     if (VO_ERR_NONE != mApiHandle->Init(&mEncoderHandle, VO_AUDIO_CodingAMRWB, &userData)) {
-        LOGE("Failed to init AMRWB encoder");
+        ALOGE("Failed to init AMRWB encoder");
         return UNKNOWN_ERROR;
     }
 
     // Configure AMRWB encoder$
     VOAMRWBMODE mode = pickModeFromBitRate(mBitRate);
     if (VO_ERR_NONE != mApiHandle->SetParam(mEncoderHandle, VO_PID_AMRWB_MODE,  &mode)) {
-        LOGE("Failed to set AMRWB encoder mode to %d", mode);
+        ALOGE("Failed to set AMRWB encoder mode to %d", mode);
         return UNKNOWN_ERROR;
     }
 
     VOAMRWBFRAMETYPE type = VOAMRWB_RFC3267;
     if (VO_ERR_NONE != mApiHandle->SetParam(mEncoderHandle, VO_PID_AMRWB_FRAMETYPE, &type)) {
-        LOGE("Failed to set AMRWB encoder frame type to %d", type);
+        ALOGE("Failed to set AMRWB encoder frame type to %d", type);
         return UNKNOWN_ERROR;
     }
 
@@ -140,7 +140,7 @@ status_t AMRWBEncoder::start(MetaData *params) {
 
     status_t err = mSource->start(params);
     if (err != OK) {
-        LOGE("AudioSource is not available");
+        ALOGE("AudioSource is not available");
         return err;
     }
     mStarted = true;

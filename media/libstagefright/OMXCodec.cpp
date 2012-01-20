@@ -181,7 +181,7 @@ static const CodecInfo kEncoderInfo[] = {
 
 #define CODEC_LOGI(x, ...) ALOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGV(x, ...) ALOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
-#define CODEC_LOGE(x, ...) LOGE("[%s] "x, mComponentName, ##__VA_ARGS__)
+#define CODEC_LOGE(x, ...) ALOGE("[%s] "x, mComponentName, ##__VA_ARGS__)
 
 struct OMXCodecObserver : public BnOMXObserver {
     OMXCodecObserver() {
@@ -625,7 +625,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
             status_t err;
             if ((err = parseAVCCodecSpecificData(
                             data, size, &profile, &level)) != OK) {
-                LOGE("Malformed AVC codec specific data.");
+                ALOGE("Malformed AVC codec specific data.");
                 return err;
             }
 
@@ -639,7 +639,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                 // does not handle this gracefully and would clobber the heap
                 // and wreak havoc instead...
 
-                LOGE("Profile and/or level exceed the decoder's capabilities.");
+                ALOGE("Profile and/or level exceed the decoder's capabilities.");
                 return ERROR_UNSUPPORTED;
             }
         } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
@@ -981,7 +981,7 @@ void OMXCodec::setVideoInputFormat(
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
     } else {
-        LOGE("Not a supported video mime type: %s", mime);
+        ALOGE("Not a supported video mime type: %s", mime);
         CHECK(!"Should not be here. Not a supported video mime type.");
     }
 
@@ -1375,7 +1375,7 @@ status_t OMXCodec::setVideoOutputFormat(
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG2, mime)) {
         compressionFormat = OMX_VIDEO_CodingMPEG2;
     } else {
-        LOGE("Not a supported video mime type: %s", mime);
+        ALOGE("Not a supported video mime type: %s", mime);
         CHECK(!"Should not be here. Not a supported video mime type.");
     }
 
@@ -1664,7 +1664,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
     }
 
     if ((mFlags & kEnableGrallocUsageProtected) && portIndex == kPortIndexOutput) {
-        LOGE("protected output buffers must be stent to an ANativeWindow");
+        ALOGE("protected output buffers must be stent to an ANativeWindow");
         return PERMISSION_DENIED;
     }
 
@@ -1673,7 +1673,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
             && portIndex == kPortIndexInput) {
         err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexInput, OMX_TRUE);
         if (err != OK) {
-            LOGE("Storing meta data in video buffers is not supported");
+            ALOGE("Storing meta data in video buffers is not supported");
             return err;
         }
     }
@@ -1735,7 +1735,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         }
 
         if (err != OK) {
-            LOGE("allocate_buffer_with_backup failed");
+            ALOGE("allocate_buffer_with_backup failed");
             return err;
         }
 
@@ -1849,7 +1849,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
             def.format.video.eColorFormat);
 
     if (err != 0) {
-        LOGE("native_window_set_buffers_geometry failed: %s (%d)",
+        ALOGE("native_window_set_buffers_geometry failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -1881,11 +1881,11 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
                 mNativeWindow.get(), NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
                 &queuesToNativeWindow);
         if (err != 0) {
-            LOGE("error authenticating native window: %d", err);
+            ALOGE("error authenticating native window: %d", err);
             return err;
         }
         if (queuesToNativeWindow != 1) {
-            LOGE("native window could not be authenticated");
+            ALOGE("native window could not be authenticated");
             return PERMISSION_DENIED;
         }
     }
@@ -1894,7 +1894,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     err = native_window_set_usage(
             mNativeWindow.get(), usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
     if (err != 0) {
-        LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
+        ALOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
         return err;
     }
 
@@ -1902,7 +1902,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     err = mNativeWindow->query(mNativeWindow.get(),
             NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &minUndequeuedBufs);
     if (err != 0) {
-        LOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
+        ALOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -1925,7 +1925,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     err = native_window_set_buffer_count(
             mNativeWindow.get(), def.nBufferCountActual);
     if (err != 0) {
-        LOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err),
+        ALOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err),
                 -err);
         return err;
     }
@@ -1938,7 +1938,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         ANativeWindowBuffer* buf;
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
         if (err != 0) {
-            LOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
+            ALOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
             break;
         }
 
@@ -2052,7 +2052,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = native_window_api_disconnect(mNativeWindow.get(),
             NATIVE_WINDOW_API_MEDIA);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: api_disconnect failed: %s (%d)",
+        ALOGE("error pushing blank frames: api_disconnect failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -2060,7 +2060,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = native_window_api_connect(mNativeWindow.get(),
             NATIVE_WINDOW_API_CPU);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: api_connect failed: %s (%d)",
+        ALOGE("error pushing blank frames: api_connect failed: %s (%d)",
                 strerror(-err), -err);
         return err;
     }
@@ -2068,7 +2068,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = native_window_set_scaling_mode(mNativeWindow.get(),
             NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: set_buffers_geometry failed: %s (%d)",
+        ALOGE("error pushing blank frames: set_buffers_geometry failed: %s (%d)",
                 strerror(-err), -err);
         goto error;
     }
@@ -2076,7 +2076,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = native_window_set_buffers_geometry(mNativeWindow.get(), 1, 1,
             HAL_PIXEL_FORMAT_RGBX_8888);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: set_buffers_geometry failed: %s (%d)",
+        ALOGE("error pushing blank frames: set_buffers_geometry failed: %s (%d)",
                 strerror(-err), -err);
         goto error;
     }
@@ -2084,7 +2084,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = native_window_set_usage(mNativeWindow.get(),
             GRALLOC_USAGE_SW_WRITE_OFTEN);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: set_usage failed: %s (%d)",
+        ALOGE("error pushing blank frames: set_usage failed: %s (%d)",
                 strerror(-err), -err);
         goto error;
     }
@@ -2092,7 +2092,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     err = mNativeWindow->query(mNativeWindow.get(),
             NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &minUndequeuedBufs);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: MIN_UNDEQUEUED_BUFFERS query "
+        ALOGE("error pushing blank frames: MIN_UNDEQUEUED_BUFFERS query "
                 "failed: %s (%d)", strerror(-err), -err);
         goto error;
     }
@@ -2100,7 +2100,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     numBufs = minUndequeuedBufs + 1;
     err = native_window_set_buffer_count(mNativeWindow.get(), numBufs);
     if (err != NO_ERROR) {
-        LOGE("error pushing blank frames: set_buffer_count failed: %s (%d)",
+        ALOGE("error pushing blank frames: set_buffer_count failed: %s (%d)",
                 strerror(-err), -err);
         goto error;
     }
@@ -2112,7 +2112,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
     for (int i = 0; i < numBufs + 1; i++) {
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &anb);
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: dequeueBuffer failed: %s (%d)",
+            ALOGE("error pushing blank frames: dequeueBuffer failed: %s (%d)",
                     strerror(-err), -err);
             goto error;
         }
@@ -2121,7 +2121,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
         err = mNativeWindow->lockBuffer(mNativeWindow.get(),
                 buf->getNativeBuffer());
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: lockBuffer failed: %s (%d)",
+            ALOGE("error pushing blank frames: lockBuffer failed: %s (%d)",
                     strerror(-err), -err);
             goto error;
         }
@@ -2130,7 +2130,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
         uint32_t* img = NULL;
         err = buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: lock failed: %s (%d)",
+            ALOGE("error pushing blank frames: lock failed: %s (%d)",
                     strerror(-err), -err);
             goto error;
         }
@@ -2139,7 +2139,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
 
         err = buf->unlock();
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: unlock failed: %s (%d)",
+            ALOGE("error pushing blank frames: unlock failed: %s (%d)",
                     strerror(-err), -err);
             goto error;
         }
@@ -2147,7 +2147,7 @@ status_t OMXCodec::pushBlankBuffersToNativeWindow() {
         err = mNativeWindow->queueBuffer(mNativeWindow.get(),
                 buf->getNativeBuffer());
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: queueBuffer failed: %s (%d)",
+            ALOGE("error pushing blank frames: queueBuffer failed: %s (%d)",
                     strerror(-err), -err);
             goto error;
         }
@@ -2174,7 +2174,7 @@ error:
         err = native_window_api_disconnect(mNativeWindow.get(),
                 NATIVE_WINDOW_API_CPU);
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: api_disconnect failed: %s (%d)",
+            ALOGE("error pushing blank frames: api_disconnect failed: %s (%d)",
                     strerror(-err), -err);
             return err;
         }
@@ -2182,7 +2182,7 @@ error:
         err = native_window_api_connect(mNativeWindow.get(),
                 NATIVE_WINDOW_API_MEDIA);
         if (err != NO_ERROR) {
-            LOGE("error pushing blank frames: api_connect failed: %s (%d)",
+            ALOGE("error pushing blank frames: api_connect failed: %s (%d)",
                     strerror(-err), -err);
             return err;
         }

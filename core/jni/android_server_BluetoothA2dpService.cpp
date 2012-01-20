@@ -65,7 +65,7 @@ static bool initNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
     nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
-        LOGE("%s: out of memory!", __FUNCTION__);
+        ALOGE("%s: out of memory!", __FUNCTION__);
         return false;
     }
     env->GetJavaVM( &(nat->vm) );
@@ -77,7 +77,7 @@ static bool initNative(JNIEnv* env, jobject object) {
     dbus_threads_init_default();
     nat->conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
     if (dbus_error_is_set(&err)) {
-        LOGE("Could not get onto the system bus: %s", err.message);
+        ALOGE("Could not get onto the system bus: %s", err.message);
         dbus_error_free(&err);
         return false;
     }
@@ -117,7 +117,7 @@ static jobjectArray getSinkPropertiesNative(JNIEnv *env, jobject object,
             LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
             return NULL;
         } else if (!reply) {
-            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
+            ALOGE("DBus reply is NULL in function %s", __FUNCTION__);
             return NULL;
         }
         DBusMessageIter iter;
@@ -268,7 +268,7 @@ DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
         ALOGV("... ignored");
     }
     if (env->ExceptionCheck()) {
-        LOGE("VM Exception occurred while handling %s.%s (%s) in %s,"
+        ALOGE("VM Exception occurred while handling %s.%s (%s) in %s,"
              " leaving for VM",
              dbus_message_get_interface(msg), dbus_message_get_member(msg),
              dbus_message_get_path(msg), __FUNCTION__);
@@ -326,7 +326,7 @@ static JNINativeMethod sMethods[] = {
 int register_android_server_BluetoothA2dpService(JNIEnv *env) {
     jclass clazz = env->FindClass("android/server/BluetoothA2dpService");
     if (clazz == NULL) {
-        LOGE("Can't find android/server/BluetoothA2dpService");
+        ALOGE("Can't find android/server/BluetoothA2dpService");
         return -1;
     }
 

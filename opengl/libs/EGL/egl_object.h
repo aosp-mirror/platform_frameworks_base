@@ -110,7 +110,7 @@ void egl_object_t::LocalRef<N,T>::release() const {
     if (ref) {
         if (ref->decRef() == 1) {
             // shouldn't happen because this is called from LocalRef
-            LOGE("LocalRef::release() removed the last reference!");
+            ALOGE("LocalRef::release() removed the last reference!");
         }
     }
 }

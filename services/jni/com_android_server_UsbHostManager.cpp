@@ -45,7 +45,7 @@ static jmethodID method_usbDeviceRemoved;
 
 static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
+        ALOGE("An exception was thrown by callback '%s'.", methodName);
         LOGE_EX(env);
         env->ExceptionClear();
     }
@@ -57,7 +57,7 @@ static int usb_device_added(const char *devname, void* client_data) {
 
     struct usb_device *device = usb_device_open(devname);
     if (!device) {
-        LOGE("usb_device_open failed\n");
+        ALOGE("usb_device_open failed\n");
         return 0;
     }
 
@@ -135,7 +135,7 @@ static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject
 {
     struct usb_host_context* context = usb_host_init();
     if (!context) {
-        LOGE("usb_host_init failed");
+        ALOGE("usb_host_init failed");
         return;
     }
     // this will never return so it is safe to pass thiz directly
@@ -175,17 +175,17 @@ int register_android_server_UsbHostManager(JNIEnv *env)
 {
     jclass clazz = env->FindClass("com/android/server/usb/UsbHostManager");
     if (clazz == NULL) {
-        LOGE("Can't find com/android/server/usb/UsbHostManager");
+        ALOGE("Can't find com/android/server/usb/UsbHostManager");
         return -1;
     }
     method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIII[I[I)V");
     if (method_usbDeviceAdded == NULL) {
-        LOGE("Can't find usbDeviceAdded");
+        ALOGE("Can't find usbDeviceAdded");
         return -1;
     }
     method_usbDeviceRemoved = env->GetMethodID(clazz, "usbDeviceRemoved", "(Ljava/lang/String;)V");
     if (method_usbDeviceRemoved == NULL) {
-        LOGE("Can't find usbDeviceRemoved");
+        ALOGE("Can't find usbDeviceRemoved");
         return -1;
     }
 

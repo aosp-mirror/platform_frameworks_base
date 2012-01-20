@@ -157,7 +157,7 @@ status_t AudioTrack::set(
 
     AutoMutex lock(mLock);
     if (mAudioTrack != 0) {
-        LOGE("Track already in use");
+        ALOGE("Track already in use");
         return INVALID_OPERATION;
     }
 
@@ -187,7 +187,7 @@ status_t AudioTrack::set(
 
     // validate parameters
     if (!audio_is_valid_format(format)) {
-        LOGE("Invalid format");
+        ALOGE("Invalid format");
         return BAD_VALUE;
     }
 
@@ -197,7 +197,7 @@ status_t AudioTrack::set(
     }
 
     if (!audio_is_output_channel(channelMask)) {
-        LOGE("Invalid channel mask");
+        ALOGE("Invalid channel mask");
         return BAD_VALUE;
     }
     uint32_t channelCount = popcount(channelMask);
@@ -208,7 +208,7 @@ status_t AudioTrack::set(
                                     (audio_policy_output_flags_t)flags);
 
     if (output == 0) {
-        LOGE("Could not get audio output for stream type %d", streamType);
+        ALOGE("Could not get audio output for stream type %d", streamType);
         return BAD_VALUE;
     }
 
@@ -238,7 +238,7 @@ status_t AudioTrack::set(
     if (cbf != 0) {
         mAudioTrackThread = new AudioTrackThread(*this, threadCanCallJava);
         if (mAudioTrackThread == 0) {
-          LOGE("Could not create callback thread");
+          ALOGE("Could not create callback thread");
           return NO_INIT;
         }
     }
@@ -323,7 +323,7 @@ void AudioTrack::start()
     if (t != 0) {
         if (t->exitPending()) {
             if (t->requestExitAndWait() == WOULD_BLOCK) {
-                LOGE("AudioTrack::start called from thread");
+                ALOGE("AudioTrack::start called from thread");
                 return;
             }
         }
@@ -561,12 +561,12 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
     if (loopStart >= loopEnd ||
         loopEnd - loopStart > cblk->frameCount ||
         cblk->server > loopStart) {
-        LOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, cblk->frameCount, cblk->user);
+        ALOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, cblk->frameCount, cblk->user);
         return BAD_VALUE;
     }
 
     if ((mSharedBuffer != 0) && (loopEnd > cblk->frameCount)) {
-        LOGE("setLoop invalid value: loop markers beyond data: loopStart %d, loopEnd %d, framecount %d",
+        ALOGE("setLoop invalid value: loop markers beyond data: loopStart %d, loopEnd %d, framecount %d",
             loopStart, loopEnd, cblk->frameCount);
         return BAD_VALUE;
     }
@@ -721,7 +721,7 @@ status_t AudioTrack::createTrack_l(
     status_t status;
     const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
     if (audioFlinger == 0) {
-       LOGE("Could not get audioflinger");
+       ALOGE("Could not get audioflinger");
        return NO_INIT;
     }
 
@@ -764,7 +764,7 @@ status_t AudioTrack::createTrack_l(
             }
             if (frameCount < minFrameCount) {
                 if (enforceFrameCount) {
-                    LOGE("Invalid buffer size: minFrameCount %d, frameCount %d", minFrameCount, frameCount);
+                    ALOGE("Invalid buffer size: minFrameCount %d, frameCount %d", minFrameCount, frameCount);
                     return BAD_VALUE;
                 } else {
                     frameCount = minFrameCount;
@@ -774,7 +774,7 @@ status_t AudioTrack::createTrack_l(
             // Ensure that buffer alignment matches channelcount
             int channelCount = popcount(channelMask);
             if (((uint32_t)sharedBuffer->pointer() & (channelCount | 1)) != 0) {
-                LOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
+                ALOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
                 return BAD_VALUE;
             }
             frameCount = sharedBuffer->size()/channelCount/sizeof(int16_t);
@@ -794,12 +794,12 @@ status_t AudioTrack::createTrack_l(
                                                       &status);
 
     if (track == 0) {
-        LOGE("AudioFlinger could not create track, status: %d", status);
+        ALOGE("AudioFlinger could not create track, status: %d", status);
         return status;
     }
     sp<IMemory> cblk = track->getCblk();
     if (cblk == 0) {
-        LOGE("Could not get control block");
+        ALOGE("Could not get control block");
         return NO_INIT;
     }
     mAudioTrack.clear();
@@ -961,7 +961,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
 
     if (ssize_t(userSize) < 0) {
         // sanity-check. user is most-likely passing an error code.
-        LOGE("AudioTrack::write(buffer=%p, size=%u (%d)",
+        ALOGE("AudioTrack::write(buffer=%p, size=%u (%d)",
                 buffer, userSize, userSize);
         return BAD_VALUE;
     }
@@ -1093,7 +1093,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         status_t err = obtainBuffer(&audioBuffer, waitCount);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {
-                LOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
+                ALOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
                 return false;
             }
             break;

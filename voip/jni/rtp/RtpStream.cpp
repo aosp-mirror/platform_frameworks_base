@@ -116,7 +116,7 @@ int registerRtpStream(JNIEnv *env)
     if ((clazz = env->FindClass("android/net/rtp/RtpStream")) == NULL ||
         (gNative = env->GetFieldID(clazz, "mNative", "I")) == NULL ||
         env->RegisterNatives(clazz, gMethods, NELEM(gMethods)) < 0) {
-        LOGE("JNI registration failed");
+        ALOGE("JNI registration failed");
         return -1;
     }
     return 0;

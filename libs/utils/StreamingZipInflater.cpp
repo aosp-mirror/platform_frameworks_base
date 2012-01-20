@@ -138,7 +138,7 @@ ssize_t StreamingZipInflater::read(void* outBuf, size_t count) {
             if (mInflateState.avail_in == 0) {
                 int err = readNextChunk();
                 if (err < 0) {
-                    LOGE("Unable to access asset data: %d", err);
+                    ALOGE("Unable to access asset data: %d", err);
                     if (!mStreamNeedsInit) {
                         ::inflateEnd(&mInflateState);
                         initInflateState();
@@ -165,7 +165,7 @@ ssize_t StreamingZipInflater::read(void* outBuf, size_t count) {
             if (result == Z_OK) result = ::inflate(&mInflateState, Z_SYNC_FLUSH);
             if (result < 0) {
                 // Whoops, inflation failed
-                LOGE("Error inflating asset: %d", result);
+                ALOGE("Error inflating asset: %d", result);
                 ::inflateEnd(&mInflateState);
                 initInflateState();
                 return -1;
@@ -195,7 +195,7 @@ int StreamingZipInflater::readNextChunk() {
             //ALOGV("Reading input chunk, size %08x didread %08x", toRead, didRead);
             if (didRead < 0) {
                 // TODO: error
-                LOGE("Error reading asset data");
+                ALOGE("Error reading asset data");
                 return didRead;
             } else {
                 mInNextChunkOffset += didRead;

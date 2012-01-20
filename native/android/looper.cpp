@@ -44,7 +44,7 @@ void ALooper_release(ALooper* looper) {
 int ALooper_pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
     sp<Looper> looper = Looper::getForThread();
     if (looper == NULL) {
-        LOGE("ALooper_pollOnce: No looper for this thread!");
+        ALOGE("ALooper_pollOnce: No looper for this thread!");
         return ALOOPER_POLL_ERROR;
     }
 
@@ -55,7 +55,7 @@ int ALooper_pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outDa
 int ALooper_pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
     sp<Looper> looper = Looper::getForThread();
     if (looper == NULL) {
-        LOGE("ALooper_pollAll: No looper for this thread!");
+        ALOGE("ALooper_pollAll: No looper for this thread!");
         return ALOOPER_POLL_ERROR;
     }
 

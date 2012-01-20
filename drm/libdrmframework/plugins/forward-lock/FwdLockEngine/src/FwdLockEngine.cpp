@@ -92,12 +92,12 @@ int FwdLockEngine::getConvertedStatus(FwdLockConv_Status_t status) {
         case FwdLockConv_Status_InvalidArgument:
         case FwdLockConv_Status_UnsupportedFileFormat:
         case FwdLockConv_Status_UnsupportedContentTransferEncoding:
-            LOGE("FwdLockEngine getConvertedStatus: file conversion Error %d. "
+            ALOGE("FwdLockEngine getConvertedStatus: file conversion Error %d. "
                   "Returning STATUS_INPUTDATA_ERROR", status);
             retStatus = DrmConvertedStatus::STATUS_INPUTDATA_ERROR;
             break;
         default:
-            LOGE("FwdLockEngine getConvertedStatus: file conversion Error %d. "
+            ALOGE("FwdLockEngine getConvertedStatus: file conversion Error %d. "
                   "Returning STATUS_ERROR", status);
             retStatus = DrmConvertedStatus::STATUS_ERROR;
             break;
@@ -139,7 +139,7 @@ android::status_t FwdLockEngine::onInitialize(int uniqueId) {
     if (FwdLockGlue_InitializeKeyEncryption()) {
         LOG_VERBOSE("FwdLockEngine::onInitialize -- FwdLockGlue_InitializeKeyEncryption succeeded");
     } else {
-        LOGE("FwdLockEngine::onInitialize -- FwdLockGlue_InitializeKeyEncryption failed:"
+        ALOGE("FwdLockEngine::onInitialize -- FwdLockGlue_InitializeKeyEncryption failed:"
              "errno = %d", errno);
     }
 
@@ -351,7 +351,7 @@ status_t FwdLockEngine::onOpenConvertSession(int uniqueId,
             convertSessionMap.addValue(convertId, newSession);
             result = DRM_NO_ERROR;
         } else {
-            LOGE("FwdLockEngine::onOpenConvertSession -- FwdLockConv_OpenSession failed.");
+            ALOGE("FwdLockEngine::onOpenConvertSession -- FwdLockConv_OpenSession failed.");
             delete newSession;
         }
     }
@@ -448,7 +448,7 @@ status_t FwdLockEngine::onOpenDecryptSession(int uniqueId,
         (!decodeSessionMap.isCreated(decryptHandle->decryptId))) {
         fileDesc = dup(fd);
     } else {
-        LOGE("FwdLockEngine::onOpenDecryptSession parameter error");
+        ALOGE("FwdLockEngine::onOpenDecryptSession parameter error");
         return result;
     }
 
@@ -550,13 +550,13 @@ status_t FwdLockEngine::onInitializeDecryptUnit(int uniqueId,
                                                 DecryptHandle* decryptHandle,
                                                 int decryptUnitId,
                                                 const DrmBuffer* headerInfo) {
-    LOGE("FwdLockEngine::onInitializeDecryptUnit is not supported for this DRM scheme");
+    ALOGE("FwdLockEngine::onInitializeDecryptUnit is not supported for this DRM scheme");
     return DRM_ERROR_UNKNOWN;
 }
 
 status_t FwdLockEngine::onDecrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
             const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) {
-    LOGE("FwdLockEngine::onDecrypt is not supported for this DRM scheme");
+    ALOGE("FwdLockEngine::onDecrypt is not supported for this DRM scheme");
     return DRM_ERROR_UNKNOWN;
 }
 
@@ -565,14 +565,14 @@ status_t FwdLockEngine::onDecrypt(int uniqueId,
                                   int decryptUnitId,
                                   const DrmBuffer* encBuffer,
                                   DrmBuffer** decBuffer) {
-    LOGE("FwdLockEngine::onDecrypt is not supported for this DRM scheme");
+    ALOGE("FwdLockEngine::onDecrypt is not supported for this DRM scheme");
     return DRM_ERROR_UNKNOWN;
 }
 
 status_t FwdLockEngine::onFinalizeDecryptUnit(int uniqueId,
                                               DecryptHandle* decryptHandle,
                                               int decryptUnitId) {
-    LOGE("FwdLockEngine::onFinalizeDecryptUnit is not supported for this DRM scheme");
+    ALOGE("FwdLockEngine::onFinalizeDecryptUnit is not supported for this DRM scheme");
     return DRM_ERROR_UNKNOWN;
 }
 
@@ -650,11 +650,11 @@ ssize_t FwdLockEngine::onPread(int uniqueId,
         if (((off_t)-1) != decoderSession->offset) {
             bytesRead = onRead(uniqueId, decryptHandle, buffer, numBytes);
             if (bytesRead < 0) {
-                LOGE("FwdLockEngine::onPread error reading");
+                ALOGE("FwdLockEngine::onPread error reading");
             }
         }
     } else {
-        LOGE("FwdLockEngine::onPread decryptId not found");
+        ALOGE("FwdLockEngine::onPread decryptId not found");
     }
 
     return bytesRead;

@@ -70,7 +70,7 @@ const sp<IAudioFlinger>& AudioSystem::get_audio_flinger()
         gAudioFlinger = interface_cast<IAudioFlinger>(binder);
         gAudioFlinger->registerClient(gAudioFlingerClient);
     }
-    LOGE_IF(gAudioFlinger==0, "no AudioFlinger!?");
+    ALOGE_IF(gAudioFlinger==0, "no AudioFlinger!?");
 
     return gAudioFlinger;
 }

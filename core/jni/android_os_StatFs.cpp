@@ -91,7 +91,7 @@ android_os_StatFs_native_restat(JNIEnv *env, jobject thiz, jstring path)
     // note that stat will contain the new file data corresponding to
     // pathstr
     if (statfs(pathstr, stat) != 0) {
-        LOGE("statfs %s failed, errno: %d", pathstr, errno);
+        ALOGE("statfs %s failed, errno: %d", pathstr, errno);
         delete stat;
         env->SetIntField(thiz, fields.context, 0);
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -146,13 +146,13 @@ int register_android_os_StatFs(JNIEnv *env)
 
     clazz = env->FindClass("android/os/StatFs");
     if (clazz == NULL) {
-        LOGE("Can't find android/os/StatFs");
+        ALOGE("Can't find android/os/StatFs");
         return -1;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        LOGE("Can't find StatFs.mNativeContext");
+        ALOGE("Can't find StatFs.mNativeContext");
         return -1;
     }
 

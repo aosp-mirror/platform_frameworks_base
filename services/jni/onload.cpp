@@ -43,7 +43,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     jint result = -1;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        LOGE("GetEnv failed!");
+        ALOGE("GetEnv failed!");
         return result;
     }
     LOG_ASSERT(env, "Could not retrieve the env!");

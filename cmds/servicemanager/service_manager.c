@@ -12,7 +12,7 @@
 
 #if 0
 #define ALOGI(x...) fprintf(stderr, "svcmgr: " x)
-#define LOGE(x...) fprintf(stderr, "svcmgr: " x)
+#define ALOGE(x...) fprintf(stderr, "svcmgr: " x)
 #else
 #define LOG_TAG "ServiceManager"
 #include <cutils/log.h>
@@ -152,7 +152,7 @@ int do_add_service(struct binder_state *bs,
         return -1;
 
     if (!svc_can_register(uid, s)) {
-        LOGE("add_service('%s',%p) uid=%d - PERMISSION DENIED\n",
+        ALOGE("add_service('%s',%p) uid=%d - PERMISSION DENIED\n",
              str8(s), ptr, uid);
         return -1;
     }
@@ -160,7 +160,7 @@ int do_add_service(struct binder_state *bs,
     si = find_svc(s, len);
     if (si) {
         if (si->ptr) {
-            LOGE("add_service('%s',%p) uid=%d - ALREADY REGISTERED, OVERRIDE\n",
+            ALOGE("add_service('%s',%p) uid=%d - ALREADY REGISTERED, OVERRIDE\n",
                  str8(s), ptr, uid);
             svcinfo_death(bs, si);
         }
@@ -168,7 +168,7 @@ int do_add_service(struct binder_state *bs,
     } else {
         si = malloc(sizeof(*si) + (len + 1) * sizeof(uint16_t));
         if (!si) {
-            LOGE("add_service('%s',%p) uid=%d - OUT OF MEMORY\n",
+            ALOGE("add_service('%s',%p) uid=%d - OUT OF MEMORY\n",
                  str8(s), ptr, uid);
             return -1;
         }
@@ -246,7 +246,7 @@ int svcmgr_handler(struct binder_state *bs,
         return -1;
     }
     default:
-        LOGE("unknown code %d\n", txn->code);
+        ALOGE("unknown code %d\n", txn->code);
         return -1;
     }
 
@@ -262,7 +262,7 @@ int main(int argc, char **argv)
     bs = binder_open(128*1024);
 
     if (binder_become_context_manager(bs)) {
-        LOGE("cannot become context manager (%s)\n", strerror(errno));
+        ALOGE("cannot become context manager (%s)\n", strerror(errno));
         return -1;
     }
 

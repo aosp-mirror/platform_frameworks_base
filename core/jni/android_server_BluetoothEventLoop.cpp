@@ -161,7 +161,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
-        LOGE("%s: out of memory!", __FUNCTION__);
+        ALOGE("%s: out of memory!", __FUNCTION__);
         return;
     }
     memset(nat, 0, sizeof(native_data_t));
@@ -176,7 +176,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
         dbus_threads_init_default();
         nat->conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
         if (dbus_error_is_set(&err)) {
-            LOGE("%s: Could not get onto the system bus!", __FUNCTION__);
+            ALOGE("%s: Could not get onto the system bus!", __FUNCTION__);
             dbus_error_free(&err);
         }
         dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
@@ -321,7 +321,7 @@ const char * get_adapter_path(DBusConnection *conn) {
         msg = dbus_message_new_method_call("org.bluez", "/",
               "org.bluez.Manager", "DefaultAdapter");
         if (!msg) {
-            LOGE("%s: Can't allocate new method call for get_adapter_path!",
+            ALOGE("%s: Can't allocate new method call for get_adapter_path!",
                   __FUNCTION__);
             return NULL;
         }
@@ -346,7 +346,7 @@ const char * get_adapter_path(DBusConnection *conn) {
         }
     }
     if (attempt == 1000) {
-        LOGE("Time out while trying to get Adapter path, is bluetoothd up ?");
+        ALOGE("Time out while trying to get Adapter path, is bluetoothd up ?");
         goto failed;
     }
 
@@ -375,7 +375,7 @@ static int register_agent(native_data_t *nat,
 
     if (!dbus_connection_register_object_path(nat->conn, agent_path,
             &agent_vtable, nat)) {
-        LOGE("%s: Can't register object path %s for agent!",
+        ALOGE("%s: Can't register object path %s for agent!",
               __FUNCTION__, agent_path);
         return -1;
     }
@@ -387,7 +387,7 @@ static int register_agent(native_data_t *nat,
     msg = dbus_message_new_method_call("org.bluez", nat->adapter,
           "org.bluez.Adapter", "RegisterAgent");
     if (!msg) {
-        LOGE("%s: Can't allocate new method call for agent!",
+        ALOGE("%s: Can't allocate new method call for agent!",
               __FUNCTION__);
         return -1;
     }
@@ -400,7 +400,7 @@ static int register_agent(native_data_t *nat,
     dbus_message_unref(msg);
 
     if (!reply) {
-        LOGE("%s: Can't register agent!", __FUNCTION__);
+        ALOGE("%s: Can't register agent!", __FUNCTION__);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
         }
@@ -442,7 +442,7 @@ static void tearDownEventLoop(native_data_t *nat) {
             }
             dbus_message_unref(msg);
         } else {
-             LOGE("%s: Can't create new method call!", __FUNCTION__);
+             ALOGE("%s: Can't create new method call!", __FUNCTION__);
         }
 
         dbus_connection_flush(nat->conn);
@@ -725,14 +725,14 @@ static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
     nat->pollData = (struct pollfd *)malloc(sizeof(struct pollfd) *
             DEFAULT_INITIAL_POLLFD_COUNT);
     if (!nat->pollData) {
-        LOGE("out of memory error starting EventLoop!");
+        ALOGE("out of memory error starting EventLoop!");
         goto done;
     }
 
     nat->watchData = (DBusWatch **)malloc(sizeof(DBusWatch *) *
             DEFAULT_INITIAL_POLLFD_COUNT);
     if (!nat->watchData) {
-        LOGE("out of memory error starting EventLoop!");
+        ALOGE("out of memory error starting EventLoop!");
         goto done;
     }
 
@@ -744,7 +744,7 @@ static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
     nat->pollMemberCount = 1;
 
     if (socketpair(AF_LOCAL, SOCK_STREAM, 0, &(nat->controlFdR))) {
-        LOGE("Error getting BT control socket");
+        ALOGE("Error getting BT control socket");
         goto done;
     }
     nat->pollData[0].fd = nat->controlFdR;
@@ -756,7 +756,7 @@ static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
     nat->me = env->NewGlobalRef(object);
 
     if (setUpEventLoop(nat) != JNI_TRUE) {
-        LOGE("failure setting up Event Loop!");
+        ALOGE("failure setting up Event Loop!");
         goto done;
     }
 
@@ -1111,7 +1111,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         // reply
         DBusMessage *reply = dbus_message_new_method_return(msg);
         if (!reply) {
-            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            ALOGE("%s: Cannot create message reply\n", __FUNCTION__);
             goto failure;
         }
         dbus_connection_send(nat->conn, reply, NULL);
@@ -1126,7 +1126,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_STRING, &uuid,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for Authorize() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for Authorize() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1145,7 +1145,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (!dbus_message_get_args(msg, NULL,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for OutOfBandData available() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for OutOfBandData available() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1160,7 +1160,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (available) {
             DBusMessage *reply = dbus_message_new_method_return(msg);
             if (!reply) {
-                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                ALOGE("%s: Cannot create message reply\n", __FUNCTION__);
                 goto failure;
             }
             dbus_connection_send(nat->conn, reply, NULL);
@@ -1169,7 +1169,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
             DBusMessage *reply = dbus_message_new_error(msg,
                     "org.bluez.Error.DoesNotExist", "OutofBand data not available");
             if (!reply) {
-                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+                ALOGE("%s: Cannot create message reply\n", __FUNCTION__);
                 goto failure;
             }
             dbus_connection_send(nat->conn, reply, NULL);
@@ -1182,7 +1182,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (!dbus_message_get_args(msg, NULL,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestPinCode() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestPinCode() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1197,7 +1197,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (!dbus_message_get_args(msg, NULL,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1212,7 +1212,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (!dbus_message_get_args(msg, NULL,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestOobData() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestOobData() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1229,7 +1229,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_UINT32, &passkey,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1247,7 +1247,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_UINT32, &passkey,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestConfirmation() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestConfirmation() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1263,7 +1263,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         if (!dbus_message_get_args(msg, NULL,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestPairingConsent() method", __FUNCTION__);
+            ALOGE("%s: Invalid arguments for RequestPairingConsent() method", __FUNCTION__);
             goto failure;
         }
 
@@ -1277,7 +1277,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         // reply
         DBusMessage *reply = dbus_message_new_method_return(msg);
         if (!reply) {
-            LOGE("%s: Cannot create message reply\n", __FUNCTION__);
+            ALOGE("%s: Cannot create message reply\n", __FUNCTION__);
             goto failure;
         }
         dbus_connection_send(nat->conn, reply, NULL);
@@ -1354,7 +1354,7 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
             ALOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_AUTH_TIMEOUT;
         } else {
-            LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
+            ALOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
             result = BOND_RESULT_ERROR;
         }
     }
@@ -1445,7 +1445,7 @@ void onGetDeviceServiceChannelResult(DBusMessage *msg, void *user, void *n) {
         !dbus_message_get_args(msg, &err,
                                DBUS_TYPE_INT32, &channel,
                                DBUS_TYPE_INVALID)) {
-        LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
+        ALOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
         dbus_error_free(&err);
     }
 

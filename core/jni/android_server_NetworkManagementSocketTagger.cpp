@@ -36,7 +36,7 @@ static jint QTagUid_tagSocketFd(JNIEnv* env, jclass,
   int userFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
   if (env->ExceptionOccurred() != NULL) {
-    LOGE("Can't get FileDescriptor num");
+    ALOGE("Can't get FileDescriptor num");
     return (jint)-1;
   }
 
@@ -52,7 +52,7 @@ static int QTagUid_untagSocketFd(JNIEnv* env, jclass,
   int userFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
   if (env->ExceptionOccurred() != NULL) {
-    LOGE("Can't get FileDescriptor num");
+    ALOGE("Can't get FileDescriptor num");
     return (jint)-1;
   }
 

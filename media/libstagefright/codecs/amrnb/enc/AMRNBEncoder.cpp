@@ -84,7 +84,7 @@ status_t AMRNBEncoder::start(MetaData *params) {
 
     status_t err = mSource->start(params);
     if (err != OK) {
-        LOGE("AudioSource is not available");
+        ALOGE("AudioSource is not available");
         return err;
     }
 

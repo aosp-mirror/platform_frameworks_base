@@ -63,21 +63,21 @@ static int create_interface(int mtu)
     // Allocate interface.
     ifr4.ifr_flags = IFF_TUN | IFF_NO_PI;
     if (ioctl(tun, TUNSETIFF, &ifr4)) {
-        LOGE("Cannot allocate TUN: %s", strerror(errno));
+        ALOGE("Cannot allocate TUN: %s", strerror(errno));
         goto error;
     }
 
     // Activate interface.
     ifr4.ifr_flags = IFF_UP;
     if (ioctl(inet4, SIOCSIFFLAGS, &ifr4)) {
-        LOGE("Cannot activate %s: %s", ifr4.ifr_name, strerror(errno));
+        ALOGE("Cannot activate %s: %s", ifr4.ifr_name, strerror(errno));
         goto error;
     }
 
     // Set MTU if it is specified.
     ifr4.ifr_mtu = mtu;
     if (mtu > 0 && ioctl(inet4, SIOCSIFMTU, &ifr4)) {
-        LOGE("Cannot set MTU on %s: %s", ifr4.ifr_name, strerror(errno));
+        ALOGE("Cannot set MTU on %s: %s", ifr4.ifr_name, strerror(errno));
         goto error;
     }
 
@@ -92,7 +92,7 @@ static int get_interface_name(char *name, int tun)
 {
     ifreq ifr4;
     if (ioctl(tun, TUNGETIFF, &ifr4)) {
-        LOGE("Cannot get interface name: %s", strerror(errno));
+        ALOGE("Cannot get interface name: %s", strerror(errno));
         return SYSTEM_ERROR;
     }
     strncpy(name, ifr4.ifr_name, IFNAMSIZ);
@@ -104,7 +104,7 @@ static int get_interface_index(const char *name)
     ifreq ifr4;
     strncpy(ifr4.ifr_name, name, IFNAMSIZ);
     if (ioctl(inet4, SIOGIFINDEX, &ifr4)) {
-        LOGE("Cannot get index of %s: %s", name, strerror(errno));
+        ALOGE("Cannot get index of %s: %s", name, strerror(errno));
         return SYSTEM_ERROR;
     }
     return ifr4.ifr_ifindex;
@@ -176,11 +176,11 @@ static int set_addresses(const char *name, const char *addresses)
     }
 
     if (count == BAD_ARGUMENT) {
-        LOGE("Invalid address: %s/%d", address, prefix);
+        ALOGE("Invalid address: %s/%d", address, prefix);
     } else if (count == SYSTEM_ERROR) {
-        LOGE("Cannot add address: %s/%d: %s", address, prefix, strerror(errno));
+        ALOGE("Cannot add address: %s/%d: %s", address, prefix, strerror(errno));
     } else if (*addresses) {
-        LOGE("Invalid address: %s", addresses);
+        ALOGE("Invalid address: %s", addresses);
         count = BAD_ARGUMENT;
     }
 
@@ -265,12 +265,12 @@ static int set_routes(const char *name, const char *routes)
     }
 
     if (count == BAD_ARGUMENT) {
-        LOGE("Invalid route: %s/%d", address, prefix);
+        ALOGE("Invalid route: %s/%d", address, prefix);
     } else if (count == SYSTEM_ERROR) {
-        LOGE("Cannot add route: %s/%d: %s",
+        ALOGE("Cannot add route: %s/%d: %s",
                 address, prefix, strerror(errno));
     } else if (*routes) {
-        LOGE("Invalid route: %s", routes);
+        ALOGE("Invalid route: %s", routes);
         count = BAD_ARGUMENT;
     }
 
@@ -284,7 +284,7 @@ static int reset_interface(const char *name)
     ifr4.ifr_flags = 0;
 
     if (ioctl(inet4, SIOCSIFFLAGS, &ifr4) && errno != ENODEV) {
-        LOGE("Cannot reset %s: %s", name, strerror(errno));
+        ALOGE("Cannot reset %s: %s", name, strerror(errno));
         return SYSTEM_ERROR;
     }
     return 0;
@@ -297,7 +297,7 @@ static int check_interface(const char *name)
     ifr4.ifr_flags = 0;
 
     if (ioctl(inet4, SIOCGIFFLAGS, &ifr4) && errno != ENODEV) {
-        LOGE("Cannot check %s: %s", name, strerror(errno));
+        ALOGE("Cannot check %s: %s", name, strerror(errno));
     }
     return ifr4.ifr_flags;
 }
@@ -305,7 +305,7 @@ static int check_interface(const char *name)
 static int bind_to_interface(int socket, const char *name)
 {
     if (setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name))) {
-        LOGE("Cannot bind socket to %s: %s", name, strerror(errno));
+        ALOGE("Cannot bind socket to %s: %s", name, strerror(errno));
         return SYSTEM_ERROR;
     }
     return 0;

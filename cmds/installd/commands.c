@@ -30,47 +30,47 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
     char libdir[PKG_PATH_MAX];
 
     if ((uid < AID_SYSTEM) || (gid < AID_SYSTEM)) {
-        LOGE("invalid uid/gid: %d %d\n", uid, gid);
+        ALOGE("invalid uid/gid: %d %d\n", uid, gid);
         return -1;
     }
 
     if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0)) {
-        LOGE("cannot create package path\n");
+        ALOGE("cannot create package path\n");
         return -1;
     }
 
     if (create_pkg_path(libdir, pkgname, PKG_LIB_POSTFIX, 0)) {
-        LOGE("cannot create package lib path\n");
+        ALOGE("cannot create package lib path\n");
         return -1;
     }
 
     if (mkdir(pkgdir, 0751) < 0) {
-        LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
         return -errno;
     }
     if (chmod(pkgdir, 0751) < 0) {
-        LOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
         return -errno;
     }
     if (chown(pkgdir, uid, gid) < 0) {
-        LOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
         return -errno;
     }
     if (mkdir(libdir, 0755) < 0) {
-        LOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
         unlink(pkgdir);
         return -errno;
     }
     if (chmod(libdir, 0755) < 0) {
-        LOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
         unlink(pkgdir);
         return -errno;
     }
     if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
-        LOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
         unlink(pkgdir);
         return -errno;
@@ -100,7 +100,7 @@ int renamepkg(const char *oldpkgname, const char *newpkgname)
         return -1;
 
     if (rename(oldpkgdir, newpkgdir) < 0) {
-        LOGE("cannot rename dir '%s' to '%s': %s\n", oldpkgdir, newpkgdir, strerror(errno));
+        ALOGE("cannot rename dir '%s' to '%s': %s\n", oldpkgdir, newpkgdir, strerror(errno));
         return -errno;
     }
     return 0;
@@ -127,11 +127,11 @@ int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
         return -1;
     }
     if (mkdir(pkgdir, 0751) < 0) {
-        LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
         return -errno;
     }
     if (chown(pkgdir, uid, uid) < 0) {
-        LOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        ALOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
         return -errno;
     }
@@ -165,7 +165,7 @@ static int64_t disk_free()
     if (statfs(android_data_dir.path, &sfs) == 0) {
         return sfs.f_bavail * sfs.f_bsize;
     } else {
-        LOGE("Couldn't statfs %s: %s\n", android_data_dir.path, strerror(errno));
+        ALOGE("Couldn't statfs %s: %s\n", android_data_dir.path, strerror(errno));
         return -1;
     }
 }
@@ -193,13 +193,13 @@ int free_cache(int64_t free_size)
     if (avail >= free_size) return 0;
 
     if (create_persona_path(datadir, 0)) {
-        LOGE("couldn't get directory for persona 0");
+        ALOGE("couldn't get directory for persona 0");
         return -1;
     }
 
     d = opendir(datadir);
     if (d == NULL) {
-        LOGE("cannot open %s: %s\n", datadir, strerror(errno));
+        ALOGE("cannot open %s: %s\n", datadir, strerror(errno));
         return -1;
     }
     dfd = dirfd(d);
@@ -245,7 +245,7 @@ int move_dex(const char *src, const char *dst)
 
     ALOGV("move %s -> %s\n", src_dex, dst_dex);
     if (rename(src_dex, dst_dex) < 0) {
-        LOGE("Couldn't move %s: %s\n", src_dex, strerror(errno));
+        ALOGE("Couldn't move %s: %s\n", src_dex, strerror(errno));
         return -1;
     } else {
         return 0;
@@ -261,7 +261,7 @@ int rm_dex(const char *path)
 
     ALOGV("unlink %s\n", dex_path);
     if (unlink(dex_path) < 0) {
-        LOGE("Couldn't unlink %s: %s\n", dex_path, strerror(errno));
+        ALOGE("Couldn't unlink %s: %s\n", dex_path, strerror(errno));
         return -1;
     } else {
         return 0;
@@ -281,12 +281,12 @@ int protect(char *pkgname, gid_t gid)
     if (stat(pkgpath, &s) < 0) return -1;
 
     if (chown(pkgpath, s.st_uid, gid) < 0) {
-        LOGE("failed to chgrp '%s': %s\n", pkgpath, strerror(errno));
+        ALOGE("failed to chgrp '%s': %s\n", pkgpath, strerror(errno));
         return -1;
     }
 
     if (chmod(pkgpath, S_IRUSR|S_IWUSR|S_IRGRP) < 0) {
-        LOGE("failed to chmod '%s': %s\n", pkgpath, strerror(errno));
+        ALOGE("failed to chmod '%s': %s\n", pkgpath, strerror(errno));
         return -1;
     }
 
@@ -443,7 +443,7 @@ static void run_dexopt(int zip_fd, int odex_fd, const char* input_file_name,
 
     execl(DEX_OPT_BIN, DEX_OPT_BIN, "--zip", zip_num, odex_num, input_file_name,
         dexopt_flags, (char*) NULL);
-    LOGE("execl(%s) failed: %s\n", DEX_OPT_BIN, strerror(errno));
+    ALOGE("execl(%s) failed: %s\n", DEX_OPT_BIN, strerror(errno));
 }
 
 static int wait_dexopt(pid_t pid, const char* apk_path)
@@ -515,24 +515,24 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
 
     zip_fd = open(apk_path, O_RDONLY, 0);
     if (zip_fd < 0) {
-        LOGE("dexopt cannot open '%s' for input\n", apk_path);
+        ALOGE("dexopt cannot open '%s' for input\n", apk_path);
         return -1;
     }
 
     unlink(dex_path);
     odex_fd = open(dex_path, O_RDWR | O_CREAT | O_EXCL, 0644);
     if (odex_fd < 0) {
-        LOGE("dexopt cannot open '%s' for output\n", dex_path);
+        ALOGE("dexopt cannot open '%s' for output\n", dex_path);
         goto fail;
     }
     if (fchown(odex_fd, AID_SYSTEM, uid) < 0) {
-        LOGE("dexopt cannot chown '%s'\n", dex_path);
+        ALOGE("dexopt cannot chown '%s'\n", dex_path);
         goto fail;
     }
     if (fchmod(odex_fd,
                S_IRUSR|S_IWUSR|S_IRGRP |
                (is_public ? S_IROTH : 0)) < 0) {
-        LOGE("dexopt cannot chmod '%s'\n", dex_path);
+        ALOGE("dexopt cannot chmod '%s'\n", dex_path);
         goto fail;
     }
 
@@ -543,15 +543,15 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
     if (pid == 0) {
         /* child -- drop privileges before continuing */
         if (setgid(uid) != 0) {
-            LOGE("setgid(%d) failed during dexopt\n", uid);
+            ALOGE("setgid(%d) failed during dexopt\n", uid);
             exit(64);
         }
         if (setuid(uid) != 0) {
-            LOGE("setuid(%d) during dexopt\n", uid);
+            ALOGE("setuid(%d) during dexopt\n", uid);
             exit(65);
         }
         if (flock(odex_fd, LOCK_EX | LOCK_NB) != 0) {
-            LOGE("flock(%s) failed: %s\n", dex_path, strerror(errno));
+            ALOGE("flock(%s) failed: %s\n", dex_path, strerror(errno));
             exit(66);
         }
 
@@ -560,7 +560,7 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
     } else {
         res = wait_dexopt(pid, apk_path);
         if (res != 0) {
-            LOGE("dexopt failed on '%s' res = %d\n", dex_path, res);
+            ALOGE("dexopt failed on '%s' res = %d\n", dex_path, res);
             goto fail;
         }
     }
@@ -626,7 +626,7 @@ int movefileordir(char* srcpath, char* dstpath, int dstbasepos,
         ALOGV("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
         if (rename(srcpath, dstpath) >= 0) {
             if (chown(dstpath, dstuid, dstgid) < 0) {
-                LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
+                ALOGE("cannot chown %s: %s\n", dstpath, strerror(errno));
                 unlink(dstpath);
                 return 1;
             }
@@ -852,30 +852,30 @@ int linklib(const char* dataDir, const char* asecLibDir)
 
     const size_t libdirLen = strlen(dataDir) + strlen(PKG_LIB_POSTFIX);
     if (libdirLen >= PKG_PATH_MAX) {
-        LOGE("library dir len too large");
+        ALOGE("library dir len too large");
         return -1;
     }
 
     if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
-        LOGE("library dir not written successfully: %s\n", strerror(errno));
+        ALOGE("library dir not written successfully: %s\n", strerror(errno));
         return -1;
     }
 
     if (stat(dataDir, &s) < 0) return -1;
 
     if (chown(dataDir, 0, 0) < 0) {
-        LOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
         return -1;
     }
 
     if (chmod(dataDir, 0700) < 0) {
-        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -1;
         goto out;
     }
 
     if (lstat(libdir, &libStat) < 0) {
-        LOGE("couldn't stat lib dir: %s\n", strerror(errno));
+        ALOGE("couldn't stat lib dir: %s\n", strerror(errno));
         rc = -1;
         goto out;
     }
@@ -893,13 +893,13 @@ int linklib(const char* dataDir, const char* asecLibDir)
     }
 
     if (symlink(asecLibDir, libdir) < 0) {
-        LOGE("couldn't symlink directory '%s' -> '%s': %s\n", libdir, asecLibDir, strerror(errno));
+        ALOGE("couldn't symlink directory '%s' -> '%s': %s\n", libdir, asecLibDir, strerror(errno));
         rc = -errno;
         goto out;
     }
 
     if (lchown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
-        LOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
         rc = -errno;
         goto out;
@@ -907,12 +907,12 @@ int linklib(const char* dataDir, const char* asecLibDir)
 
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
-        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
         return -errno;
     }
 
     if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
-        LOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
         return -errno;
     }
 
@@ -931,28 +931,28 @@ int unlinklib(const char* dataDir)
     }
 
     if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
-        LOGE("library dir not written successfully: %s\n", strerror(errno));
+        ALOGE("library dir not written successfully: %s\n", strerror(errno));
         return -1;
     }
 
     if (stat(dataDir, &s) < 0) {
-        LOGE("couldn't state data dir");
+        ALOGE("couldn't state data dir");
         return -1;
     }
 
     if (chown(dataDir, 0, 0) < 0) {
-        LOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
         return -1;
     }
 
     if (chmod(dataDir, 0700) < 0) {
-        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
         rc = -1;
         goto out;
     }
 
     if (lstat(libdir, &libStat) < 0) {
-        LOGE("couldn't stat lib dir: %s\n", strerror(errno));
+        ALOGE("couldn't stat lib dir: %s\n", strerror(errno));
         rc = -1;
         goto out;
     }
@@ -970,13 +970,13 @@ int unlinklib(const char* dataDir)
     }
 
     if (mkdir(libdir, 0755) < 0) {
-        LOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
         rc = -errno;
         goto out;
     }
 
     if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
-        LOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
+        ALOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
         unlink(libdir);
         rc = -errno;
         goto out;
@@ -984,12 +984,12 @@ int unlinklib(const char* dataDir)
 
 out:
     if (chmod(dataDir, s.st_mode) < 0) {
-        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
         return -1;
     }
 
     if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
-        LOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
+        ALOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
         return -1;
     }
 

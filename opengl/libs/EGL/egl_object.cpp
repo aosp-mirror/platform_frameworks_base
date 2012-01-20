@@ -45,7 +45,7 @@ void egl_object_t::terminate() {
     display->removeObject(this);
     if (decRef() == 1) {
         // shouldn't happen because this is called from LocalRef
-        LOGE("egl_object_t::terminate() removed the last reference!");
+        ALOGE("egl_object_t::terminate() removed the last reference!");
     }
 }
 

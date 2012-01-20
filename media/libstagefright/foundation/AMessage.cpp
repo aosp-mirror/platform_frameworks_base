@@ -471,7 +471,7 @@ sp<AMessage> AMessage::FromParcel(const Parcel &parcel) {
 
             default:
             {
-                LOGE("This type of object cannot cross process boundaries.");
+                ALOGE("This type of object cannot cross process boundaries.");
                 TRESPASS();
             }
         }
@@ -535,7 +535,7 @@ void AMessage::writeToParcel(Parcel *parcel) const {
 
             default:
             {
-                LOGE("This type of object cannot cross process boundaries.");
+                ALOGE("This type of object cannot cross process boundaries.");
                 TRESPASS();
             }
         }

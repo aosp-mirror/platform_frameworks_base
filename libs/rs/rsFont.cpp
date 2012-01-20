@@ -39,7 +39,7 @@ Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL) {
 bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data, uint32_t dataLen) {
 #ifndef ANDROID_RS_SERIALIZE
     if (mInitialized) {
-        LOGE("Reinitialization of fonts not supported");
+        ALOGE("Reinitialization of fonts not supported");
         return false;
     }
 
@@ -51,7 +51,7 @@ bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data
     }
 
     if (error) {
-        LOGE("Unable to initialize font %s", name);
+        ALOGE("Unable to initialize font %s", name);
         return false;
     }
 
@@ -61,7 +61,7 @@ bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data
 
     error = FT_Set_Char_Size(mFace, (FT_F26Dot6)(fontSize * 64.0f), 0, dpi, 0);
     if (error) {
-        LOGE("Unable to set font size on %s", name);
+        ALOGE("Unable to set font size on %s", name);
         return false;
     }
 
@@ -124,7 +124,7 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int32_t x, int32_t y,
     for (cacheX = glyph->mBitmapMinX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mBitmapMinY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
             if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
-                LOGE("Skipping invalid index");
+                ALOGE("Skipping invalid index");
                 continue;
             }
             uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
@@ -165,7 +165,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
 
     if (mode == Font::MEASURE) {
         if (bounds == NULL) {
-            LOGE("No return rectangle provided to measure text");
+            ALOGE("No return rectangle provided to measure text");
             return;
         }
         // Reset min and max of the bounding box to something large
@@ -237,7 +237,7 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph) {
 #ifndef ANDROID_RS_SERIALIZE
     FT_Error error = FT_Load_Glyph( mFace, glyph->mGlyphIndex, FT_LOAD_RENDER );
     if (error) {
-        LOGE("Couldn't load glyph.");
+        ALOGE("Couldn't load glyph.");
         return;
     }
 
@@ -378,7 +378,7 @@ FT_Library FontState::getLib() {
     if (!mLibrary) {
         FT_Error error = FT_Init_FreeType(&mLibrary);
         if (error) {
-            LOGE("Unable to initialize freetype");
+            ALOGE("Unable to initialize freetype");
             return NULL;
         }
     }
@@ -409,7 +409,7 @@ void FontState::flushAllAndInvalidate() {
 bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
     // If the glyph is too tall, don't cache it
     if ((uint32_t)bitmap->rows > mCacheLines[mCacheLines.size()-1]->mMaxHeight) {
-        LOGE("Font size to large to fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
+        ALOGE("Font size to large to fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
         return false;
     }
 
@@ -439,7 +439,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
         // if we still don't fit, something is wrong and we shouldn't draw
         if (!bitmapFit) {
-            LOGE("Bitmap doesn't fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
+            ALOGE("Bitmap doesn't fit in cache. width, height = %i, %i", (int)bitmap->width, (int)bitmap->rows);
             return false;
         }
     }
@@ -471,7 +471,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     // Some debug code
     /*for (uint32_t i = 0; i < mCacheLines.size(); i ++) {
-        LOGE("Cache Line: H: %u Empty Space: %f",
+        ALOGE("Cache Line: H: %u Empty Space: %f",
              mCacheLines[i]->mMaxHeight,
               (1.0f - (float)mCacheLines[i]->mCurrentCol/(float)mCacheLines[i]->mMaxWidth)*100.0f);
 
@@ -663,9 +663,9 @@ void FontState::appendMeshQuad(float x1, float y1, float z1,
     }
 
     /*LOGE("V0 x: %f y: %f z: %f", x1, y1, z1);
-    LOGE("V1 x: %f y: %f z: %f", x2, y2, z2);
-    LOGE("V2 x: %f y: %f z: %f", x3, y3, z3);
-    LOGE("V3 x: %f y: %f z: %f", x4, y4, z4);*/
+    ALOGE("V1 x: %f y: %f z: %f", x2, y2, z2);
+    ALOGE("V2 x: %f y: %f z: %f", x3, y3, z3);
+    ALOGE("V3 x: %f y: %f z: %f", x4, y4, z4);*/
 
     (*currentPos++) = x1;
     (*currentPos++) = y1;
@@ -742,7 +742,7 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
         currentFont = mDefault.get();
     }
     if (!currentFont) {
-        LOGE("Unable to initialize any fonts");
+        ALOGE("Unable to initialize any fonts");
         return;
     }
 

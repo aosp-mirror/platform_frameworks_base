@@ -105,13 +105,13 @@ SensorDevice::SensorDevice()
     status_t err = hw_get_module(SENSORS_HARDWARE_MODULE_ID,
             (hw_module_t const**)&mSensorModule);
 
-    LOGE_IF(err, "couldn't load %s module (%s)",
+    ALOGE_IF(err, "couldn't load %s module (%s)",
             SENSORS_HARDWARE_MODULE_ID, strerror(-err));
 
     if (mSensorModule) {
         err = sensors_open(&mSensorModule->common, &mSensorDevice);
 
-        LOGE_IF(err, "couldn't open device for module %s (%s)",
+        ALOGE_IF(err, "couldn't open device for module %s (%s)",
                 SENSORS_HARDWARE_MODULE_ID, strerror(-err));
 
         if (mSensorDevice) {
@@ -219,7 +219,7 @@ status_t SensorDevice::activate(void* ident, int handle, int enabled)
 
         err = mSensorDevice->activate(mSensorDevice, handle, enabled);
         if (enabled) {
-            LOGE_IF(err, "Error activating sensor %d (%s)", handle, strerror(-err));
+            ALOGE_IF(err, "Error activating sensor %d (%s)", handle, strerror(-err));
             if (err == 0) {
                 BatteryService::getInstance().enableSensor(handle);
             }
@@ -256,7 +256,7 @@ status_t SensorDevice::Info::setDelayForIdent(void* ident, int64_t ns)
 {
     ssize_t index = rates.indexOfKey(ident);
     if (index < 0) {
-        LOGE("Info::setDelayForIdent(ident=%p, ns=%lld) failed (%s)",
+        ALOGE("Info::setDelayForIdent(ident=%p, ns=%lld) failed (%s)",
                 ident, ns, strerror(-index));
         return BAD_INDEX;
     }

@@ -42,13 +42,13 @@ Program::Program(const char* vertex, const char* fragment) {
             GLint status;
             glGetProgramiv(id, GL_LINK_STATUS, &status);
             if (status != GL_TRUE) {
-                LOGE("Error while linking shaders:");
+                ALOGE("Error while linking shaders:");
                 GLint infoLen = 0;
                 glGetProgramiv(id, GL_INFO_LOG_LENGTH, &infoLen);
                 if (infoLen > 1) {
                     GLchar log[infoLen];
                     glGetProgramInfoLog(id, infoLen, 0, &log[0]);
-                    LOGE("%s", log);
+                    ALOGE("%s", log);
                 }
                 glDeleteShader(vertexShader);
                 glDeleteShader(fragmentShader);
@@ -115,7 +115,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
         // use a fixed size instead
         GLchar log[512];
         glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
-        LOGE("Error while compiling shader: %s", log);
+        ALOGE("Error while compiling shader: %s", log);
         glDeleteShader(shader);
         return 0;
     }
