@@ -21,14 +21,12 @@
 
 namespace android {
 
-class CommonClock;
-class LocalClock;
+class CommonTimeServer;
 
 class CommonClockService : public BnCommonClock,
                            public android::IBinder::DeathRecipient {
   public:
-    static sp<CommonClockService> instantiate(CommonClock* common_clock,
-                                              LocalClock* local_clock);
+    static sp<CommonClockService> instantiate(CommonTimeServer& timeServer);
 
     virtual status_t dump(int fd, const Vector<String16>& args);
 
@@ -54,18 +52,36 @@ class CommonClockService : public BnCommonClock,
     void notifyOnTimelineChanged(uint64_t timelineID);
 
   private:
-    CommonClockService() {}
-    bool init(CommonClock* common_clock, LocalClock* local_clock);
+    CommonClockService(CommonTimeServer& timeServer)
+        : mTimeServer(timeServer) { };
 
     virtual void binderDied(const wp<IBinder>& who);
 
-    CommonClock* mCommonClock;
-    LocalClock*  mLocalClock;
+    CommonTimeServer& mTimeServer;
 
-    // this lock serializes access to mTimelineID and mListeners
-    Mutex mLock;
+    // locks used to synchronize access to the list of registered listeners.
+    // The callback lock is held whenever the list is used to perform callbacks
+    // or while the list is being modified.  The registration lock used to
+    // serialize access across registerListener, unregisterListener, and
+    // binderDied.
+    //
+    // The reason for two locks is that registerListener, unregisterListener,
+    // and binderDied each call into the core service and obtain the core
+    // service thread lock when they call reevaluateAutoDisableState.  The core
+    // service thread obtains the main thread lock whenever its thread is
+    // running, and sometimes needs to call notifyOnTimelineChanged which then
+    // obtains the callback lock.  If callers of registration functions were
+    // holding the callback lock when they called into the core service, we
+    // would have a classic A/B, B/A ordering deadlock.  To avoid this, the
+    // registration functions hold the registration lock for the duration of
+    // their call, but hold the callback lock only while they mutate the list.
+    // This way, the list's size cannot change (because of the registration
+    // lock) during the call into reevaluateAutoDisableState, but the core work
+    // thread can still safely call notifyOnTimelineChanged while holding the
+    // main thread lock.
+    Mutex mCallbackLock;
+    Mutex mRegistrationLock;
 
-    uint32_t mTimelineID;
     Vector<sp<ICommonClockListener> > mListeners;
 };
 

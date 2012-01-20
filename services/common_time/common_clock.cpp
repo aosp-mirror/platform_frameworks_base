@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ CommonClock::CommonClock() {
     cur_trans_.b_zero = 0;
     cur_trans_.a_to_b_numer = local_to_common_freq_numer_ = 1;
     cur_trans_.a_to_b_denom = local_to_common_freq_denom_ = 1;
+    duration_trans_ = cur_trans_;
 }
 
 bool CommonClock::init(uint64_t local_freq) {
@@ -58,6 +59,7 @@ bool CommonClock::init(uint64_t local_freq) {
         static_cast<uint32_t>(numer);
     cur_trans_.a_to_b_denom = local_to_common_freq_denom_ =
         static_cast<uint32_t>(denom);
+    duration_trans_ = cur_trans_;
 
     return true;
 }
@@ -84,6 +86,12 @@ status_t CommonClock::commonToLocal(int64_t common, int64_t *local_out) const {
         return INVALID_OPERATION;
 
     return OK;
+}
+
+int64_t CommonClock::localDurationToCommonDuration(int64_t localDur) const {
+    int64_t ret;
+    duration_trans_.doForwardTransform(localDur, &ret);
+    return ret;
 }
 
 void CommonClock::setBasis(int64_t local, int64_t common) {

@@ -14,87 +14,99 @@
  * limitations under the License.
  */
 
-#include <binder/IServiceManager.h>
+#include <utils/String8.h>
 
 #include "common_time_config_service.h"
+#include "common_time_server.h"
 
 namespace android {
 
-sp<CommonTimeConfigService> CommonTimeConfigService::instantiate() {
-    sp<CommonTimeConfigService> ctcs = new CommonTimeConfigService();
+sp<CommonTimeConfigService> CommonTimeConfigService::instantiate(
+        CommonTimeServer& timeServer) {
+    sp<CommonTimeConfigService> ctcs = new CommonTimeConfigService(timeServer);
+    if (ctcs == NULL)
+        return NULL;
 
     defaultServiceManager()->addService(ICommonTimeConfig::kServiceName, ctcs);
     return ctcs;
 }
 
+status_t CommonTimeConfigService::dump(int fd, const Vector<String16>& args) {
+    return mTimeServer.dumpConfigInterface(fd, args);
+}
+
 status_t CommonTimeConfigService::getMasterElectionPriority(uint8_t *priority) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getMasterElectionPriority(priority);
 }
 
 status_t CommonTimeConfigService::setMasterElectionPriority(uint8_t priority) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setMasterElectionPriority(priority);
 }
 
 status_t CommonTimeConfigService::getMasterElectionEndpoint(
         struct sockaddr_storage *addr) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getMasterElectionEndpoint(addr);
 }
 
 status_t CommonTimeConfigService::setMasterElectionEndpoint(
         const struct sockaddr_storage *addr) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setMasterElectionEndpoint(addr);
 }
 
 status_t CommonTimeConfigService::getMasterElectionGroupId(uint64_t *id) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getMasterElectionGroupId(id);
 }
 
 status_t CommonTimeConfigService::setMasterElectionGroupId(uint64_t id) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setMasterElectionGroupId(id);
 }
 
 status_t CommonTimeConfigService::getInterfaceBinding(String16& ifaceName) {
-    return UNKNOWN_ERROR;
+    String8 tmp;
+    status_t ret = mTimeServer.getInterfaceBinding(tmp);
+    ifaceName = String16(tmp);
+    return ret;
 }
 
 status_t CommonTimeConfigService::setInterfaceBinding(const String16& ifaceName) {
-        return UNKNOWN_ERROR;
+    String8 tmp(ifaceName);
+    return mTimeServer.setInterfaceBinding(tmp);
 }
 
 status_t CommonTimeConfigService::getMasterAnnounceInterval(int *interval) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getMasterAnnounceInterval(interval);
 }
 
 status_t CommonTimeConfigService::setMasterAnnounceInterval(int interval) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setMasterAnnounceInterval(interval);
 }
 
 status_t CommonTimeConfigService::getClientSyncInterval(int *interval) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getClientSyncInterval(interval);
 }
 
 status_t CommonTimeConfigService::setClientSyncInterval(int interval) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setClientSyncInterval(interval);
 }
 
 status_t CommonTimeConfigService::getPanicThreshold(int *threshold) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getPanicThreshold(threshold);
 }
 
 status_t CommonTimeConfigService::setPanicThreshold(int threshold) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setPanicThreshold(threshold);
 }
 
 status_t CommonTimeConfigService::getAutoDisable(bool *autoDisable) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.getAutoDisable(autoDisable);
 }
 
 status_t CommonTimeConfigService::setAutoDisable(bool autoDisable) {
-    return UNKNOWN_ERROR;
+    return mTimeServer.setAutoDisable(autoDisable);
 }
 
 status_t CommonTimeConfigService::forceNetworklessMasterMode() {
-    return UNKNOWN_ERROR;
+    return mTimeServer.forceNetworklessMasterMode();
 }
 
 }; // namespace android

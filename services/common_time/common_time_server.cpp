@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,285 +19,53 @@
  * a master that defines a timeline and clients that follow the timeline.
  */
 
+#define LOG_TAG "common_time"
+#include <utils/Log.h>
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <limits>
 #include <linux/if_ether.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <netinet/ip.h>
 #include <poll.h>
 #include <stdio.h>
+#include <sys/eventfd.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#define LOG_TAG "common_time"
-
 #include <common_time/local_clock.h>
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
-#include <utils/Log.h>
 #include <utils/Timers.h>
 
 #include "common_clock_service.h"
 #include "common_time_config_service.h"
+#include "common_time_server.h"
+#include "common_time_server_packets.h"
 #include "clock_recovery.h"
 #include "common_clock.h"
 
+using std::numeric_limits;
+
 namespace android {
 
-/***** time sync protocol packets *****/
+const char*    CommonTimeServer::kDefaultMasterElectionAddr = "239.195.128.88";
+const uint16_t CommonTimeServer::kDefaultMasterElectionPort = 8887;
+const uint64_t CommonTimeServer::kDefaultSyncGroupID = 0;
+const uint8_t  CommonTimeServer::kDefaultMasterPriority = 1;
+const uint32_t CommonTimeServer::kDefaultMasterAnnounceIntervalMs = 10000;
+const uint32_t CommonTimeServer::kDefaultSyncRequestIntervalMs = 1000;
+const uint32_t CommonTimeServer::kDefaultPanicThresholdUsec = 50000;
+const bool     CommonTimeServer::kDefaultAutoDisable = true;
+const int      CommonTimeServer::kSetupRetryTimeout = 30000;
+const int64_t  CommonTimeServer::kNoGoodDataPanicThreshold = 600000000ll;
 
-enum TimeServicePacketType {
-    TIME_PACKET_WHO_IS_MASTER_REQUEST = 1,
-    TIME_PACKET_WHO_IS_MASTER_RESPONSE,
-    TIME_PACKET_SYNC_REQUEST,
-    TIME_PACKET_SYNC_RESPONSE,
-    TIME_PACKET_MASTER_ANNOUNCEMENT,
-};
-
-struct TimeServicePacketHeader {
-    TimeServicePacketHeader(TimeServicePacketType type)
-        : magic(htonl(kMagic)),
-          packetType(htonl(type)),
-          kernelTxLocalTime(0),
-          kernelTxCommonTime(0),
-          kernelRxLocalTime(0) { }
-
-    TimeServicePacketType type() const {
-        return static_cast<TimeServicePacketType>(ntohl(packetType));
-    }
-
-    bool checkMagic() const {
-        return (ntohl(magic) == kMagic);
-    }
-
-    static const uint32_t kMagic;
-
-    // magic number identifying the protocol
-    uint32_t magic;
-
-    // TimeServicePacketType value
-    uint32_t packetType;
-
-    // placeholders for transmit/receive timestamps that can be filled in
-    // by a kernel netfilter driver
-    //
-    // local time (in the transmitter's domain) when this packet was sent
-    int64_t kernelTxLocalTime;
-    // common time when this packet was sent
-    int64_t kernelTxCommonTime;
-    // local time (in the receiver's domain) when this packet was received
-    int64_t kernelRxLocalTime;
-} __attribute__((packed));
-
-const uint32_t TimeServicePacketHeader::kMagic = 0x54756e67;
-
-// packet querying for a suitable master
-struct WhoIsMasterRequestPacket {
-    WhoIsMasterRequestPacket() : header(TIME_PACKET_WHO_IS_MASTER_REQUEST) {}
-
-    TimeServicePacketHeader header;
-
-    // device ID of the sender
-    uint64_t senderDeviceID;
-
-    // If this is kInvalidTimelineID, then any master can response to this
-    // request.  If this is not kInvalidTimelineID, the only a master publishing
-    // the given timeline ID will respond.
-    uint32_t timelineID;
-} __attribute__((packed));
-
-// response to a WhoIsMaster request
-struct WhoIsMasterResponsePacket {
-    WhoIsMasterResponsePacket() : header(TIME_PACKET_WHO_IS_MASTER_RESPONSE) {}
-
-    TimeServicePacketHeader header;
-
-    // the master's device ID
-    uint64_t deviceID;
-
-    // the timeline ID being published by this master
-    uint32_t timelineID;
-} __attribute__((packed));
-
-// packet sent by a client requesting correspondence between local
-// and common time
-struct SyncRequestPacket {
-    SyncRequestPacket() : header(TIME_PACKET_SYNC_REQUEST) {}
-
-    TimeServicePacketHeader header;
-
-    // timeline that the client is following
-    uint32_t timelineID;
-
-    // local time when this request was transmitted
-    int64_t clientTxLocalTime;
-} __attribute__((packed));
-
-// response to a sync request sent by the master
-struct SyncResponsePacket {
-    SyncResponsePacket() : header(TIME_PACKET_SYNC_RESPONSE) {}
-
-    TimeServicePacketHeader header;
-
-    // flag that is set if the recipient of the sync request is not acting
-    // as a master for the requested timeline
-    uint32_t nak;
-
-    // local time when this request was transmitted by the client
-    int64_t clientTxLocalTime;
-
-    // common time when the master received the request
-    int64_t masterRxCommonTime;
-
-    // common time when the master transmitted the response
-    int64_t masterTxCommonTime;
-} __attribute__((packed));
-
-// announcement of the master's presence
-struct MasterAnnouncementPacket {
-    MasterAnnouncementPacket() : header(TIME_PACKET_MASTER_ANNOUNCEMENT) {}
-
-    TimeServicePacketHeader header;
-
-    // the master's device ID
-    uint64_t deviceID;
-
-    // the timeline ID being published by this master
-    uint32_t timelineID;
-} __attribute__((packed));
-
-/***** time service implementation *****/
-
-class CommonTimeServer : public Thread {
-  public:
-    CommonTimeServer();
-    ~CommonTimeServer();
-
-  private:
-    bool threadLoop();
-
-    bool runStateMachine();
-    bool setup();
-
-    void assignTimelineID();
-    bool assignDeviceID();
-
-    static bool arbitrateMaster(uint64_t deviceID1, uint64_t deviceID2);
-
-    bool handlePacket();
-    bool handleWhoIsMasterRequest (const WhoIsMasterRequestPacket* request,
-                                   const sockaddr_in& srcAddr);
-    bool handleWhoIsMasterResponse(const WhoIsMasterResponsePacket* response,
-                                   const sockaddr_in& srcAddr);
-    bool handleSyncRequest        (const SyncRequestPacket* request,
-                                   const sockaddr_in& srcAddr);
-    bool handleSyncResponse       (const SyncResponsePacket* response,
-                                   const sockaddr_in& srcAddr);
-    bool handleMasterAnnouncement (const MasterAnnouncementPacket* packet,
-                                   const sockaddr_in& srcAddr);
-
-    bool handleTimeout();
-    bool handleTimeoutInitial();
-    bool handleTimeoutClient();
-    bool handleTimeoutMaster();
-    bool handleTimeoutRonin();
-    bool handleTimeoutWaitForElection();
-
-    bool sendWhoIsMasterRequest();
-    bool sendSyncRequest();
-    bool sendMasterAnnouncement();
-
-    bool becomeClient(const sockaddr_in& masterAddr,
-                      uint64_t masterDeviceID,
-                      uint32_t timelineID);
-    bool becomeMaster();
-    bool becomeRonin();
-    bool becomeWaitForElection();
-    bool becomeInitial();
-
-    void notifyClockSync();
-    void notifyClockSyncLoss();
-
-    ICommonClock::State mState;
-    static const char* stateToString(ICommonClock::State s);
-    void setState(ICommonClock::State s);
-
-    // interval in milliseconds of the state machine's timeout
-    int mTimeoutMs;
-
-    // common clock, local clock abstraction, and clock recovery loop
-    CommonClock mCommonClock;
-    LocalClock mLocalClock;
-    ClockRecoveryLoop mClockRecovery;
-
-    // implementation of ICommonClock
-    sp<CommonClockService> mICommonClock;
-
-    // implementation of ICommonTimeConfig
-    sp<CommonTimeConfigService> mICommonTimeConfig;
-
-    // UDP socket for the time sync protocol
-    int mSocket;
-
-    // unique ID of this device
-    uint64_t mDeviceID;
-
-    // timestamp captured when a packet is received
-    int64_t mLastPacketRxLocalTime;
-
-    // multicast address used for master queries and announcements
-    struct sockaddr_in mMulticastAddr;
-
-    // ID of the timeline that this device is following
-    uint32_t mTimelineID;
-
-    // flag for whether the clock has been synced to a timeline
-    bool mClockSynced;
-
-    /*** status while in the Initial state ***/
-    int mInitial_WhoIsMasterRequestTimeouts;
-    static const int kInitial_NumWhoIsMasterRetries;
-    static const int kInitial_WhoIsMasterTimeoutMs;
-
-    /*** status while in the Client state ***/
-    struct sockaddr_in mClient_MasterAddr;
-    uint64_t mClient_MasterDeviceID;
-    bool mClient_SyncRequestPending;
-    int mClient_SyncRequestTimeouts;
-    uint32_t mClient_SyncsSentToCurMaster;
-    uint32_t mClient_SyncRespsRvcedFromCurMaster;
-    static const int kClient_SyncRequestIntervalMs;
-    static const int kClient_SyncRequestTimeoutMs;
-    static const int kClient_NumSyncRequestRetries;
-
-    /*** status while in the Master state ***/
-    static const int kMaster_AnnouncementIntervalMs;
-
-    /*** status while in the Ronin state ***/
-    int mRonin_WhoIsMasterRequestTimeouts;
-    static const int kRonin_NumWhoIsMasterRetries;
-    static const int kRonin_WhoIsMasterTimeoutMs;
-
-    /*** status while in the WaitForElection state ***/
-    static const int kWaitForElection_TimeoutMs;
-
-    static const char* kServiceAddr;
-    static const uint16_t kServicePort;
-
-    static const int kInfiniteTimeout;
-};
-
-// multicast IP address used by this protocol
-const char* CommonTimeServer::kServiceAddr = "224.128.87.87";
-
-// UDP port used by this protocol
-const uint16_t CommonTimeServer::kServicePort = 8787;
-
-// mTimeoutMs value representing an infinite timeout
+// timeout value representing an infinite timeout
 const int CommonTimeServer::kInfiniteTimeout = -1;
 
 /*** Initial state constants ***/
@@ -310,20 +78,11 @@ const int CommonTimeServer::kInitial_WhoIsMasterTimeoutMs = 500;
 
 /*** Client state constants ***/
 
-// interval between sync requests sent to the master
-const int CommonTimeServer::kClient_SyncRequestIntervalMs = 1000;
-
-// timeout used when waiting for a response to a sync request
-const int CommonTimeServer::kClient_SyncRequestTimeoutMs = 400;
-
 // number of sync requests that can fail before a client assumes its master
 // is dead
 const int CommonTimeServer::kClient_NumSyncRequestRetries = 5;
 
 /*** Master state constants ***/
-
-// timeout between announcements by the master
-const int CommonTimeServer::kMaster_AnnouncementIntervalMs = 10000;
 
 /*** Ronin state constants ***/
 
@@ -342,155 +101,405 @@ const int CommonTimeServer::kWaitForElection_TimeoutMs = 5000;
 CommonTimeServer::CommonTimeServer()
     : Thread(false)
     , mState(ICommonClock::STATE_INITIAL)
-    , mTimeoutMs(kInfiniteTimeout)
     , mClockRecovery(&mLocalClock, &mCommonClock)
     , mSocket(-1)
-    , mDeviceID(0)
     , mLastPacketRxLocalTime(0)
     , mTimelineID(ICommonClock::kInvalidTimelineID)
     , mClockSynced(false)
+    , mCommonClockHasClients(false)
     , mInitial_WhoIsMasterRequestTimeouts(0)
     , mClient_MasterDeviceID(0)
-    , mClient_SyncRequestPending(false)
-    , mClient_SyncRequestTimeouts(0)
-    , mClient_SyncsSentToCurMaster(0)
-    , mClient_SyncRespsRvcedFromCurMaster(0)
+    , mClient_MasterDevicePriority(0)
     , mRonin_WhoIsMasterRequestTimeouts(0) {
-    memset(&mMulticastAddr, 0, sizeof(mMulticastAddr));
-    memset(&mClient_MasterAddr, 0, sizeof(mClient_MasterAddr));
+    // zero out sync stats
+    resetSyncStats();
+
+    // Setup the master election endpoint to use the default.
+    struct sockaddr_in* meep =
+        reinterpret_cast<struct sockaddr_in*>(&mMasterElectionEP);
+    memset(&mMasterElectionEP, 0, sizeof(mMasterElectionEP));
+    inet_aton(kDefaultMasterElectionAddr, &meep->sin_addr);
+    meep->sin_family = AF_INET;
+    meep->sin_port   = htons(kDefaultMasterElectionPort);
+
+    // Zero out the master endpoint.
+    memset(&mMasterEP, 0, sizeof(mMasterEP));
+    mMasterEPValid    = false;
+    mBindIfaceValid   = false;
+    setForceLowPriority(false);
+
+    // Set all remaining configuration parameters to their defaults.
+    mDeviceID                 = 0;
+    mSyncGroupID              = kDefaultSyncGroupID;
+    mMasterPriority           = kDefaultMasterPriority;
+    mMasterAnnounceIntervalMs = kDefaultMasterAnnounceIntervalMs;
+    mSyncRequestIntervalMs    = kDefaultSyncRequestIntervalMs;
+    mPanicThresholdUsec       = kDefaultPanicThresholdUsec;
+    mAutoDisable              = kDefaultAutoDisable;
+
+    // Create the eventfd we will use to signal our thread to wake up when
+    // needed.
+    mWakeupThreadFD = eventfd(0, EFD_NONBLOCK);
+
+    // seed the random number generator (used to generated timeline IDs)
+    srand48(static_cast<unsigned int>(systemTime()));
 }
 
 CommonTimeServer::~CommonTimeServer() {
-    if (mSocket != -1) {
-        close(mSocket);
-        mSocket = -1;
+    shutdownThread();
+
+    // No need to grab the lock here.  We are in the destructor; if the the user
+    // has a thread in any of the APIs while the destructor is being called,
+    // there is a threading problem a the application level we cannot reasonably
+    // do anything about.
+    cleanupSocket_l();
+
+    if (mWakeupThreadFD >= 0) {
+        close(mWakeupThreadFD);
+        mWakeupThreadFD = -1;
     }
 }
 
+bool CommonTimeServer::startServices() {
+    // start the ICommonClock service
+    mICommonClock = CommonClockService::instantiate(*this);
+    if (mICommonClock == NULL)
+        return false;
+
+    // start the ICommonTimeConfig service
+    mICommonTimeConfig = CommonTimeConfigService::instantiate(*this);
+    if (mICommonTimeConfig == NULL)
+        return false;
+
+    return true;
+}
+
 bool CommonTimeServer::threadLoop() {
-    runStateMachine();
+    // Register our service interfaces.
+    if (!startServices())
+        return false;
+
+    // Hold the lock while we are in the main thread loop.  It will release the
+    // lock when it blocks, and hold the lock at all other times.
+    mLock.lock();
+    runStateMachine_l();
+    mLock.unlock();
+
     IPCThreadState::self()->stopProcess();
     return false;
 }
 
-bool CommonTimeServer::runStateMachine() {
+bool CommonTimeServer::runStateMachine_l() {
     if (!mLocalClock.initCheck())
         return false;
 
     if (!mCommonClock.init(mLocalClock.getLocalFreq()))
         return false;
 
-    if (!setup())
-        return false;
-
-    // Enter the initial state; this will also send the first request to
-    // discover the master
-    becomeInitial();
+    // Enter the initial state.
+    becomeInitial("startup");
 
     // run the state machine
-    while (true) {
-        struct pollfd pfd = {mSocket, POLLIN, 0};
-        nsecs_t startNs = systemTime();
-        int rc = poll(&pfd, 1, mTimeoutMs);
-        int elapsedMs = ns2ms(systemTime() - startNs);
-        mLastPacketRxLocalTime = mLocalClock.getLocalTime();
+    while (!exitPending()) {
+        struct pollfd pfds[2];
+        int rc;
+        int eventCnt = 0;
+        int64_t wakeupTime;
 
-        if (rc == -1) {
+        // We are always interested in our wakeup FD.
+        pfds[eventCnt].fd      = mWakeupThreadFD;
+        pfds[eventCnt].events  = POLLIN;
+        pfds[eventCnt].revents = 0;
+        eventCnt++;
+
+        // If we have a valid socket, then we are interested in what it has to
+        // say as well.
+        if (mSocket >= 0) {
+            pfds[eventCnt].fd      = mSocket;
+            pfds[eventCnt].events  = POLLIN;
+            pfds[eventCnt].revents = 0;
+            eventCnt++;
+        }
+
+        // Note, we were holding mLock when this function was called.  We
+        // release it only while we are blocking and hold it at all other times.
+        mLock.unlock();
+        rc          = poll(pfds, eventCnt, mCurTimeout.msecTillTimeout());
+        wakeupTime  = mLocalClock.getLocalTime();
+        mLock.lock();
+
+        // Is it time to shutdown?  If so, don't hesitate... just do it.
+        if (exitPending())
+            break;
+
+        // Did the poll fail?  This should never happen and is fatal if it does.
+        if (rc < 0) {
             LOGE("%s:%d poll failed", __PRETTY_FUNCTION__, __LINE__);
             return false;
         }
 
-        if (rc == 0) {
-            mTimeoutMs = kInfiniteTimeout;
-            if (!handleTimeout()) {
-                LOGE("handleTimeout failed");
-            }
-        } else {
-            if (mTimeoutMs != kInfiniteTimeout) {
-                mTimeoutMs = (mTimeoutMs > elapsedMs)
-                           ? mTimeoutMs - elapsedMs
-                           : 0;
+        if (rc == 0)
+            mCurTimeout.setTimeout(kInfiniteTimeout);
+
+        // Were we woken up on purpose?  If so, clear the eventfd with a read.
+        if (pfds[0].revents)
+            clearPendingWakeupEvents_l();
+
+        // Is out bind address dirty?  If so, clean up our socket (if any).
+        // Alternatively, do we have an active socket but should be auto
+        // disabled?  If so, release the socket and enter the proper sync state.
+        bool droppedSocket = false;
+        if (mBindIfaceDirty || ((mSocket >= 0) && shouldAutoDisable())) {
+            cleanupSocket_l();
+            mBindIfaceDirty = false;
+            droppedSocket = true;
+        }
+
+        // Do we not have a socket but should have one?  If so, try to set one
+        // up.
+        if ((mSocket < 0) && mBindIfaceValid && !shouldAutoDisable()) {
+            if (setupSocket_l()) {
+                // Success!  We are now joining a new network (either coming
+                // from no network, or coming from a potentially different
+                // network).  Force our priority to be lower so that we defer to
+                // any other masters which may already be on the network we are
+                // joining.  Later, when we enter either the client or the
+                // master state, we will clear this flag and go back to our
+                // normal election priority.
+                setForceLowPriority(true);
+                switch (mState) {
+                    // If we were in initial (whether we had a immediately
+                    // before this network or not) we want to simply reset the
+                    // system and start again.  Forcing a transition from
+                    // INITIAL to INITIAL should do the job.
+                    case CommonClockService::STATE_INITIAL:
+                        becomeInitial("bound interface");
+                        break;
+
+                    // If we were in the master state, then either we were the
+                    // master in a no-network situation, or we were the master
+                    // of a different network and have moved to a new interface.
+                    // In either case, immediately send out a master
+                    // announcement at low priority.
+                    case CommonClockService::STATE_MASTER:
+                        sendMasterAnnouncement();
+                        break;
+                        
+                    // If we were in any other state (CLIENT, RONIN, or
+                    // WAIT_FOR_ELECTION) then we must be moving from one
+                    // network to another.  We have lost our old master;
+                    // transition to RONIN in an attempt to find a new master.
+                    // If there are none out there, we will just assume
+                    // responsibility for the timeline we used to be a client
+                    // of.
+                    default:
+                        becomeRonin("bound interface");
+                        break;
+                }
+            } else {
+                // That's odd... we failed to set up our socket.  This could be
+                // due to some transient network change which will work itself
+                // out shortly; schedule a retry attempt in the near future.
+                mCurTimeout.setTimeout(kSetupRetryTimeout);
             }
 
-            if (pfd.revents & POLLIN) {
-                if (!handlePacket()) {
-                    LOGE("handlePacket failed");
-                }
+            // One way or the other, we don't have any data to process at this
+            // point (since we just tried to bulid a new socket).  Loop back
+            // around and wait for the next thing to do.
+            continue;
+        } else if (droppedSocket) {
+            // We just lost our socket, and for whatever reason (either no
+            // config, or auto disable engaged) we are not supposed to rebuild
+            // one at this time.  We are not going to rebuild our socket until
+            // something about our config/auto-disabled status changes, so we
+            // are basically in network-less mode.  If we are already in either
+            // INITIAL or MASTER, just stay there until something changes.  If
+            // we are in any other state (CLIENT, RONIN or WAIT_FOR_ELECTION),
+            // then transition to either INITIAL or MASTER depending on whether
+            // or not our timeline is valid.
+            LOGI("Entering networkless mode interface is %s, "
+                 "shouldAutoDisable = %s",
+                 mBindIfaceValid ? "valid" : "invalid",
+                 shouldAutoDisable() ? "true" : "false");
+            if ((mState != ICommonClock::STATE_INITIAL) &&
+                (mState != ICommonClock::STATE_MASTER)) {
+                if (mTimelineID == ICommonClock::kInvalidTimelineID)
+                    becomeInitial("network-less mode");
+                else
+                    becomeMaster("network-less mode");
             }
+
+            continue;
+        }
+
+        // Did we wakeup with no signalled events across all of our FDs?  If so,
+        // we must have hit our timeout.
+        if (rc == 0) {
+            if (!handleTimeout())
+                LOGE("handleTimeout failed");
+            continue;
+        }
+
+        // Does our socket have data for us (assuming we still have one, we
+        // may have RXed a packet at the same time as a config change telling us
+        // to shut our socket down)?  If so, process its data.
+        if ((mSocket >= 0) && (eventCnt > 1) && (pfds[1].revents)) {
+            mLastPacketRxLocalTime = wakeupTime;
+            if (!handlePacket())
+                LOGE("handlePacket failed");
         }
     }
 
+    cleanupSocket_l();
     return true;
 }
 
-bool CommonTimeServer::setup() {
-    int rc;
+void CommonTimeServer::clearPendingWakeupEvents_l() {
+    int64_t tmp;
+    read(mWakeupThreadFD, &tmp, sizeof(tmp));
+}
 
-    // seed the random number generator (used to generated timeline IDs)
-    srand(static_cast<unsigned int>(systemTime()));
+void CommonTimeServer::wakeupThread_l() {
+    int64_t tmp = 1;
+    write(mWakeupThreadFD, &tmp, sizeof(tmp));
+}
+
+void CommonTimeServer::cleanupSocket_l() {
+    if (mSocket >= 0) {
+        close(mSocket);
+        mSocket = -1;
+    }
+}
+
+void CommonTimeServer::shutdownThread() {
+    // Flag the work thread for shutdown.
+    this->requestExit();
+
+    // Signal the thread in case its sleeping.
+    mLock.lock();
+    wakeupThread_l();
+    mLock.unlock();
+
+    // Wait for the thread to exit.
+    this->join();
+}
+
+bool CommonTimeServer::setupSocket_l() {
+    int rc;
+    bool ret_val = false;
+    struct sockaddr_in* ipv4_addr = NULL;
+    char masterElectionEPStr[64];
+    const int one = 1;
+
+    // This should never be needed, but if we happened to have an old socket
+    // lying around, be sure to not leak it before proceeding.
+    cleanupSocket_l();
+
+    // If we don't have a valid endpoint to bind to, then how did we get here in
+    // the first place?  Regardless, we know that we are going to fail to bind,
+    // so don't even try.
+    if (!mBindIfaceValid)
+        return false;
+
+    sockaddrToString(mMasterElectionEP, true, masterElectionEPStr,
+                     sizeof(masterElectionEPStr));
+    LOGI("Building socket :: bind = %s master election = %s",
+         mBindIface.string(), masterElectionEPStr);
+
+    // TODO: add proper support for IPv6.  Right now, we block IPv6 addresses at
+    // the configuration interface level.
+    if (AF_INET != mMasterElectionEP.ss_family) {
+        LOGW("TODO: add proper IPv6 support");
+        goto bailout;
+    }
 
     // open a UDP socket for the timeline serivce
     mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (mSocket == -1) {
-        LOGE("%s:%d socket failed", __PRETTY_FUNCTION__, __LINE__);
-        return false;
+    if (mSocket < 0) {
+        LOGE("Failed to create socket (errno = %d)", errno);
+        goto bailout;
     }
 
-    // initialize the multicast address
-    memset(&mMulticastAddr, 0, sizeof(mMulticastAddr));
-    mMulticastAddr.sin_family = AF_INET;
-    inet_aton(kServiceAddr, &mMulticastAddr.sin_addr);
-    mMulticastAddr.sin_port = htons(kServicePort);
-
-    // bind the socket to the time service port on all interfaces
-    struct sockaddr_in bindAddr;
-    memset(&bindAddr, 0, sizeof(bindAddr));
-    bindAddr.sin_family = AF_INET;
-    bindAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bindAddr.sin_port = htons(kServicePort);
-    rc = bind(mSocket, reinterpret_cast<const sockaddr *>(&bindAddr),
-            sizeof(bindAddr));
+    // Bind to the selected interface using Linux's spiffy SO_BINDTODEVICE.
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", mBindIface.string());
+    ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = 0;
+    rc = setsockopt(mSocket, SOL_SOCKET, SO_BINDTODEVICE,
+                    (void *)&ifr, sizeof(ifr));
     if (rc) {
-        LOGE("%s:%d bind failed", __PRETTY_FUNCTION__, __LINE__);
-        return false;
+        LOGE("Failed to bind socket at to interface %s (errno = %d)",
+              ifr.ifr_name, errno);
+        goto bailout;
     }
 
-    // add the socket to the multicast group
-    struct ip_mreq mreq;
-    mreq.imr_multiaddr = mMulticastAddr.sin_addr;
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-    rc = setsockopt(mSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                    &mreq, sizeof(mreq));
-    if (rc == -1) {
-        LOGE("%s:%d setsockopt failed (err = %d)",
-                __PRETTY_FUNCTION__, __LINE__, errno);
-        return false;
+    // Bind our socket to INADDR_ANY and the master election port.  The
+    // interface binding we made using SO_BINDTODEVICE should limit us to
+    // traffic only on the interface we are interested in.  We need to bind to
+    // INADDR_ANY and the specific master election port in order to be able to
+    // receive both unicast traffic and master election multicast traffic with
+    // just a single socket.
+    struct sockaddr_in bindAddr;
+    ipv4_addr = reinterpret_cast<struct sockaddr_in*>(&mMasterElectionEP);
+    memcpy(&bindAddr, ipv4_addr, sizeof(bindAddr));
+    bindAddr.sin_addr.s_addr = INADDR_ANY;
+    rc = bind(mSocket,
+              reinterpret_cast<const sockaddr *>(&bindAddr),
+              sizeof(bindAddr));
+    if (rc) {
+        LOGE("Failed to bind socket to port %hu (errno = %d)",
+              ntohs(bindAddr.sin_port), errno);
+        goto bailout;
     }
 
-    // disable loopback of multicast packets
-    const int zero = 0;
-    rc = setsockopt(mSocket, IPPROTO_IP, IP_MULTICAST_LOOP,
-                    &zero, sizeof(zero));
+    if (0xE0000000 == (ntohl(ipv4_addr->sin_addr.s_addr) & 0xF0000000)) {
+        // If our master election endpoint is a multicast address, be sure to join
+        // the multicast group.
+        struct ip_mreq mreq;
+        mreq.imr_multiaddr = ipv4_addr->sin_addr;
+        mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+        rc = setsockopt(mSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+                        &mreq, sizeof(mreq));
+        if (rc == -1) {
+            LOGE("Failed to join multicast group at %s.  (errno = %d)",
+                 masterElectionEPStr, errno);
+            goto bailout;
+        }
+
+        // disable loopback of multicast packets
+        const int zero = 0;
+        rc = setsockopt(mSocket, IPPROTO_IP, IP_MULTICAST_LOOP,
+                        &zero, sizeof(zero));
+        if (rc == -1) {
+            LOGE("Failed to disable multicast loopback (errno = %d)", errno);
+            goto bailout;
+        }
+    } else
+    if (ntohl(ipv4_addr->sin_addr.s_addr) != 0xFFFFFFFF) {
+        // If the master election address is neither broadcast, nor multicast,
+        // then we are misconfigured.  The config API layer should prevent this
+        // from ever happening.
+        goto bailout;
+    }
+
+    // Set the TTL of sent packets to 1.  (Time protocol sync should never leave
+    // the local subnet)
+    rc = setsockopt(mSocket, IPPROTO_IP, IP_TTL, &one, sizeof(one));
     if (rc == -1) {
-        LOGE("%s:%d setsockopt failed", __PRETTY_FUNCTION__, __LINE__);
-        return false;
+        LOGE("Failed to set TTL to %d (errno = %d)", one, errno);
+        goto bailout;
     }
 
     // get the device's unique ID
     if (!assignDeviceID())
-        return false;
+        goto bailout;
 
-    // start the ICommonClock service
-    mICommonClock = CommonClockService::instantiate(&mCommonClock, &mLocalClock);
-    if (mICommonClock == NULL)
-        return false;
+    ret_val = true;
 
-    // start the ICommonTimeConfig service
-    mICommonTimeConfig = CommonTimeConfigService::instantiate();
-    if (mICommonTimeConfig == NULL)
-        return false;
-
-    return true;
+bailout:
+    if (!ret_val)
+        cleanupSocket_l();
+    return ret_val;
 }
 
 // generate a unique device ID that can be used for arbitration
@@ -524,99 +533,67 @@ bool CommonTimeServer::assignDeviceID() {
 // generate a new timeline ID
 void CommonTimeServer::assignTimelineID() {
     do {
-        mTimelineID = rand();
+        mTimelineID = (static_cast<uint64_t>(lrand48()) << 32)
+                    |  static_cast<uint64_t>(lrand48());
     } while (mTimelineID == ICommonClock::kInvalidTimelineID);
 }
 
 // Select a preference between the device IDs of two potential masters.
 // Returns true if the first ID wins, or false if the second ID wins.
-bool CommonTimeServer::arbitrateMaster(uint64_t deviceID1,
-        uint64_t deviceID2) {
-    return (deviceID1 > deviceID2);
+bool CommonTimeServer::arbitrateMaster(
+        uint64_t deviceID1, uint8_t devicePrio1,
+        uint64_t deviceID2, uint8_t devicePrio2) {
+    return ((devicePrio1 >  devicePrio2) ||
+           ((devicePrio1 == devicePrio2) && (deviceID1 > deviceID2)));
 }
 
 bool CommonTimeServer::handlePacket() {
-    const int kMaxPacketSize = 100;
-    uint8_t buf[kMaxPacketSize];
-    struct sockaddr_in srcAddr;
+    uint8_t buf[256];
+    struct sockaddr_storage srcAddr;
     socklen_t srcAddrLen = sizeof(srcAddr);
 
     ssize_t recvBytes = recvfrom(
             mSocket, buf, sizeof(buf), 0,
             reinterpret_cast<const sockaddr *>(&srcAddr), &srcAddrLen);
 
-    if (recvBytes == -1) {
+    if (recvBytes < 0) {
         LOGE("%s:%d recvfrom failed", __PRETTY_FUNCTION__, __LINE__);
         return false;
     }
 
-    if (recvBytes < static_cast<ssize_t>(sizeof(TimeServicePacketHeader)))
-        return false;
-
-    TimeServicePacketHeader* header =
-        reinterpret_cast<TimeServicePacketHeader*>(buf);
-
-    if (!header->checkMagic())
+    UniversalTimeServicePacket pkt;
+    recvBytes = pkt.deserializePacket(buf, recvBytes, mSyncGroupID);
+    if (recvBytes < 0)
         return false;
 
     bool result;
+    switch (pkt.packetType) {
+        case TIME_PACKET_WHO_IS_MASTER_REQUEST:
+            result = handleWhoIsMasterRequest(&pkt.p.who_is_master_request,
+                                              srcAddr);
+            break;
 
-    switch (header->type()) {
-        case TIME_PACKET_WHO_IS_MASTER_REQUEST: {
-            if (recvBytes <
-                static_cast<ssize_t>(sizeof(WhoIsMasterRequestPacket))) {
-                result = false;
-            } else {
-                result = handleWhoIsMasterRequest(
-                        reinterpret_cast<WhoIsMasterRequestPacket*>(buf),
-                        srcAddr);
-            }
-        } break;
+        case TIME_PACKET_WHO_IS_MASTER_RESPONSE:
+            result = handleWhoIsMasterResponse(&pkt.p.who_is_master_response,
+                                               srcAddr);
+            break;
 
-        case TIME_PACKET_WHO_IS_MASTER_RESPONSE: {
-            if (recvBytes <
-                static_cast<ssize_t>(sizeof(WhoIsMasterResponsePacket))) {
-                result = false;
-            } else {
-                result = handleWhoIsMasterResponse(
-                        reinterpret_cast<WhoIsMasterResponsePacket*>(buf),
-                        srcAddr);
-            }
-        } break;
+        case TIME_PACKET_SYNC_REQUEST:
+            result = handleSyncRequest(&pkt.p.sync_request, srcAddr);
+            break;
 
-        case TIME_PACKET_SYNC_REQUEST: {
-            if (recvBytes < static_cast<ssize_t>(sizeof(SyncRequestPacket))) {
-                result = false;
-            } else {
-                result = handleSyncRequest(
-                        reinterpret_cast<SyncRequestPacket*>(buf),
-                        srcAddr);
-            }
-        } break;
+        case TIME_PACKET_SYNC_RESPONSE:
+            result = handleSyncResponse(&pkt.p.sync_response, srcAddr);
+            break;
 
-        case TIME_PACKET_SYNC_RESPONSE: {
-            if (recvBytes < static_cast<ssize_t>(sizeof(SyncResponsePacket))) {
-                result = false;
-            } else {
-                result = handleSyncResponse(
-                        reinterpret_cast<SyncResponsePacket*>(buf),
-                        srcAddr);
-            }
-        } break;
-
-        case TIME_PACKET_MASTER_ANNOUNCEMENT: {
-            if (recvBytes <
-                static_cast<ssize_t>(sizeof(MasterAnnouncementPacket))) {
-                result = false;
-            } else {
-                result = handleMasterAnnouncement(
-                        reinterpret_cast<MasterAnnouncementPacket*>(buf),
-                        srcAddr);
-            }
-        } break;
+        case TIME_PACKET_MASTER_ANNOUNCEMENT:
+            result = handleMasterAnnouncement(&pkt.p.master_announcement,
+                                              srcAddr);
+            break;
 
         default: {
-            LOGD("%s:%d unknown packet type", __PRETTY_FUNCTION__, __LINE__);
+            LOGD("%s:%d unknown packet type(%d)",
+                    __PRETTY_FUNCTION__, __LINE__, pkt.packetType);
             result = false;
         } break;
     }
@@ -625,6 +602,10 @@ bool CommonTimeServer::handlePacket() {
 }
 
 bool CommonTimeServer::handleTimeout() {
+    // If we have no socket, then this must be a timeout to retry socket setup.
+    if (mSocket < 0)
+        return true;
+
     switch (mState) {
         case ICommonClock::STATE_INITIAL:
             return handleTimeoutInitial();
@@ -646,7 +627,7 @@ bool CommonTimeServer::handleTimeoutInitial() {
             kInitial_NumWhoIsMasterRetries) {
         // none of our attempts to discover a master succeeded, so make
         // this device the master
-        return becomeMaster();
+        return becomeMaster("initial timeout");
     } else {
         // retry the WhoIsMaster request
         return sendWhoIsMasterRequest();
@@ -654,6 +635,9 @@ bool CommonTimeServer::handleTimeoutInitial() {
 }
 
 bool CommonTimeServer::handleTimeoutClient() {
+    if (shouldPanicNotGettingGoodData())
+        return becomeInitial("timeout panic, no good data");
+
     if (mClient_SyncRequestPending) {
         mClient_SyncRequestPending = false;
 
@@ -664,7 +648,7 @@ bool CommonTimeServer::handleTimeoutClient() {
             // The master has failed to respond to a sync request for too many
             // times in a row.  Assume the master is dead and start electing
             // a new master.
-            return becomeRonin();
+            return becomeRonin("master not responding");
         }
     } else {
         // initiate the next sync request
@@ -680,31 +664,37 @@ bool CommonTimeServer::handleTimeoutMaster() {
 bool CommonTimeServer::handleTimeoutRonin() {
     if (++mRonin_WhoIsMasterRequestTimeouts == kRonin_NumWhoIsMasterRetries) {
         // no other master is out there, so we won the election
-        return becomeMaster();
+        return becomeMaster("no better masters detected");
     } else {
         return sendWhoIsMasterRequest();
     }
 }
 
 bool CommonTimeServer::handleTimeoutWaitForElection() {
-    return becomeRonin();
+    return becomeRonin("timeout waiting for election conclusion");
 }
 
 bool CommonTimeServer::handleWhoIsMasterRequest(
         const WhoIsMasterRequestPacket* request,
-        const sockaddr_in& srcAddr) {
+        const sockaddr_storage& srcAddr) {
     if (mState == ICommonClock::STATE_MASTER) {
         // is this request related to this master's timeline?
-        if (ntohl(request->timelineID) != ICommonClock::kInvalidTimelineID &&
-            ntohl(request->timelineID) != mTimelineID)
+        if (request->timelineID != ICommonClock::kInvalidTimelineID &&
+            request->timelineID != mTimelineID)
             return true;
 
-        WhoIsMasterResponsePacket response;
-        response.deviceID = htonq(mDeviceID);
-        response.timelineID = htonl(mTimelineID);
+        WhoIsMasterResponsePacket pkt;
+        pkt.initHeader(mTimelineID, mSyncGroupID);
+        pkt.deviceID = mDeviceID;
+        pkt.devicePriority = effectivePriority();
+
+        uint8_t buf[256];
+        ssize_t bufSz = pkt.serializePacket(buf, sizeof(buf));
+        if (bufSz < 0)
+            return false;
 
         ssize_t sendBytes = sendto(
-                mSocket, &response, sizeof(response), 0,
+                mSocket, buf, bufSz, 0,
                 reinterpret_cast<const sockaddr *>(&srcAddr),
                 sizeof(srcAddr));
         if (sendBytes == -1) {
@@ -716,11 +706,14 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
         // the same timeline and that device wins arbitration, then we will stop
         // trying to elect ourselves master and will instead wait for an
         // announcement from the election winner
-        if (ntohl(request->timelineID) != mTimelineID)
+        if (request->timelineID != mTimelineID)
             return true;
 
-        if (arbitrateMaster(ntohq(request->senderDeviceID), mDeviceID))
-            return becomeWaitForElection();
+        if (arbitrateMaster(request->senderDeviceID,
+                            request->senderDevicePriority,
+                            mDeviceID,
+                            effectivePriority()))
+            return becomeWaitForElection("would lose election");
 
         return true;
     } else if (mState == ICommonClock::STATE_INITIAL) {
@@ -731,8 +724,11 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
         // WhoIsMaster(InvalidTimeline) requests from peers.  If we would lose
         // arbitration against that peer, reset our timeout count so that the
         // peer has a chance to become master before we time out.
-        if (ntohl(request->timelineID) == ICommonClock::kInvalidTimelineID &&
-                arbitrateMaster(ntohq(request->senderDeviceID), mDeviceID)) {
+        if (request->timelineID == ICommonClock::kInvalidTimelineID &&
+                arbitrateMaster(request->senderDeviceID, 
+                                request->senderDevicePriority,
+                                mDeviceID,
+                                effectivePriority())) {
             mInitial_WhoIsMasterRequestTimeouts = 0;
         }
     }
@@ -742,20 +738,26 @@ bool CommonTimeServer::handleWhoIsMasterRequest(
 
 bool CommonTimeServer::handleWhoIsMasterResponse(
         const WhoIsMasterResponsePacket* response,
-        const sockaddr_in& srcAddr) {
+        const sockaddr_storage& srcAddr) {
     if (mState == ICommonClock::STATE_INITIAL || mState == ICommonClock::STATE_RONIN) {
         return becomeClient(srcAddr,
-                            ntohq(response->deviceID),
-                            ntohl(response->timelineID));
+                            response->deviceID,
+                            response->devicePriority,
+                            response->timelineID,
+                            "heard whois response");
     } else if (mState == ICommonClock::STATE_CLIENT) {
         // if we get multiple responses because there are multiple devices
         // who believe that they are master, then follow the master that
         // wins arbitration
-        if (arbitrateMaster(ntohq(response->deviceID),
-                            mClient_MasterDeviceID)) {
+        if (arbitrateMaster(response->deviceID,
+                            response->devicePriority,
+                            mClient_MasterDeviceID,
+                            mClient_MasterDevicePriority)) {
             return becomeClient(srcAddr,
-                                ntohq(response->deviceID),
-                                ntohl(response->timelineID));
+                                response->deviceID,
+                                response->devicePriority,
+                                response->timelineID,
+                                "heard whois response");
         }
     }
 
@@ -763,48 +765,47 @@ bool CommonTimeServer::handleWhoIsMasterResponse(
 }
 
 bool CommonTimeServer::handleSyncRequest(const SyncRequestPacket* request,
-                                       const sockaddr_in& srcAddr) {
-    SyncResponsePacket response;
-    if (mState == ICommonClock::STATE_MASTER && ntohl(request->timelineID) == mTimelineID) {
-        int64_t rxLocalTime = (request->header.kernelRxLocalTime) ?
-            ntohq(request->header.kernelRxLocalTime) : mLastPacketRxLocalTime;
+                                         const sockaddr_storage& srcAddr) {
+    SyncResponsePacket pkt;
+    pkt.initHeader(mTimelineID, mSyncGroupID);
 
+    if ((mState == ICommonClock::STATE_MASTER) &&
+        (mTimelineID == request->timelineID)) {
+        int64_t rxLocalTime = mLastPacketRxLocalTime;
         int64_t rxCommonTime;
+
+        // If we are master on an actual network and have actual clients, then
+        // we are no longer low priority.
+        setForceLowPriority(false);
+
         if (OK != mCommonClock.localToCommon(rxLocalTime, &rxCommonTime)) {
             return false;
         }
 
-        // TODO(johngro) : now that common time has moved out of the kernel, in
-        // order to turn netfilter based timestamping of transmit and receive
-        // times, we will need to make some changes to the sync request/resposne
-        // packet structure.  Currently masters send back to clients RX and TX
-        // times expressed in common time (since the master's local time is not
-        // useful to the client).  Now that the netfilter driver has no access
-        // to common time, then netfilter driver should capture the master's rx
-        // local time as the packet comes in, and put the master's tx local time
-        // into the packet as the response goes out.  The user mode code (this
-        // function) needs to add the master's local->common transformation to
-        // the packet so that the client can make use of the data.
         int64_t txLocalTime = mLocalClock.getLocalTime();;
         int64_t txCommonTime;
         if (OK != mCommonClock.localToCommon(txLocalTime, &txCommonTime)) {
             return false;
         }
 
-        response.nak = htonl(0);
-        response.clientTxLocalTime = (request->header.kernelTxLocalTime) ?
-            request->header.kernelTxLocalTime : request->clientTxLocalTime;
-        response.masterRxCommonTime = htonq(rxCommonTime);
-        response.masterTxCommonTime = htonq(txCommonTime);
+        pkt.nak = 0;
+        pkt.clientTxLocalTime  = request->clientTxLocalTime;
+        pkt.masterRxCommonTime = rxCommonTime;
+        pkt.masterTxCommonTime = txCommonTime;
     } else {
-        response.nak = htonl(1);
-        response.clientTxLocalTime = htonl(0);
-        response.masterRxCommonTime = htonl(0);
-        response.masterTxCommonTime = htonl(0);
+        pkt.nak = 1;
+        pkt.clientTxLocalTime  = 0;
+        pkt.masterRxCommonTime = 0;
+        pkt.masterTxCommonTime = 0;
     }
 
+    uint8_t buf[256];
+    ssize_t bufSz = pkt.serializePacket(buf, sizeof(buf));
+    if (bufSz < 0)
+        return false;
+
     ssize_t sendBytes = sendto(
-            mSocket, &response, sizeof(response), 0,
+            mSocket, &buf, bufSz, 0, 
             reinterpret_cast<const sockaddr *>(&srcAddr),
             sizeof(srcAddr));
     if (sendBytes == -1) {
@@ -817,93 +818,112 @@ bool CommonTimeServer::handleSyncRequest(const SyncRequestPacket* request,
 
 bool CommonTimeServer::handleSyncResponse(
         const SyncResponsePacket* response,
-        const sockaddr_in& srcAddr) {
+        const sockaddr_storage& srcAddr) {
     if (mState != ICommonClock::STATE_CLIENT)
         return true;
 
-    if ((srcAddr.sin_addr.s_addr != mClient_MasterAddr.sin_addr.s_addr) ||
-        (srcAddr.sin_port        != mClient_MasterAddr.sin_port)) {
-        uint32_t srcIP      = ntohl(srcAddr.sin_addr.s_addr);
-        uint32_t expectedIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
+    assert(mMasterEPValid);
+    if (!sockaddrMatch(srcAddr, mMasterEP, true)) {
+        char srcEP[64], expectedEP[64];
+        sockaddrToString(srcAddr, true, srcEP, sizeof(srcEP));
+        sockaddrToString(mMasterEP, true, expectedEP, sizeof(expectedEP));
         LOGI("Dropping sync response from unexpected address."
-             " Expected %u.%u.%u.%u:%hu"
-             " Got %u.%u.%u.%u:%hu",
-             ((expectedIP >> 24) & 0xFF), ((expectedIP >> 16) & 0xFF),
-             ((expectedIP >>  8) & 0xFF),  (expectedIP & 0xFF),
-             ntohs(mClient_MasterAddr.sin_port),
-             ((srcIP >> 24) & 0xFF), ((srcIP >> 16) & 0xFF),
-             ((srcIP >>  8) & 0xFF),  (srcIP & 0xFF),
-             ntohs(srcAddr.sin_port));
+             " Expected %s Got %s", expectedEP, srcEP);
         return true;
     }
 
-    if (ntohl(response->nak)) {
+    if (response->nak) {
         // if our master is no longer accepting requests, then we need to find
         // a new master
-        return becomeRonin();
+        return becomeRonin("master NAK'ed");
     }
 
     mClient_SyncRequestPending = 0;
     mClient_SyncRequestTimeouts = 0;
+    mClient_PacketRTTLog.logRX(response->clientTxLocalTime,
+                               mLastPacketRxLocalTime);
 
     bool result;
-
-    if (!(mClient_SyncRespsRvcedFromCurMaster++)) {
+    if (!(mClient_SyncRespsRXedFromCurMaster++)) {
         // the first request/response exchange between a client and a master
         // may take unusually long due to ARP, so discard it.
         result = true;
     } else {
-        int64_t clientTxLocalTime = ntohq(response->clientTxLocalTime);
-        int64_t clientRxLocalTime = (response->header.kernelRxLocalTime)
-                                  ? ntohq(response->header.kernelRxLocalTime)
-                                  : mLastPacketRxLocalTime;
-        int64_t masterTxCommonTime = (response->header.kernelTxCommonTime)
-                                   ?  ntohq(response->header.kernelTxCommonTime)
-                                   : ntohq(response->masterTxCommonTime);
-        int64_t masterRxCommonTime = ntohq(response->masterRxCommonTime);
+        int64_t clientTxLocalTime  = response->clientTxLocalTime;
+        int64_t clientRxLocalTime  = mLastPacketRxLocalTime;
+        int64_t masterTxCommonTime = response->masterTxCommonTime;
+        int64_t masterRxCommonTime = response->masterRxCommonTime;
 
         int64_t rtt       = (clientRxLocalTime - clientTxLocalTime);
         int64_t avgLocal  = (clientTxLocalTime + clientRxLocalTime) >> 1;
         int64_t avgCommon = (masterTxCommonTime + masterRxCommonTime) >> 1;
-        result = mClockRecovery.pushDisciplineEvent(avgLocal, avgCommon, rtt);
 
-        if (result) {
-            // indicate to listeners that we've synced to the common timeline
-            notifyClockSync();
+        // if the RTT of the packet is significantly larger than the panic
+        // threshold, we should simply discard it.  Its better to do nothing
+        // than to take cues from a packet like that.
+        int rttCommon = mCommonClock.localDurationToCommonDuration(rtt);
+        if (rttCommon > (static_cast<int64_t>(mPanicThresholdUsec) * 5)) {
+            LOGV("Dropping sync response with RTT of %lld uSec", rttCommon);
+            mClient_ExpiredSyncRespsRXedFromCurMaster++;
+            if (shouldPanicNotGettingGoodData())
+                return becomeInitial("RX panic, no good data");
         } else {
-            LOGE("Panic!  Observed clock sync error is too high to tolerate,"
-                    " resetting state machine and starting over.");
-            notifyClockSyncLoss();
-            return becomeInitial();
+            result = mClockRecovery.pushDisciplineEvent(avgLocal, avgCommon, rtt);
+            mClient_LastGoodSyncRX = clientRxLocalTime;
+
+            if (result) {
+                // indicate to listeners that we've synced to the common timeline
+                notifyClockSync();
+            } else {
+                LOGE("Panic!  Observed clock sync error is too high to tolerate,"
+                        " resetting state machine and starting over.");
+                notifyClockSyncLoss();
+                return becomeInitial("panic");
+            }
         }
     }
 
-    mTimeoutMs = kClient_SyncRequestIntervalMs;
+    mCurTimeout.setTimeout(mSyncRequestIntervalMs);
     return result;
 }
 
 bool CommonTimeServer::handleMasterAnnouncement(
         const MasterAnnouncementPacket* packet,
-        const sockaddr_in& srcAddr) {
-    uint64_t newDeviceID = ntohq(packet->deviceID);
-    uint32_t newTimelineID = ntohl(packet->timelineID);
+        const sockaddr_storage& srcAddr) {
+    uint64_t newDeviceID   = packet->deviceID;
+    uint8_t  newDevicePrio = packet->devicePriority;
+    uint64_t newTimelineID = packet->timelineID;
 
     if (mState == ICommonClock::STATE_INITIAL ||
         mState == ICommonClock::STATE_RONIN ||
         mState == ICommonClock::STATE_WAIT_FOR_ELECTION) {
         // if we aren't currently following a master, then start following
         // this new master
-        return becomeClient(srcAddr, newDeviceID, newTimelineID);
+        return becomeClient(srcAddr,
+                            newDeviceID,
+                            newDevicePrio,
+                            newTimelineID,
+                            "heard master announcement");
     } else if (mState == ICommonClock::STATE_CLIENT) {
         // if the new master wins arbitration against our current master,
         // then become a client of the new master
-        if (arbitrateMaster(newDeviceID, mClient_MasterDeviceID))
-            return becomeClient(srcAddr, newDeviceID, newTimelineID);
+        if (arbitrateMaster(newDeviceID,
+                            newDevicePrio,
+                            mClient_MasterDeviceID,
+                            mClient_MasterDevicePriority))
+            return becomeClient(srcAddr,
+                                newDeviceID,
+                                newDevicePrio,
+                                newTimelineID,
+                                "heard master announcement");
     } else if (mState == ICommonClock::STATE_MASTER) {
         // two masters are competing - if the new one wins arbitration, then
         // cease acting as master
-        if (arbitrateMaster(newDeviceID, mDeviceID))
-            return becomeClient(srcAddr, newDeviceID, newTimelineID);
+        if (arbitrateMaster(newDeviceID, newDevicePrio,
+                            mDeviceID, effectivePriority()))
+            return becomeClient(srcAddr, newDeviceID,
+                                newDevicePrio, newTimelineID,
+                                "heard master announcement");
     }
 
     return true;
@@ -912,85 +932,131 @@ bool CommonTimeServer::handleMasterAnnouncement(
 bool CommonTimeServer::sendWhoIsMasterRequest() {
     assert(mState == ICommonClock::STATE_INITIAL || mState == ICommonClock::STATE_RONIN);
 
-    WhoIsMasterRequestPacket request;
-    request.senderDeviceID = htonq(mDeviceID);
-    request.timelineID = htonl(mTimelineID);
+    // If we have no socket, then we must be in the unconfigured initial state.
+    // Don't report any errors, just don't try to send the initial who-is-master
+    // query.  Eventually, our network will either become configured, or we will
+    // be forced into network-less master mode by higher level code.
+    if (mSocket < 0) {
+        assert(mState == ICommonClock::STATE_INITIAL);
+        return true;
+    }
 
-    ssize_t sendBytes = sendto(
-            mSocket, &request, sizeof(request), 0,
-            reinterpret_cast<const sockaddr *>(&mMulticastAddr),
-            sizeof(mMulticastAddr));
-    if (sendBytes == -1) {
-        LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
+    bool ret = false;
+    WhoIsMasterRequestPacket pkt;
+    pkt.initHeader(mSyncGroupID);
+    pkt.senderDeviceID = mDeviceID;
+    pkt.senderDevicePriority = effectivePriority();
+
+    uint8_t buf[256];
+    ssize_t bufSz = pkt.serializePacket(buf, sizeof(buf));
+    if (bufSz >= 0) {
+        ssize_t sendBytes = sendto(
+                mSocket, buf, bufSz, 0,
+                reinterpret_cast<const sockaddr *>(&mMasterElectionEP),
+                sizeof(mMasterElectionEP));
+        if (sendBytes < 0)
+            LOGE("WhoIsMaster sendto failed (errno %d)", errno);
+        ret = true;
     }
 
     if (mState == ICommonClock::STATE_INITIAL) {
-        mTimeoutMs = kInitial_WhoIsMasterTimeoutMs;
+        mCurTimeout.setTimeout(kInitial_WhoIsMasterTimeoutMs);
     } else {
-        mTimeoutMs = kRonin_WhoIsMasterTimeoutMs;
+        mCurTimeout.setTimeout(kRonin_WhoIsMasterTimeoutMs);
     }
 
-    return (sendBytes != -1);
+    return ret;
 }
 
 bool CommonTimeServer::sendSyncRequest() {
+    // If we are sending sync requests, then we must be in the client state and
+    // we must have a socket (when we have no network, we are only supposed to
+    // be in INITIAL or MASTER)
     assert(mState == ICommonClock::STATE_CLIENT);
+    assert(mSocket >= 0);
 
-    SyncRequestPacket request;
-    request.timelineID = htonl(mTimelineID);
-    request.clientTxLocalTime = htonq(mLocalClock.getLocalTime());
+    bool ret = false;
+    SyncRequestPacket pkt;
+    pkt.initHeader(mTimelineID, mSyncGroupID);
+    pkt.clientTxLocalTime = mLocalClock.getLocalTime();
 
-    ssize_t sendBytes = sendto(
-            mSocket, &request, sizeof(request), 0,
-            reinterpret_cast<const sockaddr *>(&mClient_MasterAddr),
-            sizeof(mClient_MasterAddr));
-    if (sendBytes == -1) {
-        LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
+    if (!mClient_FirstSyncTX)
+        mClient_FirstSyncTX = pkt.clientTxLocalTime;
+
+    mClient_PacketRTTLog.logTX(pkt.clientTxLocalTime);
+
+    uint8_t buf[256];
+    ssize_t bufSz = pkt.serializePacket(buf, sizeof(buf));
+    if (bufSz >= 0) {
+        ssize_t sendBytes = sendto(
+                mSocket, buf, bufSz, 0,
+                reinterpret_cast<const sockaddr *>(&mMasterEP),
+                sizeof(mMasterEP));
+        if (sendBytes < 0)
+            LOGE("SyncRequest sendto failed (errno %d)", errno);
+        ret = true;
     }
 
     mClient_SyncsSentToCurMaster++;
-    mTimeoutMs = kClient_SyncRequestTimeoutMs;
+    mCurTimeout.setTimeout(mSyncRequestIntervalMs);
     mClient_SyncRequestPending = true;
-    return (sendBytes != -1);
+
+    return ret;
 }
 
 bool CommonTimeServer::sendMasterAnnouncement() {
+    bool ret = false;
     assert(mState == ICommonClock::STATE_MASTER);
 
-    MasterAnnouncementPacket announce;
-    announce.deviceID = htonq(mDeviceID);
-    announce.timelineID = htonl(mTimelineID);
-
-    ssize_t sendBytes = sendto(
-            mSocket, &announce, sizeof(announce), 0,
-            reinterpret_cast<const sockaddr *>(&mMulticastAddr),
-            sizeof(mMulticastAddr));
-    if (sendBytes == -1) {
-        LOGE("%s:%d sendto failed", __PRETTY_FUNCTION__, __LINE__);
+    // If we are being asked to send a master announcement, but we have no
+    // socket, we must be in network-less master mode.  Don't bother to send the
+    // announcement, and don't bother to schedule a timeout.  When the network
+    // comes up, the work thread will get poked and start the process of
+    // figuring out who the current master should be.
+    if (mSocket < 0) {
+        mCurTimeout.setTimeout(kInfiniteTimeout);
+        return true;
     }
 
-    mTimeoutMs = kMaster_AnnouncementIntervalMs;
-    return (sendBytes != -1);
+    MasterAnnouncementPacket pkt;
+    pkt.initHeader(mTimelineID, mSyncGroupID);
+    pkt.deviceID = mDeviceID;
+    pkt.devicePriority = effectivePriority();
+
+    uint8_t buf[256];
+    ssize_t bufSz = pkt.serializePacket(buf, sizeof(buf));
+    if (bufSz >= 0) {
+        ssize_t sendBytes = sendto(
+                mSocket, buf, bufSz, 0,
+                reinterpret_cast<const sockaddr *>(&mMasterElectionEP),
+                sizeof(mMasterElectionEP));
+        if (sendBytes < 0)
+            LOGE("MasterAnnouncement sendto failed (errno %d)", errno);
+        ret = true;
+    }
+
+    mCurTimeout.setTimeout(mMasterAnnounceIntervalMs);
+    return ret;
 }
 
-bool CommonTimeServer::becomeClient(const sockaddr_in& masterAddr,
-                                  uint64_t masterDeviceID,
-                                  uint32_t timelineID) {
-    uint32_t newIP = ntohl(masterAddr.sin_addr.s_addr);
-    uint32_t oldIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
-    LOGI("%s --> CLIENT%s"
-         " OldMaster: %016llx::%08x::%u.%u.%u.%u:%hu"
-         " NewMaster: %016llx::%08x::%u.%u.%u.%u:%hu",
-         stateToString(mState),
+bool CommonTimeServer::becomeClient(const sockaddr_storage& masterEP,
+                                    uint64_t masterDeviceID,
+                                    uint8_t  masterDevicePriority,
+                                    uint64_t timelineID,
+                                    const char* cause) {
+    char newEPStr[64], oldEPStr[64];
+    sockaddrToString(masterEP, true, newEPStr, sizeof(newEPStr));
+    sockaddrToString(mMasterEP, mMasterEPValid, oldEPStr, sizeof(oldEPStr));
+
+    LOGI("%s --> CLIENT (%s) :%s"
+         " OldMaster: %02x-%014llx::%016llx::%s"
+         " NewMaster: %02x-%014llx::%016llx::%s",
+         stateToString(mState), cause,
          (mTimelineID != timelineID) ? " (new timeline)" : "",
-         mClient_MasterDeviceID, mTimelineID,
-         ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
-         ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
-         ntohs(mClient_MasterAddr.sin_port),
-         masterDeviceID, timelineID,
-         ((newIP >> 24) & 0xFF), ((newIP >> 16) & 0xFF),
-         ((newIP >>  8) & 0xFF),  (newIP & 0xFF),
-         ntohs(masterAddr.sin_port));
+         mClient_MasterDevicePriority, mClient_MasterDeviceID,
+         mTimelineID, oldEPStr,
+         masterDevicePriority, masterDeviceID,
+         timelineID, newEPStr);
 
     if (mTimelineID != timelineID) {
         // start following a new timeline
@@ -1002,25 +1068,26 @@ bool CommonTimeServer::becomeClient(const sockaddr_in& masterAddr,
         mClockRecovery.reset(false, true);
     }
 
-    mClient_MasterAddr = masterAddr;
+    mMasterEP = masterEP;
+    mMasterEPValid = true;
+    setForceLowPriority(false);
+
     mClient_MasterDeviceID = masterDeviceID;
-    mClient_SyncRequestPending = 0;
-    mClient_SyncRequestTimeouts = 0;
-    mClient_SyncsSentToCurMaster = 0;
-    mClient_SyncRespsRvcedFromCurMaster = 0;
+    mClient_MasterDevicePriority = masterDevicePriority;
+    resetSyncStats();
 
     setState(ICommonClock::STATE_CLIENT);
 
     // add some jitter to when the various clients send their requests
     // in order to reduce the likelihood that a group of clients overload
     // the master after receiving a master announcement
-    usleep((rand() % 100) * 1000);
+    usleep((lrand48() % 100) * 1000);
 
     return sendSyncRequest();
 }
 
-bool CommonTimeServer::becomeMaster() {
-    uint32_t oldTimelineID = mTimelineID;
+bool CommonTimeServer::becomeMaster(const char* cause) {
+    uint64_t oldTimelineID = mTimelineID;
     if (mTimelineID == ICommonClock::kInvalidTimelineID) {
         // this device has not been following any existing timeline,
         // so it will create a new timeline and declare itself master
@@ -1036,19 +1103,25 @@ bool CommonTimeServer::becomeMaster() {
         notifyClockSync();
     }
 
-    LOGI("%s --> MASTER %s timeline %08x",
-         stateToString(mState),
+    LOGI("%s --> MASTER (%s) : %s timeline %016llx",
+         stateToString(mState), cause,
          (oldTimelineID == mTimelineID) ? "taking ownership of"
                                         : "creating new",
          mTimelineID);
 
+    memset(&mMasterEP, 0, sizeof(mMasterEP));
+    mMasterEPValid = false;
+    setForceLowPriority(false);
+    mClient_MasterDevicePriority = effectivePriority();
+    mClient_MasterDeviceID = mDeviceID;
     mClockRecovery.reset(false, true);
+    resetSyncStats();
 
     setState(ICommonClock::STATE_MASTER);
     return sendMasterAnnouncement();
 }
 
-bool CommonTimeServer::becomeRonin() {
+bool CommonTimeServer::becomeRonin(const char* cause) {
     // If we were the client of a given timeline, but had never received even a
     // single time sync packet, then we transition back to Initial instead of
     // Ronin.  If we transition to Ronin and end up becoming the new Master, we
@@ -1057,47 +1130,51 @@ bool CommonTimeServer::becomeRonin() {
     // other clients who know what time it is, but would lose master arbitration
     // in the Ronin case, will step up and become the proper new master of the
     // old timeline.
-    uint32_t oldIP = ntohl(mClient_MasterAddr.sin_addr.s_addr);
+
+    char oldEPStr[64];
+    sockaddrToString(mMasterEP, mMasterEPValid, oldEPStr, sizeof(oldEPStr));
+    memset(&mMasterEP, 0, sizeof(mMasterEP));
+    mMasterEPValid = false;
+
     if (mCommonClock.isValid()) {
-        LOGI("%s --> RONIN : lost track of previously valid timeline "
-             "%016llx::%08x::%u.%u.%u.%u:%hu (%d TXed %d RXed)",
-             stateToString(mState),
-             mClient_MasterDeviceID, mTimelineID,
-             ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
-             ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
-             ntohs(mClient_MasterAddr.sin_port),
+        LOGI("%s --> RONIN (%s) : lost track of previously valid timeline "
+             "%02x-%014llx::%016llx::%s (%d TXed %d RXed %d RXExpired)",
+             stateToString(mState), cause,
+             mClient_MasterDevicePriority, mClient_MasterDeviceID,
+             mTimelineID, oldEPStr,
              mClient_SyncsSentToCurMaster,
-             mClient_SyncRespsRvcedFromCurMaster);
+             mClient_SyncRespsRXedFromCurMaster,
+             mClient_ExpiredSyncRespsRXedFromCurMaster);
 
         mRonin_WhoIsMasterRequestTimeouts = 0;
         setState(ICommonClock::STATE_RONIN);
         return sendWhoIsMasterRequest();
     } else {
-        LOGI("%s --> INITIAL : never synced timeline "
-             "%016llx::%08x::%u.%u.%u.%u:%hu (%d TXed %d RXed)",
-             stateToString(mState),
-             mClient_MasterDeviceID, mTimelineID,
-             ((oldIP >> 24) & 0xFF), ((oldIP >> 16) & 0xFF),
-             ((oldIP >>  8) & 0xFF),  (oldIP & 0xFF),
-             ntohs(mClient_MasterAddr.sin_port),
+        LOGI("%s --> INITIAL (%s) : never synced timeline "
+             "%02x-%014llx::%016llx::%s (%d TXed %d RXed %d RXExpired)",
+             stateToString(mState), cause,
+             mClient_MasterDevicePriority, mClient_MasterDeviceID,
+             mTimelineID, oldEPStr,
              mClient_SyncsSentToCurMaster,
-             mClient_SyncRespsRvcedFromCurMaster);
+             mClient_SyncRespsRXedFromCurMaster,
+             mClient_ExpiredSyncRespsRXedFromCurMaster);
 
-        return becomeInitial();
+        return becomeInitial("ronin, no timeline");
     }
 }
 
-bool CommonTimeServer::becomeWaitForElection() {
-    LOGI("%s --> WAIT_FOR_ELECTION : dropping out of election, waiting %d mSec"
-         " for completion.", stateToString(mState), kWaitForElection_TimeoutMs);
+bool CommonTimeServer::becomeWaitForElection(const char* cause) {
+    LOGI("%s --> WAIT_FOR_ELECTION (%s) : dropping out of election,"
+         " waiting %d mSec for completion.",
+         stateToString(mState), cause, kWaitForElection_TimeoutMs);
 
     setState(ICommonClock::STATE_WAIT_FOR_ELECTION);
-    mTimeoutMs = kWaitForElection_TimeoutMs;
+    mCurTimeout.setTimeout(kWaitForElection_TimeoutMs);
     return true;
 }
 
-bool CommonTimeServer::becomeInitial() {
-    LOGI("Entering INITIAL, total reset.");
+bool CommonTimeServer::becomeInitial(const char* cause) {
+    LOGI("Entering INITIAL (%s), total reset.", cause);
 
     setState(ICommonClock::STATE_INITIAL);
 
@@ -1105,17 +1182,17 @@ bool CommonTimeServer::becomeInitial() {
     mClockRecovery.reset(true, true);
 
     // reset internal state bookkeeping.
-    mTimeoutMs = kInfiniteTimeout;
+    mCurTimeout.setTimeout(kInfiniteTimeout);
+    memset(&mMasterEP, 0, sizeof(mMasterEP));
+    mMasterEPValid = false;
     mLastPacketRxLocalTime = 0;
     mTimelineID = ICommonClock::kInvalidTimelineID;
     mClockSynced = false;
     mInitial_WhoIsMasterRequestTimeouts = 0;
     mClient_MasterDeviceID = 0;
-    mClient_SyncsSentToCurMaster = 0;
-    mClient_SyncRespsRvcedFromCurMaster = 0;
-    mClient_SyncRequestPending = false;
-    mClient_SyncRequestTimeouts = 0;
+    mClient_MasterDevicePriority = 0;
     mRonin_WhoIsMasterRequestTimeouts = 0;
+    resetSyncStats();
 
     // send the first request to discover the master
     return sendWhoIsMasterRequest();
@@ -1157,18 +1234,145 @@ const char* CommonTimeServer::stateToString(ICommonClock::State s) {
     }
 }
 
-}  // namespace android
+void CommonTimeServer::sockaddrToString(const sockaddr_storage& addr,
+                                        bool addrValid,
+                                        char* buf, size_t bufLen) {
+    if (!bufLen || !buf)
+        return;
 
-int main(int argc, char *argv[]) {
-    using namespace android;
+    if (addrValid) {
+        switch (addr.ss_family) {
+            case AF_INET: {
+                const struct sockaddr_in* sa =
+                    reinterpret_cast<const struct sockaddr_in*>(&addr);
+                unsigned long a = ntohl(sa->sin_addr.s_addr);
+                uint16_t      p = ntohs(sa->sin_port);
+                snprintf(buf, bufLen, "%lu.%lu.%lu.%lu:%hu",
+                        ((a >> 24) & 0xFF), ((a >> 16) & 0xFF),
+                        ((a >>  8) & 0xFF),  (a        & 0xFF), p);
+            } break;
 
-    sp<CommonTimeServer> service = new CommonTimeServer();
-    if (service == NULL)
-        return 1;
+            case AF_INET6: {
+                const struct sockaddr_in6* sa =
+                    reinterpret_cast<const struct sockaddr_in6*>(&addr);
+                const uint8_t* a = sa->sin6_addr.s6_addr;
+                uint16_t       p = ntohs(sa->sin6_port);
+                snprintf(buf, bufLen,
+                        "%02X%02X:%02X%02X:%02X%02X:%02X%02X:"
+                        "%02X%02X:%02X%02X:%02X%02X:%02X%02X port %hd",
+                        a[0], a[1], a[ 2], a[ 3], a[ 4], a[ 5], a[ 6], a[ 7],
+                        a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
+                        p);
+            } break;
 
-    ProcessState::self()->startThreadPool();
-    service->run("CommonTimeServer", ANDROID_PRIORITY_NORMAL);
+            default:
+                snprintf(buf, bufLen,
+                         "<unknown sockaddr family %d>", addr.ss_family);
+                break;
+        }
+    } else {
+        snprintf(buf, bufLen, "<none>");
+    }
 
-    IPCThreadState::self()->joinThreadPool();
-    return 0;
+    buf[bufLen - 1] = 0;
 }
+
+bool CommonTimeServer::sockaddrMatch(const sockaddr_storage& a1,
+                                     const sockaddr_storage& a2,
+                                     bool matchAddressOnly) {
+    if (a1.ss_family != a2.ss_family)
+        return false;
+
+    switch (a1.ss_family) {
+        case AF_INET: {
+            const struct sockaddr_in* sa1 =
+                reinterpret_cast<const struct sockaddr_in*>(&a1);
+            const struct sockaddr_in* sa2 =
+                reinterpret_cast<const struct sockaddr_in*>(&a2);
+
+            if (sa1->sin_addr.s_addr != sa2->sin_addr.s_addr)
+                return false;
+
+            return (matchAddressOnly || (sa1->sin_port == sa2->sin_port));
+        } break;
+
+        case AF_INET6: {
+            const struct sockaddr_in6* sa1 =
+                reinterpret_cast<const struct sockaddr_in6*>(&a1);
+            const struct sockaddr_in6* sa2 =
+                reinterpret_cast<const struct sockaddr_in6*>(&a2);
+
+            if (memcmp(&sa1->sin6_addr, &sa2->sin6_addr, sizeof(sa2->sin6_addr)))
+                return false;
+
+            return (matchAddressOnly || (sa1->sin6_port == sa2->sin6_port));
+        } break;
+
+        // Huh?  We don't deal in non-IPv[46] addresses.  Not sure how we got
+        // here, but we don't know how to comapre these addresses and simply
+        // default to a no-match decision.
+        default: return false;
+    }
+}
+
+void CommonTimeServer::TimeoutHelper::setTimeout(int msec) {
+    mTimeoutValid = (msec >= 0);
+    if (mTimeoutValid)
+        mEndTime = systemTime() +
+                   (static_cast<nsecs_t>(msec) * 1000000);
+}
+
+int CommonTimeServer::TimeoutHelper::msecTillTimeout() {
+    if (!mTimeoutValid)
+        return kInfiniteTimeout;
+
+    nsecs_t now = systemTime();
+    if (now >= mEndTime)
+        return 0;
+
+    uint64_t deltaMsec = (((mEndTime - now) + 999999) / 1000000);
+
+    if (deltaMsec > static_cast<uint64_t>(std::numeric_limits<int>::max()))
+        return std::numeric_limits<int>::max();
+
+    return static_cast<int>(deltaMsec);
+}
+
+bool CommonTimeServer::shouldPanicNotGettingGoodData() {
+    if (mClient_FirstSyncTX) {
+        int64_t now = mLocalClock.getLocalTime();
+        int64_t delta = now - (mClient_LastGoodSyncRX
+                             ? mClient_LastGoodSyncRX
+                             : mClient_FirstSyncTX);
+        int64_t deltaUsec = mCommonClock.localDurationToCommonDuration(delta);
+
+        if (deltaUsec >= kNoGoodDataPanicThreshold)
+            return true;
+    }
+
+    return false;
+}
+
+void CommonTimeServer::PacketRTTLog::logTX(int64_t txTime) {
+    txTimes[wrPtr] = txTime;
+    rxTimes[wrPtr] = 0;
+    wrPtr = (wrPtr + 1) % RTT_LOG_SIZE;
+    if (!wrPtr)
+        logFull = true;
+}
+
+void CommonTimeServer::PacketRTTLog::logRX(int64_t txTime, int64_t rxTime) {
+    if (!logFull && !wrPtr)
+        return;
+
+    uint32_t i = logFull ? wrPtr : 0;
+    do {
+        if (txTimes[i] == txTime) {
+            rxTimes[i] = rxTime;
+            break;
+        }
+        i = (i + 1) % RTT_LOG_SIZE;
+    } while (i != wrPtr);
+}
+
+}  // namespace android

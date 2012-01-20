@@ -10,8 +10,11 @@ LOCAL_SRC_FILES := \
     common_clock_service.cpp \
     common_time_config_service.cpp \
     common_time_server.cpp \
+    common_time_server_api.cpp \
+    common_time_server_packets.cpp \
     clock_recovery.cpp \
-    common_clock.cpp
+    common_clock.cpp \
+    main.cpp
 
 ifeq ($(TIME_SERVICE_DEBUG), true)
 LOCAL_SRC_FILES += diag_thread.cpp
