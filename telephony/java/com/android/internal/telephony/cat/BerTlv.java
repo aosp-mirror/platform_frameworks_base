@@ -81,12 +81,18 @@ class BerTlv {
                     temp = data[curIndex++] & 0xff;
                     if (temp < 0x80) {
                         throw new ResultException(
-                                ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                                ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                                "length < 0x80 length=" + Integer.toHexString(length) +
+                                " curIndex=" + curIndex + " endIndex=" + endIndex);
+
                     }
                     length = temp;
                 } else {
                     throw new ResultException(
-                            ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+                            ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                            "Expected first byte to be length or a length tag and < 0x81" +
+                            " byte= " + Integer.toHexString(temp) + " curIndex=" + curIndex +
+                            " endIndex=" + endIndex);
                 }
             } else {
                 if (ComprehensionTlvTag.COMMAND_DETAILS.value() == (tag & ~0x80)) {
@@ -95,14 +101,18 @@ class BerTlv {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING);
+            throw new ResultException(ResultCode.REQUIRED_VALUES_MISSING,
+                    "IndexOutOfBoundsException " +
+                    " curIndex=" + curIndex + " endIndex=" + endIndex);
         } catch (ResultException e) {
-            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD, e.explanation());
         }
 
         /* COMPREHENSION-TLVs */
         if (endIndex - curIndex < length) {
-            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
+            throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD,
+                    "Command had extra data endIndex=" + endIndex + " curIndex=" + curIndex +
+                    " length=" + length);
         }
 
         List<ComprehensionTlv> ctlvs = ComprehensionTlv.decodeMany(data,

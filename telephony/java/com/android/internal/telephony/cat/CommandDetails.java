@@ -74,6 +74,14 @@ class CommandDetails extends ValueObject implements Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "CmdDetails: compRequired=" + compRequired +
+                " commandNumber=" + commandNumber +
+                " typeOfCommand=" + typeOfCommand +
+                " commandQualifier=" + commandQualifier;
+    }
 }
 
 class DeviceIdentities extends ValueObject {
