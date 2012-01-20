@@ -27,6 +27,7 @@
 #include "JNIHelp.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_util_Log.h"
 
 #define MIN(a,b) ((a<b)?a:b)
 
@@ -56,40 +57,48 @@ static int toLevel(const char* value)
     return levels.info;
 }
 
+static jboolean isLoggable(const char* tag, jint level) {
+    String8 key;
+    key.append(LOG_NAMESPACE);
+    key.append(tag);
+
+    char buf[PROPERTY_VALUE_MAX];
+    if (property_get(key.string(), buf, "") <= 0) {
+        return false;
+    }
+
+    int logLevel = toLevel(buf);
+    return logLevel >= 0 && level >= logLevel;
+}
+
 static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring tag, jint level)
 {
-    int len;
-    char key[PROPERTY_KEY_MAX];
-    char buf[PROPERTY_VALUE_MAX];
-
     if (tag == NULL) {
         return false;
     }
 
-    jboolean result = false;
-
     const char* chars = env->GetStringUTFChars(tag, NULL);
+    if (!chars) {
+        return false;
+    }
 
+    jboolean result = false;
     if ((strlen(chars)+sizeof(LOG_NAMESPACE)) > PROPERTY_KEY_MAX) {
         char buf2[200];
         snprintf(buf2, sizeof(buf2), "Log tag \"%s\" exceeds limit of %d characters\n",
                 chars, PROPERTY_KEY_MAX - sizeof(LOG_NAMESPACE));
 
-        // release the chars!
-        env->ReleaseStringUTFChars(tag, chars);
-
         jniThrowException(env, "java/lang/IllegalArgumentException", buf2);
-        return false;
     } else {
-        strncpy(key, LOG_NAMESPACE, sizeof(LOG_NAMESPACE)-1);
-        strcpy(key + sizeof(LOG_NAMESPACE) - 1, chars);
+        result = isLoggable(chars, level);
     }
 
     env->ReleaseStringUTFChars(tag, chars);
+    return result;
+}
 
-    len = property_get(key, buf, "");
-    int logLevel = toLevel(buf);
-    return (logLevel >= 0 && level >= logLevel) ? true : false;
+bool android_util_Log_isVerboseLogEnabled(const char* tag) {
+    return isLoggable(tag, levels.verbose);
 }
 
 /*
