@@ -112,3 +112,20 @@ static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCame
         break;
     }
 }
+
+static void processAllParams(rs_allocation shaderConst,
+                             rs_allocation allParams,
+                             const SgCamera *camera) {
+    if (rsIsObject(shaderConst)) {
+        uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(shaderConst, 0);
+
+        int numParams = 0;
+        if (rsIsObject(allParams)) {
+            numParams = rsAllocationGetDimX(allParams);
+        }
+        for (int i = 0; i < numParams; i ++) {
+            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(allParams, i);
+            processParam(current, constantBuffer, camera);
+        }
+    }
+}

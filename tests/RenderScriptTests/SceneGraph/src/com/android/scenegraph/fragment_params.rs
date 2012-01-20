@@ -23,20 +23,7 @@
 #include "params.rsh"
 
 void root(rs_allocation *v_out, const void *usrData) {
-
     SgFragmentShader *shader = (SgFragmentShader *)rsGetElementAt(*v_out, 0);
     const SgCamera *camera = (const SgCamera*)usrData;
-    if (rsIsObject(shader->shaderConst)) {
-        uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(shader->shaderConst, 0);
-
-        int numParams = 0;
-        if (rsIsObject(shader->shaderConstParams)) {
-            numParams = rsAllocationGetDimX(shader->shaderConstParams);
-        }
-        for (int i = 0; i < numParams; i ++) {
-            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(shader->shaderConstParams, i);
-            processParam(current, constantBuffer, camera);
-        }
-        rsgAllocationSyncAll(shader->shaderConst);
-    }
+    processAllParams(shader->shaderConst, shader->shaderConstParams, camera);
 }
