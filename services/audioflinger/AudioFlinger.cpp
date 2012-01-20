@@ -3231,7 +3231,7 @@ void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
 {
     // FIXME explain this formula
     int frameCount = (3 * mFrameCount * mSampleRate) / thread->sampleRate();
-    OutputTrack *outputTrack = new OutputTrack((ThreadBase *)thread,
+    OutputTrack *outputTrack = new OutputTrack(thread,
                                             this,
                                             mSampleRate,
                                             mFormat,
@@ -3300,7 +3300,7 @@ uint32_t AudioFlinger::DuplicatingThread::activeSleepTimeUs()
 
 // TrackBase constructor must be called with AudioFlinger::mLock held
 AudioFlinger::ThreadBase::TrackBase::TrackBase(
-            const wp<ThreadBase>& thread,
+            ThreadBase *thread,
             const sp<Client>& client,
             uint32_t sampleRate,
             audio_format_t format,
@@ -3456,7 +3456,7 @@ void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t f
 
 // Track constructor must be called with AudioFlinger::mLock and ThreadBase::mLock held
 AudioFlinger::PlaybackThread::Track::Track(
-            const wp<ThreadBase>& thread,
+            PlaybackThread *thread,
             const sp<Client>& client,
             audio_stream_type_t streamType,
             uint32_t sampleRate,
@@ -3470,11 +3470,9 @@ AudioFlinger::PlaybackThread::Track::Track(
     mAuxEffectId(0), mHasVolumeController(false)
 {
     if (mCblk != NULL) {
-        sp<ThreadBase> baseThread = thread.promote();
-        if (baseThread != 0) {
-            PlaybackThread *playbackThread = (PlaybackThread *)baseThread.get();
-            mName = playbackThread->getTrackName_l();
-            mMainBuffer = playbackThread->mixBuffer();
+        if (thread != NULL) {
+            mName = thread->getTrackName_l();
+            mMainBuffer = thread->mixBuffer();
         }
         ALOGV("Track constructor name %d, calling pid %d", mName, IPCThreadState::self()->getCallingPid());
         if (mName < 0) {
@@ -3760,7 +3758,7 @@ void AudioFlinger::PlaybackThread::Track::setAuxBuffer(int EffectId, int32_t *bu
 
 sp<AudioFlinger::PlaybackThread::TimedTrack>
 AudioFlinger::PlaybackThread::TimedTrack::create(
-            const wp<ThreadBase>& thread,
+            PlaybackThread *thread,
             const sp<Client>& client,
             audio_stream_type_t streamType,
             uint32_t sampleRate,
@@ -3785,7 +3783,7 @@ AudioFlinger::PlaybackThread::TimedTrack::create(
 }
 
 AudioFlinger::PlaybackThread::TimedTrack::TimedTrack(
-            const wp<ThreadBase>& thread,
+            PlaybackThread *thread,
             const sp<Client>& client,
             audio_stream_type_t streamType,
             uint32_t sampleRate,
@@ -3925,15 +3923,6 @@ status_t AudioFlinger::PlaybackThread::TimedTrack::getNextBuffer(
         buffer->frameCount = 0;
         return INVALID_OPERATION;
     }
-
-    // get ahold of the output stream that these samples will be written to
-    sp<ThreadBase> thread = mThread.promote();
-    if (thread == NULL) {
-        buffer->raw = 0;
-        buffer->frameCount = 0;
-        return INVALID_OPERATION;
-    }
-    PlaybackThread* playbackThread = static_cast<PlaybackThread*>(thread.get());
 
     Mutex::Autolock _l(mTimedBufferQueueLock);
 
@@ -4160,7 +4149,7 @@ AudioFlinger::PlaybackThread::TimedTrack::TimedBuffer::TimedBuffer(
 
 // RecordTrack constructor must be called with AudioFlinger::mLock held
 AudioFlinger::RecordThread::RecordTrack::RecordTrack(
-            const wp<ThreadBase>& thread,
+            RecordThread *thread,
             const sp<Client>& client,
             uint32_t sampleRate,
             audio_format_t format,
@@ -4273,17 +4262,16 @@ void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
 // ----------------------------------------------------------------------------
 
 AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
-            const wp<ThreadBase>& thread,
+            PlaybackThread *playbackThread,
             DuplicatingThread *sourceThread,
             uint32_t sampleRate,
             audio_format_t format,
             uint32_t channelMask,
             int frameCount)
-    :   Track(thread, NULL, AUDIO_STREAM_CNT, sampleRate, format, channelMask, frameCount, NULL, 0),
+    :   Track(playbackThread, NULL, AUDIO_STREAM_CNT, sampleRate, format, channelMask, frameCount, NULL, 0),
     mActive(false), mSourceThread(sourceThread)
 {
 
-    PlaybackThread *playbackThread = (PlaybackThread *)thread.unsafe_get();
     if (mCblk != NULL) {
         mCblk->flags |= CBLK_DIRECTION_OUT;
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
@@ -6595,18 +6583,17 @@ size_t AudioFlinger::RecordThread::removeEffectChain_l(const sp<EffectChain>& ch
 #undef LOG_TAG
 #define LOG_TAG "AudioFlinger::EffectModule"
 
-AudioFlinger::EffectModule::EffectModule(const wp<ThreadBase>& wThread,
+AudioFlinger::EffectModule::EffectModule(ThreadBase *thread,
                                         const wp<AudioFlinger::EffectChain>& chain,
                                         effect_descriptor_t *desc,
                                         int id,
                                         int sessionId)
-    : mThread(wThread), mChain(chain), mId(id), mSessionId(sessionId), mEffectInterface(NULL),
+    : mThread(thread), mChain(chain), mId(id), mSessionId(sessionId), mEffectInterface(NULL),
       mStatus(NO_INIT), mState(IDLE), mSuspended(false)
 {
     ALOGV("Constructor %p", this);
     int lStatus;
-    sp<ThreadBase> thread = mThread.promote();
-    if (thread == 0) {
+    if (thread == NULL) {
         return;
     }
 
@@ -7576,15 +7563,14 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 #undef LOG_TAG
 #define LOG_TAG "AudioFlinger::EffectChain"
 
-AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
+AudioFlinger::EffectChain::EffectChain(ThreadBase *thread,
                                         int sessionId)
-    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mTrackCnt(0), mTailBufferCount(0),
+    : mThread(thread), mSessionId(sessionId), mActiveTrackCnt(0), mTrackCnt(0), mTailBufferCount(0),
       mOwnInBuffer(false), mVolumeCtrlIdx(-1), mLeftVolume(UINT_MAX), mRightVolume(UINT_MAX),
       mNewLeftVolume(UINT_MAX), mNewRightVolume(UINT_MAX)
 {
     mStrategy = AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
-    sp<ThreadBase> thread = mThread.promote();
-    if (thread == 0) {
+    if (thread == NULL) {
         return;
     }
     mMaxTailBuffers = ((kProcessTailDurationMs * thread->sampleRate()) / 1000) /
