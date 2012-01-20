@@ -130,7 +130,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file MPEG4 854 x 480
      */
-    // TODO : Remove TC_MP_001
     @LargeTest
     public void testPropertiesMPEG4854_480() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -163,7 +162,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file MPEG4 WVGA
      */
-    // TODO : Remove TC_MP_002
     @LargeTest
     public void testPropertiesMPEGWVGA() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -195,7 +193,6 @@ public class MediaPropertiesTest extends
     /**
      *To test media properties for MPEG4 720x480 (NTSC) + AAC file.
      */
-    // TODO : Remove TC_MP_003
     @LargeTest
     public void testPropertiesMPEGNTSC() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -227,7 +224,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file MPEG4 VGA
      */
-    // TODO : Remove TC_MP_004
     @LargeTest
     public void testPropertiesMPEGVGA() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -259,7 +255,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file MPEG4 QCIF
      */
-    // TODO : Remove TC_MP_005
     @LargeTest
     public void testPropertiesMPEGQCIF() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -291,7 +286,6 @@ public class MediaPropertiesTest extends
     /**
      *To To test media properties for H263 176x144 (QCIF) + AAC (mono) file.
      */
-    // TODO : Remove TC_MP_006
     @LargeTest
     public void testPropertiesH263QCIF() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -322,7 +316,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file H264 VGA
      */
-    // TODO : Remove TC_MP_007
     @LargeTest
     public void testPropertiesH264VGA() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -353,7 +346,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file H264 NTSC
      */
-    // TODO : Remove TC_MP_008
     @LargeTest
     public void testPropertiesH264NTSC() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -385,7 +377,6 @@ public class MediaPropertiesTest extends
     /**
      *To test media properties for H264 800x480 (WVGA) + AAC file.
      */
-    // TODO : Remove TC_MP_009
     @LargeTest
     public void testPropertiesH264WVGA() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
@@ -417,7 +408,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file H264 HD1280
      */
-    // TODO : Remove TC_MP_010
     @LargeTest
     public void testPropertiesH264HD1280() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -449,7 +439,6 @@ public class MediaPropertiesTest extends
     /**
      *To test media properties for H264 1080x720 + AAC file
      */
-    // TODO : Remove TC_MP_011
     @LargeTest
     public void testPropertiesH264HD1080WithAudio() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -481,7 +470,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file WMV - Unsupported type
      */
-    // TODO : Remove TC_MP_012
     @LargeTest
     public void testPropertiesWMVFile() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
@@ -506,7 +494,6 @@ public class MediaPropertiesTest extends
     /**
      *To test media properties for H.264 Main/Advanced profile.
      */
-    // TODO : Remove TC_MP_013
     @LargeTest
     public void testPropertiesH264MainLineProfile() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH
@@ -539,7 +526,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for non existing file.
      */
-    // TODO : Remove TC_MP_014
     @LargeTest
     public void testPropertiesForNonExsitingFile() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH + "abc.3gp";
@@ -559,7 +545,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file H264 HD1080
      */
-    // TODO : Remove TC_MP_015
     @LargeTest
     public void testPropertiesH264HD1080WithoutAudio() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
@@ -591,7 +576,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for Image file of JPEG Type
      */
-    // TODO : Remove TC_MP_016
     @LargeTest
     public void testPropertiesVGAImage() throws Exception {
         final String imageItemFilename = INPUT_FILE_PATH + "IMG_640x480.jpg";
@@ -611,7 +595,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for Image file of PNG Type
      */
-    // TODO : Remove TC_MP_017
     @LargeTest
     public void testPropertiesPNG() throws Exception {
         final String imageItemFilename = INPUT_FILE_PATH + "IMG_640x480.png";
@@ -630,7 +613,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file GIF - Unsupported type
      */
-    // TODO : Remove TC_MP_018
     @LargeTest
     public void testPropertiesGIFFile() throws Exception {
 
@@ -651,7 +633,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file Text file named as 3GP
      */
-    // TODO : Remove TC_MP_019
     @LargeTest
     public void testPropertiesofDirtyFile() throws Exception {
 
@@ -672,7 +653,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file name as NULL
      */
-    // TODO : Remove TC_MP_020
     @LargeTest
     public void testPropertieNULLFile() throws Exception {
         final String videoItemFilename = null;
@@ -691,7 +671,6 @@ public class MediaPropertiesTest extends
     /**
      *To test Media Properties for file which is of type MPEG2
      */
-    // TODO : Remove TC_MP_021
     @LargeTest
     public void testPropertiesMPEG2File() throws Exception {
         final String videoItemFilename = INPUT_FILE_PATH +
@@ -709,9 +688,8 @@ public class MediaPropertiesTest extends
     }
 
     /**
-     *To test Media Properties TC_MP_023 for file without Video only Audio
+     *To test Media Properties for file without Video only Audio
      */
-    // TODO : Remove TC_MP_023
     @LargeTest
     public void testProperties3GPWithoutVideoMediaItem() throws Exception {
         final String audioFilename = INPUT_FILE_PATH +
@@ -731,7 +709,6 @@ public class MediaPropertiesTest extends
     /**
      *To test media properties for Audio Track file. (No Video, AAC Audio)
      */
-    // TODO : Remove TC_MP_024
     @LargeTest
     public void testProperties3GPWithoutVideoAudioTrack() throws Exception {
 
@@ -753,7 +730,6 @@ public class MediaPropertiesTest extends
         /**
      *To test media properties for Audio Track file. MP3 file
      */
-    // TODO : Remove TC_MP_025
     @LargeTest
     public void testPropertiesMP3AudioTrack() throws Exception {
 

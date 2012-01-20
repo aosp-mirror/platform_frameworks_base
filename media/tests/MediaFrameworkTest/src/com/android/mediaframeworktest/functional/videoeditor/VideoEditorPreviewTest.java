@@ -216,7 +216,6 @@ public class VideoEditorPreviewTest extends
     /**
      *To test Preview : FULL Preview of current work (beginning till end)
      */
-    // TODO : remove TC_PRV_001
     @LargeTest
     public void testPreviewTheStoryBoard() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH
@@ -275,7 +274,6 @@ public class VideoEditorPreviewTest extends
     /**
      * To test Preview : Preview of start + 10 sec till end of story board
      */
-    // TODO : remove TC_PRV_002
     @LargeTest
     public void testPreviewTheStoryBoardFromDuration() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH
@@ -336,7 +334,6 @@ public class VideoEditorPreviewTest extends
     /**
      * To test Preview : Preview of current Effects applied
      */
-    // TODO : remove TC_PRV_003
     @LargeTest
     public void testPreviewOfEffects() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH +
@@ -394,7 +391,6 @@ public class VideoEditorPreviewTest extends
      *To test Preview : Preview of current Transitions applied (with multiple
      * generatePreview)
      */
-    // TODO : remove TC_PRV_004
     @LargeTest
     public void testPreviewWithTransition() throws Exception {
 
@@ -547,7 +543,6 @@ public class VideoEditorPreviewTest extends
     /**
      * To test Preview : Preview of current Overlay applied
      */
-    // TODO : remove TC_PRV_005
     @LargeTest
     public void testPreviewWithOverlay() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -601,7 +596,6 @@ public class VideoEditorPreviewTest extends
      * To test Preview : Preview of current Trim applied (with default aspect
      * ratio)
      */
-    // TODO : remove TC_PRV_006
     @LargeTest
     public void testPreviewWithTrim() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -625,7 +619,6 @@ public class VideoEditorPreviewTest extends
      * applied
      */
 
-    // TODO : remove TC_PRV_007
     @LargeTest
     public void testPreviewWithOverlayEffectKenBurn() throws Exception {
 
@@ -684,7 +677,6 @@ public class VideoEditorPreviewTest extends
     /**
      *To test Preview : Export during preview
      */
-    // TODO : remove TC_PRV_008
     @LargeTest
     public void testPreviewDuringExport() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -765,7 +757,6 @@ public class VideoEditorPreviewTest extends
      * To test Preview : Preview of current Effects applied (with from time >
      * total duration)
      */
-    // TODO : remove TC_PRV_009
     @LargeTest
     public void testPreviewWithDurationGreaterThanMediaDuration()
         throws Exception {
@@ -826,7 +817,6 @@ public class VideoEditorPreviewTest extends
      * To test Preview : Preview of current Effects applied (with Render Preview
      * Frame)
      */
-    // TODO : remove TC_PRV_010
     @LargeTest
     public void testPreviewWithRenderPreviewFrame() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
@@ -873,7 +863,6 @@ public class VideoEditorPreviewTest extends
      * To test Preview : Preview of current work from selected jump location
      * till end with Audio Track
      */
-    // TODO : remove TC_PRV_011
     @LargeTest
     public void testPreviewWithEndAudioTrack() throws Exception {
         final String imageItemFilename1 = INPUT_FILE_PATH + "IMG_1600x1200.jpg";
@@ -917,7 +906,6 @@ public class VideoEditorPreviewTest extends
     /**
      * To test render Preview Frame
      */
-    // TODO : remove TC_PRV_012
     @LargeTest
     public void testRenderPreviewFrame() throws Exception {
         final String videoItemFileName1 = INPUT_FILE_PATH
@@ -1031,7 +1019,6 @@ public class VideoEditorPreviewTest extends
     /**
      * To Test Preview : Without any Media Items in the story Board
      */
-    // TODO : remove TC_PRV_013
     @LargeTest
     public void testStartPreviewWithoutMediaItems() throws Exception {
         boolean flagForException = false;
@@ -1064,7 +1051,6 @@ public class VideoEditorPreviewTest extends
      * To Test Preview : Add Media and Remove Media Item (Without any Media
      * Items in the story Board)
      */
-    // TODO : remove TC_PRV_014
     @LargeTest
     public void testStartPreviewAddRemoveMediaItems() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH
@@ -1134,7 +1120,6 @@ public class VideoEditorPreviewTest extends
      * To test Preview : Preview of current Effects applied (with Render Preview
      * Frame)
      */
-    // TODO : remove TC_PRV_015
     @LargeTest
     public void testPreviewWithRenderPreviewFrameWithoutGenerate() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH +
