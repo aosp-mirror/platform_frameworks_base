@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -275,7 +276,7 @@ public class AccountManagerService
                         accountNames.add(accountName);
                     }
                 }
-                for (HashMap.Entry<String, ArrayList<String>> cur
+                for (Map.Entry<String, ArrayList<String>> cur
                         : accountNamesByType.entrySet()) {
                     final String accountType = cur.getKey();
                     final ArrayList<String> accountNames = cur.getValue();
