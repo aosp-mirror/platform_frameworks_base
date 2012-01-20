@@ -8353,7 +8353,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         final boolean touchIsFinished = (action == MotionEvent.ACTION_UP) &&
-                !shouldIgnoreActionUpEvent() && isFocused();
+                !mIgnoreActionUpEvent && isFocused();
 
          if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
                 && mText instanceof Spannable && mLayout != null) {
@@ -8377,6 +8377,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (touchIsFinished && (isTextEditable() || mTextIsSelectable)) {
+                // Move cursor
+                final int offset = getOffsetForPosition(event.getX(), event.getY());
+                Selection.setSelection((Spannable) mText, offset);
+
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
@@ -8527,17 +8531,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void cancelLongPress() {
         super.cancelLongPress();
         mIgnoreActionUpEvent = true;
-    }
-
-    /**
-     * This method is only valid during a touch event.
-     *
-     * @return true when the ACTION_UP event should be ignored, false otherwise.
-     *
-     * @hide
-     */
-    public boolean shouldIgnoreActionUpEvent() {
-        return mIgnoreActionUpEvent;
     }
 
     @Override
@@ -10145,8 +10138,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean willExtract = extractedTextModeWillBeStarted();
 
-        // Do not start the action mode when extracted text will show up full screen, thus
-        // immediately hiding the newly created action bar, which would be visually distracting.
+        // Do not start the action mode when extracted text will show up full screen, which would
+        // immediately hide the newly created action bar and would be visually distracting.
         if (!willExtract) {
             ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
             mSelectionActionMode = startActionMode(actionModeCallback);
