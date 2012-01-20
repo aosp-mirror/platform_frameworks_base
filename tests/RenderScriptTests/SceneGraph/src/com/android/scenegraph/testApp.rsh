@@ -22,6 +22,14 @@ typedef struct VShaderParams_s {
     rs_matrix4x4 viewProj;
 } VShaderParams;
 
+typedef struct VSParams_s {
+    rs_matrix4x4 viewProj;
+} VSParams;
+
+typedef struct VObjectParams_s {
+    rs_matrix4x4 model;
+} VObjectParams;
+
 typedef struct FShaderParams_s {
     float4 cameraPos;
 } FShaderParams;

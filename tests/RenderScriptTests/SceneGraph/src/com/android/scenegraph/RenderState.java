@@ -35,21 +35,28 @@ import android.util.Log;
  * @hide
  */
 public class RenderState extends SceneGraphBase {
-    ProgramVertex mVertex;
-    ProgramFragment mFragment;
+    VertexShader mVertex;
+    FragmentShader mFragment;
     ProgramStore mStore;
     ProgramRaster mRaster;
 
     ScriptField_RenderState_s mField;
 
-    public RenderState(ProgramVertex pv,
-                       ProgramFragment pf,
+    public RenderState(VertexShader pv,
+                       FragmentShader pf,
                        ProgramStore ps,
                        ProgramRaster pr) {
         mVertex = pv;
         mFragment = pf;
         mStore = ps;
         mRaster = pr;
+    }
+
+    public RenderState(ProgramVertex pv,
+                       ProgramFragment pf,
+                       ProgramStore ps,
+                       ProgramRaster pr) {
+        // Just to fix the build for now
     }
 
     public RenderState(RenderState r) {
@@ -59,11 +66,11 @@ public class RenderState extends SceneGraphBase {
         mRaster = r.mRaster;
     }
 
-    public void setProgramVertex(ProgramVertex pv) {
+    public void setProgramVertex(VertexShader pv) {
         mVertex = pv;
     }
 
-    public void setProgramFragment(ProgramFragment pf) {
+    public void setProgramFragment(FragmentShader pf) {
         mFragment = pf;
     }
 
@@ -81,8 +88,8 @@ public class RenderState extends SceneGraphBase {
         }
 
         ScriptField_RenderState_s.Item item = new ScriptField_RenderState_s.Item();
-        item.pv = mVertex;
-        item.pf = mFragment;
+        item.pv = mVertex.getRSData(rs).getAllocation();
+        item.pf = mFragment.getRSData(rs).getAllocation();
         item.ps = mStore;
         item.pr = mRaster;
 

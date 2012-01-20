@@ -141,7 +141,7 @@ public class Renderable extends RenderableBase {
                 mRsFieldItem.pf_textures[paramIndex++] = p.getTexture().getRsData(rs, res);
             }
         }
-        ProgramFragment pf = mRenderState.mFragment;
+        ProgramFragment pf = mRenderState.mFragment.mProgram;
         mRsFieldItem.pf_num_textures = pf != null ? Math.min(pf.getTextureCount(), paramIndex) : 0;
         mRsField.set(mRsFieldItem, 0, true);
     }
@@ -157,47 +157,17 @@ public class Renderable extends RenderableBase {
         mRsField.set(mRsFieldItem, 0, true);
     }
 
-    ShaderParam findParamByName(String name) {
-        return mSourceParams.get(name);
-    }
-
-    void fillInParams(Element constantElem, ArrayList<ShaderParam> paramList) {
-        int subElemCount = constantElem.getSubElementCount();
-        for (int i = 0; i < subElemCount; i ++) {
-            String inputName = constantElem.getSubElementName(i);
-            int offset = constantElem.getSubElementOffsetBytes(i);
-            ShaderParam matchingParam = findParamByName(inputName);
-            Element subElem = constantElem.getSubElement(i);
-            // Make one if it's not there
-            if (matchingParam == null) {
-                if (subElem.getDataType() == Element.DataType.FLOAT_32) {
-                    matchingParam = new Float4Param(inputName);
-                } else if (subElem.getDataType() == Element.DataType.MATRIX_4X4) {
-                    TransformParam trParam = new TransformParam(inputName);
-                    trParam.setTransform(mTransform);
-                    matchingParam = trParam;
-                }
-            }
-            matchingParam.setOffset(offset);
-            if (subElem.getDataType() == Element.DataType.FLOAT_32) {
-                Float4Param fParam = (Float4Param)matchingParam;
-                fParam.setVecSize(subElem.getVectorSize());
-            }
-            paramList.add(matchingParam);
-        }
-    }
-
     void linkConstants() {
         // Assign all the fragment params
         if (mFragmentConstants != null) {
             Element fragmentConst = mFragmentConstants.getType().getElement();
-            fillInParams(fragmentConst, mFragmentParamList);
+            ShaderParam.fillInParams(fragmentConst, mSourceParams, mTransform, mFragmentParamList);
         }
 
         // Assign all the vertex params
         if (mVertexConstants != null) {
             Element vertexConst = mVertexConstants.getType().getElement();
-            fillInParams(vertexConst, mVertexParamList);
+            ShaderParam.fillInParams(vertexConst, mSourceParams, mTransform, mVertexParamList);
         }
     }
 
@@ -218,13 +188,13 @@ public class Renderable extends RenderableBase {
             return;
         }
 
-        ProgramVertex pv = mRenderState.mVertex;
-        if (pv != null && pv.getConstantCount() > 0) {
-            mVertexConstants = Allocation.createTyped(rs, pv.getConstant(0));
+        VertexShader pv = mRenderState.mVertex;
+        if (pv != null && pv.getObjectConstants() != null) {
+            mVertexConstants = Allocation.createTyped(rs, pv.getObjectConstants());
         }
-        ProgramFragment pf = mRenderState.mFragment;
-        if (pf != null && pf.getConstantCount() > 0) {
-            mFragmentConstants = Allocation.createTyped(rs, pf.getConstant(0));
+        FragmentShader pf = mRenderState.mFragment;
+        if (pf != null && pf.getObjectConstants() != null) {
+            mFragmentConstants = Allocation.createTyped(rs, pf.getObjectConstants());
         }
 
         // Very important step that links available inputs and the constants vertex and

@@ -22,12 +22,16 @@
 rs_script gTransformScript;
 rs_script gCameraScript;
 rs_script gLightScript;
-rs_script gParamsScript;
+rs_script gObjectParamsScript;
+rs_script gFragmentParamsScript;
+rs_script gVertexParamsScript;
 rs_script gCullScript;
 
 SgTransform *gRootNode;
 rs_allocation gCameras;
 rs_allocation gLights;
+rs_allocation gFragmentShaders;
+rs_allocation gVertexShaders;
 rs_allocation gRenderableObjects;
 
 rs_allocation gRenderPasses;
@@ -57,11 +61,14 @@ static void draw(SgRenderable *obj) {
     printName(obj->name);
 #endif //DEBUG_RENDERABLES
 
-    if (rsIsObject(obj->pv_const)) {
-        rsgBindConstant(renderState->pv, 0, obj->pv_const);
+    const SgVertexShader *pv = (const SgVertexShader *)rsGetElementAt(renderState->pv, 0);
+    const SgFragmentShader *pf = (const SgFragmentShader *)rsGetElementAt(renderState->pf, 0);
+
+    if (pv->objectConstIndex != -1) {
+        rsgBindConstant(pv->program, pv->objectConstIndex, obj->pv_const);
     }
-    if (rsIsObject(obj->pf_const)) {
-        rsgBindConstant(renderState->pf, 0, obj->pf_const);
+    if (pf->objectConstIndex != -1) {
+        rsgBindConstant(pf->program, pf->objectConstIndex, obj->pf_const);
     }
 
     if (rsIsObject(renderState->ps)) {
@@ -77,14 +84,14 @@ static void draw(SgRenderable *obj) {
         rsgBindProgramRaster(pr);
     }
 
-    rsgBindProgramFragment(renderState->pf);
-    rsgBindProgramVertex(renderState->pv);
+    rsgBindProgramVertex(pv->program);
+    rsgBindProgramFragment(pf->program);
 
     for (uint32_t i = 0; i < obj->pf_num_textures; i ++) {
         if (rsIsObject(obj->pf_textures[i])) {
-            rsgBindTexture(renderState->pf, i, obj->pf_textures[i]);
+            rsgBindTexture(pf->program, i, obj->pf_textures[i]);
         } else {
-            rsgBindTexture(renderState->pf, i, gTGrid);
+            rsgBindTexture(pf->program, i, gTGrid);
         }
     }
 
@@ -138,9 +145,14 @@ static void drawAllObjects(rs_allocation allObj) {
         return;
     }
 
+    rsForEach(gVertexParamsScript, nullAlloc, gVertexShaders,
+              gActiveCamera, sizeof(gActiveCamera));
+    rsForEach(gFragmentParamsScript, nullAlloc, gFragmentShaders,
+              gActiveCamera, sizeof(gActiveCamera));
+
     // Run the params and cull script
     rsForEach(gCullScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
-    rsForEach(gParamsScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
+    rsForEach(gObjectParamsScript, nullAlloc, allObj, gActiveCamera, sizeof(gActiveCamera));
 
     int numRenderables = rsAllocationGetDimX(allObj);
     for (int i = 0; i < numRenderables; i ++) {

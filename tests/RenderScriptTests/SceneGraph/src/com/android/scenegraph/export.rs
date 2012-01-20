@@ -27,9 +27,13 @@ SgRenderPass *pExport;
 SgCamera *exportPtrCam;
 SgLight *exportPtrLight;
 SgShaderParam *spExport;
+SgVertexShader *pvExport;
+SgFragmentShader *pfExport;
+
 FBlurOffsets *blurExport;
 VertexShaderInputs *iExport;
-
 VShaderParams *vConst;
 FShaderParams *fConst;
 FShaderLightParams *fConts2;
+VSParams *vConst2;
+VObjectParams *vConst3;

@@ -69,7 +69,9 @@ public class TransformParam extends ShaderParam {
     void initLocalData(RenderScriptGL rs) {
         mRsFieldItem.type = getTypeFromName();
         mRsFieldItem.bufferOffset = mOffset;
-        mRsFieldItem.transform = mTransform.getRSData(rs).getAllocation();
+        if (mTransform != null) {
+            mRsFieldItem.transform = mTransform.getRSData(rs).getAllocation();
+        }
         if (mCamera != null) {
             mRsFieldItem.camera = mCamera.getRSData(rs).getAllocation();
         }

@@ -18,13 +18,16 @@ package com.android.scenegraph;
 
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import android.renderscript.RenderScriptGL;
+import com.android.scenegraph.Transform;
+
+import android.renderscript.Element;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
 import android.renderscript.ProgramVertex;
-import android.renderscript.Element;
+import android.renderscript.RenderScriptGL;
 import android.util.Log;
 
 /**
@@ -66,6 +69,36 @@ public abstract class ShaderParam extends SceneGraphBase {
 
     String mParamName;
     int mOffset;
+
+    static void fillInParams(Element constantElem,
+                             HashMap<String, ShaderParam> sourceParams,
+                             Transform transform,
+                             ArrayList<ShaderParam> paramList) {
+        int subElemCount = constantElem.getSubElementCount();
+        for (int i = 0; i < subElemCount; i ++) {
+            String inputName = constantElem.getSubElementName(i);
+            int offset = constantElem.getSubElementOffsetBytes(i);
+
+            ShaderParam matchingParam = sourceParams.get(inputName);
+            Element subElem = constantElem.getSubElement(i);
+            // Make one if it's not there
+            if (matchingParam == null) {
+                if (subElem.getDataType() == Element.DataType.FLOAT_32) {
+                    matchingParam = new Float4Param(inputName);
+                } else if (subElem.getDataType() == Element.DataType.MATRIX_4X4) {
+                    TransformParam trParam = new TransformParam(inputName);
+                    trParam.setTransform(transform);
+                    matchingParam = trParam;
+                }
+            }
+            matchingParam.setOffset(offset);
+            if (subElem.getDataType() == Element.DataType.FLOAT_32) {
+                Float4Param fParam = (Float4Param)matchingParam;
+                fParam.setVecSize(subElem.getVectorSize());
+            }
+            paramList.add(matchingParam);
+        }
+    }
 
     public ShaderParam(String name) {
         mParamName = name;
