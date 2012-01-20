@@ -31,32 +31,6 @@ void root(rs_allocation *v_out, const void *usrData) {
     }
 
     const SgCamera *camera = (const SgCamera*)usrData;
-    // Data we are updating
-    if (rsIsObject(drawable->pf_const)) {
-        uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(drawable->pf_const, 0);
-
-        int numParams = 0;
-        if (rsIsObject(drawable->pf_constParams)) {
-            numParams = rsAllocationGetDimX(drawable->pf_constParams);
-        }
-        for (int i = 0; i < numParams; i ++) {
-            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pf_constParams, i);
-            processParam(current, constantBuffer, camera);
-        }
-        //rsgAllocationSyncAll(drawable->pf_const);
-    }
-
-    if (rsIsObject(drawable->pv_const)) {
-        uint8_t *constantBuffer = (uint8_t*)rsGetElementAt(drawable->pv_const, 0);
-
-        int numParams = 0;
-        if (rsIsObject(drawable->pv_constParams)) {
-            numParams = rsAllocationGetDimX(drawable->pv_constParams);
-        }
-        for (int i = 0; i < numParams; i ++) {
-            SgShaderParam *current = (SgShaderParam*)rsGetElementAt(drawable->pv_constParams, i);
-            processParam(current, constantBuffer, camera);
-        }
-        //rsgAllocationSyncAll(drawable->pv_const);
-    }
+    processAllParams(drawable->pf_const, drawable->pf_constParams, camera);
+    processAllParams(drawable->pv_const, drawable->pv_constParams, camera);
 }
