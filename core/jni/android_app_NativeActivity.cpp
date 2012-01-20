@@ -36,7 +36,7 @@
 #include "android_view_KeyEvent.h"
 
 #define LOG_TRACE(...)
-//#define LOG_TRACE(...) LOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+//#define LOG_TRACE(...) ALOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
 namespace android
 {

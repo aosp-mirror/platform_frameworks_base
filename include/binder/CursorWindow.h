@@ -31,8 +31,8 @@
 
 #else
 
-#define IF_LOG_WINDOW() IF_LOG(LOG_DEBUG, "CursorWindow")
-#define LOG_WINDOW(...) LOG(LOG_DEBUG, "CursorWindow", __VA_ARGS__)
+#define IF_LOG_WINDOW() IF_ALOG(LOG_DEBUG, "CursorWindow")
+#define LOG_WINDOW(...) ALOG(LOG_DEBUG, "CursorWindow", __VA_ARGS__)
 
 #endif
 
