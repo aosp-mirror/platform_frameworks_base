@@ -394,7 +394,7 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
             if (portIndex == kPortIndexInput && i == 0) {
                 // Only log this warning once per allocation round.
 
-                LOGW("OMX.TI.DUCATI1.VIDEO.DECODER requires the use of "
+                ALOGW("OMX.TI.DUCATI1.VIDEO.DECODER requires the use of "
                      "OMX_AllocateBuffer instead of the preferred "
                      "OMX_UseBuffer. Vendor must fix this.");
             }
@@ -454,7 +454,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
     OMX_U32 usage = 0;
     err = mOMX->getGraphicBufferUsage(mNode, kPortIndexOutput, &usage);
     if (err != 0) {
-        LOGW("querying usage flags from OMX IL component failed: %d", err);
+        ALOGW("querying usage flags from OMX IL component failed: %d", err);
         // XXX: Currently this error is logged, but not fatal.
         usage = 0;
     }
@@ -734,7 +734,7 @@ void ACodec::setComponentRole(
                 &roleParams, sizeof(roleParams));
 
         if (err != OK) {
-            LOGW("[%s] Failed to set standard component role '%s'.",
+            ALOGW("[%s] Failed to set standard component role '%s'.",
                  mComponentName.c_str(), role);
         }
     }

@@ -246,7 +246,7 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         if (device && test_bit(axis, device->absBitmask)) {
             struct input_absinfo info;
             if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
-                LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+                ALOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
                      axis, device->identifier.name.string(), device->fd, errno);
                 return -errno;
             }
@@ -355,7 +355,7 @@ status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t*
         if (device && test_bit(axis, device->absBitmask)) {
             struct input_absinfo info;
             if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
-                LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+                ALOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
                      axis, device->identifier.name.string(), device->fd, errno);
                 return -errno;
             }
@@ -614,7 +614,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                 if (eventItem.events & EPOLLIN) {
                     mPendingINotify = true;
                 } else {
-                    LOGW("Received unexpected epoll event 0x%08x for INotify.", eventItem.events);
+                    ALOGW("Received unexpected epoll event 0x%08x for INotify.", eventItem.events);
                 }
                 continue;
             }
@@ -629,7 +629,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         nRead = read(mWakeReadPipeFd, buffer, sizeof(buffer));
                     } while ((nRead == -1 && errno == EINTR) || nRead == sizeof(buffer));
                 } else {
-                    LOGW("Received unexpected epoll event 0x%08x for wake read pipe.",
+                    ALOGW("Received unexpected epoll event 0x%08x for wake read pipe.",
                             eventItem.events);
                 }
                 continue;
@@ -637,7 +637,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
 
             ssize_t deviceIndex = mDevices.indexOfKey(eventItem.data.u32);
             if (deviceIndex < 0) {
-                LOGW("Received unexpected epoll event 0x%08x for unknown device id %d.",
+                ALOGW("Received unexpected epoll event 0x%08x for unknown device id %d.",
                         eventItem.events, eventItem.data.u32);
                 continue;
             }
@@ -648,13 +648,13 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                         sizeof(struct input_event) * capacity);
                 if (readSize == 0 || (readSize < 0 && errno == ENODEV)) {
                     // Device was removed before INotify noticed.
-                    LOGW("could not get event, removed? (fd: %d size: %d bufferSize: %d capacity: %d errno: %d)\n",
+                    ALOGW("could not get event, removed? (fd: %d size: %d bufferSize: %d capacity: %d errno: %d)\n",
                          device->fd, readSize, bufferSize, capacity, errno);
                     deviceChanged = true;
                     closeDeviceLocked(device);
                 } else if (readSize < 0) {
                     if (errno != EAGAIN && errno != EINTR) {
-                        LOGW("could not get event (errno=%d)", errno);
+                        ALOGW("could not get event (errno=%d)", errno);
                     }
                 } else if ((readSize % sizeof(struct input_event)) != 0) {
                     LOGE("could not get event (wrong size: %d)", readSize);
@@ -710,7 +710,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                     }
                 }
             } else {
-                LOGW("Received unexpected epoll event 0x%08x for device %s.",
+                ALOGW("Received unexpected epoll event 0x%08x for device %s.",
                         eventItem.events, device->identifier.name.string());
             }
         }
@@ -768,7 +768,7 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
             // Sleep after errors to avoid locking up the system.
             // Hopefully the error is transient.
             if (errno != EINTR) {
-                LOGW("poll failed (errno=%d)\n", errno);
+                ALOGW("poll failed (errno=%d)\n", errno);
                 usleep(100000);
             }
         } else {
@@ -803,7 +803,7 @@ void EventHub::wake() {
     } while (nWrite == -1 && errno == EINTR);
 
     if (nWrite != 1 && errno != EAGAIN) {
-        LOGW("Could not write wake signal, errno=%d", errno);
+        ALOGW("Could not write wake signal, errno=%d", errno);
     }
 }
 
@@ -1175,13 +1175,13 @@ void EventHub::closeDeviceLocked(Device* device) {
          device->fd, device->classes);
 
     if (device->id == mBuiltInKeyboardId) {
-        LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
+        ALOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
                 device->path.string(), mBuiltInKeyboardId);
         mBuiltInKeyboardId = -1;
     }
 
     if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, device->fd, NULL)) {
-        LOGW("Could not remove device fd from epoll instance.  errno=%d", errno);
+        ALOGW("Could not remove device fd from epoll instance.  errno=%d", errno);
     }
 
     mDevices.removeItem(device->id);
@@ -1231,7 +1231,7 @@ status_t EventHub::readNotifyLocked() {
     if(res < (int)sizeof(*event)) {
         if(errno == EINTR)
             return 0;
-        LOGW("could not get event, %s\n", strerror(errno));
+        ALOGW("could not get event, %s\n", strerror(errno));
         return -1;
     }
     //printf("got %d bytes of event information\n", res);

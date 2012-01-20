@@ -286,7 +286,7 @@ bool SniffDRM(
             *mimeType = String8("drm+es_based+") + decryptHandle->mimeType;
         } else if (decryptHandle->decryptApiType == DecryptApiType::WV_BASED) {
             *mimeType = MEDIA_MIMETYPE_CONTAINER_WVM;
-            LOGW("SniffWVM: found match\n");
+            ALOGW("SniffWVM: found match\n");
         }
         *confidence = 10.0f;
 

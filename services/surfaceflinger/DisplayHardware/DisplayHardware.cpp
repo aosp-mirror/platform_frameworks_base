@@ -170,7 +170,7 @@ void DisplayHardware::init(uint32_t dpy)
     char property[PROPERTY_VALUE_MAX];
     if (property_get("debug.sf.hw", property, NULL) > 0) {
         if (atoi(property) == 0) {
-            LOGW("H/W composition disabled");
+            ALOGW("H/W composition disabled");
             attribs[2] = EGL_CONFIG_CAVEAT;
             attribs[3] = EGL_SLOW_CONFIG;
         }
@@ -228,7 +228,7 @@ void DisplayHardware::init(uint32_t dpy)
      */
     if (property_get("qemu.sf.lcd_density", property, NULL) <= 0) {
         if (property_get("ro.sf.lcd_density", property, NULL) <= 0) {
-            LOGW("ro.sf.lcd_density not defined, using 160 dpi by default.");
+            ALOGW("ro.sf.lcd_density not defined, using 160 dpi by default.");
             strcpy(property, "160");
         }
     } else {

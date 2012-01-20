@@ -54,7 +54,7 @@ public:
         if (status == NO_ERROR) {
             status = reply.readInt32();
         } else {
-            LOGW("start() error: %s", strerror(-status));
+            ALOGW("start() error: %s", strerror(-status));
         }
         return status;
     }
@@ -109,7 +109,7 @@ public:
         if (status == NO_ERROR) {
             status = reply.readInt32();
         } else {
-            LOGW("attachAuxEffect() error: %s", strerror(-status));
+            ALOGW("attachAuxEffect() error: %s", strerror(-status));
         }
         return status;
     }

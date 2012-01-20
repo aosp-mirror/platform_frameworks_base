@@ -49,7 +49,7 @@ int main(int argc, const char* const argv[])
     blockSignals();
     
     // You can trust me, honestly!
-    LOGW("*** Current priority: %d\n", getpriority(PRIO_PROCESS, 0));
+    ALOGW("*** Current priority: %d\n", getpriority(PRIO_PROCESS, 0));
     setpriority(PRIO_PROCESS, 0, -1);
 
     system_init();    

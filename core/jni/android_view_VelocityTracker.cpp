@@ -154,7 +154,7 @@ static void android_view_VelocityTracker_nativeAddMovement(JNIEnv* env, jclass c
         jobject eventObj) {
     const MotionEvent* event = android_view_MotionEvent_getNativePtr(env, eventObj);
     if (!event) {
-        LOGW("nativeAddMovement failed because MotionEvent was finalized.");
+        ALOGW("nativeAddMovement failed because MotionEvent was finalized.");
         return;
     }
 

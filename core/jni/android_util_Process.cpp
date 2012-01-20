@@ -371,7 +371,7 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     int fd = open("/proc/meminfo", O_RDONLY);
 
     if (fd < 0) {
-        LOGW("Unable to open /proc/meminfo");
+        ALOGW("Unable to open /proc/meminfo");
         return -1;
     }
 
@@ -380,7 +380,7 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     close(fd);
 
     if (len < 0) {
-        LOGW("Unable to read /proc/meminfo");
+        ALOGW("Unable to read /proc/meminfo");
         return -1;
     }
     buffer[len] = 0;
@@ -479,7 +479,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         close(fd);
 
         if (len < 0) {
-            LOGW("Unable to read %s", file.string());
+            ALOGW("Unable to read %s", file.string());
             len = 0;
         }
         buffer[len] = 0;
@@ -521,7 +521,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
 
         free(buffer);
     } else {
-        LOGW("Unable to open %s", file.string());
+        ALOGW("Unable to open %s", file.string());
     }
 
     //ALOGI("Done!");
@@ -759,7 +759,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(file, file8);
 
     if (fd < 0) {
-        //LOGW("Unable to open process file: %s\n", file8);
+        //ALOGW("Unable to open process file: %s\n", file8);
         return JNI_FALSE;
     }
 
@@ -768,7 +768,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     close(fd);
 
     if (len < 0) {
-        //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        //ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
         return JNI_FALSE;
     }
     buffer[len] = 0;

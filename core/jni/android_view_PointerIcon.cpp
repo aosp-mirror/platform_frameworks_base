@@ -43,7 +43,7 @@ jobject android_view_PointerIcon_getSystemIcon(JNIEnv* env, jobject contextObj, 
     jobject pointerIconObj = env->CallStaticObjectMethod(gPointerIconClassInfo.clazz,
             gPointerIconClassInfo.getSystemIcon, contextObj, style);
     if (env->ExceptionCheck()) {
-        LOGW("An exception occurred while getting a pointer icon with style %d.", style);
+        ALOGW("An exception occurred while getting a pointer icon with style %d.", style);
         LOGW_EX(env);
         env->ExceptionClear();
         return NULL;
@@ -62,7 +62,7 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
     jobject loadedPointerIconObj = env->CallObjectMethod(pointerIconObj,
             gPointerIconClassInfo.load, contextObj);
     if (env->ExceptionCheck() || !loadedPointerIconObj) {
-        LOGW("An exception occurred while loading a pointer icon.");
+        ALOGW("An exception occurred while loading a pointer icon.");
         LOGW_EX(env);
         env->ExceptionClear();
         return UNKNOWN_ERROR;

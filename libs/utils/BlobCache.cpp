@@ -69,11 +69,11 @@ void BlobCache::set(const void* key, size_t keySize, const void* value,
         return;
     }
     if (keySize == 0) {
-        LOGW("set: not caching because keySize is 0");
+        ALOGW("set: not caching because keySize is 0");
         return;
     }
     if (valueSize <= 0) {
-        LOGW("set: not caching because valueSize is 0");
+        ALOGW("set: not caching because valueSize is 0");
         return;
     }
 

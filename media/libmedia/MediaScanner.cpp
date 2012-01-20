@@ -153,7 +153,7 @@ MediaScanResult MediaScanner::doProcessDirectory(
 
     DIR* dir = opendir(path);
     if (!dir) {
-        LOGW("Error opening directory '%s', skipping: %s.", path, strerror(errno));
+        ALOGW("Error opening directory '%s', skipping: %s.", path, strerror(errno));
         return MEDIA_SCAN_RESULT_SKIPPED;
     }
 
