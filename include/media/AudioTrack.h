@@ -411,7 +411,7 @@ public:
      */
 
         enum {
-            NO_MORE_BUFFERS = 0x80000001,
+            NO_MORE_BUFFERS = 0x80000001,   // same name in AudioFlinger.h, ok to be different value
             STOPPED = 1
         };
 
