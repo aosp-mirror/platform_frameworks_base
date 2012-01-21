@@ -179,7 +179,7 @@ public:
      */
     void operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc);
 
-    sp<TextLayoutCacheValue> getValue(SkPaint* paint, const jchar* text, jint start, jint count,
+    sp<TextLayoutCacheValue> getValue(const SkPaint* paint, const jchar* text, jint start, jint count,
             jint contextCount, jint dirFlags);
 
     /**
@@ -224,7 +224,7 @@ public:
     TextLayoutEngine();
     virtual ~TextLayoutEngine();
 
-    void computeValues(TextLayoutCacheValue* value, SkPaint* paint, const UChar* chars,
+    void computeValues(TextLayoutCacheValue* value, const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags);
 
 private:
@@ -273,14 +273,14 @@ private:
      */
     UnicodeString mBuffer;
 
-    size_t shapeFontRun(SkPaint* paint, bool isRTL);
+    size_t shapeFontRun(const SkPaint* paint, bool isRTL);
 
-    void computeValues(SkPaint* paint, const UChar* chars,
+    void computeValues(const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);
 
-    void computeRunValues(SkPaint* paint, const UChar* chars,
+    void computeRunValues(const SkPaint* paint, const UChar* chars,
             size_t count, bool isRTL,
             Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
             Vector<jchar>* const outGlyphs);

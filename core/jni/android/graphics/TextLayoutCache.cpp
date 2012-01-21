@@ -93,7 +93,7 @@ void TextLayoutCache::clear() {
 /*
  * Caching
  */
-sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
+sp<TextLayoutCacheValue> TextLayoutCache::getValue(const SkPaint* paint,
             const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
     nsecs_t startTime = 0;
@@ -360,7 +360,7 @@ TextLayoutEngine::~TextLayoutEngine() {
     // we don't bother at the moment
 }
 
-void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags) {
 
     computeValues(paint, chars, start, count, contextCount, dirFlags,
@@ -371,7 +371,7 @@ void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, SkPaint* paint
 #endif
 }
 
-void TextLayoutEngine::computeValues(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeValues(const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -513,7 +513,7 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
     }
 }
 
-void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
+void TextLayoutEngine::computeRunValues(const SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -719,7 +719,7 @@ void TextLayoutEngine::computeRunValues(SkPaint* paint, const UChar* chars,
 }
 
 
-size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
+size_t TextLayoutEngine::shapeFontRun(const SkPaint* paint, bool isRTL) {
     // Reset kerning
     mShaperItem.kerning_applied = false;
 
