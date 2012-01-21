@@ -1401,6 +1401,12 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
 
         /**
+         * Adjustment to auto-brightness to make it generally more (>0.0 <1.0)
+         * or less (<0.0 >-1.0) bright.
+         */
+        public static final String SCREEN_AUTO_BRIGHTNESS_ADJ = "screen_auto_brightness_adj";
+
+        /**
          * SCREEN_BRIGHTNESS_MODE value for manual mode.
          */
         public static final int SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
@@ -1927,6 +1933,7 @@ public final class Settings {
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
             SCREEN_BRIGHTNESS_MODE,
+            SCREEN_AUTO_BRIGHTNESS_ADJ,
             VIBRATE_ON,
             MODE_RINGER,
             MODE_RINGER_STREAMS_AFFECTED,
