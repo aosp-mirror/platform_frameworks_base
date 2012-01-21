@@ -37,8 +37,6 @@
 #include <cutils/properties.h>
 #include <cutils/compiler.h>
 
-#include <media/AudioTrack.h>
-#include <media/AudioRecord.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaDeathNotifier.h>
 
@@ -3909,7 +3907,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
         if (mOutBuffer.frameCount == 0) {
             mOutBuffer.frameCount = pInBuffer->frameCount;
             nsecs_t startTime = systemTime();
-            if (obtainBuffer(&mOutBuffer, waitTimeLeftMs) == (status_t)AudioTrack::NO_MORE_BUFFERS) {
+            if (obtainBuffer(&mOutBuffer, waitTimeLeftMs) == (status_t)NO_MORE_BUFFERS) {
                 ALOGV ("OutputTrack::write() %p thread %p no more output buffers", this, mThread.unsafe_get());
                 outputBufferFull = true;
                 break;
@@ -4000,11 +3998,11 @@ status_t AudioFlinger::PlaybackThread::OutputTrack::obtainBuffer(AudioBufferProv
             active = mActive;
             if (CC_UNLIKELY(!active)) {
                 ALOGV("Not active and NO_MORE_BUFFERS");
-                return AudioTrack::NO_MORE_BUFFERS;
+                return NO_MORE_BUFFERS;
             }
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (result != NO_ERROR) {
-                return AudioTrack::NO_MORE_BUFFERS;
+                return NO_MORE_BUFFERS;
             }
             // read the server count again
         start_loop_here:
@@ -4013,7 +4011,7 @@ status_t AudioFlinger::PlaybackThread::OutputTrack::obtainBuffer(AudioBufferProv
     }
 
 //    if (framesAvail < framesReq) {
-//        return AudioTrack::NO_MORE_BUFFERS;
+//        return NO_MORE_BUFFERS;
 //    }
 
     if (framesReq > framesAvail) {

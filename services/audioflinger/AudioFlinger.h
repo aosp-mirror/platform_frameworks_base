@@ -26,7 +26,7 @@
 #include <media/IAudioFlingerClient.h>
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
-#include <media/AudioTrack.h>
+#include <media/AudioSystem.h>
 
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
@@ -207,6 +207,7 @@ public:
                 bool        btNrecIsOff() { return mBtNrecIsOff; }
 
 private:
+
                             AudioFlinger();
     virtual                 ~AudioFlinger();
 
@@ -673,6 +674,10 @@ private:
             wp<ThreadBase>&     thread()  { return mThread; }
 
         private:
+
+            enum {
+                NO_MORE_BUFFERS = 0x80000001,   // same in AudioTrack.h, ok to be different value
+            };
 
             status_t            obtainBuffer(AudioBufferProvider::Buffer* buffer, uint32_t waitTimeMs);
             void                clearBufferQueue();
