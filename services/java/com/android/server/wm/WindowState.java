@@ -1449,7 +1449,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
                 || (atoken == null && mRootToken.hidden)
-                || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
+                || (atoken != null && atoken.hiddenRequested)
                 || mAttachedHidden
                 || mExiting || mDestroying;
     }
