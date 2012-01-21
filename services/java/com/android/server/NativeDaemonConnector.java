@@ -153,6 +153,10 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                         start = i + 1;
                     }
                 }
+                if (start == 0) {
+                    final String rawEvent = new String(buffer, start, count, Charsets.UTF_8);
+                    log("RCV incomplete <- {" + rawEvent + "}");
+                }
 
                 // We should end at the amount we read. If not, compact then
                 // buffer and read again.
@@ -297,7 +301,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             throws NativeDaemonConnectorException {
         final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
 
-        mResponseQueue.clear();
+        while (mResponseQueue.size() > 0) {
+            try {
+                log("ignoring {" + mResponseQueue.take() + "}");
+            } catch (Exception e) {}
+        }
 
         final String sentCommand = sendCommandLocked(cmd, args);
 
