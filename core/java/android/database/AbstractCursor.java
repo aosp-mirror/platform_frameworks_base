@@ -284,23 +284,6 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         }
     }
 
-    /**
-     * This is hidden until the data set change model has been re-evaluated.
-     * @hide
-     */
-    protected void notifyDataSetChange() {
-        mDataSetObservable.notifyChanged();
-    }
-
-    /**
-     * This is hidden until the data set change model has been re-evaluated.
-     * @hide
-     */
-    protected DataSetObservable getDataSetObservable() {
-        return mDataSetObservable;
-
-    }
-
     public void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);
     }
