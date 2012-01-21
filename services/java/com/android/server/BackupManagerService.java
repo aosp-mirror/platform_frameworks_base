@@ -140,6 +140,8 @@ class BackupManagerService extends IBackupManager.Stub {
     static final int BACKUP_FILE_VERSION = 1;
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
+    static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
+
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
     private static final long BACKUP_INTERVAL = AlarmManager.INTERVAL_HOUR;
@@ -2325,14 +2327,16 @@ class BackupManagerService extends IBackupManager.Stub {
             ParcelFileDescriptor mPipe;
             int mToken;
             boolean mSendApk;
+            boolean mWriteManifest;
 
             FullBackupRunner(PackageInfo pack, IBackupAgent agent, ParcelFileDescriptor pipe,
-                    int token, boolean sendApk)  throws IOException {
+                    int token, boolean sendApk, boolean writeManifest)  throws IOException {
                 mPackage = pack;
                 mAgent = agent;
                 mPipe = ParcelFileDescriptor.dup(pipe.getFileDescriptor());
                 mToken = token;
                 mSendApk = sendApk;
+                mWriteManifest = writeManifest;
             }
 
             @Override
@@ -2341,12 +2345,14 @@ class BackupManagerService extends IBackupManager.Stub {
                     BackupDataOutput output = new BackupDataOutput(
                             mPipe.getFileDescriptor());
 
-                    if (MORE_DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
-                    writeAppManifest(mPackage, mManifestFile, mSendApk);
-                    FullBackup.backupToTar(mPackage.packageName, null, null,
-                            mFilesDir.getAbsolutePath(),
-                            mManifestFile.getAbsolutePath(),
-                            output);
+                    if (mWriteManifest) {
+                        if (MORE_DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
+                        writeAppManifest(mPackage, mManifestFile, mSendApk);
+                        FullBackup.backupToTar(mPackage.packageName, null, null,
+                                mFilesDir.getAbsolutePath(),
+                                mManifestFile.getAbsolutePath(),
+                                output);
+                    }
 
                     if (mSendApk) {
                         writeApkToBackup(mPackage, output);
@@ -2433,10 +2439,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
-            // Cull any packages that have indicated that backups are not permitted.
+            // Cull any packages that have indicated that backups are not permitted, as well
+            // as any explicit mention of the 'special' shared-storage agent package (we
+            // handle that one at the end).
             for (int i = 0; i < packagesToBackup.size(); ) {
                 PackageInfo pkg = packagesToBackup.get(i);
-                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
+                        || pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
                     packagesToBackup.remove(i);
                 } else {
                     i++;
@@ -2516,16 +2525,21 @@ class BackupManagerService extends IBackupManager.Stub {
                     return;
                 }
 
+                // Shared storage if requested
+                if (mIncludeShared) {
+                    try {
+                        pkg = mPackageManager.getPackageInfo(SHARED_BACKUP_AGENT_PACKAGE, 0);
+                        packagesToBackup.add(pkg);
+                    } catch (NameNotFoundException e) {
+                        Slog.e(TAG, "Unable to find shared-storage backup handler");
+                    }
+                }
+
                 // Now back up the app data via the agent mechanism
                 int N = packagesToBackup.size();
                 for (int i = 0; i < N; i++) {
                     pkg = packagesToBackup.get(i);
                     backupOnePackage(pkg, out);
-                }
-
-                // Shared storage if requested
-                if (mIncludeShared) {
-                    backupSharedStorage();
                 }
 
                 // Done!
@@ -2633,19 +2647,21 @@ class BackupManagerService extends IBackupManager.Stub {
             if (agent != null) {
                 ParcelFileDescriptor[] pipes = null;
                 try {
-                     pipes = ParcelFileDescriptor.createPipe();
+                    pipes = ParcelFileDescriptor.createPipe();
 
                     ApplicationInfo app = pkg.applicationInfo;
+                    final boolean isSharedStorage = pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
                     final boolean sendApk = mIncludeApks
+                            && !isSharedStorage
                             && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
                             && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
                                 (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 
-                    sendOnBackupPackage(pkg.packageName);
+                    sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                     final int token = generateToken();
                     FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
-                            token, sendApk);
+                            token, sendApk, !isSharedStorage);
                     pipes[1].close();   // the runner has dup'd it
                     pipes[1] = null;
                     Thread t = new Thread(runner);
@@ -2717,33 +2733,6 @@ class BackupManagerService extends IBackupManager.Stub {
                                 obbDirName, obb.getAbsolutePath(), output);
                     }
                 }
-            }
-        }
-
-        private void backupSharedStorage() throws RemoteException {
-            PackageInfo pkg = null;
-            try {
-                pkg = mPackageManager.getPackageInfo("com.android.sharedstoragebackup", 0);
-                IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
-                        IApplicationThread.BACKUP_MODE_FULL);
-                if (agent != null) {
-                    sendOnBackupPackage("Shared storage");
-
-                    final int token = generateToken();
-                    prepareOperationTimeout(token, TIMEOUT_SHARED_BACKUP_INTERVAL, null);
-                    agent.doFullBackup(mOutputFile, token, mBackupManagerBinder);
-                    if (!waitUntilOperationComplete(token)) {
-                        Slog.e(TAG, "Full backup failed on shared storage");
-                    } else {
-                        if (DEBUG) Slog.d(TAG, "Full shared storage backup success");
-                    }
-                } else {
-                    Slog.e(TAG, "Could not bind to shared storage backup agent");
-                }
-            } catch (NameNotFoundException e) {
-                Slog.e(TAG, "Shared storage backup package not found");
-            } finally {
-                tearDown(pkg);
             }
         }
 
@@ -2972,7 +2961,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
             // Are we able to restore shared-storage data?
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                mPackagePolicies.put("com.android.sharedstoragebackup", RestorePolicy.ACCEPT);
+                mPackagePolicies.put(SHARED_BACKUP_AGENT_PACKAGE, RestorePolicy.ACCEPT);
             }
 
             FileInputStream rawInStream = null;
@@ -3850,7 +3839,7 @@ class BackupManagerService extends IBackupManager.Stub {
                             info.path, 0, FullBackup.SHARED_PREFIX.length())) {
                         // File in shared storage.  !!! TODO: implement this.
                         info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
-                        info.packageName = "com.android.sharedstoragebackup";
+                        info.packageName = SHARED_BACKUP_AGENT_PACKAGE;
                         info.domain = FullBackup.SHARED_STORAGE_TOKEN;
                         if (DEBUG) Slog.i(TAG, "File in shared storage: " + info.path);
                     } else if (FullBackup.APPS_PREFIX.regionMatches(0,
