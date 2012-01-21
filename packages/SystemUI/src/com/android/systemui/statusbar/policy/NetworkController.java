@@ -913,6 +913,9 @@ public class NetworkController extends BroadcastReceiver {
             combinedActivityIconId = mMobileActivityIconId;
             combinedSignalIconId = mDataSignalIconId; // set by updateDataIcon()
             mContentDescriptionCombinedSignal = mContentDescriptionDataType;
+        } else {
+            mobileLabel = mHasMobileDataFeature ?
+                context.getString(R.string.status_bar_settings_signal_meter_disconnected) : "";
         }
 
         if (mWifiConnected) {
