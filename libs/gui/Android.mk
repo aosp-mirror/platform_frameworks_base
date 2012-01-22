@@ -3,6 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
 	BitTube.cpp \
+	BufferQueue.cpp \
 	DisplayEventReceiver.cpp \
 	IDisplayEventConnection.cpp \
 	ISensorEventConnection.cpp \
