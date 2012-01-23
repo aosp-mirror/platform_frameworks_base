@@ -466,7 +466,8 @@ public:
         jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
 
         TextLayoutCacheValue value(contextCount);
-        TextLayoutEngine::getInstance().computeValues(&value, paint, text, start, count, contextCount, flags);
+        TextLayoutEngine::getInstance().computeValues(&value, paint, text, start, count,
+                contextCount, flags);
         const jchar* shapedGlyphs = value.getGlyphs();
         size_t glyphsCount = value.getGlyphsCount();
         memcpy(glyphsArray, shapedGlyphs, sizeof(jchar) * glyphsCount);
@@ -673,13 +674,25 @@ public:
         }
     }
 
-    static int breakText(JNIEnv* env, const SkPaint& paint, const jchar text[],
+    static int breakText(JNIEnv* env, SkPaint& paint, const jchar text[],
                          int count, float maxWidth, jfloatArray jmeasured,
                          SkPaint::TextBufferDirection tbd) {
-        SkASSERT(paint.getTextEncoding() == SkPaint::kUTF16_TextEncoding);
+        sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+        value = TextLayoutCache::getInstance().getValue(&paint, text, 0, count,
+                count, paint.getFlags());
+        if (value == NULL) {
+            ALOGE("Cannot get TextLayoutCache value for text = '%s'",
+                    String8(text, count).string());
+        }
+#else
+        value = new TextLayoutCacheValue(count);
+        TextLayoutEngine::getInstance().computeValues(value.get(), &paint,
+                reinterpret_cast<const UChar*>(text), 0, count, count, paint.getFlags());
+#endif
 
         SkScalar     measured;
-        size_t       bytes = paint.breakText(text, count << 1,
+        size_t       bytes = paint.breakText(value->getGlyphs(), value->getGlyphsCount() << 1,
                                    SkFloatToScalar(maxWidth), &measured, tbd);
         SkASSERT((bytes & 1) == 0);
 
@@ -743,7 +756,20 @@ public:
         SkRect  r;
         SkIRect ir;
 
-        paint.measureText(text, count << 1, &r);
+        sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+        value = TextLayoutCache::getInstance().getValue(&paint, text, 0, count,
+                count, paint.getFlags());
+        if (value == NULL) {
+            ALOGE("Cannot get TextLayoutCache value for text = '%s'",
+                    String8(text, count).string());
+        }
+#else
+        value = new TextLayoutCacheValue(count);
+        TextLayoutEngine::getInstance().computeValues(value.get(), &paint,
+                reinterpret_cast<const UChar*>(text), 0, count, count, paint.getFlags());
+#endif
+        paint.measureText(value->getGlyphs(), value->getGlyphsCount() << 1, &r);
         r.roundOut(&ir);
         GraphicsJNI::irect_to_jrect(ir, env, bounds);
     }
