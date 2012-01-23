@@ -457,13 +457,13 @@ public class NetworkController extends BroadcastReceiver {
     private final void updateTelephonySignalStrength() {
         if (!hasService()) {
             if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: !hasService()");
-            mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
-            mDataSignalIconId = R.drawable.stat_sys_signal_0;
+            mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+            mDataSignalIconId = R.drawable.stat_sys_signal_null;
         } else {
             if (mSignalStrength == null) {
                 if (CHATTY) Slog.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
-                mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
-                mDataSignalIconId = R.drawable.stat_sys_signal_0;
+                mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+                mDataSignalIconId = R.drawable.stat_sys_signal_null;
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0]);
             } else {
