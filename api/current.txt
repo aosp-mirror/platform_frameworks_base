@@ -17560,6 +17560,7 @@ package android.provider {
     field public static final java.lang.String RADIO_NFC = "nfc";
     field public static final java.lang.String RADIO_WIFI = "wifi";
     field public static final java.lang.String RINGTONE = "ringtone";
+    field public static final java.lang.String SCREEN_AUTO_BRIGHTNESS_ADJ = "screen_auto_brightness_adj";
     field public static final java.lang.String SCREEN_BRIGHTNESS = "screen_brightness";
     field public static final java.lang.String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
     field public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1; // 0x1
