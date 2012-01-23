@@ -6791,7 +6791,8 @@ package android.database {
 
   public class ContentObservable extends android.database.Observable {
     ctor public ContentObservable();
-    method public void dispatchChange(boolean);
+    method public deprecated void dispatchChange(boolean);
+    method public void dispatchChange(boolean, android.net.Uri);
     method public deprecated void notifyChange(boolean);
     method public void registerObserver(android.database.ContentObserver);
   }
@@ -6799,8 +6800,10 @@ package android.database {
   public abstract class ContentObserver {
     ctor public ContentObserver(android.os.Handler);
     method public boolean deliverSelfNotifications();
-    method public final void dispatchChange(boolean);
+    method public final deprecated void dispatchChange(boolean);
+    method public final void dispatchChange(boolean, android.net.Uri);
     method public void onChange(boolean);
+    method public void onChange(boolean, android.net.Uri);
   }
 
   public abstract interface CrossProcessCursor implements android.database.Cursor {

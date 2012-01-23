@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.net.Uri;
 import android.os.Handler;
 
 /**
@@ -83,6 +84,9 @@ public abstract class ContentObserver {
 
     /**
      * This method is called when a content change occurs.
+     * <p>
+     * Subclasses should override this method to handle content changes.
+     * </p>
      *
      * @param selfChange True if this is a self-change notification.
      */
@@ -91,32 +95,89 @@ public abstract class ContentObserver {
     }
 
     /**
-     * Dispatches a change notification to the observer.
+     * This method is called when a content change occurs.
+     * Includes the changed content Uri when available.
+     * <p>
+     * Subclasses should override this method to handle content changes.
+     * To ensure correct operation on older versions of the framework that
+     * did not provide a Uri argument, applications should also implement
+     * the {@link #onChange(boolean)} overload of this method whenever they
+     * implement the {@link #onChange(boolean, Uri)} overload.
+     * </p><p>
+     * Example implementation:
+     * <pre><code>
+     * // Implement the onChange(boolean) method to delegate the change notification to
+     * // the onChange(boolean, Uri) method to ensure correct operation on older versions
+     * // of the framework that did not have the onChange(boolean, Uri) method.
+     * {@literal @Override}
+     * public void onChange(boolean selfChange) {
+     *     onChange(selfChange, null);
+     * }
      *
+     * // Implement the onChange(boolean, Uri) method to take advantage of the new Uri argument.
+     * {@literal @Override}
+     * public void onChange(boolean selfChange, Uri uri) {
+     *     // Handle change.
+     * }
+     * </code></pre>
+     * </p>
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uri The Uri of the changed content, or null if unknown.
+     */
+    public void onChange(boolean selfChange, Uri uri) {
+        onChange(selfChange);
+    }
+
+    /**
+     * Dispatches a change notification to the observer.
+     * <p>
      * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
      * then a call to the {@link #onChange} method is posted to the handler's message queue.
      * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
+     * </p>
      *
      * @param selfChange True if this is a self-change notification.
+     *
+     * @deprecated Use {@link #dispatchChange(boolean, Uri)} instead.
      */
+    @Deprecated
     public final void dispatchChange(boolean selfChange) {
+        dispatchChange(selfChange, null);
+    }
+
+    /**
+     * Dispatches a change notification to the observer.
+     * Includes the changed content Uri when available.
+     * <p>
+     * If a {@link Handler} was supplied to the {@link ContentObserver} constructor,
+     * then a call to the {@link #onChange} method is posted to the handler's message queue.
+     * Otherwise, the {@link #onChange} method is invoked immediately on this thread.
+     * </p>
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uri The Uri of the changed content, or null if unknown.
+     */
+    public final void dispatchChange(boolean selfChange, Uri uri) {
         if (mHandler == null) {
-            onChange(selfChange);
+            onChange(selfChange, uri);
         } else {
-            mHandler.post(new NotificationRunnable(selfChange));
+            mHandler.post(new NotificationRunnable(selfChange, uri));
         }
     }
 
     private final class NotificationRunnable implements Runnable {
-        private final boolean mSelf;
+        private final boolean mSelfChange;
+        private final Uri mUri;
 
-        public NotificationRunnable(boolean self) {
-            mSelf = self;
+        public NotificationRunnable(boolean selfChange, Uri uri) {
+            mSelfChange = selfChange;
+            mUri = uri;
         }
 
         @Override
         public void run() {
-            ContentObserver.this.onChange(mSelf);
+            ContentObserver.this.onChange(mSelfChange, mUri);
         }
     }
 
@@ -128,10 +189,10 @@ public abstract class ContentObserver {
         }
 
         @Override
-        public void onChange(boolean selfChange) {
+        public void onChange(boolean selfChange, Uri uri) {
             ContentObserver contentObserver = mContentObserver;
             if (contentObserver != null) {
-                contentObserver.dispatchChange(selfChange);
+                contentObserver.dispatchChange(selfChange, uri);
             }
         }
 
