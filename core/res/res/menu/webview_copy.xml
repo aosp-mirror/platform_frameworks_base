@@ -19,9 +19,19 @@
         android:title="@string/selectAll"
         android:showAsAction="ifRoom|withText"
         />
+    <item android:id="@+id/cut"
+        android:icon="?android:attr/actionModeCutDrawable"
+        android:title="@string/cut"
+        android:showAsAction="ifRoom|withText"
+        />
     <item android:id="@+id/copy"
         android:icon="?android:attr/actionModeCopyDrawable"
         android:title="@string/copy"
+        android:showAsAction="ifRoom|withText"
+        />
+    <item android:id="@+id/paste"
+        android:icon="?android:attr/actionModePasteDrawable"
+        android:title="@string/paste"
         android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/share"
