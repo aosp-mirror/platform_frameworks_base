@@ -342,6 +342,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     private SuggestionRangeSpan mSuggestionRangeSpan;
+    private Runnable mShowSuggestionRunnable;
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
@@ -4513,6 +4514,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mSelectionModifierCursorController.onDetached();
         }
 
+        if (mShowSuggestionRunnable != null) {
+            removeCallbacks(mShowSuggestionRunnable);
+        }
+
         hideControllers();
 
         resetResolvedDrawables();
@@ -8330,6 +8335,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             getSelectionController().onTouchEvent(event);
         }
 
+        if (mShowSuggestionRunnable != null) {
+            removeCallbacks(mShowSuggestionRunnable);
+        }
+
         if (action == MotionEvent.ACTION_DOWN) {
             mLastDownPositionX = event.getX();
             mLastDownPositionY = event.getY();
@@ -8370,7 +8379,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
                         getSelectionEnd(), ClickableSpan.class);
 
-                if (links.length != 0) {
+                if (links.length > 0) {
                     links[0].onClick(this);
                     handled = true;
                 }
@@ -8397,7 +8406,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     if (!extractedTextModeWillBeStarted()) {
                         if (isCursorInsideEasyCorrectionSpan()) {
-                            showSuggestions();
+                            if (mShowSuggestionRunnable == null) {
+                                mShowSuggestionRunnable = new Runnable() {
+                                    public void run() {
+                                        showSuggestions();
+                                    }
+                                };
+                            }
+                            postDelayed(mShowSuggestionRunnable,
+                                    ViewConfiguration.getDoubleTapTimeout());
                         } else if (hasInsertionController()) {
                             getInsertionController().show();
                         }
