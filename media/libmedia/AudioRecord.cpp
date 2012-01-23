@@ -84,7 +84,7 @@ AudioRecord::AudioRecord()
 }
 
 AudioRecord::AudioRecord(
-        int inputSource,
+        audio_source_t inputSource,
         uint32_t sampleRate,
         audio_format_t format,
         uint32_t channelMask,
@@ -119,7 +119,7 @@ AudioRecord::~AudioRecord()
 }
 
 status_t AudioRecord::set(
-        int inputSource,
+        audio_source_t inputSource,
         uint32_t sampleRate,
         audio_format_t format,
         uint32_t channelMask,
@@ -228,7 +228,7 @@ status_t AudioRecord::set(
     mMarkerReached = false;
     mNewPosition = 0;
     mUpdatePeriod = 0;
-    mInputSource = (uint8_t)inputSource;
+    mInputSource = inputSource;
     mFlags = flags;
     mInput = input;
     AudioSystem::acquireAudioSessionId(mSessionId);
@@ -272,9 +272,9 @@ size_t AudioRecord::frameSize() const
     }
 }
 
-int AudioRecord::inputSource() const
+audio_source_t AudioRecord::inputSource() const
 {
-    return (int)mInputSource;
+    return mInputSource;
 }
 
 // -------------------------------------------------------------------------

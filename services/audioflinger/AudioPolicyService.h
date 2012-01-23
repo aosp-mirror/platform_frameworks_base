@@ -74,7 +74,7 @@ public:
                                 audio_stream_type_t stream,
                                 int session = 0);
     virtual void releaseOutput(audio_io_handle_t output);
-    virtual audio_io_handle_t getInput(int inputSource,
+    virtual audio_io_handle_t getInput(audio_source_t inputSource,
                                     uint32_t samplingRate = 0,
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = 0,
