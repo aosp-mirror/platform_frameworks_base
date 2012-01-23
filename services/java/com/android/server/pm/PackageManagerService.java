@@ -620,11 +620,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         packages = new String[size];
                         components = new ArrayList[size];
                         uids = new int[size];
-                        Iterator<HashMap.Entry<String, ArrayList<String>>>
+                        Iterator<Map.Entry<String, ArrayList<String>>>
                                 it = mPendingBroadcasts.entrySet().iterator();
                         int i = 0;
                         while (it.hasNext() && i < size) {
-                            HashMap.Entry<String, ArrayList<String>> ent = it.next();
+                            Map.Entry<String, ArrayList<String>> ent = it.next();
                             packages[i] = ent.getKey();
                             components[i] = ent.getValue();
                             PackageSetting ps = mSettings.mPackages.get(ent.getKey());
