@@ -243,7 +243,7 @@ public class ZygoteInit {
     private static void preloadClasses() {
         final VMRuntime runtime = VMRuntime.getRuntime();
 
-        InputStream is = ZygoteInit.class.getClassLoader().getResourceAsStream(
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(
                 PRELOADED_CLASSES);
         if (is == null) {
             Log.e(TAG, "Couldn't find " + PRELOADED_CLASSES + ".");
