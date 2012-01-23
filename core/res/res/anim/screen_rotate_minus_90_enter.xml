@@ -19,8 +19,44 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false">
+    <!--
+    <scale android:fromXScale="1.0" android:toXScale="0.565"
+            android:fromYScale="1.0" android:toYScale="0.565"
+            android:pivotX="50%" android:pivotY="50%"
+            android:interpolator="@interpolator/decelerate_quint"
+            android:fillEnabled="true"
+            android:fillBefore="false" android:fillAfter="true"
+            android:duration="@android:integer/config_mediumAnimTime"/>
+    <scale android:fromXScale="1.0" android:toXScale="1.777777777"
+            android:fromYScale="1.0" android:toYScale="1.777777777"
+            android:pivotX="50%" android:pivotY="50%"
+            android:interpolator="@interpolator/decelerate_quint"
+            android:fillEnabled="true"
+            android:fillBefore="false" android:fillAfter="true"
+            android:startOffset="@android:integer/config_longAnimTime"
+            android:duration="@android:integer/config_mediumAnimTime"/>
+    <scale android:fromXScale="100%p" android:toXScale="100%"
+            android:fromYScale="100%p" android:toYScale="100%"
+            android:pivotX="50%" android:pivotY="50%"
+            android:interpolator="@interpolator/decelerate_quint"
+            android:fillEnabled="true"
+            android:fillBefore="true" android:fillAfter="true"
+            android:startOffset="@android:integer/config_longAnimTime"
+            android:duration="@android:integer/config_mediumAnimTime" />
+    -->
+    <!--
+    <scale android:fromXScale="100%p" android:toXScale="100%"
+            android:fromYScale="100%p" android:toYScale="100%"
+            android:pivotX="50%" android:pivotY="50%"
+            android:interpolator="@interpolator/decelerate_quint"
+            android:fillEnabled="true"
+            android:fillBefore="true" android:fillAfter="true"
+            android:duration="@android:integer/config_mediumAnimTime" />
+    -->
     <rotate android:fromDegrees="-90" android:toDegrees="0"
             android:pivotX="50%" android:pivotY="50%"
             android:interpolator="@interpolator/decelerate_quint"
+            android:fillEnabled="true"
+            android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_mediumAnimTime" />
 </set>
