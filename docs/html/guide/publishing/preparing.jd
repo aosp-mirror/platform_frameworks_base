@@ -117,6 +117,9 @@ Android system allows you to sign your applications with a self-signed certifica
 certificate requirements, see <a href="{@docRoot}guide/publishing/app-signing.html#cert">Obtain a
 suitable private key</a>.</p>
 
+<p class="caution"><strong>Important:</strong> Your application must be signed with a cryptographic
+key whose validity period ends after 22 October 2033.</p>
+
 <p>You may also have to obtain other release keys if your application accesses a service or uses a
 third-party library that requires you to use a key that is based on your private key. For example,
 if your application uses the <a
