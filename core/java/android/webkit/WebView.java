@@ -383,17 +383,17 @@ public class WebView extends AbsoluteLayout
         }
 
         @Override
-        public boolean deleteSurroundingText(int leftLength, int rightLength) {
+        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
             // Look for one-character delete and send it as a key press.
-            if (leftLength == 1 && rightLength == 0) {
+            if (beforeLength == 1 && afterLength == 0) {
                 sendKeyPress(KeyEvent.KEYCODE_DEL);
-            } else if (leftLength == 0 && rightLength == 1){
+            } else if (beforeLength == 0 && afterLength == 1){
                 sendKeyPress(KeyEvent.KEYCODE_FORWARD_DEL);
             } else if (mWebViewCore != null) {
                 mWebViewCore.sendMessage(EventHub.DELETE_SURROUNDING_TEXT,
-                        leftLength, rightLength);
+                        beforeLength, afterLength);
             }
-            return super.deleteSurroundingText(leftLength, rightLength);
+            return super.deleteSurroundingText(beforeLength, afterLength);
         }
     }
 
