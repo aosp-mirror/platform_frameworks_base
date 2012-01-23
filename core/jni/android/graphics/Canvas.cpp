@@ -776,9 +776,6 @@ public:
 
     static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
-        // TODO: need to suppress this code after the GL renderer is modified for not
-        // copying the paint
-
         // Beware: this needs Glyph encoding (already done on the Paint constructor)
         canvas->drawText(glyphArray + index * 2, count * 2, x, y, *paint);
     }
