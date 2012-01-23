@@ -7996,84 +7996,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * @hide
-     */
-    public void setFastTranslationX(float x) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mTranslationX = x;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastTranslationY(float y) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mTranslationY = y;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastX(float x) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mTranslationX = x - mLeft;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastY(float y) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mTranslationY = y - mTop;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastScaleX(float x) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mScaleX = x;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastScaleY(float y) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mScaleY = y;
-        info.mMatrixDirty = true;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastAlpha(float alpha) {
-        ensureTransformationInfo();
-        mTransformationInfo.mAlpha = alpha;
-    }
-
-    /**
-     * @hide
-     */
-    public void setFastRotationY(float y) {
-        ensureTransformationInfo();
-        final TransformationInfo info = mTransformationInfo;
-        info.mRotationY = y;
-        info.mMatrixDirty = true;
-    }
-
-    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
@@ -8645,37 +8567,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
                 // Don't call invalidate -- we don't want to internally scroll
                 // our own bounds
                 p.invalidateChild(this, r);
-            }
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void fastInvalidate() {
-        if (skipInvalidate()) {
-            return;
-        }
-        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
-            (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID ||
-            (mPrivateFlags & INVALIDATED) != INVALIDATED) {
-            if (mParent instanceof View) {
-                ((View) mParent).mPrivateFlags |= INVALIDATED;
-            }
-            mPrivateFlags &= ~DRAWN;
-            mPrivateFlags |= DIRTY;
-            mPrivateFlags |= INVALIDATED;
-            mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            if (mParent != null && mAttachInfo != null) {
-                if (mAttachInfo.mHardwareAccelerated) {
-                    mParent.invalidateChild(this, null);
-                } else {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
-                    r.set(0, 0, mRight - mLeft, mBottom - mTop);
-                    // Don't call invalidate -- we don't want to internally scroll
-                    // our own bounds
-                    mParent.invalidateChild(this, r);
-                }
             }
         }
     }
