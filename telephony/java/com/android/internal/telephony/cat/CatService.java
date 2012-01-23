@@ -427,11 +427,11 @@ public class CatService extends Handler implements AppInterface {
                     }
                     break;
                 default:
-                    CatLog.d(this, "encodeOptionalTags() Unsupported Cmd:" + cmdDet.typeOfCommand);
+                    CatLog.d(this, "encodeOptionalTags() Unsupported Cmd details=" + cmdDet);
                     break;
             }
         } else {
-            CatLog.d(this, "encodeOptionalTags() bad Cmd:" + cmdDet.typeOfCommand);
+            CatLog.d(this, "encodeOptionalTags() bad Cmd details=" + cmdDet);
         }
     }
 
