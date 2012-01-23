@@ -1742,6 +1742,7 @@ public final class WebViewCore {
                             Rect rect = (Rect) msg.obj;
                             nativeScrollLayer(mNativeClass, nativeLayer,
                                     rect);
+                            break;
 
                         case DELETE_TEXT: {
                             int[] handles = (int[]) msg.obj;
