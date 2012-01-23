@@ -185,7 +185,8 @@ public final class ViewTreeObserver {
             mTouchableInsets = TOUCHABLE_INSETS_FRAME;
         }
         
-        @Override public boolean equals(Object o) {
+        @Override
+        public boolean equals(Object o) {
             try {
                 if (o == null) {
                     return false;
@@ -357,10 +358,26 @@ public final class ViewTreeObserver {
      * @param victim The callback to remove
      *
      * @throws IllegalStateException If {@link #isAlive()} returns false
+     * 
+     * @deprecated Use #removeOnGlobalLayoutListener instead
      *
      * @see #addOnGlobalLayoutListener(OnGlobalLayoutListener)
      */
+    @Deprecated
     public void removeGlobalOnLayoutListener(OnGlobalLayoutListener victim) {
+        removeOnGlobalLayoutListener(victim);
+    }
+
+    /**
+     * Remove a previously installed global layout callback
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     * 
+     * @see #addOnGlobalLayoutListener(OnGlobalLayoutListener)
+     */
+    public void removeOnGlobalLayoutListener(OnGlobalLayoutListener victim) {
         checkIsAlive();
         if (mOnGlobalLayoutListeners == null) {
             return;

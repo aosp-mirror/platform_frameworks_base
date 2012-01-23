@@ -23818,8 +23818,9 @@ package android.view {
     method public final void dispatchOnGlobalLayout();
     method public final boolean dispatchOnPreDraw();
     method public boolean isAlive();
-    method public void removeGlobalOnLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
+    method public deprecated void removeGlobalOnLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
     method public void removeOnGlobalFocusChangeListener(android.view.ViewTreeObserver.OnGlobalFocusChangeListener);
+    method public void removeOnGlobalLayoutListener(android.view.ViewTreeObserver.OnGlobalLayoutListener);
     method public void removeOnPreDrawListener(android.view.ViewTreeObserver.OnPreDrawListener);
     method public void removeOnScrollChangedListener(android.view.ViewTreeObserver.OnScrollChangedListener);
     method public void removeOnTouchModeChangeListener(android.view.ViewTreeObserver.OnTouchModeChangeListener);
