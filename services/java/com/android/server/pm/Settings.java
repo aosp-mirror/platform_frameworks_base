@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import libcore.io.IoUtils;
 
@@ -929,7 +930,7 @@ final class Settings {
             }
             
             if (mRenamedPackages.size() > 0) {
-                for (HashMap.Entry<String, String> e : mRenamedPackages.entrySet()) {
+                for (Map.Entry<String, String> e : mRenamedPackages.entrySet()) {
                     serializer.startTag(null, "renamed-package");
                     serializer.attribute(null, "new", e.getKey());
                     serializer.attribute(null, "old", e.getValue());
@@ -2144,7 +2145,7 @@ final class Settings {
 
         printedSomething = false;
         if (mRenamedPackages.size() > 0) {
-            for (final HashMap.Entry<String, String> e : mRenamedPackages.entrySet()) {
+            for (final Map.Entry<String, String> e : mRenamedPackages.entrySet()) {
                 if (packageName != null && !packageName.equals(e.getKey())
                         && !packageName.equals(e.getValue())) {
                     continue;
