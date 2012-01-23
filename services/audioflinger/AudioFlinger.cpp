@@ -1943,7 +1943,7 @@ uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
 
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
     :   PlaybackThread(audioFlinger, output, id, device),
-        mAudioMixer(0), mPrevMixerStatus(MIXER_IDLE)
+        mAudioMixer(0)
 {
     mType = ThreadBase::MIXER;
     mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
@@ -2060,7 +2060,6 @@ bool AudioFlinger::MixerThread::threadLoop()
                     LOGV("MixerThread %p TID %d waking up\n", this, gettid());
                     acquireWakeLock_l();
 
-                    mPrevMixerStatus = MIXER_IDLE;
                     if (mMasterMute == false) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
@@ -2232,11 +2231,11 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         // make sure that we have enough frames to mix one full buffer.
         // enforce this condition only once to enable draining the buffer in case the client
         // app does not call stop() and relies on underrun to stop:
-        // hence the test on (mPrevMixerStatus == MIXER_TRACKS_READY) meaning the track was mixed
+        // hence the test on (track->mRetryCount >= kMaxTrackRetries) meaning the track was mixed
         // during last round
         uint32_t minFrames = 1;
         if (!track->isStopped() && !track->isPausing() &&
-                (mPrevMixerStatus == MIXER_TRACKS_READY)) {
+                (track->mRetryCount >= kMaxTrackRetries)) {
             if (t->sampleRate() == (int)mSampleRate) {
                 minFrames = mFrameCount;
             } else {
@@ -2358,13 +2357,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
             // reset retry count
             track->mRetryCount = kMaxTrackRetries;
-            // If one track is ready, set the mixer ready if:
-            //  - the mixer was not ready during previous round OR
-            //  - no other track is not ready
-            if (mPrevMixerStatus != MIXER_TRACKS_READY ||
-                    mixerStatus != MIXER_TRACKS_ENABLED) {
-                mixerStatus = MIXER_TRACKS_READY;
-            }
+            mixerStatus = MIXER_TRACKS_READY;
         } else {
             //LOGV("track %d u=%08x, s=%08x [NOT READY] on thread %p", track->name(), cblk->user, cblk->server, this);
             if (track->isStopped()) {
@@ -2382,11 +2375,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     tracksToRemove->add(track);
                     // indicate to client process that the track was disabled because of underrun
                     android_atomic_or(CBLK_DISABLED_ON, &cblk->flags);
-                // If one track is not ready, mark the mixer also not ready if:
-                //  - the mixer was ready during previous round OR
-                //  - no other track is ready
-                } else if (mPrevMixerStatus == MIXER_TRACKS_READY ||
-                                mixerStatus != MIXER_TRACKS_READY) {
+                } else if (mixerStatus != MIXER_TRACKS_READY) {
                     mixerStatus = MIXER_TRACKS_ENABLED;
                 }
             }
@@ -2420,7 +2409,6 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         memset(mMixBuffer, 0, mFrameCount * mChannelCount * sizeof(int16_t));
     }
 
-    mPrevMixerStatus = mixerStatus;
     return mixerStatus;
 }
 
@@ -3157,7 +3145,6 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     LOGV("DuplicatingThread %p TID %d waking up\n", this, gettid());
                     acquireWakeLock_l();
 
-                    mPrevMixerStatus = MIXER_IDLE;
                     if (mMasterMute == false) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");

@@ -930,9 +930,7 @@ private:
         virtual     uint32_t    idleSleepTimeUs();
         virtual     uint32_t    suspendSleepTimeUs();
 
-                    AudioMixer* mAudioMixer;
-                    uint32_t    mPrevMixerStatus; // previous status (mixer_state) returned by
-                                                  // prepareTracks_l()
+        AudioMixer*                     mAudioMixer;
     };
 
     class DirectOutputThread : public PlaybackThread {
