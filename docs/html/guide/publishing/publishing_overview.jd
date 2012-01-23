@@ -134,7 +134,7 @@ href="{@docRoot}guide/publishing/licensing.html">application licensing</a>. This
 and features, coupled with numerous end-user community features, makes Android Market the premier
 marketplace for selling and buying Android applications.</p>
 
-<p>Releasing your application on Android Market is a simple process that involves four basic
+<p>Releasing your application on Android Market is a simple process that involves three basic
   steps:</p>
 
 <div class="figure" style="width:275px">
@@ -153,21 +153,16 @@ marketplace for selling and buying Android applications.</p>
     create promotional materials for your application, such as screenshots, videos, graphics, and
     promotional text.</p>
   </li>
-  <li>Planning publishing options.
+  <li>Configuring options and uploading assets.
     <p>Android Market lets you target your application to a worldwide pool of users and devices.
-    Using various Android Market tools, you can choose the countries you want to reach, the
-    price you want to charge in each country, and the devices you want to target. You can also
-    use Android Market's filtering settings to target specific device features and capabilities.</p>
-  </li>
-  <li>Configuring publishing options and uploading assets.
-    <p>After you create your promotional materials and determine which publishing options are
-    suitable for your application, you can use the Android Market developer console to configure
-    those options and upload the promotional materials. You can also use the developer console to
-    upload your application as a draft (unpublished) application, which lets you do final
-    testing before you publish it for final release.</p>
+    By configuring various Android Market settings, you can choose the countries you want to
+    reach, the listing languages you want to use, and the price you want to charge in each
+    country. You can also configure listing details such as the application type, category, and
+    content rating. When you are done configuring options you can upload your promotional materials
+    and your application as a draft (unpublished) application.</p>
   </li>
   <li>Publishing the release version of your application.
-    <p>When you are satisfied that your publishing settings are correctly configured and your
+    <p>If you are satisfied that your publishing settings are correctly configured and your
     uploaded application is ready to be released to the public, you can simply click
     <strong>Publish</strong > in the developer console and within minutes your application will be
     live and available for download around the world.</p>
