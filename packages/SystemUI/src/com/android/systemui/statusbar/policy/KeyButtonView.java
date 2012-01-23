@@ -55,6 +55,7 @@ public class KeyButtonView extends ImageView {
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
     boolean mSupportsLongpress = true;
     RectF mRect = new RectF(0f,0f,0f,0f);
+    AnimatorSet mPressedAnim;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -173,7 +174,10 @@ public class KeyButtonView extends ImageView {
     public void setPressed(boolean pressed) {
         if (mGlowBG != null) {
             if (pressed != isPressed()) {
-                AnimatorSet as = new AnimatorSet();
+                if (mPressedAnim != null && mPressedAnim.isRunning()) {
+                    mPressedAnim.cancel();
+                }
+                final AnimatorSet as = mPressedAnim = new AnimatorSet();
                 if (pressed) {
                     if (mGlowScale < GLOW_MAX_SCALE_FACTOR) 
                         mGlowScale = GLOW_MAX_SCALE_FACTOR;
