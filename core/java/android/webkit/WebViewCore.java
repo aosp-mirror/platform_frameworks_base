@@ -1126,6 +1126,11 @@ public final class WebViewCore {
         // private message ids
         private static final int DESTROY =     200;
 
+        // for cut & paste
+        static final int COPY_TEXT = 210;
+        static final int DELETE_TEXT = 211;
+        static final int INSERT_TEXT = 212;
+
         // Private handler for WebCore messages.
         private Handler mHandler;
         // Message queue for containing messages before the WebCore thread is
@@ -1737,6 +1742,27 @@ public final class WebViewCore {
                             Rect rect = (Rect) msg.obj;
                             nativeScrollLayer(mNativeClass, nativeLayer,
                                     rect);
+
+                        case DELETE_TEXT: {
+                            int[] handles = (int[]) msg.obj;
+                            nativeDeleteText(mNativeClass, handles[0],
+                                    handles[1], handles[2], handles[3]);
+                            break;
+                        }
+                        case COPY_TEXT: {
+                            int[] handles = (int[]) msg.obj;
+                            String copiedText = nativeGetText(mNativeClass,
+                                    handles[0], handles[1], handles[2],
+                                    handles[3]);
+                            if (copiedText != null) {
+                                mWebView.mPrivateHandler.obtainMessage(WebView.COPY_TO_CLIPBOARD, copiedText)
+                                        .sendToTarget();
+                            }
+                            break;
+                        }
+                        case INSERT_TEXT:
+                            nativeInsertText(mNativeClass, (String) msg.obj);
+                            break;
                     }
                 }
             };
@@ -2976,4 +3002,35 @@ public final class WebViewCore {
 
     private native void nativeAutoFillForm(int nativeClass, int queryId);
     private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
+
+    /**
+     * Deletes editable text between two points. Note that the selection may
+     * differ from the WebView's selection because the algorithms for selecting
+     * text differs for non-LTR text. Any text that isn't editable will be
+     * left unchanged.
+     * @param nativeClass The pointer to the native class (mNativeClass)
+     * @param startX The X position of the top-left selection point.
+     * @param startY The Y position of the top-left selection point.
+     * @param endX The X position of the bottom-right selection point.
+     * @param endY The Y position of the bottom-right selection point.
+     */
+    private native void nativeDeleteText(int nativeClass,
+            int startX, int startY, int endX, int endY);
+    /**
+     * Inserts text at the current cursor position. If the currently-focused
+     * node does not have a cursor position then this function does nothing.
+     */
+    private native void nativeInsertText(int nativeClass, String text);
+    /**
+     * Gets the text between two selection points. Note that the selection
+     * may differ from the WebView's selection because the algorithms for
+     * selecting text differs for non-LTR text.
+     * @param nativeClass The pointer to the native class (mNativeClass)
+     * @param startX The X position of the top-left selection point.
+     * @param startY The Y position of the top-left selection point.
+     * @param endX The X position of the bottom-right selection point.
+     * @param endY The Y position of the bottom-right selection point.
+     */
+    private native String nativeGetText(int nativeClass,
+            int startX, int startY, int endX, int endY);
 }
