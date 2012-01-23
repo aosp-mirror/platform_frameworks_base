@@ -6792,7 +6792,7 @@ package android.database {
   public class ContentObservable extends android.database.Observable {
     ctor public ContentObservable();
     method public void dispatchChange(boolean);
-    method public void notifyChange(boolean);
+    method public deprecated void notifyChange(boolean);
     method public void registerObserver(android.database.ContentObserver);
   }
 

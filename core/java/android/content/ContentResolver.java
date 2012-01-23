@@ -1034,8 +1034,11 @@ public abstract class ContentResolver {
      * To register, call {@link #registerContentObserver(android.net.Uri , boolean, android.database.ContentObserver) registerContentObserver()}.
      * By default, CursorAdapter objects will get this notification.
      *
-     * @param uri
-     * @param observer The observer that originated the change, may be <code>null</null>
+     * @param uri The uri of the content that was changed.
+     * @param observer The observer that originated the change, may be <code>null</null>.
+     * The observer that originated the change will only receive the notification if it
+     * has requested to receive self-change notifications by implementing
+     * {@link ContentObserver#deliverSelfNotifications()} to return true.
      */
     public void notifyChange(Uri uri, ContentObserver observer) {
         notifyChange(uri, observer, true /* sync to network */);
@@ -1046,8 +1049,11 @@ public abstract class ContentResolver {
      * To register, call {@link #registerContentObserver(android.net.Uri , boolean, android.database.ContentObserver) registerContentObserver()}.
      * By default, CursorAdapter objects will get this notification.
      *
-     * @param uri
-     * @param observer The observer that originated the change, may be <code>null</null>
+     * @param uri The uri of the content that was changed.
+     * @param observer The observer that originated the change, may be <code>null</null>.
+     * The observer that originated the change will only receive the notification if it
+     * has requested to receive self-change notifications by implementing
+     * {@link ContentObserver#deliverSelfNotifications()} to return true.
      * @param syncToNetwork If true, attempt to sync the change to the network.
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {

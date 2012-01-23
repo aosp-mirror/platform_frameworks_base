@@ -17,20 +17,28 @@
 package android.database;
 
 /**
- * A specialization of Observable for ContentObserver that provides methods for
- * invoking the various callback methods of ContentObserver.
+ * A specialization of {@link Observable} for {@link ContentObserver}
+ * that provides methods for sending notifications to a list of
+ * {@link ContentObserver} objects.
  */
 public class ContentObservable extends Observable<ContentObserver> {
-
+    // Even though the generic method defined in Observable would be perfectly
+    // fine on its own, we can't delete this overridden method because it would
+    // potentially break binary compatibility with existing applications.
     @Override
     public void registerObserver(ContentObserver observer) {
         super.registerObserver(observer);
     }
 
     /**
-     * invokes dispatchUpdate on each observer, unless the observer doesn't want
-     * self-notifications and the update is from a self-notification
-     * @param selfChange
+     * Invokes {@link ContentObserver#dispatchChange} on each observer.
+     *
+     * If <code>selfChange</code> is true, only delivers the notification
+     * to the observer if it has indicated that it wants to receive self-change
+     * notifications by implementing {@link ContentObserver#deliverSelfNotifications}
+     * to return true.
+     *
+     * @param selfChange True if this is a self-change notification.
      */
     public void dispatchChange(boolean selfChange) {
         synchronized(mObservers) {
@@ -43,9 +51,13 @@ public class ContentObservable extends Observable<ContentObserver> {
     }
 
     /**
-     * invokes onChange on each observer
-     * @param selfChange
+     * Invokes {@link ContentObserver#onChange} on each observer.
+     *
+     * @param selfChange True if this is a self-change notification.
+     *
+     * @deprecated Use {@link #dispatchChange} instead.
      */
+    @Deprecated
     public void notifyChange(boolean selfChange) {
         synchronized(mObservers) {
             for (ContentObserver observer : mObservers) {

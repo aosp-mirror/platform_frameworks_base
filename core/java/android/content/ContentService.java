@@ -176,7 +176,7 @@ public final class ContentService extends IContentService.Stub {
             for (int i=0; i<numCalls; i++) {
                 ObserverCall oc = calls.get(i);
                 try {
-                    oc.mObserver.onChange(oc.mSelfNotify);
+                    oc.mObserver.onChange(oc.mSelfChange);
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "Notified " + oc.mObserver + " of " + "update at " + uri);
                     }
@@ -218,13 +218,12 @@ public final class ContentService extends IContentService.Stub {
     public static final class ObserverCall {
         final ObserverNode mNode;
         final IContentObserver mObserver;
-        final boolean mSelfNotify;
+        final boolean mSelfChange;
 
-        ObserverCall(ObserverNode node, IContentObserver observer,
-                boolean selfNotify) {
+        ObserverCall(ObserverNode node, IContentObserver observer, boolean selfChange) {
             mNode = node;
             mObserver = observer;
-            mSelfNotify = selfNotify;
+            mSelfChange = selfChange;
         }
     }
 
@@ -668,7 +667,7 @@ public final class ContentService extends IContentService.Stub {
         }
 
         private void collectMyObserversLocked(boolean leaf, IContentObserver observer,
-                boolean selfNotify, ArrayList<ObserverCall> calls) {
+                boolean observerWantsSelfNotifications, ArrayList<ObserverCall> calls) {
             int N = mObservers.size();
             IBinder observerBinder = observer == null ? null : observer.asBinder();
             for (int i = 0; i < N; i++) {
@@ -676,28 +675,29 @@ public final class ContentService extends IContentService.Stub {
 
                 // Don't notify the observer if it sent the notification and isn't interesed
                 // in self notifications
-                if (entry.observer.asBinder() == observerBinder && !selfNotify) {
+                boolean selfChange = (entry.observer.asBinder() == observerBinder);
+                if (selfChange && !observerWantsSelfNotifications) {
                     continue;
                 }
 
                 // Make sure the observer is interested in the notification
                 if (leaf || (!leaf && entry.notifyForDescendents)) {
-                    calls.add(new ObserverCall(this, entry.observer, selfNotify));
+                    calls.add(new ObserverCall(this, entry.observer, selfChange));
                 }
             }
         }
 
         public void collectObserversLocked(Uri uri, int index, IContentObserver observer,
-                boolean selfNotify, ArrayList<ObserverCall> calls) {
+                boolean observerWantsSelfNotifications, ArrayList<ObserverCall> calls) {
             String segment = null;
             int segmentCount = countUriSegments(uri);
             if (index >= segmentCount) {
                 // This is the leaf node, notify all observers
-                collectMyObserversLocked(true, observer, selfNotify, calls);
+                collectMyObserversLocked(true, observer, observerWantsSelfNotifications, calls);
             } else if (index < segmentCount){
                 segment = getUriSegment(uri, index);
                 // Notify any observers at this level who are interested in descendents
-                collectMyObserversLocked(false, observer, selfNotify, calls);
+                collectMyObserversLocked(false, observer, observerWantsSelfNotifications, calls);
             }
 
             int N = mChildren.size();
@@ -705,7 +705,8 @@ public final class ContentService extends IContentService.Stub {
                 ObserverNode node = mChildren.get(i);
                 if (segment == null || node.mName.equals(segment)) {
                     // We found the child,
-                    node.collectObserversLocked(uri, index + 1, observer, selfNotify, calls);
+                    node.collectObserversLocked(uri, index + 1,
+                            observer, observerWantsSelfNotifications, calls);
                     if (segment != null) {
                         break;
                     }
