@@ -71,6 +71,11 @@ import com.android.internal.R;
 public class NumberPicker extends LinearLayout {
 
     /**
+     * The number of items show in the selector wheel.
+     */
+    public static final int SELECTOR_WHEEL_ITEM_COUNT = 5;
+
+    /**
      * The default update interval during long press.
      */
     private static final long DEFAULT_LONG_PRESS_UPDATE_INTERVAL = 300;
@@ -1137,14 +1142,17 @@ public class NumberPicker extends LinearLayout {
      * items shown on the selector wheel) the selector wheel wrapping is
      * enabled.
      * </p>
-     *
+     * <p>
+     * <strong>Note:</strong> If the number of items, i.e. the range
+     * ({@link #getMaxValue()} - {@link #getMinValue()}) is less than
+     * {@link #SELECTOR_WHEEL_ITEM_COUNT}, the selector wheel will not
+     * wrap. Hence, in such a case calling this method is a NOP.
+     * </p>
      * @param wrapSelectorWheel Whether to wrap.
      */
     public void setWrapSelectorWheel(boolean wrapSelectorWheel) {
-        if (wrapSelectorWheel && (mMaxValue - mMinValue) < mSelectorIndices.length) {
-            throw new IllegalStateException("Range less than selector items count.");
-        }
-        if (wrapSelectorWheel != mWrapSelectorWheel) {
+        final boolean wrappingAllowed = (mMaxValue - mMinValue) >= mSelectorIndices.length;
+        if ((!wrapSelectorWheel || wrappingAllowed) && wrapSelectorWheel != mWrapSelectorWheel) {
             mWrapSelectorWheel = wrapSelectorWheel;
             updateIncrementAndDecrementButtonsVisibilityState();
         }
