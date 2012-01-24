@@ -109,6 +109,9 @@ class MeasuredText {
             for (int i = 0; i < spans.length; i++) {
                 int startInPara = spanned.getSpanStart(spans[i]) - start;
                 int endInPara = spanned.getSpanEnd(spans[i]) - start;
+                // The span interval may be larger and must be restricted to [start, end[
+                if (startInPara < 0) startInPara = 0;
+                if (endInPara > len) endInPara = len;
                 for (int j = startInPara; j < endInPara; j++) {
                     mChars[j] = '\uFFFC';
                 }
