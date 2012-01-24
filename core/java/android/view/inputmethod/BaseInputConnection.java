@@ -193,10 +193,12 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation performs the deletion around the current
      * selection position of the editable text.
+     * @param beforeLength
+     * @param afterLength
      */
-    public boolean deleteSurroundingText(int leftLength, int rightLength) {
-        if (DEBUG) Log.v(TAG, "deleteSurroundingText " + leftLength
-                + " / " + rightLength);
+    public boolean deleteSurroundingText(int beforeLength, int afterLength) {
+        if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
+                + " / " + afterLength);
         final Editable content = getEditable();
         if (content == null) return false;
 
@@ -226,17 +228,17 @@ public class BaseInputConnection implements InputConnection {
 
         int deleted = 0;
 
-        if (leftLength > 0) {
-            int start = a - leftLength;
+        if (beforeLength > 0) {
+            int start = a - beforeLength;
             if (start < 0) start = 0;
             content.delete(start, a);
             deleted = a - start;
         }
 
-        if (rightLength > 0) {
+        if (afterLength > 0) {
             b = b - deleted;
 
-            int end = b + rightLength;
+            int end = b + afterLength;
             if (end > content.length()) end = content.length();
 
             content.delete(b, end);

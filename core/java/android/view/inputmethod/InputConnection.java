@@ -138,19 +138,20 @@ public interface InputConnection {
             int flags);
 
     /**
-     * Delete <var>leftLength</var> characters of text before the current cursor
-     * position, and delete <var>rightLength</var> characters of text after the
+     * Delete <var>beforeLength</var> characters of text before the current cursor
+     * position, and delete <var>afterLength</var> characters of text after the
      * current cursor position, excluding composing text.
      * 
-     * @param leftLength The number of characters to be deleted before the
+     *
+     * @param beforeLength The number of characters to be deleted before the
      *        current cursor position.
-     * @param rightLength The number of characters to be deleted after the
+     * @param afterLength The number of characters to be deleted after the
      *        current cursor position.
-     *        
+     *
      * @return Returns true on success, false if the input connection is no longer
      * valid.
      */
-    public boolean deleteSurroundingText(int leftLength, int rightLength);
+    public boolean deleteSurroundingText(int beforeLength, int afterLength);
 
     /**
      * Set composing text around the current cursor position with the given text,
