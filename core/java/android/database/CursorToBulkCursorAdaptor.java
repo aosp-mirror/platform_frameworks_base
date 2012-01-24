@@ -16,6 +16,7 @@
 
 package android.database;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -78,9 +79,9 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
 
         @Override
-        public void onChange(boolean selfChange) {
+        public void onChange(boolean selfChange, Uri uri) {
             try {
-                mRemote.onChange(selfChange);
+                mRemote.onChange(selfChange, uri);
             } catch (RemoteException ex) {
                 // Do nothing, the far side is dead
             }

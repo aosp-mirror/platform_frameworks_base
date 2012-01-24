@@ -300,7 +300,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      */
     protected void onChange(boolean selfChange) {
         synchronized (mSelfObserverLock) {
-            mContentObservable.dispatchChange(selfChange);
+            mContentObservable.dispatchChange(selfChange, null);
             if (mNotifyUri != null && selfChange) {
                 mContentResolver.notifyChange(mNotifyUri, mSelfObserver);
             }
