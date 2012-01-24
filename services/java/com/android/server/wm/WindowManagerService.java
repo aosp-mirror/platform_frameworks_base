@@ -2538,8 +2538,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return 0;
             }
-            win.mRequestedWidth = requestedWidth;
-            win.mRequestedHeight = requestedHeight;
+            if (win.mRequestedWidth != requestedWidth
+                    || win.mRequestedHeight != requestedHeight) {
+                win.mLayoutNeeded = true;
+                win.mRequestedWidth = requestedWidth;
+                win.mRequestedHeight = requestedHeight;
+            }
             if (attrs != null && seq == win.mSeq) {
                 win.mSystemUiVisibility = systemUiVisibility;
             }
@@ -2560,6 +2564,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 flagChanges = win.mAttrs.flags ^= attrs.flags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
+                if ((attrChanges&WindowManager.LayoutParams.LAYOUT_CHANGED) != 0) {
+                    win.mLayoutNeeded = true;
+                }
             }
 
             if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": " + win.mAttrs);
@@ -7438,12 +7445,13 @@ public class WindowManagerService extends IWindowManager.Stub
             // if they want.  (We do the normal layout for INVISIBLE
             // windows, since that means "perform layout as normal,
             // just don't display").
-            if (!gone || !win.mHaveFrame) {
+            if (!gone || !win.mHaveFrame || win.mLayoutNeeded) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
+                    win.mLayoutNeeded = false;
                     win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
                     win.mLayoutSeq = seq;
@@ -7475,11 +7483,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 // windows, since that means "perform layout as normal,
                 // just don't display").
                 if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
-                        || !win.mHaveFrame) {
+                        || !win.mHaveFrame || win.mLayoutNeeded) {
                     if (initial) {
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
+                    win.mLayoutNeeded = false;
                     win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
                     win.mLayoutSeq = seq;
