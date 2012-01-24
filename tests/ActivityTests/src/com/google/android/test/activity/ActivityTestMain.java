@@ -22,6 +22,7 @@ import java.util.List;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ScrollView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -98,6 +101,20 @@ public class ActivityTestMain extends Activity {
         super.onCreate(savedInstanceState);
 
         mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("Animate!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityTestMain.this,
+                        R.style.SlowDialog);
+                builder.setTitle("This is a title");
+                builder.show();
+                return true;
+            }
+        });
+        return true;
     }
 
     @Override
