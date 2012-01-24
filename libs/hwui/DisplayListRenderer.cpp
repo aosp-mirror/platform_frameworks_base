@@ -67,6 +67,8 @@ const char* DisplayList::OP_NAMES[] = {
     "SetupColorFilter",
     "ResetShadow",
     "SetupShadow",
+    "ResetPaintFilter",
+    "SetupPaintFilter",
     "DrawGLFunction"
 };
 
@@ -249,7 +251,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 int flags = getInt();
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p, 0x%x", (char*) indent,
                     OP_NAMES[op], f1, f2, f3, f4, paint, flags);
@@ -322,7 +324,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 Layer* layer = (Layer*) getInt();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     layer, x, y, paint);
             }
@@ -331,7 +333,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 SkBitmap* bitmap = getBitmap();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     bitmap, x, y, paint);
             }
@@ -339,7 +341,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
             case DrawBitmapMatrix: {
                 SkBitmap* bitmap = getBitmap();
                 SkMatrix* matrix = getMatrix();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %p, %p", (char*) indent, OP_NAMES[op],
                     bitmap, matrix, paint);
             }
@@ -354,7 +356,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f6 = getFloat();
                 float f7 = getFloat();
                 float f8 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
             }
@@ -368,7 +370,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float* vertices = getFloats(verticesCount);
                 bool hasColors = getInt();
                 int* colors = hasColors ? getInts(colorsCount) : NULL;
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
             break;
@@ -387,7 +389,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float top = getFloat();
                 float right = getFloat();
                 float bottom = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f", (char*) indent, OP_NAMES[op],
                         left, top, right, bottom);
             }
@@ -403,7 +405,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     f1, f2, f3, f4, paint);
             }
@@ -415,7 +417,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f4 = getFloat();
                 float f5 = getFloat();
                 float f6 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, paint);
             }
@@ -424,7 +426,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f1 = getFloat();
                 float f2 = getFloat();
                 float f3 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, paint);
             }
@@ -434,7 +436,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, paint);
             }
@@ -447,28 +449,28 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 float f5 = getFloat();
                 float f6 = getFloat();
                 int i1 = getInt();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %d, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, i1, paint);
             }
             break;
             case DrawPath: {
                 SkPath* path = getPath();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %p, %p", (char*) indent, OP_NAMES[op], path, paint);
             }
             break;
             case DrawLines: {
                 int count = 0;
                 float* points = getFloats(count);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
             break;
             case DrawPoints: {
                 int count = 0;
                 float* points = getFloats(count);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
             }
             break;
@@ -477,7 +479,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 int count = getInt();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 float length = getFloat();
                 ALOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent, OP_NAMES[op],
                     text.text(), text.length(), count, x, y, paint, length);
@@ -488,7 +490,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 int count = getInt();
                 int positionsCount = 0;
                 float* positions = getFloats(positionsCount);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 ALOGD("%s%s %s, %d, %d, %p", (char*) indent, OP_NAMES[op],
                     text.text(), text.length(), count, paint);
             }
@@ -521,6 +523,16 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
                 int color = getInt();
                 ALOGD("%s%s %.2f, %.2f, %.2f, 0x%x", (char*) indent, OP_NAMES[op],
                     radius, dx, dy, color);
+            }
+            break;
+            case ResetPaintFilter: {
+                ALOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case SetupPaintFilter: {
+                int clearBits = getInt();
+                int setBits = getInt();
+                ALOGD("%s%s 0x%x, 0x%x", (char*) indent, OP_NAMES[op], clearBits, setBits);
             }
             break;
             default:
@@ -588,7 +600,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 int flags = getInt();
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p, 0x%x", (char*) indent,
                     OP_NAMES[op], f1, f2, f3, f4, paint, flags);
@@ -671,7 +683,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 Layer* layer = (Layer*) getInt();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     layer, x, y, paint);
                 renderer.drawLayer(layer, x, y, paint);
@@ -681,7 +693,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 SkBitmap* bitmap = getBitmap();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     bitmap, x, y, paint);
                 renderer.drawBitmap(bitmap, x, y, paint);
@@ -690,7 +702,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             case DrawBitmapMatrix: {
                 SkBitmap* bitmap = getBitmap();
                 SkMatrix* matrix = getMatrix();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %p, %p", (char*) indent, OP_NAMES[op],
                     bitmap, matrix, paint);
                 renderer.drawBitmap(bitmap, matrix, paint);
@@ -706,7 +718,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f6 = getFloat();
                 float f7 = getFloat();
                 float f8 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
                 renderer.drawBitmap(bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
@@ -722,7 +734,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float* vertices = getFloats(verticesCount);
                 bool hasColors = getInt();
                 int* colors = hasColors ? getInts(colorsCount) : NULL;
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
 
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, paint);
@@ -746,7 +758,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float top = getFloat();
                 float right = getFloat();
                 float bottom = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
 
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawPatch(bitmap, xDivs, yDivs, colors, xDivsCount, yDivsCount,
@@ -765,7 +777,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
                     f1, f2, f3, f4, paint);
                 renderer.drawRect(f1, f2, f3, f4, paint);
@@ -778,7 +790,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f4 = getFloat();
                 float f5 = getFloat();
                 float f6 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, paint);
                 renderer.drawRoundRect(f1, f2, f3, f4, f5, f6, paint);
@@ -788,7 +800,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f1 = getFloat();
                 float f2 = getFloat();
                 float f3 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, paint);
                 renderer.drawCircle(f1, f2, f3, paint);
@@ -799,7 +811,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f2 = getFloat();
                 float f3 = getFloat();
                 float f4 = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, paint);
                 renderer.drawOval(f1, f2, f3, f4, paint);
@@ -813,7 +825,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float f5 = getFloat();
                 float f6 = getFloat();
                 int i1 = getInt();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %d, %p",
                     (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, i1, paint);
                 renderer.drawArc(f1, f2, f3, f4, f5, f6, i1 == 1, paint);
@@ -821,7 +833,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             break;
             case DrawPath: {
                 SkPath* path = getPath();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %p, %p", (char*) indent, OP_NAMES[op], path, paint);
                 renderer.drawPath(path, paint);
             }
@@ -829,7 +841,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             case DrawLines: {
                 int count = 0;
                 float* points = getFloats(count);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawLines(points, count, paint);
             }
@@ -837,7 +849,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             case DrawPoints: {
                 int count = 0;
                 float* points = getFloats(count);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawPoints(points, count, paint);
             }
@@ -847,7 +859,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 int count = getInt();
                 float x = getFloat();
                 float y = getFloat();
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 float length = getFloat();
                 DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p, %.2f", (char*) indent,
                         OP_NAMES[op], text.text(), text.length(), count, x, y, paint, length);
@@ -859,7 +871,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 int count = getInt();
                 int positionsCount = 0;
                 float* positions = getFloats(positionsCount);
-                SkPaint* paint = getPaint();
+                SkPaint* paint = getPaint(renderer);
                 DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %p", (char*) indent,
                         OP_NAMES[op], text.text(), text.length(), count, paint);
                 renderer.drawPosText(text.text(), text.length(), count, positions, paint);
@@ -900,6 +912,19 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, 0x%x", (char*) indent, OP_NAMES[op],
                     radius, dx, dy, color);
                 renderer.setupShadow(radius, dx, dy, color);
+            }
+            break;
+            case ResetPaintFilter: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+                renderer.resetPaintFilter();
+            }
+            break;
+            case SetupPaintFilter: {
+                int clearBits = getInt();
+                int setBits = getInt();
+                DISPLAY_LIST_LOGD("%s%s 0x%x, 0x%x", (char*) indent, OP_NAMES[op],
+                        clearBits, setBits);
+                renderer.setupPaintFilter(clearBits, setBits);
             }
             break;
             default:
@@ -1275,6 +1300,16 @@ void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int colo
     addFloat(radius);
     addPoint(dx, dy);
     addInt(color);
+}
+
+void DisplayListRenderer::resetPaintFilter() {
+    addOp(DisplayList::ResetPaintFilter);
+}
+
+void DisplayListRenderer::setupPaintFilter(int clearBits, int setBits) {
+    addOp(DisplayList::SetupPaintFilter);
+    addInt(clearBits);
+    addInt(setBits);
 }
 
 }; // namespace uirenderer

@@ -325,9 +325,6 @@ changed.</li>
 
         <li>{@link android.graphics.Canvas#drawBitmapMesh drawBitmapMesh()}: colors array is
         ignored</li>
-
-        <li>{@link android.graphics.Canvas#setDrawFilter setDrawFilter()}: can be set, but is
-        ignored</li>
       </ul>
     </li>
 
