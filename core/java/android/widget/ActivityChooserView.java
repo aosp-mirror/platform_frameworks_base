@@ -545,6 +545,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                         position = mAdapter.getShowDefaultActivity() ? position : position + 1;
                         Intent launchIntent = mAdapter.getDataModel().chooseActivity(position);
                         if (launchIntent != null) {
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                             mContext.startActivity(launchIntent);
                         }
                     }
@@ -562,6 +563,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                 final int index = mAdapter.getDataModel().getActivityIndex(defaultActivity);
                 Intent launchIntent = mAdapter.getDataModel().chooseActivity(index);
                 if (launchIntent != null) {
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                     mContext.startActivity(launchIntent);
                 }
             } else if (view == mExpandActivityOverflowButton) {
