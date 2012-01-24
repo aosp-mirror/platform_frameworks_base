@@ -18,6 +18,7 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkIdentity.scrubSubscriberId;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
@@ -231,10 +232,13 @@ public class NetworkTemplate implements Parcelable {
      * Check if matches Wi-Fi network template.
      */
     private boolean matchesWifi(NetworkIdentity ident) {
-        if (ident.mType == TYPE_WIFI) {
-            return true;
+        switch (ident.mType) {
+            case TYPE_WIFI:
+            case TYPE_WIFI_P2P:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     /**
