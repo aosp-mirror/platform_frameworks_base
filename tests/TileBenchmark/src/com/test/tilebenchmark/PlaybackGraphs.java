@@ -80,7 +80,7 @@ public class PlaybackGraphs {
                     for (int tileID = 1; tileID < frame.length; tileID++) {
                         TileData data = frame[tileID];
                         double coverage = viewportCoverage(frame[0], data);
-                        total += coverage * (data.isReady ? 1 : 0);
+                        total += coverage * (data.isReady ? 100 : 0);
                         totalCount += coverage;
                     }
                     if (totalCount == 0) {
@@ -91,7 +91,7 @@ public class PlaybackGraphs {
 
                 @Override
                 public double getMax() {
-                    return 1;
+                    return 100;
                 }
 
                 @Override
@@ -108,6 +108,9 @@ public class PlaybackGraphs {
     }
 
     public static double getPercentile(double sortedValues[], double ratioAbove) {
+        if (sortedValues.length == 0)
+            return -1;
+
         double index = ratioAbove * (sortedValues.length - 1);
         int intIndex = (int) Math.floor(index);
         if (index == intIndex) {
@@ -116,6 +119,31 @@ public class PlaybackGraphs {
         double alpha = index - intIndex;
         return sortedValues[intIndex] * (1 - alpha)
                 + sortedValues[intIndex + 1] * (alpha);
+    }
+
+    public static double getMean(double sortedValues[]) {
+        if (sortedValues.length == 0)
+            return -1;
+
+        double agg = 0;
+        for (double val : sortedValues) {
+            agg += val;
+        }
+        return agg / sortedValues.length;
+    }
+
+    public static double getStdDev(double sortedValues[]) {
+        if (sortedValues.length == 0)
+            return -1;
+
+        double agg = 0;
+        double sqrAgg = 0;
+        for (double val : sortedValues) {
+            agg += val;
+            sqrAgg += val*val;
+        }
+        double mean = agg / sortedValues.length;
+        return Math.sqrt((sqrAgg / sortedValues.length) - (mean * mean));
     }
 
     protected static StatGen[] Stats = new StatGen[] {
@@ -149,6 +177,26 @@ public class PlaybackGraphs {
                 public int getLabelId() {
                     return R.string.percentile_75;
                 }
+            }, new StatGen() {
+                @Override
+                public double getValue(double[] sortedValues) {
+                    return getStdDev(sortedValues);
+                }
+
+                @Override
+                public int getLabelId() {
+                    return R.string.std_dev;
+                }
+            }, new StatGen() {
+                @Override
+                public double getValue(double[] sortedValues) {
+                    return getMean(sortedValues);
+                }
+
+                @Override
+                public int getLabelId() {
+                    return R.string.mean;
+                }
             },
     };
 
@@ -159,40 +207,47 @@ public class PlaybackGraphs {
     }
 
     private ArrayList<ShapeDrawable> mShapes = new ArrayList<ShapeDrawable>();
-    protected double[][] mStats = new double[Metrics.length][Stats.length];
+    protected final double[][] mStats = new double[Metrics.length][Stats.length];
     protected HashMap<String, Double> mSingleStats;
+
+    private void gatherFrameMetric(int metricIndex, double metricValues[], RunData data) {
+        // create graph out of rectangles, one per frame
+        int lastBar = 0;
+        for (int frameIndex = 0; frameIndex < data.frames.length; frameIndex++) {
+            TileData frame[] = data.frames[frameIndex];
+            int newBar = (frame[0].top + frame[0].bottom) / 2;
+
+            MetricGen s = Metrics[metricIndex];
+            double absoluteValue = s.getValue(frame);
+            double relativeValue = absoluteValue / s.getMax();
+            relativeValue = Math.min(1,relativeValue);
+            relativeValue = Math.max(0,relativeValue);
+            int rightPos = (int) (-BAR_WIDTH * metricIndex);
+            int leftPos = (int) (-BAR_WIDTH * (metricIndex + relativeValue));
+
+            ShapeDrawable graphBar = new ShapeDrawable();
+            graphBar.getPaint().setColor(Color.BLUE);
+            graphBar.setBounds(leftPos, lastBar, rightPos, newBar);
+
+            mShapes.add(graphBar);
+            metricValues[frameIndex] = absoluteValue;
+            lastBar = newBar;
+        }
+    }
 
     public void setData(RunData data) {
         mShapes.clear();
         double metricValues[] = new double[data.frames.length];
+
+        mSingleStats = data.singleStats;
 
         if (data.frames.length == 0) {
             return;
         }
 
         for (int metricIndex = 0; metricIndex < Metrics.length; metricIndex++) {
-            // create graph out of rectangles, one per frame
-            int lastBar = 0;
-            for (int frameIndex = 0; frameIndex < data.frames.length; frameIndex++) {
-                TileData frame[] = data.frames[frameIndex];
-                int newBar = (frame[0].top + frame[0].bottom) / 2;
-
-                MetricGen s = Metrics[metricIndex];
-                double absoluteValue = s.getValue(frame);
-                double relativeValue = absoluteValue / s.getMax();
-                relativeValue = Math.min(1,relativeValue);
-                relativeValue = Math.max(0,relativeValue);
-                int rightPos = (int) (-BAR_WIDTH * metricIndex);
-                int leftPos = (int) (-BAR_WIDTH * (metricIndex + relativeValue));
-
-                ShapeDrawable graphBar = new ShapeDrawable();
-                graphBar.getPaint().setColor(Color.BLUE);
-                graphBar.setBounds(leftPos, lastBar, rightPos, newBar);
-
-                mShapes.add(graphBar);
-                metricValues[frameIndex] = absoluteValue;
-                lastBar = newBar;
-            }
+            // calculate metric based on list of frames
+            gatherFrameMetric(metricIndex, metricValues, data);
 
             // store aggregate statistics per metric (median, and similar)
             Arrays.sort(metricValues);
@@ -200,8 +255,6 @@ public class PlaybackGraphs {
                 mStats[metricIndex][statIndex] =
                         Stats[statIndex].getValue(metricValues);
             }
-
-            mSingleStats = data.singleStats;
         }
     }
 
