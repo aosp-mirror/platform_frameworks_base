@@ -21,6 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.AttributeSet;
@@ -62,6 +64,35 @@ public class NavigationBarView extends LinearLayout {
 
     boolean mHidden, mLowProfile, mShowMenu;
     int mDisabledFlags = 0;
+
+    // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
+    final static boolean WORKAROUND_INVALID_LAYOUT = true;
+    final static int MSG_CHECK_INVALID_LAYOUT = 8686;
+
+    private class H extends Handler {
+        public void handleMessage(Message m) {
+            switch (m.what) {
+                case MSG_CHECK_INVALID_LAYOUT:
+                    final String how = "" + m.obj;
+                    final int w = getWidth();
+                    final int h = getHeight();
+                    final int vw = mCurrentView.getWidth();
+                    final int vh = mCurrentView.getHeight();
+
+                    if (h != vh || w != vw) {
+                        Slog.w(TAG, String.format(
+                            "*** Invalid layout in navigation bar (%s this=%dx%d cur=%dx%d)",
+                            how, w, h, vw, vh));
+                        if (WORKAROUND_INVALID_LAYOUT) {
+                            requestLayout();
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    private H mHandler = new H();
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -249,6 +280,36 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (DEBUG) Slog.d(TAG, String.format(
+                    "onSizeChanged: (%dx%d) old: (%dx%d)", w, h, oldw, oldh));
+        postCheckForInvalidLayout("sizeChanged");
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
+
+    /*
+    @Override
+    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
+        if (DEBUG) Slog.d(TAG, String.format(
+                    "onLayout: %s (%d,%d,%d,%d)", 
+                    changed?"changed":"notchanged", left, top, right, bottom));
+        super.onLayout(changed, left, top, right, bottom);
+    }
+
+    // uncomment this for extra defensiveness in WORKAROUND_INVALID_LAYOUT situations: if all else
+    // fails, any touch on the display will fix the layout.
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (DEBUG) Slog.d(TAG, "onInterceptTouchEvent: " + ev.toString());
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            postCheckForInvalidLayout("touch");
+        }
+        return super.onInterceptTouchEvent(ev);
+    }
+    */
+        
+
     private String getResourceName(int resId) {
         if (resId != 0) {
             final android.content.res.Resources res = mContext.getResources();
@@ -260,6 +321,10 @@ public class NavigationBarView extends LinearLayout {
         } else {
             return "(null)";
         }
+    }
+
+    private void postCheckForInvalidLayout(final String how) {
+        mHandler.obtainMessage(MSG_CHECK_INVALID_LAYOUT, 0, 0, how).sendToTarget();
     }
 
     private static String visibilityToString(int vis) {
