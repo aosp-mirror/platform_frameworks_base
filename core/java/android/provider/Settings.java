@@ -4111,17 +4111,38 @@ public final class Settings {
         /** {@hide} */
         public static final String NETSTATS_POLL_INTERVAL = "netstats_poll_interval";
         /** {@hide} */
-        public static final String NETSTATS_PERSIST_THRESHOLD = "netstats_persist_threshold";
+        public static final String NETSTATS_TIME_CACHE_MAX_AGE = "netstats_time_cache_max_age";
         /** {@hide} */
-        public static final String NETSTATS_NETWORK_BUCKET_DURATION = "netstats_network_bucket_duration";
+        public static final String NETSTATS_GLOBAL_ALERT_BYTES = "netstats_global_alert_bytes";
         /** {@hide} */
-        public static final String NETSTATS_NETWORK_MAX_HISTORY = "netstats_network_max_history";
+        public static final String NETSTATS_SAMPLE_ENABLED = "netstats_sample_enabled";
+
+        /** {@hide} */
+        public static final String NETSTATS_DEV_BUCKET_DURATION = "netstats_dev_bucket_duration";
+        /** {@hide} */
+        public static final String NETSTATS_DEV_PERSIST_BYTES = "netstats_dev_persist_bytes";
+        /** {@hide} */
+        public static final String NETSTATS_DEV_ROTATE_AGE = "netstats_dev_rotate_age";
+        /** {@hide} */
+        public static final String NETSTATS_DEV_DELETE_AGE = "netstats_dev_delete_age";
+
         /** {@hide} */
         public static final String NETSTATS_UID_BUCKET_DURATION = "netstats_uid_bucket_duration";
         /** {@hide} */
-        public static final String NETSTATS_UID_MAX_HISTORY = "netstats_uid_max_history";
+        public static final String NETSTATS_UID_PERSIST_BYTES = "netstats_uid_persist_bytes";
         /** {@hide} */
-        public static final String NETSTATS_TAG_MAX_HISTORY = "netstats_tag_max_history";
+        public static final String NETSTATS_UID_ROTATE_AGE = "netstats_uid_rotate_age";
+        /** {@hide} */
+        public static final String NETSTATS_UID_DELETE_AGE = "netstats_uid_delete_age";
+
+        /** {@hide} */
+        public static final String NETSTATS_UID_TAG_BUCKET_DURATION = "netstats_uid_tag_bucket_duration";
+        /** {@hide} */
+        public static final String NETSTATS_UID_TAG_PERSIST_BYTES = "netstats_uid_tag_persist_bytes";
+        /** {@hide} */
+        public static final String NETSTATS_UID_TAG_ROTATE_AGE = "netstats_uid_tag_rotate_age";
+        /** {@hide} */
+        public static final String NETSTATS_UID_TAG_DELETE_AGE = "netstats_uid_tag_delete_age";
 
         /** Preferred NTP server. {@hide} */
         public static final String NTP_SERVER = "ntp_server";

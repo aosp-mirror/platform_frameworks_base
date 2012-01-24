@@ -1573,6 +1573,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
         try {
             return mNetworkStats.getSummaryForNetwork(template, start, end).getTotalBytes();
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "problem reading network stats: " + e);
+            return 0;
         } catch (RemoteException e) {
             // ignored; service lives in system_server
             return 0;

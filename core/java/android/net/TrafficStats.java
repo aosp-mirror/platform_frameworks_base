@@ -195,7 +195,7 @@ public class TrafficStats {
             // subtract starting values and return delta
             final NetworkStats profilingStop = getDataLayerSnapshotForUid(context);
             final NetworkStats profilingDelta = NetworkStats.subtract(
-                    profilingStop, sActiveProfilingStart, null);
+                    profilingStop, sActiveProfilingStart, null, null);
             sActiveProfilingStart = null;
             return profilingDelta;
         }

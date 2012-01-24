@@ -26,16 +26,18 @@ import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLongArray;
 import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
+import static com.android.internal.util.ArrayUtils.total;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.MathUtils;
 
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.io.CharArrayWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.Random;
@@ -74,6 +76,7 @@ public class NetworkStatsHistory implements Parcelable {
     private long[] txBytes;
     private long[] txPackets;
     private long[] operations;
+    private long totalBytes;
 
     public static class Entry {
         public static final long UNKNOWN = -1;
@@ -106,6 +109,12 @@ public class NetworkStatsHistory implements Parcelable {
         if ((fields & FIELD_TX_PACKETS) != 0) txPackets = new long[initialSize];
         if ((fields & FIELD_OPERATIONS) != 0) operations = new long[initialSize];
         bucketCount = 0;
+        totalBytes = 0;
+    }
+
+    public NetworkStatsHistory(NetworkStatsHistory existing, long bucketDuration) {
+        this(bucketDuration, existing.estimateResizeBuckets(bucketDuration));
+        recordEntireHistory(existing);
     }
 
     public NetworkStatsHistory(Parcel in) {
@@ -118,6 +127,7 @@ public class NetworkStatsHistory implements Parcelable {
         txPackets = readLongArray(in);
         operations = readLongArray(in);
         bucketCount = bucketStart.length;
+        totalBytes = in.readLong();
     }
 
     /** {@inheritDoc} */
@@ -130,6 +140,7 @@ public class NetworkStatsHistory implements Parcelable {
         writeLongArray(out, txBytes, bucketCount);
         writeLongArray(out, txPackets, bucketCount);
         writeLongArray(out, operations, bucketCount);
+        out.writeLong(totalBytes);
     }
 
     public NetworkStatsHistory(DataInputStream in) throws IOException {
@@ -144,6 +155,7 @@ public class NetworkStatsHistory implements Parcelable {
                 txPackets = new long[bucketStart.length];
                 operations = new long[bucketStart.length];
                 bucketCount = bucketStart.length;
+                totalBytes = total(rxBytes) + total(txBytes);
                 break;
             }
             case VERSION_ADD_PACKETS:
@@ -158,6 +170,7 @@ public class NetworkStatsHistory implements Parcelable {
                 txPackets = readVarLongArray(in);
                 operations = readVarLongArray(in);
                 bucketCount = bucketStart.length;
+                totalBytes = total(rxBytes) + total(txBytes);
                 break;
             }
             default: {
@@ -205,6 +218,13 @@ public class NetworkStatsHistory implements Parcelable {
         } else {
             return Long.MIN_VALUE;
         }
+    }
+
+    /**
+     * Return total bytes represented by this history.
+     */
+    public long getTotalBytes() {
+        return totalBytes;
     }
 
     /**
@@ -266,13 +286,16 @@ public class NetworkStatsHistory implements Parcelable {
      * distribute across internal buckets, creating new buckets as needed.
      */
     public void recordData(long start, long end, NetworkStats.Entry entry) {
-        if (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0 || entry.txPackets < 0
-                || entry.operations < 0) {
+        long rxBytes = entry.rxBytes;
+        long rxPackets = entry.rxPackets;
+        long txBytes = entry.txBytes;
+        long txPackets = entry.txPackets;
+        long operations = entry.operations;
+
+        if (entry.isNegative()) {
             throw new IllegalArgumentException("tried recording negative data");
         }
-        if (entry.rxBytes == 0 && entry.rxPackets == 0 && entry.txBytes == 0 && entry.txPackets == 0
-                && entry.operations == 0) {
-            // nothing to record; skip
+        if (entry.isEmpty()) {
             return;
         }
 
@@ -295,21 +318,23 @@ public class NetworkStatsHistory implements Parcelable {
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            final long fracRxBytes = entry.rxBytes * overlap / duration;
-            final long fracRxPackets = entry.rxPackets * overlap / duration;
-            final long fracTxBytes = entry.txBytes * overlap / duration;
-            final long fracTxPackets = entry.txPackets * overlap / duration;
-            final long fracOperations = entry.operations * overlap / duration;
+            final long fracRxBytes = rxBytes * overlap / duration;
+            final long fracRxPackets = rxPackets * overlap / duration;
+            final long fracTxBytes = txBytes * overlap / duration;
+            final long fracTxPackets = txPackets * overlap / duration;
+            final long fracOperations = operations * overlap / duration;
 
             addLong(activeTime, i, overlap);
-            addLong(rxBytes, i, fracRxBytes); entry.rxBytes -= fracRxBytes;
-            addLong(rxPackets, i, fracRxPackets); entry.rxPackets -= fracRxPackets;
-            addLong(txBytes, i, fracTxBytes); entry.txBytes -= fracTxBytes;
-            addLong(txPackets, i, fracTxPackets); entry.txPackets -= fracTxPackets;
-            addLong(operations, i, fracOperations); entry.operations -= fracOperations;
+            addLong(this.rxBytes, i, fracRxBytes); rxBytes -= fracRxBytes;
+            addLong(this.rxPackets, i, fracRxPackets); rxPackets -= fracRxPackets;
+            addLong(this.txBytes, i, fracTxBytes); txBytes -= fracTxBytes;
+            addLong(this.txPackets, i, fracTxPackets); txPackets -= fracTxPackets;
+            addLong(this.operations, i, fracOperations); operations -= fracOperations;
 
             duration -= overlap;
         }
+
+        totalBytes += entry.rxBytes + entry.txBytes;
     }
 
     /**
@@ -394,6 +419,7 @@ public class NetworkStatsHistory implements Parcelable {
     /**
      * Remove buckets older than requested cutoff.
      */
+    @Deprecated
     public void removeBucketsBefore(long cutoff) {
         int i;
         for (i = 0; i < bucketCount; i++) {
@@ -415,6 +441,8 @@ public class NetworkStatsHistory implements Parcelable {
             if (txPackets != null) txPackets = Arrays.copyOfRange(txPackets, i, length);
             if (operations != null) operations = Arrays.copyOfRange(operations, i, length);
             bucketCount -= i;
+
+            // TODO: subtract removed values from totalBytes
         }
     }
 
@@ -527,19 +555,17 @@ public class NetworkStatsHistory implements Parcelable {
         return (long) (start + (r.nextFloat() * (end - start)));
     }
 
-    public void dump(String prefix, PrintWriter pw, boolean fullHistory) {
-        pw.print(prefix);
+    public void dump(IndentingPrintWriter pw, boolean fullHistory) {
         pw.print("NetworkStatsHistory: bucketDuration="); pw.println(bucketDuration);
+        pw.increaseIndent();
 
         final int start = fullHistory ? 0 : Math.max(0, bucketCount - 32);
         if (start > 0) {
-            pw.print(prefix);
-            pw.print("  (omitting "); pw.print(start); pw.println(" buckets)");
+            pw.print("(omitting "); pw.print(start); pw.println(" buckets)");
         }
 
         for (int i = start; i < bucketCount; i++) {
-            pw.print(prefix);
-            pw.print("  bucketStart="); pw.print(bucketStart[i]);
+            pw.print("bucketStart="); pw.print(bucketStart[i]);
             if (activeTime != null) { pw.print(" activeTime="); pw.print(activeTime[i]); }
             if (rxBytes != null) { pw.print(" rxBytes="); pw.print(rxBytes[i]); }
             if (rxPackets != null) { pw.print(" rxPackets="); pw.print(rxPackets[i]); }
@@ -548,12 +574,14 @@ public class NetworkStatsHistory implements Parcelable {
             if (operations != null) { pw.print(" operations="); pw.print(operations[i]); }
             pw.println();
         }
+
+        pw.decreaseIndent();
     }
 
     @Override
     public String toString() {
         final CharArrayWriter writer = new CharArrayWriter();
-        dump("", new PrintWriter(writer), false);
+        dump(new IndentingPrintWriter(writer, "  "), false);
         return writer.toString();
     }
 
@@ -577,6 +605,10 @@ public class NetworkStatsHistory implements Parcelable {
 
     private static void addLong(long[] array, int i, long value) {
         if (array != null) array[i] += value;
+    }
+
+    public int estimateResizeBuckets(long newBucketDuration) {
+        return (int) (size() * getBucketDuration() / newBucketDuration);
     }
 
     /**
