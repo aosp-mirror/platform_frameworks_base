@@ -111,6 +111,7 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     mShader = NULL;
     mColorFilter = NULL;
     mHasShadow = false;
+    mHasDrawFilter = false;
 
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
@@ -2396,6 +2397,31 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
     mShadowDx = dx;
     mShadowDy = dy;
     mShadowColor = color;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Draw filters
+///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::resetPaintFilter() {
+    mHasDrawFilter = false;
+}
+
+void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
+    mHasDrawFilter = true;
+    mPaintFilterClearBits = clearBits & SkPaint::kAllFlags;
+    mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
+}
+
+SkPaint* OpenGLRenderer::filterPaint(SkPaint* paint) {
+    if (!mHasDrawFilter || !paint) return paint;
+
+    uint32_t flags = paint->getFlags();
+
+    mFilteredPaint = *paint;
+    mFilteredPaint.setFlags((flags & ~mPaintFilterClearBits) | mPaintFilterSetBits);
+
+    return &mFilteredPaint;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

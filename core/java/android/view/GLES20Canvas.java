@@ -22,6 +22,7 @@ import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.PorterDuff;
@@ -546,6 +547,7 @@ class GLES20Canvas extends HardwareCanvas {
     
     private static native void nSetMatrix(int renderer, int matrix);
 
+    @SuppressWarnings("deprecation")
     @Override
     public void getMatrix(Matrix matrix) {
         nGetMatrix(mRenderer, matrix.native_instance);
@@ -658,7 +660,16 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void setDrawFilter(DrawFilter filter) {
         mFilter = filter;
+        if (filter == null) {
+            nResetPaintFilter(mRenderer);
+        } else if (filter instanceof PaintFlagsDrawFilter) {
+            PaintFlagsDrawFilter flagsFilter = (PaintFlagsDrawFilter) filter;
+            nSetupPaintFilter(mRenderer, flagsFilter.clearBits, flagsFilter.setBits);
+        }
     }
+
+    private static native void nResetPaintFilter(int renderer);
+    private static native void nSetupPaintFilter(int renderer, int clearBits, int setBits);
 
     @Override
     public DrawFilter getDrawFilter() {
@@ -968,6 +979,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDrawPoints(int renderer, float[] points,
             int offset, int count, int paint);
 
+    @SuppressWarnings("deprecation")
     @Override
     public void drawPosText(char[] text, int index, int count, float[] pos, Paint paint) {
         if (index < 0 || index + count > text.length || count * 2 > pos.length) {
@@ -985,6 +997,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDrawPosText(int renderer, char[] text, int index, int count,
             float[] pos, int paint);
 
+    @SuppressWarnings("deprecation")
     @Override
     public void drawPosText(String text, float[] pos, Paint paint) {
         if (text.length() * 2 > pos.length) {

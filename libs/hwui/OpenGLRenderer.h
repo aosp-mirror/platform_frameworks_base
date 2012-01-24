@@ -136,6 +136,11 @@ public:
     virtual void resetShadow();
     virtual void setupShadow(float radius, float dx, float dy, int color);
 
+    virtual void resetPaintFilter();
+    virtual void setupPaintFilter(int clearBits, int setBits);
+
+    SkPaint* filterPaint(SkPaint* paint);
+
 protected:
     /**
      * Compose the layer defined in the current snapshot with the layer
@@ -580,6 +585,12 @@ private:
     float mShadowDx;
     float mShadowDy;
     int mShadowColor;
+
+    // Draw filters
+    bool mHasDrawFilter;
+    int mPaintFilterClearBits;
+    int mPaintFilterSetBits;
+    SkPaint mFilteredPaint;
 
     // Various caches
     Caches& mCaches;

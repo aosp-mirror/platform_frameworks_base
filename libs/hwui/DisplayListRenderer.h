@@ -103,6 +103,8 @@ public:
         SetupColorFilter,
         ResetShadow,
         SetupShadow,
+        ResetPaintFilter,
+        SetupPaintFilter,
         DrawGLFunction,
     };
 
@@ -177,8 +179,8 @@ private:
         return (SkPath*) getInt();
     }
 
-    SkPaint* getPaint() {
-        return (SkPaint*) getInt();
+    SkPaint* getPaint(OpenGLRenderer& renderer) {
+        return renderer.filterPaint((SkPaint*) getInt());
     }
 
     DisplayList* getDisplayList() {
@@ -303,6 +305,9 @@ public:
 
     virtual void resetShadow();
     virtual void setupShadow(float radius, float dx, float dy, int color);
+
+    virtual void resetPaintFilter();
+    virtual void setupPaintFilter(int clearBits, int setBits);
 
     ANDROID_API void reset();
 

@@ -31,6 +31,15 @@
         android:hardwareAccelerated="true">
 
         <activity
+                android:name="PaintDrawFilterActivity"
+                android:label="_DrawFilter">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
                 android:name="DisplayListLayersActivity"
                 android:label="__DisplayListLayers">
             <intent-filter>

@@ -483,6 +483,20 @@ static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
 }
 
 // ----------------------------------------------------------------------------
+// Draw filters
+// ----------------------------------------------------------------------------
+
+static void android_view_GLES20Canvas_setupPaintFilter(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jint clearBits, jint setBits) {
+    renderer->setupPaintFilter(clearBits, setBits);
+}
+
+static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer) {
+    renderer->resetPaintFilter();
+}
+
+// ----------------------------------------------------------------------------
 // Text
 // ----------------------------------------------------------------------------
 
@@ -869,6 +883,9 @@ static JNINativeMethod gMethods[] = {
     { "nSetupShader",       "(II)V",           (void*) android_view_GLES20Canvas_setupShader },
     { "nSetupColorFilter",  "(II)V",           (void*) android_view_GLES20Canvas_setupColorFilter },
     { "nSetupShadow",       "(IFFFI)V",        (void*) android_view_GLES20Canvas_setupShadow },
+
+    { "nSetupPaintFilter",  "(III)V",          (void*) android_view_GLES20Canvas_setupPaintFilter },
+    { "nResetPaintFilter",  "(I)V",            (void*) android_view_GLES20Canvas_resetPaintFilter },
 
     { "nDrawText",          "(I[CIIFFII)V",    (void*) android_view_GLES20Canvas_drawTextArray },
     { "nDrawText",          "(ILjava/lang/String;IIFFII)V",
