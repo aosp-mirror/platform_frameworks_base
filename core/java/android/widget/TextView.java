@@ -8386,10 +8386,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (touchIsFinished && (isTextEditable() || mTextIsSelectable)) {
-                // Move cursor
-                final int offset = getOffsetForPosition(event.getX(), event.getY());
-                Selection.setSelection((Spannable) mText, offset);
-
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
@@ -8416,6 +8412,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             postDelayed(mShowSuggestionRunnable,
                                     ViewConfiguration.getDoubleTapTimeout());
                         } else if (hasInsertionController()) {
+                            // Move cursor
+                            final int offset = getOffsetForPosition(event.getX(), event.getY());
+                            Selection.setSelection((Spannable) mText, offset);
                             getInsertionController().show();
                         }
                     }
