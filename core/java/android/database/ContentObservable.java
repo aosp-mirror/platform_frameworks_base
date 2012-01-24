@@ -16,6 +16,8 @@
 
 package android.database;
 
+import android.net.Uri;
+
 /**
  * A specialization of {@link Observable} for {@link ContentObserver}
  * that provides methods for sending notifications to a list of
@@ -31,20 +33,41 @@ public class ContentObservable extends Observable<ContentObserver> {
     }
 
     /**
-     * Invokes {@link ContentObserver#dispatchChange} on each observer.
-     *
+     * Invokes {@link ContentObserver#dispatchChange(boolean)} on each observer.
+     * <p>
      * If <code>selfChange</code> is true, only delivers the notification
      * to the observer if it has indicated that it wants to receive self-change
      * notifications by implementing {@link ContentObserver#deliverSelfNotifications}
      * to return true.
+     * </p>
      *
      * @param selfChange True if this is a self-change notification.
+     *
+     * @deprecated Use {@link #dispatchChange(boolean, Uri)} instead.
      */
+    @Deprecated
     public void dispatchChange(boolean selfChange) {
+        dispatchChange(selfChange, null);
+    }
+
+    /**
+     * Invokes {@link ContentObserver#dispatchChange(boolean, Uri)} on each observer.
+     * Includes the changed content Uri when available.
+     * <p>
+     * If <code>selfChange</code> is true, only delivers the notification
+     * to the observer if it has indicated that it wants to receive self-change
+     * notifications by implementing {@link ContentObserver#deliverSelfNotifications}
+     * to return true.
+     * </p>
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uri The Uri of the changed content, or null if unknown.
+     */
+    public void dispatchChange(boolean selfChange, Uri uri) {
         synchronized(mObservers) {
             for (ContentObserver observer : mObservers) {
                 if (!selfChange || observer.deliverSelfNotifications()) {
-                    observer.dispatchChange(selfChange);
+                    observer.dispatchChange(selfChange, uri);
                 }
             }
         }
@@ -61,7 +84,7 @@ public class ContentObservable extends Observable<ContentObserver> {
     public void notifyChange(boolean selfChange) {
         synchronized(mObservers) {
             for (ContentObserver observer : mObservers) {
-                observer.onChange(selfChange);
+                observer.onChange(selfChange, null);
             }
         }
     }
