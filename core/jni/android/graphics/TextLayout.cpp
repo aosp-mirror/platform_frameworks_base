@@ -53,19 +53,9 @@ bool TextLayout::needsLayout(const jchar* text, jint len, jint bidiFlags) {
 // a path representing the text that would have been drawn.
 void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
                             jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    // Return advances from the cache. Compute them if needed
-    value = TextLayoutCache::getInstance().getValue(paint, text, 0, len,
-            len, bidiFlags);
-#else
-    value = new TextLayoutCacheValue(len);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            reinterpret_cast<const UChar*>(text), 0, len, len, bidiFlags);
-#endif
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, 0, len, len, bidiFlags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text, len).string());
         return ;
     }
     SkScalar x_ = SkFloatToScalar(x);
@@ -77,19 +67,9 @@ void TextLayout::handleText(SkPaint *paint, const jchar* text, jsize len,
 void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                     jint count, jint contextCount, jint dirFlags,
                                     jfloat* resultAdvances, jfloat* resultTotalAdvance) {
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    // Return advances from the cache. Compute them if needed
-    value = TextLayoutCache::getInstance().getValue(paint, chars, start, count,
-            contextCount, dirFlags);
-#else
-    value = new TextLayoutCacheValue(contextCount);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            reinterpret_cast<const UChar*>(chars), start, count, contextCount, dirFlags);
-#endif
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            chars, start, count, contextCount, dirFlags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(chars + start, count).string());
         return ;
     }
     if (resultAdvances) {
@@ -126,20 +106,12 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
         return;
     }
 
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, 0, count,
-            count, bidiFlags);
-#else
-    value = new TextLayoutCacheValue(count);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            reinterpret_cast<const UChar*>(text), 0, count, count, bidiFlags);
-#endif
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, 0, count, count, bidiFlags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text, count).string());
-        return ;
+        return;
     }
+
     // Beware: this needs Glyph encoding (already done on the Paint constructor)
     canvas->drawTextOnPathHV(value->getGlyphs(), value->getGlyphsCount() * 2, *path, h_, v_, *paint);
 }

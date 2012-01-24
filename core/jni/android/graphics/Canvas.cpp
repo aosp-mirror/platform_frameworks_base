@@ -757,20 +757,11 @@ public:
             int start, int count, int contextCount,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
 
-        sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-        value = TextLayoutCache::getInstance().getValue(paint, textArray, start, count,
-                contextCount, flags);
+        sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+                textArray, start, count, contextCount, flags);
         if (value == NULL) {
-            ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                    String8(textArray + start, count).string());
-            return ;
+            return;
         }
-#else
-        value = new TextLayoutCacheValue(contextCount);
-        TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-                reinterpret_cast<const UChar*>(textArray), start, count, contextCount, flags);
-#endif
         doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(), x, y, flags, paint);
     }
 
