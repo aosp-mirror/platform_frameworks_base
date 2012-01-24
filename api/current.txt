@@ -26676,6 +26676,7 @@ package android.widget {
     method public void setOnValueChangedListener(android.widget.NumberPicker.OnValueChangeListener);
     method public void setValue(int);
     method public void setWrapSelectorWheel(boolean);
+    field public static final int SELECTOR_WHEEL_ITEM_COUNT = 5; // 0x5
   }
 
   public static abstract interface NumberPicker.Formatter {
