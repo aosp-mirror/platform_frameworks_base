@@ -142,6 +142,14 @@ public class ArrayUtils
         return false;
     }
 
+    public static long total(long[] array) {
+        long total = 0;
+        for (long value : array) {
+            total += value;
+        }
+        return total;
+    }
+
     /**
      * Appends an element to a copy of the array and returns the copy.
      * @param array The original array, or null to represent an empty array.
