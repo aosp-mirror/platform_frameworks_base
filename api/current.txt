@@ -7785,7 +7785,7 @@ package android.gesture {
 
 package android.graphics {
 
-  public class AvoidXfermode extends android.graphics.Xfermode {
+  public deprecated class AvoidXfermode extends android.graphics.Xfermode {
     ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
   }
 
@@ -8564,7 +8564,7 @@ package android.graphics {
     field public int bytesPerPixel;
   }
 
-  public class PixelXorXfermode extends android.graphics.Xfermode {
+  public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
   }
 
