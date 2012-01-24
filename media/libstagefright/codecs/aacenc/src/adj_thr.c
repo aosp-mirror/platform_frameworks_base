@@ -1039,7 +1039,7 @@ void AdjThrInit(ADJ_THR_STATE *hAdjThr,
 
   /* minSnr adaptation */
   /* maximum reduction of minSnr goes down to minSnr^maxRed */
-  msaParam->maxRed = 0x20000000;     /* *0.25f /
+  msaParam->maxRed = 0x20000000;     /* *0.25f */
   /* start adaptation of minSnr for avgEn/sfbEn > startRatio */
   msaParam->startRatio = 0x0ccccccd; /* 10 */
   /* maximum minSnr reduction to minSnr^maxRed is reached for
