@@ -68,22 +68,13 @@ public class RecentTasksLoader {
 
         // get the icon size we want -- on tablets, we use bigger icons
         boolean isTablet = res.getBoolean(R.bool.config_recents_interface_for_tablets);
-        int density = res.getDisplayMetrics().densityDpi;
         if (isTablet) {
-            if (density == DisplayMetrics.DENSITY_LOW) {
-                mIconDpi = DisplayMetrics.DENSITY_MEDIUM;
-            } else if (density == DisplayMetrics.DENSITY_MEDIUM) {
-                mIconDpi = DisplayMetrics.DENSITY_HIGH;
-            } else if (density == DisplayMetrics.DENSITY_HIGH) {
-                mIconDpi = DisplayMetrics.DENSITY_XHIGH;
-            } else if (density == DisplayMetrics.DENSITY_XHIGH) {
-                // We'll need to use a denser icon, or some sort of a mipmap
-                mIconDpi = DisplayMetrics.DENSITY_XHIGH;
-            }
+            ActivityManager activityManager =
+                    (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            mIconDpi = activityManager.getLauncherLargeIconDensity();
         } else {
             mIconDpi = res.getDisplayMetrics().densityDpi;
         }
-        mIconDpi = isTablet ? DisplayMetrics.DENSITY_HIGH : res.getDisplayMetrics().densityDpi;
 
         // Render the default thumbnail background
         int width = (int) res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
