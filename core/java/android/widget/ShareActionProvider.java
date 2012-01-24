@@ -279,6 +279,7 @@ public class ShareActionProvider extends ActionProvider {
             final int itemId = item.getItemId();
             Intent launchIntent = dataModel.chooseActivity(itemId);
             if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 mContext.startActivity(launchIntent);
             }
             return true;
