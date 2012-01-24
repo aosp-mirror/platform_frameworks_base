@@ -1649,11 +1649,46 @@ public class AudioManager {
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
                     mContext.getPackageName() /* package name */);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocus() from AudioService due to "+e);
+            Log.e(TAG, "Can't call requestAudioFocus() on AudioService due to "+e);
         }
         return status;
     }
 
+    /**
+     * @hide
+     * Used internally by telephony package to request audio focus. Will cause the focus request
+     * to be associated with the "voice communication" identifier only used in AudioService
+     * to identify this use case.
+     * @param streamType use STREAM_RING for focus requests when ringing, VOICE_CALL for
+     *    the establishment of the call
+     * @param durationHint the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
+     *    media applications resume after a call
+     */
+    public void requestAudioFocusForCall(int streamType, int durationHint) {
+        IAudioService service = getService();
+        try {
+            service.requestAudioFocus(streamType, durationHint, mICallBack, null,
+                    AudioService.IN_VOICE_COMM_FOCUS_ID,
+                    "system" /* dump-friendly package name */);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
+        }
+    }
+
+    /**
+     * @hide
+     * Used internally by telephony package to abandon audio focus, typically after a call or
+     * when ringing ends and the call is rejected or not answered.
+     * Should match one or more calls to {@link #requestAudioFocusForCall(int, int)}.
+     */
+    public void abandonAudioFocusForCall() {
+        IAudioService service = getService();
+        try {
+            service.abandonAudioFocus(null, AudioService.IN_VOICE_COMM_FOCUS_ID);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService due to "+e);
+        }
+    }
 
     /**
      *  Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
@@ -1668,7 +1703,7 @@ public class AudioManager {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
                     getIdForAudioFocusListener(l));
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocus() from AudioService due to "+e);
+            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService due to "+e);
         }
         return status;
     }
