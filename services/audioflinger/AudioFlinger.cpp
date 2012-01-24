@@ -1973,11 +1973,14 @@ bool AudioFlinger::MixerThread::threadLoop()
         if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             mAudioMixer->process();
-            sleepTime = 0;
-            // increase sleep time progressively when application underrun condition clears
-            if (sleepTimeShift > 0) {
+            // increase sleep time progressively when application underrun condition clears.
+            // Only increase sleep time if the mixer is ready for two consecutive times to avoid
+            // that a steady state of alternating ready/not ready conditions keeps the sleep time
+            // such that we would underrun the audio HAL.
+            if ((sleepTime == 0) && (sleepTimeShift > 0)) {
                 sleepTimeShift--;
             }
+            sleepTime = 0;
             standbyTime = systemTime() + kStandbyTimeInNsecs;
             //TODO: delay standby when effects have a tail
         } else {
