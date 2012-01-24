@@ -20,21 +20,28 @@ import android.content.Context;
 import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import com.test.tilebenchmark.ProfileActivity.ProfileCallback;
 import com.test.tilebenchmark.RunData.TileData;
 
 public class ProfiledWebView extends WebView {
+    private static final String LOGTAG = "ProfiledWebView";
+
     private int mSpeed;
 
     private boolean mIsTesting = false;
     private boolean mIsScrolling = false;
     private ProfileCallback mCallback;
     private long mContentInvalMillis;
-    private boolean mHadToBeForced = false;
     private static final int LOAD_STALL_MILLIS = 2000; // nr of millis after load,
                                                        // before test is forced
+    private double mLoadTime;
+    private double mAnimationTime;
 
     public ProfiledWebView(Context context) {
         super(context);
@@ -51,6 +58,39 @@ public class ProfiledWebView extends WebView {
     public ProfiledWebView(Context context, AttributeSet attrs, int defStyle,
             boolean privateBrowsing) {
         super(context, attrs, defStyle, privateBrowsing);
+    }
+
+    private class JavaScriptInterface {
+        Context mContext;
+
+        /** Instantiate the interface and set the context */
+        JavaScriptInterface(Context c) {
+            mContext = c;
+        }
+
+        /** Show a toast from the web page */
+        public void animationComplete() {
+            Toast.makeText(mContext, "Animation complete!", Toast.LENGTH_SHORT).show();
+            //Log.d(LOGTAG, "anim complete");
+            mAnimationTime = System.currentTimeMillis();
+        }
+    }
+
+    public void init(Context c) {
+        WebSettings settings = getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setSupportZoom(true);
+        settings.setEnableSmoothTransition(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setProperty("use_minimal_memory", "false"); // prefetch tiles, as browser does
+        addJavascriptInterface(new JavaScriptInterface(c), "Android");
+        mAnimationTime = 0;
+        mLoadTime = 0;
+    }
+
+    public void onPageFinished() {
+        mLoadTime = System.currentTimeMillis();
     }
 
     @Override
@@ -72,9 +112,12 @@ public class ProfiledWebView extends WebView {
      * scrolling, invalidate all content and redraw it, measuring time taken.
      */
     public void startScrollTest(ProfileCallback callback, boolean autoScrolling) {
-        mIsScrolling = autoScrolling;
         mCallback = callback;
         mIsTesting = false;
+        mIsScrolling = false;
+        WebSettings settings = getSettings();
+        settings.setProperty("tree_updates", "0");
+
 
         if (autoScrolling) {
             // after a while, force it to start even if the pages haven't swapped
@@ -86,13 +129,18 @@ public class ProfiledWebView extends WebView {
                 @Override
                 public void onFinish() {
                     // invalidate all content, and kick off redraw
+                    Log.d("ProfiledWebView",
+                            "kicking off test with callback registration, and tile discard...");
                     registerPageSwapCallback();
                     discardAllTextures();
                     invalidate();
-
+                    mIsScrolling = true;
                     mContentInvalMillis = System.currentTimeMillis();
                 }
             }.start();
+        } else {
+            mIsTesting = true;
+            tileProfilingStart();
         }
     }
 
@@ -102,13 +150,35 @@ public class ProfiledWebView extends WebView {
      */
     @Override
     protected void pageSwapCallback(boolean startAnim) {
-        mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
-        super.pageSwapCallback(startAnim);
-        Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis
-                + "millis");
-        mIsTesting = true;
-        invalidate(); // ensure a redraw so that auto-scrolling can occur
-        tileProfilingStart();
+        if (!mIsTesting && mIsScrolling) {
+            // kick off testing
+            mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
+            super.pageSwapCallback(startAnim);
+            Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis + "millis");
+            mIsTesting = true;
+            invalidate(); // ensure a redraw so that auto-scrolling can occur
+            tileProfilingStart();
+        }
+    }
+
+    private double animFramerate() {
+        WebSettings settings = getSettings();
+        String updatesString = settings.getProperty("tree_updates");
+        int updates = (updatesString == null) ? -1 : Integer.parseInt(updatesString);
+
+        double animationTime;
+        if (mAnimationTime == 0) {
+            animationTime = System.currentTimeMillis() - mLoadTime;
+        } else {
+            animationTime = mAnimationTime - mLoadTime;
+        }
+
+        return updates * 1000 / animationTime;
+    }
+
+    public void setDoubleBuffering(boolean useDoubleBuffering) {
+        WebSettings settings = getSettings();
+        settings.setProperty("use_double_buffering", useDoubleBuffering ? "true" : "false");
     }
 
     /*
@@ -127,11 +197,12 @@ public class ProfiledWebView extends WebView {
         // record the time spent (before scrolling) rendering the page
         data.singleStats.put(getResources().getString(R.string.render_millis),
                 (double)mContentInvalMillis);
-        // record if the page render timed out
-        Log.d("ProfiledWebView", "hadtobeforced = " + mHadToBeForced);
-        data.singleStats.put(getResources().getString(R.string.render_stalls),
-                             mHadToBeForced ? 1.0 : 0.0);
-        mHadToBeForced = false;
+
+        // record framerate
+        double framerate = animFramerate();
+        Log.d(LOGTAG, "anim framerate was "+framerate);
+        data.singleStats.put(getResources().getString(R.string.animation_framerate),
+                framerate);
 
         for (int frame = 0; frame < data.frames.length; frame++) {
             data.frames[frame] = new TileData[
@@ -159,6 +230,8 @@ public class ProfiledWebView extends WebView {
 
     @Override
     public void loadUrl(String url) {
+        mAnimationTime = 0;
+        mLoadTime = 0;
         if (!url.startsWith("http://") && !url.startsWith("file://")) {
             url = "http://" + url;
         }

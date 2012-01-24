@@ -49,8 +49,9 @@
     <!-- Drop down menu entry - automatically scroll to the end of the page
     with scrollBy() [CHAR LIMIT=15] -->
     <string name="movement_auto_scroll">Auto-scroll</string>
-    <!-- Drop down menu entry -  [CHAR LIMIT=15] -->
-    <string name="movement_auto_fling">Auto-fling</string>
+    <!-- Drop down menu entry - automatically record for a set time before
+    stopping [CHAR LIMIT=15] -->
+    <string name="movement_timed">Timed</string>
     <!-- Drop down menu entry - manually navigate the page(s), hit 'capture'
     button [CHAR LIMIT=15] -->
     <string name="movement_manual">Manual</string>
@@ -67,14 +68,21 @@
     <!-- 75th percentile - 75% of frames fall below this value [CHAR LIMIT=12]
     -->
     <string name="percentile_75">75%ile</string>
+    <!-- standard deviation [CHAR LIMIT=12] -->
+    <string name="std_dev">StdDev</string>
+    <!-- mean [CHAR LIMIT=12] -->
+    <string name="mean">mean</string>
+
+
+
     <!-- Frame rate [CHAR LIMIT=15] -->
     <string name="frames_per_second">Frames/sec</string>
     <!-- Portion of viewport covered by good tiles [CHAR LIMIT=15] -->
     <string name="viewport_coverage">Coverage</string>
     <!-- Milliseconds taken to inval, and re-render the page [CHAR LIMIT=15] -->
     <string name="render_millis">RenderMillis</string>
-    <!-- Number of rendering stalls while running the test [CHAR LIMIT=15] -->
-    <string name="render_stalls">Stalls</string>
+    <!-- Animation Framerate [CHAR LIMIT=15] -->
+    <string name="animation_framerate">AnimFramerate</string>
     <!-- Format string for stat value overlay [CHAR LIMIT=15] -->
     <string name="format_stat">%4.4f</string>
 
