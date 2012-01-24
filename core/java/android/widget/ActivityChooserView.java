@@ -33,8 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
 
 /**
@@ -366,7 +364,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             getListPopupWindow().dismiss();
             ViewTreeObserver viewTreeObserver = getViewTreeObserver();
             if (viewTreeObserver.isAlive()) {
-                viewTreeObserver.removeGlobalOnLayoutListener(mOnGlobalLayoutListener);
+                viewTreeObserver.removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
             }
         }
         return true;
@@ -400,7 +398,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         }
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
         if (viewTreeObserver.isAlive()) {
-            viewTreeObserver.removeGlobalOnLayoutListener(mOnGlobalLayoutListener);
+            viewTreeObserver.removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
         }
         mIsAttachedToWindow = false;
     }
