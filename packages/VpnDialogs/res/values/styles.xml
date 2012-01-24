@@ -15,13 +15,6 @@
 -->
 
 <resources>
-
-    <style name="transparent">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
     <style name="label">
         <item name="android:gravity">center_vertical|right</item>
         <item name="android:paddingRight">2mm</item>
