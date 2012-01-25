@@ -160,7 +160,10 @@ static const char * const audio_interfaces[] = {
 
 AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
-        mPrimaryHardwareDev(NULL), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
+        mPrimaryHardwareDev(NULL),
+        mHardwareStatus(AUDIO_HW_IDLE), // see also onFirstRef()
+        mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1),
+        mMode(AUDIO_MODE_INVALID),
         mBtNrecIsOff(false)
 {
 }
@@ -172,7 +175,6 @@ void AudioFlinger::onFirstRef()
     Mutex::Autolock _l(mLock);
 
     /* TODO: move all this work into an Init() function */
-    mHardwareStatus = AUDIO_HW_IDLE;
 
     for (size_t i = 0; i < ARRAY_SIZE(audio_interfaces); i++) {
         const hw_module_t *mod;
@@ -971,7 +973,8 @@ void AudioFlinger::audioConfigChanged_l(int event, int ioHandle, void *param2)
 {
     size_t size = mNotificationClients.size();
     for (size_t i = 0; i < size; i++) {
-        mNotificationClients.valueAt(i)->client()->ioConfigChanged(event, ioHandle, param2);
+        mNotificationClients.valueAt(i)->audioFlingerClient()->ioConfigChanged(event, ioHandle,
+                                                                               param2);
     }
 }
 
@@ -989,11 +992,15 @@ AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int i
         type_t type)
     :   Thread(false),
         mType(type),
-        mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFrameSize(1), mFormat(AUDIO_FORMAT_INVALID), mStandby(false), mId(id), mExiting(false),
-        mDevice(device)
+        mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0),
+        // mChannelMask
+        mChannelCount(0),
+        mFrameSize(1), mFormat(AUDIO_FORMAT_INVALID),
+        mParamStatus(NO_ERROR),
+        mStandby(false), mId(id), mExiting(false),
+        mDevice(device),
+        mDeathRecipient(new PMDeathRecipient(this))
 {
-    mDeathRecipient = new PMDeathRecipient(this);
 }
 
 AudioFlinger::ThreadBase::~ThreadBase()
@@ -1377,17 +1384,20 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
                                              uint32_t device,
                                              type_t type)
     :   ThreadBase(audioFlinger, id, device, type),
-        mMixBuffer(NULL), mSuspended(0), mBytesWritten(0), mOutput(output),
+        mMixBuffer(NULL), mSuspended(0), mBytesWritten(0),
+        // Assumes constructor is called by AudioFlinger with it's mLock held,
+        // but it would be safer to explicitly pass initial masterMute as parameter
+        mMasterMute(audioFlinger->masterMute_l()),
+        // mStreamTypes[] initialized in constructor body
+        mOutput(output),
+        // Assumes constructor is called by AudioFlinger with it's mLock held,
+        // but it would be safer to explicitly pass initial masterVolume as parameter
+        mMasterVolume(audioFlinger->masterVolume_l()),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
     snprintf(mName, kNameLength, "AudioOut_%d", id);
 
     readOutputParameters();
-
-    // Assumes constructor is called by AudioFlinger with it's mLock held,
-    // but it would be safer to explicitly pass these as parameters
-    mMasterVolume = mAudioFlinger->masterVolume_l();
-    mMasterMute = mAudioFlinger->masterMute_l();
 
     // mStreamTypes[AUDIO_STREAM_CNT] is initialized by stream_type_t default constructor
     // There is no AUDIO_STREAM_MIN, and ++ operator does not compile
@@ -1851,10 +1861,9 @@ uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
 AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output,
         int id, uint32_t device, type_t type)
     :   PlaybackThread(audioFlinger, output, id, device, type),
-        mAudioMixer(NULL), mPrevMixerStatus(MIXER_IDLE)
+        mAudioMixer(new AudioMixer(mFrameCount, mSampleRate)),
+        mPrevMixerStatus(MIXER_IDLE)
 {
-    mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
-
     // FIXME - Current mixer implementation only supports stereo output
     if (mChannelCount == 1) {
         ALOGE("Invalid audio hardware channel count");
@@ -2519,6 +2528,8 @@ uint32_t AudioFlinger::MixerThread::suspendSleepTimeUs()
 // ----------------------------------------------------------------------------
 AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
     :   PlaybackThread(audioFlinger, output, id, device, DIRECT)
+        // mLeftVolFloat, mRightVolFloat
+        // mLeftVolShort, mRightVolShort
 {
 }
 
@@ -3249,13 +3260,17 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
     :   RefBase(),
         mThread(thread),
         mClient(client),
-        mCblk(0),
+        mCblk(NULL),
+        // mBuffer
+        // mBufferEnd
         mFrameCount(0),
         mState(IDLE),
         mClientTid(-1),
         mFormat(format),
         mFlags(flags & ~SYSTEM_FLAGS_MASK),
         mSessionId(sessionId)
+        // mChannelCount
+        // mChannelMask
 {
     ALOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
@@ -3322,6 +3337,7 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
     }
     mCblkMemory.clear();            // and free the shared memory
     if (mClient != NULL) {
+        // Client destructor must run with AudioFlinger mutex locked
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
         mClient.clear();
     }
@@ -4079,13 +4095,12 @@ sp<MemoryDealer> AudioFlinger::Client::heap() const
 AudioFlinger::NotificationClient::NotificationClient(const sp<AudioFlinger>& audioFlinger,
                                                      const sp<IAudioFlingerClient>& client,
                                                      pid_t pid)
-    : mAudioFlinger(audioFlinger), mPid(pid), mClient(client)
+    : mAudioFlinger(audioFlinger), mPid(pid), mAudioFlingerClient(client)
 {
 }
 
 AudioFlinger::NotificationClient::~NotificationClient()
 {
-    mClient.clear();
 }
 
 void AudioFlinger::NotificationClient::binderDied(const wp<IBinder>& who)
@@ -4271,12 +4286,15 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
                                          int id,
                                          uint32_t device) :
     ThreadBase(audioFlinger, id, device, RECORD),
-    mInput(input), mTrack(NULL), mResampler(NULL), mRsmpOutBuffer(NULL), mRsmpInBuffer(NULL)
+    mInput(input), mTrack(NULL), mResampler(NULL), mRsmpOutBuffer(NULL), mRsmpInBuffer(NULL),
+    // mRsmpInIndex and mInputBytes set by readInputParameters()
+    mReqChannelCount(popcount(channels)),
+    mReqSampleRate(sampleRate)
+    // mBytesRead is only meaningful while active, and so is cleared in start()
+    // (but might be better to also clear here for dump?)
 {
     snprintf(mName, kNameLength, "AudioIn_%d", id);
 
-    mReqChannelCount = popcount(channels);
-    mReqSampleRate = sampleRate;
     readInputParameters();
 }
 
@@ -5245,12 +5263,8 @@ void AudioFlinger::acquireAudioSessionId(int audioSession)
             return;
         }
     }
-    AudioSessionRef *ref = new AudioSessionRef();
-    ref->sessionid = audioSession;
-    ref->pid = caller;
-    ref->cnt = 1;
-    mAudioSessionRefs.push(ref);
-    ALOGV(" added new entry for %d", ref->sessionid);
+    mAudioSessionRefs.push(new AudioSessionRef(audioSession, caller));
+    ALOGV(" added new entry for %d", audioSession);
 }
 
 void AudioFlinger::releaseAudioSessionId(int audioSession)

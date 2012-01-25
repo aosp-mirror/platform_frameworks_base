@@ -233,9 +233,9 @@ private:
     private:
                             Client(const Client&);
                             Client& operator = (const Client&);
-        sp<AudioFlinger>    mAudioFlinger;
-        sp<MemoryDealer>    mMemoryDealer;
-        pid_t               mPid;
+        const sp<AudioFlinger> mAudioFlinger;
+        const sp<MemoryDealer> mMemoryDealer;
+        const pid_t         mPid;
     };
 
     // --- Notification Client ---
@@ -246,7 +246,7 @@ private:
                                                 pid_t pid);
         virtual             ~NotificationClient();
 
-                sp<IAudioFlingerClient>    client() { return mClient; }
+                sp<IAudioFlingerClient> audioFlingerClient() const { return mAudioFlingerClient; }
 
                 // IBinder::DeathRecipient
                 virtual     void        binderDied(const wp<IBinder>& who);
@@ -255,9 +255,9 @@ private:
                             NotificationClient(const NotificationClient&);
                             NotificationClient& operator = (const NotificationClient&);
 
-        sp<AudioFlinger>        mAudioFlinger;
-        pid_t                   mPid;
-        sp<IAudioFlingerClient> mClient;
+        const sp<AudioFlinger>  mAudioFlinger;
+        const pid_t             mPid;
+        const sp<IAudioFlingerClient> mAudioFlingerClient;
     };
 
     class TrackHandle;
@@ -367,8 +367,8 @@ private:
             bool step();
             void reset();
 
-            wp<ThreadBase>      mThread;
-            sp<Client>          mClient;
+            const wp<ThreadBase> mThread;
+            /*const*/ sp<Client> mClient;   // see explanation at ~TrackBase() why not const
             sp<IMemory>         mCblkMemory;
             audio_track_cblk_t* mCblk;
             void*               mBuffer;
@@ -377,9 +377,9 @@ private:
             // we don't really need a lock for these
             track_state         mState;
             int                 mClientTid;
-            audio_format_t      mFormat;
+            const audio_format_t mFormat;
             uint32_t            mFlags;
-            int                 mSessionId;
+            const int           mSessionId;
             uint8_t             mChannelCount;
             uint32_t            mChannelMask;
         };
@@ -532,7 +532,7 @@ private:
 
                     const type_t            mType;
                     Condition               mWaitWorkCV;
-                    sp<AudioFlinger>        mAudioFlinger;
+                    const sp<AudioFlinger>  mAudioFlinger;
                     uint32_t                mSampleRate;
                     size_t                  mFrameCount;
                     uint32_t                mChannelMask;
@@ -553,7 +553,7 @@ private:
                     char                    mName[kNameLength];
                     sp<IPowerManager>       mPowerManager;
                     sp<IBinder>             mWakeLockToken;
-                    sp<PMDeathRecipient>    mDeathRecipient;
+                    const sp<PMDeathRecipient> mDeathRecipient;
                     // list of suspended effects per session and per type. The first vector is
                     // keyed by session ID, the second by type UUID timeLow field
                     KeyedVector< int, KeyedVector< int, sp<SuspendedSessionDesc> > >  mSuspendedSessions;
@@ -671,7 +671,7 @@ private:
                     bool        write(int16_t* data, uint32_t frames);
                     bool        bufferQueueEmpty() { return (mBufferQueue.size() == 0) ? true : false; }
                     bool        isActive() { return mActive; }
-            wp<ThreadBase>&     thread()  { return mThread; }
+            const wp<ThreadBase>& thread() { return mThread; }
 
         private:
 
@@ -688,7 +688,7 @@ private:
             Vector < Buffer* >          mBufferQueue;
             AudioBufferProvider::Buffer mOutBuffer;
             bool                        mActive;
-            DuplicatingThread*          mSourceThread;
+            DuplicatingThread* const mSourceThread; // for waitTimeMs() in write()
         };  // end of OutputTrack
 
         PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id,
@@ -919,7 +919,7 @@ private:
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     private:
-        sp<PlaybackThread::Track> mTrack;
+        const sp<PlaybackThread::Track> mTrack;
     };
 
     friend class Client;
@@ -1023,8 +1023,8 @@ private:
                 int16_t                             *mRsmpInBuffer;
                 size_t                              mRsmpInIndex;
                 size_t                              mInputBytes;
-                int                                 mReqChannelCount;
-                uint32_t                            mReqSampleRate;
+                const int                           mReqChannelCount;
+                const uint32_t                      mReqSampleRate;
                 ssize_t                             mBytesRead;
     };
 
@@ -1038,7 +1038,7 @@ private:
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     private:
-        sp<RecordThread::RecordTrack> mRecordTrack;
+        const sp<RecordThread::RecordTrack> mRecordTrack;
     };
 
     //--- Audio Effect Management
@@ -1107,7 +1107,7 @@ private:
         int16_t     *outBuffer() { return mConfig.outputCfg.buffer.s16; }
         void        setChain(const wp<EffectChain>& chain) { mChain = chain; }
         void        setThread(const wp<ThreadBase>& thread) { mThread = thread; }
-        wp<ThreadBase>& thread() { return mThread; }
+        const wp<ThreadBase>& thread() { return mThread; }
 
         status_t addHandle(const sp<EffectHandle>& handle);
         void disconnect(const wp<EffectHandle>& handle, bool unpiniflast);
@@ -1379,8 +1379,11 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
     };
 
     struct AudioSessionRef {
-        int sessionid;
-        pid_t pid;
+        // FIXME rename parameter names when fields get "m" prefix
+        AudioSessionRef(int sessionid_, pid_t pid_) :
+            sessionid(sessionid_), pid(pid_), cnt(1) {}
+        const int sessionid;
+        const pid_t pid;
         int cnt;
     };
 
