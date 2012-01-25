@@ -219,6 +219,8 @@ public class TestAppRS {
         fb.setObjectConst(mFsConst2.getAllocation().getType());
         fb.setShader(mRes, R.raw.plastic_lights);
         mLightsF = fb.create();
+
+        FullscreenBlur.initShaders(mRes, mRS);
     }
 
     void initRenderPasses() {
