@@ -265,13 +265,10 @@ status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
 
     result.append("Clients:\n");
     for (size_t i = 0; i < mClients.size(); ++i) {
-        wp<Client> wClient = mClients.valueAt(i);
-        if (wClient != 0) {
-            sp<Client> client = wClient.promote();
-            if (client != 0) {
-                snprintf(buffer, SIZE, "  pid: %d\n", client->pid());
-                result.append(buffer);
-            }
+        sp<Client> client = mClients.valueAt(i).promote();
+        if (client != 0) {
+            snprintf(buffer, SIZE, "  pid: %d\n", client->pid());
+            result.append(buffer);
         }
     }
 
@@ -1431,13 +1428,10 @@ status_t AudioFlinger::PlaybackThread::dumpTracks(int fd, const Vector<String16>
     result.append(buffer);
     result.append("   Name  Clien Typ Fmt Chn mask   Session Buf  S M F SRate LeftV RighV  Serv       User       Main buf   Aux Buf\n");
     for (size_t i = 0; i < mActiveTracks.size(); ++i) {
-        wp<Track> wTrack = mActiveTracks[i];
-        if (wTrack != 0) {
-            sp<Track> track = wTrack.promote();
-            if (track != 0) {
-                track->dump(buffer, SIZE);
-                result.append(buffer);
-            }
+        sp<Track> track = mActiveTracks[i].promote();
+        if (track != 0) {
+            track->dump(buffer, SIZE);
+            result.append(buffer);
         }
     }
     write(fd, result.string(), result.size());
