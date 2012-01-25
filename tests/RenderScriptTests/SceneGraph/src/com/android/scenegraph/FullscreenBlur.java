@@ -45,21 +45,18 @@ class FullscreenBlur {
     static Allocation sRenderTargetBlur2Color;
     static Allocation sRenderTargetBlur2Depth;
 
-    static ProgramFragment mPF_BlurH;
-    static ProgramFragment mPF_BlurV;
-    static ProgramFragment mPF_SelectColor;
-    static ProgramFragment mPF_Texture;
-    static ScriptField_FBlurOffsets_s mFsBlurHConst;
-    static ScriptField_FBlurOffsets_s mFsBlurVConst;
-    static ProgramVertex mPV_Paint;
-    static ProgramVertex mPV_Blur;
+    static FragmentShader mPF_BlurH;
+    static FragmentShader mPF_BlurV;
+    static FragmentShader mPF_SelectColor;
+    static FragmentShader mPF_Texture;
+    static VertexShader mPV_Paint;
+    static VertexShader mPV_Blur;
 
     // This is only used when full screen blur is enabled
     // Basically, it's the offscreen render targets
     static void createRenderTargets(RenderScriptGL rs, int w, int h) {
         Type.Builder b = new Type.Builder(rs, Element.RGBA_8888(rs));
-        b.setX(w/8).setY(h/8);
-        Type renderType = b.create();
+        Type renderType = b.setX(w/8).setY(h/8).create();
         int usage = Allocation.USAGE_GRAPHICS_TEXTURE | Allocation.USAGE_GRAPHICS_RENDER_TARGET;
         sRenderTargetBlur0Color = Allocation.createTyped(rs, renderType, usage);
         sRenderTargetBlur1Color = Allocation.createTyped(rs, renderType, usage);
@@ -67,8 +64,7 @@ class FullscreenBlur {
 
         b = new Type.Builder(rs, Element.createPixel(rs, Element.DataType.UNSIGNED_16,
                                                      Element.DataKind.PIXEL_DEPTH));
-        b.setX(w/8).setY(h/8);
-        renderType = b.create();
+        renderType = b.setX(w/8).setY(h/8).create();
         usage = Allocation.USAGE_GRAPHICS_RENDER_TARGET;
         sRenderTargetBlur0Depth = Allocation.createTyped(rs, renderType, usage);
         sRenderTargetBlur1Depth = Allocation.createTyped(rs, renderType, usage);
@@ -159,42 +155,31 @@ class FullscreenBlur {
         compositePass.appendRenderable(quad);
     }
 
-    static void initShaders(Resources res, RenderScript rs) {
-        ProgramVertex.Builder vb = new ProgramVertex.Builder(rs);
+    static private FragmentShader getShader(Resources res, RenderScriptGL rs,
+                                            int resID, Type constants) {
+        FragmentShader.Builder fb = new FragmentShader.Builder(rs);
+        fb.setShader(res, resID);
+        fb.addTexture(TextureType.TEXTURE_2D, "color");
+        if (constants != null) {
+            fb.setObjectConst(constants);
+        }
+        FragmentShader prog = fb.create();
+        prog.mProgram.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
+        return prog;
+    }
+
+    static void initShaders(Resources res, RenderScriptGL rs) {
+        ScriptField_FBlurOffsets_s blurConst = new ScriptField_FBlurOffsets_s(rs, 1);
+        VertexShader.Builder vb = new VertexShader.Builder(rs);
         vb.addInput(ScriptField_VertexShaderInputs_s.createElement(rs));
         vb.setShader(res, R.raw.blur_vertex);
         mPV_Blur = vb.create();
 
-        ProgramFragment.Builder fb = new ProgramFragment.Builder(rs);
-        fb.setShader(res, R.raw.texture);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_Texture = fb.create();
-        mPF_Texture.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
-
-        mFsBlurHConst = new ScriptField_FBlurOffsets_s(rs, 1);
-
-        fb = new ProgramFragment.Builder(rs);
-        fb.addConstant(mFsBlurHConst.getAllocation().getType());
-        fb.setShader(res, R.raw.blur_h);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_BlurH = fb.create();
-        mPF_BlurH.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
-
-        mFsBlurVConst = new ScriptField_FBlurOffsets_s(rs, 1);
-
-        fb = new ProgramFragment.Builder(rs);
-        fb.addConstant(mFsBlurVConst.getAllocation().getType());
-        fb.setShader(res, R.raw.blur_v);
-        fb.addTexture(TextureType.TEXTURE_2D);
-
-        mPF_BlurV = fb.create();
-        mPF_BlurV.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
-
-        fb = new ProgramFragment.Builder(rs);
-        fb.setShader(res, R.raw.select_color);
-        fb.addTexture(TextureType.TEXTURE_2D);
-        mPF_SelectColor = fb.create();
-        mPF_SelectColor.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
+        mPF_Texture = getShader(res, rs, R.raw.texture, null);
+        mPF_Texture.mProgram.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
+        mPF_BlurH = getShader(res, rs, R.raw.blur_h, blurConst.getAllocation().getType());
+        mPF_BlurV = getShader(res, rs, R.raw.blur_v, blurConst.getAllocation().getType());
+        mPF_SelectColor = getShader(res, rs, R.raw.select_color, null);
     }
 
 }
