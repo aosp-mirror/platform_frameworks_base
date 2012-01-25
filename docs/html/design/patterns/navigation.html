@@ -131,7 +131,7 @@ return the user to the Home screen, or even to a different application.</p>
 <p>The Back key also supports a few behaviors not directly tied to screen-to-screen navigation:</p>
 <ul>
 <li>Back dismisses floating windows (dialogs, popups)</li>
-<li>Back dismisses contextual action bars, and remove highlight from selected items</li>
+<li>Back dismisses contextual action bars, and removes the highlight from the selected items</li>
 <li>Back hides the onscreen keyboard (IME)</li>
 </ul>
 <h2>Navigation Within Your App</h2>
@@ -189,18 +189,19 @@ screen widget can bypass the Inbox screen, taking the user directly to a convers
 <h4>App-to-app navigation</h4>
 <p>When navigating deep into your app's hierarchy directly from another app via an intent, Back will
 return to the referring app.</p>
-<p>The Up button is handled is follows:
+<p>The Up button is handled as follows:
 - If the destination screen is typically reached from one particular screen within your app, Up
   should navigate to that screen.
 - Otherwise, Up should navigate to the topmost ("Home") screen of your app.</p>
-<p>For example, after choosing to share a book being view in Market, the user navigates directly to the
-Gmail's compose screen. From there, Up returns to the Inbox (which happens to be both the typical
-referrer to compose, as well as the topmost screen of the app), while Back returns to Market.</p>
+<p>For example, after choosing to share a book being viewed in Market, the user navigates directly to
+Gmail's compose screen. From there, Up returns to the Inbox (which happens to be both the
+typical referrer to compose, as well as the topmost screen of the app), while Back returns to
+Market.</p>
 
 <img src="../static/content/navigation_from_outside_up.png">
 
 <h4>System-to-app navigation</h4>
-<p>If the your app was reached via the system mechanisms of notifications or home screen widgets, Up
+<p>If your app was reached via the system mechanisms of notifications or home screen widgets, Up
 behaves as described for app-to-app navigation, above.</p>
 <p>For the Back key, you should make navigation more predictably by inserting into the task's back
 stack the complete upward navigation path to the app's topmost screen. This way, a user who has
