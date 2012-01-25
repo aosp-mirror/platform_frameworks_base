@@ -77,12 +77,12 @@ typedef unsigned short UWord16;
 /*
  ********* define 32 bit signed/unsigned types & constants
  */
-typedef long Word32;
-typedef unsigned long UWord32;
+typedef int Word32;
+typedef unsigned int UWord32;
 
 
 
-#ifdef LINUX
+#ifndef _MSC_VER
 typedef long long Word64;
 typedef unsigned long long UWord64;
 #else
