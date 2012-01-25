@@ -35,6 +35,11 @@ public class EditableInputConnection extends BaseInputConnection {
 
     private final TextView mTextView;
 
+    // Keeps track of nested begin/end batch edit to ensure this connection always has a
+    // balanced impact on its associated TextView.
+    // A negative value means that this connection has been finished by the InputMethodManager.
+    private int mBatchEditNesting;
+
     public EditableInputConnection(TextView textview) {
         super(textview, true);
         mTextView = textview;
@@ -48,19 +53,35 @@ public class EditableInputConnection extends BaseInputConnection {
         }
         return null;
     }
-    
+
     @Override
     public boolean beginBatchEdit() {
-        mTextView.beginBatchEdit();
-        return true;
+        synchronized(this) {
+            if (mBatchEditNesting >= 0) {
+                mTextView.beginBatchEdit();
+                mBatchEditNesting++;
+                return true;
+            }
+        }
+        return false;
     }
-    
+
     @Override
     public boolean endBatchEdit() {
-        mTextView.endBatchEdit();
-        return true;
+        synchronized(this) {
+            if (mBatchEditNesting > 0) {
+                // When the connection is reset by the InputMethodManager and finishComposingText
+                // is called, some endBatchEdit calls may still be asynchronously received from the
+                // IME. Do not take these into account, thus ensuring that this IC's final
+                // contribution to mTextView's nested batch edit count is zero.
+                mTextView.endBatchEdit();
+                mBatchEditNesting--;
+                return true;
+            }
+        }
+        return false;
     }
-    
+
     @Override
     public boolean clearMetaKeyStates(int states) {
         final Editable content = getEditable();
@@ -76,7 +97,24 @@ public class EditableInputConnection extends BaseInputConnection {
         }
         return true;
     }
-    
+
+    @Override
+    public boolean finishComposingText() {
+        final boolean superResult = super.finishComposingText();
+        synchronized(this) {
+            if (mBatchEditNesting < 0) {
+                // The connection was already finished
+                return false;
+            }
+            while (mBatchEditNesting > 0) {
+                endBatchEdit();
+            }
+            // Will prevent any further calls to begin or endBatchEdit
+            mBatchEditNesting = -1;
+        }
+        return superResult;
+    }
+
     @Override
     public boolean commitCompletion(CompletionInfo text) {
         if (DEBUG) Log.v(TAG, "commitCompletion " + text);
