@@ -1084,12 +1084,17 @@ bool AaptGroupEntry::getDensityName(const char* name,
         if (out) out->density = ResTable_config::DENSITY_HIGH;
         return true;
     }
-    
+
     if (strcmp(name, "xhdpi") == 0) {
-        if (out) out->density = ResTable_config::DENSITY_MEDIUM*2;
+        if (out) out->density = ResTable_config::DENSITY_XHIGH;
         return true;
     }
-    
+
+    if (strcmp(name, "xxhdpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_XXHIGH;
+        return true;
+    }
+
     char* c = (char*)name;
     while (*c >= '0' && *c <= '9') {
         c++;
