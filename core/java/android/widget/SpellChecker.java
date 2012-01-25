@@ -102,7 +102,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         mTextServicesManager = (TextServicesManager) mTextView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        if (!mTextServicesManager.isSpellCheckerEnabled()) {
+        if (!mTextServicesManager.isSpellCheckerEnabled()
+                ||  mTextServicesManager.getCurrentSpellCheckerSubtype(true) == null) {
             mSpellCheckerSession = null;
         } else {
             mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
