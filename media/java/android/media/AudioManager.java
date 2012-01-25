@@ -620,8 +620,9 @@ public class AudioManager {
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
      * @param flags One or more flags.
+     * @hide
      */
-    private void adjustMasterVolume(int direction, int flags) {
+    public void adjustMasterVolume(int direction, int flags) {
         IAudioService service = getService();
         try {
             service.adjustMasterVolume(direction, flags);
