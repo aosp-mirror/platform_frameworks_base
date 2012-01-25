@@ -19,8 +19,13 @@ package com.android.mediaframeworktest.functional.audio;
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.util.Log;
 
 /**
  * Junit / Instrumentation test case for the media AudioManager api
@@ -28,8 +33,13 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
 
-    private String TAG = "MediaAudioManagerTest";
+    private final static String TAG = "MediaAudioManagerTest";
+    // the AudioManager used throughout the test
     private AudioManager mAudioManager;
+    // keep track of looper for AudioManager so we can terminate it
+    private Looper mAudioManagerLooper;
+    private final Object mLooperLock = new Object();
+    private final static int WAIT_FOR_LOOPER_TO_INITIALIZE_MS = 60000;  // 60s
     private int[] ringtoneMode = {AudioManager.RINGER_MODE_NORMAL,
              AudioManager.RINGER_MODE_SILENT, AudioManager.RINGER_MODE_VIBRATE};
 
@@ -37,16 +47,47 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
 
+    private void initializeAudioManagerWithLooper() {
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                mAudioManagerLooper = Looper.myLooper();
+                mAudioManager = (AudioManager)getActivity().getSystemService(Context.AUDIO_SERVICE);
+                synchronized (mLooperLock) {
+                    mLooperLock.notify();
+                }
+                Looper.loop();
+            }
+        }.start();
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+        synchronized(mLooperLock) {
+            initializeAudioManagerWithLooper();
+            try {
+                mLooperLock.wait(WAIT_FOR_LOOPER_TO_INITIALIZE_MS);
+            } catch (Exception e) {
+                assertTrue("initializeAudioManagerWithLooper() failed to complete in time", false);
+            }
+        }
      }
 
      @Override
      protected void tearDown() throws Exception {
          super.tearDown();
+         synchronized(mLooperLock) {
+             if (mAudioManagerLooper != null) {
+                 mAudioManagerLooper.quit();
+             }
+         }
      }
+
+     //-----------------------------------------------------------------
+     //      Ringer Mode
+     //----------------------------------
 
      public boolean validateSetRingTone(int i) {
          int getRingtone = mAudioManager.getRingerMode();
@@ -67,4 +108,136 @@ public class MediaAudioManagerTest extends ActivityInstrumentationTestCase2<Medi
              assertTrue("SetRingtoneMode : " + ringtoneMode[i], result);
          }
      }
+
+    //-----------------------------------------------------------------
+    //      AudioFocus
+    //----------------------------------
+
+    private static AudioFocusListener mAudioFocusListener;
+    private final static int INVALID_FOCUS = -80; // initialized to magic invalid focus change type
+    private final static int WAIT_FOR_AUDIOFOCUS_LOSS_MS = 10;
+
+    private static class AudioFocusListener implements OnAudioFocusChangeListener {
+        public int mLastFocusChange = INVALID_FOCUS;
+        public int mFocusChangeCounter = 0;
+        public AudioFocusListener() {
+        }
+        public void onAudioFocusChange(int focusChange) {
+            mLastFocusChange = focusChange;
+            mFocusChangeCounter++;
+        }
+    }
+
+    /**
+     * Fails the test if expectedFocusLossMode != mAudioFocusListener.mLastFocusChange
+     */
+    private void verifyAudioFocusLoss(int focusGainMode, int expectedFocusLossMode)
+            throws Exception {
+        // request AudioFocus so we can test that mAudioFocusListener loses it when another
+        //     request comes in
+        int result = mAudioManager.requestAudioFocus(mAudioFocusListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        assertTrue("requestAudioFocus returned " + result,
+                result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+        // cause mAudioFocusListener to lose AudioFocus
+        result = mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+                focusGainMode);
+        assertTrue("requestAudioFocus returned " + result,
+                result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+        // the audio focus request is async, so wait a bit to verify it had the expected effect
+        java.lang.Thread.sleep(WAIT_FOR_AUDIOFOCUS_LOSS_MS);
+        // test successful if the expected focus loss was recorded
+        assertEquals("listener lost focus",
+                mAudioFocusListener.mLastFocusChange, expectedFocusLossMode);
+    }
+
+    private void setupAudioFocusListener() {
+        mAudioFocusListener = new AudioFocusListener();
+        mAudioManager.registerAudioFocusListener(mAudioFocusListener);
+    }
+
+    private void cleanupAudioFocusListener() {
+        // clean up
+        mAudioManager.abandonAudioFocus(mAudioFocusListener);
+        mAudioManager.unregisterAudioFocusListener(mAudioFocusListener);
+    }
+
+    //----------------------------------
+
+    //Test case 1: test audio focus listener loses audio focus:
+    //   AUDIOFOCUS_GAIN causes AUDIOFOCUS_LOSS
+    @MediumTest
+    public void testAudioFocusLoss() throws Exception {
+        setupAudioFocusListener();
+
+        verifyAudioFocusLoss(AudioManager.AUDIOFOCUS_GAIN, AudioManager.AUDIOFOCUS_LOSS);
+
+        cleanupAudioFocusListener();
+    }
+
+    //Test case 2: test audio focus listener loses audio focus:
+    //   AUDIOFOCUS_GAIN_TRANSIENT causes AUDIOFOCUS_LOSS_TRANSIENT
+    @MediumTest
+    public void testAudioFocusLossTransient() throws Exception {
+        setupAudioFocusListener();
+
+        verifyAudioFocusLoss(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT);
+
+        cleanupAudioFocusListener();
+    }
+
+    //Test case 3: test audio focus listener loses audio focus:
+    //   AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK causes AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+    @MediumTest
+    public void testAudioFocusLossTransientDuck() throws Exception {
+        setupAudioFocusListener();
+
+        verifyAudioFocusLoss(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK);
+
+        cleanupAudioFocusListener();
+    }
+
+    //Test case 4: test audio focus registering and use over 3000 iterations
+    @LargeTest
+    public void testAudioFocusStressListenerRequestAbandon() throws Exception {
+        final int ITERATIONS = 3000;
+        // here we only test the life cycle of a focus listener, and make sure we don't crash
+        // when doing it many times without waiting
+        for (int i = 0 ; i < ITERATIONS ; i++) {
+            setupAudioFocusListener();
+            int result = mAudioManager.requestAudioFocus(mAudioFocusListener,
+                    AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+            assertTrue("audio focus request was not granted",
+                    result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+            cleanupAudioFocusListener();
+        }
+        assertTrue("testAudioFocusListenerLifeCycle : tested" + ITERATIONS +" iterations", true);
+    }
+
+    //Test case 5: test audio focus use without listener
+    @LargeTest
+    public void testAudioFocusStressNoListenerRequestAbandon() throws Exception {
+        final int ITERATIONS = 1000;
+        // make sure we have a listener in the stack
+        setupAudioFocusListener();
+        mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        // keep making the current owner lose and gain audio focus repeatedly
+        for (int i = 0 ; i < ITERATIONS ; i++) {
+            mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            mAudioManager.abandonAudioFocus(null);
+            // the audio focus request is async, so wait a bit to verify it had the expected effect
+            java.lang.Thread.sleep(WAIT_FOR_AUDIOFOCUS_LOSS_MS);
+        }
+        // verify there were 2 audio focus changes per iteration (one loss + one gain)
+        assertTrue("testAudioFocusListenerLifeCycle : observed " +
+                mAudioFocusListener.mFocusChangeCounter + " AudioFocus changes",
+                mAudioFocusListener.mFocusChangeCounter == ITERATIONS * 2);
+        mAudioManager.abandonAudioFocus(mAudioFocusListener);
+        mAudioManager.unregisterAudioFocusListener(mAudioFocusListener);
+    }
  }
