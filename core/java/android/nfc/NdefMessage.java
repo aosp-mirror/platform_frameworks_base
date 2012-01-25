@@ -92,9 +92,7 @@ public final class NdefMessage implements Parcelable {
      * @throws FormatException if the data cannot be parsed
      */
     public NdefMessage(byte[] data) throws FormatException {
-        if (data == null) {
-            throw new NullPointerException("null data");
-        }
+        if (data == null) throw new NullPointerException("data is null");
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         mRecords = NdefRecord.parse(buffer, false);
@@ -112,9 +110,8 @@ public final class NdefMessage implements Parcelable {
      */
     public NdefMessage(NdefRecord record, NdefRecord ... records) {
         // validate
-        if (record == null) {
-            throw new NullPointerException("record cannot be null");
-        }
+        if (record == null) throw new NullPointerException("record cannot be null");
+
         for (NdefRecord r : records) {
             if (r == null) {
                 throw new NullPointerException("record cannot be null");
@@ -147,7 +144,12 @@ public final class NdefMessage implements Parcelable {
 
     /**
      * Get the NDEF Records inside this NDEF Message.<p>
-     * An NDEF Message always has one or more NDEF Records.
+     * An {@link NdefMessage} always has one or more NDEF Records: so the
+     * following code to retrieve the first record is always safe
+     * (no need to check for null or array length >= 1):
+     * <pre>
+     * NdefRecord firstRecord = ndefMessage.getRecords()[0];
+     * </pre>
      *
      * @return array of one or more NDEF records.
      */

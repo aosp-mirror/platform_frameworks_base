@@ -66,6 +66,9 @@ public final class NfcAdapter {
      * <p>If the tag has an NDEF payload this intent is started before
      * {@link #ACTION_TECH_DISCOVERED}. If any activities respond to this intent neither
      * {@link #ACTION_TECH_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
+     *
+     * <p>The MIME type or data URI of this intent are normalized before dispatch -
+     * so that MIME, URI scheme and URI host are always lower-case.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
@@ -151,9 +154,13 @@ public final class NfcAdapter {
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
 
     /**
-     * Optional extra containing an array of {@link NdefMessage} present on the discovered tag for
-     * the {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
-     * {@link #ACTION_TAG_DISCOVERED} intents.
+     * Extra containing an array of {@link NdefMessage} present on the discovered tag.<p>
+     * This extra is mandatory for {@link #ACTION_NDEF_DISCOVERED} intents,
+     * and optional for {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.<p>
+     * When this extra is present there will always be at least one
+     * {@link NdefMessage} element. Most NDEF tags have only one NDEF message,
+     * but we use an array for future compatibility.
      */
     public static final String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
 
@@ -386,10 +393,10 @@ public final class NfcAdapter {
      */
     @Deprecated
     public static NfcAdapter getDefaultAdapter() {
-        // introduce in API version 9 (GB 2.3)
+        // introduced in API version 9 (GB 2.3)
         // deprecated in API version 10 (GB 2.3.3)
         // removed from public API in version 16 (ICS MR2)
-        // will need to maintain this as a hidden API for a while longer...
+        // should maintain as a hidden API for binary compatibility for a little longer
         Log.w(TAG, "WARNING: NfcAdapter.getDefaultAdapter() is deprecated, use " +
                 "NfcAdapter.getDefaultAdapter(Context) instead", new Exception());
 
@@ -803,6 +810,7 @@ public final class NfcAdapter {
      * @throws IllegalStateException if the Activity has already been paused
      * @deprecated use {@link #setNdefPushMessage} instead
      */
+    @Deprecated
     public void disableForegroundNdefPush(Activity activity) {
         if (activity == null) {
             throw new NullPointerException();
@@ -871,6 +879,24 @@ public final class NfcAdapter {
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
+        }
+    }
+
+    /**
+     * Inject a mock NFC tag.<p>
+     * Used for testing purposes.
+     * <p class="note">Requires the
+     * {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
+     * @hide
+     */
+    public void dispatch(Tag tag, NdefMessage message) {
+        if (tag == null) {
+            throw new NullPointerException("tag cannot be null");
+        }
+        try {
+            sService.dispatch(tag, message);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
         }
     }
 

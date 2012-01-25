@@ -449,8 +449,6 @@ web_docs_sample_code_flags := \
 		            resources/samples/training/ads-and-ux "Mobile Advertisement Integration" \
 		-samplecode $(sample_dir)/MultiResolution \
 		            resources/samples/MultiResolution "Multiple Resolutions" \
-		-samplecode $(sample_dir)/NFCDemo \
-		            resources/samples/NFCDemo "NFC Demo" \
 		-samplecode $(sample_dir)/training/multiscreen/newsreader \
 		            resources/samples/newsreader "News Reader" \
 		-samplecode $(sample_dir)/NotePad \
