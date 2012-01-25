@@ -65,8 +65,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * interface. For a query such as: {@code SELECT name, birth, phone FROM
      * myTable WHERE ... LIMIT 1,20 ORDER BY...} the column names (name, birth,
      * phone) would be in the projection argument and everything from
-     * {@code FROM} onward would be in the params argument. This constructor
-     * has package scope.
+     * {@code FROM} onward would be in the params argument.
      *
      * @param db a reference to a Database object that is already constructed
      *     and opened. This param is not used any longer
@@ -86,8 +85,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * interface. For a query such as: {@code SELECT name, birth, phone FROM
      * myTable WHERE ... LIMIT 1,20 ORDER BY...} the column names (name, birth,
      * phone) would be in the projection argument and everything from
-     * {@code FROM} onward would be in the params argument. This constructor
-     * has package scope.
+     * {@code FROM} onward would be in the params argument.
      *
      * @param editTable the name of the table used for this query
      * @param query the {@link SQLiteQuery} object associated with this cursor object.
