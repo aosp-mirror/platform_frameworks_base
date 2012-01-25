@@ -5351,6 +5351,7 @@ package android.content {
     method public static android.content.Intent makeMainActivity(android.content.ComponentName);
     method public static android.content.Intent makeMainSelectorActivity(java.lang.String, java.lang.String);
     method public static android.content.Intent makeRestartActivityTask(android.content.ComponentName);
+    method public static java.lang.String normalizeMimeType(java.lang.String);
     method public static android.content.Intent parseIntent(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.content.Intent parseUri(java.lang.String, int) throws java.net.URISyntaxException;
     method public android.content.Intent putCharSequenceArrayListExtra(java.lang.String, java.util.ArrayList<java.lang.CharSequence>);
@@ -5399,13 +5400,16 @@ package android.content {
     method public android.content.Intent setClassName(java.lang.String, java.lang.String);
     method public android.content.Intent setComponent(android.content.ComponentName);
     method public android.content.Intent setData(android.net.Uri);
+    method public android.content.Intent setDataAndNormalize(android.net.Uri);
     method public android.content.Intent setDataAndType(android.net.Uri, java.lang.String);
+    method public android.content.Intent setDataAndTypeAndNormalize(android.net.Uri, java.lang.String);
     method public void setExtrasClassLoader(java.lang.ClassLoader);
     method public android.content.Intent setFlags(int);
     method public android.content.Intent setPackage(java.lang.String);
     method public void setSelector(android.content.Intent);
     method public void setSourceBounds(android.graphics.Rect);
     method public android.content.Intent setType(java.lang.String);
+    method public android.content.Intent setTypeAndNormalize(java.lang.String);
     method public deprecated java.lang.String toURI();
     method public java.lang.String toUri(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -11834,6 +11838,7 @@ package android.net {
     method public abstract boolean isHierarchical();
     method public boolean isOpaque();
     method public abstract boolean isRelative();
+    method public android.net.Uri normalize();
     method public static android.net.Uri parse(java.lang.String);
     method public abstract java.lang.String toString();
     method public static android.net.Uri withAppendedPath(android.net.Uri, java.lang.String);
