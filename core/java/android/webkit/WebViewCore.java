@@ -647,18 +647,6 @@ public final class WebViewCore {
             int end, int textGeneration);
 
     /**
-     * Delete text near the cursor.
-     * @param nativeClass The pointer to the native class (mNativeClass)
-     * @param leftLength The number of characters to the left of the cursor to
-     * delete
-     * @param rightLength The number of characters to the right of the cursor
-     * to delete.
-     */
-    private native void nativeDeleteSurroundingText(int nativeClass,
-            int leftLength,
-            int rightLength);
-
-    /**
      *  Set the selection to (start, end) in the focused textfield. If start and
      *  end are out of order, swap them.
      * @param  nativeClass Pointer to the C++ WebViewCore object mNativeClass
@@ -1574,11 +1562,6 @@ public final class WebViewCore {
                                     = (TextSelectionData) msg.obj;
                             nativeDeleteSelection(mNativeClass,
                                     deleteSelectionData.mStart, deleteSelectionData.mEnd, msg.arg1);
-                            break;
-
-                        case DELETE_SURROUNDING_TEXT:
-                            nativeDeleteSurroundingText(mNativeClass,
-                                    msg.arg1, msg.arg2);
                             break;
 
                         case SET_SELECTION:
@@ -2737,6 +2720,15 @@ public final class WebViewCore {
         if (mWebView == null) return;
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.FIND_AGAIN).sendToTarget();
+    }
+
+    // called by JNI
+    private void initEditField(String text, int start, int end) {
+        if (mWebView == null) {
+            return;
+        }
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.INIT_EDIT_FIELD, start, end, text).sendToTarget();
     }
 
     private native void nativeUpdateFrameCacheIfLoading(int nativeClass);
