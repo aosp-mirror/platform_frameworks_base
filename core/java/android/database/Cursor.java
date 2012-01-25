@@ -341,6 +341,7 @@ public interface Cursor {
      * Deactivates the Cursor, making all calls on it fail until {@link #requery} is called.
      * Inactive Cursors use fewer resources than active Cursors.
      * Calling {@link #requery} will make the cursor active again.
+     * @deprecated Since {@link #requery()} is deprecated, so too is this.
      */
     void deactivate();
 

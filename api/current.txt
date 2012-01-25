@@ -6822,7 +6822,7 @@ package android.database {
   public abstract interface Cursor {
     method public abstract void close();
     method public abstract void copyStringToBuffer(int, android.database.CharArrayBuffer);
-    method public abstract void deactivate();
+    method public abstract deprecated void deactivate();
     method public abstract byte[] getBlob(int);
     method public abstract int getColumnCount();
     method public abstract int getColumnIndex(java.lang.String);
@@ -14427,6 +14427,7 @@ package android.os {
     field public static final int HONEYCOMB_MR2 = 13; // 0xd
     field public static final int ICE_CREAM_SANDWICH = 14; // 0xe
     field public static final int ICE_CREAM_SANDWICH_MR1 = 15; // 0xf
+    field public static final int JELLY_BEAN = 10000; // 0x2710
   }
 
   public final class Bundle implements java.lang.Cloneable android.os.Parcelable {
