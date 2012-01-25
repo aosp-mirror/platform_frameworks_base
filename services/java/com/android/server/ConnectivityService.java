@@ -992,11 +992,15 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 NetworkInfo ni = network.getNetworkInfo();
 
                 if (ni.isAvailable() == false) {
-                    if (DBG) log("special network not available");
                     if (!TextUtils.equals(feature,Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
+                        if (DBG) log("special network not available ni=" + ni.getTypeName());
                         return Phone.APN_TYPE_NOT_AVAILABLE;
                     } else {
                         // else make the attempt anyway - probably giving REQUEST_STARTED below
+                        if (DBG) {
+                            log("special network not available, but try anyway ni=" +
+                                    ni.getTypeName());
+                        }
                     }
                 }
 
