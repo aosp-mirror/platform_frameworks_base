@@ -23,9 +23,13 @@
 
 	.section .text
 	.global	PreMDCT
+	.fnstart
 
 PreMDCT:
 	stmdb     sp!, {r4 - r11, lr}
+	.save	  {r4 - r11, lr}
+	fstmfdd   sp!, {d8 - d15}
+	.vsave	  {d8 - d15}
 
 	add         r9, r0, r1, lsl #2
 	sub         r3, r9, #32
@@ -74,14 +78,20 @@ PreMDCT_LOOP:
 	bne       	PreMDCT_LOOP
 
 PreMDCT_END:
+	fldmfdd   sp!, {d8 - d15}
 	ldmia     sp!, {r4 - r11, pc}
 	@ENDP  @ |PreMDCT|
+	.fnend
 
 	.section .text
 	.global	PostMDCT
+	.fnstart
 
 PostMDCT:
 	stmdb     sp!, {r4 - r11, lr}
+	.save	  {r4 - r11, lr}
+	fstmfdd   sp!, {d8 - d15}
+	.vsave	  {d8 - d15}
 
 	add         r9, r0, r1, lsl #2
 	sub         r3, r9, #32
@@ -129,7 +139,8 @@ PostMDCT_LOOP:
 	bne       	PostMDCT_LOOP
 
 PostMDCT_END:
+	fldmfdd   sp!, {d8 - d15}
 	ldmia     sp!, {r4 - r11, pc}
 
 	@ENDP  		@ |PostMDCT|
-	.end
+	.fnend
