@@ -245,7 +245,6 @@ AudioFlinger::~AudioFlinger()
         audio_hw_device_t *dev = mAudioHwDevs[i];
         audio_hw_device_close(dev);
     }
-    mAudioHwDevs.clear();
 }
 
 audio_hw_device_t* AudioFlinger::findSuitableHwDev_l(uint32_t devices)
@@ -2982,7 +2981,6 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
     for (size_t i = 0; i < mOutputTracks.size(); i++) {
         mOutputTracks[i]->destroy();
     }
-    mOutputTracks.clear();
 }
 
 bool AudioFlinger::DuplicatingThread::threadLoop()
@@ -3297,7 +3295,7 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
             mCblk->~audio_track_cblk_t();   // destroy our shared-structure.
         }
     }
-    mCblkMemory.clear();            // and free the shared memory
+    mCblkMemory.clear();    // free the shared memory before releasing the heap it belongs to
     if (mClient != 0) {
         // Client destructor must run with AudioFlinger mutex locked
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
@@ -6919,7 +6917,7 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
             // unlike ~TrackBase(), mCblk is never a local new, so don't delete
             mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
         }
-        mCblkMemory.clear();            // and free the shared memory
+        mCblkMemory.clear();    // free the shared memory before releasing the heap it belongs to
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
         mClient.clear();
     }
