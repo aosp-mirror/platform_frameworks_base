@@ -840,7 +840,10 @@ public class AudioTrack
 
     /**
      * Stops playing the audio data.
-     *
+     * When used on an instance created in {@link #MODE_STREAM} mode, audio will stop playing
+     * after the last buffer that was written has been played. For an immediate stop, use
+     * {@link #pause()}, followed by {@link #flush()} to discard audio data that hasn't been played
+     * back yet.
      * @throws IllegalStateException
      */
     public void stop()
@@ -859,7 +862,7 @@ public class AudioTrack
     /**
      * Pauses the playback of the audio data. Data that has not been played
      * back will not be discarded. Subsequent calls to {@link #play} will play
-     * this data back.
+     * this data back. See {@link #flush()} to discard this data.
      *
      * @throws IllegalStateException
      */
