@@ -36,12 +36,27 @@ namespace android {
 EventThread::EventThread(const sp<SurfaceFlinger>& flinger)
     : mFlinger(flinger),
       mHw(flinger->graphicPlane(0).displayHardware()),
+      mLastVSyncTimestamp(0),
       mDeliveredEvents(0)
 {
 }
 
 void EventThread::onFirstRef() {
     run("EventThread", PRIORITY_URGENT_DISPLAY + PRIORITY_MORE_FAVORABLE);
+}
+
+sp<DisplayEventConnection> EventThread::createEventConnection() const {
+    return new DisplayEventConnection(const_cast<EventThread*>(this));
+}
+
+nsecs_t EventThread::getLastVSyncTimestamp() const {
+    Mutex::Autolock _l(mLock);
+    return mLastVSyncTimestamp;
+}
+
+nsecs_t EventThread::getVSyncPeriod() const {
+    return mHw.getRefreshPeriod();
+
 }
 
 status_t EventThread::registerDisplayEventConnection(
@@ -80,8 +95,11 @@ void EventThread::setVsyncRate(uint32_t count,
         Mutex::Autolock _l(mLock);
         ConnectionInfo* info = getConnectionInfoLocked(connection);
         if (info) {
-            info->count = (count == 0) ? -1 : count;
-            mCondition.signal();
+            const int32_t new_count = (count == 0) ? -1 : count;
+            if (info->count != new_count) {
+                info->count = new_count;
+                mCondition.signal();
+            }
         }
     }
 }
@@ -90,10 +108,8 @@ void EventThread::requestNextVsync(
         const wp<DisplayEventConnection>& connection) {
     Mutex::Autolock _l(mLock);
     ConnectionInfo* info = getConnectionInfoLocked(connection);
-    if (info) {
-        if (info->count < 0) {
-            info->count = 0;
-        }
+    if (info && info->count < 0) {
+        info->count = 0;
         mCondition.signal();
     }
 }
@@ -132,6 +148,7 @@ bool EventThread::threadLoop() {
             timestamp = mHw.waitForRefresh();
             mLock.lock();
             mDeliveredEvents++;
+            mLastVSyncTimestamp = timestamp;
 
             // now see if we still need to report this VSYNC event
             bool reportVsync = false;

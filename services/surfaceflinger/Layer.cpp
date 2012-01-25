@@ -97,7 +97,12 @@ void Layer::onFirstRef()
     mSurfaceTexture = new SurfaceTextureLayer(mTextureName, this);
     mSurfaceTexture->setFrameAvailableListener(new FrameQueuedListener(this));
     mSurfaceTexture->setSynchronousMode(true);
+#ifdef USE_TRIPLE_BUFFERING
+#warning "using triple buffering"
+    mSurfaceTexture->setBufferCountServer(3);
+#else
     mSurfaceTexture->setBufferCountServer(2);
+#endif
 }
 
 Layer::~Layer()
