@@ -651,19 +651,7 @@ public final class InputMethodManager {
                 }
             }
             
-            if (mServedInputConnection != null) {
-                // We need to tell the previously served view that it is no
-                // longer the input target, so it can reset its state.  Schedule
-                // this call on its window's Handler so it will be on the correct
-                // thread and outside of our lock.
-                Handler vh = mServedView.getHandler();
-                if (vh != null) {
-                    // This will result in a call to reportFinishInputConnection()
-                    // below.
-                    vh.sendMessage(vh.obtainMessage(ViewRootImpl.FINISH_INPUT_CONNECTION,
-                            mServedInputConnection));
-                }
-            }
+            notifyInputConnectionFinished();
             
             mServedView = null;
             mCompletions = null;
@@ -671,7 +659,25 @@ public final class InputMethodManager {
             clearConnectionLocked();
         }
     }
-    
+
+    /**
+     * Notifies the served view that the current InputConnection will no longer be used.
+     */
+    private void notifyInputConnectionFinished() {
+        if (mServedView != null && mServedInputConnection != null) {
+            // We need to tell the previously served view that it is no
+            // longer the input target, so it can reset its state.  Schedule
+            // this call on its window's Handler so it will be on the correct
+            // thread and outside of our lock.
+            Handler vh = mServedView.getHandler();
+            if (vh != null) {
+                // This will result in a call to reportFinishInputConnection() below.
+                vh.sendMessage(vh.obtainMessage(ViewRootImpl.FINISH_INPUT_CONNECTION,
+                        mServedInputConnection));
+            }
+        }
+    }
+
     /**
      * Called from the FINISH_INPUT_CONNECTION message above.
      * @hide
@@ -681,7 +687,7 @@ public final class InputMethodManager {
             ic.finishComposingText();
         }
     }
-    
+
     public void displayCompletions(View view, CompletionInfo[] completions) {
         checkFocus();
         synchronized (mH) {
@@ -831,7 +837,7 @@ public final class InputMethodManager {
      * shown with {@link #SHOW_FORCED}.
      */
     public static final int HIDE_NOT_ALWAYS = 0x0002;
-    
+
     /**
      * Synonym for {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}
      * without a result: request to hide the soft input window from the
@@ -993,7 +999,7 @@ public final class InputMethodManager {
         tba.fieldId = view.getId();
         InputConnection ic = view.onCreateInputConnection(tba);
         if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
-        
+
         synchronized (mH) {
             // Now that we are locked again, validate that our state hasn't
             // changed.
@@ -1012,6 +1018,8 @@ public final class InputMethodManager {
             // Hook 'em up and let 'er rip.
             mCurrentTextBoxAttribute = tba;
             mServedConnecting = false;
+            // Notify the served view that its previous input connection is finished
+            notifyInputConnectionFinished();
             mServedInputConnection = ic;
             IInputContext servedContext;
             if (ic != null) {
@@ -1115,7 +1123,7 @@ public final class InputMethodManager {
         }
     }
 
-    void scheduleCheckFocusLocked(View view) {
+    static void scheduleCheckFocusLocked(View view) {
         Handler vh = view.getHandler();
         if (vh != null && !vh.hasMessages(ViewRootImpl.CHECK_FOCUS)) {
             // This will result in a call to checkFocus() below.
