@@ -60,6 +60,10 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.Selection;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -363,38 +367,125 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * InputConnection used for ContentEditable. This captures the 'delete'
-     * commands and sends delete key presses.
+     * InputConnection used for ContentEditable. This captures changes
+     * to the text and sends them either as key strokes or text changes.
      */
     private class WebViewInputConnection extends BaseInputConnection {
-        public WebViewInputConnection() {
-            super(WebView.this, false);
-        }
+        // Used for mapping characters to keys typed.
+        private KeyCharacterMap mKeyCharacterMap;
 
-        private void sendKeyPress(int keyCode) {
-            long eventTime = SystemClock.uptimeMillis();
-            sendKeyEvent(new KeyEvent(eventTime, eventTime,
-                    KeyEvent.ACTION_DOWN, keyCode, 0, 0,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                    KeyEvent.FLAG_SOFT_KEYBOARD));
-            sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
-                    KeyEvent.ACTION_UP, keyCode, 0, 0,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                    KeyEvent.FLAG_SOFT_KEYBOARD));
+        public WebViewInputConnection() {
+            super(WebView.this, true);
         }
 
         @Override
-        public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-            // Look for one-character delete and send it as a key press.
-            if (beforeLength == 1 && afterLength == 0) {
-                sendKeyPress(KeyEvent.KEYCODE_DEL);
-            } else if (beforeLength == 0 && afterLength == 1){
-                sendKeyPress(KeyEvent.KEYCODE_FORWARD_DEL);
-            } else if (mWebViewCore != null) {
-                mWebViewCore.sendMessage(EventHub.DELETE_SURROUNDING_TEXT,
-                        beforeLength, afterLength);
+        public boolean setComposingText(CharSequence text, int newCursorPosition) {
+            Editable editable = getEditable();
+            int start = getComposingSpanStart(editable);
+            int end = getComposingSpanEnd(editable);
+            if (start < 0 || end < 0) {
+                start = Selection.getSelectionStart(editable);
+                end = Selection.getSelectionEnd(editable);
             }
-            return super.deleteSurroundingText(beforeLength, afterLength);
+            if (end < start) {
+                int temp = end;
+                end = start;
+                start = temp;
+            }
+            setNewText(start, end, text);
+            return super.setComposingText(text, newCursorPosition);
+        }
+
+        @Override
+        public boolean commitText(CharSequence text, int newCursorPosition) {
+            setComposingText(text, newCursorPosition);
+            finishComposingText();
+            return true;
+        }
+
+        @Override
+        public boolean deleteSurroundingText(int leftLength, int rightLength) {
+            Editable editable = getEditable();
+            int cursorPosition = Selection.getSelectionEnd(editable);
+            int startDelete = Math.max(0, cursorPosition - leftLength);
+            int endDelete = Math.min(editable.length(),
+                    cursorPosition + rightLength);
+            setNewText(startDelete, endDelete, "");
+            return super.deleteSurroundingText(leftLength, rightLength);
+        }
+
+        /**
+         * Sends a text change to webkit indirectly. If it is a single-
+         * character add or delete, it sends it as a key stroke. If it cannot
+         * be represented as a key stroke, it sends it as a field change.
+         * @param start The start offset (inclusive) of the text being changed.
+         * @param end The end offset (exclusive) of the text being changed.
+         * @param text The new text to replace the changed text.
+         */
+        private void setNewText(int start, int end, CharSequence text) {
+            Editable editable = getEditable();
+            CharSequence original = editable.subSequence(start, end);
+            boolean isCharacterAdd = false;
+            boolean isCharacterDelete = false;
+            int textLength = text.length();
+            int originalLength = original.length();
+            if (textLength > originalLength) {
+                isCharacterAdd = (textLength == originalLength + 1)
+                        && TextUtils.regionMatches(text, 0, original, 0,
+                                originalLength);
+            } else if (originalLength > textLength) {
+                isCharacterDelete = (textLength == originalLength - 1)
+                        && TextUtils.regionMatches(text, 0, original, 0,
+                                textLength);
+            }
+            if (isCharacterAdd) {
+                sendCharacter(text.charAt(textLength - 1));
+                mTextGeneration++;
+            } else if (isCharacterDelete) {
+                sendDeleteKey();
+                mTextGeneration++;
+            } else if (textLength != originalLength ||
+                    !TextUtils.regionMatches(text, 0, original, 0,
+                            textLength)) {
+                // Send a message so that key strokes and text replacement
+                // do not come out of order.
+                Message replaceMessage = mPrivateHandler.obtainMessage(
+                        REPLACE_TEXT, start,  end, text.toString());
+                mPrivateHandler.sendMessage(replaceMessage);
+            }
+        }
+
+        /**
+         * Send a single character to the WebView as a key down and up event.
+         * @param c The character to be sent.
+         */
+        private void sendCharacter(char c) {
+            if (mKeyCharacterMap == null) {
+                mKeyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+            }
+            char[] chars = new char[1];
+            chars[0] = c;
+            KeyEvent[] events = mKeyCharacterMap.getEvents(chars);
+            if (events != null) {
+                for (KeyEvent event : events) {
+                    sendKeyEvent(event);
+                }
+            }
+        }
+
+        /**
+         * Send the delete character as a key down and up event.
+         */
+        private void sendDeleteKey() {
+            long eventTime = SystemClock.uptimeMillis();
+            sendKeyEvent(new KeyEvent(eventTime, eventTime,
+                    KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD));
+            sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+                    KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL, 0, 0,
+                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                    KeyEvent.FLAG_SOFT_KEYBOARD));
         }
     }
 
@@ -799,6 +890,8 @@ public class WebView extends AbsoluteLayout
     static final int EXIT_FULLSCREEN_VIDEO              = 140;
 
     static final int COPY_TO_CLIPBOARD                  = 141;
+    static final int INIT_EDIT_FIELD                    = 142;
+    static final int REPLACE_TEXT                       = 143;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = HIT_TEST_RESULT;
@@ -4951,12 +5044,18 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+        outAttrs.inputType = EditorInfo.IME_FLAG_NO_FULLSCREEN
                 | EditorInfo.TYPE_CLASS_TEXT
-                | EditorInfo.TYPE_TEXT_VARIATION_NORMAL;
+                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+                | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT
+                | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+
         if (mInputConnection == null) {
             mInputConnection = new WebViewInputConnection();
         }
+        outAttrs.initialCapsMode = mInputConnection.getCursorCapsMode(InputType.TYPE_CLASS_TEXT);
         return mInputConnection;
     }
 
@@ -8963,6 +9062,31 @@ public class WebView extends AbsoluteLayout
                     copyToClipboard((String) msg.obj);
                     break;
 
+                case INIT_EDIT_FIELD:
+                    if (mInputConnection != null) {
+                        mTextGeneration = 0;
+                        String text = (String)msg.obj;
+                        mInputConnection.beginBatchEdit();
+                        Editable editable = mInputConnection.getEditable();
+                        editable.replace(0, editable.length(), text);
+                        int start = msg.arg1;
+                        int end = msg.arg2;
+                        mInputConnection.setComposingRegion(end, end);
+                        mInputConnection.setSelection(start, end);
+                        mInputConnection.endBatchEdit();
+                    }
+                    break;
+
+                case REPLACE_TEXT:{
+                    String text = (String)msg.obj;
+                    int start = msg.arg1;
+                    int end = msg.arg2;
+                    int cursorPosition = start + text.length();
+                    replaceTextfieldText(start, end, text,
+                            cursorPosition, cursorPosition);
+                    break;
+                }
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -9088,10 +9212,13 @@ public class WebView extends AbsoluteLayout
      */
     private void updateTextSelectionFromMessage(int nodePointer,
             int textGeneration, WebViewCore.TextSelectionData data) {
-        if (inEditingMode()
-                && mWebTextView.isSameTextField(nodePointer)
-                && textGeneration == mTextGeneration) {
-            mWebTextView.setSelectionFromWebKit(data.mStart, data.mEnd);
+        if (textGeneration == mTextGeneration) {
+            if (inEditingMode()
+                    && mWebTextView.isSameTextField(nodePointer)) {
+                mWebTextView.setSelectionFromWebKit(data.mStart, data.mEnd);
+            } else if (mInputConnection != null){
+                mInputConnection.setSelection(data.mStart, data.mEnd);
+            }
         }
     }
 
