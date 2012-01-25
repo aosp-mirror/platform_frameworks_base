@@ -52,13 +52,6 @@ public class RenderState extends SceneGraphBase {
         mRaster = pr;
     }
 
-    public RenderState(ProgramVertex pv,
-                       ProgramFragment pf,
-                       ProgramStore ps,
-                       ProgramRaster pr) {
-        // Just to fix the build for now
-    }
-
     public RenderState(RenderState r) {
         mVertex = r.mVertex;
         mFragment = r.mFragment;
