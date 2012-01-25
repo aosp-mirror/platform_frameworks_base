@@ -328,8 +328,11 @@ public abstract class DataConnection extends StateMachine {
         String reason = null;
 
         if (dp.onCompletedMsg != null) {
+            // Get ApnContext, but only valid on GSM devices this is a string on CDMA devices.
             Message msg = dp.onCompletedMsg;
-            alreadySent = (ApnContext)msg.obj;
+            if (msg.obj instanceof ApnContext) {
+                alreadySent = (ApnContext)msg.obj;
+            }
             reason = dp.reason;
             if (VDBG) {
                 log(String.format("msg=%s msg.obj=%s", msg.toString(),
