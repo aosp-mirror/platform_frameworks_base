@@ -238,6 +238,15 @@ public abstract class HardwareRenderer {
     private static native void nSetupShadersDiskCache(String cacheFile);
 
     /**
+     * Notifies EGL that the frame is about to be rendered.
+     */
+    private static void beginFrame() {
+        nBeginFrame();
+    }
+
+    private static native void nBeginFrame();
+
+    /**
      * Interface used to receive callbacks whenever a view is drawn by
      * a hardware renderer instance.
      */
@@ -808,6 +817,7 @@ public abstract class HardwareRenderer {
         }        
         
         void onPreDraw(Rect dirty) {
+            
         }
 
         void onPostDraw() {
@@ -831,6 +841,8 @@ public abstract class HardwareRenderer {
                     if (surfaceState == SURFACE_STATE_UPDATED) {
                         dirty = null;
                     }
+
+                    beginFrame();
 
                     onPreDraw(dirty);
 

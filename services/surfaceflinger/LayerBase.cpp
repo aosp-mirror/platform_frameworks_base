@@ -471,6 +471,9 @@ void LayerBase::drawWithOpenGL(const Region& clip) const
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 {
     const Layer::State& s(drawingState());
+    s.transparentRegion.dump(result, "transparentRegion");
+    transparentRegionScreen.dump(result, "transparentRegionScreen");
+    visibleRegionScreen.dump(result, "visibleRegionScreen");
     snprintf(buffer, SIZE,
             "+ %s %p (%s)\n"
             "      "
@@ -491,6 +494,9 @@ void LayerBase::shortDump(String8& result, char* scratch, size_t size) const
     LayerBase::dump(result, scratch, size);
 }
 
+void LayerBase::dumpStats(String8& result, char* scratch, size_t SIZE) const
+{
+}
 
 // ---------------------------------------------------------------------------
 

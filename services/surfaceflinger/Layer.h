@@ -34,6 +34,7 @@
 #include "LayerBase.h"
 #include "SurfaceTextureLayer.h"
 #include "Transform.h"
+#include <utils/Timers.h>
 
 namespace android {
 
@@ -78,12 +79,15 @@ public:
     // LayerBaseClient interface
     virtual wp<IBinder> getSurfaceTextureBinder() const;
 
+    virtual void onLayerDisplayed();
+
     // only for debugging
     inline const sp<GraphicBuffer>& getActiveBuffer() const { return mActiveBuffer; }
 
 protected:
     virtual void onFirstRef();
     virtual void dump(String8& result, char* scratch, size_t size) const;
+    virtual void dumpStats(String8& result, char* buffer, size_t SIZE) const;
 
 private:
     friend class SurfaceTextureLayer;
@@ -110,6 +114,16 @@ private:
     uint32_t mCurrentTransform;
     uint32_t mCurrentScalingMode;
     bool mCurrentOpacity;
+    bool mFrameLatencyNeeded;
+    int mFrameLatencyOffset;
+    struct Statistics {
+        Statistics() : timestamp(0), set(0), vsync(0) { }
+        nsecs_t timestamp;  // buffer timestamp
+        nsecs_t set;        // buffer displayed timestamp
+        nsecs_t vsync;      // vsync immediately before set
+    };
+    // protected by mLock
+    Statistics mFrameStats[128];
 
     // constants
     PixelFormat mFormat;
@@ -121,9 +135,6 @@ private:
     bool mSecure;         // no screenshots
     bool mProtectedByApp; // application requires protected path to external sink
     Region mPostedDirtyRegion;
-
-    // binder thread, transaction thread
-    mutable Mutex mLock;
 };
 
 // ---------------------------------------------------------------------------
