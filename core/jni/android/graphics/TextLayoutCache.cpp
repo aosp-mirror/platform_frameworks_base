@@ -811,7 +811,7 @@ size_t TextLayoutEngine::shapeFontRun(SkPaint* paint, bool isRTL) {
     case HB_Script_Hebrew:
     case HB_Script_Bengali:
     case HB_Script_Thai:{
-        const uint16_t* text16 = (const uint16_t*)mShaperItem.string;
+        const uint16_t* text16 = (const uint16_t*)(mShaperItem.string + mShaperItem.item.pos);
         SkUnichar firstUnichar = SkUTF16_NextUnichar(&text16);
         baseGlyphCount = paint->getBaseGlyphCount(firstUnichar);
         break;
