@@ -1457,7 +1457,9 @@ public class ActivityManager {
             case DisplayMetrics.DENSITY_HIGH:
                 return DisplayMetrics.DENSITY_XHIGH;
             case DisplayMetrics.DENSITY_XHIGH:
-                return DisplayMetrics.DENSITY_MEDIUM * 2;
+                return DisplayMetrics.DENSITY_XXHIGH;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                return DisplayMetrics.DENSITY_XHIGH * 2;
             default:
                 // The density is some abnormal value.  Return some other
                 // abnormal value that is a reasonable scaling of it.
@@ -1491,7 +1493,9 @@ public class ActivityManager {
             case DisplayMetrics.DENSITY_HIGH:
                 return (size * DisplayMetrics.DENSITY_XHIGH) / DisplayMetrics.DENSITY_HIGH;
             case DisplayMetrics.DENSITY_XHIGH:
-                return (size * DisplayMetrics.DENSITY_MEDIUM * 2) / DisplayMetrics.DENSITY_XHIGH;
+                return (size * DisplayMetrics.DENSITY_XXHIGH) / DisplayMetrics.DENSITY_XHIGH;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                return (size * DisplayMetrics.DENSITY_XHIGH*2) / DisplayMetrics.DENSITY_XXHIGH;
             default:
                 // The density is some abnormal value.  Return some other
                 // abnormal value that is a reasonable scaling of it.
