@@ -1231,7 +1231,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
         sp<EffectModule> mEffect;           // pointer to controlled EffectModule
         sp<IEffectClient> mEffectClient;    // callback interface for client notifications
-        sp<Client>          mClient;        // client for shared memory allocation
+        /*const*/ sp<Client> mClient;       // client for shared memory allocation, see disconnect()
         sp<IMemory>         mCblkMemory;    // shared memory for control block
         effect_param_cblk_t* mCblk;         // control block for deferred parameter setting via shared memory
         uint8_t*            mBuffer;        // pointer to parameter area in shared memory
@@ -1403,7 +1403,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
     mutable     Mutex                               mLock;
 
-                DefaultKeyedVector< pid_t, wp<Client> >     mClients;
+                DefaultKeyedVector< pid_t, wp<Client> >     mClients;   // see ~Client()
 
                 mutable     Mutex                   mHardwareLock;
                 audio_hw_device_t*                  mPrimaryHardwareDev;
@@ -1429,6 +1429,10 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
                 float       masterVolume_l() const  { return mMasterVolume; }
                 bool        masterMute_l() const    { return mMasterMute; }
+
+private:
+    sp<Client>  registerPid_l(pid_t pid);    // always returns non-0
+
 };
 
 
