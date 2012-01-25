@@ -129,7 +129,7 @@ bool EventThread::threadLoop() {
 
             // at least one listener requested VSYNC
             mLock.unlock();
-            timestamp = mHw.waitForVSync();
+            timestamp = mHw.waitForRefresh();
             mLock.lock();
             mDeliveredEvents++;
 

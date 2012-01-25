@@ -76,7 +76,9 @@ public:
     uint32_t    getMaxViewportDims() const;
 
     // waits for the next vsync and returns the timestamp of when it happened
-    nsecs_t        waitForVSync() const;
+    nsecs_t     waitForRefresh() const;
+    nsecs_t     getRefreshPeriod() const;
+    nsecs_t     getRefreshTimestamp() const;
 
     uint32_t getPageFlipCount() const;
     EGLDisplay getEGLDisplay() const { return mDisplay; }
@@ -119,6 +121,7 @@ private:
     mutable Mutex   mFakeVSyncMutex;
     mutable nsecs_t mNextFakeVSync;
     nsecs_t         mRefreshPeriod;
+    mutable nsecs_t mLastHwVSync;
 
     HWComposer*     mHwc;
 

@@ -477,6 +477,26 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface surface,
     return result;
 }
 
+void EGLAPI eglBeginFrame(EGLDisplay dpy, EGLSurface surface) {
+    clearError();
+
+    egl_display_t const * const dp = validate_display(dpy);
+    if (!dp) {
+        return;
+    }
+
+    SurfaceRef _s(dp, surface);
+    if (!_s.get()) {
+        setError(EGL_BAD_SURFACE, EGL_FALSE);
+        return;
+    }
+
+    int64_t timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+
+    egl_surface_t const * const s = get_surface(surface);
+    native_window_set_buffers_timestamp(s->win.get(), timestamp);
+}
+
 // ----------------------------------------------------------------------------
 // Contexts
 // ----------------------------------------------------------------------------
