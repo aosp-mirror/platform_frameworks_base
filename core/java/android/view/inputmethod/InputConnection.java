@@ -140,7 +140,8 @@ public interface InputConnection {
     /**
      * Delete <var>beforeLength</var> characters of text before the current cursor
      * position, and delete <var>afterLength</var> characters of text after the
-     * current cursor position, excluding composing text.
+     * current cursor position, excluding composing text. Before and after refer
+     * to the order of the characters in the string, not to their visual representation.
      * 
      *
      * @param beforeLength The number of characters to be deleted before the
