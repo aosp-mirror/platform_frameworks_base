@@ -125,12 +125,6 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-
-import static javax.microedition.khronos.egl.EGL10.EGL_DEFAULT_DISPLAY;
-
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
  * can roll your own web browser or simply display some online content within your Activity.
@@ -975,9 +969,6 @@ public class WebView extends AbsoluteLayout
     private int mMaxAutoScrollY = 0;
     private Rect mScrollingLayerBounds = new Rect();
     private boolean mSentAutoScrollMessage = false;
-
-    // Temporary hack to work around the context removal upon memory pressure
-    private static boolean mIncrementEGLContextHack = false;
 
     // used for serializing asynchronously handled touch events.
     private final TouchEventQueue mTouchEventQueue = new TouchEventQueue();
@@ -4385,13 +4376,6 @@ public class WebView extends AbsoluteLayout
         }
 
         if (canvas.isHardwareAccelerated()) {
-            if (mIncrementEGLContextHack == false) {
-                mIncrementEGLContextHack = true;
-                EGL10 egl = (EGL10) EGLContext.getEGL();
-                EGLDisplay eglDisplay = egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
-                int[] version = new int[2];
-                egl.eglInitialize(eglDisplay, version);
-            }
             mZoomManager.setHardwareAccelerated();
         }
 
