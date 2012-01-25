@@ -789,12 +789,18 @@ public class WebView extends AbsoluteLayout
     // know to handle Shift and arrows natively first
     private boolean mAccessibilityScriptInjected;
 
-    static final boolean USE_JAVA_TEXT_SELECTION = true;
-    static final boolean DEBUG_TEXT_HANDLES = false;
-    private Region mTextSelectionRegion = new Region();
-    private Paint mTextSelectionPaint;
     private Drawable mSelectHandleLeft;
     private Drawable mSelectHandleRight;
+    private Rect mSelectCursorBase = new Rect();
+    private int mSelectCursorBaseLayerId;
+    private Rect mSelectCursorExtent = new Rect();
+    private int mSelectCursorExtentLayerId;
+    private Rect mSelectDraggingCursor;
+    private Point mSelectDraggingOffset = new Point();
+    static final int HANDLE_ID_START = 0;
+    static final int HANDLE_ID_END = 1;
+    static final int HANDLE_ID_BASE = 2;
+    static final int HANDLE_ID_EXTENT = 3;
 
     static boolean sDisableNavcache = false;
     // the color used to highlight the touch rectangles
@@ -2656,12 +2662,6 @@ public class WebView extends AbsoluteLayout
         return mZoomManager.getScale();
     }
 
-    // Called by JNI. Returns the scale to apply to the text selection handles
-    /* package */ float getTextHandleScale() {
-        float density = mContext.getResources().getDisplayMetrics().density;
-        return density / getScale();
-    }
-
     /**
      * Compute the reading level scale of the WebView
      * @param scale The current scale.
@@ -3852,6 +3852,16 @@ public class WebView extends AbsoluteLayout
         if (x == mScrollingLayerRect.left && y == mScrollingLayerRect.top) {
             return;
         }
+        if (mSelectingText) {
+            int dx = mScrollingLayerRect.left - x;
+            int dy = mScrollingLayerRect.top - y;
+            if (mSelectCursorBaseLayerId == mCurrentScrollingLayerId) {
+                mSelectCursorBase.offset(dx, dy);
+            }
+            if (mSelectCursorExtentLayerId == mCurrentScrollingLayerId) {
+                mSelectCursorExtent.offset(dx, dy);
+            }
+        }
         nativeScrollLayer(mCurrentScrollingLayerId, x, y);
         mScrollingLayerRect.left = x;
         mScrollingLayerRect.top = y;
@@ -4624,12 +4634,7 @@ public class WebView extends AbsoluteLayout
      * Select the word at the indicated content coordinates.
      */
     boolean selectText(int x, int y) {
-        if (!setUpSelect(true, x, y)) {
-            return false;
-        }
-        nativeSetExtendSelection();
-        mDrawSelectionPointer = false;
-        mTouchMode = TOUCH_DRAG_MODE;
+        mWebViewCore.sendMessage(EventHub.SELECT_WORD_AT, x, y);
         return true;
     }
 
@@ -4830,11 +4835,8 @@ public class WebView extends AbsoluteLayout
         int extras = DRAW_EXTRAS_NONE;
         if (mFindIsUp) {
             extras = DRAW_EXTRAS_FIND;
-        } else if (mSelectingText && (!USE_JAVA_TEXT_SELECTION || DEBUG_TEXT_HANDLES)) {
+        } else if (mSelectingText) {
             extras = DRAW_EXTRAS_SELECTION;
-            nativeSetSelectionPointer(mNativeClass,
-                    mDrawSelectionPointer,
-                    mZoomManager.getInvScale(), mSelectX, mSelectY - getTitleHeight());
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
@@ -4879,7 +4881,7 @@ public class WebView extends AbsoluteLayout
         }
 
         canvas.restoreToCount(saveCount);
-        if (mSelectingText && USE_JAVA_TEXT_SELECTION) {
+        if (mSelectingText) {
             drawTextSelectionHandles(canvas);
         }
 
@@ -4901,30 +4903,12 @@ public class WebView extends AbsoluteLayout
     }
 
     private void drawTextSelectionHandles(Canvas canvas) {
-        if (mTextSelectionPaint == null) {
-            mTextSelectionPaint = new Paint();
-            mTextSelectionPaint.setColor(HIGHLIGHT_COLOR);
-        }
-        mTextSelectionRegion.setEmpty();
-        nativeGetTextSelectionRegion(mNativeClass, mTextSelectionRegion);
-        Rect r = new Rect();
-        RegionIterator iter = new RegionIterator(mTextSelectionRegion);
-        Rect clip = canvas.getClipBounds();
-        while (iter.next(r)) {
-            r.set(contentToViewDimension(r.left),
-                    contentToViewDimension(r.top),
-                    contentToViewDimension(r.right),
-                    contentToViewDimension(r.bottom));
-            if (r.intersect(clip)) {
-                canvas.drawRect(r, mTextSelectionPaint);
-            }
-        }
         if (mSelectHandleLeft == null) {
             mSelectHandleLeft = mContext.getResources().getDrawable(
                     com.android.internal.R.drawable.text_select_handle_left);
         }
         int[] handles = new int[4];
-        nativeGetSelectionHandles(mNativeClass, handles);
+        getSelectionHandles(handles);
         int start_x = contentToViewDimension(handles[0]);
         int start_y = contentToViewDimension(handles[1]);
         int end_x = contentToViewDimension(handles[2]);
@@ -4942,12 +4926,29 @@ public class WebView extends AbsoluteLayout
         mSelectHandleRight.setBounds(end_x, end_y,
                 end_x + mSelectHandleRight.getIntrinsicWidth(),
                 end_y + mSelectHandleRight.getIntrinsicHeight());
-        if (DEBUG_TEXT_HANDLES) {
-            mSelectHandleLeft.setAlpha(125);
-            mSelectHandleRight.setAlpha(125);
-        }
         mSelectHandleLeft.draw(canvas);
         mSelectHandleRight.draw(canvas);
+    }
+
+    /**
+     * Takes an int[4] array as an output param with the values being
+     * startX, startY, endX, endY
+     */
+    private void getSelectionHandles(int[] handles) {
+        handles[0] = mSelectCursorBase.right;
+        handles[1] = mSelectCursorBase.bottom -
+                (mSelectCursorBase.height() / 4);
+        handles[2] = mSelectCursorExtent.left;
+        handles[3] = mSelectCursorExtent.bottom
+                - (mSelectCursorExtent.height() / 4);
+        if (!nativeIsBaseFirst(mNativeClass)) {
+            int swap = handles[0];
+            handles[0] = handles[2];
+            handles[2] = swap;
+            swap = handles[1];
+            handles[1] = handles[3];
+            handles[3] = swap;
+        }
     }
 
     // draw history
@@ -5009,7 +5010,7 @@ public class WebView extends AbsoluteLayout
     /* package */ void deleteSelection(int start, int end) {
         mTextGeneration++;
         WebViewCore.TextSelectionData data
-                = new WebViewCore.TextSelectionData(start, end);
+                = new WebViewCore.TextSelectionData(start, end, 0);
         mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, mTextGeneration, 0,
                 data);
     }
@@ -5462,15 +5463,6 @@ public class WebView extends AbsoluteLayout
                         return pinScrollTo(mContentWidth, mScrollY, true, 0);
                 }
             }
-            if (mSelectingText) {
-                int xRate = keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                    ? -1 : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : 0;
-                int yRate = keyCode == KeyEvent.KEYCODE_DPAD_UP ?
-                    -1 : keyCode == KeyEvent.KEYCODE_DPAD_DOWN ? 1 : 0;
-                int multiplier = event.getRepeatCount() + 1;
-                moveSelection(xRate * multiplier, yRate * multiplier);
-                return true;
-            }
             if (navHandledKey(keyCode, 1, false, event.getEventTime())) {
                 playSoundEffect(keyCodeToSoundsEffect(keyCode));
                 return true;
@@ -5623,14 +5615,8 @@ public class WebView extends AbsoluteLayout
             mGotCenterDown = false;
 
             if (mSelectingText) {
-                if (mExtendSelection) {
-                    copySelection();
-                    selectionDone();
-                } else {
-                    mExtendSelection = true;
-                    nativeSetExtendSelection();
-                    invalidate(); // draw the i-beam instead of the arrow
-                }
+                copySelection();
+                selectionDone();
                 return true; // discard press if copy in progress
             }
 
@@ -5676,21 +5662,7 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    /*
-     * Enter selecting text mode, and see if CAB should be shown.
-     * Returns true if the WebView is now in
-     * selecting text mode (including if it was already in that mode, and this
-     * method did nothing).
-     */
-    private boolean setUpSelect(boolean selectWord, int x, int y) {
-        if (0 == mNativeClass) return false; // client isn't initialized
-        if (inFullScreenMode()) return false;
-        if (mSelectingText) return true;
-        nativeResetSelection();
-        if (selectWord && !nativeWordSelection(x, y)) {
-            selectionDone();
-            return false;
-        }
+    private boolean startSelectActionMode() {
         mSelectCallback = new SelectActionModeCallback();
         mSelectCallback.setWebView(this);
         if (startActionMode(mSelectCallback) == null) {
@@ -5699,52 +5671,41 @@ public class WebView extends AbsoluteLayout
             selectionDone();
             return false;
         }
-        mExtendSelection = false;
-        mSelectingText = mDrawSelectionPointer = true;
-        if (DEBUG_TEXT_HANDLES) {
-            // Debugging text handles requires running in software mode
-            setLayerType(LAYER_TYPE_SOFTWARE, null);
-        }
-        // don't let the picture change during text selection
-        WebViewCore.pauseUpdatePicture(mWebViewCore);
-        if (nativeHasCursorNode()) {
-            Rect rect = nativeCursorNodeBounds();
-            mSelectX = contentToViewX(rect.left);
-            mSelectY = contentToViewY(rect.top);
-        } else if (mLastTouchY > getVisibleTitleHeightImpl()) {
-            mSelectX = mScrollX + mLastTouchX;
-            mSelectY = mScrollY + mLastTouchY;
-        } else {
-            mSelectX = mScrollX + getViewWidth() / 2;
-            mSelectY = mScrollY + getViewHeightWithTitle() / 2;
-        }
-        nativeHideCursor();
-        mMinAutoScrollX = 0;
-        mMaxAutoScrollX = getViewWidth();
-        mMinAutoScrollY = 0;
-        mMaxAutoScrollY = getViewHeightWithTitle();
-        mCurrentScrollingLayerId = nativeScrollableLayer(viewToContentX(mSelectX),
-                viewToContentY(mSelectY), mScrollingLayerRect,
-                mScrollingLayerBounds);
-        if (mCurrentScrollingLayerId != 0) {
-            if (mScrollingLayerRect.left != mScrollingLayerRect.right) {
-                mMinAutoScrollX = Math.max(mMinAutoScrollX,
-                        contentToViewX(mScrollingLayerBounds.left));
-                mMaxAutoScrollX = Math.min(mMaxAutoScrollX,
-                        contentToViewX(mScrollingLayerBounds.right));
-            }
-            if (mScrollingLayerRect.top != mScrollingLayerRect.bottom) {
-                mMinAutoScrollY = Math.max(mMinAutoScrollY,
-                        contentToViewY(mScrollingLayerBounds.top));
-                mMaxAutoScrollY = Math.min(mMaxAutoScrollY,
-                        contentToViewY(mScrollingLayerBounds.bottom));
-            }
-        }
-        mMinAutoScrollX += SELECT_SCROLL;
-        mMaxAutoScrollX -= SELECT_SCROLL;
-        mMinAutoScrollY += SELECT_SCROLL;
-        mMaxAutoScrollY -= SELECT_SCROLL;
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         return true;
+    }
+
+    private void syncSelectionCursors() {
+        mSelectCursorBaseLayerId =
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_BASE, mSelectCursorBase);
+        mSelectCursorExtentLayerId =
+                nativeGetHandleLayerId(mNativeClass, HANDLE_ID_EXTENT, mSelectCursorExtent);
+    }
+
+    private boolean setupWebkitSelect() {
+        syncSelectionCursors();
+        if (!startSelectActionMode()) {
+            selectionDone();
+            return false;
+        }
+        mSelectingText = true;
+        mTouchMode = TOUCH_DRAG_MODE;
+        return true;
+    }
+
+    private void updateWebkitSelection() {
+        int[] handles = null;
+        if (mSelectingText) {
+            handles = new int[4];
+            handles[0] = mSelectCursorBase.centerX();
+            handles[1] = mSelectCursorBase.centerY();
+            handles[2] = mSelectCursorExtent.centerX();
+            handles[3] = mSelectCursorExtent.centerY();
+        } else {
+            nativeSetTextSelection(mNativeClass, 0);
+        }
+        mWebViewCore.removeMessages(EventHub.SELECT_TEXT);
+        mWebViewCore.sendMessageAtFrontOfQueue(EventHub.SELECT_TEXT, handles);
     }
 
     /**
@@ -5755,7 +5716,6 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void emulateShiftHeld() {
         checkThread();
-        setUpSelect(false, 0, 0);
     }
 
     /**
@@ -5764,17 +5724,8 @@ public class WebView extends AbsoluteLayout
      * @hide This is an implementation detail.
      */
     public void selectAll() {
-        if (0 == mNativeClass) return; // client isn't initialized
-        if (inFullScreenMode()) return;
-        if (!mSelectingText) {
-            // retrieve a point somewhere within the text
-            Point select = nativeSelectableText();
-            if (!selectText(select.x, select.y)) return;
-        }
-        nativeSelectAll();
-        mDrawSelectionPointer = false;
-        mExtendSelection = true;
-        invalidate();
+        // TODO
+        //mWebViewCore.sendMessage(EventHub.SELECT_ALL);
     }
 
     /**
@@ -5783,17 +5734,11 @@ public class WebView extends AbsoluteLayout
     void selectionDone() {
         if (mSelectingText) {
             mSelectingText = false;
-            if (DEBUG_TEXT_HANDLES) {
-                // Debugging text handles required running in software mode, set
-                // back to default now
-                setLayerType(LAYER_TYPE_NONE, null);
-            }
             // finish is idempotent, so this is fine even if selectionDone was
             // called by mSelectCallback.onDestroyActionMode
             mSelectCallback.finish();
             mSelectCallback = null;
-            WebViewCore.resumePriority();
-            WebViewCore.resumeUpdatePicture(mWebViewCore);
+            updateWebkitSelection();
             invalidate(); // redraw without selection
             mAutoScrollX = 0;
             mAutoScrollY = 0;
@@ -5821,7 +5766,7 @@ public class WebView extends AbsoluteLayout
                     .getSystemService(Context.CLIPBOARD_SERVICE);
             cm.setText(selection);
             int[] handles = new int[4];
-            nativeGetSelectionHandles(mNativeClass, handles);
+            getSelectionHandles(handles);
             mWebViewCore.sendMessage(EventHub.COPY_TEXT, handles);
         }
         invalidate(); // remove selection region and pointer
@@ -5836,7 +5781,7 @@ public class WebView extends AbsoluteLayout
     public void cutSelection() {
         copySelection();
         int[] handles = new int[4];
-        nativeGetSelectionHandles(mNativeClass, handles);
+        getSelectionHandles(handles);
         mWebViewCore.sendMessage(EventHub.DELETE_TEXT, handles);
     }
 
@@ -5854,7 +5799,7 @@ public class WebView extends AbsoluteLayout
             CharSequence pasteText = clipItem.getText();
             if (pasteText != null) {
                 int[] handles = new int[4];
-                nativeGetSelectionHandles(mNativeClass, handles);
+                getSelectionHandles(handles);
                 mWebViewCore.sendMessage(EventHub.DELETE_TEXT, handles);
                 mWebViewCore.sendMessage(EventHub.INSERT_TEXT,
                         pasteText.toString());
@@ -6407,12 +6352,26 @@ public class WebView extends AbsoluteLayout
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
                     if (mSelectingText) {
-                        mDrawSelectionPointer = false;
-                        mSelectionStarted = nativeStartSelection(contentX, contentY);
+                        mSelectionStarted = false;
+                        int shiftedY = y - getTitleHeight() + mScrollY;
+                        int shiftedX = x + mScrollX;
+                        if (mSelectHandleLeft.getBounds()
+                                .contains(shiftedX, shiftedY)) {
+                            mSelectionStarted = true;
+                            mSelectDraggingCursor = mSelectCursorBase;
+                        } else if (mSelectHandleRight.getBounds()
+                                .contains(shiftedX, shiftedY)) {
+                            mSelectionStarted = true;
+                            mSelectDraggingCursor = mSelectCursorExtent;
+                        }
+                        if (mSelectDraggingCursor != null) {
+                            mSelectDraggingOffset.set(
+                                    mSelectDraggingCursor.left - contentX,
+                                    mSelectDraggingCursor.top - contentY);
+                        }
                         if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "select=" + contentX + "," + contentY);
                         }
-                        invalidate();
                     }
                 }
                 // Trigger the link
@@ -6478,6 +6437,26 @@ public class WebView extends AbsoluteLayout
                         removeTouchHighlight();
                     }
                 }
+                if (mSelectingText && mSelectionStarted) {
+                    if (DebugFlags.WEB_VIEW) {
+                        Log.v(LOGTAG, "extend=" + contentX + "," + contentY);
+                    }
+                    ViewParent parent = getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
+                    }
+                    if (deltaX != 0 || deltaY != 0) {
+                        mSelectDraggingCursor.offsetTo(
+                                contentX + mSelectDraggingOffset.x,
+                                contentY + mSelectDraggingOffset.y);
+                        updateWebkitSelection();
+                        mLastTouchX = x;
+                        mLastTouchY = y;
+                        invalidate();
+                    }
+                    break;
+                }
+
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
@@ -6519,30 +6498,6 @@ public class WebView extends AbsoluteLayout
                             + " mTouchMode = " + mTouchMode);
                 } else {
                     mVelocityTracker.addMovement(ev);
-                }
-                if (mSelectingText && mSelectionStarted) {
-                    if (DebugFlags.WEB_VIEW) {
-                        Log.v(LOGTAG, "extend=" + contentX + "," + contentY);
-                    }
-                    ViewParent parent = getParent();
-                    if (parent != null) {
-                        parent.requestDisallowInterceptTouchEvent(true);
-                    }
-                    mAutoScrollX = x <= mMinAutoScrollX ? -SELECT_SCROLL
-                            : x >= mMaxAutoScrollX ? SELECT_SCROLL : 0;
-                    mAutoScrollY = y <= mMinAutoScrollY ? -SELECT_SCROLL
-                            : y >= mMaxAutoScrollY ? SELECT_SCROLL : 0;
-                    if ((mAutoScrollX != 0 || mAutoScrollY != 0)
-                            && !mSentAutoScrollMessage) {
-                        mSentAutoScrollMessage = true;
-                        mPrivateHandler.sendEmptyMessageDelayed(
-                                SCROLL_SELECT_TEXT, SELECT_SCROLL_INTERVAL);
-                    }
-                    if (deltaX != 0 || deltaY != 0) {
-                        nativeExtendSelection(contentX, contentY);
-                        invalidate();
-                    }
-                    break;
                 }
 
                 if (mTouchMode != TOUCH_DRAG_MODE &&
@@ -6758,7 +6713,7 @@ public class WebView extends AbsoluteLayout
                         } else {
                             if (mSelectingText) {
                                 // tapping on selection or controls does nothing
-                                if (!nativeHitSelection(contentX, contentY)) {
+                                if (!mSelectionStarted) {
                                     selectionDone();
                                 }
                                 break;
@@ -7055,6 +7010,12 @@ public class WebView extends AbsoluteLayout
         if (mOverScrollGlow != null) {
             mOverScrollGlow.releaseAll();
         }
+
+        if (mSelectingText) {
+            mSelectionStarted = false;
+            syncSelectionCursors();
+            invalidate();
+        }
     }
 
     private void cancelTouch() {
@@ -7119,8 +7080,6 @@ public class WebView extends AbsoluteLayout
     private int mTrackballYMove = 0;
     private boolean mSelectingText = false;
     private boolean mSelectionStarted = false;
-    private boolean mExtendSelection = false;
-    private boolean mDrawSelectionPointer = false;
     private static final int TRACKBALL_KEY_TIMEOUT = 1000;
     private static final int TRACKBALL_TIMEOUT = 200;
     private static final int TRACKBALL_WAIT = 100;
@@ -7189,14 +7148,8 @@ public class WebView extends AbsoluteLayout
             mTrackballDown = false;
             mTrackballUpTime = time;
             if (mSelectingText) {
-                if (mExtendSelection) {
-                    copySelection();
-                    selectionDone();
-                } else {
-                    mExtendSelection = true;
-                    nativeSetExtendSelection();
-                    invalidate(); // draw the i-beam instead of the arrow
-                }
+                copySelection();
+                selectionDone();
                 return true; // discard press if copy in progress
             }
             if (DebugFlags.WEB_VIEW) {
@@ -7238,42 +7191,6 @@ public class WebView extends AbsoluteLayout
         doTrackball(time, ev.getMetaState());
         return true;
     }
-
-    void moveSelection(float xRate, float yRate) {
-        if (mNativeClass == 0)
-            return;
-        int width = getViewWidth();
-        int height = getViewHeight();
-        mSelectX += xRate;
-        mSelectY += yRate;
-        int maxX = width + mScrollX;
-        int maxY = height + mScrollY;
-        mSelectX = Math.min(maxX, Math.max(mScrollX - SELECT_CURSOR_OFFSET
-                , mSelectX));
-        mSelectY = Math.min(maxY, Math.max(mScrollY - SELECT_CURSOR_OFFSET
-                , mSelectY));
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "moveSelection"
-                    + " mSelectX=" + mSelectX
-                    + " mSelectY=" + mSelectY
-                    + " mScrollX=" + mScrollX
-                    + " mScrollY=" + mScrollY
-                    + " xRate=" + xRate
-                    + " yRate=" + yRate
-                    );
-        }
-        nativeMoveSelection(viewToContentX(mSelectX), viewToContentY(mSelectY));
-        int scrollX = mSelectX < mScrollX ? -SELECT_CURSOR_OFFSET
-                : mSelectX > maxX - SELECT_CURSOR_OFFSET ? SELECT_CURSOR_OFFSET
-                : 0;
-        int scrollY = mSelectY < mScrollY ? -SELECT_CURSOR_OFFSET
-                : mSelectY > maxY - SELECT_CURSOR_OFFSET ? SELECT_CURSOR_OFFSET
-                : 0;
-        pinScrollBy(scrollX, scrollY, true, 0);
-        Rect select = new Rect(mSelectX, mSelectY, mSelectX + 1, mSelectY + 1);
-        requestRectangleOnScreen(select);
-        invalidate();
-   }
 
     private int scaleTrackballX(float xRate, int width) {
         int xMove = (int) (xRate / TRACKBALL_SCALE * width);
@@ -7328,21 +7245,6 @@ public class WebView extends AbsoluteLayout
         float yRate = mTrackballRemainsY * 1000 / elapsed;
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeight();
-        if (mSelectingText) {
-            if (!mDrawSelectionPointer) {
-                // The last selection was made by touch, disabling drawing the
-                // selection pointer. Allow the trackball to adjust the
-                // position of the touch control.
-                mSelectX = contentToViewX(nativeSelectionX());
-                mSelectY = contentToViewY(nativeSelectionY());
-                mDrawSelectionPointer = mExtendSelection = true;
-                nativeSetExtendSelection();
-            }
-            moveSelection(scaleTrackballX(xRate, viewWidth),
-                    scaleTrackballY(yRate, viewHeight));
-            mTrackballRemainsX = mTrackballRemainsY = 0;
-            return;
-        }
         float ax = Math.abs(xRate);
         float ay = Math.abs(yRate);
         float maxA = Math.max(ax, ay);
@@ -9204,6 +9106,18 @@ public class WebView extends AbsoluteLayout
                 mInputConnection.setSelection(data.mStart, data.mEnd);
             }
         }
+
+        nativeSetTextSelection(mNativeClass, data.mSelectTextPtr);
+        if (data.mSelectTextPtr != 0) {
+            if (!mSelectingText) {
+                setupWebkitSelect();
+            } else if (!mSelectionStarted) {
+                syncSelectionCursors();
+            }
+        } else {
+            selectionDone();
+        }
+        invalidate();
     }
 
     // Class used to use a dropdown for a <select> element
@@ -9952,7 +9866,6 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeMoveCursor(int keyCode, int count,
             boolean noScroll);
     private native int      nativeMoveGeneration();
-    private native void     nativeMoveSelection(int x, int y);
     /**
      * @return true if the page should get the shift and arrow keys, rather
      * than select text/navigation.
@@ -9962,15 +9875,8 @@ public class WebView extends AbsoluteLayout
      */
     private native boolean  nativePageShouldHandleShiftAndArrows();
     private native boolean  nativePointInNavCache(int x, int y, int slop);
-    // Like many other of our native methods, you must make sure that
-    // mNativeClass is not null before calling this method.
-    private native void     nativeResetSelection();
-    private native Point    nativeSelectableText();
-    private native void     nativeSelectAll();
     private native void     nativeSelectBestAt(Rect rect);
     private native void     nativeSelectAt(int x, int y);
-    private native int      nativeSelectionX();
-    private native int      nativeSelectionY();
     private native int      nativeFindIndex();
     private native void     nativeSetExtendSelection();
     private native void     nativeSetFindIsEmpty();
@@ -10026,12 +9932,14 @@ public class WebView extends AbsoluteLayout
     private native int      nativeGetBackgroundColor();
     native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
-    private native void     nativeGetTextSelectionRegion(int instance, Region region);
-    private native void     nativeGetSelectionHandles(int instance, int[] handles);
     /**
      * See {@link ComponentCallbacks2} for the trim levels and descriptions
      */
     private static native void     nativeOnTrimMemory(int level);
     private static native void nativeSetPauseDrawing(int instance, boolean pause);
     private static native boolean nativeDisableNavcache();
+    private static native void nativeSetTextSelection(int instance, int selection);
+    private static native int nativeGetHandleLayerId(int instance, int handle,
+            Rect cursorLocation);
+    private static native boolean nativeIsBaseFirst(int instance);
 }

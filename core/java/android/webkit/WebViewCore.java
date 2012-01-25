@@ -835,12 +835,14 @@ public final class WebViewCore {
     }
 
     static class TextSelectionData {
-        public TextSelectionData(int start, int end) {
+        public TextSelectionData(int start, int end, int selectTextPtr) {
             mStart = start;
             mEnd = end;
+            mSelectTextPtr = selectTextPtr;
         }
         int mStart;
         int mEnd;
+        int mSelectTextPtr;
     }
 
     static class TouchUpData {
@@ -1118,6 +1120,8 @@ public final class WebViewCore {
         static final int COPY_TEXT = 210;
         static final int DELETE_TEXT = 211;
         static final int INSERT_TEXT = 212;
+        static final int SELECT_TEXT = 213;
+        static final int SELECT_WORD_AT = 214;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1747,6 +1751,22 @@ public final class WebViewCore {
                         case INSERT_TEXT:
                             nativeInsertText(mNativeClass, (String) msg.obj);
                             break;
+                        case SELECT_TEXT: {
+                            int[] args = (int[]) msg.obj;
+                            if (args == null) {
+                                nativeClearTextSelection(mNativeClass);
+                            } else {
+                                nativeSelectText(mNativeClass, args[0],
+                                        args[1], args[2], args[3]);
+                            }
+                            break;
+                        }
+                        case SELECT_WORD_AT: {
+                            int x = msg.arg1;
+                            int y = msg.arg2;
+                            nativeSelectWordAt(mNativeClass, x, y);
+                            break;
+                        }
                     }
                 }
             };
@@ -2700,11 +2720,11 @@ public final class WebViewCore {
 
     // called by JNI
     private void updateTextSelection(int pointer, int start, int end,
-            int textGeneration) {
+            int textGeneration, int selectionPtr) {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
                 WebView.UPDATE_TEXT_SELECTION_MSG_ID, pointer, textGeneration,
-                new TextSelectionData(start, end)).sendToTarget();
+                new TextSelectionData(start, end, selectionPtr)).sendToTarget();
         }
     }
 
@@ -2771,7 +2791,7 @@ public final class WebViewCore {
         if (mWebView != null) {
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
-                    textGeneration, new TextSelectionData(selStart, selEnd))
+                    textGeneration, new TextSelectionData(selStart, selEnd, 0))
                     .sendToTarget();
         }
     }
@@ -3026,4 +3046,8 @@ public final class WebViewCore {
      */
     private native String nativeGetText(int nativeClass,
             int startX, int startY, int endX, int endY);
+    private native void nativeSelectText(int nativeClass,
+            int startX, int startY, int endX, int endY);
+    private native void nativeClearTextSelection(int nativeClass);
+    private native void nativeSelectWordAt(int nativeClass, int x, int y);
 }
