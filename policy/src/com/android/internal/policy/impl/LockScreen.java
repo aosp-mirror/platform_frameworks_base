@@ -23,6 +23,8 @@ import com.android.internal.widget.WaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -34,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import android.util.Log;
 import android.media.AudioManager;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
 
@@ -229,8 +232,16 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
                     // Start the Camera
                     Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                    mCallback.goToUnlockScreen();
+                    try {
+                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "can't dismiss keyguard on launch");
+                    }
+                    try {
+                        mContext.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w(TAG, "Camera application not found");
+                    }
                 } else {
                     toggleRingMode();
                     mUnlockWidgetMethods.updateResources();
