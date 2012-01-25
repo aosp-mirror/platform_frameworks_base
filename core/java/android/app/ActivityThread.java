@@ -3741,7 +3741,6 @@ public final class ActivityThread {
     }
 
     final void handleTrimMemory(int level) {
-        WindowManagerImpl.getDefault().trimMemory(level);
         ArrayList<ComponentCallbacks2> callbacks;
 
         synchronized (mPackages) {
@@ -3752,6 +3751,7 @@ public final class ActivityThread {
         for (int i=0; i<N; i++) {
             callbacks.get(i).onTrimMemory(level);
         }
+        WindowManagerImpl.getDefault().trimMemory(level);
     }
 
     private void setupGraphicsSupport(LoadedApk info) {
