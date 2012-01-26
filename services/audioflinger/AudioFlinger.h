@@ -828,7 +828,7 @@ private:
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
-                    uint32_t    prepareTracks_l(const SortedVector< wp<Track> >& activeTracks,
+                    mixer_state prepareTracks_l(const SortedVector< wp<Track> >& activeTracks,
                                                 Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
@@ -836,8 +836,7 @@ private:
         virtual     uint32_t    suspendSleepTimeUs();
 
                     AudioMixer* mAudioMixer;
-                    uint32_t    mPrevMixerStatus; // previous status (mixer_state) returned by
-                                                  // prepareTracks_l()
+                    mixer_state mPrevMixerStatus; // previous status returned by prepareTracks_l()
     };
 
     class DirectOutputThread : public PlaybackThread {
