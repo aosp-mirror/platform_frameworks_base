@@ -63,6 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:paddingRight="6dp"
                 >
 
                 <ImageView
@@ -87,7 +88,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="12dp"
-                android:paddingLeft="6dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:text="@string/status_bar_settings_settings_button"
@@ -99,6 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:paddingRight="6dp"
                 >
 
                 <ImageView
@@ -122,7 +123,6 @@
                 android:layout_gravity="left|center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="6dp"
                 android:paddingRight="12dp"
                 android:singleLine="true"
                 android:ellipsize="end"
