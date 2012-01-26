@@ -67,7 +67,7 @@ public:
 
     virtual     status_t    dump(int fd, const Vector<String16>& args);
 
-    // IAudioFlinger interface
+    // IAudioFlinger interface, in binder opcode order
     virtual sp<IAudioTrack> createTrack(
                                 pid_t pid,
                                 audio_stream_type_t streamType,
@@ -78,6 +78,17 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 audio_io_handle_t output,
+                                int *sessionId,
+                                status_t *status);
+
+    virtual sp<IAudioRecord> openRecord(
+                                pid_t pid,
+                                audio_io_handle_t input,
+                                uint32_t sampleRate,
+                                audio_format_t format,
+                                uint32_t channelMask,
+                                int frameCount,
+                                uint32_t flags,
                                 int *sessionId,
                                 status_t *status);
 
@@ -112,7 +123,6 @@ public:
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
     virtual     size_t      getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const;
-    virtual     unsigned int  getInputFramesLost(audio_io_handle_t ioHandle) const;
 
     virtual audio_io_handle_t openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
@@ -145,6 +155,8 @@ public:
     virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames,
                                        audio_io_handle_t output) const;
 
+    virtual     unsigned int  getInputFramesLost(audio_io_handle_t ioHandle) const;
+
     virtual int newAudioSessionId();
 
     virtual void acquireAudioSessionId(int audioSession);
@@ -171,48 +183,18 @@ public:
     virtual status_t moveEffects(int sessionId, audio_io_handle_t srcOutput,
                         audio_io_handle_t dstOutput);
 
-    enum hardware_call_state {
-        AUDIO_HW_IDLE = 0,
-        AUDIO_HW_INIT,
-        AUDIO_HW_OUTPUT_OPEN,
-        AUDIO_HW_OUTPUT_CLOSE,
-        AUDIO_HW_INPUT_OPEN,
-        AUDIO_HW_INPUT_CLOSE,
-        AUDIO_HW_STANDBY,
-        AUDIO_HW_SET_MASTER_VOLUME,
-        AUDIO_HW_GET_ROUTING,
-        AUDIO_HW_SET_ROUTING,
-        AUDIO_HW_GET_MODE,
-        AUDIO_HW_SET_MODE,
-        AUDIO_HW_GET_MIC_MUTE,
-        AUDIO_HW_SET_MIC_MUTE,
-        AUDIO_SET_VOICE_VOLUME,
-        AUDIO_SET_PARAMETER,
-    };
-
-    // record interface
-    virtual sp<IAudioRecord> openRecord(
-                                pid_t pid,
-                                audio_io_handle_t input,
-                                uint32_t sampleRate,
-                                audio_format_t format,
-                                uint32_t channelMask,
-                                int frameCount,
-                                uint32_t flags,
-                                int *sessionId,
-                                status_t *status);
-
     virtual     status_t    onTransact(
                                 uint32_t code,
                                 const Parcel& data,
                                 Parcel* reply,
                                 uint32_t flags);
 
+    // end of IAudioFlinger interface
+
+private:
                audio_mode_t getMode() const { return mMode; }
 
                 bool        btNrecIsOff() const { return mBtNrecIsOff; }
-
-private:
 
                             AudioFlinger();
     virtual                 ~AudioFlinger();
@@ -1408,6 +1390,26 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 mutable     Mutex                   mHardwareLock;
                 audio_hw_device_t*                  mPrimaryHardwareDev;
                 Vector<audio_hw_device_t*>          mAudioHwDevs;
+
+    enum hardware_call_state {
+        AUDIO_HW_IDLE = 0,
+        AUDIO_HW_INIT,
+        AUDIO_HW_OUTPUT_OPEN,
+        AUDIO_HW_OUTPUT_CLOSE,
+        AUDIO_HW_INPUT_OPEN,
+        AUDIO_HW_INPUT_CLOSE,
+        AUDIO_HW_STANDBY,
+        AUDIO_HW_SET_MASTER_VOLUME,
+        AUDIO_HW_GET_ROUTING,
+        AUDIO_HW_SET_ROUTING,
+        AUDIO_HW_GET_MODE,
+        AUDIO_HW_SET_MODE,
+        AUDIO_HW_GET_MIC_MUTE,
+        AUDIO_HW_SET_MIC_MUTE,
+        AUDIO_SET_VOICE_VOLUME,
+        AUDIO_SET_PARAMETER,
+    };
+
     mutable     hardware_call_state                 mHardwareStatus;    // for dump only
 
 
