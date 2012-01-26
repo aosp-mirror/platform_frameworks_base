@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="status_bar_clear_all_button" msgid="4661583896803349732">"Borrar todas"</string>
+    <string name="status_bar_clear_all_button" msgid="4661583896803349732">"Eliminar todas"</string>
     <string name="notifications_off_title" msgid="1860117696034775851">"Notificaciones desactivadas"</string>
     <string name="notifications_off_text" msgid="1439152806320786912">"Toca aquí para volver a activar las notificaciones."</string>
 </resources>

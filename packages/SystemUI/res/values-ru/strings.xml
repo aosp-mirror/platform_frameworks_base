@@ -36,7 +36,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Уведомления"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Подключите зарядное устройство"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Батарея разряжена."</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"Осталось: <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"Осталось <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Зарядка через порт USB не поддерживается."\n"Используйте только зарядное устройство из комплекта поставки."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Расход заряда батареи"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Настройки"</string>
