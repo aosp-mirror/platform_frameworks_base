@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;

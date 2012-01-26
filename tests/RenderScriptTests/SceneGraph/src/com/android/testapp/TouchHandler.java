@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +39,7 @@ import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
 
-import com.android.scenegraph.SceneManager.SceneLoadedCallback;
+import com.android.scenegraph.*;
 
 public class TouchHandler {
 

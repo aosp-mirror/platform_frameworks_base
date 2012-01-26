@@ -17,7 +17,7 @@
 #pragma rs java_package_name(com.android.scenegraph)
 
 //#define DEBUG_CAMERA
-#include "transform_def.rsh"
+#include "scenegraph_objects.rsh"
 
 void root(const rs_allocation *v_in, rs_allocation *v_out, const float *usrData) {
 

@@ -17,7 +17,7 @@
 #pragma rs java_package_name(com.android.scenegraph)
 
 #include "rs_graphics.rsh"
-#include "transform_def.rsh"
+#include "scenegraph_objects.rsh"
 
 rs_script gTransformScript;
 rs_script gCameraScript;

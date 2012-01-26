@@ -48,13 +48,7 @@ public class ColladaScene {
     private final int STATE_LAST_FOCUS = 1;
     boolean mLoadFromSD = false;
 
-    TestAppRS mRenderer;
     SceneLoadedCallback mCallback;
-
-    public ColladaScene(String name, TestAppRS renderer) {
-        modelName = name;
-        mRenderer = renderer;
-    }
 
     public ColladaScene(String name, SceneLoadedCallback cb) {
         modelName = name;
@@ -104,9 +98,6 @@ public class ColladaScene {
 
         protected void onPostExecute(Boolean result) {
             mActiveScene = sceneSource.getScene();
-            if (mRenderer != null) {
-                mRenderer.prepareToRender(mActiveScene);
-            }
             if (mCallback != null) {
                 mCallback.mLoadedScene = mActiveScene;
                 mCallback.run();

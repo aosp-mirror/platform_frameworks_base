@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import com.android.scenegraph.SceneManager;
+import com.android.scenegraph.*;
 import com.android.scenegraph.SceneManager.SceneLoadedCallback;
-import com.android.scenegraph.VertexShader;
-import com.android.scenegraph.VertexShader.Builder;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -157,9 +155,9 @@ public class TestAppRS {
             fb.addShaderTexture(TextureType.TEXTURE_CUBE, "reflection");
         }
         FragmentShader pf = fb.create();
-        pf.mProgram.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
+        pf.getProgram().bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
         if (addCubemap) {
-            pf.mProgram.bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
+            pf.getProgram().bindSampler(Sampler.CLAMP_LINEAR_MIP_LINEAR(mRS), 1);
         }
         return pf;
     }

@@ -59,7 +59,7 @@ public class VertexShader extends Shader {
             return this;
         }
 
-        VertexShader create() {
+        public VertexShader create() {
             if (mShader.mPerShaderConstants != null) {
                 mBuilder.addConstant(mShader.mPerShaderConstants);
             }
@@ -72,6 +72,10 @@ public class VertexShader extends Shader {
     }
 
     VertexShader() {
+    }
+
+    public ProgramVertex getProgram() {
+        return mProgram;
     }
 
     public ScriptField_VertexShader_s getRSData(RenderScriptGL rs, Resources res) {

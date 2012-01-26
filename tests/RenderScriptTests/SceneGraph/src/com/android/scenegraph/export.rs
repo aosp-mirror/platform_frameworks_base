@@ -18,8 +18,7 @@
 
 // The sole purpose of this script is to have various structs exposed
 // so that java reflected classes are generated
-#include "transform_def.rsh"
-#include "testApp.rsh"
+#include "scenegraph_objects.rsh"
 SgTransform *exportPtr;
 SgRenderState *sExport;
 SgRenderable *drExport;
@@ -29,11 +28,3 @@ SgLight *exportPtrLight;
 SgShaderParam *spExport;
 SgVertexShader *pvExport;
 SgFragmentShader *pfExport;
-
-FBlurOffsets *blurExport;
-VertexShaderInputs *iExport;
-VShaderParams *vConst;
-FShaderParams *fConst;
-FShaderLightParams *fConts2;
-VSParams *vConst2;
-VObjectParams *vConst3;

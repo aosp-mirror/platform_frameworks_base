@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +33,6 @@ import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
 
-import com.android.scenegraph.SceneManager.SceneLoadedCallback;
-
 // This is where the scenegraph and the rendered objects are initialized and used
 public class TestAppLoadingScreen {
 
@@ -45,7 +43,7 @@ public class TestAppLoadingScreen {
 
     private Resources mRes;
     private RenderScriptGL mRS;
-    private ScriptC_scenegraph mScript;
+    private ScriptC_test_app mScript;
 
     public TestAppLoadingScreen(RenderScriptGL rs, Resources res) {
         mRS = rs;
@@ -106,7 +104,7 @@ public class TestAppLoadingScreen {
     // Could also be used to do some custom renderscript work before handing things over
     // to the scenegraph
     void renderLoading() {
-        mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph);
+        mScript = new ScriptC_test_app(mRS, mRes, R.raw.test_app);
         mRS.bindRootScript(mScript);
     }
 
