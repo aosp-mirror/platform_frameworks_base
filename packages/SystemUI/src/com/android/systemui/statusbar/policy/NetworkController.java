@@ -892,13 +892,24 @@ public class NetworkController extends BroadcastReceiver {
             mDataSignalIconId = mPhoneSignalIconId = 0;
             mobileLabel = "";
         } else {
-            // We want to show the carrier name even if data is not being routed over that link, so
-            // we look only at the service state here.
-            mobileLabel = hasService() 
-                ? mNetworkName
-                : context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            if (DEBUG) {
-                mobileLabel += "yyyyYYYYyyyyYYYY";
+            // We want to show the carrier name if in service and either:
+            //   - We are connected to mobile data, or
+            //   - We are not connected to mobile data, as long as the *reason* packets are not
+            //     being routed over that link is that we have better connectivity via wifi.
+            // If data is disconnected for some other reason but wifi is connected, we show nothing.
+            // Otherwise (nothing connected) we show "No internet connection".
+
+            if (mDataConnected) {
+                mobileLabel = mNetworkName;
+            } else if (mWifiConnected) {
+                if (hasService()) {
+                    mobileLabel = mNetworkName;
+                } else {
+                    mobileLabel = "";
+                }
+            } else {
+                mobileLabel 
+                    = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             }
 
             // Now for things that should only be shown when actually using mobile data.
