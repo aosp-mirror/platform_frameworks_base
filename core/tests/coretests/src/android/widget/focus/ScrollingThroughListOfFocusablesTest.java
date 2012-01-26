@@ -20,10 +20,9 @@ import android.graphics.Rect;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.util.InternalSelectionView;
 import android.view.KeyEvent;
 import android.widget.ListView;
-import android.widget.focus.ListOfInternalSelectionViews;
-import android.util.InternalSelectionView;
 
 
 /**
@@ -51,6 +50,10 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
                     mNumRowsPerItem,      // 5 internally selectable rows per item
                     mScreenHeightFactor)); // each item is 5 / 4 screen height tall
         mListView = mActivity.getListView();
+        // Make sure we have some fading edge regardless of ListView style.
+        mListView.setVerticalFadingEdgeEnabled(true);
+        mListView.setFadingEdgeLength(10);
+        ensureNotInTouchMode();
     }
 
     @Override
@@ -67,12 +70,12 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
         assertEquals(mNumRowsPerItem, mActivity.getNumRowsPerItem());
     }
 
-    // TODO: needs to be adjusted to pass on non-HVGA displays
-    // @MediumTest
+    @MediumTest
     public void testScrollingDownInFirstItem() throws Exception {
 
         for (int i = 0; i < mNumRowsPerItem; i++) {
             assertEquals(0, mListView.getSelectedItemPosition());
+            
             InternalSelectionView view = mActivity.getSelectedView();
 
             assertInternallySelectedRowOnScreen(view, i);
@@ -90,12 +93,11 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
                     mListView.getSelectedView();
 
             // 1 pixel tolerance in case height / 4 is not an even number
-            final int fadingEdge = mListView.getBottom() - mListView.getVerticalFadingEdgeLength();
+            final int bottomFadingEdgeTop =
+                mListView.getBottom() - mListView.getVerticalFadingEdgeLength();
             assertTrue("bottom of view should be just above fading edge",
-                    view.getBottom() >= fadingEdge - 1 &&
-                    view.getBottom() <= fadingEdge);
+                    view.getBottom() == bottomFadingEdgeTop);
         }
-
 
         // make sure fading edge is the expected view
         {
@@ -108,7 +110,6 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
                     mActivity.getLabelForPosition(1), peekingChild.getLabel());
         }
     }
-
 
     @MediumTest
     public void testScrollingToSecondItem() throws Exception {
@@ -222,5 +223,13 @@ public class ScrollingThroughListOfFocusablesTest extends InstrumentationTestCas
                 mTempRect.top >= 0);
         assertTrue("bottom of row " + row + " should be on sreen",
                 mTempRect.bottom < mActivity.getScreenHeight());
+    }
+
+    private void ensureNotInTouchMode() {
+        // If in touch mode inject a DPAD down event to exit that mode.
+        if (mListView.isInTouchMode()) {
+            sendKeys(KeyEvent.KEYCODE_DPAD_DOWN);
+            getInstrumentation().waitForIdleSync();
+        }
     }
 }
