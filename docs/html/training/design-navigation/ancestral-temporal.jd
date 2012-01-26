@@ -21,6 +21,7 @@ next.link=wireframing.html
 
 <h2>You should also read</h2>
 <ul>
+  <li><a href="{@docRoot}design/patterns/navigation.html">Android Design: Navigation</a></li>
   <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
 </ul>
 
@@ -30,6 +31,11 @@ next.link=wireframing.html
 
 <p>Now that users can navigate <a href="descendant-lateral.html">deep into</a> the application's screen hierarchy, we need to provide a method for navigating up the hierarchy, to parent and ancestor screens. Additionally, we should ensure that temporal navigation via the BACK button is respected to respect Android conventions.</p>
 
+<div class="design-announce">
+<p><strong>Back/Up Navigation Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/patterns/navigation.html">Navigation</a> pattern guide.</p>
+</div>
 
 <h2 id="temporal-navigation">Support Temporal Navigation: <em>Back</em></h2>
 
@@ -49,7 +55,7 @@ next.link=wireframing.html
 
 <h2 id="ancestral-navigation">Provide Ancestral Navigation: <em>Up</em> and <em>Home</em></h2>
 
-<p>Before Android 3.0, the most common form of ancestral navigation was the <em>Home</em> metaphor. This was generally implemented as a <em>Home</em> item accessible via the device's MENU button, or a <em>Home</em> button at the top-left of the screen, usually as a component of the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>. Upon selecting <em>Home</em>, the user would be taken to the screen at the top of the screen hierarchy, generally known as the application's home screen.</p>
+<p>Before Android 3.0, the most common form of ancestral navigation was the <em>Home</em> metaphor. This was generally implemented as a <em>Home</em> item accessible via the device's MENU button, or a <em>Home</em> button at the top-left of the screen, usually as a component of the Action Bar (<a href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design). Upon selecting <em>Home</em>, the user would be taken to the screen at the top of the screen hierarchy, generally known as the application's home screen.</p>
 
 <p>Providing direct access to the application's home screen can give the user a sense of comfort and security. Regardless of where they are in the application, if they get lost in the app, they can select <em>Home</em> to arrive back at the familiar home screen.</p>
 
