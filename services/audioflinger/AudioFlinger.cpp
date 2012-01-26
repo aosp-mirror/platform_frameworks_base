@@ -985,8 +985,10 @@ void AudioFlinger::removeClient_l(pid_t pid)
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id, uint32_t device)
+AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id, uint32_t device,
+        type_t type)
     :   Thread(false),
+        mType(type),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
         mFrameSize(1), mFormat(AUDIO_FORMAT_INVALID), mStandby(false), mId(id), mExiting(false),
         mDevice(device)
@@ -1372,8 +1374,9 @@ void AudioFlinger::ThreadBase::checkSuspendOnEffectEnabled_l(const sp<EffectModu
 AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger,
                                              AudioStreamOut* output,
                                              int id,
-                                             uint32_t device)
-    :   ThreadBase(audioFlinger, id, device),
+                                             uint32_t device,
+                                             type_t type)
+    :   ThreadBase(audioFlinger, id, device, type),
         mMixBuffer(NULL), mSuspended(0), mBytesWritten(0), mOutput(output),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
@@ -1845,11 +1848,11 @@ uint32_t AudioFlinger::PlaybackThread::activeSleepTimeUs()
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
-    :   PlaybackThread(audioFlinger, output, id, device),
+AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output,
+        int id, uint32_t device, type_t type)
+    :   PlaybackThread(audioFlinger, output, id, device, type),
         mAudioMixer(NULL), mPrevMixerStatus(MIXER_IDLE)
 {
-    mType = ThreadBase::MIXER;
     mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
 
     // FIXME - Current mixer implementation only supports stereo output
@@ -2512,9 +2515,8 @@ uint32_t AudioFlinger::MixerThread::suspendSleepTimeUs()
 
 // ----------------------------------------------------------------------------
 AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
-    :   PlaybackThread(audioFlinger, output, id, device)
+    :   PlaybackThread(audioFlinger, output, id, device, DIRECT)
 {
-    mType = ThreadBase::DIRECT;
 }
 
 AudioFlinger::DirectOutputThread::~DirectOutputThread()
@@ -2991,10 +2993,11 @@ uint32_t AudioFlinger::DirectOutputThread::suspendSleepTimeUs()
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread, int id)
-    :   MixerThread(audioFlinger, mainThread->getOutput(), id, mainThread->device()), mWaitTimeMs(UINT_MAX)
+AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger,
+        AudioFlinger::MixerThread* mainThread, int id)
+    :   MixerThread(audioFlinger, mainThread->getOutput(), id, mainThread->device(), DUPLICATING),
+        mWaitTimeMs(UINT_MAX)
 {
-    mType = ThreadBase::DUPLICATING;
     addOutputTrack(mainThread);
 }
 
@@ -4265,11 +4268,9 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
                                          uint32_t channels,
                                          int id,
                                          uint32_t device) :
-    ThreadBase(audioFlinger, id, device),
+    ThreadBase(audioFlinger, id, device, RECORD),
     mInput(input), mTrack(NULL), mResampler(NULL), mRsmpOutBuffer(NULL), mRsmpInBuffer(NULL)
 {
-    mType = ThreadBase::RECORD;
-
     snprintf(mName, kNameLength, "AudioIn_%d", id);
 
     mReqChannelCount = popcount(channels);
