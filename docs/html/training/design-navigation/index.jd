@@ -14,7 +14,7 @@ next.link=screen-planning.html
 
 <p>This class is not specific to any particular version of the Android platform. It is also primarily design-focused and does not require knowledge of the Android SDK. That said, you should have experience using an Android device for a better understanding of the context in which Android applications run.</p>
 
-<p>You should also have basic familiarity with the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, used across most applications in devices running Android 3.0 and later.</p>
+<p>You should also have basic familiarity with the Action Bar (<a href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design), used across most applications in devices running Android 3.0 and later.</p>
 
 
 </div>
