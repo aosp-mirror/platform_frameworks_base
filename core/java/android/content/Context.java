@@ -1907,6 +1907,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.bluetooth.BluetoothAdapter} for using Bluetooth.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String BLUETOOTH_SERVICE = "bluetooth";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.net.sip.SipManager} for accessing the SIP related service.
      *
      * @see #getSystemService
