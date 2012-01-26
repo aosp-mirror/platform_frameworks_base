@@ -19,6 +19,8 @@ package android.database.sqlite;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 
+import android.content.CancelationSignal;
+import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
@@ -82,7 +84,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-public final class SQLiteConnection {
+public final class SQLiteConnection implements CancelationSignal.OnCancelListener {
     private static final String TAG = "SQLiteConnection";
     private static final boolean DEBUG = false;
 
@@ -107,6 +109,12 @@ public final class SQLiteConnection {
     private int mConnectionPtr;
 
     private boolean mOnlyAllowReadOnlyOperations;
+
+    // The number of times attachCancelationSignal has been called.
+    // Because SQLite statement execution can be re-entrant, we keep track of how many
+    // times we have attempted to attach a cancelation signal to the connection so that
+    // we can ensure that we detach the signal at the right time.
+    private int mCancelationSignalAttachCount;
 
     private static native int nativeOpen(String path, int openFlags, String label,
             boolean enableTrace, boolean enableProfile);
@@ -145,6 +153,8 @@ public final class SQLiteConnection {
             int connectionPtr, int statementPtr, int windowPtr,
             int startPos, int requiredPos, boolean countAllRows);
     private static native int nativeGetDbLookaside(int connectionPtr);
+    private static native void nativeCancel(int connectionPtr);
+    private static native void nativeResetCancel(int connectionPtr, boolean cancelable);
 
     private SQLiteConnection(SQLiteConnectionPool pool,
             SQLiteDatabaseConfiguration configuration,
@@ -345,11 +355,14 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public void execute(String sql, Object[] bindArgs) {
+    public void execute(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -361,7 +374,12 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    nativeExecute(mConnectionPtr, statement.mStatementPtr);
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -378,13 +396,16 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The value of the first column in the first row of the result set
      * as a <code>long</code>, or zero if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public long executeForLong(String sql, Object[] bindArgs) {
+    public long executeForLong(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -396,7 +417,12 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -413,13 +439,16 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The value of the first column in the first row of the result set
      * as a <code>String</code>, or null if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public String executeForString(String sql, Object[] bindArgs) {
+    public String executeForString(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -431,7 +460,12 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -449,14 +483,17 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The file descriptor for a shared memory region that contains
      * the value of the first column in the first row of the result set as a BLOB,
      * or null if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public ParcelFileDescriptor executeForBlobFileDescriptor(String sql, Object[] bindArgs) {
+    public ParcelFileDescriptor executeForBlobFileDescriptor(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -469,9 +506,14 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                int fd = nativeExecuteForBlobFileDescriptor(
-                        mConnectionPtr, statement.mStatementPtr);
-                return fd >= 0 ? ParcelFileDescriptor.adoptFd(fd) : null;
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    int fd = nativeExecuteForBlobFileDescriptor(
+                            mConnectionPtr, statement.mStatementPtr);
+                    return fd >= 0 ? ParcelFileDescriptor.adoptFd(fd) : null;
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -489,12 +531,15 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The number of rows that were changed.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public int executeForChangedRowCount(String sql, Object[] bindArgs) {
+    public int executeForChangedRowCount(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -507,8 +552,13 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                return nativeExecuteForChangedRowCount(
-                        mConnectionPtr, statement.mStatementPtr);
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    return nativeExecuteForChangedRowCount(
+                            mConnectionPtr, statement.mStatementPtr);
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -526,12 +576,15 @@ public final class SQLiteConnection {
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The row id of the last row that was inserted, or 0 if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public long executeForLastInsertedRowId(String sql, Object[] bindArgs) {
+    public long executeForLastInsertedRowId(String sql, Object[] bindArgs,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -544,8 +597,13 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                return nativeExecuteForLastInsertedRowId(
-                        mConnectionPtr, statement.mStatementPtr);
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    return nativeExecuteForLastInsertedRowId(
+                            mConnectionPtr, statement.mStatementPtr);
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -571,14 +629,17 @@ public final class SQLiteConnection {
      * so that it does.  Must be greater than or equal to <code>startPos</code>.
      * @param countAllRows True to count all rows that the query would return
      * regagless of whether they fit in the window.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The number of rows that were counted during query execution.  Might
      * not be all rows in the result set unless <code>countAllRows</code> is true.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
+     * @throws OperationCanceledException if the operation was canceled.
      */
     public int executeForCursorWindow(String sql, Object[] bindArgs,
-            CursorWindow window, int startPos, int requiredPos, boolean countAllRows) {
+            CursorWindow window, int startPos, int requiredPos, boolean countAllRows,
+            CancelationSignal cancelationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -597,14 +658,19 @@ public final class SQLiteConnection {
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                final long result = nativeExecuteForCursorWindow(
-                        mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
-                        startPos, requiredPos, countAllRows);
-                actualPos = (int)(result >> 32);
-                countedRows = (int)result;
-                filledRows = window.getNumRows();
-                window.setStartPosition(actualPos);
-                return countedRows;
+                attachCancelationSignal(cancelationSignal);
+                try {
+                    final long result = nativeExecuteForCursorWindow(
+                            mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
+                            startPos, requiredPos, countAllRows);
+                    actualPos = (int)(result >> 32);
+                    countedRows = (int)result;
+                    filledRows = window.getNumRows();
+                    window.setStartPosition(actualPos);
+                    return countedRows;
+                } finally {
+                    detachCancelationSignal(cancelationSignal);
+                }
             } finally {
                 releasePreparedStatement(statement);
             }
@@ -683,6 +749,46 @@ public final class SQLiteConnection {
     private void finalizePreparedStatement(PreparedStatement statement) {
         nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
         recyclePreparedStatement(statement);
+    }
+
+    private void attachCancelationSignal(CancelationSignal cancelationSignal) {
+        if (cancelationSignal != null) {
+            cancelationSignal.throwIfCanceled();
+
+            mCancelationSignalAttachCount += 1;
+            if (mCancelationSignalAttachCount == 1) {
+                // Reset cancelation flag before executing the statement.
+                nativeResetCancel(mConnectionPtr, true /*cancelable*/);
+
+                // After this point, onCancel() may be called concurrently.
+                cancelationSignal.setOnCancelListener(this);
+            }
+        }
+    }
+
+    private void detachCancelationSignal(CancelationSignal cancelationSignal) {
+        if (cancelationSignal != null) {
+            assert mCancelationSignalAttachCount > 0;
+
+            mCancelationSignalAttachCount -= 1;
+            if (mCancelationSignalAttachCount == 0) {
+                // After this point, onCancel() cannot be called concurrently.
+                cancelationSignal.setOnCancelListener(null);
+
+                // Reset cancelation flag after executing the statement.
+                nativeResetCancel(mConnectionPtr, false /*cancelable*/);
+            }
+        }
+    }
+
+    // CancelationSignal.OnCancelationListener callback.
+    // This method may be called on a different thread than the executing statement.
+    // However, it will only be called between calls to attachCancelationSignal and
+    // detachCancelationSignal, while a statement is executing.  We can safely assume
+    // that the SQLite connection is still alive.
+    @Override
+    public void onCancel() {
+        nativeCancel(mConnectionPtr);
     }
 
     private void bindArguments(PreparedStatement statement, Object[] bindArgs) {
@@ -822,8 +928,8 @@ public final class SQLiteConnection {
         long pageCount = 0;
         long pageSize = 0;
         try {
-            pageCount = executeForLong("PRAGMA page_count;", null);
-            pageSize = executeForLong("PRAGMA page_size;", null);
+            pageCount = executeForLong("PRAGMA page_count;", null, null);
+            pageSize = executeForLong("PRAGMA page_size;", null, null);
         } catch (SQLiteException ex) {
             // Ignore.
         }
@@ -834,15 +940,15 @@ public final class SQLiteConnection {
         // the main database which we have already described.
         CursorWindow window = new CursorWindow("collectDbStats");
         try {
-            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false);
+            executeForCursorWindow("PRAGMA database_list;", null, window, 0, 0, false, null);
             for (int i = 1; i < window.getNumRows(); i++) {
                 String name = window.getString(i, 1);
                 String path = window.getString(i, 2);
                 pageCount = 0;
                 pageSize = 0;
                 try {
-                    pageCount = executeForLong("PRAGMA " + name + ".page_count;", null);
-                    pageSize = executeForLong("PRAGMA " + name + ".page_size;", null);
+                    pageCount = executeForLong("PRAGMA " + name + ".page_count;", null, null);
+                    pageSize = executeForLong("PRAGMA " + name + ".page_size;", null, null);
                 } catch (SQLiteException ex) {
                     // Ignore.
                 }

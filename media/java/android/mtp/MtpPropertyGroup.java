@@ -191,7 +191,7 @@ class MtpPropertyGroup {
             // for now we are only reading properties from the "objects" table
             c = mProvider.query(mUri,
                             new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null);
+                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
             if (c != null && c.moveToNext()) {
                 return c.getString(1);
             } else {
@@ -211,7 +211,7 @@ class MtpPropertyGroup {
         try {
             c = mProvider.query(Audio.Media.getContentUri(mVolumeName),
                             new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null);
+                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
             if (c != null && c.moveToNext()) {
                 return c.getString(1);
             } else {
@@ -232,7 +232,7 @@ class MtpPropertyGroup {
             Uri uri = Audio.Genres.getContentUriForAudioId(mVolumeName, id);
             c = mProvider.query(uri,
                             new String [] { Files.FileColumns._ID, Audio.GenresColumns.NAME },
-                            null, null, null);
+                            null, null, null, null);
             if (c != null && c.moveToNext()) {
                 return c.getString(1);
             } else {
@@ -254,7 +254,7 @@ class MtpPropertyGroup {
             // for now we are only reading properties from the "objects" table
             c = mProvider.query(mUri,
                             new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null);
+                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
             if (c != null && c.moveToNext()) {
                 return new Long(c.getLong(1));
             }
@@ -323,7 +323,7 @@ class MtpPropertyGroup {
         try {
             // don't query if not necessary
             if (depth > 0 || handle == 0xFFFFFFFF || mColumns.length > 1) {
-                c = mProvider.query(mUri, mColumns, where, whereArgs, null);
+                c = mProvider.query(mUri, mColumns, where, whereArgs, null, null);
                 if (c == null) {
                     return new MtpPropertyList(0, MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
                 }

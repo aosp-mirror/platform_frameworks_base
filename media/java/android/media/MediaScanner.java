@@ -1035,7 +1035,7 @@ public class MediaScanner
                 // First read existing files from the files table
 
                 c = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
-                        where, selectionArgs, null);
+                        where, selectionArgs, null, null);
 
                 if (c != null) {
                     mWasEmptyPriorToScan = c.getCount() == 0;
@@ -1072,7 +1072,7 @@ public class MediaScanner
 
         // compute original size of images
         mOriginalCount = 0;
-        c = mMediaProvider.query(mImagesUri, ID_PROJECTION, null, null, null);
+        c = mMediaProvider.query(mImagesUri, ID_PROJECTION, null, null, null, null);
         if (c != null) {
             mOriginalCount = c.getCount();
             c.close();
@@ -1107,7 +1107,7 @@ public class MediaScanner
                     new String [] { "_data" },
                     null,
                     null,
-                    null);
+                    null, null);
             Log.v(TAG, "pruneDeadThumbnailFiles... " + c);
             if (c != null && c.moveToFirst()) {
                 do {
@@ -1472,7 +1472,7 @@ public class MediaScanner
             if (bestMatch.mRowId == 0) {
                 Cursor c = mMediaProvider.query(mAudioUri, ID_PROJECTION,
                         MediaStore.Files.FileColumns.DATA + "=?",
-                        new String[] { bestMatch.mPath }, null);
+                        new String[] { bestMatch.mPath }, null, null);
                 if (c != null) {
                     if (c.moveToNext()) {
                         bestMatch.mRowId = c.getLong(0);

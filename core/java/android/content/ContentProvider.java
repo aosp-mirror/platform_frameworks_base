@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.File;
@@ -174,28 +175,33 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return getContentProvider().getClass().getName();
         }
 
+        @Override
         public Cursor query(Uri uri, String[] projection,
-                String selection, String[] selectionArgs, String sortOrder) {
+                String selection, String[] selectionArgs, String sortOrder,
+                ICancelationSignal cancelationSignal) {
             enforceReadPermission(uri);
-            return ContentProvider.this.query(uri, projection, selection,
-                    selectionArgs, sortOrder);
+            return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
+                    CancelationSignal.fromTransport(cancelationSignal));
         }
 
+        @Override
         public String getType(Uri uri) {
             return ContentProvider.this.getType(uri);
         }
 
-
+        @Override
         public Uri insert(Uri uri, ContentValues initialValues) {
             enforceWritePermission(uri);
             return ContentProvider.this.insert(uri, initialValues);
         }
 
+        @Override
         public int bulkInsert(Uri uri, ContentValues[] initialValues) {
             enforceWritePermission(uri);
             return ContentProvider.this.bulkInsert(uri, initialValues);
         }
 
+        @Override
         public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             for (ContentProviderOperation operation : operations) {
@@ -210,17 +216,20 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return ContentProvider.this.applyBatch(operations);
         }
 
+        @Override
         public int delete(Uri uri, String selection, String[] selectionArgs) {
             enforceWritePermission(uri);
             return ContentProvider.this.delete(uri, selection, selectionArgs);
         }
 
+        @Override
         public int update(Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
             enforceWritePermission(uri);
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
         }
 
+        @Override
         public ParcelFileDescriptor openFile(Uri uri, String mode)
                 throws FileNotFoundException {
             if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
@@ -228,6 +237,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return ContentProvider.this.openFile(uri, mode);
         }
 
+        @Override
         public AssetFileDescriptor openAssetFile(Uri uri, String mode)
                 throws FileNotFoundException {
             if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
@@ -235,6 +245,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return ContentProvider.this.openAssetFile(uri, mode);
         }
 
+        @Override
         public Bundle call(String method, String arg, Bundle extras) {
             return ContentProvider.this.call(method, arg, extras);
         }
@@ -249,6 +260,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 throws FileNotFoundException {
             enforceReadPermission(uri);
             return ContentProvider.this.openTypedAssetFile(uri, mimeType, opts);
+        }
+
+        @Override
+        public ICancelationSignal createCancelationSignal() throws RemoteException {
+            return CancelationSignal.createTransport();
         }
 
         private void enforceReadPermission(Uri uri) {
@@ -539,6 +555,75 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      */
     public abstract Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder);
+
+    /**
+     * Implement this to handle query requests from clients with support for cancelation.
+     * This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     * <p>
+     * Example client call:<p>
+     * <pre>// Request a specific record.
+     * Cursor managedCursor = managedQuery(
+                ContentUris.withAppendedId(Contacts.People.CONTENT_URI, 2),
+                projection,    // Which columns to return.
+                null,          // WHERE clause.
+                null,          // WHERE clause value substitution
+                People.NAME + " ASC");   // Sort order.</pre>
+     * Example implementation:<p>
+     * <pre>// SQLiteQueryBuilder is a helper class that creates the
+        // proper SQL syntax for us.
+        SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
+
+        // Set the table we're querying.
+        qBuilder.setTables(DATABASE_TABLE_NAME);
+
+        // If the query ends in a specific record number, we're
+        // being asked for a specific record, so set the
+        // WHERE clause in our query.
+        if((URI_MATCHER.match(uri)) == SPECIFIC_MESSAGE){
+            qBuilder.appendWhere("_id=" + uri.getPathLeafId());
+        }
+
+        // Make the query.
+        Cursor c = qBuilder.query(mDb,
+                projection,
+                selection,
+                selectionArgs,
+                groupBy,
+                having,
+                sortOrder);
+        c.setNotificationUri(getContext().getContentResolver(), uri);
+        return c;</pre>
+     * <p>
+     * If you implement this method then you must also implement the version of
+     * {@link #query(Uri, String[], String, String[], String)} that does not take a cancelation
+     * provider to ensure correct operation on older versions of the Android Framework in
+     * which the cancelation signal overload was not available.
+     *
+     * @param uri The URI to query. This will be the full URI sent by the client;
+     *      if the client is requesting a specific record, the URI will end in a record number
+     *      that the implementation should parse and add to a WHERE or HAVING clause, specifying
+     *      that _id value.
+     * @param projection The list of columns to put into the cursor. If
+     *      null all columns are included.
+     * @param selection A selection criteria to apply when filtering rows.
+     *      If null then all rows are included.
+     * @param selectionArgs You may include ?s in selection, which will be replaced by
+     *      the values from selectionArgs, in order that they appear in the selection.
+     *      The values will be bound as Strings.
+     * @param sortOrder How the rows in the cursor should be sorted.
+     *      If null then the provider is free to define the sort order.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * when the query is executed.
+     * @return a Cursor or null.
+     */
+    public Cursor query(Uri uri, String[] projection,
+            String selection, String[] selectionArgs, String sortOrder,
+            CancelationSignal cancelationSignal) {
+        return query(uri, projection, selection, selectionArgs, sortOrder);
+    }
 
     /**
      * Implement this to handle requests for the MIME type of the data at the

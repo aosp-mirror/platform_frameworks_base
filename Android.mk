@@ -94,6 +94,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothHealthCallback.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
 	core/java/android/bluetooth/IBluetoothStateChangeCallback.aidl \
+	core/java/android/content/ICancelationSignal.aidl \
 	core/java/android/content/IClipboard.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
