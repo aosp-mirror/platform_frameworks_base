@@ -188,6 +188,14 @@ static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
     renderer->finish();
 }
 
+static jint android_view_GLES20Canvas_getStencilSize(JNIEnv* env, jobject clazz) {
+    return OpenGLRenderer::getStencilSize();
+}
+
+// ----------------------------------------------------------------------------
+// Functor
+// ----------------------------------------------------------------------------
+
 static bool android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, Functor *functor) {
     android::uirenderer::Rect dirty;
@@ -807,6 +815,8 @@ static JNINativeMethod gMethods[] = {
     { "nPrepare",           "(IZ)V",           (void*) android_view_GLES20Canvas_prepare },
     { "nPrepareDirty",      "(IIIIIZ)V",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
+
+    { "nGetStencilSize",    "()I",             (void*) android_view_GLES20Canvas_getStencilSize },
 
     { "nCallDrawGLFunction", "(II)Z",
             (void*) android_view_GLES20Canvas_callDrawGLFunction },

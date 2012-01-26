@@ -141,6 +141,8 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint);
 
+    ANDROID_API static uint32_t getStencilSize();
+
 protected:
     /**
      * Compose the layer defined in the current snapshot with the layer

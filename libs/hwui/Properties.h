@@ -37,6 +37,11 @@
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
 
+// Defines the size in bits of the stencil buffer
+// Note: We only want 1 bit, but in practice we'll get 8 bits on all GPUs
+//       for the foreseeable future
+#define STENCIL_BUFFER_SIZE 0
+
 /**
  * Debug level for app developers.
  */
