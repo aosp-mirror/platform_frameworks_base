@@ -9754,11 +9754,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void show() {
             if (!(mText instanceof Editable)) return;
 
-            updateSuggestions();
-            mCursorWasVisibleBeforeSuggestions = mCursorVisible;
-            setCursorVisible(false);
-            mIsShowingUp = true;
-            super.show();
+            if (updateSuggestions()) {
+                mCursorWasVisibleBeforeSuggestions = mCursorVisible;
+                setCursorVisible(false);
+                mIsShowingUp = true;
+                super.show();
+            }
         }
 
         @Override
@@ -9814,11 +9815,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             super.hide();
         }
 
-        private void updateSuggestions() {
+        private boolean updateSuggestions() {
             Spannable spannable = (Spannable) TextView.this.mText;
             SuggestionSpan[] suggestionSpans = getSuggestionSpans();
 
             final int nbSpans = suggestionSpans.length;
+            // Suggestions are shown after a delay: the underlying spans may have been removed
+            if (nbSpans == 0) return false;
 
             mNumberOfSuggestions = 0;
             int spanUnionStart = mText.length();
@@ -9904,6 +9907,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             mSuggestionsAdapter.notifyDataSetChanged();
+            return true;
         }
 
         private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
