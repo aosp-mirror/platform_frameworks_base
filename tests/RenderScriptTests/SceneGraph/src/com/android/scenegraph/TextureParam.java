@@ -34,22 +34,22 @@ import android.util.Log;
  */
 public class TextureParam extends ShaderParam {
 
-    Texture2D mTexture;
+    TextureBase mTexture;
 
     public TextureParam(String name) {
         super(name);
     }
 
-    public TextureParam(String name, Texture2D t) {
+    public TextureParam(String name, TextureBase t) {
         super(name);
         setTexture(t);
     }
 
-    public void setTexture(Texture2D t) {
+    public void setTexture(TextureBase t) {
         mTexture = t;
     }
 
-    public Texture2D getTexture() {
+    public TextureBase getTexture() {
         return mTexture;
     }
 

@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import android.content.res.Resources;
 import android.renderscript.*;
+import android.renderscript.ProgramFragment.Builder;
 import android.util.Log;
 
 /**
@@ -33,7 +34,10 @@ public abstract class Shader extends SceneGraphBase {
 
     protected HashMap<String, ShaderParam> mSourceParams;
     protected ArrayList<ShaderParam> mParamList;
+    protected ArrayList<String> mShaderTextureNames;
+    protected ArrayList<Program.TextureType > mShaderTextureTypes;
     protected ArrayList<String> mTextureNames;
+    protected ArrayList<Program.TextureType > mTextureTypes;
 
     protected Allocation mConstantBuffer;
     protected Allocation mConstantBufferParams;
@@ -41,7 +45,10 @@ public abstract class Shader extends SceneGraphBase {
     public Shader() {
         mSourceParams = new HashMap<String, ShaderParam>();
         mParamList = new ArrayList<ShaderParam>();
+        mShaderTextureNames = new ArrayList<String>();
+        mShaderTextureTypes = new ArrayList<Program.TextureType>();
         mTextureNames = new ArrayList<String>();
+        mTextureTypes = new ArrayList<Program.TextureType>();
     }
 
     public void appendSourceParams(ShaderParam p) {
@@ -56,7 +63,7 @@ public abstract class Shader extends SceneGraphBase {
         return mPerObjConstants;
     }
 
-    void linkConstants(RenderScriptGL rs) {
+    void linkConstants(RenderScriptGL rs, Resources res) {
         if (mPerShaderConstants == null) {
             return;
         }

@@ -231,7 +231,7 @@ public class Renderable extends RenderableBase {
             mRsFieldItem.transformMatrix = mTransform.getRSData(rs).getAllocation();
         }
         mRsFieldItem.name = SceneManager.getStringAsAllocation(rs, getName());
-        mRsFieldItem.render_state = mRenderState.getRSData(rs).getAllocation();
+        mRsFieldItem.render_state = mRenderState.getRSData(rs, res).getAllocation();
         mRsFieldItem.bVolInitialized = 0;
         mRsFieldItem.cullType = mCullType;
     }
