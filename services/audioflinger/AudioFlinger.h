@@ -727,7 +727,7 @@ private:
                                     int sessionId,
                                     status_t *status);
 
-                    AudioStreamOut* getOutput();
+                    AudioStreamOut* getOutput() const;
                     AudioStreamOut* clearOutput();
                     virtual audio_stream_t* stream();
 
@@ -804,7 +804,7 @@ private:
         SortedVector< sp<Track> >       mTracks;
         // mStreamTypes[] uses 1 additional stream type internally for the OutputTrack used by DuplicatingThread
         stream_type_t                   mStreamTypes[AUDIO_STREAM_CNT + 1];
-        AudioStreamOut*                 mOutput;
+        AudioStreamOut                  *mOutput;
         float                           mMasterVolume;
         nsecs_t                         mLastWriteTime;
         int                             mNumWrites;
@@ -994,7 +994,7 @@ private:
                 status_t    start(RecordTrack* recordTrack);
                 void        stop(RecordTrack* recordTrack);
                 status_t    dump(int fd, const Vector<String16>& args);
-                AudioStreamIn* getInput();
+                AudioStreamIn* getInput() const;
                 AudioStreamIn* clearInput();
                 virtual audio_stream_t* stream();
 
@@ -1357,17 +1357,21 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         KeyedVector< int, sp<SuspendedEffectDesc> > mSuspendedEffects;
     };
 
+    // AudioStreamOut and AudioStreamIn are immutable, so their fields are const.
+    // For emphasis, we could also make all pointers to them be "const *",
+    // but that would clutter the code unnecessarily.
+
     struct AudioStreamOut {
-        audio_hw_device_t   *hwDev;
-        audio_stream_out_t  *stream;
+        audio_hw_device_t*  const hwDev;
+        audio_stream_out_t* const stream;
 
         AudioStreamOut(audio_hw_device_t *dev, audio_stream_out_t *out) :
             hwDev(dev), stream(out) {}
     };
 
     struct AudioStreamIn {
-        audio_hw_device_t   *hwDev;
-        audio_stream_in_t   *stream;
+        audio_hw_device_t* const hwDev;
+        audio_stream_in_t* const stream;
 
         AudioStreamIn(audio_hw_device_t *dev, audio_stream_in_t *in) :
             hwDev(dev), stream(in) {}
