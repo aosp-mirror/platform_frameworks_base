@@ -842,9 +842,11 @@ public class GridLayout extends ViewGroup {
      * @hide
      */
     @Override
-    protected void onChildVisibilityChanged(View child, int visibility) {
-        super.onChildVisibilityChanged(child, visibility);
-        invalidateStructure();
+    protected void onChildVisibilityChanged(View child, int oldVisibility, int newVisibility) {
+        super.onChildVisibilityChanged(child, oldVisibility, newVisibility);
+        if (oldVisibility == GONE || newVisibility == GONE) {
+            invalidateStructure();
+        }
     }
 
     // Measurement

@@ -888,18 +888,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Called when a view's visibility has changed. Notify the parent to take any appropriate
+     * action.
+     *
+     * @param child The view whose visibility has changed
+     * @param oldVisibility The previous visibility value (GONE, INVISIBLE, or VISIBLE).
+     * @param newVisibility The new visibility value (GONE, INVISIBLE, or VISIBLE).
      * @hide
-     * @param child
-     * @param visibility
      */
-    protected void onChildVisibilityChanged(View child, int visibility) {
+    protected void onChildVisibilityChanged(View child, int oldVisibility, int newVisibility) {
         if (mTransition != null) {
-            if (visibility == VISIBLE) {
-                mTransition.showChild(this, child);
+            if (newVisibility == VISIBLE) {
+                mTransition.showChild(this, child, oldVisibility);
             } else {
-                mTransition.hideChild(this, child);
-            }
-            if (visibility != VISIBLE) {
+                mTransition.hideChild(this, child, newVisibility);
                 // Only track this on disappearing views - appearing views are already visible
                 // and don't need special handling during drawChild()
                 if (mVisibilityChangingChildren == null) {
@@ -914,7 +916,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // in all cases, for drags
         if (mCurrentDrag != null) {
-            if (visibility == VISIBLE) {
+            if (newVisibility == VISIBLE) {
                 notifyChildOfDrag(child);
             }
         }
