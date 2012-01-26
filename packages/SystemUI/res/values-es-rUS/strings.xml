@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Eliminar"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"No molestar"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificaciones"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
@@ -122,7 +122,7 @@
     <skip />
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuración del sistema"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificaciones"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Borrar notificación"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS habilitado"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Adquisición de GPS"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter habilitado"</string>
@@ -133,12 +133,12 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos de 4G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Se inhabilitaron los datos móviles"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Datos inhabilitados"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Alcanzaste el límite de uso de datos especificado."\n\n"Puede que tu operador te cobre por volver a habilitar datos."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a habilitar datos"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Alcanzaste el límite de uso de datos especificado."\n\n"Puede que tu operador te cobre por volver a activar datos."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a activar datos"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"La ubicación se estableció por GPS"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas las notificaciones"</string>
     <string name="dreams_dock_launcher" msgid="3541196417659166245">"Activar el protector de pantalla"</string>
 </resources>
