@@ -130,12 +130,6 @@ AudioResampler::AudioResampler(int bitDepth, int inChannelCount,
     mVolume[0] = mVolume[1] = 0;
     mBuffer.frameCount = 0;
 
-    // save format for quick lookup
-    if (inChannelCount == 1) {
-        mFormat = MONO_16_BIT;
-    } else {
-        mFormat = STEREO_16_BIT;
-    }
 }
 
 AudioResampler::~AudioResampler() {
