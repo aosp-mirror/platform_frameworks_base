@@ -18,8 +18,17 @@ next.link=ancestral-temporal.html
   <li><a href="#buttons">Buttons and Simple Targets</a></li>
   <li><a href="#lists">Lists, Grids, Carousels, and Stacks</a></li>
   <li><a href="#tabs">Tabs</a></li>
-  <li><a href="#paging">Horizontal Paging</a></li>
+  <li><a href="#paging">Horizontal Paging (Swipe Views)</a></li>
 </ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/building-blocks/buttons.html">Android Design: Buttons</a></li>
+  <li><a href="{@docRoot}design/building-blocks/lists.html">Android Design: Lists</a></li>
+  <li><a href="{@docRoot}design/building-blocks/grid-lists.html">Android Design: Grid Lists</a></li>
+  <li><a href="{@docRoot}design/building-blocks/tabs.html">Android Design: Tabs</a></li>
+  <li><a href="{@docRoot}design/patterns/swipe-views.html">Android Design: Swipe Views</a></li>
+</ul>
 
 </div>
 </div>
@@ -48,6 +57,12 @@ next.link=ancestral-temporal.html
 
 <h2 id="buttons">Buttons and Simple Targets</h2>
 
+<div class="design-announce">
+<p><strong>Button Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/building-blocks/buttons.html">Buttons</a> guide.</p>
+</div>
+
 <p>For section-related screens, offering touchable and keyboard-focusable targets in the parent is generally the most straightforward and familiar kind of touch-based navigation interface. Examples of such targets include buttons, fixed-size list views, or text links, although the latter is not an ideal UI (user interface) element for touch-based navigation. Upon selecting one of these targets, the child screen is opened, replacing the current context (screen) entirely. Buttons and other simple targets are rarely used for representing items in a collection.</p>
 
 
@@ -63,6 +78,13 @@ next.link=ancestral-temporal.html
 
 
 <h2 id="lists">Lists, Grids, Carousels, and Stacks</h2>
+
+<div class="design-announce">
+<p><strong>List and Grid List Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/building-blocks/lists.html">Lists</a> and <a
+  href="{@docRoot}design/building-blocks/grid-lists.html">Grid Lists</a> guides.</p>
+</div>
 
 <p>For collection-related screens, and especially for textual information, vertically scrolling lists are often the most straightforward and familiar kind of interface. For more visual or media-rich content items such as photos or videos, vertically scrolling grids of items, horizontally scrolling lists (sometimes referred to as <em>carousels</em>), or stacks (sometimes referred to as <em>cards</em>) can be used instead. These UI elements are generally best used for presenting item collections or large sets of child screens (for example, a list of stories or a list of 10 or more news topics), rather than a small set of unrelated, sibling child screens.</p>
 
@@ -80,6 +102,12 @@ next.link=ancestral-temporal.html
 
 <h2 id="tabs">Tabs</h2>
 
+<div class="design-announce">
+<p><strong>Tab Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/building-blocks/tabs.html">Tabs</a> guide.</p>
+</div>
+
 <p>Using tabs is a very popular solution for lateral navigation. This pattern allows grouping of sibling screens, in that the tab content container in the parent screen can embed child screens that otherwise would be entirely separate contexts. Tabs are most appropriate for small sets (4 or fewer) of section-related screens.</p>
 
 
@@ -89,7 +117,7 @@ next.link=ancestral-temporal.html
 <p class="img-caption"><strong>Figure 5.</strong> Example phone and tablet tab-based navigation interfaces with relevant screen map excerpt.</p>
 
 
-<p>Several best practices apply when using tabs. Tabs should be persistent across immediate related screens. Only the designated content region should change when selecting a tab, and tab indicators should remain available at all times. Additionally, tab switches should not be treated as history. For example, if a user switches from a tab <em>A</em> to another tab <em>B</em>, pressing the BACK button (more on that in the <a href="ancestral-temporal.html">next lesson</a>) should not re-select tab <em>A</em>. Tabs are usually laid out horizontally, although other presentations of tab navigation such as using a drop-down list in the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> are sometimes appropriate. Lastly, and most importantly, <em>tabs should always run along the top of the screen</em>, and should not be aligned to the bottom of the screen.</p>
+<p>Several best practices apply when using tabs. Tabs should be persistent across immediate related screens. Only the designated content region should change when selecting a tab, and tab indicators should remain available at all times. Additionally, tab switches should not be treated as history. For example, if a user switches from a tab <em>A</em> to another tab <em>B</em>, pressing the BACK button (more on that in the <a href="ancestral-temporal.html">next lesson</a>) should not re-select tab <em>A</em>. Tabs are usually laid out horizontally, although other presentations of tab navigation such as using a drop-down list in the Action Bar (<a href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design) are sometimes appropriate. Lastly, and most importantly, <em>tabs should always run along the top of the screen</em>, and should not be aligned to the bottom of the screen.</p>
 
 <p>There are some obvious immediate benefits of tabs over simpler list- and button-based navigation:</p>
 
@@ -101,9 +129,15 @@ next.link=ancestral-temporal.html
 <p>A common criticism is that space must be reserved for the tab indicators, detracting from the space available to tab contents. This consequence is usually acceptable, and the tradeoff commonly weighs in favor of using this pattern. You should also feel free to customize tab indicators, showing text and/or icons to make optimal use of vertical space. When adjusting indicator heights however, ensure that tab indicators are large enough for a human finger to touch without error.</p>
 
 
-<h2 id="paging">Horizontal Paging</h2>
+<h2 id="paging">Horizontal Paging (Swipe Views)</h2>
 
-<p>Another popular lateral navigation pattern is horizontal paging. This pattern applies best to collection-related sibling screens, such as a list of categories (world, business, technology, and health stories). Like tabs, this pattern also allows grouping screens in that the parent presents the contents of child screens embedded within its own layout.</p>
+<div class="design-announce">
+<p><strong>Swipe Views Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/patterns/swipe-views.html">Swipe Views</a> pattern guides.</p>
+</div>
+
+<p>Another popular lateral navigation pattern is horizontal paging, also referred to as swipe views. This pattern applies best to collection-related sibling screens, such as a list of categories (world, business, technology, and health stories). Like tabs, this pattern also allows grouping screens in that the parent presents the contents of child screens embedded within its own layout.</p>
 
 
 <img src="{@docRoot}images/training/app-navigation-descendant-lateral-paging.png"
