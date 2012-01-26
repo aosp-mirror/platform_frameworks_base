@@ -616,8 +616,7 @@ void AudioPolicyService::setPreProcessorEnabled(InputDesc *inputDesc, bool enabl
 {
     Vector<sp<AudioEffect> > fxVector = inputDesc->mEffects;
     for (size_t i = 0; i < fxVector.size(); i++) {
-        sp<AudioEffect> fx = fxVector.itemAt(i);
-        fx->setEnabled(enabled);
+        fxVector.itemAt(i)->setEnabled(enabled);
     }
 }
 

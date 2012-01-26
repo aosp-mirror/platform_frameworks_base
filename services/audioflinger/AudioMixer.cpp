@@ -556,7 +556,7 @@ void AudioMixer::volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, i
     }
     t->prevVolume[0] = vl;
     t->prevVolume[1] = vr;
-    t->adjustVolumeRamp((aux != NULL));
+    t->adjustVolumeRamp(aux != NULL);
 }
 
 void AudioMixer::volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux)
@@ -862,7 +862,7 @@ void AudioMixer::process__genericNoResampling(state_t* state, int64_t pts)
                 while (outFrames) {
                     size_t inFrames = (t.frameCount > outFrames)?outFrames:t.frameCount;
                     if (inFrames) {
-                        (t.hook)(&t, outTemp + (BLOCKSIZE-outFrames)*MAX_NUM_CHANNELS, inFrames, state->resampleTemp, aux);
+                        t.hook(&t, outTemp + (BLOCKSIZE-outFrames)*MAX_NUM_CHANNELS, inFrames, state->resampleTemp, aux);
                         t.frameCount -= inFrames;
                         outFrames -= inFrames;
                         if (CC_UNLIKELY(aux != NULL)) {
@@ -944,7 +944,7 @@ void AudioMixer::process__genericResampling(state_t* state, int64_t pts)
             // the resampler.
             if ((t.needs & NEEDS_RESAMPLE__MASK) == NEEDS_RESAMPLE_ENABLED) {
                 t.resampler->setPTS(pts);
-                (t.hook)(&t, outTemp, numFrames, state->resampleTemp, aux);
+                t.hook(&t, outTemp, numFrames, state->resampleTemp, aux);
             } else {
 
                 size_t outFrames = 0;
@@ -961,7 +961,7 @@ void AudioMixer::process__genericResampling(state_t* state, int64_t pts)
                     if (CC_UNLIKELY(aux != NULL)) {
                         aux += outFrames;
                     }
-                    (t.hook)(&t, outTemp + outFrames*MAX_NUM_CHANNELS, t.buffer.frameCount, state->resampleTemp, aux);
+                    t.hook(&t, outTemp + outFrames*MAX_NUM_CHANNELS, t.buffer.frameCount, state->resampleTemp, aux);
                     outFrames += t.buffer.frameCount;
                     t.bufferProvider->releaseBuffer(&t.buffer);
                 }

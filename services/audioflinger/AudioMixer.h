@@ -114,7 +114,6 @@ private:
     struct state_t;
     struct track_t;
 
-    typedef void (*mix_t)(state_t* state, int64_t pts);
     typedef void (*hook_t)(track_t* t, int32_t* output, size_t numOutFrames, int32_t* temp, int32_t* aux);
     static const int BLOCKSIZE = 16; // 4 cache lines
 
@@ -167,7 +166,7 @@ private:
         uint32_t        enabledTracks;
         uint32_t        needsChanged;
         size_t          frameCount;
-        mix_t           hook;
+        void            (*hook)(state_t* state, int64_t pts);   // one of process__*, never NULL
         int32_t         *outputTemp;
         int32_t         *resampleTemp;
         int32_t         reserved[2];
