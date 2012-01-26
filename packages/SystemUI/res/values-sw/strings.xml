@@ -26,7 +26,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ondoa kwenye orodha"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Taarifa za programu-matumizi"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Hakuna programu za sasa"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ondosha programu za hivi karibuni"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ondosha prog za hivi karibuni"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for status_bar_accessibility_recent_apps:other (1040784359794890744) -->
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Hakuna arifa"</string>
