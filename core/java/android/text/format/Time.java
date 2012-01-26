@@ -481,6 +481,9 @@ public class Time {
      * @throws android.util.TimeFormatException if s cannot be parsed.
      */
      public boolean parse3339(String s) {
+         if (s == null) {
+             throw new NullPointerException("time string is null");
+         }
          if (nativeParse3339(s)) {
              timezone = TIMEZONE_UTC;
              return true;
