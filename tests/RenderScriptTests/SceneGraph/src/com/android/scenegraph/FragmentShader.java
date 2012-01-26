@@ -56,9 +56,15 @@ public class FragmentShader extends Shader {
             return this;
         }
 
+        public Builder addShaderTexture(Program.TextureType texType, String name) {
+            mShader.mShaderTextureNames.add(name);
+            mShader.mShaderTextureTypes.add(texType);
+            return this;
+        }
+
         public Builder addTexture(Program.TextureType texType, String name) {
-            mBuilder.addTexture(texType);
             mShader.mTextureNames.add(name);
+            mShader.mTextureTypes.add(texType);
             return this;
         }
 
@@ -69,6 +75,13 @@ public class FragmentShader extends Shader {
             if (mShader.mPerObjConstants != null) {
                 mBuilder.addConstant(mShader.mPerObjConstants);
             }
+            for (int i = 0; i < mShader.mTextureTypes.size(); i ++) {
+                mBuilder.addTexture(mShader.mTextureTypes.get(i));
+            }
+            for (int i = 0; i < mShader.mShaderTextureTypes.size(); i ++) {
+                mBuilder.addTexture(mShader.mShaderTextureTypes.get(i));
+            }
+
             mShader.mProgram = mBuilder.create();
             return mShader;
         }
@@ -77,7 +90,18 @@ public class FragmentShader extends Shader {
     FragmentShader() {
     }
 
-    public ScriptField_FragmentShader_s getRSData(RenderScriptGL rs) {
+    public void updateTextures(RenderScriptGL rs, Resources res) {
+        int shaderTextureStart = mTextureTypes.size();
+        for (int i = 0; i < mShaderTextureNames.size(); i ++) {
+            ShaderParam sp = mSourceParams.get(mShaderTextureNames.get(i));
+            if (sp != null && sp instanceof TextureParam) {
+                TextureParam p = (TextureParam)sp;
+                mProgram.bindTexture(p.getTexture().getRsData(rs, res), shaderTextureStart + i);
+            }
+        }
+    }
+
+    public ScriptField_FragmentShader_s getRSData(RenderScriptGL rs, Resources res) {
         if (mField != null) {
             return mField;
         }
@@ -85,7 +109,7 @@ public class FragmentShader extends Shader {
         ScriptField_FragmentShader_s.Item item = new ScriptField_FragmentShader_s.Item();
         item.program = mProgram;
 
-        linkConstants(rs);
+        linkConstants(rs, res);
         if (mPerShaderConstants != null) {
             item.shaderConst = mConstantBuffer;
             item.shaderConstParams = mConstantBufferParams;

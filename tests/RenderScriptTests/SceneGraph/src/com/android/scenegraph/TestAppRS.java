@@ -78,9 +78,8 @@ public class TestAppRS {
     private VertexShader mPaintV;
 
     private Allocation mDefaultCube;
-    private Allocation mAllocPV;
-    private Allocation mEnvCube;
-    private Allocation mDiffCube;
+    private TextureCube mEnvCube;
+    private TextureCube mDiffCube;
 
     Scene mActiveScene;
 
@@ -135,35 +134,6 @@ public class TestAppRS {
         mSceneManager.loadModel(path, mLoadedCallback);
     }
 
-    // We use this to laod environment maps off the UI thread
-    private class ImageLoaderTask extends AsyncTask<String, Void, Boolean> {
-        Allocation tempEnv;
-        Allocation tempDiff;
-
-        protected Boolean doInBackground(String... names) {
-            long start = System.currentTimeMillis();
-
-            tempEnv = SceneManager.loadCubemap("sdcard/scenegraph/cube_env.png", mRS, mRes);
-            tempDiff = SceneManager.loadCubemap("sdcard/scenegraph/cube_spec.png", mRS, mRes);
-
-            long end = System.currentTimeMillis();
-            Log.v("TIMER", "Image load time: " + (end - start));
-            return new Boolean(true);
-        }
-
-        protected void onPostExecute(Boolean result) {
-            if (tempEnv != null) {
-                mEnvCube = tempEnv;
-                mPaintF.mProgram.bindTexture(mEnvCube, 1);
-            }
-
-            if (tempDiff != null) {
-                mDiffCube = tempDiff;
-                mAluminumF.mProgram.bindTexture(mDiffCube, 1);
-            }
-        }
-    }
-
     public void onActionDown(float x, float y) {
         mTouchHandler.onActionDown(x, y);
 
@@ -184,7 +154,7 @@ public class TestAppRS {
         fb.setShader(mRes, id);
         fb.addTexture(TextureType.TEXTURE_2D, "diffuse");
         if (addCubemap) {
-            fb.addTexture(TextureType.TEXTURE_CUBE, "reflection");
+            fb.addShaderTexture(TextureType.TEXTURE_CUBE, "reflection");
         }
         FragmentShader pf = fb.create();
         pf.mProgram.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
@@ -209,7 +179,9 @@ public class TestAppRS {
         mFsConst2 = new ScriptField_FShaderLightParams_s(mRS, 1);
 
         mPaintF = createFromResource(R.raw.paintf, true);
+        mPaintF.appendSourceParams(new TextureParam("reflection", mEnvCube));
         mAluminumF = createFromResource(R.raw.metal, true);
+        mAluminumF.appendSourceParams(new TextureParam("reflection", mDiffCube));
 
         mPlasticF = createFromResource(R.raw.plastic, false);
         mDiffuseF = createFromResource(R.raw.diffuse, false);
@@ -307,15 +279,10 @@ public class TestAppRS {
     private void initRS() {
 
         FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
-        initPaintShaders();
-
-        Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.defaultcube);
-        mDefaultCube = Allocation.createCubemapFromBitmap(mRS, b);
-        mPaintF.mProgram.bindTexture(mDefaultCube, 1);
-        mAluminumF.mProgram.bindTexture(mDefaultCube, 1);
-
         // Reflection maps from SD card
-        new ImageLoaderTask().execute();
+        mEnvCube = new TextureCube("sdcard/scenegraph/", "cube_env.png");
+        mDiffCube = new TextureCube("sdcard/scenegraph/", "cube_spec.png");
+        initPaintShaders();
 
         ScriptC_render renderLoop = mSceneManager.getRenderLoop();
 

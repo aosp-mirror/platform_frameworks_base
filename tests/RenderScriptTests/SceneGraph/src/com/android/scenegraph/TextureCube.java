@@ -39,6 +39,11 @@ public class TextureCube extends TextureBase {
         setTexture(tex);
     }
 
+    public TextureCube(String dir, String file) {
+        setFileDir(dir);
+        setFileName(file);
+    }
+
     public void setFileDir(String dir) {
         mFileDir = dir;
     }

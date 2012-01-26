@@ -18,6 +18,7 @@ package com.android.scenegraph;
 
 import java.lang.Math;
 import java.util.ArrayList;
+import android.content.res.Resources;
 
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -75,14 +76,14 @@ public class RenderState extends SceneGraphBase {
         mRaster = pr;
     }
 
-    public ScriptField_RenderState_s getRSData(RenderScriptGL rs) {
+    public ScriptField_RenderState_s getRSData(RenderScriptGL rs, Resources res) {
         if (mField != null) {
             return mField;
         }
 
         ScriptField_RenderState_s.Item item = new ScriptField_RenderState_s.Item();
-        item.pv = mVertex.getRSData(rs).getAllocation();
-        item.pf = mFragment.getRSData(rs).getAllocation();
+        item.pv = mVertex.getRSData(rs, res).getAllocation();
+        item.pf = mFragment.getRSData(rs, res).getAllocation();
         item.ps = mStore;
         item.pr = mRaster;
 

@@ -51,6 +51,22 @@ public class Scene extends SceneGraphBase {
         }
     }
 
+    private class ShaderImageLoader extends AsyncTask<ArrayList<FragmentShader>, Void, Boolean> {
+        protected Boolean doInBackground(ArrayList<FragmentShader>... objects) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < objects[0].size(); i ++) {
+                FragmentShader sI = objects[0].get(i);
+                sI.updateTextures(mRS, mRes);
+            }
+            long end = System.currentTimeMillis();
+            Log.v(TIMER_TAG, "Shader texture init time: " + (end - start));
+            return new Boolean(true);
+        }
+
+        protected void onPostExecute(Boolean result) {
+        }
+    }
+
     CompoundTransform mRootTransforms;
     HashMap<String, Transform> mTransformMap;
     ArrayList<RenderPass> mRenderPasses;
@@ -210,6 +226,7 @@ public class Scene extends SceneGraphBase {
     }
 
     public void initRenderPassRS(RenderScriptGL rs, SceneManager sceneManager) {
+        new ShaderImageLoader().execute(mFragmentShaders);
         if (mRenderPasses.size() != 0) {
             mRenderPassAlloc = new ScriptField_RenderPass_s(mRS, mRenderPasses.size());
             for (int i = 0; i < mRenderPasses.size(); i ++) {
@@ -246,7 +263,7 @@ public class Scene extends SceneGraphBase {
         Allocation[] shaderAllocs = new Allocation[mVertexShaders.size()];
         for (int i = 0; i < mVertexShaders.size(); i ++) {
             VertexShader sI = mVertexShaders.get(i);
-            shaderAllocs[i] = sI.getRSData(rs).getAllocation();
+            shaderAllocs[i] = sI.getRSData(rs, res).getAllocation();
         }
         shaderData.copyFrom(shaderAllocs);
         sceneManager.mRenderLoop.set_gVertexShaders(shaderData);
@@ -255,7 +272,7 @@ public class Scene extends SceneGraphBase {
         shaderAllocs = new Allocation[mFragmentShaders.size()];
         for (int i = 0; i < mFragmentShaders.size(); i ++) {
             FragmentShader sI = mFragmentShaders.get(i);
-            shaderAllocs[i] = sI.getRSData(rs).getAllocation();
+            shaderAllocs[i] = sI.getRSData(rs, res).getAllocation();
         }
         shaderData.copyFrom(shaderAllocs);
         sceneManager.mRenderLoop.set_gFragmentShaders(shaderData);
