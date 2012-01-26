@@ -2957,6 +2957,13 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_RECEIVER_REPLACE_PENDING = 0x20000000;
     /**
+     * If set, when sending a broadcast the recipient is allowed to run at
+     * foreground priority, with a shorter timeout interval.  During normal
+     * broadcasts the receivers are not automatically hoisted out of the
+     * background priority class.
+     */
+    public static final int FLAG_RECEIVER_FOREGROUND = 0x10000000;
+    /**
      * If set, when sending a broadcast <i>before boot has completed</i> only
      * registered receivers will be called -- no BroadcastReceiver components
      * will be launched.  Sticky intent state will be recorded properly even
@@ -2969,14 +2976,14 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x10000000;
+    public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x08000000;
     /**
      * Set when this broadcast is for a boot upgrade, a special mode that
      * allows the broadcast to be sent before the system is ready and launches
      * the app process with no providers running in it.
      * @hide
      */
-    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x08000000;
+    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x04000000;
 
     /**
      * @hide Flags that can't be changed with PendingIntent.
