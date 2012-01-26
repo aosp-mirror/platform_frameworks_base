@@ -2661,8 +2661,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.onAnimationStart();
             }
 
-            more = a.getTransformation(drawingTime, mChildTransformation,
-                    scalingRequired ? mAttachInfo.mApplicationScale : 1f);
+            more = a.getTransformation(drawingTime, mChildTransformation, 1f);
             if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
                 if (mInvalidationTransformation == null) {
                     mInvalidationTransformation = new Transformation();
