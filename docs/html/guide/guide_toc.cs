@@ -87,10 +87,24 @@
             <span class="en">Content Providers</span>
           </a></div>
           <ul>
-            <li><a href="<?cs var:toroot ?>guide/topics/providers/calendar-provider.html">
-                  <span class="en">Calendar Provider</span></a>
-                  <span class="new">new!</span>
-                </li>
+            <li>
+                <a href="<?cs var:toroot ?>guide/topics/providers/content-provider-basics.html">
+                    <span class="en">Content Provider Basics</span>
+                </a>
+                <span class="new">new!</span>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>guide/topics/providers/content-provider-creating.html">
+                    <span class="en">Creating a Content Provider</span>
+                </a>
+                <span class="new">new!</span>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>guide/topics/providers/calendar-provider.html">
+                    <span class="en">Calendar Provider</span>
+                </a>
+                <span class="new">new!</span>
+            </li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
