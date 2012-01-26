@@ -436,7 +436,7 @@ package android {
     field public static final int fadeEnabled = 16843390; // 0x101027e
     field public static final int fadeOffset = 16843383; // 0x1010277
     field public static final int fadeScrollbars = 16843434; // 0x10102aa
-    field public static final deprecated int fadingEdge = 16842975; // 0x10100df
+    field public static final int fadingEdge = 16842975; // 0x10100df
     field public static final int fadingEdgeLength = 16842976; // 0x10100e0
     field public static final int fastScrollAlwaysVisible = 16843573; // 0x1010335
     field public static final int fastScrollEnabled = 16843302; // 0x1010226
