@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.util.TypedValue;
@@ -297,7 +298,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      * that in {@link #onStop}.
      */
     public void dismiss() {
-        mHandler.post(mDismissAction);
+        if (Looper.myLooper() == mHandler.getLooper()) {
+            dismissDialog();
+        } else {
+            mHandler.post(mDismissAction);
+        }
     }
 
     void dismissDialog() {
