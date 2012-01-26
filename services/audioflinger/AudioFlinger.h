@@ -908,12 +908,12 @@ private:
     public:
                             TrackHandle(const sp<PlaybackThread::Track>& track);
         virtual             ~TrackHandle();
+        virtual sp<IMemory> getCblk() const;
         virtual status_t    start();
         virtual void        stop();
         virtual void        flush();
         virtual void        mute(bool);
         virtual void        pause();
-        virtual sp<IMemory> getCblk() const;
         virtual status_t    attachAuxEffect(int effectId);
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
@@ -1031,9 +1031,9 @@ private:
     public:
         RecordHandle(const sp<RecordThread::RecordTrack>& recordTrack);
         virtual             ~RecordHandle();
+        virtual sp<IMemory> getCblk() const;
         virtual status_t    start();
         virtual void        stop();
-        virtual sp<IMemory> getCblk() const;
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     private:

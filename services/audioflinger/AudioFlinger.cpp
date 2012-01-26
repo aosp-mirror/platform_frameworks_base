@@ -4104,6 +4104,10 @@ AudioFlinger::TrackHandle::~TrackHandle() {
     mTrack->destroy();
 }
 
+sp<IMemory> AudioFlinger::TrackHandle::getCblk() const {
+    return mTrack->getCblk();
+}
+
 status_t AudioFlinger::TrackHandle::start() {
     return mTrack->start();
 }
@@ -4122,10 +4126,6 @@ void AudioFlinger::TrackHandle::mute(bool e) {
 
 void AudioFlinger::TrackHandle::pause() {
     mTrack->pause();
-}
-
-sp<IMemory> AudioFlinger::TrackHandle::getCblk() const {
-    return mTrack->getCblk();
 }
 
 status_t AudioFlinger::TrackHandle::attachAuxEffect(int EffectId)
@@ -4234,6 +4234,10 @@ AudioFlinger::RecordHandle::~RecordHandle() {
     stop();
 }
 
+sp<IMemory> AudioFlinger::RecordHandle::getCblk() const {
+    return mRecordTrack->getCblk();
+}
+
 status_t AudioFlinger::RecordHandle::start() {
     ALOGV("RecordHandle::start()");
     return mRecordTrack->start();
@@ -4242,10 +4246,6 @@ status_t AudioFlinger::RecordHandle::start() {
 void AudioFlinger::RecordHandle::stop() {
     ALOGV("RecordHandle::stop()");
     mRecordTrack->stop();
-}
-
-sp<IMemory> AudioFlinger::RecordHandle::getCblk() const {
-    return mRecordTrack->getCblk();
 }
 
 status_t AudioFlinger::RecordHandle::onTransact(
