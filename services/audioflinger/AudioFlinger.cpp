@@ -3549,7 +3549,7 @@ status_t AudioFlinger::PlaybackThread::Track::start()
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
-        int state = mState;
+        track_state state = mState;
         // here the track could be either new, or restarted
         // in both cases "unstop" the track
         if (mState == PAUSED) {
@@ -3590,7 +3590,7 @@ void AudioFlinger::PlaybackThread::Track::stop()
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
-        int state = mState;
+        track_state state = mState;
         if (mState > STOPPED) {
             mState = STOPPED;
             // If the track is not active (PAUSED and buffers full), flush buffers

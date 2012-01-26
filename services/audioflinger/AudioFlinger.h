@@ -375,7 +375,7 @@ private:
             void*               mBufferEnd;
             uint32_t            mFrameCount;
             // we don't really need a lock for these
-            int                 mState;
+            track_state         mState;
             int                 mClientTid;
             audio_format_t      mFormat;
             uint32_t            mFlags;
