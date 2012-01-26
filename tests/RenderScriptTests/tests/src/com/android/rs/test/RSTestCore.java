@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ public class RSTestCore {
         unitTests.add(new UT_alloc(this, mRes, mCtx));
         unitTests.add(new UT_refcount(this, mRes, mCtx));
         unitTests.add(new UT_foreach(this, mRes, mCtx));
+        unitTests.add(new UT_atomic(this, mRes, mCtx));
         unitTests.add(new UT_math(this, mRes, mCtx));
         unitTests.add(new UT_fp_mad(this, mRes, mCtx));
         /*
