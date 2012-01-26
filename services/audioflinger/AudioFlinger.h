@@ -1087,7 +1087,7 @@ private:
         void reset_l();
         status_t configure();
         status_t init();
-        uint32_t state() {
+        effect_state state() const {
             return mState;
         }
         uint32_t status() {
@@ -1152,8 +1152,8 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         effect_descriptor_t mDescriptor;// effect descriptor received from effect engine
         effect_config_t     mConfig;    // input and output audio configuration
         effect_handle_t  mEffectInterface; // Effect module C API
-        status_t mStatus;               // initialization status
-        uint32_t mState;                // current activation state (effect_state)
+        status_t            mStatus;    // initialization status
+        effect_state        mState;     // current activation state
         Vector< wp<EffectHandle> > mHandles;    // list of client handles
         uint32_t mMaxDisableWaitCnt;    // maximum grace period before forcing an effect off after
                                         // sending disable command.
