@@ -404,7 +404,7 @@ public class LockPatternUtils {
         saveLockPassword(null, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
         setLockPatternEnabled(false);
         saveLockPattern(null);
-        setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+        setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         setLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
     }
 

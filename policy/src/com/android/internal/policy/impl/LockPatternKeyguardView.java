@@ -855,6 +855,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
             case Password:
                 secure = mLockPatternUtils.isLockPasswordEnabled();
                 break;
+            case Unknown:
+                // This means no security is set up
+                break;
             default:
                 throw new IllegalStateException("unknown unlock mode " + unlockMode);
         }
@@ -877,8 +880,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
 
         // Re-create the unlock screen if necessary. This is primarily required to properly handle
         // SIM state changes. This typically happens when this method is called by reset()
-        if (mode == Mode.UnlockScreen) {
-            final UnlockMode unlockMode = getUnlockMode();
+        final UnlockMode unlockMode = getUnlockMode();
+        if (mode == Mode.UnlockScreen && unlockMode != UnlockMode.Unknown) {
             if (force || mUnlockScreen == null || unlockMode != mUnlockScreenMode) {
                 boolean restartFaceLock = stopFaceLockIfRunning();
                 recreateUnlockScreen(unlockMode);
@@ -1052,11 +1055,15 @@ public class LockPatternKeyguardView extends KeyguardViewBase implements Handler
                     break;
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-                    // "forgot pattern" button is only available in the pattern mode...
-                    if (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) {
-                        currentMode = UnlockMode.Account;
+                    if (mLockPatternUtils.isLockPatternEnabled()) {
+                        // "forgot pattern" button is only available in the pattern mode...
+                        if (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) {
+                            currentMode = UnlockMode.Account;
+                        } else {
+                            currentMode = UnlockMode.Pattern;
+                        }
                     } else {
-                        currentMode = UnlockMode.Pattern;
+                        currentMode = UnlockMode.Unknown;
                     }
                     break;
                 default:
