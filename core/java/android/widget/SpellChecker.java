@@ -342,56 +342,15 @@ public class SpellChecker implements SpellCheckerSessionListener {
         final int end = editable.getSpanEnd(spellCheckSpan);
         if (start < 0 || end <= start) return; // span was removed in the meantime
 
-        // Other suggestion spans may exist on that region, with identical suggestions, filter
-        // them out to avoid duplicates.
-        SuggestionSpan[] suggestionSpans = editable.getSpans(start, end, SuggestionSpan.class);
-        final int length = suggestionSpans.length;
-        for (int i = 0; i < length; i++) {
-            final int spanStart = editable.getSpanStart(suggestionSpans[i]);
-            final int spanEnd = editable.getSpanEnd(suggestionSpans[i]);
-            if (spanStart != start || spanEnd != end) {
-                // Nulled (to avoid new array allocation) if not on that exact same region
-                suggestionSpans[i] = null;
-            }
-        }
-
         final int suggestionsCount = suggestionsInfo.getSuggestionsCount();
-        String[] suggestions;
         if (suggestionsCount <= 0) {
             // A negative suggestion count is possible
-            suggestions = ArrayUtils.emptyArray(String.class);
-        } else {
-            int numberOfSuggestions = 0;
-            suggestions = new String[suggestionsCount];
+            return;
+        }
 
-            for (int i = 0; i < suggestionsCount; i++) {
-                final String spellSuggestion = suggestionsInfo.getSuggestionAt(i);
-                if (spellSuggestion == null) break;
-                boolean suggestionFound = false;
-
-                for (int j = 0; j < length && !suggestionFound; j++) {
-                    if (suggestionSpans[j] == null) break;
-
-                    String[] suggests = suggestionSpans[j].getSuggestions();
-                    for (int k = 0; k < suggests.length; k++) {
-                        if (spellSuggestion.equals(suggests[k])) {
-                            // The suggestion is already provided by an other SuggestionSpan
-                            suggestionFound = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!suggestionFound) {
-                    suggestions[numberOfSuggestions++] = spellSuggestion;
-                }
-            }
-
-            if (numberOfSuggestions != suggestionsCount) {
-                String[] newSuggestions = new String[numberOfSuggestions];
-                System.arraycopy(suggestions, 0, newSuggestions, 0, numberOfSuggestions);
-                suggestions = newSuggestions;
-            }
+        String[] suggestions = new String[suggestionsCount];
+        for (int i = 0; i < suggestionsCount; i++) {
+            suggestions[i] = suggestionsInfo.getSuggestionAt(i);
         }
 
         SuggestionSpan suggestionSpan = new SuggestionSpan(mTextView.getContext(), suggestions,
