@@ -21399,6 +21399,7 @@ package android.util {
     field public static final int DENSITY_MEDIUM = 160; // 0xa0
     field public static final int DENSITY_TV = 213; // 0xd5
     field public static final int DENSITY_XHIGH = 320; // 0x140
+    field public static final int DENSITY_XXHIGH = 480; // 0x1e0
     field public float density;
     field public int densityDpi;
     field public int heightPixels;

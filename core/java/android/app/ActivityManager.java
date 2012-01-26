@@ -1442,9 +1442,10 @@ public class ActivityManager {
     public int getLauncherLargeIconDensity() {
         final Resources res = mContext.getResources();
         final int density = res.getDisplayMetrics().densityDpi;
+        final int sw = res.getConfiguration().smallestScreenWidthDp;
 
-        if ((res.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
-                != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+        if (sw < 600) {
+            // Smaller than approx 7" tablets, use the regular icon size.
             return density;
         }
 
@@ -1456,9 +1457,13 @@ public class ActivityManager {
             case DisplayMetrics.DENSITY_HIGH:
                 return DisplayMetrics.DENSITY_XHIGH;
             case DisplayMetrics.DENSITY_XHIGH:
-                return DisplayMetrics.DENSITY_MEDIUM * 2;
+                return DisplayMetrics.DENSITY_XXHIGH;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                return DisplayMetrics.DENSITY_XHIGH * 2;
             default:
-                return density;
+                // The density is some abnormal value.  Return some other
+                // abnormal value that is a reasonable scaling of it.
+                return (int)(density*1.5f);
         }
     }
 
@@ -1471,9 +1476,10 @@ public class ActivityManager {
     public int getLauncherLargeIconSize() {
         final Resources res = mContext.getResources();
         final int size = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
+        final int sw = res.getConfiguration().smallestScreenWidthDp;
 
-        if ((res.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
-                != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+        if (sw < 600) {
+            // Smaller than approx 7" tablets, use the regular icon size.
             return size;
         }
 
@@ -1487,9 +1493,13 @@ public class ActivityManager {
             case DisplayMetrics.DENSITY_HIGH:
                 return (size * DisplayMetrics.DENSITY_XHIGH) / DisplayMetrics.DENSITY_HIGH;
             case DisplayMetrics.DENSITY_XHIGH:
-                return (size * DisplayMetrics.DENSITY_MEDIUM * 2) / DisplayMetrics.DENSITY_XHIGH;
+                return (size * DisplayMetrics.DENSITY_XXHIGH) / DisplayMetrics.DENSITY_XHIGH;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                return (size * DisplayMetrics.DENSITY_XHIGH*2) / DisplayMetrics.DENSITY_XXHIGH;
             default:
-                return size;
+                // The density is some abnormal value.  Return some other
+                // abnormal value that is a reasonable scaling of it.
+                return (int)(size*1.5f);
         }
     }
 
