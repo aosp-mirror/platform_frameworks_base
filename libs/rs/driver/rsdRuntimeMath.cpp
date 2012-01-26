@@ -329,12 +329,32 @@ static int32_t SC_AtomicXor(volatile int32_t *ptr, int32_t value) {
     return prev;
 }
 
+static uint32_t SC_AtomicUMin(volatile uint32_t *ptr, uint32_t value) {
+    uint32_t prev, status;
+    do {
+        prev = *ptr;
+        uint32_t n = rsMin(value, prev);
+        status = android_atomic_release_cas((int32_t) prev, (int32_t)n, (volatile int32_t*) ptr);
+    } while (CC_UNLIKELY(status != 0));
+    return prev;
+}
+
 static int32_t SC_AtomicMin(volatile int32_t *ptr, int32_t value) {
     int32_t prev, status;
     do {
         prev = *ptr;
         int32_t n = rsMin(value, prev);
         status = android_atomic_release_cas(prev, n, ptr);
+    } while (CC_UNLIKELY(status != 0));
+    return prev;
+}
+
+static uint32_t SC_AtomicUMax(volatile uint32_t *ptr, uint32_t value) {
+    uint32_t prev, status;
+    do {
+        prev = *ptr;
+        uint32_t n = rsMax(value, prev);
+        status = android_atomic_release_cas((int32_t) prev, (int32_t) n, (volatile int32_t*) ptr);
     } while (CC_UNLIKELY(status != 0));
     return prev;
 }
@@ -524,9 +544,9 @@ static RsdSymbolTable gSyms[] = {
     { "_Z11rsAtomicXorPVii", (void *)&SC_AtomicXor, true },
     { "_Z11rsAtomicXorPVjj", (void *)&SC_AtomicXor, true },
     { "_Z11rsAtomicMinPVii", (void *)&SC_AtomicMin, true },
-    { "_Z11rsAtomicMinPVjj", (void *)&SC_AtomicMin, true },
+    { "_Z11rsAtomicMinPVjj", (void *)&SC_AtomicUMin, true },
     { "_Z11rsAtomicMaxPVii", (void *)&SC_AtomicMax, true },
-    { "_Z11rsAtomicMaxPVjj", (void *)&SC_AtomicMax, true },
+    { "_Z11rsAtomicMaxPVjj", (void *)&SC_AtomicUMax, true },
     { "_Z11rsAtomicCasPViii", (void *)&SC_AtomicCas, true },
     { "_Z11rsAtomicCasPVjjj", (void *)&SC_AtomicCas, true },
 

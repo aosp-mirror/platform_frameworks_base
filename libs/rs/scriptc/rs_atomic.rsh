@@ -242,7 +242,7 @@ extern int32_t __attribute__((overloadable))
  * @return old value
  */
 extern uint32_t __attribute__((overloadable))
-    rsAtomicCas(volatile uint32_t* addr, int32_t compareValue, int32_t newValue);
+    rsAtomicCas(volatile uint32_t* addr, uint32_t compareValue, uint32_t newValue);
 
 #endif //defined(RS_VERSION) && (RS_VERSION >= 14)
 
