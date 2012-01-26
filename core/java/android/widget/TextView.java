@@ -9844,17 +9844,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
-                    SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-                    suggestionInfo.suggestionSpan = suggestionSpan;
-                    suggestionInfo.suggestionIndex = suggestionIndex;
-                    suggestionInfo.text.replace(0, suggestionInfo.text.length(),
-                            suggestions[suggestionIndex]);
+                    String suggestion = suggestions[suggestionIndex];
 
-                    mNumberOfSuggestions++;
-                    if (mNumberOfSuggestions == MAX_NUMBER_SUGGESTIONS) {
-                        // Also end outer for loop
-                        spanIndex = nbSpans;
-                        break;
+                    boolean suggestionIsDuplicate = false;
+                    for (int i = 0; i < mNumberOfSuggestions; i++) {
+                        if (mSuggestionInfos[i].text.toString().equals(suggestion)) {
+                            SuggestionSpan otherSuggestionSpan = mSuggestionInfos[i].suggestionSpan;
+                            final int otherSpanStart = spannable.getSpanStart(otherSuggestionSpan);
+                            final int otherSpanEnd = spannable.getSpanEnd(otherSuggestionSpan);
+                            if (spanStart == otherSpanStart && spanEnd == otherSpanEnd) {
+                                suggestionIsDuplicate = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!suggestionIsDuplicate) {
+                        SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
+                        suggestionInfo.suggestionSpan = suggestionSpan;
+                        suggestionInfo.suggestionIndex = suggestionIndex;
+                        suggestionInfo.text.replace(0, suggestionInfo.text.length(), suggestion);
+
+                        mNumberOfSuggestions++;
+
+                        if (mNumberOfSuggestions == MAX_NUMBER_SUGGESTIONS) {
+                            // Also end outer for loop
+                            spanIndex = nbSpans;
+                            break;
+                        }
                     }
                 }
             }
@@ -9863,7 +9880,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 highlightTextDifferences(mSuggestionInfos[i], spanUnionStart, spanUnionEnd);
             }
 
-            // Add to dictionary item if there is a span with the misspelled flag
+            // Add "Add to dictionary" item if there is a span with the misspelled flag
             if (misspelledSpan != null) {
                 final int misspelledStart = spannable.getSpanStart(misspelledSpan);
                 final int misspelledEnd = spannable.getSpanEnd(misspelledSpan);
@@ -9921,8 +9938,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Add the text before and after the span.
-            suggestionInfo.text.insert(0, mText.toString().substring(unionStart, spanStart));
-            suggestionInfo.text.append(mText.toString().substring(spanEnd, unionEnd));
+            final String textAsString = text.toString();
+            suggestionInfo.text.insert(0, textAsString.substring(unionStart, spanStart));
+            suggestionInfo.text.append(textAsString.substring(spanEnd, unionEnd));
         }
 
         @Override

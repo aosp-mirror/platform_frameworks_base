@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -114,7 +115,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      * @param context Context for the application
      * @param locale locale Locale of the suggestions
      * @param suggestions Suggestions for the string under the span. Only the first up to
-     * {@link SuggestionSpan#SUGGESTIONS_MAX_SIZE} will be considered.
+     * {@link SuggestionSpan#SUGGESTIONS_MAX_SIZE} will be considered. Null values not permitted.
      * @param flags Additional flags indicating how this span is handled in TextView
      * @param notificationTargetClass if not null, this class will get notified when the user
      * selects one of the suggestions.
@@ -124,10 +125,13 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         final int N = Math.min(SUGGESTIONS_MAX_SIZE, suggestions.length);
         mSuggestions = Arrays.copyOf(suggestions, N);
         mFlags = flags;
-        if (context != null && locale == null) {
+        if (locale != null) {
+            mLocaleString = locale.toString();
+        } else if (context != null) {
             mLocaleString = context.getResources().getConfiguration().locale.toString();
         } else {
-            mLocaleString = locale.toString();
+            Log.e("SuggestionSpan", "No locale or context specified in SuggestionSpan constructor");
+            mLocaleString = "";
         }
 
         if (notificationTargetClass != null) {
