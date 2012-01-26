@@ -168,6 +168,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     View mView;
     View mFocusedView;
     View mRealFocusedView;  // this is not set to null in touch mode
+    View mOldFocusedView;
     int mViewVisibility;
     boolean mAppVisible = true;
     int mOrigWindowType = -1;
@@ -2226,32 +2227,33 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     public void requestChildFocus(View child, View focused) {
         checkThread();
-        if (mFocusedView != focused) {
-            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mFocusedView, focused);
-            scheduleTraversals();
+
+        if (DEBUG_INPUT_RESIZE) {
+            Log.v(TAG, "Request child focus: focus now " + focused);
         }
+
+        mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mOldFocusedView, focused);
+        scheduleTraversals();
+
         mFocusedView = mRealFocusedView = focused;
-        if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Request child focus: focus now "
-                + mFocusedView);
     }
 
     public void clearChildFocus(View child) {
         checkThread();
 
-        View oldFocus = mFocusedView;
-
-        if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Clearing child focus");
-        mFocusedView = mRealFocusedView = null;
-        if (mView != null && !mView.hasFocus()) {
-            // If a view gets the focus, the listener will be invoked from requestChildFocus()
-            if (!mView.requestFocus(View.FOCUS_FORWARD)) {
-                mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, null);
-            }
-        } else if (oldFocus != null) {
-            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(oldFocus, null);
+        if (DEBUG_INPUT_RESIZE) {
+            Log.v(TAG, "Clearing child focus");
         }
-    }
 
+        mOldFocusedView = mFocusedView;
+
+        // Invoke the listener only if there is no view to take focus
+        if (focusSearch(null, View.FOCUS_FORWARD) == null) {
+            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(mOldFocusedView, null);
+        }
+
+        mFocusedView = mRealFocusedView = null;
+    }
 
     public void focusableViewAvailable(View v) {
         checkThread();
@@ -2724,6 +2726,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         mView.unFocus();
                         mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(focused, null);
                         mFocusedView = null;
+                        mOldFocusedView = null;
                         return true;
                     }
                 }
