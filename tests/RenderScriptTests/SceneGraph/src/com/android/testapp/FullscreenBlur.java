@@ -15,14 +15,11 @@
  */
 
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import java.util.ArrayList;
 
-import com.android.scenegraph.Float4Param;
-import com.android.scenegraph.SceneManager;
-import com.android.scenegraph.Texture2D;
-import com.android.scenegraph.TextureParam;
+import com.android.scenegraph.*;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -164,7 +161,7 @@ class FullscreenBlur {
             fb.setObjectConst(constants);
         }
         FragmentShader prog = fb.create();
-        prog.mProgram.bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
+        prog.getProgram().bindSampler(Sampler.CLAMP_LINEAR(rs), 0);
         return prog;
     }
 
@@ -176,7 +173,7 @@ class FullscreenBlur {
         mPV_Blur = vb.create();
 
         mPF_Texture = getShader(res, rs, R.raw.texture, null);
-        mPF_Texture.mProgram.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
+        mPF_Texture.getProgram().bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(rs), 0);
         mPF_BlurH = getShader(res, rs, R.raw.blur_h, blurConst.getAllocation().getType());
         mPF_BlurV = getShader(res, rs, R.raw.blur_v, blurConst.getAllocation().getType());
         mPF_SelectColor = getShader(res, rs, R.raw.select_color, null);

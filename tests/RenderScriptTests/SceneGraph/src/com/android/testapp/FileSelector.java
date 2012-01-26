@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.scenegraph;
+package com.android.testapp;
 
 import java.io.File;
 import java.io.FileFilter;

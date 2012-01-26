@@ -14,7 +14,7 @@
 
 #pragma version(1)
 
-#pragma rs java_package_name(com.android.scenegraph)
+#pragma rs java_package_name(com.android.testapp)
 
 // Helpers
 typedef struct VShaderParams_s {

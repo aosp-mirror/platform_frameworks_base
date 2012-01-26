@@ -14,10 +14,19 @@
 
 #pragma version(1)
 
-#pragma rs java_package_name(com.android.scenegraph)
+#pragma rs java_package_name(com.android.testapp)
 
 #include "rs_graphics.rsh"
-#include "transform_def.rsh"
+#include "test_app.rsh"
+
+// Making sure these get reflected
+FBlurOffsets *blurExport;
+VertexShaderInputs *iExport;
+VShaderParams *vConst;
+FShaderParams *fConst;
+FShaderLightParams *fConts2;
+VSParams *vConst2;
+VObjectParams *vConst3;
 
 rs_program_vertex gPVBackground;
 rs_program_fragment gPFBackground;

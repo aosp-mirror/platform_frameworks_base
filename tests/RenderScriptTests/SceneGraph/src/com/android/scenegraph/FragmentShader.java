@@ -68,7 +68,7 @@ public class FragmentShader extends Shader {
             return this;
         }
 
-        FragmentShader create() {
+        public FragmentShader create() {
             if (mShader.mPerShaderConstants != null) {
                 mBuilder.addConstant(mShader.mPerShaderConstants);
             }
@@ -88,6 +88,10 @@ public class FragmentShader extends Shader {
     }
 
     FragmentShader() {
+    }
+
+    public ProgramFragment getProgram() {
+        return mProgram;
     }
 
     public void updateTextures(RenderScriptGL rs, Resources res) {

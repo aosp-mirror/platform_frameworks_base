@@ -18,7 +18,7 @@
 
 //#define DEBUG_TRANSFORMS
 
-#include "transform_def.rsh"
+#include "scenegraph_objects.rsh"
 
 rs_script gTransformScript;
 

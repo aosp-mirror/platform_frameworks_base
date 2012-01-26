@@ -149,8 +149,8 @@ public class SceneManager extends SceneGraphBase {
     }
 
     public static class SceneLoadedCallback implements Runnable {
-        Scene mLoadedScene;
-        String mName;
+        public Scene mLoadedScene;
+        public String mName;
         public void run() {
         }
     }

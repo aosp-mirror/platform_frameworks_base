@@ -16,7 +16,7 @@
 
 #pragma rs java_package_name(com.android.scenegraph)
 
-#include "transform_def.rsh"
+#include "scenegraph_objects.rsh"
 
 static void getTransformedSphere(SgRenderable *obj) {
     obj->worldBoundingSphere = obj->boundingSphere;

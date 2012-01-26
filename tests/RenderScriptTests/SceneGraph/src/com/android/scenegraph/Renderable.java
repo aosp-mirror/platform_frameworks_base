@@ -151,7 +151,7 @@ public class Renderable extends RenderableBase {
         mRsFieldItem.pf_textures[slot] = a;
     }
 
-    void setVisible(RenderScriptGL rs, boolean vis) {
+    public void setVisible(RenderScriptGL rs, boolean vis) {
         getRsField(rs, null);
         mRsFieldItem.cullType = vis ? 0 : 2;
         mRsField.set(mRsFieldItem, 0, true);
