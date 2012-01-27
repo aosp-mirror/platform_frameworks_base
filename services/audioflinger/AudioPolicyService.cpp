@@ -1415,7 +1415,7 @@ static audio_io_handle_t aps_open_input(void *service,
                                             uint32_t *pSamplingRate,
                                             audio_format_t *pFormat,
                                             uint32_t *pChannels,
-                                            uint32_t acoustics)
+                                            audio_in_acoustics_t acoustics)
 {
     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
     if (af == NULL) {

@@ -126,7 +126,7 @@ public:
                                     uint32_t *pSamplingRate,
                                     audio_format_t *pFormat,
                                     uint32_t *pChannels,
-                                    uint32_t acoustics) = 0;
+                                    audio_in_acoustics_t acoustics) = 0;
     virtual status_t closeInput(int input) = 0;
 
     virtual status_t setStreamOutput(audio_stream_type_t stream, int output) = 0;

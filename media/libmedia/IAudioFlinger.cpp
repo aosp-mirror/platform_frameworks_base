@@ -432,7 +432,7 @@ public:
                             uint32_t *pSamplingRate,
                             audio_format_t *pFormat,
                             uint32_t *pChannels,
-                            uint32_t acoustics)
+                            audio_in_acoustics_t acoustics)
     {
         Parcel data, reply;
         uint32_t devices = pDevices ? *pDevices : 0;
@@ -445,7 +445,7 @@ public:
         data.writeInt32(samplingRate);
         data.writeInt32(format);
         data.writeInt32(channels);
-        data.writeInt32(acoustics);
+        data.writeInt32((int32_t) acoustics);
         remote()->transact(OPEN_INPUT, data, &reply);
         int input = reply.readInt32();
         devices = reply.readInt32();
@@ -881,13 +881,13 @@ status_t BnAudioFlinger::onTransact(
             uint32_t samplingRate = data.readInt32();
             audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
-            uint32_t acoutics = data.readInt32();
+            audio_in_acoustics_t acoustics = (audio_in_acoustics_t) data.readInt32();
 
             int input = openInput(&devices,
                                      &samplingRate,
                                      &format,
                                      &channels,
-                                     acoutics);
+                                     acoustics);
             reply->writeInt32(input);
             reply->writeInt32(devices);
             reply->writeInt32(samplingRate);

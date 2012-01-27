@@ -131,7 +131,7 @@ public:
                             uint32_t *pSamplingRate,
                             audio_format_t *pFormat,
                             uint32_t *pChannels,
-                            uint32_t acoustics);
+                            audio_in_acoustics_t acoustics);
 
     virtual status_t closeInput(int input);
 
