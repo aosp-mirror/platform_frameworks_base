@@ -257,6 +257,7 @@ void AudioMixer::setParameter(int name, int target, int param, void *value)
             }
             break;
         case AUXLEVEL:
+            //assert(0 <= valueInt && valueInt <= MAX_GAIN_INT);
             if (track.auxLevel != valueInt) {
                 ALOGV("setParameter(VOLUME, AUXLEVEL: %04x)", valueInt);
                 track.prevAuxLevel = track.auxLevel << 16;
@@ -565,7 +566,7 @@ void AudioMixer::volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32
     const int16_t vr = t->volume[1];
 
     if (CC_UNLIKELY(aux != NULL)) {
-        const int16_t va = (int16_t)t->auxLevel;
+        const int16_t va = t->auxLevel;
         do {
             int16_t l = (int16_t)(*temp++ >> 12);
             int16_t r = (int16_t)(*temp++ >> 12);
