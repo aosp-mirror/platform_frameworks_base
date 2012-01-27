@@ -35,18 +35,13 @@ namespace android {
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
 #define TYPEFACE_THAI "/system/fonts/DroidSansThai.ttf"
 
-#if USE_TEXT_LAYOUT_CACHE
-
-    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutCache);
-
-#endif
-
-    ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
+ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
 //--------------------------------------------------------------------------------------------------
 
-TextLayoutCache::TextLayoutCache() :
-        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> >::kUnlimitedCapacity),
+TextLayoutCache::TextLayoutCache(TextLayoutShaper* shaper) :
+        mShaper(shaper),
+        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutValue> >::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB)),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
@@ -75,7 +70,7 @@ void TextLayoutCache::init() {
 /**
  *  Callbacks
  */
-void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc) {
+void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutValue>& desc) {
     size_t totalSizeToDelete = text.getSize() + desc->getSize();
     mSize -= totalSizeToDelete;
     if (mDebugEnabled) {
@@ -93,7 +88,7 @@ void TextLayoutCache::clear() {
 /*
  * Caching
  */
-sp<TextLayoutCacheValue> TextLayoutCache::getValue(const SkPaint* paint,
+sp<TextLayoutValue> TextLayoutCache::getValue(const SkPaint* paint,
             const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
     nsecs_t startTime = 0;
@@ -105,7 +100,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(const SkPaint* paint,
     TextLayoutCacheKey key(paint, text, start, count, contextCount, dirFlags);
 
     // Get value from cache if possible
-    sp<TextLayoutCacheValue> value = mCache.get(key);
+    sp<TextLayoutValue> value = mCache.get(key);
 
     // Value not found for the key, we need to add a new value in the cache
     if (value == NULL) {
@@ -113,10 +108,10 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(const SkPaint* paint,
             startTime = systemTime(SYSTEM_TIME_MONOTONIC);
         }
 
-        value = new TextLayoutCacheValue(contextCount);
+        value = new TextLayoutValue(contextCount);
 
         // Compute advances and store them
-        TextLayoutEngine::getInstance().computeValues(value.get(), paint,
+        mShaper->computeValues(value.get(), paint,
                 reinterpret_cast<const UChar*>(text), start, count,
                 size_t(contextCount), int(dirFlags));
 
@@ -312,31 +307,33 @@ size_t TextLayoutCacheKey::getSize() const {
 /**
  * TextLayoutCacheValue
  */
-TextLayoutCacheValue::TextLayoutCacheValue(size_t contextCount) :
+TextLayoutValue::TextLayoutValue(size_t contextCount) :
         mTotalAdvance(0), mElapsedTime(0) {
     // Give a hint for advances and glyphs vectors size
     mAdvances.setCapacity(contextCount);
     mGlyphs.setCapacity(contextCount);
 }
 
-size_t TextLayoutCacheValue::getSize() const {
-    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvances.capacity() +
+size_t TextLayoutValue::getSize() const {
+    return sizeof(TextLayoutValue) + sizeof(jfloat) * mAdvances.capacity() +
             sizeof(jchar) * mGlyphs.capacity();
 }
 
-void TextLayoutCacheValue::setElapsedTime(uint32_t time) {
+void TextLayoutValue::setElapsedTime(uint32_t time) {
     mElapsedTime = time;
 }
 
-uint32_t TextLayoutCacheValue::getElapsedTime() {
+uint32_t TextLayoutValue::getElapsedTime() {
     return mElapsedTime;
 }
 
-TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0) {
+TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
     mDefaultTypeface = SkFontHost::CreateTypeface(NULL, NULL, NULL, 0, SkTypeface::kNormal);
     mArabicTypeface = NULL;
     mHebrewRegularTypeface = NULL;
     mHebrewBoldTypeface = NULL;
+    mBengaliTypeface = NULL;
+    mThaiTypeface = NULL;
 
     mFontRec.klass = &harfbuzzSkiaClass;
     mFontRec.userData = 0;
@@ -355,12 +352,17 @@ TextLayoutEngine::TextLayoutEngine() : mShaperItemGlyphArraySize(0) {
     mShaperItem.font->userData = &mShapingPaint;
 }
 
-TextLayoutEngine::~TextLayoutEngine() {
-    // FIXME should free fonts and caches but since this class is a singleton,
-    // we don't bother at the moment
+TextLayoutShaper::~TextLayoutShaper() {
+    SkSafeUnref(mDefaultTypeface);
+    SkSafeUnref(mArabicTypeface);
+    SkSafeUnref(mHebrewRegularTypeface);
+    SkSafeUnref(mHebrewBoldTypeface);
+    SkSafeUnref(mBengaliTypeface);
+    SkSafeUnref(mThaiTypeface);
+    deleteShaperItemGlyphArrays();
 }
 
-void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, const SkPaint* paint, const UChar* chars,
+void TextLayoutShaper::computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags) {
 
     computeValues(paint, chars, start, count, contextCount, dirFlags,
@@ -371,7 +373,7 @@ void TextLayoutEngine::computeValues(TextLayoutCacheValue* value, const SkPaint*
 #endif
 }
 
-void TextLayoutEngine::computeValues(const SkPaint* paint, const UChar* chars,
+void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -513,7 +515,7 @@ static void logGlyphs(HB_ShaperItem shaperItem) {
     }
 }
 
-void TextLayoutEngine::computeRunValues(const SkPaint* paint, const UChar* chars,
+void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars,
         size_t count, bool isRTL,
         Vector<jfloat>* const outAdvances, jfloat* outTotalAdvance,
         Vector<jchar>* const outGlyphs) {
@@ -719,7 +721,7 @@ void TextLayoutEngine::computeRunValues(const SkPaint* paint, const UChar* chars
 }
 
 
-size_t TextLayoutEngine::shapeFontRun(const SkPaint* paint, bool isRTL) {
+size_t TextLayoutShaper::shapeFontRun(const SkPaint* paint, bool isRTL) {
     // Reset kerning
     mShaperItem.kerning_applied = false;
 
@@ -833,14 +835,14 @@ size_t TextLayoutEngine::shapeFontRun(const SkPaint* paint, bool isRTL) {
     return baseGlyphCount;
 }
 
-void TextLayoutEngine::ensureShaperItemGlyphArrays(size_t size) {
+void TextLayoutShaper::ensureShaperItemGlyphArrays(size_t size) {
     if (size > mShaperItemGlyphArraySize) {
         deleteShaperItemGlyphArrays();
         createShaperItemGlyphArrays(size);
     }
 }
 
-void TextLayoutEngine::createShaperItemGlyphArrays(size_t size) {
+void TextLayoutShaper::createShaperItemGlyphArrays(size_t size) {
 #if DEBUG_GLYPHS
     ALOGD("Creating Glyph Arrays with size = %d", size);
 #endif
@@ -858,7 +860,7 @@ void TextLayoutEngine::createShaperItemGlyphArrays(size_t size) {
     mShaperItem.log_clusters = new unsigned short[size];
 }
 
-void TextLayoutEngine::deleteShaperItemGlyphArrays() {
+void TextLayoutShaper::deleteShaperItemGlyphArrays() {
     delete[] mShaperItem.glyphs;
     delete[] mShaperItem.attributes;
     delete[] mShaperItem.advances;
@@ -866,7 +868,7 @@ void TextLayoutEngine::deleteShaperItemGlyphArrays() {
     delete[] mShaperItem.log_clusters;
 }
 
-SkTypeface* TextLayoutEngine::getCachedTypeface(SkTypeface** typeface, const char path[]) {
+SkTypeface* TextLayoutShaper::getCachedTypeface(SkTypeface** typeface, const char path[]) {
     if (!*typeface) {
         *typeface = SkTypeface::CreateFromFile(path);
         // CreateFromFile(path) can return NULL if the path is non existing
@@ -884,7 +886,7 @@ SkTypeface* TextLayoutEngine::getCachedTypeface(SkTypeface** typeface, const cha
     return *typeface;
 }
 
-HB_Face TextLayoutEngine::getCachedHBFace(SkTypeface* typeface) {
+HB_Face TextLayoutShaper::getCachedHBFace(SkTypeface* typeface) {
     SkFontID fontId = typeface->uniqueID();
     ssize_t index = mCachedHBFaces.indexOfKey(fontId);
     if (index >= 0) {
@@ -898,6 +900,38 @@ HB_Face TextLayoutEngine::getCachedHBFace(SkTypeface* typeface) {
         mCachedHBFaces.add(fontId, face);
     }
     return face;
+}
+
+TextLayoutEngine::TextLayoutEngine() {
+    mShaper = new TextLayoutShaper();
+#if USE_TEXT_LAYOUT_CACHE
+    mTextLayoutCache = new TextLayoutCache(mShaper);
+#else
+    mTextLayoutCache = NULL;
+#endif
+}
+
+TextLayoutEngine::~TextLayoutEngine() {
+    delete mTextLayoutCache;
+    delete mShaper;
+}
+
+sp<TextLayoutValue> TextLayoutEngine::getValue(const SkPaint* paint, const jchar* text,
+        jint start, jint count, jint contextCount, jint dirFlags) {
+    sp<TextLayoutValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+    value = mTextLayoutCache->getValue(paint, text, start, count,
+            contextCount, dirFlags);
+    if (value == NULL) {
+        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
+                String8(text + start, count).string());
+    }
+#else
+    value = new TextLayoutValue(count);
+    mShaper->computeValues(value.get(), paint,
+            reinterpret_cast<const UChar*>(text), start, count, contextCount, dirFlags);
+#endif
+    return value;
 }
 
 } // namespace android

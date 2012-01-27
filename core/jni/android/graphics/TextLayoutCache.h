@@ -115,11 +115,11 @@ inline int compare_type(const TextLayoutCacheKey& lhs, const TextLayoutCacheKey&
 }
 
 /*
- * TextLayoutCacheValue is the Cache value
+ * TextLayoutValue is the Cache value
  */
-class TextLayoutCacheValue : public RefBase {
+class TextLayoutValue : public RefBase {
 public:
-    TextLayoutCacheValue(size_t contextCount);
+    TextLayoutValue(size_t contextCount);
 
     void setElapsedTime(uint32_t time);
     uint32_t getElapsedTime();
@@ -159,72 +159,14 @@ private:
 }; // TextLayoutCacheValue
 
 /**
- * Cache of text layout information.
+ * The TextLayoutShaper is responsible for shaping (with the Harfbuzz library)
  */
-class TextLayoutCache : public OnEntryRemoved<TextLayoutCacheKey, sp<TextLayoutCacheValue> >,
-        public Singleton<TextLayoutCache>
-{
+class TextLayoutShaper {
 public:
-    TextLayoutCache();
+    TextLayoutShaper();
+    virtual ~TextLayoutShaper();
 
-    virtual ~TextLayoutCache();
-
-    bool isInitialized() {
-        return mInitialized;
-    }
-
-    /**
-     * Used as a callback when an entry is removed from the cache
-     * Do not invoke directly
-     */
-    void operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc);
-
-    sp<TextLayoutCacheValue> getValue(const SkPaint* paint, const jchar* text, jint start, jint count,
-            jint contextCount, jint dirFlags);
-
-    /**
-     * Clear the cache
-     */
-    void clear();
-
-private:
-    Mutex mLock;
-    bool mInitialized;
-
-    GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> > mCache;
-
-    uint32_t mSize;
-    uint32_t mMaxSize;
-
-    uint32_t mCacheHitCount;
-    uint64_t mNanosecondsSaved;
-
-    uint64_t mCacheStartTime;
-
-    RtlDebugLevel mDebugLevel;
-    bool mDebugEnabled;
-
-    /*
-     * Class initialization
-     */
-    void init();
-
-    /**
-     * Dump Cache statistics
-     */
-    void dumpCacheStats();
-
-}; // TextLayoutCache
-
-/**
- * The TextLayoutEngine is responsible for shaping with Harfbuzz library
- */
-class TextLayoutEngine : public Singleton<TextLayoutEngine> {
-public:
-    TextLayoutEngine();
-    virtual ~TextLayoutEngine();
-
-    void computeValues(TextLayoutCacheValue* value, const SkPaint* paint, const UChar* chars,
+    void computeValues(TextLayoutValue* value, const SkPaint* paint, const UChar* chars,
             size_t start, size_t count, size_t contextCount, int dirFlags);
 
 private:
@@ -292,8 +234,80 @@ private:
     void createShaperItemGlyphArrays(size_t size);
     void deleteShaperItemGlyphArrays();
 
-}; // TextLayoutEngine
+}; // TextLayoutShaper
 
+/**
+ * Cache of text layout information.
+ */
+class TextLayoutCache : private OnEntryRemoved<TextLayoutCacheKey, sp<TextLayoutValue> >
+{
+public:
+    TextLayoutCache(TextLayoutShaper* shaper);
+
+    ~TextLayoutCache();
+
+    bool isInitialized() {
+        return mInitialized;
+    }
+
+    /**
+     * Used as a callback when an entry is removed from the cache
+     * Do not invoke directly
+     */
+    void operator()(TextLayoutCacheKey& text, sp<TextLayoutValue>& desc);
+
+    sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
+            jint count, jint contextCount, jint dirFlags);
+
+    /**
+     * Clear the cache
+     */
+    void clear();
+
+private:
+    TextLayoutShaper* mShaper;
+    Mutex mLock;
+    bool mInitialized;
+
+    GenerationCache<TextLayoutCacheKey, sp<TextLayoutValue> > mCache;
+
+    uint32_t mSize;
+    uint32_t mMaxSize;
+
+    uint32_t mCacheHitCount;
+    uint64_t mNanosecondsSaved;
+
+    uint64_t mCacheStartTime;
+
+    RtlDebugLevel mDebugLevel;
+    bool mDebugEnabled;
+
+    /*
+     * Class initialization
+     */
+    void init();
+
+    /**
+     * Dump Cache statistics
+     */
+    void dumpCacheStats();
+
+}; // TextLayoutCache
+
+/**
+ * The TextLayoutEngine is reponsible for computing TextLayoutValues
+ */
+class TextLayoutEngine : public Singleton<TextLayoutEngine> {
+public:
+    TextLayoutEngine();
+    virtual ~TextLayoutEngine();
+
+    sp<TextLayoutValue> getValue(const SkPaint* paint, const jchar* text, jint start,
+            jint count, jint contextCount, jint dirFlags);
+private:
+    TextLayoutCache* mTextLayoutCache;
+    TextLayoutShaper* mShaper;
+}; // TextLayoutEngine
 
 } // namespace android
 #endif /* ANDROID_TEXT_LAYOUT_CACHE_H */
