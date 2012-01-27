@@ -87,9 +87,6 @@ public class FragmentShader extends Shader {
         }
     }
 
-    FragmentShader() {
-    }
-
     public ProgramFragment getProgram() {
         return mProgram;
     }

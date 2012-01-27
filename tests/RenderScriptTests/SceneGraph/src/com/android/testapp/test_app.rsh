@@ -17,24 +17,19 @@
 #pragma rs java_package_name(com.android.testapp)
 
 // Helpers
-typedef struct VShaderParams_s {
-    rs_matrix4x4 model;
-    rs_matrix4x4 viewProj;
-} VShaderParams;
-
-typedef struct VSParams_s {
+typedef struct ViewProjParams {
     rs_matrix4x4 viewProj;
 } VSParams;
 
-typedef struct VObjectParams_s {
+typedef struct ModelParams {
     rs_matrix4x4 model;
 } VObjectParams;
 
-typedef struct FShaderParams_s {
+typedef struct CameraParams {
     float4 cameraPos;
 } FShaderParams;
 
-typedef struct FShaderLightParams_s {
+typedef struct LightParams {
     float4 lightPos_0;
     float4 lightColor_0;
     float4 lightPos_1;
@@ -43,15 +38,15 @@ typedef struct FShaderLightParams_s {
     float4 diffuse;
 } FShaderLightParams;
 
-typedef struct FBlurOffsets_s {
+typedef struct BlurOffsets {
     float blurOffset0;
     float blurOffset1;
     float blurOffset2;
     float blurOffset3;
 } FBlurOffsets;
 
-typedef struct VertexShaderInputs_s {
+typedef struct VertexShaderInputs {
     float4 position;
     float3 normal;
     float2 texture0;
-} VertexShaderInputs;
+} VShaderInputs;

@@ -21,8 +21,7 @@
 
 // Making sure these get reflected
 FBlurOffsets *blurExport;
-VertexShaderInputs *iExport;
-VShaderParams *vConst;
+VShaderInputs *iExport;
 FShaderParams *fConst;
 FShaderLightParams *fConts2;
 VSParams *vConst2;

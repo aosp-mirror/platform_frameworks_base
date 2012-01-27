@@ -29,10 +29,11 @@ import android.util.Log;
  */
 public class CompoundTransform extends Transform {
 
-    public static class Component {
+    public static abstract class Component {
         String mName;
         int mRsId;
-        public Float4 mValue;
+        Float4 mValue;
+        CompoundTransform mParent;
 
         public String getName() {
             return mName;
@@ -45,6 +46,15 @@ public class CompoundTransform extends Transform {
             mName = name;
             mValue = new Float4(translate.x, translate.y, translate.z, 0);
         }
+        public Float3 getValue() {
+            return new Float3(mValue.x, mValue.y, mValue.z);
+        }
+        public void setValue(Float3 val) {
+            mValue.x = val.x;
+            mValue.y = val.y;
+            mValue.z = val.z;
+            mParent.updateRSData();
+        }
     }
 
     public static class RotateComponent extends Component {
@@ -53,6 +63,22 @@ public class CompoundTransform extends Transform {
             mName = name;
             mValue = new Float4(axis.x, axis.y, axis.z, angle);
         }
+        public Float3 getAxis() {
+            return new Float3(mValue.x, mValue.y, mValue.z);
+        }
+        public float getAngle() {
+            return mValue.w;
+        }
+        public void setAxis(Float3 val) {
+            mValue.x = val.x;
+            mValue.y = val.y;
+            mValue.z = val.z;
+            mParent.updateRSData();
+        }
+        public void setAngle(float val) {
+            mValue.w = val;
+            mParent.updateRSData();
+        }
     }
 
     public static class ScaleComponent extends Component {
@@ -60,6 +86,15 @@ public class CompoundTransform extends Transform {
             mRsId = RS_ID_SCALE;
             mName = name;
             mValue = new Float4(scale.x, scale.y, scale.z, 0);
+        }
+        public Float3 getValue() {
+            return new Float3(mValue.x, mValue.y, mValue.z);
+        }
+        public void setValue(Float3 val) {
+            mValue.x = val.x;
+            mValue.y = val.y;
+            mValue.z = val.z;
+            mParent.updateRSData();
         }
     }
 
@@ -73,10 +108,18 @@ public class CompoundTransform extends Transform {
     }
 
     public void addComponent(Component c) {
+        if (c.mParent != null) {
+            throw new IllegalArgumentException("Transform components may not be shared");
+        }
+        c.mParent = this;
         mTransformComponents.add(c);
     }
 
     public void setComponent(int index, Component c) {
+        if (c.mParent != null) {
+            throw new IllegalArgumentException("Transform components may not be shared");
+        }
+        c.mParent = this;
         mTransformComponents.set(index, c);
     }
 
@@ -97,7 +140,10 @@ public class CompoundTransform extends Transform {
         mTransformData.name = SceneManager.getStringAsAllocation(mRS, getName());
     }
 
-    public void updateRSData() {
+    void updateRSData() {
+        if (mField == null) {
+            return;
+        }
         int numElements = mTransformComponents.size();
         for (int i = 0; i < numElements; i ++) {
             Component ith = mTransformComponents.get(i);

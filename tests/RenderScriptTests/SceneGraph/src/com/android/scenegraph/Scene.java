@@ -22,12 +22,14 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.renderscript.RenderScriptGL;
-import android.renderscript.Mesh;
-import android.renderscript.*;
+import com.android.scenegraph.SceneManager;
+
 import android.content.res.Resources;
-import android.util.Log;
 import android.os.AsyncTask;
+import android.renderscript.*;
+import android.renderscript.Mesh;
+import android.renderscript.RenderScriptGL;
+import android.util.Log;
 
 /**
  * @hide
@@ -204,7 +206,8 @@ public class Scene extends SceneGraphBase {
         entries.add(d);
     }
 
-    public void destroyRS(SceneManager sceneManager) {
+    public void destroyRS() {
+        SceneManager sceneManager = SceneManager.getInstance();
         mTransformRSData = null;
         sceneManager.mRenderLoop.bind_gRootNode(mTransformRSData);
         sceneManager.mRenderLoop.set_gRenderableObjects(null);

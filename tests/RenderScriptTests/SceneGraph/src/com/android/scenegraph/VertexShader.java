@@ -71,9 +71,6 @@ public class VertexShader extends Shader {
         }
     }
 
-    VertexShader() {
-    }
-
     public ProgramVertex getProgram() {
         return mProgram;
     }

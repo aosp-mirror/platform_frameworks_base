@@ -62,10 +62,6 @@ public class TestAppRS {
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    ScriptField_FShaderParams_s mFsConst;
-    ScriptField_FShaderLightParams_s mFsConst2;
-    ScriptField_VShaderParams_s mVsConst;
-
     // Shaders
     private FragmentShader mPaintF;
     private FragmentShader mLightsF;
@@ -73,17 +69,9 @@ public class TestAppRS {
     private FragmentShader mPlasticF;
     private FragmentShader mDiffuseF;
     private FragmentShader mTextureF;
-    private VertexShader mPaintV;
-
-    private Allocation mDefaultCube;
-    private TextureCube mEnvCube;
-    private TextureCube mDiffCube;
+    private VertexShader mGenericV;
 
     Scene mActiveScene;
-
-    public TestAppRS() {
-        mUseBlur = false;
-    }
 
     // This is a part of the test app, it's used to tests multiple render passes and is toggled
     // on and off in the menu, off by default
@@ -103,6 +91,7 @@ public class TestAppRS {
     }
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
+        mUseBlur = false;
         mRS = rs;
         mRes = res;
         mWidth = width;
@@ -117,7 +106,9 @@ public class TestAppRS {
         mLoadingScreen = new TestAppLoadingScreen(mRS, mRes);
 
         // Initi renderscript stuff specific to the app. This will need to be abstracted out later.
-        initRS();
+        FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
+        initPaintShaders();
+        mLoadingScreen.setRenderLoop(mSceneManager.getRenderLoop());
 
         // Load a scene to render
         mSceneManager.loadModel(mFilePath + modelName, mLoadedCallback);
@@ -126,14 +117,12 @@ public class TestAppRS {
     // When a new model file is selected from the UI, this function gets called to init everything
     void loadModel(String path) {
         mLoadingScreen.showLoadingScreen(true);
-        mActiveScene.destroyRS(mSceneManager);
+        mActiveScene.destroyRS();
         mSceneManager.loadModel(path, mLoadedCallback);
     }
 
     public void onActionDown(float x, float y) {
         mTouchHandler.onActionDown(x, y);
-
-        //mSceneManager.getRenderLoop().invoke_pick((int)x, (int)y);
     }
 
     public void onActionScale(float scale) {
@@ -144,9 +133,9 @@ public class TestAppRS {
         mTouchHandler.onActionMove(x, y);
     }
 
-    FragmentShader createFromResource(int id, boolean addCubemap) {
+    FragmentShader createFromResource(int id, boolean addCubemap, Type constType) {
         FragmentShader.Builder fb = new FragmentShader.Builder(mRS);
-        fb.setShaderConst(mFsConst.getAllocation().getType());
+        fb.setShaderConst(constType);
         fb.setShader(mRes, id);
         fb.addTexture(TextureType.TEXTURE_2D, "diffuse");
         if (addCubemap) {
@@ -161,30 +150,34 @@ public class TestAppRS {
     }
 
     private void initPaintShaders() {
-        ScriptField_VObjectParams_s objConst = new ScriptField_VObjectParams_s(mRS, 1);
-        ScriptField_VSParams_s shaderConst = new ScriptField_VSParams_s(mRS, 1);
+        ScriptField_ModelParams objConst = new ScriptField_ModelParams(mRS, 1);
+        ScriptField_ViewProjParams shaderConst = new ScriptField_ViewProjParams(mRS, 1);
 
         VertexShader.Builder vb = new VertexShader.Builder(mRS);
-        vb.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
+        vb.addInput(ScriptField_VertexShaderInputs.createElement(mRS));
         vb.setShader(mRes, R.raw.shader2v);
         vb.setObjectConst(objConst.getAllocation().getType());
         vb.setShaderConst(shaderConst.getAllocation().getType());
-        mPaintV = vb.create();
+        mGenericV = vb.create();
 
-        mFsConst = new ScriptField_FShaderParams_s(mRS, 1);
-        mFsConst2 = new ScriptField_FShaderLightParams_s(mRS, 1);
+        ScriptField_CameraParams fsConst = new ScriptField_CameraParams(mRS, 1);
+        ScriptField_LightParams fsConst2 = new ScriptField_LightParams(mRS, 1);
 
-        mPaintF = createFromResource(R.raw.paintf, true);
-        mPaintF.appendSourceParams(new TextureParam("reflection", mEnvCube));
-        mAluminumF = createFromResource(R.raw.metal, true);
-        mAluminumF.appendSourceParams(new TextureParam("reflection", mDiffCube));
+        mPaintF = createFromResource(R.raw.paintf, true, fsConst.getAllocation().getType());
+        // Assign a reflection map
+        TextureCube envCube = new TextureCube("sdcard/scenegraph/", "cube_env.png");
+        mPaintF.appendSourceParams(new TextureParam("reflection", envCube));
 
-        mPlasticF = createFromResource(R.raw.plastic, false);
-        mDiffuseF = createFromResource(R.raw.diffuse, false);
-        mTextureF = createFromResource(R.raw.texture, false);
+        mAluminumF = createFromResource(R.raw.metal, true, fsConst.getAllocation().getType());
+        TextureCube diffCube = new TextureCube("sdcard/scenegraph/", "cube_spec.png");
+        mAluminumF.appendSourceParams(new TextureParam("reflection", diffCube));
+
+        mPlasticF = createFromResource(R.raw.plastic, false, fsConst.getAllocation().getType());
+        mDiffuseF = createFromResource(R.raw.diffuse, false, fsConst.getAllocation().getType());
+        mTextureF = createFromResource(R.raw.texture, false, fsConst.getAllocation().getType());
 
         FragmentShader.Builder fb = new FragmentShader.Builder(mRS);
-        fb.setObjectConst(mFsConst2.getAllocation().getType());
+        fb.setObjectConst(fsConst2.getAllocation().getType());
         fb.setShader(mRes, R.raw.plastic_lights);
         mLightsF = fb.create();
 
@@ -222,19 +215,19 @@ public class TestAppRS {
         mActiveScene.appendShader(mPlasticF);
         mActiveScene.appendShader(mDiffuseF);
         mActiveScene.appendShader(mTextureF);
-        mActiveScene.appendShader(mPaintV);
+        mActiveScene.appendShader(mGenericV);
     }
 
     public void prepareToRender(Scene s) {
         mSceneManager.setActiveScene(s);
         mActiveScene = s;
         addShadersToScene();
-        RenderState plastic = new RenderState(mPaintV, mPlasticF, null, null);
-        RenderState diffuse = new RenderState(mPaintV, mDiffuseF, null, null);
-        RenderState paint = new RenderState(mPaintV, mPaintF, null, null);
-        RenderState aluminum = new RenderState(mPaintV, mAluminumF, null, null);
-        RenderState lights = new RenderState(mPaintV, mLightsF, null, null);
-        RenderState glassTransp = new RenderState(mPaintV, mPaintF,
+        RenderState plastic = new RenderState(mGenericV, mPlasticF, null, null);
+        RenderState diffuse = new RenderState(mGenericV, mDiffuseF, null, null);
+        RenderState paint = new RenderState(mGenericV, mPaintF, null, null);
+        RenderState aluminum = new RenderState(mGenericV, mAluminumF, null, null);
+        RenderState lights = new RenderState(mGenericV, mLightsF, null, null);
+        RenderState glassTransp = new RenderState(mGenericV, mPaintF,
                                                   ProgramStore.BLEND_ALPHA_DEPTH_TEST(mRS), null);
 
         initRenderPasses();
@@ -257,7 +250,7 @@ public class TestAppRS {
 
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
-            RenderState texState = new RenderState(mPaintV, mTextureF, null, null);
+            RenderState texState = new RenderState(mGenericV, mTextureF, null, null);
             plane.setRenderState(texState);
             plane.setVisible(mRS, !mUseBlur);
         }
@@ -270,16 +263,5 @@ public class TestAppRS {
         Log.v("TIMER", "Scene init time: " + (end - start));
 
         mLoadingScreen.showLoadingScreen(false);
-    }
-
-    private void initRS() {
-
-        FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
-        // Reflection maps from SD card
-        mEnvCube = new TextureCube("sdcard/scenegraph/", "cube_env.png");
-        mDiffCube = new TextureCube("sdcard/scenegraph/", "cube_spec.png");
-        initPaintShaders();
-
-        mLoadingScreen.setRenderLoop(mSceneManager.getRenderLoop());
     }
 }
