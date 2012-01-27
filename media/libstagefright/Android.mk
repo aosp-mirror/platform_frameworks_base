@@ -77,7 +77,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
-        libstagefright_aacenc \
         libstagefright_amrnbenc \
         libstagefright_amrwbenc \
         libstagefright_avcenc \

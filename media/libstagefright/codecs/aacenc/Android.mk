@@ -85,3 +85,29 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/src/asm/ARMV7
 endif
 
 include $(BUILD_STATIC_LIBRARY)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftAACEncoder.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+	frameworks/base/media/libstagefright/codecs/common/include \
+
+LOCAL_CFLAGS := -DOSCL_IMPORT_REF=
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_aacenc
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright_omx libstagefright_foundation libutils \
+        libstagefright_enc_common
+
+LOCAL_MODULE := libstagefright_soft_aacenc
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_SHARED_LIBRARY)

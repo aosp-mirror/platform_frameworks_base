@@ -38,7 +38,7 @@ static const int32_t kVideoBitRate = 512 * 1024;
 static const int32_t kAudioBitRate = 12200;
 static const int64_t kDurationUs = 10000000LL;  // 10 seconds
 
-#if 1
+#if 0
 class DummySource : public MediaSource {
 
 public:
@@ -318,7 +318,7 @@ int main(int argc, char **argv) {
 
     sp<MetaData> encMeta = new MetaData;
     encMeta->setCString(kKeyMIMEType,
-            1 ? MEDIA_MIMETYPE_AUDIO_AMR_WB : MEDIA_MIMETYPE_AUDIO_AAC);
+            0 ? MEDIA_MIMETYPE_AUDIO_AMR_WB : MEDIA_MIMETYPE_AUDIO_AAC);
     encMeta->setInt32(kKeySampleRate, kSampleRate);
     encMeta->setInt32(kKeyChannelCount, kNumChannels);
     encMeta->setInt32(kKeyMaxInputSize, 8192);
