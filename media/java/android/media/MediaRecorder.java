@@ -138,10 +138,13 @@ public class MediaRecorder
      */
     public final class AudioSource {
       /* Do not change these values without updating their counterparts
-       * in include/media/mediarecorder.h!
+       * in system/core/include/system/audio.h!
        */
         private AudioSource() {}
+
+        /** Default audio source **/
         public static final int DEFAULT = 0;
+
         /** Microphone audio source */
         public static final int MIC = 1;
 

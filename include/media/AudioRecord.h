@@ -149,7 +149,7 @@ public:
          RECORD_IIR_ENABLE = AUDIO_IN_ACOUSTICS_TX_IIR_ENABLE,
      };
 
-                        AudioRecord(int inputSource,
+                        AudioRecord(audio_source_t inputSource,
                                     uint32_t sampleRate = 0,
                                     audio_format_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
@@ -175,7 +175,7 @@ public:
      *  - NO_INIT: audio server or audio hardware not initialized
      *  - PERMISSION_DENIED: recording is not allowed for the requesting process
      * */
-            status_t    set(int inputSource     = 0,
+            status_t    set(audio_source_t inputSource = AUDIO_SOURCE_DEFAULT,
                             uint32_t sampleRate = 0,
                             audio_format_t format = AUDIO_FORMAT_DEFAULT,
                             uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
@@ -208,7 +208,7 @@ public:
             int         channels() const;
             uint32_t    frameCount() const;
             size_t      frameSize() const;
-            int         inputSource() const;
+            audio_source_t inputSource() const;
 
 
     /* After it's created the track is not active. Call start() to
@@ -367,8 +367,7 @@ private:
     audio_track_cblk_t*     mCblk;
     audio_format_t          mFormat;
     uint8_t                 mChannelCount;
-    uint8_t                 mInputSource;
-    uint8_t                 mReserved[2];
+    audio_source_t          mInputSource;
     status_t                mStatus;
     uint32_t                mLatency;
 

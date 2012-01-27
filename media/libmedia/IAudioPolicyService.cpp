@@ -172,7 +172,7 @@ public:
     }
 
     virtual audio_io_handle_t getInput(
-                                    int inputSource,
+                                    audio_source_t inputSource,
                                     uint32_t samplingRate,
                                     audio_format_t format,
                                     uint32_t channels,
@@ -181,7 +181,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.writeInt32(inputSource);
+        data.writeInt32((int32_t) inputSource);
         data.writeInt32(samplingRate);
         data.writeInt32(static_cast <uint32_t>(format));
         data.writeInt32(channels);
@@ -461,7 +461,7 @@ status_t BnAudioPolicyService::onTransact(
 
         case GET_INPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            int inputSource = data.readInt32();
+            audio_source_t inputSource = (audio_source_t) data.readInt32();
             uint32_t samplingRate = data.readInt32();
             audio_format_t format = (audio_format_t) data.readInt32();
             uint32_t channels = data.readInt32();
