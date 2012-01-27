@@ -1808,7 +1808,7 @@ uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
 }
 
 
-AudioFlinger::AudioStreamOut* AudioFlinger::PlaybackThread::getOutput()
+AudioFlinger::AudioStreamOut* AudioFlinger::PlaybackThread::getOutput() const
 {
     Mutex::Autolock _l(mLock);
     return mOutput;
@@ -4898,7 +4898,7 @@ AudioFlinger::RecordThread::RecordTrack* AudioFlinger::RecordThread::track()
     return mTrack;
 }
 
-AudioFlinger::AudioStreamIn* AudioFlinger::RecordThread::getInput()
+AudioFlinger::AudioStreamIn* AudioFlinger::RecordThread::getInput() const
 {
     Mutex::Autolock _l(mLock);
     return mInput;
@@ -5046,6 +5046,7 @@ status_t AudioFlinger::closeOutput(int output)
 
     if (thread->type() != ThreadBase::DUPLICATING) {
         AudioStreamOut *out = thread->clearOutput();
+        assert(out != NULL);
         // from now on thread->mOutput is NULL
         out->hwDev->close_output_stream(out->hwDev, out->stream);
         delete out;
@@ -5187,6 +5188,7 @@ status_t AudioFlinger::closeInput(int input)
     thread->exit();
 
     AudioStreamIn *in = thread->clearInput();
+    assert(in != NULL);
     // from now on thread->mInput is NULL
     in->hwDev->close_input_stream(in->hwDev, in->stream);
     delete in;
