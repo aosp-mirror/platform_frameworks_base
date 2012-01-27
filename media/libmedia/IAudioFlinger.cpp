@@ -325,7 +325,7 @@ public:
         return reply.readInt32();
     }
 
-    virtual String8 getParameters(int ioHandle, const String8& keys)
+    virtual String8 getParameters(int ioHandle, const String8& keys) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -343,7 +343,7 @@ public:
         remote()->transact(REGISTER_CLIENT, data, &reply);
     }
 
-    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount)
+    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -487,7 +487,7 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output)
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -507,7 +507,7 @@ public:
         return status;
     }
 
-    virtual unsigned int getInputFramesLost(int ioHandle)
+    virtual unsigned int getInputFramesLost(int ioHandle) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -544,7 +544,7 @@ public:
         remote()->transact(RELEASE_AUDIO_SESSION_ID, data, &reply);
     }
 
-    virtual status_t queryNumberEffects(uint32_t *numEffects)
+    virtual status_t queryNumberEffects(uint32_t *numEffects) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
@@ -562,7 +562,7 @@ public:
         return NO_ERROR;
     }
 
-    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor)
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor) const
     {
         if (pDescriptor == NULL) {
             return BAD_VALUE;
@@ -582,7 +582,8 @@ public:
         return NO_ERROR;
     }
 
-    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *pDescriptor)
+    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid,
+            effect_descriptor_t *pDescriptor) const
     {
         if (pUuid == NULL || pDescriptor == NULL) {
             return BAD_VALUE;

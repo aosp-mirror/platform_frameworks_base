@@ -816,7 +816,7 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
     return BAD_VALUE;
 }
 
-String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
+String8 AudioFlinger::getParameters(int ioHandle, const String8& keys) const
 {
 //    ALOGV("getParameters() io %d, keys %s, tid %d, calling tid %d",
 //            ioHandle, keys.string(), gettid(), IPCThreadState::self()->getCallingPid());
@@ -846,7 +846,7 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
     return String8("");
 }
 
-size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount)
+size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const
 {
     status_t ret = initCheck();
     if (ret != NO_ERROR) {
@@ -856,7 +856,7 @@ size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, audio_format_t form
     return mPrimaryHardwareDev->get_input_buffer_size(mPrimaryHardwareDev, sampleRate, format, channelCount);
 }
 
-unsigned int AudioFlinger::getInputFramesLost(int ioHandle)
+unsigned int AudioFlinger::getInputFramesLost(int ioHandle) const
 {
     if (ioHandle == 0) {
         return 0;
@@ -891,7 +891,7 @@ status_t AudioFlinger::setVoiceVolume(float value)
     return ret;
 }
 
-status_t AudioFlinger::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output)
+status_t AudioFlinger::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) const
 {
     status_t status;
 
@@ -5413,19 +5413,20 @@ uint32_t AudioFlinger::primaryOutputDevice_l()
 // ----------------------------------------------------------------------------
 
 
-status_t AudioFlinger::queryNumberEffects(uint32_t *numEffects)
+status_t AudioFlinger::queryNumberEffects(uint32_t *numEffects) const
 {
     Mutex::Autolock _l(mLock);
     return EffectQueryNumberEffects(numEffects);
 }
 
-status_t AudioFlinger::queryEffect(uint32_t index, effect_descriptor_t *descriptor)
+status_t AudioFlinger::queryEffect(uint32_t index, effect_descriptor_t *descriptor) const
 {
     Mutex::Autolock _l(mLock);
     return EffectQueryEffect(index, descriptor);
 }
 
-status_t AudioFlinger::getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *descriptor)
+status_t AudioFlinger::getEffectDescriptor(effect_uuid_t *pUuid,
+        effect_descriptor_t *descriptor) const
 {
     Mutex::Autolock _l(mLock);
     return EffectGetDescriptor(pUuid, descriptor);
