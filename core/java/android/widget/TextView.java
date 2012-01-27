@@ -8402,6 +8402,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 boolean selectAllGotFocus = mSelectAllOnFocus && didTouchFocusSelect();
                 hideControllers();
                 if (!selectAllGotFocus && mText.length() > 0) {
+                    // Move cursor
+                    final int offset = getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection((Spannable) mText, offset);
                     if (mSpellChecker != null) {
                         // When the cursor moves, the word that was typed may need spell check
                         mSpellChecker.onSelectionChanged();
@@ -8418,9 +8421,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             postDelayed(mShowSuggestionRunnable,
                                     ViewConfiguration.getDoubleTapTimeout());
                         } else if (hasInsertionController()) {
-                            // Move cursor
-                            final int offset = getOffsetForPosition(event.getX(), event.getY());
-                            Selection.setSelection((Spannable) mText, offset);
                             getInsertionController().show();
                         }
                     }
