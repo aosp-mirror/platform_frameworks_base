@@ -588,8 +588,12 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 
-        if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
-            mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
+        if (isCdma()) {
+            if (isCdmaEri()) {
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
+            }
+        } else if (mPhone.isNetworkRoaming()) {
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
         }
     }
 
@@ -1019,10 +1023,13 @@ public class NetworkController extends BroadcastReceiver {
             mContentDescriptionCombinedSignal = mHasMobileDataFeature
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
 
-            if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
+            mDataTypeIconId = 0;
+            if (isCdma()) {
+                if (isCdmaEri()) {
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
+                }
+            } else if (mPhone.isNetworkRoaming()) {
                 mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
-            } else {
-                mDataTypeIconId = 0;
             }
         }
 
