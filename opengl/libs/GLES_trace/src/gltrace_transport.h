@@ -76,10 +76,11 @@ public:
 };
 
 /**
- * Utility method: start a server at @serverPort, and wait for a client
- * connection. Returns the connected client socket on success, or -1 on failure.
+ * Utility method: start a server listening at @sockName (unix domain socket,
+ * abstract namespace path), and wait for a client connection.
+ * Returns the connected client socket on success, or -1 on failure.
  */
-int acceptClientConnection(int serverPort);
+int acceptClientConnection(char *sockName);
 
 };
 };
