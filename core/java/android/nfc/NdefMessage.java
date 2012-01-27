@@ -167,7 +167,7 @@ public final class NdefMessage implements Parcelable {
      * always be equal to the length of the byte array produced by
      * {@link #toByteArray}.
      *
-     * @return length of this NDEF Message when written to bytes with {@link toByteArray}
+     * @return length of this NDEF Message when written to bytes with {@link #toByteArray}
      * @see #toByteArray
      */
     public int getByteArrayLength() {
