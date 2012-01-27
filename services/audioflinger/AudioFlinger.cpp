@@ -1866,7 +1866,7 @@ AudioFlinger::MixerThread::~MixerThread()
 bool AudioFlinger::MixerThread::threadLoop()
 {
     Vector< sp<Track> > tracksToRemove;
-    uint32_t mixerStatus = MIXER_IDLE;
+    mixer_state mixerStatus = MIXER_IDLE;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount * mFrameSize;
     // FIXME: Relaxed timing because of a certain device that can't meet latency
@@ -2085,10 +2085,11 @@ bool AudioFlinger::MixerThread::threadLoop()
 }
 
 // prepareTracks_l() must be called with ThreadBase::mLock held
-uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove)
+AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTracks_l(
+        const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove)
 {
 
-    uint32_t mixerStatus = MIXER_IDLE;
+    mixer_state mixerStatus = MIXER_IDLE;
     // find out which tracks need to be processed
     size_t count = activeTracks.size();
     size_t mixedTracks = 0;
@@ -2612,7 +2613,7 @@ void AudioFlinger::DirectOutputThread::applyVolume(uint16_t leftVol, uint16_t ri
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    uint32_t mixerStatus = MIXER_IDLE;
+    mixer_state mixerStatus = MIXER_IDLE;
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
     nsecs_t standbyTime = systemTime();
@@ -3009,7 +3010,7 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 bool AudioFlinger::DuplicatingThread::threadLoop()
 {
     Vector< sp<Track> > tracksToRemove;
-    uint32_t mixerStatus = MIXER_IDLE;
+    mixer_state mixerStatus = MIXER_IDLE;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount*mFrameSize;
     SortedVector< sp<OutputTrack> > outputTracks;
