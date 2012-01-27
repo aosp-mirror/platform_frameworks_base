@@ -361,7 +361,7 @@
          with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
          to this list.  If this is empty, no parts of the host USB bus will be excluded.
     -->
-    <string-array name="config_usbHostBlacklist">
+    <string-array name="config_usbHostBlacklist" translatable="false">
     </string-array>
 
     <!-- Vibrator pattern for feedback about a long screen/key press -->
@@ -533,13 +533,13 @@
 
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not
          specified -->
-    <string name="default_wallpaper_component">@null</string>
+    <string name="default_wallpaper_component" translatable="false">@null</string>
 
     <!-- Component name of the service providing network location support. -->
-    <string name="config_networkLocationProvider">@null</string>
+    <string name="config_networkLocationProvider" translatable="false">@null</string>
 
     <!-- Component name of the service providing geocoder API support. -->
-    <string name="config_geocodeProvider">@null</string>
+    <string name="config_geocodeProvider" translatable="false">@null</string>
 
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
@@ -563,7 +563,7 @@
     <integer name="config_datause_throttle_kbitsps">300</integer>
 
     <!-- The default iface on which to monitor data use -->
-    <string name="config_datause_iface">rmnet0</string>
+    <string name="config_datause_iface" translatable="false">rmnet0</string>
 
     <!-- The default reduced-datarate notification mask -->
     <!-- 2 means give warning -->
@@ -593,11 +593,11 @@
     <bool name="config_sms_capable">true</bool>
 
     <!-- IP address of the dns server to use if nobody else suggests one -->
-    <string name="config_default_dns_server">8.8.8.8</string>
+    <string name="config_default_dns_server" translatable="false">8.8.8.8</string>
 
     <!-- The default character set for GsmAlphabet -->
     <!-- Empty string means MBCS is not considered -->
-    <string name="gsm_alphabet_default_charset"></string>
+    <string name="gsm_alphabet_default_charset" translatable="false"></string>
 
     <!-- Enables SIP on WIFI only -->
     <bool name="config_sip_wifi_only">false</bool>
@@ -632,7 +632,7 @@
          OMA-TS-UAProf-V2_0-20060206-A Section 8.1.1.1. If the URL contains a '%s'
          format string then that substring will be replaced with the value of
          Build.MODEL. The format string shall not be escaped. -->
-    <string name="config_useragentprofile_url"></string>
+    <string name="config_useragentprofile_url" translatable="false"></string>
 
     <!-- When a database query is executed, the results retuned are paginated
          in pages of size (in KB) indicated by this value -->
@@ -643,7 +643,7 @@
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
 
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
-    <string-array name="config_twoDigitNumberPattern">
+    <string-array name="config_twoDigitNumberPattern" translatable="false">
     </string-array>
 
     <!-- The VoiceMail default value is displayed to my own number if it is true -->
@@ -743,18 +743,18 @@
     <!-- Set and Unsets WiMAX -->
     <bool name="config_wimaxEnabled">false</bool>
     <!-- Location of the wimax framwork jar location -->
-    <string name="config_wimaxServiceJarLocation"></string>
+    <string name="config_wimaxServiceJarLocation" translatable="false"></string>
     <!-- Location of the wimax native library locaiton -->
-    <string name="config_wimaxNativeLibLocation"></string>
+    <string name="config_wimaxNativeLibLocation" translatable="false"></string>
     <!-- Name of the wimax manager class -->
-    <string name="config_wimaxManagerClassname"></string>
+    <string name="config_wimaxManagerClassname" translatable="false"></string>
     <!-- Name of the wimax service class -->
-    <string name="config_wimaxServiceClassname"></string>
+    <string name="config_wimaxServiceClassname" translatable="false"></string>
     <!-- Name of the wimax state tracker clas -->
-    <string name="config_wimaxStateTrackerClassname"></string>
+    <string name="config_wimaxStateTrackerClassname" translatable="false"></string>
 
     <!-- Name of screensaver components to look for if none has been chosen by the user -->
-    <string name="config_defaultDreamComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
+    <string name="config_defaultDreamComponent" translatable="false">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->
