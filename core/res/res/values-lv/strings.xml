@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"Labi"</string>
     <string name="report" msgid="4060218260984795706">"Pārskats"</string>
     <string name="wait" msgid="7147118217226317732">"Gaidīt"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"No lapas netiek saņemta atbilde."\n\n"Vai vēlaties to aizvērt?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Lietotne ir novirzīta"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> tagad darbojas."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Sākotnēji tika palaista lietojumprogramma <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>

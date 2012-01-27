@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"该网页已无响应。"\n\n"要将其关闭吗？"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"应用程序已重定向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前正在运行。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g>已启动。"</string>

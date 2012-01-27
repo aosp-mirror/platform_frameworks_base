@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Attendre"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"La page ne répond pas."\n" "\n"Voulez-vous la fermer ?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Application redirigée"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> est maintenant lancée."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Application lancée initialement : <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>

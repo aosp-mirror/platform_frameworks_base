@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"ΟΚ"</string>
     <string name="report" msgid="4060218260984795706">"Αναφορά"</string>
     <string name="wait" msgid="7147118217226317732">"Αναμονή"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Η σελίδα δεν ανταποκρίνεται πια."\n\n"Θέλετε να την κλείσετε;"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Ανακατεύθυνση εφαρμογής"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται τώρα."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Έγινε εκκίνηση πρώτα της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>

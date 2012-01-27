@@ -908,13 +908,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Niestety, aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> została zatrzymana."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Niestety, proces <xliff:g id="PROCESS">%1$s</xliff:g> został zatrzymany."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Aplikacja <xliff:g id="APPLICATION">%2$s</xliff:g> nie odpowiada."\n\n"Czy chcesz ją zamknąć?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"Aplikacja <xliff:g id="APPLICATION">%2$s</xliff:g> nie reaguje."\n\n"Czy chcesz ją zamknąć?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> nie odpowiada."\n\n"Czy chcesz je zakończyć?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> nie odpowiada. Czy chcesz ją zamknąć?"</string>
+    <string name="anr_application_process" msgid="8941757607340481057">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> nie reaguje. Czy chcesz ją zamknąć?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nie odpowiada."\n\n"Czy chcesz go zakończyć?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Zgłoś"</string>
     <string name="wait" msgid="7147118217226317732">"Czekaj"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Strona nie odpowiada na żądania."\n\n"Zamknąć ją?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Aplikacja przekierowana"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest uruchomiona."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
@@ -1214,12 +1215,12 @@
     <string name="ssl_certificate" msgid="6510040486049237639">"Certyfikat zabezpieczeń"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certyfikat jest ważny."</string>
     <string name="issued_to" msgid="454239480274921032">"Wystawiony dla:"</string>
-    <string name="common_name" msgid="2233209299434172646">"Nazwa pospolita (CN):"</string>
+    <string name="common_name" msgid="2233209299434172646">"Nazwa (CN):"</string>
     <string name="org_name" msgid="6973561190762085236">"Organizacja:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Jednostka organizacyjna:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Wystawca:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Ważność:"</string>
-    <string name="issued_on" msgid="5895017404361397232">"Data wystawienia:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Wystawiony:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Wygasa:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numer seryjny:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Odciski cyfrowe:"</string>

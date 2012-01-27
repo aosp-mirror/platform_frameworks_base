@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"D\'acord"</string>
     <string name="report" msgid="4060218260984795706">"Informe"</string>
     <string name="wait" msgid="7147118217226317732">"Espera"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"La pàgina ha deixat de respondre."\n\n"Vols tancar-la?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Aplicació redirigida"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> s\'està executant."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> es va iniciar originalment."</string>
