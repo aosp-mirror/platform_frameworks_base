@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"확인"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"페이지가 응답하지 않습니다."\n\n"페이지를 닫으시겠습니까?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"앱 리디렉션됨"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 실행 중입니다."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"원래 <xliff:g id="APP_NAME">%1$s</xliff:g>을(를) 실행했습니다."</string>

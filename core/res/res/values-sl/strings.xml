@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"V redu"</string>
     <string name="report" msgid="4060218260984795706">"Poročaj"</string>
     <string name="wait" msgid="7147118217226317732">"Čakaj"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Stran se ne odziva."\n" "\n"Ali jo želite zapreti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Program preusmerjen"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se izvaja."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Prvotno je bil zagnan program <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>

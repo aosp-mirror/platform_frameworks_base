@@ -50,7 +50,7 @@
     <string name="invalidPuk" msgid="8761456210898036513">"Унесите PUK који се састоји од 8 цифара или више."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM картица је закључана PUK кодом. Унесите PUK кôд да бисте је откључали."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Унесите PUK2 да бисте деблокирали SIM картицу."</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Долазећи ИД позиваоца"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Долазни ИД позиваоца"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Одлазни ИД позиваоца"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Преусмеравање позива"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Позив на чекању"</string>
@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"Потврди"</string>
     <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Сачекај"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница је престала да се одазива."\n\n" Да ли желите да је затворите?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Апликација је преусмерена"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је сада покренута."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Првобитно је покренута апликација <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>

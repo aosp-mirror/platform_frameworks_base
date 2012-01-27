@@ -140,7 +140,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringervibrering"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Ringeren er aktiveret"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned ..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tabletcomputer slukkes nu."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon slukkes nu."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Vil du slukke?"</string>
@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Rapporter"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Siden svarer ikke."\n\n"Vil du lukke den?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Appen er omdirigeret"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører nu."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> blev oprindeligt åbnet."</string>

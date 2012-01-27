@@ -697,7 +697,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，手機現在將恢復原廠設定。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘記解鎖圖形？"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"解除封鎖帳戶"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帳戶解鎖"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"圖形嘗試次數過多"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"如要解除鎖定，請使用 Google 帳戶登入。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"使用者名稱 (電子郵件)"</string>
@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"確定"</string>
     <string name="report" msgid="4060218260984795706">"回報"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"網頁沒有回應。"\n\n"您要結束嗎？"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"應用程式已重新導向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在正在執行。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」原先已啟動。"</string>

@@ -915,6 +915,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Verslag"</string>
     <string name="wait" msgid="7147118217226317732">"Wag"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Die bladsy reageer nie meer nie."\n\n"Wil jy dit toemaak?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Program herlei"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> loop nou."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> is oorspronklik laat loop."</string>
