@@ -1920,7 +1920,7 @@ bool AudioFlinger::MixerThread::threadLoop()
             if (CC_UNLIKELY((!activeTracks.size() && systemTime() > standbyTime) ||
                         mSuspended)) {
                 if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p, mSuspended %d\n", this, mSuspended);
+                    ALOGV("Audio hardware entering standby, mixer %p, mSuspended %d", this, mSuspended);
                     mOutput->stream->common.standby(&mOutput->stream->common);
                     mStandby = true;
                     mBytesWritten = 0;
@@ -1934,9 +1934,9 @@ bool AudioFlinger::MixerThread::threadLoop()
 
                     releaseWakeLock_l();
                     // wait until we have something to do...
-                    ALOGV("MixerThread %p TID %d going to sleep\n", this, gettid());
+                    ALOGV("MixerThread %p TID %d going to sleep", this, gettid());
                     mWaitWorkCV.wait(mLock);
-                    ALOGV("MixerThread %p TID %d waking up\n", this, gettid());
+                    ALOGV("MixerThread %p TID %d waking up", this, gettid());
                     acquireWakeLock_l();
 
                     mPrevMixerStatus = MIXER_IDLE;
@@ -2638,7 +2638,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         mSuspended)) {
                 // wait until we have something to do...
                 if (!mStandby) {
-                    ALOGV("Audio hardware entering standby, mixer %p\n", this);
+                    ALOGV("Audio hardware entering standby, mixer %p", this);
                     mOutput->stream->common.standby(&mOutput->stream->common);
                     mStandby = true;
                     mBytesWritten = 0;
@@ -2651,9 +2651,9 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     if (exitPending()) break;
 
                     releaseWakeLock_l();
-                    ALOGV("DirectOutputThread %p TID %d going to sleep\n", this, gettid());
+                    ALOGV("DirectOutputThread %p TID %d going to sleep", this, gettid());
                     mWaitWorkCV.wait(mLock);
-                    ALOGV("DirectOutputThread %p TID %d waking up in active mode\n", this, gettid());
+                    ALOGV("DirectOutputThread %p TID %d waking up in active mode", this, gettid());
                     acquireWakeLock_l();
 
                     if (!mMasterMute) {
@@ -3046,9 +3046,9 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     if (exitPending()) break;
 
                     releaseWakeLock_l();
-                    ALOGV("DuplicatingThread %p TID %d going to sleep\n", this, gettid());
+                    ALOGV("DuplicatingThread %p TID %d going to sleep", this, gettid());
                     mWaitWorkCV.wait(mLock);
-                    ALOGV("DuplicatingThread %p TID %d waking up\n", this, gettid());
+                    ALOGV("DuplicatingThread %p TID %d waking up", this, gettid());
                     acquireWakeLock_l();
 
                     mPrevMixerStatus = MIXER_IDLE;
@@ -6209,7 +6209,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::EffectModule::controlHandle()
 
 void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool unpiniflast)
 {
-    ALOGV("disconnect() %p handle %p ", this, handle.unsafe_get());
+    ALOGV("disconnect() %p handle %p", this, handle.unsafe_get());
     // keep a strong reference on this EffectModule to avoid calling the
     // destructor before we exit
     sp<EffectModule> keep(this);
