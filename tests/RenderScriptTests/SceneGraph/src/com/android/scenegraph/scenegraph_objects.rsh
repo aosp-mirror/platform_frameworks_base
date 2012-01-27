@@ -247,4 +247,34 @@ static void getCameraRay(const SgCamera *cam, int screenX, int screenY, float3 *
     *pnt = cam->position.xyz;
 }
 
+static bool intersect(const SgRenderable *obj, float3 pnt, float3 vec) {
+    // Solving for t^2 + Bt + C = 0
+    float3 originMinusCenter = pnt - obj->worldBoundingSphere.xyz;
+    float B = dot(originMinusCenter, vec) * 2.0f;
+    float C = dot(originMinusCenter, originMinusCenter) -
+              obj->worldBoundingSphere.w * obj->worldBoundingSphere.w;
+
+    float discriminant = B * B - 4.0f * C;
+    if (discriminant < 0.0f) {
+        return false;
+    }
+    discriminant = sqrt(discriminant);
+
+    float t0 = (-B - discriminant) * 0.5f;
+    float t1 = (-B + discriminant) * 0.5f;
+
+    if (t0 > t1) {
+        float temp = t0;
+        t0 = t1;
+        t1 = temp;
+    }
+
+    // The sphere is behind us
+    if (t1 < 0.0f) {
+        return false;
+    }
+    return true;
+}
+
+
 #endif // _TRANSFORM_DEF_

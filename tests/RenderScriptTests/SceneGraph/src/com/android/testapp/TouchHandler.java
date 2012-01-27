@@ -16,62 +16,38 @@
 
 package com.android.testapp;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import android.renderscript.*;
-import android.renderscript.Allocation.MipmapControl;
-import android.renderscript.Element.Builder;
-import android.renderscript.Font.Style;
-import android.renderscript.Program.TextureType;
-import android.renderscript.ProgramStore.DepthFunc;
 import android.util.Log;
-
+import android.renderscript.Float3;
 import com.android.scenegraph.*;
+import com.android.scenegraph.CompoundTransform.RotateComponent;
+import com.android.scenegraph.CompoundTransform.TranslateComponent;
 
 public class TouchHandler {
-
     private static String TAG = "TouchHandler";
-
-    public TouchHandler() {
-    }
-
-    public void init(Scene scene) {
-        mCameraRotate = (CompoundTransform)scene.getTransformByName("CameraAim");
-        mCameraDist = (CompoundTransform)scene.getTransformByName("CameraDist");
-
-        if (mCameraRotate != null && mCameraDist != null) {
-            mRotateX = mCameraRotate.mTransformComponents.get(2);
-            mRotateY = mCameraRotate.mTransformComponents.get(1);
-            mDist = mCameraDist.mTransformComponents.get(0);
-        }
-    }
-
-
-    private Resources mRes;
-    private RenderScriptGL mRS;
 
     float mLastX;
     float mLastY;
 
-    CompoundTransform mCameraRotate;
-    CompoundTransform mCameraDist;
+    RotateComponent mRotateX;
+    float mRotateXValue;
+    RotateComponent mRotateY;
+    float mRotateYValue;
+    TranslateComponent mDist;
+    Float3 mDistValue;
 
-    CompoundTransform.Component mRotateX;
-    CompoundTransform.Component mRotateY;
-    CompoundTransform.Component mDist;
+    public void init(Scene scene) {
+        CompoundTransform cameraRotate = (CompoundTransform)scene.getTransformByName("CameraAim");
+        CompoundTransform cameraDist = (CompoundTransform)scene.getTransformByName("CameraDist");
+
+        if (cameraRotate != null && cameraDist != null) {
+            mRotateX = (RotateComponent)cameraRotate.mTransformComponents.get(2);
+            mRotateXValue = mRotateX.getAngle();
+            mRotateY = (RotateComponent)cameraRotate.mTransformComponents.get(1);
+            mRotateYValue = mRotateY.getAngle();
+            mDist = (TranslateComponent)cameraDist.mTransformComponents.get(0);
+            mDistValue = mDist.getValue();
+        }
+    }
 
     public void onActionDown(float x, float y) {
         mLastX = x;
@@ -79,16 +55,16 @@ public class TouchHandler {
     }
 
     public void onActionScale(float scale) {
-        if (mCameraDist == null) {
+        if (mDist == null) {
             return;
         }
-        mDist.mValue.z *= 1.0f / scale;
-        mDist.mValue.z = Math.max(20.0f, Math.min(mDist.mValue.z, 100.0f));
-        mCameraDist.updateRSData();
+        mDistValue.z *= 1.0f / scale;
+        mDistValue.z = Math.max(20.0f, Math.min(mDistValue.z, 100.0f));
+        mDist.setValue(mDistValue);
     }
 
     public void onActionMove(float x, float y) {
-        if (mCameraRotate == null) {
+        if (mRotateX == null) {
             return;
         }
 
@@ -102,21 +78,17 @@ public class TouchHandler {
             dx = 0.0f;
         }
 
-        mRotateY.mValue.w += dx*0.25;
-        if (mRotateY.mValue.w > 360) {
-            mRotateY.mValue.w -= 360;
-        }
-        if (mRotateY.mValue.w < 0) {
-            mRotateY.mValue.w += 360;
-        }
+        mRotateYValue += dx * 0.25f;
+        mRotateYValue %= 360.0f;
 
-        mRotateX.mValue.w += dy*0.25;
-        mRotateX.mValue.w = Math.max(mRotateX.mValue.w, -80.0f);
-        mRotateX.mValue.w = Math.min(mRotateX.mValue.w, 0.0f);
+        mRotateXValue  += dy * 0.25f;
+        mRotateXValue  = Math.max(mRotateXValue , -80.0f);
+        mRotateXValue  = Math.min(mRotateXValue , 0.0f);
+
+        mRotateX.setAngle(mRotateXValue);
+        mRotateY.setAngle(mRotateYValue);
 
         mLastX = x;
         mLastY = y;
-
-        mCameraRotate.updateRSData();
     }
 }

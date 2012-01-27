@@ -38,9 +38,6 @@ public class TestAppLoadingScreen {
 
     private static String TAG = "TestAppLoadingScreen";
 
-    int mWidth;
-    int mHeight;
-
     private Resources mRes;
     private RenderScriptGL mRS;
     private ScriptC_test_app mScript;
@@ -107,7 +104,6 @@ public class TestAppLoadingScreen {
         mScript = new ScriptC_test_app(mRS, mRes, R.raw.test_app);
         mRS.bindRootScript(mScript);
     }
-
 
     public void setRenderLoop(ScriptC renderLoop) {
         mScript.set_gRenderLoop(renderLoop);

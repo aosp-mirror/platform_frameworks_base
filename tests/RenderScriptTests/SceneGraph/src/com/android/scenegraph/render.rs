@@ -51,16 +51,15 @@ static rs_allocation nullAlloc;
 
 //#define DEBUG_RENDERABLES
 static void draw(SgRenderable *obj) {
-
-    const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
-    const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
 #ifdef DEBUG_RENDERABLES
+    const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
     rsDebug("**** Drawing object with transform", obj);
     printName(objTransform->name);
     rsDebug("Model matrix: ", &objTransform->globalMat);
     printName(obj->name);
 #endif //DEBUG_RENDERABLES
 
+    const SgRenderState *renderState = (const SgRenderState *)rsGetElementAt(obj->render_state, 0);
     const SgVertexShader *pv = (const SgVertexShader *)rsGetElementAt(renderState->pv, 0);
     const SgFragmentShader *pf = (const SgFragmentShader *)rsGetElementAt(renderState->pf, 0);
 
@@ -213,35 +212,6 @@ void root(const void *v_in, void *v_out) {
         updateActiveCamera(*camAlloc);
         drawAllObjects(gRenderableObjects);
     }
-}
-
-static bool intersect(const SgRenderable *obj, float3 pnt, float3 vec) {
-    // Solving for t^2 + Bt + C = 0
-    float3 originMinusCenter = pnt - obj->worldBoundingSphere.xyz;
-    float B = dot(originMinusCenter, vec) * 2.0f;
-    float C = dot(originMinusCenter, originMinusCenter) -
-              obj->worldBoundingSphere.w * obj->worldBoundingSphere.w;
-
-    float discriminant = B * B - 4.0f * C;
-    if (discriminant < 0.0f) {
-        return false;
-    }
-    discriminant = sqrt(discriminant);
-
-    float t0 = (-B - discriminant) * 0.5f;
-    float t1 = (-B + discriminant) * 0.5f;
-
-    if (t0 > t1) {
-        float temp = t0;
-        t0 = t1;
-        t1 = temp;
-    }
-
-    // The sphere is behind us
-    if (t1 < 0.0f) {
-        return false;
-    }
-    return true;
 }
 
 // Search through sorted and culled objects

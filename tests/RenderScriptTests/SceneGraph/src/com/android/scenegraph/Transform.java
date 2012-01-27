@@ -51,9 +51,9 @@ public abstract class Transform extends SceneGraphBase {
     }
 
     abstract void initLocalData();
-    public abstract void updateRSData();
+    abstract void updateRSData();
 
-    public ScriptField_SgTransform getRSData(RenderScriptGL rs) {
+    ScriptField_SgTransform getRSData(RenderScriptGL rs) {
         if (mField != null) {
             return mField;
         }
@@ -62,8 +62,7 @@ public abstract class Transform extends SceneGraphBase {
         initLocalData();
 
         if (mChildren.size() != 0) {
-            Allocation childRSData = Allocation.createSized(rs,
-                                                            Element.ALLOCATION(rs),
+            Allocation childRSData = Allocation.createSized(rs, Element.ALLOCATION(rs),
                                                             mChildren.size());
             mTransformData.children = childRSData;
 

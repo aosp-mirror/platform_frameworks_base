@@ -166,9 +166,9 @@ class FullscreenBlur {
     }
 
     static void initShaders(Resources res, RenderScriptGL rs) {
-        ScriptField_FBlurOffsets_s blurConst = new ScriptField_FBlurOffsets_s(rs, 1);
+        ScriptField_BlurOffsets blurConst = new ScriptField_BlurOffsets(rs, 1);
         VertexShader.Builder vb = new VertexShader.Builder(rs);
-        vb.addInput(ScriptField_VertexShaderInputs_s.createElement(rs));
+        vb.addInput(ScriptField_VertexShaderInputs.createElement(rs));
         vb.setShader(res, R.raw.blur_vertex);
         mPV_Blur = vb.create();
 
