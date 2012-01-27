@@ -630,7 +630,7 @@ void AudioSystem::releaseOutput(audio_io_handle_t output)
     aps->releaseOutput(output);
 }
 
-audio_io_handle_t AudioSystem::getInput(int inputSource,
+audio_io_handle_t AudioSystem::getInput(audio_source_t inputSource,
                                     uint32_t samplingRate,
                                     audio_format_t format,
                                     uint32_t channels,

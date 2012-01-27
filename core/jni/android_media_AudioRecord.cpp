@@ -157,7 +157,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     int frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
     
-    if (source >= AUDIO_SOURCE_CNT) {
+    if (uint32_t(source) >= AUDIO_SOURCE_CNT) {
         ALOGE("Error creating AudioRecord: unknown source.");
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
@@ -198,7 +198,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // we use a weak reference so the AudioRecord object can be garbage collected.
     lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
     
-    lpRecorder->set(source,
+    lpRecorder->set((audio_source_t) source,
         sampleRateInHertz,
         format,        // word length, PCM
         channels,

@@ -287,7 +287,7 @@ void AudioPolicyService::releaseOutput(audio_io_handle_t output)
     mpAudioPolicy->release_output(mpAudioPolicy, output);
 }
 
-audio_io_handle_t AudioPolicyService::getInput(int inputSource,
+audio_io_handle_t AudioPolicyService::getInput(audio_source_t inputSource,
                                     uint32_t samplingRate,
                                     audio_format_t format,
                                     uint32_t channels,
@@ -295,6 +295,10 @@ audio_io_handle_t AudioPolicyService::getInput(int inputSource,
                                     int audioSession)
 {
     if (mpAudioPolicy == NULL) {
+        return 0;
+    }
+    // already checked by client, but double-check in case the client wrapper is bypassed
+    if (uint32_t(inputSource) >= AUDIO_SOURCE_CNT) {
         return 0;
     }
     Mutex::Autolock _l(mLock);
@@ -305,7 +309,7 @@ audio_io_handle_t AudioPolicyService::getInput(int inputSource,
         return input;
     }
     // create audio pre processors according to input source
-    ssize_t index = mInputSources.indexOfKey((audio_source_t)inputSource);
+    ssize_t index = mInputSources.indexOfKey(inputSource);
     if (index < 0) {
         return input;
     }
