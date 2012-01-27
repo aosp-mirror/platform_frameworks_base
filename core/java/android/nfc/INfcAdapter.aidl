@@ -44,5 +44,5 @@ interface INfcAdapter
             in IntentFilter[] filters, in TechListParcel techLists);
     void setForegroundNdefPush(in NdefMessage msg, in INdefPushCallback callback);
 
-    void dispatch(in Tag tag, in NdefMessage message);
+    void dispatch(in Tag tag);
 }
