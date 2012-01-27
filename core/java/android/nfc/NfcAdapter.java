@@ -889,12 +889,12 @@ public final class NfcAdapter {
      * {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission.
      * @hide
      */
-    public void dispatch(Tag tag, NdefMessage message) {
+    public void dispatch(Tag tag) {
         if (tag == null) {
             throw new NullPointerException("tag cannot be null");
         }
         try {
-            sService.dispatch(tag, message);
+            sService.dispatch(tag);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }

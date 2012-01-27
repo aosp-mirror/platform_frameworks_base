@@ -158,7 +158,28 @@ public final class NdefMessage implements Parcelable {
     }
 
     /**
-     * Return this NDEF MEssage as raw bytes.<p>
+     * Return the length of this NDEF Message if it is written to a byte array
+     * with {@link #toByteArray}.<p>
+     * An NDEF Message can be formatted to bytes in different ways
+     * depending on chunking, SR, and ID flags, so the length returned
+     * by this method may not be equal to the length of the original
+     * byte array used to construct this NDEF Message. However it will
+     * always be equal to the length of the byte array produced by
+     * {@link #toByteArray}.
+     *
+     * @return length of this NDEF Message when written to bytes with {@link toByteArray}
+     * @see #toByteArray
+     */
+    public int getByteArrayLength() {
+        int length = 0;
+        for (NdefRecord r : mRecords) {
+            length += r.getByteLength();
+        }
+        return length;
+    }
+
+    /**
+     * Return this NDEF Message as raw bytes.<p>
      * The NDEF Message is formatted as per the NDEF 1.0 specification,
      * and the byte array is suitable for network transmission or storage
      * in an NFC Forum NDEF compatible tag.<p>
@@ -166,13 +187,10 @@ public final class NdefMessage implements Parcelable {
      * short record (SR) format and omit the identifier field when possible.
      *
      * @return NDEF Message in binary format
+     * @see getByteArrayLength
      */
     public byte[] toByteArray() {
-        int length = 0;
-        for (NdefRecord r : mRecords) {
-            length += r.getByteLength();
-        }
-
+        int length = getByteArrayLength();
         ByteBuffer buffer = ByteBuffer.allocate(length);
 
         for (int i=0; i<mRecords.length; i++) {

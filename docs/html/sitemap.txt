@@ -231,7 +231,6 @@ http://developer.android.com/resources/samples/JetBoy/index.html
 http://developer.android.com/resources/samples/CubeLiveWallpaper/index.html
 http://developer.android.com/resources/samples/LunarLander/index.html
 http://developer.android.com/resources/samples/MultiResolution/index.html
-http://developer.android.com/resources/samples/NFCDemo/index.html
 http://developer.android.com/resources/samples/NotePad/index.html
 http://developer.android.com/resources/samples/SampleSyncAdapter/index.html
 http://developer.android.com/resources/samples/SearchableDictionary/index.html
@@ -1996,17 +1995,6 @@ http://developer.android.com/reference/java/io/Reader.html
 http://developer.android.com/reference/android/content/DialogInterface.html
 http://developer.android.com/reference/org/apache/http/message/BasicHeaderIterator.html
 http://developer.android.com/reference/org/apache/http/message/BasicListHeaderIterator.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/TagViewer.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/NdefMessageParser.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/record/ParsedNdefRecord.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/record/SmartPoster.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/record/TextRecord.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/record/UriRecord.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/simulator/FakeTagsActivity.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/simulator/MockNdefMessages.html
-http://developer.android.com/resources/samples/NFCDemo/res/index.html
-http://developer.android.com/resources/samples/NFCDemo/src/index.html
-http://developer.android.com/resources/samples/NFCDemo/AndroidManifest.html
 http://developer.android.com/reference/java/lang/InternalError.html
 http://developer.android.com/reference/java/lang/Error.html
 http://developer.android.com/reference/java/lang/VirtualMachineError.html
@@ -3039,7 +3027,6 @@ http://developer.android.com/sdk/api_diff/3/changes/pkg_dalvik.system.html
 http://developer.android.com/sdk/api_diff/3/changes/pkg_java.lang.html
 http://developer.android.com/sdk/api_diff/3/changes/pkg_java.util.jar.html
 http://developer.android.com/sdk/api_diff/3/changes/pkg_java.util.logging.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/index.html
 http://developer.android.com/sdk/api_diff/9/changes/alldiffs_index_removals.html
 http://developer.android.com/sdk/api_diff/9/changes/alldiffs_index_additions.html
 http://developer.android.com/sdk/api_diff/9/changes/alldiffs_index_changes.html
@@ -3514,7 +3501,6 @@ http://developer.android.com/reference/javax/sql/ConnectionPoolDataSource.html
 http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/view/LabelView.html
 http://developer.android.com/resources/samples/ApiDemos/res/layout/custom_view_1.html
 http://developer.android.com/resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/index.html
 http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html
 http://developer.android.com/reference/android/location/package-descr.html
 http://developer.android.com/resources/samples/AccessibilityService/res/values/strings.html
@@ -3939,10 +3925,6 @@ http://developer.android.com/reference/android/graphics/drawable/shapes/RoundRec
 http://developer.android.com/resources/samples/ContactManager/res/drawable-mdpi/icon.html
 http://developer.android.com/resources/samples/BackupRestore/src/com/example/index.html
 http://developer.android.com/reference/org/apache/http/message/package-descr.html
-http://developer.android.com/resources/samples/NFCDemo/res/drawable/index.html
-http://developer.android.com/resources/samples/NFCDemo/res/layout/index.html
-http://developer.android.com/resources/samples/NFCDemo/res/raw/index.html
-http://developer.android.com/resources/samples/NFCDemo/res/values/index.html
 http://developer.android.com/reference/android/bluetooth/package-descr.html
 http://developer.android.com/resources/samples/SipDemo/res/drawable/index.html
 http://developer.android.com/resources/samples/SipDemo/res/layout/index.html
@@ -4110,7 +4092,6 @@ http://developer.android.com/sdk/api_diff/9/changes/methods_index_removals.html
 http://developer.android.com/sdk/api_diff/9/changes/methods_index_additions.html
 http://developer.android.com/sdk/api_diff/9/changes/methods_index_changes.html
 http://developer.android.com/reference/android/media/audiofx/package-descr.html
-http://developer.android.com/resources/samples/NFCDemo/res/values/strings.html
 http://developer.android.com/reference/android/sax/ElementListener.html
 http://developer.android.com/reference/android/sax/EndElementListener.html
 http://developer.android.com/reference/android/sax/EndTextElementListener.html
@@ -4599,7 +4580,6 @@ http://developer.android.com/resources/samples/SoftKeyboard/src/com/index.html
 http://developer.android.com/reference/android/text/method/package-descr.html
 http://developer.android.com/resources/samples/JetBoy/JETBOY_content/JETBOY_Music.logic/LgDoc/index.html
 http://developer.android.com/resources/samples/TicTacToeMain/res/layout/main.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/index.html
 http://developer.android.com/resources/samples/SearchableDictionary/res/drawable-mdpi/ic_menu_search.html
 http://developer.android.com/resources/samples/TicTacToeMain/res/values/strings.html
 http://developer.android.com/sdk/api_diff/7/changes/alldiffs_index_additions.html
@@ -4637,9 +4617,6 @@ http://developer.android.com/resources/samples/SoftKeyboard/res/values/index.htm
 http://developer.android.com/resources/samples/SoftKeyboard/res/values-land/index.html
 http://developer.android.com/resources/samples/SoftKeyboard/res/xml/index.html
 http://developer.android.com/reference/junit/runner/package-descr.html
-http://developer.android.com/resources/samples/NFCDemo/res/layout/tag_divider.html
-http://developer.android.com/resources/samples/NFCDemo/res/layout/tag_text.html
-http://developer.android.com/resources/samples/NFCDemo/res/layout/tag_viewer.html
 http://developer.android.com/resources/samples/AccelerometerPlay/res/drawable-ldpi/icon.html
 http://developer.android.com/resources/samples/CubeLiveWallpaper/src/com/example/index.html
 http://developer.android.com/reference/android/text/style/package-descr.html
@@ -4726,14 +4703,12 @@ http://developer.android.com/resources/samples/SoftKeyboard/res/values-land/dime
 http://developer.android.com/sdk/api_diff/3/changes/classes_index_additions.html
 http://developer.android.com/sdk/api_diff/3/changes/classes_index_changes.html
 http://developer.android.com/resources/samples/WiktionarySimple/src/com/index.html
-http://developer.android.com/resources/samples/NFCDemo/res/drawable/icon.html
 http://developer.android.com/resources/samples/SearchableDictionary/res/drawable-hdpi/ic_menu_search.html
 http://developer.android.com/resources/samples/SipDemo/res/values/strings.html
 http://developer.android.com/resources/samples/SpinnerTest/src/com/android/index.html
 http://developer.android.com/sdk/api_diff/3/changes/methods_index_removals.html
 http://developer.android.com/sdk/api_diff/3/changes/methods_index_additions.html
 http://developer.android.com/sdk/api_diff/3/changes/methods_index_changes.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/index.html
 http://developer.android.com/resources/samples/SoftKeyboard/res/xml/method.html
 http://developer.android.com/resources/samples/SoftKeyboard/res/xml/qwerty.html
 http://developer.android.com/resources/samples/SoftKeyboard/res/xml/symbols.html
@@ -5326,8 +5301,6 @@ http://developer.android.com/resources/samples/ApiDemos/res/drawable-ldpi/stylog
 http://developer.android.com/sdk/api_diff/5/changes/alldiffs_index_removals.html
 http://developer.android.com/sdk/api_diff/5/changes/alldiffs_index_additions.html
 http://developer.android.com/sdk/api_diff/5/changes/alldiffs_index_changes.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/record/index.html
-http://developer.android.com/resources/samples/NFCDemo/src/com/example/android/nfc/simulator/index.html
 http://developer.android.com/resources/samples/BackupRestore/src/com/example/android/index.html
 http://developer.android.com/resources/samples/BluetoothChat/src/com/example/android/BluetoothChat/index.html
 http://developer.android.com/resources/samples/ContactManager/src/com/example/android/index.html

@@ -108,14 +108,14 @@ import java.util.Arrays;
  * <p>
  */
 public final class Tag implements Parcelable {
-    /*package*/ final byte[] mId;
-    /*package*/ final int[] mTechList;
-    /*package*/ final String[] mTechStringList;
-    /*package*/ final Bundle[] mTechExtras;
-    /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
-    /*package*/ final INfcTag mTagService; // interface to NFC service, will be null if mock tag
+    final byte[] mId;
+    final int[] mTechList;
+    final String[] mTechStringList;
+    final Bundle[] mTechExtras;
+    final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
+    final INfcTag mTagService; // interface to NFC service, will be null if mock tag
 
-    /*package*/ int mConnectedTechnology;
+    int mConnectedTechnology;
 
     /**
      * Hidden constructor to be used by NFC service and internal classes.
