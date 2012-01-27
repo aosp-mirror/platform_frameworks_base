@@ -502,19 +502,11 @@ static void android_view_GLES20Canvas_resetPaintFilter(JNIEnv* env, jobject claz
 
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, flags);
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, 0, count, count, flags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text, count).string());
         return;
     }
-#else
-    value = new TextLayoutCacheValue(count);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            text, 0, count, count, flags);
-#endif
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     int bytesCount = glyphsCount * sizeof(jchar);
@@ -524,19 +516,11 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, start, count, contextCount, flags);
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, start, count, contextCount, flags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text + start, count).string());
         return;
     }
-#else
-    value = new TextLayoutCacheValue(count);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            text, start, count, contextCount, flags);
-#endif
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     int bytesCount = glyphsCount * sizeof(jchar);
@@ -583,20 +567,11 @@ static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject clazz,
 
 static void renderPosText(OpenGLRenderer* renderer, const jchar* text, int count,
         const jfloat* positions, jint dirFlags, SkPaint* paint) {
-    sp<TextLayoutCacheValue> value;
-#if USE_TEXT_LAYOUT_CACHE
-    value = TextLayoutCache::getInstance().getValue(paint, text, 0, count, count, dirFlags);
+    sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(paint,
+            text, 0, count, count, dirFlags);
     if (value == NULL) {
-        ALOGE("Cannot get TextLayoutCache value for text = '%s'",
-                String8(text, count).string());
         return;
     }
-#else
-    value = new TextLayoutCacheValue(count);
-    TextLayoutEngine::getInstance().computeValues(value.get(), paint,
-            text, 0, count, count, dirFlags);
-#endif
-
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     if (count < int(glyphsCount)) glyphsCount = count;
