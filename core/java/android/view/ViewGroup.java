@@ -5203,6 +5203,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return true;
     }
 
+    /** @hide */
+    protected void onSetLayoutParams(View child, LayoutParams layoutParams) {
+    }
+
     /**
      * LayoutParams are used by views to tell their parents how they want to be
      * laid out. See
@@ -5411,29 +5415,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public static class MarginLayoutParams extends ViewGroup.LayoutParams {
         /**
-         * The left margin in pixels of the child. Whenever this value is changed, a call to
-         * {@link android.view.View#requestLayout()} needs to be done.
+         * The left margin in pixels of the child.
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int leftMargin;
 
         /**
-         * The top margin in pixels of the child. Whenever this value is changed, a call to
-         * {@link android.view.View#requestLayout()} needs to be done.
+         * The top margin in pixels of the child.
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int topMargin;
 
         /**
-         * The right margin in pixels of the child. Whenever this value is changed, a call to
-         * {@link android.view.View#requestLayout()} needs to be done.
+         * The right margin in pixels of the child.
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int rightMargin;
 
         /**
-         * The bottom margin in pixels of the child. Whenever this value is changed, a call to
-         * {@link android.view.View#requestLayout()} needs to be done.
+         * The bottom margin in pixels of the child.
+         * Call {@link ViewGroup#setLayoutParams(LayoutParams)} after reassigning a new value
+         * to this field.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int bottomMargin;

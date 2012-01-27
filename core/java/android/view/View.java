@@ -8252,6 +8252,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             throw new NullPointerException("Layout parameters cannot be null");
         }
         mLayoutParams = params;
+        if (mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).onSetLayoutParams(this, params);
+        }
         requestLayout();
     }
 
