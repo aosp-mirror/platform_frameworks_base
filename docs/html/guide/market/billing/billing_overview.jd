@@ -7,6 +7,7 @@ parent.link=index.html
 <div id="qv">
   <h2>In this document</h2>
   <ol>
+    <li><a href="#billing-types">Product and Purchase Types</a></li>
     <li><a href="#billing-arch">In-app Billing Architecture</a></li>
     <li><a href="#billing-msgs">In-app Billing Messages</a></li>
     <ol>
@@ -47,15 +48,57 @@ order number, the order date and time, and the price paid. At no point does your
 handle any financial transactions; that role is provided by Google Play's in-app billing
 service.</p>
 
+<h2 id="billing-types">Product and Purchase Types</h2>
+
+<p>In-app Billing supports different product types and purchase types to give you flexibility in how you monetize your app. In all cases, you define your products using the Google Play Developer Console, including product type, purchase type, SKU, price, description, and so on. For more information, see <a href="billing_admin.html">Administering In-app Billing</a>.</p>
+
+<h3 id="producttypes">Product Types</h3>
+
+<p>With In-app Billing, you can sell two types of products &mdash; <em>in-app products</em> and <em>subscriptions</em>. The billing characteristics of the two types are very different, but the In-app Billing API lets you handle the two product types in your app using the same communication model, data structures, and user interactions, as described later in this document.</p>
+
+<ul>
+<li><em>In-app products</em> &mdash; Items that a user would purchase one-at-a-time. For example, typical in-app products would let users purchase digital content, unlock functionality in an app, pay for one-time charges, or add almost anything to the application experience. Unlike with priced applications, once the user has purchased an in-app product there is no refund window. Users desiring refunds must contact the developer directly.
+
+<p>In-app products can be sold using either the "managed per user account" or "unmanaged" purchase type. In-app products are always explicitly associated with one and only one app. That is, one app cannot purchase an in-app product published for another app, even if they are from the same developer. In-app products are supported in all versions of In-app Billing.</p></li>
+
+<li><em>Subscriptions</em> &mdash; Items that are sold with a developer-specified, recurring billing interval. When a user purchases a subscription, Google Play and its payment processor automatically bill the user's account at the specified interval and price, charging the amount to the original payment method. Once the user purchases a subscription, Google Play continues billing the account indefinitely, without requiring approval or action from the user. The user can cancel the subscription at any time. 
+
+<p>Subscriptions can only be sold using the "managed per user account" purchase type. As with in-app products, once the user has purchased an in-app product there is no refund window. Users desiring refunds must contact the developer directly. For more information about subscriptions and how to sell them in your apps, see the <a href="billing-subscriptions.html">Subscriptions</a> document.</p></li>
+</ul>
+
+<h3 id="purchasetypes">Purchase Types</h3>
+
+<p>In-app Billing offers two purchase types that you can use when selling in-app products, "managed per user account" and "unmanaged". The purchase type controls how Google Play handles and tracks purchases for the products. </p>
+
+<ul>
+<li><em>Managed per user account</em> &mdash; Items that can be purchased only once per user account on Google Play. When a user purchases an item that uses the "managed per user account" purchase type, Google Play permanently stores the transaction information for each item on a per-user basis. This enables you to later query Google Play to restore the state of the items a specific user has purchased. If a user attempts to purchase a managed item that has already been purchased, Google Play prevents the user from purchasing the item again and displays an "Item already purchased" error.
+
+<p>The "managed per user account" purchase type is useful if you are selling items such as game levels or application features. These items are not transient and usually need to be restored whenever a user reinstalls your application, wipes the data on their device, or installs your application on a new device.</p>
+
+<li><em>Unmanaged</em> &mdash; Items that do not have their transaction information stored on Google Play. This means that you cannot later query Google Play to retrieve transaction information for those items. For "unmanaged" purchases, you are responsible for managing the transaction information. Also, Google Play does not attempt to prevent the user from purchasing an item multiple times if it uses the "unmanaged" purchase type. It's up to you to control how many times an unmanaged item can be purchased.</p>
+
+<p>The "unmanaged" purchase type is useful if you are selling consumable items, such as fuel or magic spells. These items are consumed within your application and are usually purchased multiple times.</p></li>
+</ul>
+
 <h2 id="billing-arch">In-app Billing Architecture</h2>
 
-<p>In-app billing uses an asynchronous message loop to convey billing requests and billing responses
-between your application and the Google Play server. In practice, your application never directly
-communicates with the Google Play server (see figure 1). Instead, your application sends billing
-requests to the Google Play application over interprocess communication (IPC) and receives
-purchase responses from the Google Play application in the form of asynchronous broadcast
-intents. Your application does not manage any network connections between itself and the Google
-Play server or use any special APIs from the Android platform.</p>
+<p>Your app accesses the In-app Billing service using an API that is exposed by
+the Google Play app installed on the device. The Google Play app then uses an
+asynchronous message loop to convey billing requests and responses between your
+application and the Google Play server. In practice, your application never
+directly communicates with the Google Play server (see figure 1). Instead, your
+application sends billing requests to the Google Play application over
+interprocess communication (IPC) and receives purchase responses from the Google
+Play application in the form of asynchronous broadcast intents. Your application
+does not manage any network connections between itself and the Google Play
+server or use any special APIs from the Android platform.</p>
+
+<div class="figure" style="width:440px">
+<img src="{@docRoot}images/billing_arch.png" alt="" height="582" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Your application sends and receives billing messages through the
+  Google Play application, which handles all communication with the Google Play server.</p>
+</div>
 
 <p>Some in-app billing implementations may also use a private remote server to deliver content or
 validate transactions, but a remote server is not required to implement in-app billing. A remote
@@ -65,13 +108,6 @@ transaction history or perform various in-app billing security tasks, such as si
 verification. Although you can handle all security-related tasks in your application, performing
 those tasks on a remote server is recommended because it helps make your application less vulnerable
 to security attacks.</p>
-
-<div class="figure" style="width:440px">
-<img src="{@docRoot}images/billing_arch.png" alt="" height="582" />
-<p class="img-caption">
-  <strong>Figure 1.</strong> Your application sends and receives billing messages through the
-  Google Play application, which handles all communication with the Google Play server.</p>
-</div>
 
 <p>A typical in-app billing implementation relies on three components:</p>
 <ul>
@@ -125,9 +161,9 @@ file with the in-app billing sample application.</p>
 
 <p>The <code>sendBillingRequest()</code> method has a single {@link android.os.Bundle} parameter.
 The Bundle that you deliver must include several key-value pairs that specify various parameters for
-the request, such as the type of billing request you are making, the item that is being purchased,
-and the application that is making the request. For more information about the Bundle keys that are
-sent with a request, see <a
+the request, such as the type of billing request you are making, the item that is being purchased and
+its type, and the application that is making the request. For more information about the Bundle keys
+that are sent with a request, see <a
 href="{@docRoot}guide/market/billing/billing_reference.html#billing-interface">In-app Billing
 Service Interface</a>.
 
@@ -163,7 +199,9 @@ requests:</p>
   <li><code>RESTORE_TRANSACTIONS</code>
     <p>This request retrieves a user's transaction status for <a
     href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">managed
-    purchases</a>. You should send this request only when you need to retrieve a user's transaction
+    purchases</a> and <a
+    href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">subscriptions</a>.
+    You should send this request only when you need to retrieve a user's transaction
     status, which is usually only when your application is reinstalled or installed for the first
     time on a device.</p>
   </li>
@@ -223,17 +261,17 @@ include the following:</p>
 
 <p>The JSON string that is returned with the <code>PURCHASE_STATE_CHANGED</code> intent provides
 your application with the details of one or more billing transactions. An example of this JSON
-string is shown below:</p>
-<pre class="no-pretty-print" style="color:black">
-{ "nonce" : 1836535032137741465,
+string for a subscription item is shown below:</p>
+<pre class="no-pretty-print" style="color:black">{ "nonce" : 1836535032137741465,
   "orders" :
-    { "notificationId" : "android.test.purchased",
-      "orderId" : "transactionId.android.test.purchased",
-      "packageName" : "com.example.dungeons",
-      "productId" : "android.test.purchased",
-      "developerPayload" : "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
-      "purchaseTime" : 1290114783411,
-      "purchaseState" : 0 }
+    [{ "notificationId" : "android.test.purchased",
+       "orderId" : "transactionId.android.test.purchased",
+       "packageName" : "com.example.dungeons",
+       "productId" : "android.test.purchased",
+       "developerPayload" : "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
+       "purchaseTime" : 1290114783411,
+       "purchaseState" : 0,
+       "purchaseToken" : "rojeslcdyyiapnqcynkjyyjh" }]
 }
 </pre>
 
@@ -400,7 +438,7 @@ href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">p
 to "managed per user account."</p>
 
 <p>In the second case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
-when Google Play receives a refund notification from Google Checkout. In this case, Google
+when Google Play receives a refund notification from Google Wallet. In this case, Google
 Play sends an <code>IN_APP_NOTIFY</code> message to your application. Your application can handle
 this message the same way it handles responses from an application-initiated
 <code>REQUEST_PURCHASE</code> message so that ultimately your application receives a
@@ -409,9 +447,9 @@ refunded. The refund information is included in the JSON string that accompanies
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent. Also, the <code>purchaseState</code> field in
 the JSON string is set to 2.</p>
 
-<p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to
+<p class="caution"><strong>Important:</strong> You cannot use the Google Wallet API to
 issue refunds or cancel in-app billing transactions. You must do this manually through your
-Google Checkout merchant account. However, you can use the Google Checkout API to retrieve order
+Google Wallet merchant account. However, you can use the Google Wallet API to retrieve order
 information.</p>
 
 <h2 id="billing-security">Security Controls</h2>
@@ -449,10 +487,10 @@ limitations.</p>
 <ul>
   <li>In-app billing can be implemented only in applications that you publish through Google
   Play.</li>
-  <li>You must have a Google Checkout Merchant account to use Google Play In-app Billing.</li>
-  <li>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of
-  the MyApps application. If your device is running any other version of Android, in-app billing
-  requires version 2.3.4 (or higher) of the Google Play application.</li>
+  <li>You must have a Google Wallet Merchant account to use Google Play In-app Billing.</li>
+  <li>In-app billing requires version 2.3.4 (or higher) of the Android Market application.
+  To support subscriptions, version 3.5 or higher of the Google Play app is required. On devices
+  running Android 3.0, version 5.0.12 (or higher) of the MyApps application is required.</li>
   <li>An application can use in-app billing only if the device is running Android 1.6 (API level 4)
   or higher.</li>
   <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell
@@ -465,5 +503,5 @@ limitations.</p>
 </ul>
 
 <p>For more information about in-app billing requirements, see <a
-href="http://market.android.com/support/bin/answer.py?answer=1153481">In-App Billing Availability
-and Policies</a>.</p>
+href="https://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153481">In-App
+Billing Availability and Policies</a>.</p>

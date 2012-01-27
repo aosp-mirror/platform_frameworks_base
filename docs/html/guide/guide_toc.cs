@@ -487,7 +487,7 @@ class="new">&nbsp;new!</span></span>
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/market/billing/index.html">
-            <span class="en">In-app Billing</span></a>
+            <span class="en">In-app Billing</span></a> <span class="new">updated</span>
         </div>
         <ul>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_overview.html">
@@ -495,6 +495,9 @@ class="new">&nbsp;new!</span></span>
           </li>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_integrate.html">
               <span class="en">Implementing In-app Billing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_subscriptions.html">
+              <span class="en">Subscriptions</span></a> <span class="new">new!</span>
           </li>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>

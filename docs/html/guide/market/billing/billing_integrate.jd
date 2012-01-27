@@ -242,7 +242,7 @@ how to do this.</p>
     List</a>.</p>
     <p class="note"><strong>Note:</strong> You must publish the items in your product
     list (<code>sword_001</code> and <code>potion_001</code>) even though you are not publishing the
-    sample application. Also, you must have a Google Checkout Merchant account to add items to the
+    sample application. Also, you must have a Google Wallet Merchant account to add items to the
     sample application's product list.</p>
   </li>
 </ol>
@@ -255,7 +255,7 @@ onto a device to run it. To run the sample application, do the following:</p>
 <ol>
   <li><strong>Make sure you have at least one test account registered under your Google Play
   publisher account.</strong>
-    <p>You cannot purchase items from yourself (Google Checkout prohibits this), so you need to
+    <p>You cannot purchase items from yourself (Google Wallet prohibits this), so you need to
     create at least one test account that you can use to purchase items in the sample application.
     To learn how to set up a test account, see <a
     href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-setup">Setting up Test
@@ -294,7 +294,7 @@ onto a device to run it. To run the sample application, do the following:</p>
   </li>
   <li><strong>Run the application and purchase the sword or the potion.</strong>
     <p>When you use a test account to purchase items, the test account is billed through Google
-    Checkout and your Google Checkout Merchant account receives a payout for the purchase.
+    Wallet and your Google Wallet Merchant account receives a payout for the purchase.
     Therefore, you may want to refund purchases that are made with test accounts, otherwise the
     purchases will show up as actual payouts to your merchant account.</p>
 </ol>
@@ -475,7 +475,7 @@ key can have the following five values:</p>
 
 <ul>
   <li><code>CHECK_BILLING_SUPPORTED</code>&mdash;verifies that the Google Play application
-  supports in-app billing.</li>
+  supports in-app billing and the version of the In-app Billing API available.</li>
   <li><code>REQUEST_PURCHASE</code>&mdash;sends a purchase request for an in-app item.</li>
   <li><code>GET_PURCHASE_INFORMATION</code>&mdash;retrieves transaction information for a purchase
   or refund.</li>
@@ -511,8 +511,8 @@ application's main thread.</p>
 <h4>Verifying that in-app billing is supported (CHECK_BILLING_SUPPPORTED)</h4>
 
 <p>The following code sample shows how to verify whether the Google Play application supports
-in-app billing. In the sample, <code>mService</code> is an instance of the
-<code>MarketBillingService</code> interface.</p>
+in-app billing and confirm what version of the API it supports. In the sample, <code>mService</code>
+is an instance of the <code>MarketBillingService</code> interface.</p>
 
 <pre>
 /**
@@ -523,13 +523,19 @@ in-app billing. In the sample, <code>mService</code> is an instance of the
   // Do something with this response.
 }
 </pre>
+
 <p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the
 three keys that are required for all requests: <code>BILLING_REQUEST</code>,
-<code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The request returns a synchronous {@link
+<code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. If you are offering subscriptions in
+your app, set the API_VERSION key to a value of "2", to confirm that In-app Billing v2 is
+available. For an examnple, see
+<a href="{@docRoot}guide/market/billing/billing_subscriptions.html#version">Subscriptions</a>.</p>
+
+<p>The <code>CHECK_BILLING_SUPPORTED</code> request returns a synchronous {@link
 android.os.Bundle} response, which contains only a single key: <code>RESPONSE_CODE</code>. The
 <code>RESPONSE_CODE</code> key can have the following values:</p>
 <ul>
-  <li><code>RESULT_OK</code>&mdash;in-app billing is supported.</li>
+  <li><code>RESULT_OK</code>&mdash;the spedified version of in-app billing is supported.</li>
   <li><code>RESULT_BILLING_UNAVAILABLE</code>&mdash;in-app billing is not available because the API
   version you specified is not recognized or the user is not eligible to make in-app purchases (for
   example, the user resides in a country that prohibits in-app purchases).</li>
@@ -581,6 +587,8 @@ interface.</p>
 */
   Bundle request = makeRequestBundle("REQUEST_PURCHASE");
   request.putString(ITEM_ID, mProductId);
+  // Request is for a standard in-app product
+  request.putString(ITEM_TYPE, "inapp");
   // Note that the developer payload is optional.
   if (mDeveloperPayload != null) {
     request.putString(DEVELOPER_PAYLOAD, mDeveloperPayload);

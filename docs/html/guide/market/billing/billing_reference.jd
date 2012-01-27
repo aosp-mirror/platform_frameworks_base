@@ -10,7 +10,8 @@ parent.link=index.html
     <li><a href="#billing-codes">Server Response Codes for In-app Billing</a></li>
     <li><a href="#billing-interface">In-app Billing Service Interface</a></li>
     <li><a href="#billing-intents">In-app Billing Broadcast Intents</a></li>
-    
+    <li><a href="#other-intents">Other Broadcast Intents</a></li>
+    <li><a href="#billing-versions">In-app Billing API Versions</a></li>
   </ol>
   <h2>Downloads</h2>
   <ol>
@@ -39,9 +40,11 @@ parent.link=index.html
   <li><a href="#billing-codes">Google Play Server Response Codes for In-app Billing</a></li>
   <li><a href="#billing-interface">In-app Billing Interface Parameters</a></li>
   <li><a href="#billing-intents">In-app Billing Broadcast Intents</a></li>
+  <li><a href="#other-intents">Other Intents</a></li>
+  <li><a href="#billing-versions">In-app Billing API Versions</a></li>
 </ul>
 
-<h2 id="billing-codes">Google Play Server Response Codes for In-app Billing</h2>
+<h2 id="billing-codes">Server Response Codes for In-app Billing</h2>
 
 <p>The following table lists all of the server response codes that are sent from Google Play to
 your application. Google Play sends these response codes asynchronously as
@@ -102,7 +105,7 @@ codes returned by Google Play.</p>
   <td><code>RESULT_ERROR</code></td>
   <td>6</td>
   <td>Indicates an unexpected server error. For example, this error is triggered if you try to
-purchase an item from yourself, which is not allowed by Google Checkout.</td>
+purchase an item from yourself, which is not allowed by Google Wallet.</td>
 </tr>
 </table>
 
@@ -142,10 +145,13 @@ pairs, which are summarized in table 2.</p>
 <tr>
   <td><code>API_VERSION</code></td>
   <td><code>int</code></td>
-  <td>1</td>
+  <td>  <ul>
+  <li><code>"2"</code> [<a href="#version_2">details</a>]</li>
+  <li><code>"1"</code> [<a href="#version_1">details</a>]</li>
+  </ul></td>
   <td>Yes</td>
-  <td>The version of Google Play's in-app billing service you are using. The current version is
-  1.</td>
+  <td>The version of Google Play's in-app billing service you want to use. The current version is
+  2.</td>
 </tr>
 <tr>
   <td><code>PACKAGE_NAME</code></td>
@@ -388,7 +394,7 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 </tr>
 <tr>
   <td>orderId</td>
-  <td>A unique order identifier for the transaction. This corresponds to the Google Checkout Order
+  <td>A unique order identifier for the transaction. This corresponds to the Google Wallet Order
   ID.</td>
 </tr>
 <tr>
@@ -407,8 +413,15 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 
 <tr>
   <td>purchaseState</td>
-  <td>The purchase state of the order. Possible values are 0 (purchased), 1 (canceled), or 2
-  (refunded).</td>
+  <td>The purchase state of the order. Possible values are 0 (purchased), 1 (canceled), 2
+  (refunded), or 3 (expired, for subscription purchases only).</td>
+</tr>
+<tr>
+  <td>subscriptionToken</td>
+  <td>A token that uniquely identifies a subscription purchase for a given item and user pair.
+  You can use the token to specify the subscription when querying for subscription validity.
+  
+  <p><br><em>Supported only in In-app Billing API version 2 and higher.</em></p></td>
 </tr>
 <tr>
   <td>developerPayload</td>
@@ -416,3 +429,63 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
   specify a value for this field when you make a <code>REQUEST_PURCHASE</code> request.</td>
 </tr>
 </table>
+
+<!--<h2 id="other-intents">Other Intents</h2> 
+
+<p>The following Intents related to In-app Billing may be useful in your
+implemention. </p> -->
+
+<h2 id="http-api">HTTP API for verification and cancelation</h2>
+
+<p>Google Play offers an HTTP-based API that you can use to remotely query the
+validity of a specific subscription at any time or cancel a subscription. The
+API is designed to be used from your backend servers as a way of securely
+managing subscriptions, as well as extending and integrating subscriptions with
+other services. See <a
+href="{@docRoot}guide/market/billing/billing_subscriptions.html#play-dev-api">
+Google Play Android Developer API</a> for more information.</p>
+
+<h2 id="billing-versions">In-app Billing API Versions</h2>
+
+<p>The In-app Billing API is versioned, with each version offering
+additional features to your app. At run time, your app can query the Google Play app to determine
+what version of the API it supports and what features are available. Typically, the Google Play app
+will be updated and will support the latest version of the API. For a summary of versions see
+<a href="{@docRoot}guide/market/billing/billing_reference.html#billing-versions">In-app Billing
+API Versions</a>.</p>
+
+<p>The sections below list the supported versions of the In-app Billing API.
+Versions are specified in the <code>API_VERSION</code> key of the Bundle object
+passed in the <code>sendBillingRequest()</code>, which is defined in the defined
+in the <code>IMarketBillingService.aidl</code> file, which is included with the
+in-app billing <a
+href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">
+sample application</a>. For more information, see <a
+href="#billing-interface">In-app Billing Service Interface</a>.</p>
+<h3 id="version_2">In-app Billing version 2</h3>
+
+<p><em>May 2012</em></p>
+
+<ul>
+<li>Adds support for subscriptions. 
+  <ul>
+  <li>Adds a new supported string value, "2", for the <code>API_VERSION</code> key
+  of the Bundle object passed in the <code>sendBillingRequest()</code>.</li>
+  <li>Adds a new JSON field, <code>purchaseToken</code>, to the
+  <code>orders</code> list returned in a <code>PURCHASE_STATE_CHANGED</code>
+  intent. </li> 
+  <li>Adds a new <code>purchaseState</code> value, <code>3</code> (expired), to the
+  <code>orders</code> list returned in a <code>PURCHASE_STATE_CHANGED</code>
+  intent. The value indicates that a subscription has expired and is no longer valid.</li>
+<li>Requires Google Play (Play Store) version 3.5 or higher.</li>
+</ul>
+
+<h3 id="version_1">In-app Billing version 1</h3>
+
+<p><em>March 2011</em></p>
+
+<ul>
+<li>Initial release.</li>
+<li>Requires Google Play/Android Market 2.3.4 or higher.</li>
+</ul>
+
