@@ -27,9 +27,6 @@ static struct {
     unsigned uid;
     const char *name;
 } allowed[] = {
-#ifdef LVMX
-    { AID_MEDIA, "com.lifevibes.mx.ipc" },
-#endif
     { AID_MEDIA, "media.audio_flinger" },
     { AID_MEDIA, "media.player" },
     { AID_MEDIA, "media.camera" },
