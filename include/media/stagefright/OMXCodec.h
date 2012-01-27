@@ -172,6 +172,7 @@ private:
     uint32_t mFlags;
 
     bool mIsEncoder;
+    bool mIsVideo;
     char *mMIME;
     char *mComponentName;
     sp<MetaData> mOutputFormat;

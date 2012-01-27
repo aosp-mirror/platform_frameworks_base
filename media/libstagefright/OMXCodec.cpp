@@ -18,7 +18,6 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
-#include "include/AACEncoder.h"
 #include "include/AMRNBEncoder.h"
 #include "include/AMRWBEncoder.h"
 #include "include/AVCEncoder.h"
@@ -73,7 +72,6 @@ static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaDa
 
 FACTORY_CREATE_ENCODER(AMRNBEncoder)
 FACTORY_CREATE_ENCODER(AMRWBEncoder)
-FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
 FACTORY_CREATE_ENCODER(M4vH263Encoder)
 
@@ -88,7 +86,6 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
     static const FactoryInfo kFactoryInfo[] = {
         FACTORY_REF(AMRNBEncoder)
         FACTORY_REF(AMRWBEncoder)
-        FACTORY_REF(AACEncoder)
         FACTORY_REF(AVCEncoder)
         FACTORY_REF(M4vH263Encoder)
     };
@@ -153,7 +150,7 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBEncoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "AACEncoder" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.encoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.DUCATI1.VIDEO.MPEG4E" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
@@ -1487,6 +1484,7 @@ OMXCodec::OMXCodec(
       mQuirks(quirks),
       mFlags(flags),
       mIsEncoder(isEncoder),
+      mIsVideo(!strncasecmp("video/", mime, 6)),
       mMIME(strdup(mime)),
       mComponentName(strdup(componentName)),
       mSource(source),
@@ -2192,7 +2190,7 @@ error:
 }
 
 int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
-    CHECK(mIsEncoder);
+    CHECK(mIsEncoder && mIsVideo);
 
     if (mDecodingTimeList.empty()) {
         CHECK(mSignalledEOS || mNoMoreOutputData);
@@ -2387,7 +2385,7 @@ void OMXCodec::on_message(const omx_message &msg) {
                     mNoMoreOutputData = true;
                 }
 
-                if (mIsEncoder) {
+                if (mIsEncoder && mIsVideo) {
                     int64_t decodingTimeUs = retrieveDecodingTimeUs(isCodecSpecific);
                     buffer->meta_data()->setInt64(kKeyDecodingTime, decodingTimeUs);
                 }
@@ -3249,7 +3247,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
         CHECK(lastBufferTimeUs >= 0);
-        if (mIsEncoder) {
+        if (mIsEncoder && mIsVideo) {
             mDecodingTimeList.push_back(lastBufferTimeUs);
         }
 
