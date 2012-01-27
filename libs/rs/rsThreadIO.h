@@ -37,6 +37,12 @@ public:
 
     // Plays back commands from the client.
     // Returns true if any commands were processed.
+    //
+    // waitForCommand: true, block until a command arrives or
+    // the specified time expires.
+    //
+    // timeToWait: Max time to block in microseconds.  A value of zero indicates
+    // an indefinite wait.
     bool playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait);
 
     void setTimoutCallback(void (*)(void *), void *, uint64_t timeout);
