@@ -751,7 +751,7 @@ const ToneGenerator::ToneDescriptor ToneGenerator::sToneDescriptors[] = {
 
 // Used by ToneGenerator::getToneForRegion() to convert user specified supervisory tone type
 // to actual tone for current region.
-const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONES] = {
+const unsigned char /*tone_type*/ ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONES] = {
         {   // ANSI
             TONE_ANSI_DIAL,             // TONE_SUP_DIAL
             TONE_ANSI_BUSY,             // TONE_SUP_BUSY
@@ -878,7 +878,7 @@ ToneGenerator::~ToneGenerator() {
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-bool ToneGenerator::startTone(int toneType, int durationMs) {
+bool ToneGenerator::startTone(tone_type toneType, int durationMs) {
     bool lResult = false;
     status_t lStatus;
 
@@ -1434,13 +1434,13 @@ void ToneGenerator::clearWaveGens() {
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-int ToneGenerator::getToneForRegion(int toneType) {
-    int regionTone;
+ToneGenerator::tone_type ToneGenerator::getToneForRegion(tone_type toneType) {
+    tone_type regionTone;
 
     if (mRegion == CEPT || toneType < FIRST_SUP_TONE || toneType > LAST_SUP_TONE) {
         regionTone = toneType;
     } else {
-        regionTone = sToneMappingTable[mRegion][toneType - FIRST_SUP_TONE];
+        regionTone = (tone_type) sToneMappingTable[mRegion][toneType - FIRST_SUP_TONE];
     }
 
     ALOGV("getToneForRegion, tone %d, region %d, regionTone %d", toneType, mRegion, regionTone);

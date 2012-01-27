@@ -786,7 +786,8 @@ status_t AudioPolicyService::AudioCommandThread::dump(int fd)
     return NO_ERROR;
 }
 
-void AudioPolicyService::AudioCommandThread::startToneCommand(int type, audio_stream_type_t stream)
+void AudioPolicyService::AudioCommandThread::startToneCommand(ToneGenerator::tone_type type,
+        audio_stream_type_t stream)
 {
     AudioCommand *command = new AudioCommand();
     command->mCommand = START_TONE;

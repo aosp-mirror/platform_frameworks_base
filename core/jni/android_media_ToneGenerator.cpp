@@ -48,7 +48,7 @@ static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz,
         return false;
     }
 
-    return lpToneGen->startTone(toneType, durationMs);
+    return lpToneGen->startTone((ToneGenerator::tone_type) toneType, durationMs);
 }
 
 static void android_media_ToneGenerator_stopTone(JNIEnv *env, jobject thiz) {

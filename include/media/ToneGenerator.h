@@ -154,7 +154,7 @@ public:
     ToneGenerator(audio_stream_type_t streamType, float volume, bool threadCanCallJava = false);
     ~ToneGenerator();
 
-    bool startTone(int toneType, int durationMs = -1);
+    bool startTone(tone_type toneType, int durationMs = -1);
     void stopTone();
 
     bool isInited() { return (mState == TONE_IDLE)?false:true;}
@@ -274,7 +274,7 @@ private:
     bool prepareWave();
     unsigned int numWaves(unsigned int segmentIdx);
     void clearWaveGens();
-    int getToneForRegion(int toneType);
+    tone_type getToneForRegion(tone_type toneType);
 
     // WaveGenerator generates a single sine wave
     class WaveGenerator {

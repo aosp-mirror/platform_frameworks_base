@@ -171,7 +171,8 @@ private:
         virtual     bool        threadLoop();
 
                     void        exit();
-                    void        startToneCommand(int type = 0, audio_stream_type_t stream = AUDIO_STREAM_VOICE_CALL);
+                    void        startToneCommand(ToneGenerator::tone_type type,
+                                                 audio_stream_type_t stream);
                     void        stopToneCommand();
                     status_t    volumeCommand(audio_stream_type_t stream, float volume, int output, int delayMs = 0);
                     status_t    parametersCommand(int ioHandle, const char *keyValuePairs, int delayMs = 0);
@@ -198,7 +199,7 @@ private:
 
         class ToneData {
         public:
-            int mType;      // tone type (START_TONE only)
+            ToneGenerator::tone_type mType; // tone type (START_TONE only)
             audio_stream_type_t mStream;    // stream type (START_TONE only)
         };
 
