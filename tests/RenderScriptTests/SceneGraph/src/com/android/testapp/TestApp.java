@@ -106,8 +106,8 @@ public class TestApp extends Activity {
     public void loadModel() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
-        intent.setClassName("com.android.scenegraph",
-                            "com.android.scenegraph.FileSelector");
+        intent.setClassName("com.android.testapp",
+                            "com.android.testapp.FileSelector");
         startActivityForResult(intent, FIND_DAE_MODEL);
     }
 

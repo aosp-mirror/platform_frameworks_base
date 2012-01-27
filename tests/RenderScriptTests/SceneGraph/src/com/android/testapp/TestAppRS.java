@@ -125,8 +125,6 @@ public class TestAppRS {
 
     // When a new model file is selected from the UI, this function gets called to init everything
     void loadModel(String path) {
-        //String shortName = path.substring(path.lastIndexOf('/') + 1);
-        //shortName = shortName.substring(0, shortName.lastIndexOf('.'));
         mLoadingScreen.showLoadingScreen(true);
         mActiveScene.destroyRS(mSceneManager);
         mSceneManager.loadModel(path, mLoadedCallback);
@@ -245,17 +243,17 @@ public class TestAppRS {
 
         mActiveScene.assignRenderStateToMaterial(diffuse, "lambert2$");
 
-        mActiveScene.assignRenderStateToMaterial(paint, "^#Paint");
-        mActiveScene.assignRenderStateToMaterial(paint, "^#Carbon");
-        mActiveScene.assignRenderStateToMaterial(paint, "^#Glass");
-        mActiveScene.assignRenderStateToMaterial(paint, "^#MainGlass");
+        mActiveScene.assignRenderStateToMaterial(paint, "^Paint");
+        mActiveScene.assignRenderStateToMaterial(paint, "^Carbon");
+        mActiveScene.assignRenderStateToMaterial(paint, "^Glass");
+        mActiveScene.assignRenderStateToMaterial(paint, "^MainGlass");
 
-        mActiveScene.assignRenderStateToMaterial(aluminum, "^#Metal");
-        mActiveScene.assignRenderStateToMaterial(aluminum, "^#Brake");
+        mActiveScene.assignRenderStateToMaterial(aluminum, "^Metal");
+        mActiveScene.assignRenderStateToMaterial(aluminum, "^Brake");
 
-        mActiveScene.assignRenderStateToMaterial(glassTransp, "^#GlassLight");
+        mActiveScene.assignRenderStateToMaterial(glassTransp, "^GlassLight");
 
-        mActiveScene.assignRenderStateToMaterial(lights, "^#LightBlinn");
+        mActiveScene.assignRenderStateToMaterial(lights, "^LightBlinn");
 
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
@@ -282,8 +280,6 @@ public class TestAppRS {
         mDiffCube = new TextureCube("sdcard/scenegraph/", "cube_spec.png");
         initPaintShaders();
 
-        ScriptC_render renderLoop = mSceneManager.getRenderLoop();
-
-        mLoadingScreen.setRenderLoop(renderLoop);
+        mLoadingScreen.setRenderLoop(mSceneManager.getRenderLoop());
     }
 }
