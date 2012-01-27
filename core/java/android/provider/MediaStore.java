@@ -62,6 +62,14 @@ public final class MediaStore {
     public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
 
     /**
+     * The method name used by the media scanner and mtp to tell the media provider to
+     * rescan and reclassify that have become unhidden because of renaming folders or
+     * removing nomedia files
+     * @hide
+     */
+    public static final String UNHIDE_CALL = "unhide";
+
+    /**
      * Activity Action: Launch a music player.
      * The activity should be able to play, browse, or manipulate music files stored on the device.
      *
