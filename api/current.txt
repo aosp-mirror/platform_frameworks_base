@@ -12621,7 +12621,7 @@ package android.nfc {
     ctor public NdefMessage(android.nfc.NdefRecord, android.nfc.NdefRecord...);
     ctor public NdefMessage(android.nfc.NdefRecord[]);
     method public int describeContents();
-    method public int getByteLength();
+    method public int getByteArrayLength();
     method public android.nfc.NdefRecord[] getRecords();
     method public byte[] toByteArray();
     method public void writeToParcel(android.os.Parcel, int);
