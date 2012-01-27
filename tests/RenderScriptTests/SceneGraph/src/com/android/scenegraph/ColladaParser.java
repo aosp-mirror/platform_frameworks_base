@@ -181,7 +181,7 @@ public class ColladaParser {
 
                 Renderable d = new Renderable();
                 d.setMesh(geoURL, meshIndexName);
-                d.setMaterialName(materialName);
+                d.setMaterialName(materialName.substring(1));
                 d.setName(geoURL);
 
                 //Log.v(TAG, "Created drawable geo " + geoURL + " index " + meshIndexName + " material " + materialName);

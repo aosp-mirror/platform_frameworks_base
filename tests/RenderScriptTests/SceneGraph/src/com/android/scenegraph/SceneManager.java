@@ -244,7 +244,7 @@ public class SceneManager extends SceneGraphBase {
         mRenderLoop.set_gPFSBackground(ProgramStore.BLEND_NONE_DEPTH_TEST(mRS));
     }
 
-    public ScriptC_render getRenderLoop() {
+    public ScriptC getRenderLoop() {
         return mRenderLoop;
     }
 }
