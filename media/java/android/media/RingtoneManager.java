@@ -224,7 +224,7 @@ public class RingtoneManager {
      * If a column (item from this list) exists in the Cursor, its value must
      * be true (value of 1) for the row to be returned.
      */
-    private List<String> mFilterColumns = new ArrayList<String>();
+    private final List<String> mFilterColumns = new ArrayList<String>();
     
     private boolean mStopPreviousRingtone = true;
     private Ringtone mPreviousRingtone;

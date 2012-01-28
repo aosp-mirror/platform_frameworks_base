@@ -120,18 +120,18 @@ public class MediaFile {
         }
     }
     
-    private static HashMap<String, MediaFileType> sFileTypeMap
+    private static final HashMap<String, MediaFileType> sFileTypeMap
             = new HashMap<String, MediaFileType>();
-    private static HashMap<String, Integer> sMimeTypeMap
+    private static final HashMap<String, Integer> sMimeTypeMap
             = new HashMap<String, Integer>();
     // maps file extension to MTP format code
-    private static HashMap<String, Integer> sFileTypeToFormatMap
+    private static final HashMap<String, Integer> sFileTypeToFormatMap
             = new HashMap<String, Integer>();
     // maps mime type to MTP format code
-    private static HashMap<String, Integer> sMimeTypeToFormatMap
+    private static final HashMap<String, Integer> sMimeTypeToFormatMap
             = new HashMap<String, Integer>();
     // maps MTP format code to mime type
-    private static HashMap<Integer, String> sFormatToMimeTypeMap
+    private static final HashMap<Integer, String> sFormatToMimeTypeMap
             = new HashMap<Integer, String>();
 
     static void addFileType(String extension, int fileType, String mimeType) {

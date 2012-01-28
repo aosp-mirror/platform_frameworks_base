@@ -576,6 +576,7 @@ public class RemoteControlClient
     /**
      * Cache for the metadata strings.
      * Access synchronized on mCacheLock
+     * This is re-initialized in apply() and so cannot be final.
      */
     private Bundle mMetadata = new Bundle();
 
@@ -621,7 +622,7 @@ public class RemoteControlClient
     /**
      * The IRemoteControlClient implementation
      */
-    private IRemoteControlClient mIRCC = new IRemoteControlClient.Stub() {
+    private final IRemoteControlClient mIRCC = new IRemoteControlClient.Stub() {
 
         public void onInformationRequested(int clientGeneration, int infoFlags,
                 int artWidth, int artHeight) {
