@@ -121,5 +121,5 @@ previous.link=ancestral-temporal.html
   <li><a href="{@docRoot}guide/topics/ui/index.html">Developer's Guide: User Interface</a>: learn how to implement your user interface designs using the Android SDK.</li>
   <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>: implement tabs, up navigation, on-screen actions, etc.
   <li><a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a>: implement re-usable, multi-pane layouts
-  <li><a href="{@docRoot}sdk/compatibility-library.html">Support Library</a>: implement horizontal paging using <code>ViewPager</code></li>
+  <li><a href="{@docRoot}sdk/compatibility-library.html">Support Library</a>: implement horizontal paging (swipe views) using <code>ViewPager</code></li>
 </ul>
