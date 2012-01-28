@@ -67,8 +67,10 @@ struct SQLiteConnection {
     const String8 path;
     const String8 label;
 
+    volatile bool canceled;
+
     SQLiteConnection(sqlite3* db, int openFlags, const String8& path, const String8& label) :
-        db(db), openFlags(openFlags), path(path), label(label) { }
+        db(db), openFlags(openFlags), path(path), label(label), canceled(false) { }
 };
 
 // Called each time a statement begins execution, when tracing is enabled.
@@ -83,6 +85,12 @@ static void sqliteProfileCallback(void *data, const char *sql, sqlite3_uint64 tm
     SQLiteConnection* connection = static_cast<SQLiteConnection*>(data);
     ALOG(LOG_VERBOSE, SQLITE_PROFILE_TAG, "%s: \"%s\" took %0.3f ms\n",
             connection->label.string(), sql, tm * 0.000001f);
+}
+
+// Called after each SQLite VM instruction when cancelation is enabled.
+static int sqliteProgressHandlerCallback(void* data) {
+    SQLiteConnection* connection = static_cast<SQLiteConnection*>(data);
+    return connection->canceled;
 }
 
 
@@ -871,6 +879,24 @@ static jint nativeGetDbLookaside(JNIEnv* env, jobject clazz, jint connectionPtr)
     return cur;
 }
 
+static void nativeCancel(JNIEnv* env, jobject clazz, jint connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    connection->canceled = true;
+}
+
+static void nativeResetCancel(JNIEnv* env, jobject clazz, jint connectionPtr,
+        jboolean cancelable) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    connection->canceled = false;
+
+    if (cancelable) {
+        sqlite3_progress_handler(connection->db, 4, sqliteProgressHandlerCallback,
+                connection);
+    } else {
+        sqlite3_progress_handler(connection->db, 0, NULL, NULL);
+    }
+}
+
 
 static JNINativeMethod sMethods[] =
 {
@@ -923,6 +949,10 @@ static JNINativeMethod sMethods[] =
             (void*)nativeExecuteForCursorWindow },
     { "nativeGetDbLookaside", "(I)I",
             (void*)nativeGetDbLookaside },
+    { "nativeCancel", "(I)V",
+            (void*)nativeCancel },
+    { "nativeResetCancel", "(IZ)V",
+            (void*)nativeResetCancel },
 };
 
 #define FIND_CLASS(var, className) \

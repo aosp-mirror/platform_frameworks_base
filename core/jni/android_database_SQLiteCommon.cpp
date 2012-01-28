@@ -68,50 +68,53 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
             exceptionClass = "android/database/sqlite/SQLiteDatabaseCorruptException";
             break;
         case SQLITE_CONSTRAINT:
-           exceptionClass = "android/database/sqlite/SQLiteConstraintException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteConstraintException";
+            break;
         case SQLITE_ABORT:
-           exceptionClass = "android/database/sqlite/SQLiteAbortException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteAbortException";
+            break;
         case SQLITE_DONE:
-           exceptionClass = "android/database/sqlite/SQLiteDoneException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteDoneException";
+            break;
         case SQLITE_FULL:
-           exceptionClass = "android/database/sqlite/SQLiteFullException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteFullException";
+            break;
         case SQLITE_MISUSE:
-           exceptionClass = "android/database/sqlite/SQLiteMisuseException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteMisuseException";
+            break;
         case SQLITE_PERM:
-           exceptionClass = "android/database/sqlite/SQLiteAccessPermException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteAccessPermException";
+            break;
         case SQLITE_BUSY:
-           exceptionClass = "android/database/sqlite/SQLiteDatabaseLockedException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteDatabaseLockedException";
+            break;
         case SQLITE_LOCKED:
-           exceptionClass = "android/database/sqlite/SQLiteTableLockedException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteTableLockedException";
+            break;
         case SQLITE_READONLY:
-           exceptionClass = "android/database/sqlite/SQLiteReadOnlyDatabaseException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteReadOnlyDatabaseException";
+            break;
         case SQLITE_CANTOPEN:
-           exceptionClass = "android/database/sqlite/SQLiteCantOpenDatabaseException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteCantOpenDatabaseException";
+            break;
         case SQLITE_TOOBIG:
-           exceptionClass = "android/database/sqlite/SQLiteBlobTooBigException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteBlobTooBigException";
+            break;
         case SQLITE_RANGE:
-           exceptionClass = "android/database/sqlite/SQLiteBindOrColumnIndexOutOfRangeException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteBindOrColumnIndexOutOfRangeException";
+            break;
         case SQLITE_NOMEM:
-           exceptionClass = "android/database/sqlite/SQLiteOutOfMemoryException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteOutOfMemoryException";
+            break;
         case SQLITE_MISMATCH:
-           exceptionClass = "android/database/sqlite/SQLiteDatatypeMismatchException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteDatatypeMismatchException";
+            break;
+        case SQLITE_INTERRUPT:
+            exceptionClass = "android/content/OperationCanceledException";
+            break;
         default:
-           exceptionClass = "android/database/sqlite/SQLiteException";
-           break;
+            exceptionClass = "android/database/sqlite/SQLiteException";
+            break;
     }
 
     if (sqlite3Message != NULL && message != NULL) {

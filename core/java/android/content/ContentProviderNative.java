@@ -21,7 +21,6 @@ import android.database.BulkCursorNative;
 import android.database.BulkCursorToCursorAdaptor;
 import android.database.Cursor;
 import android.database.CursorToBulkCursorAdaptor;
-import android.database.CursorWindow;
 import android.database.DatabaseUtils;
 import android.database.IBulkCursor;
 import android.database.IContentObserver;
@@ -41,8 +40,6 @@ import java.util.ArrayList;
  * {@hide}
  */
 abstract public class ContentProviderNative extends Binder implements IContentProvider {
-    private static final String TAG = "ContentProvider";
-
     public ContentProviderNative()
     {
         attachInterface(this, descriptor);
@@ -108,8 +105,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String sortOrder = data.readString();
                     IContentObserver observer = IContentObserver.Stub.asInterface(
                             data.readStrongBinder());
+                    ICancelationSignal cancelationSignal = ICancelationSignal.Stub.asInterface(
+                            data.readStrongBinder());
 
-                    Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder);
+                    Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder,
+                            cancelationSignal);
                     if (cursor != null) {
                         CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
                                 cursor, observer, getProviderName());
@@ -295,6 +295,16 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     }
                     return true;
                 }
+
+                case CREATE_CANCELATION_SIGNAL_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+
+                    ICancelationSignal cancelationSignal = createCancelationSignal();
+                    reply.writeNoException();
+                    reply.writeStrongBinder(cancelationSignal.asBinder());
+                    return true;
+                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -324,7 +334,8 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     public Cursor query(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) throws RemoteException {
+            String[] selectionArgs, String sortOrder, ICancelationSignal cancelationSignal)
+                    throws RemoteException {
         BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -352,6 +363,7 @@ final class ContentProviderProxy implements IContentProvider
             }
             data.writeString(sortOrder);
             data.writeStrongBinder(adaptor.getObserver().asBinder());
+            data.writeStrongBinder(cancelationSignal != null ? cancelationSignal.asBinder() : null);
 
             mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
 
@@ -614,6 +626,25 @@ final class ContentProviderProxy implements IContentProvider
             AssetFileDescriptor fd = has != 0
                     ? AssetFileDescriptor.CREATOR.createFromParcel(reply) : null;
             return fd;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public ICancelationSignal createCancelationSignal() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            mRemote.transact(IContentProvider.CREATE_CANCELATION_SIGNAL_TRANSACTION,
+                    data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            ICancelationSignal cancelationSignal = ICancelationSignal.Stub.asInterface(
+                    reply.readStrongBinder());
+            return cancelationSignal;
         } finally {
             data.recycle();
             reply.recycle();

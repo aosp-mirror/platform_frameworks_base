@@ -22,6 +22,7 @@ import android.accounts.Account;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.content.ContentProvider.Transport;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -302,13 +303,62 @@ public abstract class ContentResolver {
      */
     public final Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
+        return query(uri, projection, selection, selectionArgs, sortOrder, null);
+    }
+
+    /**
+     * <p>
+     * Query the given URI, returning a {@link Cursor} over the result set.
+     * </p>
+     * <p>
+     * For best performance, the caller should follow these guidelines:
+     * <ul>
+     * <li>Provide an explicit projection, to prevent
+     * reading data from storage that aren't going to be used.</li>
+     * <li>Use question mark parameter markers such as 'phone=?' instead of
+     * explicit values in the {@code selection} parameter, so that queries
+     * that differ only by those values will be recognized as the same
+     * for caching purposes.</li>
+     * </ul>
+     * </p>
+     *
+     * @param uri The URI, using the content:// scheme, for the content to
+     *         retrieve.
+     * @param projection A list of which columns to return. Passing null will
+     *         return all columns, which is inefficient.
+     * @param selection A filter declaring which rows to return, formatted as an
+     *         SQL WHERE clause (excluding the WHERE itself). Passing null will
+     *         return all rows for the given URI.
+     * @param selectionArgs You may include ?s in selection, which will be
+     *         replaced by the values from selectionArgs, in the order that they
+     *         appear in the selection. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY
+     *         clause (excluding the ORDER BY itself). Passing null will use the
+     *         default sort order, which may be unordered.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * when the query is executed.
+     * @return A Cursor object, which is positioned before the first entry, or null
+     * @see Cursor
+     */
+    public final Cursor query(final Uri uri, String[] projection,
+            String selection, String[] selectionArgs, String sortOrder,
+            CancelationSignal cancelationSignal) {
         IContentProvider provider = acquireProvider(uri);
         if (provider == null) {
             return null;
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            Cursor qCursor = provider.query(uri, projection, selection, selectionArgs, sortOrder);
+
+            ICancelationSignal remoteCancelationSignal = null;
+            if (cancelationSignal != null) {
+                cancelationSignal.throwIfCanceled();
+                remoteCancelationSignal = provider.createCancelationSignal();
+                cancelationSignal.setRemote(remoteCancelationSignal);
+            }
+            Cursor qCursor = provider.query(uri, projection,
+                    selection, selectionArgs, sortOrder, remoteCancelationSignal);
             if (qCursor == null) {
                 releaseProvider(provider);
                 return null;

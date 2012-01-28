@@ -19,7 +19,6 @@ package android.content;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,18 +48,42 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     String mSortOrder;
 
     Cursor mCursor;
+    CancelationSignal mCancelationSignal;
 
     /* Runs on a worker thread */
     @Override
     public Cursor loadInBackground() {
-        Cursor cursor = getContext().getContentResolver().query(mUri, mProjection, mSelection,
-                mSelectionArgs, mSortOrder);
-        if (cursor != null) {
-            // Ensure the cursor window is filled
-            cursor.getCount();
-            registerContentObserver(cursor, mObserver);
+        synchronized (this) {
+            if (isLoadInBackgroundCanceled()) {
+                throw new OperationCanceledException();
+            }
+            mCancelationSignal = new CancelationSignal();
         }
-        return cursor;
+        try {
+            Cursor cursor = getContext().getContentResolver().query(mUri, mProjection, mSelection,
+                    mSelectionArgs, mSortOrder, mCancelationSignal);
+            if (cursor != null) {
+                // Ensure the cursor window is filled
+                cursor.getCount();
+                registerContentObserver(cursor, mObserver);
+            }
+            return cursor;
+        } finally {
+            synchronized (this) {
+                mCancelationSignal = null;
+            }
+        }
+    }
+
+    @Override
+    protected void onCancelLoadInBackground() {
+        super.onCancelLoadInBackground();
+
+        synchronized (this) {
+            if (mCancelationSignal != null) {
+                mCancelationSignal.cancel();
+            }
+        }
     }
 
     /**

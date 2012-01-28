@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.content.CancelationSignal;
+import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.provider.BaseColumns;
@@ -137,8 +139,9 @@ public class SQLiteQueryBuilder
     /**
      * Sets the cursor factory to be used for the query.  You can use
      * one factory for all queries on a database but it is normally
-     * easier to specify the factory when doing this query.  @param
-     * factory the factor to use
+     * easier to specify the factory when doing this query.
+     *
+     * @param factory the factory to use.
      */
     public void setCursorFactory(SQLiteDatabase.CursorFactory factory) {
         mFactory = factory;
@@ -289,7 +292,7 @@ public class SQLiteQueryBuilder
             String selection, String[] selectionArgs, String groupBy,
             String having, String sortOrder) {
         return query(db, projectionIn, selection, selectionArgs, groupBy, having, sortOrder,
-                null /* limit */);
+                null /* limit */, null /* cancelationSignal */);
     }
 
     /**
@@ -327,6 +330,48 @@ public class SQLiteQueryBuilder
     public Cursor query(SQLiteDatabase db, String[] projectionIn,
             String selection, String[] selectionArgs, String groupBy,
             String having, String sortOrder, String limit) {
+        return query(db, projectionIn, selection, selectionArgs,
+                groupBy, having, sortOrder, limit, null);
+    }
+
+    /**
+     * Perform a query by combining all current settings and the
+     * information passed into this method.
+     *
+     * @param db the database to query on
+     * @param projectionIn A list of which columns to return. Passing
+     *   null will return all columns, which is discouraged to prevent
+     *   reading data from storage that isn't going to be used.
+     * @param selection A filter declaring which rows to return,
+     *   formatted as an SQL WHERE clause (excluding the WHERE
+     *   itself). Passing null will return all rows for the given URL.
+     * @param selectionArgs You may include ?s in selection, which
+     *   will be replaced by the values from selectionArgs, in order
+     *   that they appear in the selection. The values will be bound
+     *   as Strings.
+     * @param groupBy A filter declaring how to group rows, formatted
+     *   as an SQL GROUP BY clause (excluding the GROUP BY
+     *   itself). Passing null will cause the rows to not be grouped.
+     * @param having A filter declare which row groups to include in
+     *   the cursor, if row grouping is being used, formatted as an
+     *   SQL HAVING clause (excluding the HAVING itself).  Passing
+     *   null will cause all row groups to be included, and is
+     *   required when row grouping is not being used.
+     * @param sortOrder How to order the rows, formatted as an SQL
+     *   ORDER BY clause (excluding the ORDER BY itself). Passing null
+     *   will use the default sort order, which may be unordered.
+     * @param limit Limits the number of rows returned by the query,
+     *   formatted as LIMIT clause. Passing null denotes no LIMIT clause.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * If the operation is canceled, then {@link OperationCanceledException} will be thrown
+     * when the query is executed.
+     * @return a cursor over the result set
+     * @see android.content.ContentResolver#query(android.net.Uri, String[],
+     *      String, String[], String)
+     */
+    public Cursor query(SQLiteDatabase db, String[] projectionIn,
+            String selection, String[] selectionArgs, String groupBy,
+            String having, String sortOrder, String limit, CancelationSignal cancelationSignal) {
         if (mTables == null) {
             return null;
         }
@@ -341,7 +386,8 @@ public class SQLiteQueryBuilder
             // in both the wrapped and original forms.
             String sqlForValidation = buildQuery(projectionIn, "(" + selection + ")", groupBy,
                     having, sortOrder, limit);
-            validateQuerySql(db, sqlForValidation); // will throw if query is invalid
+            validateQuerySql(db, sqlForValidation,
+                    cancelationSignal); // will throw if query is invalid
         }
 
         String sql = buildQuery(
@@ -353,16 +399,18 @@ public class SQLiteQueryBuilder
         }
         return db.rawQueryWithFactory(
                 mFactory, sql, selectionArgs,
-                SQLiteDatabase.findEditTable(mTables)); // will throw if query is invalid
+                SQLiteDatabase.findEditTable(mTables),
+                cancelationSignal); // will throw if query is invalid
     }
 
     /**
      * Verifies that a SQL SELECT statement is valid by compiling it.
      * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
      */
-    private void validateQuerySql(SQLiteDatabase db, String sql) {
+    private void validateQuerySql(SQLiteDatabase db, String sql,
+            CancelationSignal cancelationSignal) {
         db.getThreadSession().prepare(sql,
-                db.getThreadDefaultConnectionFlags(true /*readOnly*/), null);
+                db.getThreadDefaultConnectionFlags(true /*readOnly*/), cancelationSignal, null);
     }
 
     /**

@@ -21,6 +21,7 @@ import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.EntityIterator;
 import android.content.IContentProvider;
+import android.content.ICancelationSignal;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
@@ -72,7 +73,7 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
+            String sortOrder, ICancelationSignal cancelationSignal) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -101,6 +102,11 @@ public class MockIContentProvider implements IContentProvider {
 
     public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
             throws RemoteException, FileNotFoundException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    @Override
+    public ICancelationSignal createCancelationSignal() throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 }

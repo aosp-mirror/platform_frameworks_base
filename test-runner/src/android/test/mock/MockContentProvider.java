@@ -21,6 +21,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ICancelationSignal;
 import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.pm.PathPermission;
@@ -92,7 +93,7 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
-                String sortOrder) throws RemoteException {
+                String sortOrder, ICancelationSignal cancelationSignal) throws RemoteException {
             return MockContentProvider.this.query(url, projection, selection,
                     selectionArgs, sortOrder);
         }
@@ -123,6 +124,11 @@ public class MockContentProvider extends ContentProvider {
         public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
                 throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openTypedAssetFile(url, mimeType, opts);
+        }
+
+        @Override
+        public ICancelationSignal createCancelationSignal() throws RemoteException {
+            return null;
         }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();

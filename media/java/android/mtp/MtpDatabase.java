@@ -266,7 +266,7 @@ public class MtpDatabase {
             Cursor c = null;
             try {
                 c = mMediaProvider.query(mObjectsUri, ID_PROJECTION, PATH_WHERE,
-                        new String[] { path }, null);
+                        new String[] { path }, null, null);
                 if (c != null && c.getCount() > 0) {
                     Log.w(TAG, "file already exists in beginSendObject: " + path);
                     return -1;
@@ -433,7 +433,7 @@ public class MtpDatabase {
             }
         }
 
-        return mMediaProvider.query(mObjectsUri, ID_PROJECTION, where, whereArgs, null);
+        return mMediaProvider.query(mObjectsUri, ID_PROJECTION, where, whereArgs, null, null);
     }
 
     private int[] getObjectList(int storageID, int format, int parent) {
@@ -699,7 +699,7 @@ public class MtpDatabase {
         String path = null;
         String[] whereArgs = new String[] {  Integer.toString(handle) };
         try {
-            c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, null);
+            c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, null, null);
             if (c != null && c.moveToNext()) {
                 path = c.getString(1);
             }
@@ -815,7 +815,7 @@ public class MtpDatabase {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
-                            ID_WHERE, new String[] {  Integer.toString(handle) }, null);
+                            ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 outStorageFormatParent[0] = c.getInt(1);
                 outStorageFormatParent[1] = c.getInt(2);
@@ -858,7 +858,7 @@ public class MtpDatabase {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
-                            ID_WHERE, new String[] {  Integer.toString(handle) }, null);
+                            ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 String path = c.getString(1);
                 path.getChars(0, path.length(), outFilePath, 0);
@@ -887,7 +887,7 @@ public class MtpDatabase {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, PATH_SIZE_FORMAT_PROJECTION,
-                            ID_WHERE, new String[] {  Integer.toString(handle) }, null);
+                            ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 // don't convert to media path here, since we will be matching
                 // against paths in the database matching /data/media
@@ -933,7 +933,7 @@ public class MtpDatabase {
         Uri uri = Files.getMtpReferencesUri(mVolumeName, handle);
         Cursor c = null;
         try {
-            c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null);
+            c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null, null);
             if (c == null) {
                 return null;
             }

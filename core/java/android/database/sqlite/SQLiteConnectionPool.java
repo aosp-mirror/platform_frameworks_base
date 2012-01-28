@@ -18,6 +18,8 @@ package android.database.sqlite;
 
 import dalvik.system.CloseGuard;
 
+import android.content.CancelationSignal;
+import android.content.OperationCanceledException;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.SystemClock;
 import android.util.Log;
@@ -282,13 +284,16 @@ public final class SQLiteConnectionPool implements Closeable {
      * @param sql If not null, try to find a connection that already has
      * the specified SQL statement in its prepared statement cache.
      * @param connectionFlags The connection request flags.
+     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
      * @return The connection that was acquired, never null.
      *
      * @throws IllegalStateException if the pool has been closed.
      * @throws SQLiteException if a database error occurs.
+     * @throws OperationCanceledException if the operation was canceled.
      */
-    public SQLiteConnection acquireConnection(String sql, int connectionFlags) {
-        return waitForConnection(sql, connectionFlags);
+    public SQLiteConnection acquireConnection(String sql, int connectionFlags,
+            CancelationSignal cancelationSignal) {
+        return waitForConnection(sql, connectionFlags, cancelationSignal);
     }
 
     /**
@@ -497,13 +502,19 @@ public final class SQLiteConnectionPool implements Closeable {
     }
 
     // Might throw.
-    private SQLiteConnection waitForConnection(String sql, int connectionFlags) {
+    private SQLiteConnection waitForConnection(String sql, int connectionFlags,
+            CancelationSignal cancelationSignal) {
         final boolean wantPrimaryConnection =
                 (connectionFlags & CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY) != 0;
 
         final ConnectionWaiter waiter;
         synchronized (mLock) {
             throwIfClosedLocked();
+
+            // Abort if canceled.
+            if (cancelationSignal != null) {
+                cancelationSignal.throwIfCanceled();
+            }
 
             // Try to acquire a connection.
             SQLiteConnection connection = null;
@@ -538,6 +549,18 @@ public final class SQLiteConnectionPool implements Closeable {
             } else {
                 mConnectionWaiterQueue = waiter;
             }
+
+            if (cancelationSignal != null) {
+                final int nonce = waiter.mNonce;
+                cancelationSignal.setOnCancelListener(new CancelationSignal.OnCancelListener() {
+                    @Override
+                    public void onCancel() {
+                        synchronized (mLock) {
+                            cancelConnectionWaiterLocked(waiter, nonce);
+                        }
+                    }
+                });
+            }
         }
 
         // Park the thread until a connection is assigned or the pool is closed.
@@ -547,7 +570,9 @@ public final class SQLiteConnectionPool implements Closeable {
         for (;;) {
             // Detect and recover from connection leaks.
             if (mConnectionLeaked.compareAndSet(true, false)) {
-                wakeConnectionWaitersLocked();
+                synchronized (mLock) {
+                    wakeConnectionWaitersLocked();
+                }
             }
 
             // Wait to be unparked (may already have happened), a timeout, or interruption.
@@ -560,15 +585,16 @@ public final class SQLiteConnectionPool implements Closeable {
             synchronized (mLock) {
                 throwIfClosedLocked();
 
-                SQLiteConnection connection = waiter.mAssignedConnection;
-                if (connection != null) {
+                final SQLiteConnection connection = waiter.mAssignedConnection;
+                final RuntimeException ex = waiter.mException;
+                if (connection != null || ex != null) {
+                    if (cancelationSignal != null) {
+                        cancelationSignal.setOnCancelListener(null);
+                    }
                     recycleConnectionWaiterLocked(waiter);
-                    return connection;
-                }
-
-                RuntimeException ex = waiter.mException;
-                if (ex != null) {
-                    recycleConnectionWaiterLocked(waiter);
+                    if (connection != null) {
+                        return connection;
+                    }
                     throw ex; // rethrow!
                 }
 
@@ -582,6 +608,40 @@ public final class SQLiteConnectionPool implements Closeable {
                 }
             }
         }
+    }
+
+    // Can't throw.
+    private void cancelConnectionWaiterLocked(ConnectionWaiter waiter, int nonce) {
+        if (waiter.mNonce != nonce) {
+            // Waiter already removed and recycled.
+            return;
+        }
+
+        if (waiter.mAssignedConnection != null || waiter.mException != null) {
+            // Waiter is done waiting but has not woken up yet.
+            return;
+        }
+
+        // Waiter must still be waiting.  Dequeue it.
+        ConnectionWaiter predecessor = null;
+        ConnectionWaiter current = mConnectionWaiterQueue;
+        while (current != waiter) {
+            assert current != null;
+            predecessor = current;
+            current = current.mNext;
+        }
+        if (predecessor != null) {
+            predecessor.mNext = waiter.mNext;
+        } else {
+            mConnectionWaiterQueue = waiter.mNext;
+        }
+
+        // Send the waiter an exception and unpark it.
+        waiter.mException = new OperationCanceledException();
+        LockSupport.unpark(waiter.mThread);
+
+        // Check whether removing this waiter will enable other waiters to make progress.
+        wakeConnectionWaitersLocked();
     }
 
     // Can't throw.
@@ -826,6 +886,7 @@ public final class SQLiteConnectionPool implements Closeable {
         waiter.mSql = null;
         waiter.mAssignedConnection = null;
         waiter.mException = null;
+        waiter.mNonce += 1;
         mConnectionWaiterPool = waiter;
     }
 
@@ -904,5 +965,6 @@ public final class SQLiteConnectionPool implements Closeable {
         public int mConnectionFlags;
         public SQLiteConnection mAssignedConnection;
         public RuntimeException mException;
+        public int mNonce;
     }
 }
