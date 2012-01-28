@@ -11807,6 +11807,7 @@ package android.net {
     enum_constant public static final android.net.NetworkInfo.DetailedState OBTAINING_IPADDR;
     enum_constant public static final android.net.NetworkInfo.DetailedState SCANNING;
     enum_constant public static final android.net.NetworkInfo.DetailedState SUSPENDED;
+    enum_constant public static final android.net.NetworkInfo.DetailedState VERIFYING_POOR_LINK;
   }
 
   public static final class NetworkInfo.State extends java.lang.Enum {

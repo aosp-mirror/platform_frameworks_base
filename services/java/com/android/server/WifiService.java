@@ -914,7 +914,7 @@ public class WifiService extends IWifiManager.Stub {
      * Get a reference to handler. This is used by a client to establish
      * an AsyncChannel communication with WifiService
      */
-    public Messenger getMessenger() {
+    public Messenger getWifiServiceMessenger() {
         /* Enforce the highest permissions
            TODO: when we consider exposing the asynchronous API, think about
                  how to provide both access and change permissions seperately
@@ -922,6 +922,13 @@ public class WifiService extends IWifiManager.Stub {
         enforceAccessPermission();
         enforceChangePermission();
         return new Messenger(mAsyncServiceHandler);
+    }
+
+    /** Get a reference to WifiStateMachine handler for AsyncChannel communication */
+    public Messenger getWifiStateMachineMessenger() {
+        enforceAccessPermission();
+        enforceChangePermission();
+        return mWifiStateMachine.getMessenger();
     }
 
     /**

@@ -3125,15 +3125,8 @@ public final class Settings {
          * ms delay before rechecking an 'online' wifi connection when it is thought to be unstable.
          * @hide
          */
-        public static final String WIFI_WATCHDOG_DNS_CHECK_SHORT_INTERVAL_MS =
-                "wifi_watchdog_dns_check_short_interval_ms";
-
-        /**
-         * ms delay before rechecking an 'online' wifi connection when it is thought to be stable.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_DNS_CHECK_LONG_INTERVAL_MS =
-                "wifi_watchdog_dns_check_long_interval_ms";
+        public static final String WIFI_WATCHDOG_ARP_CHECK_INTERVAL_MS =
+                "wifi_watchdog_arp_interval_ms";
 
         /**
          * ms delay before rechecking a connect SSID for walled garden with a http download.
@@ -3143,44 +3136,28 @@ public final class Settings {
                 "wifi_watchdog_walled_garden_interval_ms";
 
         /**
-         * max blacklist calls on an SSID before full dns check failures disable the network.
+         * Number of ARP pings per check.
          * @hide
          */
-        public static final String WIFI_WATCHDOG_MAX_SSID_BLACKLISTS =
-                "wifi_watchdog_max_ssid_blacklists";
+        public static final String WIFI_WATCHDOG_NUM_ARP_PINGS = "wifi_watchdog_num_arp_pings";
 
         /**
-         * Number of dns pings per check.
+         * Minimum number of responses to the arp pings to consider the test 'successful'.
          * @hide
          */
-        public static final String WIFI_WATCHDOG_NUM_DNS_PINGS = "wifi_watchdog_num_dns_pings";
+        public static final String WIFI_WATCHDOG_MIN_ARP_RESPONSES =
+                "wifi_watchdog_min_arp_responses";
 
         /**
-         * Minimum number of responses to the dns pings to consider the test 'successful'.
+         * Timeout on ARP pings
          * @hide
          */
-        public static final String WIFI_WATCHDOG_MIN_DNS_RESPONSES =
-                "wifi_watchdog_min_dns_responses";
+        public static final String WIFI_WATCHDOG_ARP_PING_TIMEOUT_MS =
+                "wifi_watchdog_arp_ping_timeout_ms";
 
         /**
-         * Timeout on dns pings
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_DNS_PING_TIMEOUT_MS =
-                "wifi_watchdog_dns_ping_timeout_ms";
-
-        /**
-         * We consider action from a 'blacklist' call to have finished by the end of
-         * this interval.  If we are connected to the same AP with no network connection,
-         * we are likely stuck on an SSID with no external connectivity.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_BLACKLIST_FOLLOWUP_INTERVAL_MS =
-                "wifi_watchdog_blacklist_followup_interval_ms";
-
-        /**
-         * Setting to turn off poor network avoidance on Wi-Fi. Feature is disabled by default and
-         * the setting needs to be set to 1 to enable it.
+         * Setting to turn off poor network avoidance on Wi-Fi. Feature is enabled by default and
+         * the setting needs to be set to 0 to disable it.
          * @hide
          */
         public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
@@ -3202,14 +3179,6 @@ public final class Settings {
          */
         public static final String WIFI_WATCHDOG_WALLED_GARDEN_URL =
                 "wifi_watchdog_walled_garden_url";
-
-        /**
-         * Boolean to determine whether to notify on disabling a network.  Secure setting used
-         * to notify user only once.
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP =
-                "wifi_watchdog_show_disabled_network_popup";
 
         /**
          * The maximum number of times we will retry a connection to an access

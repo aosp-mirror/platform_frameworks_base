@@ -171,8 +171,8 @@ public enum SupplicantState implements Parcelable {
     }
 
 
-    /* Supplicant associating or authenticating is considered a handshake state */
-    static boolean isHandshakeState(SupplicantState state) {
+    /** Supplicant associating or authenticating is considered a handshake state {@hide} */
+    public static boolean isHandshakeState(SupplicantState state) {
         switch(state) {
             case AUTHENTICATING:
             case ASSOCIATING:
