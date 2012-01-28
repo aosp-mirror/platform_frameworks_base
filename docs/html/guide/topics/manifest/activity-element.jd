@@ -672,7 +672,7 @@ unspecified}" setting.</td>
 
 <p class="note"><strong>Note:</strong> When you declare one of the landscape or portrait values,
 it is considered a hard requirement for the orientation in which the activity runs. As such,
-the value you declare enables filtering by services such as Android Market so your application is
+the value you declare enables filtering by services such as Google Play so your application is
 available only to devices that support the orientation required by your activities. For
 example, if you declare either {@code "landscape"}, {@code "reverseLandscape"}, or
 {@code "sensorLandscape"}, then your application will be available only to devices that support
@@ -681,7 +681,7 @@ your application requires either portrait or landscape orientation with the <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
 element. For example, <code>&lt;uses-feature
 android:name="android.hardware.screen.portrait"/></code>. This is purely a filtering behavior
-provided by Android Market (and other services that support it) and the platform itself does not
+provided by Google Play (and other services that support it) and the platform itself does not
 control whether your app can be installed when a device supports only certain orientations.</p>
 
 </dd>

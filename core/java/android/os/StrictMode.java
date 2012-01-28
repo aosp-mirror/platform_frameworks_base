@@ -106,7 +106,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * effort mechanism.  Notably, disk or network access from JNI calls
  * won't necessarily trigger it.  Future versions of Android may catch
  * more (or fewer) operations, so you should never leave StrictMode
- * enabled in shipping applications on the Android Market.
+ * enabled in applications distributed on Google Play.
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";

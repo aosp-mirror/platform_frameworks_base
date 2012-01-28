@@ -43,7 +43,7 @@ our
 know to install the data that's required for the device to become a
 multi-lingual talking machine! Downloading and installing the data is
 accomplished by firing off the ACTION_INSTALL_TTS_DATA intent, which will take
-the user to Android Market, and will let her/him initiate the download.
+the user to Google Play, and will let her/him initiate the download.
 Installation of the data will happen automatically once the download completes.
 Here is an example of what your implementation of
 <code>onActivityResult()</code> would look like:</p>

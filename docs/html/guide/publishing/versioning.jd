@@ -25,7 +25,7 @@ page.title=Versioning Your Applications
 
 <ol>
 <li><a href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish Your Application</a></li>
-<li><a href="{@docRoot}guide/publishing/publishing.html#market">Publishing On Android Market</a></li>
+<li><a href="{@docRoot}guide/publishing/publishing.html#market">Publishing On Google Play</a></li>
 <li><a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a></li>
 </ol>
 

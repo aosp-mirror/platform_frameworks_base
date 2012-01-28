@@ -481,7 +481,7 @@ and densities.</p>
 configurations of screen size and density, you can instead choose to limit the distribution of your
 application to certain types of screens, such as only tablets or only mobile devices. To do so, you
 can add elements to your Android manifest file that enable filtering based on screen configuration
-by external services such as Android Market.</p>
+by external services such as Google Play.</p>
 
 <p>However, before you decide to restrict your application to certain screen configurations, you
 should understand the techniques for <a
@@ -517,14 +517,14 @@ screens, you can declare the element in your manifest like this:</p>
 &lt;/manifest>
 </pre>
 
-<p>External services such as Android Market read this manifest element and use it to ensure that
+<p>External services such as Google Play read this manifest element and use it to ensure that
 your application is available only to devices with an extra large screen.</p>
 
 <p class="note"><strong>Note:</strong> If you use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
 with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
-external services such as Android Market <strong>do not</strong> apply filtering. Your application
+external services such as Google Play <strong>do not</strong> apply filtering. Your application
 will still be available to larger screens, but when it runs, it will not fill the screen&mdash;the
 system will draw it in a "postage stamp" window that's the same relative size as the screen size
 that your application does support. If you want to prevent your application from being downloaded on
@@ -541,7 +541,7 @@ larger devices to download the version designed for smaller screens. In such a c
 use the <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
 &lt;compatible-screens>}</a> element to manage the distribution of your application based on the
 combination of screen size and density. External services such as
-Android Market uses this information to apply filtering to your application, so that only devices
+Google Play uses this information to apply filtering to your application, so that only devices
 that have a screen configuration with which you declare compatibility can download your
 application.</p>
 
@@ -551,7 +551,7 @@ which each specify a screen configuration with which your application is compati
 the {@code android:screenSize} and {@code android:screenDensity} attributes. Each {@code
 &lt;screen&gt;} element <strong>must include both attributes</strong> to specify an individual
 screen configuration&mdash;if either attribute is missing, then the element is invalid
-(external services such as Android Market will ignore it).</p>
+(external services such as Google Play will ignore it).</p>
 
 <p>For example, if your application is compatible with only small and normal screens, regardless
 of screen density, then you must specify eight different {@code &lt;screen&gt;} elements,
@@ -613,7 +613,7 @@ orientation, you should update your application to support landscape.</p></li>
   <li><a href="#Telephony">Not all devices have telephony or other features</a>
   <p>If your application declares the {@code "android.hardware.telephony"} feature in the manifest,
 then it will not be available to devices that do not offer telephony (such as tablets), based on
-Android Market filtering. If your application can function properly without telephony, you should
+Google Play filtering. If your application can function properly without telephony, you should
 update your application to gracefully disable the telephony features when not available on a
 device.</p></li>
 </ul>
@@ -682,7 +682,7 @@ your applications. For example:</p>
 <pre>&lt;uses-feature android:name="android.hardware.telephony" /></pre>
 
 <p>By default, this declares that your application <em>requires</em> telephony features. So,
-external services such as Android Market use this information to filter your application from
+external services such as Google Play use this information to filter your application from
 devices that do not offer telephony.</p>
 
 <p>If, however, your application uses, but does not require the feature, you should

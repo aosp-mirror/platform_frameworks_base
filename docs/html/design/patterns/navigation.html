@@ -167,7 +167,7 @@ navigation does not change the behavior of Up or Back.</p>
 <img src="../static/content/navigation_between_siblings_gmail.png">
 
 <p>However, a notable exception to this occurs when browsing between "related" detail views not tied
-together by the referring list&mdash;for example, when browsing in the Market between apps from
+together by the referring list&mdash;for example, when browsing on Google Play between apps from
 the same developer, or albums by the same artist. In these cases, following each link does create
 history, causing the Back button to step through each screen of related content which has been
 viewed. Up should continue to bypass these related screens and navigate to the most recently viewed
@@ -176,7 +176,7 @@ container screen.</p>
 <img src="../static/content/navigation_between_siblings_market1.png">
 
 <p>You have the ability to make the Up behavior even smarter based on your knowledge of detail
-view. If we extend our Market sample from above, imagine the user has navigated from the last Book
+view. If we extend our Google Play sample from above, imagine the user has navigated from the last Book
 viewed to the details for the Movie adaptation. In that case, Up can return to a container (Movies)
 which the user had not previously navigated through.</p>
 
@@ -200,10 +200,10 @@ return to the referring app.</p>
 - If the destination screen is typically reached from one particular screen within your app, Up
   should navigate to that screen.
 - Otherwise, Up should navigate to the topmost ("Home") screen of your app.</p>
-<p>For example, after choosing to share a book being viewed in Market, the user navigates directly to
+<p>For example, after choosing to share a book being viewed on Google Play, the user navigates directly to
 Gmail's compose screen. From there, Up returns to the Inbox (which happens to be both the
 typical referrer to compose, as well as the topmost screen of the app), while Back returns to
-Market.</p>
+Google Play.</p>
 
 <img src="../static/content/navigation_from_outside_up.png">
 
