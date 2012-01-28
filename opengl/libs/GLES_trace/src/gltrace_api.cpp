@@ -5809,6 +5809,339 @@ void GLTrace_glGetPerfMonitorCounterDataAMD(GLuint monitor, GLenum pname, GLsize
     glContext->traceGLMessage(&glmsg);
 }
 
+void GLTrace_glBlitFramebufferANGLE(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glBlitFramebufferANGLE);
+
+    // copy argument srcX0
+    GLMessage_DataType *arg_srcX0 = glmsg.add_args();
+    arg_srcX0->set_isarray(false);
+    arg_srcX0->set_type(GLMessage::DataType::INT);
+    arg_srcX0->add_intvalue(srcX0);
+
+    // copy argument srcY0
+    GLMessage_DataType *arg_srcY0 = glmsg.add_args();
+    arg_srcY0->set_isarray(false);
+    arg_srcY0->set_type(GLMessage::DataType::INT);
+    arg_srcY0->add_intvalue(srcY0);
+
+    // copy argument srcX1
+    GLMessage_DataType *arg_srcX1 = glmsg.add_args();
+    arg_srcX1->set_isarray(false);
+    arg_srcX1->set_type(GLMessage::DataType::INT);
+    arg_srcX1->add_intvalue(srcX1);
+
+    // copy argument srcY1
+    GLMessage_DataType *arg_srcY1 = glmsg.add_args();
+    arg_srcY1->set_isarray(false);
+    arg_srcY1->set_type(GLMessage::DataType::INT);
+    arg_srcY1->add_intvalue(srcY1);
+
+    // copy argument dstX0
+    GLMessage_DataType *arg_dstX0 = glmsg.add_args();
+    arg_dstX0->set_isarray(false);
+    arg_dstX0->set_type(GLMessage::DataType::INT);
+    arg_dstX0->add_intvalue(dstX0);
+
+    // copy argument dstY0
+    GLMessage_DataType *arg_dstY0 = glmsg.add_args();
+    arg_dstY0->set_isarray(false);
+    arg_dstY0->set_type(GLMessage::DataType::INT);
+    arg_dstY0->add_intvalue(dstY0);
+
+    // copy argument dstX1
+    GLMessage_DataType *arg_dstX1 = glmsg.add_args();
+    arg_dstX1->set_isarray(false);
+    arg_dstX1->set_type(GLMessage::DataType::INT);
+    arg_dstX1->add_intvalue(dstX1);
+
+    // copy argument dstY1
+    GLMessage_DataType *arg_dstY1 = glmsg.add_args();
+    arg_dstY1->set_isarray(false);
+    arg_dstY1->set_type(GLMessage::DataType::INT);
+    arg_dstY1->add_intvalue(dstY1);
+
+    // copy argument mask
+    GLMessage_DataType *arg_mask = glmsg.add_args();
+    arg_mask->set_isarray(false);
+    arg_mask->set_type(GLMessage::DataType::INT);
+    arg_mask->add_intvalue(mask);
+
+    // copy argument filter
+    GLMessage_DataType *arg_filter = glmsg.add_args();
+    arg_filter->set_isarray(false);
+    arg_filter->set_type(GLMessage::DataType::ENUM);
+    arg_filter->add_intvalue((int)filter);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glBlitFramebufferANGLE(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glRenderbufferStorageMultisampleANGLE(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glRenderbufferStorageMultisampleANGLE);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument samples
+    GLMessage_DataType *arg_samples = glmsg.add_args();
+    arg_samples->set_isarray(false);
+    arg_samples->set_type(GLMessage::DataType::INT);
+    arg_samples->add_intvalue(samples);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glRenderbufferStorageMultisampleANGLE(target, samples, internalformat, width, height);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glRenderbufferStorageMultisampleAPPLE(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glRenderbufferStorageMultisampleAPPLE);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument samples
+    GLMessage_DataType *arg_samples = glmsg.add_args();
+    arg_samples->set_isarray(false);
+    arg_samples->set_type(GLMessage::DataType::INT);
+    arg_samples->add_intvalue(samples);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glRenderbufferStorageMultisampleAPPLE(target, samples, internalformat, width, height);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glResolveMultisampleFramebufferAPPLE(void) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glResolveMultisampleFramebufferAPPLE);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glResolveMultisampleFramebufferAPPLE();
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glLabelObjectEXT(GLenum type, GLuint object, GLsizei length, const GLchar *label) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glLabelObjectEXT);
+
+    // copy argument type
+    GLMessage_DataType *arg_type = glmsg.add_args();
+    arg_type->set_isarray(false);
+    arg_type->set_type(GLMessage::DataType::ENUM);
+    arg_type->add_intvalue((int)type);
+
+    // copy argument object
+    GLMessage_DataType *arg_object = glmsg.add_args();
+    arg_object->set_isarray(false);
+    arg_object->set_type(GLMessage::DataType::INT);
+    arg_object->add_intvalue(object);
+
+    // copy argument length
+    GLMessage_DataType *arg_length = glmsg.add_args();
+    arg_length->set_isarray(false);
+    arg_length->set_type(GLMessage::DataType::INT);
+    arg_length->add_intvalue(length);
+
+    // copy argument label
+    GLMessage_DataType *arg_label = glmsg.add_args();
+    arg_label->set_isarray(false);
+    arg_label->set_type(GLMessage::DataType::INT);
+    arg_label->add_intvalue((int)label);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glLabelObjectEXT(type, object, length, label);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetObjectLabelEXT(GLenum type, GLuint object, GLsizei bufSize, GLsizei *length, GLchar *label) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetObjectLabelEXT);
+
+    // copy argument type
+    GLMessage_DataType *arg_type = glmsg.add_args();
+    arg_type->set_isarray(false);
+    arg_type->set_type(GLMessage::DataType::ENUM);
+    arg_type->add_intvalue((int)type);
+
+    // copy argument object
+    GLMessage_DataType *arg_object = glmsg.add_args();
+    arg_object->set_isarray(false);
+    arg_object->set_type(GLMessage::DataType::INT);
+    arg_object->add_intvalue(object);
+
+    // copy argument bufSize
+    GLMessage_DataType *arg_bufSize = glmsg.add_args();
+    arg_bufSize->set_isarray(false);
+    arg_bufSize->set_type(GLMessage::DataType::INT);
+    arg_bufSize->add_intvalue(bufSize);
+
+    // copy argument length
+    GLMessage_DataType *arg_length = glmsg.add_args();
+    arg_length->set_isarray(false);
+    arg_length->set_type(GLMessage::DataType::INT);
+    arg_length->add_intvalue((int)length);
+
+    // copy argument label
+    GLMessage_DataType *arg_label = glmsg.add_args();
+    arg_label->set_isarray(false);
+    arg_label->set_type(GLMessage::DataType::INT);
+    arg_label->add_intvalue((int)label);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetObjectLabelEXT(type, object, bufSize, length, label);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glInsertEventMarkerEXT(GLsizei length, const GLchar *marker) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glInsertEventMarkerEXT);
+
+    // copy argument length
+    GLMessage_DataType *arg_length = glmsg.add_args();
+    arg_length->set_isarray(false);
+    arg_length->set_type(GLMessage::DataType::INT);
+    arg_length->add_intvalue(length);
+
+    // copy argument marker
+    GLMessage_DataType *arg_marker = glmsg.add_args();
+    arg_marker->set_isarray(false);
+    arg_marker->set_type(GLMessage::DataType::INT);
+    arg_marker->add_intvalue((int)marker);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glInsertEventMarkerEXT(length, marker);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glPushGroupMarkerEXT(GLsizei length, const GLchar *marker) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glPushGroupMarkerEXT);
+
+    // copy argument length
+    GLMessage_DataType *arg_length = glmsg.add_args();
+    arg_length->set_isarray(false);
+    arg_length->set_type(GLMessage::DataType::INT);
+    arg_length->add_intvalue(length);
+
+    // copy argument marker
+    GLMessage_DataType *arg_marker = glmsg.add_args();
+    arg_marker->set_isarray(false);
+    arg_marker->set_type(GLMessage::DataType::INT);
+    arg_marker->add_intvalue((int)marker);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glPushGroupMarkerEXT(length, marker);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glPopGroupMarkerEXT(void) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glPopGroupMarkerEXT);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glPopGroupMarkerEXT();
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
 void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, const GLenum *attachments) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
@@ -5836,6 +6169,102 @@ void GLTrace_glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments, cons
     // call function
     nsecs_t start_time = systemTime();
     glContext->hooks->gl.glDiscardFramebufferEXT(target, numAttachments, attachments);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glRenderbufferStorageMultisampleEXT(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glRenderbufferStorageMultisampleEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument samples
+    GLMessage_DataType *arg_samples = glmsg.add_args();
+    arg_samples->set_isarray(false);
+    arg_samples->set_type(GLMessage::DataType::INT);
+    arg_samples->add_intvalue(samples);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glRenderbufferStorageMultisampleEXT(target, samples, internalformat, width, height);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glFramebufferTexture2DMultisampleEXT(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glFramebufferTexture2DMultisampleEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument attachment
+    GLMessage_DataType *arg_attachment = glmsg.add_args();
+    arg_attachment->set_isarray(false);
+    arg_attachment->set_type(GLMessage::DataType::ENUM);
+    arg_attachment->add_intvalue((int)attachment);
+
+    // copy argument textarget
+    GLMessage_DataType *arg_textarget = glmsg.add_args();
+    arg_textarget->set_isarray(false);
+    arg_textarget->set_type(GLMessage::DataType::ENUM);
+    arg_textarget->add_intvalue((int)textarget);
+
+    // copy argument texture
+    GLMessage_DataType *arg_texture = glmsg.add_args();
+    arg_texture->set_isarray(false);
+    arg_texture->set_type(GLMessage::DataType::INT);
+    arg_texture->add_intvalue(texture);
+
+    // copy argument level
+    GLMessage_DataType *arg_level = glmsg.add_args();
+    arg_level->set_isarray(false);
+    arg_level->set_type(GLMessage::DataType::INT);
+    arg_level->add_intvalue(level);
+
+    // copy argument samples
+    GLMessage_DataType *arg_samples = glmsg.add_args();
+    arg_samples->set_isarray(false);
+    arg_samples->set_type(GLMessage::DataType::INT);
+    arg_samples->add_intvalue(samples);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glFramebufferTexture2DMultisampleEXT(target, attachment, textarget, texture, level, samples);
     nsecs_t end_time = systemTime();
 
     fixupGLMessage(glContext, start_time, end_time, &glmsg);
@@ -5920,6 +6349,1769 @@ void GLTrace_glMultiDrawElementsEXT(GLenum mode, const GLsizei *count, GLenum ty
     // call function
     nsecs_t start_time = systemTime();
     glContext->hooks->gl.glMultiDrawElementsEXT(mode, count, type, indices, primcount);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGenQueriesEXT(GLsizei n, GLuint *ids) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGenQueriesEXT);
+
+    // copy argument n
+    GLMessage_DataType *arg_n = glmsg.add_args();
+    arg_n->set_isarray(false);
+    arg_n->set_type(GLMessage::DataType::INT);
+    arg_n->add_intvalue(n);
+
+    // copy argument ids
+    GLMessage_DataType *arg_ids = glmsg.add_args();
+    arg_ids->set_isarray(false);
+    arg_ids->set_type(GLMessage::DataType::INT);
+    arg_ids->add_intvalue((int)ids);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGenQueriesEXT(n, ids);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glDeleteQueriesEXT(GLsizei n, const GLuint *ids) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glDeleteQueriesEXT);
+
+    // copy argument n
+    GLMessage_DataType *arg_n = glmsg.add_args();
+    arg_n->set_isarray(false);
+    arg_n->set_type(GLMessage::DataType::INT);
+    arg_n->add_intvalue(n);
+
+    // copy argument ids
+    GLMessage_DataType *arg_ids = glmsg.add_args();
+    arg_ids->set_isarray(false);
+    arg_ids->set_type(GLMessage::DataType::INT);
+    arg_ids->add_intvalue((int)ids);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glDeleteQueriesEXT(n, ids);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+GLboolean GLTrace_glIsQueryEXT(GLuint id) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glIsQueryEXT);
+
+    // copy argument id
+    GLMessage_DataType *arg_id = glmsg.add_args();
+    arg_id->set_isarray(false);
+    arg_id->set_type(GLMessage::DataType::INT);
+    arg_id->add_intvalue(id);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    GLboolean retValue = glContext->hooks->gl.glIsQueryEXT(id);
+    nsecs_t end_time = systemTime();
+
+    // set return value
+    GLMessage_DataType *rt = glmsg.mutable_returnvalue();
+    rt->set_isarray(false);
+    rt->set_type(GLMessage::DataType::BOOL);
+    rt->add_boolvalue(retValue);
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+
+    return retValue;
+}
+
+void GLTrace_glBeginQueryEXT(GLenum target, GLuint id) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glBeginQueryEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument id
+    GLMessage_DataType *arg_id = glmsg.add_args();
+    arg_id->set_isarray(false);
+    arg_id->set_type(GLMessage::DataType::INT);
+    arg_id->add_intvalue(id);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glBeginQueryEXT(target, id);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glEndQueryEXT(GLenum target) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glEndQueryEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glEndQueryEXT(target);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetQueryivEXT(GLenum target, GLenum pname, GLint *params) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetQueryivEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument pname
+    GLMessage_DataType *arg_pname = glmsg.add_args();
+    arg_pname->set_isarray(false);
+    arg_pname->set_type(GLMessage::DataType::ENUM);
+    arg_pname->add_intvalue((int)pname);
+
+    // copy argument params
+    GLMessage_DataType *arg_params = glmsg.add_args();
+    arg_params->set_isarray(false);
+    arg_params->set_type(GLMessage::DataType::INT);
+    arg_params->add_intvalue((int)params);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetQueryivEXT(target, pname, params);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetQueryObjectuivEXT(GLuint id, GLenum pname, GLuint *params) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetQueryObjectuivEXT);
+
+    // copy argument id
+    GLMessage_DataType *arg_id = glmsg.add_args();
+    arg_id->set_isarray(false);
+    arg_id->set_type(GLMessage::DataType::INT);
+    arg_id->add_intvalue(id);
+
+    // copy argument pname
+    GLMessage_DataType *arg_pname = glmsg.add_args();
+    arg_pname->set_isarray(false);
+    arg_pname->set_type(GLMessage::DataType::ENUM);
+    arg_pname->add_intvalue((int)pname);
+
+    // copy argument params
+    GLMessage_DataType *arg_params = glmsg.add_args();
+    arg_params->set_isarray(false);
+    arg_params->set_type(GLMessage::DataType::INT);
+    arg_params->add_intvalue((int)params);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetQueryObjectuivEXT(id, pname, params);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+GLenum GLTrace_glGetGraphicsResetStatusEXT(void) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetGraphicsResetStatusEXT);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    GLenum retValue = glContext->hooks->gl.glGetGraphicsResetStatusEXT();
+    nsecs_t end_time = systemTime();
+
+    // set return value
+    GLMessage_DataType *rt = glmsg.mutable_returnvalue();
+    rt->set_isarray(false);
+    rt->set_type(GLMessage::DataType::ENUM);
+    rt->add_intvalue((int)retValue);
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+
+    return retValue;
+}
+
+void GLTrace_glReadnPixelsEXT(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, void *data) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glReadnPixelsEXT);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::INT);
+    arg_x->add_intvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::INT);
+    arg_y->add_intvalue(y);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // copy argument format
+    GLMessage_DataType *arg_format = glmsg.add_args();
+    arg_format->set_isarray(false);
+    arg_format->set_type(GLMessage::DataType::ENUM);
+    arg_format->add_intvalue((int)format);
+
+    // copy argument type
+    GLMessage_DataType *arg_type = glmsg.add_args();
+    arg_type->set_isarray(false);
+    arg_type->set_type(GLMessage::DataType::ENUM);
+    arg_type->add_intvalue((int)type);
+
+    // copy argument bufSize
+    GLMessage_DataType *arg_bufSize = glmsg.add_args();
+    arg_bufSize->set_isarray(false);
+    arg_bufSize->set_type(GLMessage::DataType::INT);
+    arg_bufSize->add_intvalue(bufSize);
+
+    // copy argument data
+    GLMessage_DataType *arg_data = glmsg.add_args();
+    arg_data->set_isarray(false);
+    arg_data->set_type(GLMessage::DataType::INT);
+    arg_data->add_intvalue((int)data);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glReadnPixelsEXT(x, y, width, height, format, type, bufSize, data);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetnUniformfvEXT(GLuint program, GLint location, GLsizei bufSize, float *params) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetnUniformfvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument bufSize
+    GLMessage_DataType *arg_bufSize = glmsg.add_args();
+    arg_bufSize->set_isarray(false);
+    arg_bufSize->set_type(GLMessage::DataType::INT);
+    arg_bufSize->add_intvalue(bufSize);
+
+    // copy argument params
+    GLMessage_DataType *arg_params = glmsg.add_args();
+    arg_params->set_isarray(false);
+    arg_params->set_type(GLMessage::DataType::INT);
+    arg_params->add_intvalue((int)params);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetnUniformfvEXT(program, location, bufSize, params);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetnUniformivEXT(GLuint program, GLint location, GLsizei bufSize, GLint *params) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetnUniformivEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument bufSize
+    GLMessage_DataType *arg_bufSize = glmsg.add_args();
+    arg_bufSize->set_isarray(false);
+    arg_bufSize->set_type(GLMessage::DataType::INT);
+    arg_bufSize->add_intvalue(bufSize);
+
+    // copy argument params
+    GLMessage_DataType *arg_params = glmsg.add_args();
+    arg_params->set_isarray(false);
+    arg_params->set_type(GLMessage::DataType::INT);
+    arg_params->add_intvalue((int)params);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetnUniformivEXT(program, location, bufSize, params);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glUseProgramStagesEXT(GLuint pipeline, GLbitfield stages, GLuint program) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glUseProgramStagesEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // copy argument stages
+    GLMessage_DataType *arg_stages = glmsg.add_args();
+    arg_stages->set_isarray(false);
+    arg_stages->set_type(GLMessage::DataType::INT);
+    arg_stages->add_intvalue(stages);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glUseProgramStagesEXT(pipeline, stages, program);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glActiveShaderProgramEXT(GLuint pipeline, GLuint program) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glActiveShaderProgramEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glActiveShaderProgramEXT(pipeline, program);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+GLuint GLTrace_glCreateShaderProgramvEXT(GLenum type, GLsizei count, const GLchar **strings) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glCreateShaderProgramvEXT);
+
+    // copy argument type
+    GLMessage_DataType *arg_type = glmsg.add_args();
+    arg_type->set_isarray(false);
+    arg_type->set_type(GLMessage::DataType::ENUM);
+    arg_type->add_intvalue((int)type);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument strings
+    GLMessage_DataType *arg_strings = glmsg.add_args();
+    arg_strings->set_isarray(false);
+    arg_strings->set_type(GLMessage::DataType::INT);
+    arg_strings->add_intvalue((int)strings);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    GLuint retValue = glContext->hooks->gl.glCreateShaderProgramvEXT(type, count, strings);
+    nsecs_t end_time = systemTime();
+
+    // set return value
+    GLMessage_DataType *rt = glmsg.mutable_returnvalue();
+    rt->set_isarray(false);
+    rt->set_type(GLMessage::DataType::INT);
+    rt->add_intvalue(retValue);
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+
+    return retValue;
+}
+
+void GLTrace_glBindProgramPipelineEXT(GLuint pipeline) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glBindProgramPipelineEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glBindProgramPipelineEXT(pipeline);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glDeleteProgramPipelinesEXT(GLsizei n, const GLuint *pipelines) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glDeleteProgramPipelinesEXT);
+
+    // copy argument n
+    GLMessage_DataType *arg_n = glmsg.add_args();
+    arg_n->set_isarray(false);
+    arg_n->set_type(GLMessage::DataType::INT);
+    arg_n->add_intvalue(n);
+
+    // copy argument pipelines
+    GLMessage_DataType *arg_pipelines = glmsg.add_args();
+    arg_pipelines->set_isarray(false);
+    arg_pipelines->set_type(GLMessage::DataType::INT);
+    arg_pipelines->add_intvalue((int)pipelines);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glDeleteProgramPipelinesEXT(n, pipelines);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGenProgramPipelinesEXT(GLsizei n, GLuint *pipelines) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGenProgramPipelinesEXT);
+
+    // copy argument n
+    GLMessage_DataType *arg_n = glmsg.add_args();
+    arg_n->set_isarray(false);
+    arg_n->set_type(GLMessage::DataType::INT);
+    arg_n->add_intvalue(n);
+
+    // copy argument pipelines
+    GLMessage_DataType *arg_pipelines = glmsg.add_args();
+    arg_pipelines->set_isarray(false);
+    arg_pipelines->set_type(GLMessage::DataType::INT);
+    arg_pipelines->add_intvalue((int)pipelines);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGenProgramPipelinesEXT(n, pipelines);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+GLboolean GLTrace_glIsProgramPipelineEXT(GLuint pipeline) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glIsProgramPipelineEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    GLboolean retValue = glContext->hooks->gl.glIsProgramPipelineEXT(pipeline);
+    nsecs_t end_time = systemTime();
+
+    // set return value
+    GLMessage_DataType *rt = glmsg.mutable_returnvalue();
+    rt->set_isarray(false);
+    rt->set_type(GLMessage::DataType::BOOL);
+    rt->add_boolvalue(retValue);
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+
+    return retValue;
+}
+
+void GLTrace_glProgramParameteriEXT(GLuint program, GLenum pname, GLint value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramParameteriEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument pname
+    GLMessage_DataType *arg_pname = glmsg.add_args();
+    arg_pname->set_isarray(false);
+    arg_pname->set_type(GLMessage::DataType::ENUM);
+    arg_pname->add_intvalue((int)pname);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue(value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramParameteriEXT(program, pname, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetProgramPipelineivEXT(GLuint pipeline, GLenum pname, GLint *params) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetProgramPipelineivEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // copy argument pname
+    GLMessage_DataType *arg_pname = glmsg.add_args();
+    arg_pname->set_isarray(false);
+    arg_pname->set_type(GLMessage::DataType::ENUM);
+    arg_pname->add_intvalue((int)pname);
+
+    // copy argument params
+    GLMessage_DataType *arg_params = glmsg.add_args();
+    arg_params->set_isarray(false);
+    arg_params->set_type(GLMessage::DataType::INT);
+    arg_params->add_intvalue((int)params);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetProgramPipelineivEXT(pipeline, pname, params);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform1iEXT(GLuint program, GLint location, GLint x) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform1iEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::INT);
+    arg_x->add_intvalue(x);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform1iEXT(program, location, x);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform2iEXT(GLuint program, GLint location, GLint x, GLint y) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform2iEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::INT);
+    arg_x->add_intvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::INT);
+    arg_y->add_intvalue(y);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform2iEXT(program, location, x, y);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform3iEXT(GLuint program, GLint location, GLint x, GLint y, GLint z) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform3iEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::INT);
+    arg_x->add_intvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::INT);
+    arg_y->add_intvalue(y);
+
+    // copy argument z
+    GLMessage_DataType *arg_z = glmsg.add_args();
+    arg_z->set_isarray(false);
+    arg_z->set_type(GLMessage::DataType::INT);
+    arg_z->add_intvalue(z);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform3iEXT(program, location, x, y, z);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform4iEXT(GLuint program, GLint location, GLint x, GLint y, GLint z, GLint w) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform4iEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::INT);
+    arg_x->add_intvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::INT);
+    arg_y->add_intvalue(y);
+
+    // copy argument z
+    GLMessage_DataType *arg_z = glmsg.add_args();
+    arg_z->set_isarray(false);
+    arg_z->set_type(GLMessage::DataType::INT);
+    arg_z->add_intvalue(z);
+
+    // copy argument w
+    GLMessage_DataType *arg_w = glmsg.add_args();
+    arg_w->set_isarray(false);
+    arg_w->set_type(GLMessage::DataType::INT);
+    arg_w->add_intvalue(w);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform4iEXT(program, location, x, y, z, w);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform1fEXT(GLuint program, GLint location, GLfloat x) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform1fEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::FLOAT);
+    arg_x->add_floatvalue(x);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform1fEXT(program, location, x);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform2fEXT(GLuint program, GLint location, GLfloat x, GLfloat y) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform2fEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::FLOAT);
+    arg_x->add_floatvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::FLOAT);
+    arg_y->add_floatvalue(y);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform2fEXT(program, location, x, y);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform3fEXT(GLuint program, GLint location, GLfloat x, GLfloat y, GLfloat z) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform3fEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::FLOAT);
+    arg_x->add_floatvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::FLOAT);
+    arg_y->add_floatvalue(y);
+
+    // copy argument z
+    GLMessage_DataType *arg_z = glmsg.add_args();
+    arg_z->set_isarray(false);
+    arg_z->set_type(GLMessage::DataType::FLOAT);
+    arg_z->add_floatvalue(z);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform3fEXT(program, location, x, y, z);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform4fEXT(GLuint program, GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform4fEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument x
+    GLMessage_DataType *arg_x = glmsg.add_args();
+    arg_x->set_isarray(false);
+    arg_x->set_type(GLMessage::DataType::FLOAT);
+    arg_x->add_floatvalue(x);
+
+    // copy argument y
+    GLMessage_DataType *arg_y = glmsg.add_args();
+    arg_y->set_isarray(false);
+    arg_y->set_type(GLMessage::DataType::FLOAT);
+    arg_y->add_floatvalue(y);
+
+    // copy argument z
+    GLMessage_DataType *arg_z = glmsg.add_args();
+    arg_z->set_isarray(false);
+    arg_z->set_type(GLMessage::DataType::FLOAT);
+    arg_z->add_floatvalue(z);
+
+    // copy argument w
+    GLMessage_DataType *arg_w = glmsg.add_args();
+    arg_w->set_isarray(false);
+    arg_w->set_type(GLMessage::DataType::FLOAT);
+    arg_w->add_floatvalue(w);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform4fEXT(program, location, x, y, z, w);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform1ivEXT(GLuint program, GLint location, GLsizei count, const GLint *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform1ivEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform1ivEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform2ivEXT(GLuint program, GLint location, GLsizei count, const GLint *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform2ivEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform2ivEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform3ivEXT(GLuint program, GLint location, GLsizei count, const GLint *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform3ivEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform3ivEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform4ivEXT(GLuint program, GLint location, GLsizei count, const GLint *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform4ivEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform4ivEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform1fvEXT(GLuint program, GLint location, GLsizei count, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform1fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform1fvEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform2fvEXT(GLuint program, GLint location, GLsizei count, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform2fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform2fvEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform3fvEXT(GLuint program, GLint location, GLsizei count, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform3fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform3fvEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniform4fvEXT(GLuint program, GLint location, GLsizei count, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniform4fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniform4fvEXT(program, location, count, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniformMatrix2fvEXT(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniformMatrix2fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument transpose
+    GLMessage_DataType *arg_transpose = glmsg.add_args();
+    arg_transpose->set_isarray(false);
+    arg_transpose->set_type(GLMessage::DataType::BOOL);
+    arg_transpose->add_boolvalue(transpose);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniformMatrix2fvEXT(program, location, count, transpose, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniformMatrix3fvEXT(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniformMatrix3fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument transpose
+    GLMessage_DataType *arg_transpose = glmsg.add_args();
+    arg_transpose->set_isarray(false);
+    arg_transpose->set_type(GLMessage::DataType::BOOL);
+    arg_transpose->add_boolvalue(transpose);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniformMatrix3fvEXT(program, location, count, transpose, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glProgramUniformMatrix4fvEXT(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glProgramUniformMatrix4fvEXT);
+
+    // copy argument program
+    GLMessage_DataType *arg_program = glmsg.add_args();
+    arg_program->set_isarray(false);
+    arg_program->set_type(GLMessage::DataType::INT);
+    arg_program->add_intvalue(program);
+
+    // copy argument location
+    GLMessage_DataType *arg_location = glmsg.add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+
+    // copy argument count
+    GLMessage_DataType *arg_count = glmsg.add_args();
+    arg_count->set_isarray(false);
+    arg_count->set_type(GLMessage::DataType::INT);
+    arg_count->add_intvalue(count);
+
+    // copy argument transpose
+    GLMessage_DataType *arg_transpose = glmsg.add_args();
+    arg_transpose->set_isarray(false);
+    arg_transpose->set_type(GLMessage::DataType::BOOL);
+    arg_transpose->add_boolvalue(transpose);
+
+    // copy argument value
+    GLMessage_DataType *arg_value = glmsg.add_args();
+    arg_value->set_isarray(false);
+    arg_value->set_type(GLMessage::DataType::INT);
+    arg_value->add_intvalue((int)value);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glProgramUniformMatrix4fvEXT(program, location, count, transpose, value);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glValidateProgramPipelineEXT(GLuint pipeline) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glValidateProgramPipelineEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glValidateProgramPipelineEXT(pipeline);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glGetProgramPipelineInfoLogEXT(GLuint pipeline, GLsizei bufSize, GLsizei *length, GLchar *infoLog) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glGetProgramPipelineInfoLogEXT);
+
+    // copy argument pipeline
+    GLMessage_DataType *arg_pipeline = glmsg.add_args();
+    arg_pipeline->set_isarray(false);
+    arg_pipeline->set_type(GLMessage::DataType::INT);
+    arg_pipeline->add_intvalue(pipeline);
+
+    // copy argument bufSize
+    GLMessage_DataType *arg_bufSize = glmsg.add_args();
+    arg_bufSize->set_isarray(false);
+    arg_bufSize->set_type(GLMessage::DataType::INT);
+    arg_bufSize->add_intvalue(bufSize);
+
+    // copy argument length
+    GLMessage_DataType *arg_length = glmsg.add_args();
+    arg_length->set_isarray(false);
+    arg_length->set_type(GLMessage::DataType::INT);
+    arg_length->add_intvalue((int)length);
+
+    // copy argument infoLog
+    GLMessage_DataType *arg_infoLog = glmsg.add_args();
+    arg_infoLog->set_isarray(false);
+    arg_infoLog->set_type(GLMessage::DataType::INT);
+    arg_infoLog->add_intvalue((int)infoLog);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glGetProgramPipelineInfoLogEXT(pipeline, bufSize, length, infoLog);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTexStorage1DEXT(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTexStorage1DEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTexStorage1DEXT(target, levels, internalformat, width);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTexStorage2DEXT(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTexStorage2DEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTexStorage2DEXT(target, levels, internalformat, width, height);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTexStorage3DEXT(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTexStorage3DEXT);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // copy argument depth
+    GLMessage_DataType *arg_depth = glmsg.add_args();
+    arg_depth->set_isarray(false);
+    arg_depth->set_type(GLMessage::DataType::INT);
+    arg_depth->add_intvalue(depth);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTexStorage3DEXT(target, levels, internalformat, width, height, depth);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTextureStorage1DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTextureStorage1DEXT);
+
+    // copy argument texture
+    GLMessage_DataType *arg_texture = glmsg.add_args();
+    arg_texture->set_isarray(false);
+    arg_texture->set_type(GLMessage::DataType::INT);
+    arg_texture->add_intvalue(texture);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTextureStorage1DEXT(texture, target, levels, internalformat, width);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTextureStorage2DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTextureStorage2DEXT);
+
+    // copy argument texture
+    GLMessage_DataType *arg_texture = glmsg.add_args();
+    arg_texture->set_isarray(false);
+    arg_texture->set_type(GLMessage::DataType::INT);
+    arg_texture->add_intvalue(texture);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTextureStorage2DEXT(texture, target, levels, internalformat, width, height);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glTextureStorage3DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glTextureStorage3DEXT);
+
+    // copy argument texture
+    GLMessage_DataType *arg_texture = glmsg.add_args();
+    arg_texture->set_isarray(false);
+    arg_texture->set_type(GLMessage::DataType::INT);
+    arg_texture->add_intvalue(texture);
+
+    // copy argument target
+    GLMessage_DataType *arg_target = glmsg.add_args();
+    arg_target->set_isarray(false);
+    arg_target->set_type(GLMessage::DataType::ENUM);
+    arg_target->add_intvalue((int)target);
+
+    // copy argument levels
+    GLMessage_DataType *arg_levels = glmsg.add_args();
+    arg_levels->set_isarray(false);
+    arg_levels->set_type(GLMessage::DataType::INT);
+    arg_levels->add_intvalue(levels);
+
+    // copy argument internalformat
+    GLMessage_DataType *arg_internalformat = glmsg.add_args();
+    arg_internalformat->set_isarray(false);
+    arg_internalformat->set_type(GLMessage::DataType::ENUM);
+    arg_internalformat->add_intvalue((int)internalformat);
+
+    // copy argument width
+    GLMessage_DataType *arg_width = glmsg.add_args();
+    arg_width->set_isarray(false);
+    arg_width->set_type(GLMessage::DataType::INT);
+    arg_width->add_intvalue(width);
+
+    // copy argument height
+    GLMessage_DataType *arg_height = glmsg.add_args();
+    arg_height->set_isarray(false);
+    arg_height->set_type(GLMessage::DataType::INT);
+    arg_height->add_intvalue(height);
+
+    // copy argument depth
+    GLMessage_DataType *arg_depth = glmsg.add_args();
+    arg_depth->set_isarray(false);
+    arg_depth->set_type(GLMessage::DataType::INT);
+    arg_depth->add_intvalue(depth);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glTextureStorage3DEXT(texture, target, levels, internalformat, width, height, depth);
     nsecs_t end_time = systemTime();
 
     fixupGLMessage(glContext, start_time, end_time, &glmsg);
@@ -6016,6 +8208,75 @@ void GLTrace_glFramebufferTexture2DMultisampleIMG(GLenum target, GLenum attachme
     // call function
     nsecs_t start_time = systemTime();
     glContext->hooks->gl.glFramebufferTexture2DMultisampleIMG(target, attachment, textarget, texture, level, samples);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glCoverageMaskNV(GLboolean mask) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glCoverageMaskNV);
+
+    // copy argument mask
+    GLMessage_DataType *arg_mask = glmsg.add_args();
+    arg_mask->set_isarray(false);
+    arg_mask->set_type(GLMessage::DataType::BOOL);
+    arg_mask->add_boolvalue(mask);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glCoverageMaskNV(mask);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glCoverageOperationNV(GLenum operation) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glCoverageOperationNV);
+
+    // copy argument operation
+    GLMessage_DataType *arg_operation = glmsg.add_args();
+    arg_operation->set_isarray(false);
+    arg_operation->set_type(GLMessage::DataType::ENUM);
+    arg_operation->add_intvalue((int)operation);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glCoverageOperationNV(operation);
+    nsecs_t end_time = systemTime();
+
+    fixupGLMessage(glContext, start_time, end_time, &glmsg);
+    glContext->traceGLMessage(&glmsg);
+}
+
+void GLTrace_glDrawBuffersNV(GLsizei n, const GLenum *bufs) {
+    GLMessage glmsg;
+    GLTraceContext *glContext = getGLTraceContext();
+
+    glmsg.set_function(GLMessage::glDrawBuffersNV);
+
+    // copy argument n
+    GLMessage_DataType *arg_n = glmsg.add_args();
+    arg_n->set_isarray(false);
+    arg_n->set_type(GLMessage::DataType::INT);
+    arg_n->add_intvalue(n);
+
+    // copy argument bufs
+    GLMessage_DataType *arg_bufs = glmsg.add_args();
+    arg_bufs->set_isarray(false);
+    arg_bufs->set_type(GLMessage::DataType::INT);
+    arg_bufs->add_intvalue((int)bufs);
+
+    // call function
+    nsecs_t start_time = systemTime();
+    glContext->hooks->gl.glDrawBuffersNV(n, bufs);
     nsecs_t end_time = systemTime();
 
     fixupGLMessage(glContext, start_time, end_time, &glmsg);
@@ -6215,42 +8476,48 @@ void GLTrace_glSetFenceNV(GLuint fence, GLenum condition) {
     glContext->traceGLMessage(&glmsg);
 }
 
-void GLTrace_glCoverageMaskNV(GLboolean mask) {
+void GLTrace_glReadBufferNV(GLenum mode) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_function(GLMessage::glCoverageMaskNV);
+    glmsg.set_function(GLMessage::glReadBufferNV);
 
-    // copy argument mask
-    GLMessage_DataType *arg_mask = glmsg.add_args();
-    arg_mask->set_isarray(false);
-    arg_mask->set_type(GLMessage::DataType::BOOL);
-    arg_mask->add_boolvalue(mask);
+    // copy argument mode
+    GLMessage_DataType *arg_mode = glmsg.add_args();
+    arg_mode->set_isarray(false);
+    arg_mode->set_type(GLMessage::DataType::ENUM);
+    arg_mode->add_intvalue((int)mode);
 
     // call function
     nsecs_t start_time = systemTime();
-    glContext->hooks->gl.glCoverageMaskNV(mask);
+    glContext->hooks->gl.glReadBufferNV(mode);
     nsecs_t end_time = systemTime();
 
     fixupGLMessage(glContext, start_time, end_time, &glmsg);
     glContext->traceGLMessage(&glmsg);
 }
 
-void GLTrace_glCoverageOperationNV(GLenum operation) {
+void GLTrace_glAlphaFuncQCOM(GLenum func, GLclampf ref) {
     GLMessage glmsg;
     GLTraceContext *glContext = getGLTraceContext();
 
-    glmsg.set_function(GLMessage::glCoverageOperationNV);
+    glmsg.set_function(GLMessage::glAlphaFuncQCOM);
 
-    // copy argument operation
-    GLMessage_DataType *arg_operation = glmsg.add_args();
-    arg_operation->set_isarray(false);
-    arg_operation->set_type(GLMessage::DataType::ENUM);
-    arg_operation->add_intvalue((int)operation);
+    // copy argument func
+    GLMessage_DataType *arg_func = glmsg.add_args();
+    arg_func->set_isarray(false);
+    arg_func->set_type(GLMessage::DataType::ENUM);
+    arg_func->add_intvalue((int)func);
+
+    // copy argument ref
+    GLMessage_DataType *arg_ref = glmsg.add_args();
+    arg_ref->set_isarray(false);
+    arg_ref->set_type(GLMessage::DataType::FLOAT);
+    arg_ref->add_floatvalue(ref);
 
     // call function
     nsecs_t start_time = systemTime();
-    glContext->hooks->gl.glCoverageOperationNV(operation);
+    glContext->hooks->gl.glAlphaFuncQCOM(func, ref);
     nsecs_t end_time = systemTime();
 
     fixupGLMessage(glContext, start_time, end_time, &glmsg);
