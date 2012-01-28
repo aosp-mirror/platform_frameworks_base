@@ -19,6 +19,7 @@ package com.android.internal.policy.impl;
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccCard.State;
+import com.android.internal.widget.DigitalClock;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.TransportControlView;
 import com.android.internal.policy.impl.KeyguardUpdateMonitor.SimStateCallback;
@@ -105,6 +106,7 @@ class KeyguardStatusViewManager implements OnClickListener {
     private CharSequence mPlmn;
     private CharSequence mSpn;
     protected int mPhoneState;
+    private DigitalClock mDigitalClock;
 
     private class TransientTextManager {
         private TextView mTextView;
@@ -181,6 +183,7 @@ class KeyguardStatusViewManager implements OnClickListener {
         mTransportView = (TransportControlView) findViewById(R.id.transport);
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButtonEnabledInScreen = emergencyButtonEnabledInScreen;
+        mDigitalClock = (DigitalClock) findViewById(R.id.time);
 
         // Hide transport control view until we know we need to show it.
         if (mTransportView != null) {
@@ -290,6 +293,10 @@ class KeyguardStatusViewManager implements OnClickListener {
     /** {@inheritDoc} */
     public void onResume() {
         if (DEBUG) Log.v(TAG, "onResume()");
+
+        // First update the clock
+        mDigitalClock.updateTime();
+
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
         mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
         resetStatusInfo();
