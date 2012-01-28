@@ -1625,6 +1625,10 @@ public class WifiStateMachine extends StateMachine {
     private void handleNetworkDisconnect() {
         if (DBG) log("Stopping DHCP and clearing IP");
 
+        /* In case we were in middle of DHCP operation
+           restore back powermode */
+        handlePostDhcpSetup();
+
         /*
          * stop DHCP
          */
