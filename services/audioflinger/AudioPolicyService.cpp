@@ -649,7 +649,7 @@ AudioPolicyService::AudioCommandThread::~AudioCommandThread()
         release_wake_lock(mName.string());
     }
     mAudioCommands.clear();
-    if (mpToneGenerator != NULL) delete mpToneGenerator;
+    delete mpToneGenerator;
 }
 
 void AudioPolicyService::AudioCommandThread::onFirstRef()
@@ -682,8 +682,7 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                     ToneData *data = (ToneData *)command->mParam;
                     ALOGV("AudioCommandThread() processing start tone %d on stream %d",
                             data->mType, data->mStream);
-                    if (mpToneGenerator != NULL)
-                        delete mpToneGenerator;
+                    delete mpToneGenerator;
                     mpToneGenerator = new ToneGenerator(data->mStream, 1.0);
                     mpToneGenerator->startTone(data->mType);
                     delete data;

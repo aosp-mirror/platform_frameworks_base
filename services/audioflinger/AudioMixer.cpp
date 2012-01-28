@@ -1127,9 +1127,7 @@ void AudioMixer::process__TwoTracks16BitsStereoNoResampling(state_t* state)
         }
     }
 
-    if (buff != NULL) {
-        delete [] buff;
-    }
+    delete [] buff;
 }
 #endif
 
