@@ -22,6 +22,7 @@ next.link=descendant-lateral.html
 
 <h2>You should also read</h2>
 <ul>
+  <li><a href="{@docRoot}design/patterns/multi-pane-layouts.html">Android Design: Multi-pane Layouts</a></li>
   <li><a href="{@docRoot}training/multiscreen/index.html">Designing for Multiple Screens</a></li>
 </ul>
 
@@ -34,6 +35,12 @@ next.link=descendant-lateral.html
 <p class="note"><strong>Note: </strong> Designing applications for television sets also requires attention to other factors, including interaction methods (i.e., the lack of a touch screen), legibility of text at large reading distances, and more. Although this discussion is outside the scope of this class, you can find more information on designing for TVs in the <a href="https://developers.google.com/tv">Google TV</a> documentation for <a href="https://developers.google.com/tv/android/docs/gtv_android_patterns">design patterns</a>.</p>
 
 <h2 id="multi-pane-layouts">Group Screens with Multi-pane Layouts</h2>
+
+<div class="design-announce">
+<p><strong>Multi-pane Layout Design</strong></p>
+  <p>For design guidelines, read Android Design's <a
+  href="{@docRoot}design/patterns/multi-pane-layouts.html">Multi-pane Layouts</a> pattern guide.</p>
+</div>
 
 <p>3 to 4-inch screens are generally only suitable for showing a single vertical pane of content at a time, be it a list of items, or detail information about an item, etc. Thus on such devices, screens generally map one-to-one with levels in the information hierarchy (<em>categories</em> &rarr; <em>object list</em> &rarr; <em>object detail</em>).</p>
 
@@ -76,12 +83,12 @@ next.link=descendant-lateral.html
   <li><strong>Expand/collapse</strong>
     <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-collapse.png"
       alt="Expand/collapse strategy">
-    <p>A variation on the stretch strategy is to collapse the contents of the left pane when in portrait. This works quite well with master/detail panes where the left (master) pane contains easily collapsible list items. An example would be for a realtime chat application. In landscape, the left list could contain chat contact photos, names, and online statuses. In portrait, horizontal space could be collapsed by hiding contact names and only showing photos and online status indicator icons.</p></li>
+    <p>A variation on the stretch strategy is to collapse the contents of the left pane when in portrait. This works quite well with master/detail panes where the left (master) pane contains easily collapsible list items. An example would be for a realtime chat application. In landscape, the left list could contain chat contact photos, names, and online statuses. In portrait, horizontal space could be collapsed by hiding contact names and only showing photos and online status indicator icons. Optionally also provide an expand control that allows the user to expand the left pane content to its larger width and vice versa.</p></li>
 
   <li><strong>Show/Hide</strong>
     <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-show-hide.png"
       alt="Show/Hide strategy">
-    <p>In this scenario, the left pane is completely hidden in portrait mode. However, <em>to ensure the functional parity</em> of your screen in portrait and landscape, the left pane should be made available via an onscreen affordance (such as a button). It's usually appropriate to use the <em>Up</em> button in the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> to show the left pane, as is discussed in a <a href="ancestral-temporal.html">later lesson</a>.</p></li>
+    <p>In this scenario, the left pane is completely hidden in portrait mode. However, <em>to ensure the functional parity</em> of your screen in portrait and landscape, the left pane should be made available via an onscreen affordance (such as a button). It's usually appropriate to use the <em>Up</em> button in the Action Bar (<a href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design) to show the left pane, as is discussed in a <a href="ancestral-temporal.html">later lesson</a>.</p></li>
 
   <li><strong>Stack</strong>
     <img src="{@docRoot}images/training/app-navigation-multiple-sizes-strategy-stack.png"
