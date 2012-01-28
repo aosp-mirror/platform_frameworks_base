@@ -278,17 +278,20 @@ void InputReader::loopOnce() {
 
     { // acquire lock
         AutoMutex _l(mLock);
+        mReaderIsAliveCondition.broadcast();
 
         if (count) {
             processEventsLocked(mEventBuffer, count);
         }
         if (!count || timeoutMillis == 0) {
             nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+            if (now >= mNextTimeout) {
 #if DEBUG_RAW_EVENTS
-            ALOGD("Timeout expired, latency=%0.3fms", (now - mNextTimeout) * 0.000001f);
+                ALOGD("Timeout expired, latency=%0.3fms", (now - mNextTimeout) * 0.000001f);
 #endif
-            mNextTimeout = LLONG_MAX;
-            timeoutExpiredLocked(now);
+                mNextTimeout = LLONG_MAX;
+                timeoutExpiredLocked(now);
+            }
         }
     } // release lock
 
@@ -772,6 +775,8 @@ void InputReader::dump(String8& dump) {
 void InputReader::monitor() {
     // Acquire and release the lock to ensure that the reader has not deadlocked.
     mLock.lock();
+    mEventHub->wake();
+    mReaderIsAliveCondition.wait(mLock);
     mLock.unlock();
 
     // Check the EventHub
