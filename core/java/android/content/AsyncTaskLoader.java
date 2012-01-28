@@ -173,6 +173,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
                 if (DEBUG) Slog.v(TAG, "cancelLoad: cancelled=" + cancelled);
                 if (cancelled) {
                     mCancellingTask = mTask;
+                    onCancelLoadInBackground();
                 }
                 mTask = null;
                 return cancelled;
@@ -253,6 +254,25 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      */
     protected D onLoadInBackground() {
         return loadInBackground();
+    }
+
+    /**
+     * Override this method to try to abort the computation currently taking
+     * place on a background thread.
+     *
+     * Note that when this method is called, it is possible that {@link #loadInBackground}
+     * has not started yet or has already completed.
+     */
+    protected void onCancelLoadInBackground() {
+    }
+
+    /**
+     * Returns true if the current execution of {@link #loadInBackground()} is being canceled.
+     *
+     * @return True if the current execution of {@link #loadInBackground()} is being canceled.
+     */
+    protected boolean isLoadInBackgroundCanceled() {
+        return mCancellingTask != null;
     }
 
     /**

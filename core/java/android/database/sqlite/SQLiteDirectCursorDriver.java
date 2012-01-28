@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.content.CancelationSignal;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
@@ -28,16 +29,19 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     private final SQLiteDatabase mDatabase;
     private final String mEditTable; 
     private final String mSql;
+    private final CancelationSignal mCancelationSignal;
     private SQLiteQuery mQuery;
 
-    public SQLiteDirectCursorDriver(SQLiteDatabase db, String sql, String editTable) {
+    public SQLiteDirectCursorDriver(SQLiteDatabase db, String sql, String editTable,
+            CancelationSignal cancelationSignal) {
         mDatabase = db;
         mEditTable = editTable;
         mSql = sql;
+        mCancelationSignal = cancelationSignal;
     }
 
     public Cursor query(CursorFactory factory, String[] selectionArgs) {
-        final SQLiteQuery query = new SQLiteQuery(mDatabase, mSql);
+        final SQLiteQuery query = new SQLiteQuery(mDatabase, mSql, mCancelationSignal);
         final Cursor cursor;
         try {
             query.bindAllArgsAsStrings(selectionArgs);

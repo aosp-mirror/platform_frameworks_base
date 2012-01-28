@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import android.content.CancelationSignal;
+import android.content.OperationCanceledException;
 import android.database.CursorWindow;
 import android.util.Log;
 
@@ -29,8 +31,12 @@ import android.util.Log;
 public final class SQLiteQuery extends SQLiteProgram {
     private static final String TAG = "SQLiteQuery";
 
-    SQLiteQuery(SQLiteDatabase db, String query) {
-        super(db, query, null);
+    private final CancelationSignal mCancelationSignal;
+
+    SQLiteQuery(SQLiteDatabase db, String query, CancelationSignal cancelationSignal) {
+        super(db, query, null, cancelationSignal);
+
+        mCancelationSignal = cancelationSignal;
     }
 
     /**
@@ -44,6 +50,9 @@ public final class SQLiteQuery extends SQLiteProgram {
      * return regardless of whether they fit in the window.
      * @return Number of rows that were enumerated.  Might not be all rows
      * unless countAllRows is true.
+     *
+     * @throws SQLiteException if an error occurs.
+     * @throws OperationCanceledException if the operation was canceled.
      */
     int fillWindow(CursorWindow window, int startPos, int requiredPos, boolean countAllRows) {
         acquireReference();
@@ -51,7 +60,8 @@ public final class SQLiteQuery extends SQLiteProgram {
             window.acquireReference();
             try {
                 int numRows = getSession().executeForCursorWindow(getSql(), getBindArgs(),
-                        window, startPos, requiredPos, countAllRows, getConnectionFlags());
+                        window, startPos, requiredPos, countAllRows, getConnectionFlags(),
+                        mCancelationSignal);
                 return numRows;
             } catch (SQLiteDatabaseCorruptException ex) {
                 onCorruption();

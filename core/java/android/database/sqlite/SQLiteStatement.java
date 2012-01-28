@@ -28,7 +28,7 @@ import android.os.ParcelFileDescriptor;
  */
 public final class SQLiteStatement extends SQLiteProgram {
     SQLiteStatement(SQLiteDatabase db, String sql, Object[] bindArgs) {
-        super(db, sql, bindArgs);
+        super(db, sql, bindArgs, null);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class SQLiteStatement extends SQLiteProgram {
     public void execute() {
         acquireReference();
         try {
-            getSession().execute(getSql(), getBindArgs(), getConnectionFlags());
+            getSession().execute(getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;
@@ -62,7 +62,7 @@ public final class SQLiteStatement extends SQLiteProgram {
         acquireReference();
         try {
             return getSession().executeForChangedRowCount(
-                    getSql(), getBindArgs(), getConnectionFlags());
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;
@@ -84,7 +84,7 @@ public final class SQLiteStatement extends SQLiteProgram {
         acquireReference();
         try {
             return getSession().executeForLastInsertedRowId(
-                    getSql(), getBindArgs(), getConnectionFlags());
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;
@@ -105,7 +105,7 @@ public final class SQLiteStatement extends SQLiteProgram {
         acquireReference();
         try {
             return getSession().executeForLong(
-                    getSql(), getBindArgs(), getConnectionFlags());
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;
@@ -126,7 +126,7 @@ public final class SQLiteStatement extends SQLiteProgram {
         acquireReference();
         try {
             return getSession().executeForString(
-                    getSql(), getBindArgs(), getConnectionFlags());
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;
@@ -147,7 +147,7 @@ public final class SQLiteStatement extends SQLiteProgram {
         acquireReference();
         try {
             return getSession().executeForBlobFileDescriptor(
-                    getSql(), getBindArgs(), getConnectionFlags());
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
         } catch (SQLiteDatabaseCorruptException ex) {
             onCorruption();
             throw ex;

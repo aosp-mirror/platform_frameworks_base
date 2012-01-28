@@ -47,7 +47,20 @@ public class ContentProviderClient {
     /** See {@link ContentProvider#query ContentProvider.query} */
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException {
-        return mContentProvider.query(url, projection, selection,  selectionArgs, sortOrder);
+        return query(url, projection, selection,  selectionArgs, sortOrder, null);
+    }
+
+    /** See {@link ContentProvider#query ContentProvider.query} */
+    public Cursor query(Uri url, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder, CancelationSignal cancelationSignal)
+                    throws RemoteException {
+        ICancelationSignal remoteCancelationSignal = null;
+        if (cancelationSignal != null) {
+            remoteCancelationSignal = mContentProvider.createCancelationSignal();
+            cancelationSignal.setRemote(remoteCancelationSignal);
+        }
+        return mContentProvider.query(url, projection, selection,  selectionArgs, sortOrder,
+                remoteCancelationSignal);
     }
 
     /** See {@link ContentProvider#getType ContentProvider.getType} */
