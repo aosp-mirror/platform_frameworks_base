@@ -653,6 +653,7 @@ public class MultiWaveView extends View {
 
             case MotionEvent.ACTION_CANCEL:
                 handleMove(event);
+                handleCancel(event);
                 handled = true;
                 break;
         }
@@ -676,6 +677,12 @@ public class MultiWaveView extends View {
 
     private void handleUp(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle RELEASE");
+        switchToState(STATE_FINISH, event.getX(), event.getY());
+    }
+    
+    private void handleCancel(MotionEvent event) {
+        if (DEBUG && mDragging) Log.v(TAG, "** Handle CANCEL");
+        mActiveTarget = -1; // Drop the active target if canceled.
         switchToState(STATE_FINISH, event.getX(), event.getY());
     }
 
