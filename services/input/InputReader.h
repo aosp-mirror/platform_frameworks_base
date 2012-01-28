@@ -363,6 +363,8 @@ protected:
 private:
     Mutex mLock;
 
+    Condition mReaderIsAliveCondition;
+
     sp<EventHubInterface> mEventHub;
     sp<InputReaderPolicyInterface> mPolicy;
     sp<QueuedInputListener> mQueuedListener;

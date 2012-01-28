@@ -862,6 +862,8 @@ private:
 
     Mutex mLock;
 
+    Condition mDispatcherIsAliveCondition;
+
     sp<Looper> mLooper;
 
     EventEntry* mPendingEvent;
