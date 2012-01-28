@@ -40,7 +40,7 @@ public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        if (!UtilHelper.isWifiOnly()) {
+        if (!UtilHelper.isWifiOnly(getContext())) {
             suite.addTestSuite(ConnectivityManagerMobileTest.class);
         } else {
             // create a new test suite
