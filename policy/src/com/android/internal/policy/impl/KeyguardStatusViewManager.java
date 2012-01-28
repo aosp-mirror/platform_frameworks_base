@@ -294,8 +294,10 @@ class KeyguardStatusViewManager implements OnClickListener {
     public void onResume() {
         if (DEBUG) Log.v(TAG, "onResume()");
 
-        // First update the clock
-        mDigitalClock.updateTime();
+        // First update the clock, if present.
+        if (mDigitalClock != null) {
+            mDigitalClock.updateTime();
+        }
 
         mUpdateMonitor.registerInfoCallback(mInfoCallback);
         mUpdateMonitor.registerSimStateCallback(mSimStateCallback);
