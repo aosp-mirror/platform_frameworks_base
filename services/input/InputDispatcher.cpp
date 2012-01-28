@@ -238,6 +238,8 @@ void InputDispatcher::dispatchOnce() {
     nsecs_t nextWakeupTime = LONG_LONG_MAX;
     { // acquire lock
         AutoMutex _l(mLock);
+        mDispatcherIsAliveCondition.broadcast();
+
         dispatchOnceInnerLocked(&nextWakeupTime);
 
         if (runCommandsLockedInterruptible()) {
@@ -4086,6 +4088,8 @@ void InputDispatcher::dump(String8& dump) {
 void InputDispatcher::monitor() {
     // Acquire and release the lock to ensure that the dispatcher has not deadlocked.
     mLock.lock();
+    mLooper->wake();
+    mDispatcherIsAliveCondition.wait(mLock);
     mLock.unlock();
 }
 
