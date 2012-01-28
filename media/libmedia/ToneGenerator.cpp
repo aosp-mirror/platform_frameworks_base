@@ -811,9 +811,9 @@ ToneGenerator::ToneGenerator(audio_stream_type_t streamType, float volume, bool 
     mThreadCanCallJava = threadCanCallJava;
     mStreamType = streamType;
     mVolume = volume;
-    mpAudioTrack = 0;
-    mpToneDesc = 0;
-    mpNewToneDesc = 0;
+    mpAudioTrack = NULL;
+    mpToneDesc = NULL;
+    mpNewToneDesc = NULL;
     // Generate tone by chunks of 20 ms to keep cadencing precision
     mProcessSize = (mSamplingRate * 20) / 1000;
 
@@ -855,7 +855,7 @@ ToneGenerator::ToneGenerator(audio_stream_type_t streamType, float volume, bool 
 ToneGenerator::~ToneGenerator() {
     ALOGV("ToneGenerator destructor\n");
 
-    if (mpAudioTrack) {
+    if (mpAudioTrack != NULL) {
         stopTone();
         ALOGV("Delete Track: %p\n", mpAudioTrack);
         delete mpAudioTrack;
@@ -1012,7 +1012,7 @@ bool ToneGenerator::initAudioTrack() {
 
     if (mpAudioTrack) {
         delete mpAudioTrack;
-        mpAudioTrack = 0;
+        mpAudioTrack = NULL;
     }
 
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
@@ -1048,7 +1048,7 @@ initAudioTrack_exit:
     if (mpAudioTrack) {
         ALOGV("Delete Track I: %p\n", mpAudioTrack);
         delete mpAudioTrack;
-        mpAudioTrack = 0;
+        mpAudioTrack = NULL;
     }
 
     return false;
@@ -1317,7 +1317,7 @@ audioCallback_EndLoop:
 bool ToneGenerator::prepareWave() {
     unsigned int segmentIdx = 0;
 
-    if (!mpNewToneDesc) {
+    if (mpNewToneDesc == NULL) {
         return false;
     }
 

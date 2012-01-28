@@ -226,8 +226,8 @@ public:
     AudioEffect(const effect_uuid_t *type,
                 const effect_uuid_t *uuid = NULL,
                   int32_t priority = 0,
-                  effect_callback_t cbf = 0,
-                  void* user = 0,
+                  effect_callback_t cbf = NULL,
+                  void* user = NULL,
                   int sessionId = 0,
                   audio_io_handle_t io = 0
                   );
@@ -238,8 +238,8 @@ public:
     AudioEffect(const char *typeStr,
                     const char *uuidStr = NULL,
                     int32_t priority = 0,
-                    effect_callback_t cbf = 0,
-                    void* user = 0,
+                    effect_callback_t cbf = NULL,
+                    void* user = NULL,
                     int sessionId = 0,
                     audio_io_handle_t io = 0
                     );
@@ -260,8 +260,8 @@ public:
             status_t    set(const effect_uuid_t *type,
                             const effect_uuid_t *uuid = NULL,
                             int32_t priority = 0,
-                            effect_callback_t cbf = 0,
-                            void* user = 0,
+                            effect_callback_t cbf = NULL,
+                            void* user = NULL,
                             int sessionId = 0,
                             audio_io_handle_t io = 0
                             );

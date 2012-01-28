@@ -73,7 +73,7 @@ status_t BnAudioFlingerClient::onTransact(
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
             int event = data.readInt32();
             int ioHandle = data.readInt32();
-            void *param2 = 0;
+            void *param2 = NULL;
             AudioSystem::OutputDescriptor desc;
             uint32_t stream;
             if (event == AudioSystem::STREAM_CONFIG_CHANGED) {

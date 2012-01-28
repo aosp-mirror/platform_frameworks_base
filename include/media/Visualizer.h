@@ -66,8 +66,8 @@ public:
      * See AudioEffect constructor for details on parameters.
      */
                         Visualizer(int32_t priority = 0,
-                                   effect_callback_t cbf = 0,
-                                   void* user = 0,
+                                   effect_callback_t cbf = NULL,
+                                   void* user = NULL,
                                    int sessionId = 0);
 
                         ~Visualizer();

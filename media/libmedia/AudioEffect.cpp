@@ -342,7 +342,7 @@ void AudioEffect::binderDied()
 {
     ALOGW("IEffect died");
     mStatus = NO_INIT;
-    if (mCbf) {
+    if (mCbf != NULL) {
         status_t status = DEAD_OBJECT;
         mCbf(EVENT_ERROR, mUserData, &status);
     }
@@ -363,7 +363,7 @@ void AudioEffect::controlStatusChanged(bool controlGranted)
             mStatus = ALREADY_EXISTS;
         }
     }
-    if (mCbf) {
+    if (mCbf != NULL) {
         mCbf(EVENT_CONTROL_STATUS_CHANGED, mUserData, &controlGranted);
     }
 }
@@ -373,7 +373,7 @@ void AudioEffect::enableStatusChanged(bool enabled)
     ALOGV("enableStatusChanged %p enabled %d mCbf %p", this, enabled, mCbf);
     if (mStatus == ALREADY_EXISTS) {
         mEnabled = enabled;
-        if (mCbf) {
+        if (mCbf != NULL) {
             mCbf(EVENT_ENABLE_STATUS_CHANGED, mUserData, &enabled);
         }
     }
@@ -389,7 +389,7 @@ void AudioEffect::commandExecuted(uint32_t cmdCode,
         return;
     }
 
-    if (mCbf && cmdCode == EFFECT_CMD_SET_PARAM) {
+    if (mCbf != NULL && cmdCode == EFFECT_CMD_SET_PARAM) {
         effect_param_t *cmd = (effect_param_t *)cmdData;
         cmd->status = *(int32_t *)replyData;
         mCbf(EVENT_PARAMETER_CHANGED, mUserData, cmd);

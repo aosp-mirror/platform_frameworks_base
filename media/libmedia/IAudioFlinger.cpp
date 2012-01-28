@@ -640,7 +640,7 @@ public:
                 *id = tmp;
             }
             tmp = reply.readInt32();
-            if (enabled) {
+            if (enabled != NULL) {
                 *enabled = tmp;
             }
             effect = interface_cast<IEffect>(reply.readStrongBinder());
