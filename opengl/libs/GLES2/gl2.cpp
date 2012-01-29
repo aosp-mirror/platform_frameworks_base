@@ -110,6 +110,20 @@ extern "C" {
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
+/*
+ * glGetString() is special because we expose some extensions in the wrapper
+ */
+
+extern "C" const GLubyte * __glGetString(GLenum name);
+
+const GLubyte * glGetString(GLenum name)
+{
+    const GLubyte * ret = egl_get_string_for_current_context(name);
+    if (ret == NULL) {
+        ret = __glGetString(name);
+    }
+    return ret;
+}
 
 /*
  * These GL calls are special because they need to EGL to retrieve some

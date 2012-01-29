@@ -28,6 +28,7 @@
 #include <GLES/glext.h>
 
 #include <utils/threads.h>
+#include <utils/String8.h>
 
 #include <system/window.h>
 
@@ -158,11 +159,11 @@ public:
     typedef egl_object_t::LocalRef<egl_context_t, EGLContext> Ref;
 
     egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
-            int impl, egl_connection_t const* cnx, int version) :
-        egl_object_t(get_display(dpy)), dpy(dpy), context(context),
-                config(config), read(0), draw(0), impl(impl), cnx(cnx),
-                version(version) {
-    }
+            int impl, egl_connection_t const* cnx, int version);
+
+    void onLooseCurrent();
+    void onMakeCurrent(EGLSurface draw, EGLSurface read);
+
     EGLDisplay dpy;
     EGLContext context;
     EGLConfig config;
@@ -171,6 +172,7 @@ public:
     int impl;
     egl_connection_t const* cnx;
     int version;
+    String8 gl_extensions;
 };
 
 class egl_image_t: public egl_object_t {

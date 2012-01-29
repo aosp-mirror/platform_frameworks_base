@@ -43,6 +43,9 @@ while (my $line = <>) {
   if ($name eq "glEGLImageTargetRenderbufferStorageOES") {
     $prefix = "__";
   }
+  if ($name eq "glGetString") {
+    $prefix = "__";
+  }
   
   printf("%s API_ENTRY(%s%s)(%s)", $type, $prefix, $name, $args);
   

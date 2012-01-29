@@ -262,7 +262,7 @@ void API_ENTRY(glGetMaterialxv)(GLenum face, GLenum pname, GLfixed *params) {
 void API_ENTRY(glGetPointerv)(GLenum pname, GLvoid **params) {
     CALL_GL_API(glGetPointerv, pname, params);
 }
-const GLubyte * API_ENTRY(glGetString)(GLenum name) {
+const GLubyte * API_ENTRY(__glGetString)(GLenum name) {
     CALL_GL_API_RETURN(glGetString, name);
 }
 void API_ENTRY(glGetTexEnviv)(GLenum env, GLenum pname, GLint *params) {
