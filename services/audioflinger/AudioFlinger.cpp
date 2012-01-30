@@ -1242,8 +1242,7 @@ void AudioFlinger::ThreadBase::setEffectSuspended(
 void AudioFlinger::ThreadBase::setEffectSuspended_l(
         const effect_uuid_t *type, bool suspend, int sessionId)
 {
-    sp<EffectChain> chain;
-    chain = getEffectChain_l(sessionId);
+    sp<EffectChain> chain = getEffectChain_l(sessionId);
     if (chain != 0) {
         if (type != NULL) {
             chain->setEffectSuspended_l(type, suspend);
@@ -5820,13 +5819,8 @@ Exit:
 
 sp<AudioFlinger::EffectModule> AudioFlinger::ThreadBase::getEffect_l(int sessionId, int effectId)
 {
-    sp<EffectModule> effect;
-
     sp<EffectChain> chain = getEffectChain_l(sessionId);
-    if (chain != 0) {
-        effect = chain->getEffectFromId_l(effectId);
-    }
-    return effect;
+    return chain != 0 ? chain->getEffectFromId_l(effectId) : 0;
 }
 
 // PlaybackThread::addEffect_l() must be called with AudioFlinger::mLock and
@@ -5911,16 +5905,13 @@ sp<AudioFlinger::EffectChain> AudioFlinger::ThreadBase::getEffectChain(int sessi
 
 sp<AudioFlinger::EffectChain> AudioFlinger::ThreadBase::getEffectChain_l(int sessionId)
 {
-    sp<EffectChain> chain;
-
     size_t size = mEffectChains.size();
     for (size_t i = 0; i < size; i++) {
         if (mEffectChains[i]->sessionId() == sessionId) {
-            chain = mEffectChains[i];
-            break;
+            return mEffectChains[i];
         }
     }
-    return chain;
+    return 0;
 }
 
 void AudioFlinger::ThreadBase::setMode(audio_mode_t mode)
@@ -6253,11 +6244,7 @@ size_t AudioFlinger::EffectModule::removeHandle(const wp<EffectHandle>& handle)
 sp<AudioFlinger::EffectHandle> AudioFlinger::EffectModule::controlHandle()
 {
     Mutex::Autolock _l(mLock);
-    sp<EffectHandle> handle;
-    if (mHandles.size() != 0) {
-        handle = mHandles[0].promote();
-    }
-    return handle;
+    return mHandles.size() != 0 ? mHandles[0].promote() : 0;
 }
 
 void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool unpiniflast)
@@ -7134,48 +7121,42 @@ AudioFlinger::EffectChain::~EffectChain()
 // getEffectFromDesc_l() must be called with ThreadBase::mLock held
 sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromDesc_l(effect_descriptor_t *descriptor)
 {
-    sp<EffectModule> effect;
     size_t size = mEffects.size();
 
     for (size_t i = 0; i < size; i++) {
         if (memcmp(&mEffects[i]->desc().uuid, &descriptor->uuid, sizeof(effect_uuid_t)) == 0) {
-            effect = mEffects[i];
-            break;
+            return mEffects[i];
         }
     }
-    return effect;
+    return 0;
 }
 
 // getEffectFromId_l() must be called with ThreadBase::mLock held
 sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromId_l(int id)
 {
-    sp<EffectModule> effect;
     size_t size = mEffects.size();
 
     for (size_t i = 0; i < size; i++) {
         // by convention, return first effect if id provided is 0 (0 is never a valid id)
         if (id == 0 || mEffects[i]->id() == id) {
-            effect = mEffects[i];
-            break;
+            return mEffects[i];
         }
     }
-    return effect;
+    return 0;
 }
 
 // getEffectFromType_l() must be called with ThreadBase::mLock held
 sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromType_l(
         const effect_uuid_t *type)
 {
-    sp<EffectModule> effect;
     size_t size = mEffects.size();
 
     for (size_t i = 0; i < size; i++) {
         if (memcmp(&mEffects[i]->desc().type, type, sizeof(effect_uuid_t)) == 0) {
-            effect = mEffects[i];
-            break;
+            return mEffects[i];
         }
     }
-    return effect;
+    return 0;
 }
 
 // Must be called with EffectChain::mLock locked
@@ -7617,12 +7598,8 @@ Vector< sp<AudioFlinger::EffectModule> > AudioFlinger::EffectChain::getSuspendEl
 sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectIfEnabled(
                                                             const effect_uuid_t *type)
 {
-    sp<EffectModule> effect;
-    effect = getEffectFromType_l(type);
-    if (effect != 0 && !effect->isEnabled()) {
-        effect.clear();
-    }
-    return effect;
+    sp<EffectModule> effect = getEffectFromType_l(type);
+    return effect != 0 && effect->isEnabled() ? effect : 0;
 }
 
 void AudioFlinger::EffectChain::checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
