@@ -578,8 +578,7 @@ static void loseCurrent(egl_context_t * cur_c)
         SurfaceRef _cur_r(cur_r);
         SurfaceRef _cur_d(cur_d);
 
-        cur_c->read = NULL;
-        cur_c->draw = NULL;
+        cur_c->onLooseCurrent();
 
         _cur_c.release();
         _cur_r.release();
@@ -687,8 +686,7 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             _c.acquire();
             _r.acquire();
             _d.acquire();
-            c->read = read;
-            c->draw = draw;
+            c->onMakeCurrent(draw, read);
         } else {
             setGLHooksThreadSpecific(&gHooksNoContext);
             egl_tls_t::setContext(EGL_NO_CONTEXT);
@@ -924,7 +922,8 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                     cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
                     cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
 #if EGL_TRACE
-                    debugHooks->ext.extensions[slot] = gHooksTrace.ext.extensions[slot] =
+                    debugHooks->ext.extensions[slot] =
+                    gHooksTrace.ext.extensions[slot] =
 #endif
                             cnx->egl.eglGetProcAddress(procname);
                 }

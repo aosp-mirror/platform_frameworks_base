@@ -233,6 +233,26 @@ EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
 
 // ----------------------------------------------------------------------------
 
+const GLubyte * egl_get_string_for_current_context(GLenum name) {
+    // NOTE: returning NULL here will fall-back to the default
+    // implementation.
+
+    EGLContext context = egl_tls_t::getContext();
+    if (context == EGL_NO_CONTEXT)
+        return NULL;
+
+    egl_context_t const * const c = get_context(context);
+    if (c == NULL) // this should never happen, by construction
+        return NULL;
+
+    if (name != GL_EXTENSIONS)
+        return NULL;
+
+    return (const GLubyte *)c->gl_extensions.string();
+}
+
+// ----------------------------------------------------------------------------
+
 // this mutex protects:
 //    d->disp[]
 //    egl_init_drivers_locked()
@@ -288,6 +308,9 @@ EGLBoolean egl_init_drivers() {
 
 void gl_unimplemented() {
     ALOGE("called unimplemented OpenGL ES API");
+}
+
+void gl_noop() {
 }
 
 // ----------------------------------------------------------------------------

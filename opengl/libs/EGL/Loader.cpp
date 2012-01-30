@@ -253,6 +253,19 @@ void Loader::init_api(void* dso,
         if (f == NULL) {
             //ALOGD("%s", name);
             f = (__eglMustCastToProperFunctionPointerType)gl_unimplemented;
+
+            /*
+             * GL_EXT_debug_label is special, we always report it as
+             * supported, it's handled by GLES_trace. If GLES_trace is not
+             * enabled, then these are no-ops.
+             */
+            if (!strcmp(name, "glInsertEventMarkerEXT")) {
+                f = (__eglMustCastToProperFunctionPointerType)gl_noop;
+            } else if (!strcmp(name, "glPushGroupMarkerEXT")) {
+                f = (__eglMustCastToProperFunctionPointerType)gl_noop;
+            } else if (!strcmp(name, "glPopGroupMarkerEXT")) {
+                f = (__eglMustCastToProperFunctionPointerType)gl_noop;
+            }
         }
         *curr++ = f;
         api++;

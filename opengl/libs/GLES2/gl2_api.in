@@ -211,7 +211,7 @@ void API_ENTRY(glGetShaderPrecisionFormat)(GLenum shadertype, GLenum precisionty
 void API_ENTRY(glGetShaderSource)(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source) {
     CALL_GL_API(glGetShaderSource, shader, bufsize, length, source);
 }
-const GLubyte* API_ENTRY(glGetString)(GLenum name) {
+const GLubyte* API_ENTRY(__glGetString)(GLenum name) {
     CALL_GL_API_RETURN(glGetString, name);
 }
 void API_ENTRY(glGetTexParameterfv)(GLenum target, GLenum pname, GLfloat* params) {
