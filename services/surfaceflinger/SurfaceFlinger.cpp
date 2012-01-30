@@ -188,7 +188,8 @@ void SurfaceFlinger::binderDied(const wp<IBinder>& who)
     // the window manager died on us. prepare its eulogy.
 
     // reset screen orientation
-    setOrientation(0, eOrientationDefault, 0);
+    Vector<ComposerState> state;
+    setTransactionState(state, eOrientationDefault, 0);
 
     // restart the boot-animation
     property_set("ctl.start", "bootanim");
@@ -1223,26 +1224,6 @@ void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state,
             }
         }
     }
-}
-
-int SurfaceFlinger::setOrientation(DisplayID dpy,
-        int orientation, uint32_t flags)
-{
-    if (CC_UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
-        return BAD_VALUE;
-
-    Mutex::Autolock _l(mStateLock);
-    if (mCurrentState.orientation != orientation) {
-        if (uint32_t(orientation)<=eOrientation270 || orientation==42) {
-            mCurrentState.orientationFlags = flags;
-            mCurrentState.orientation = orientation;
-            setTransactionFlags(eTransactionNeeded);
-            mTransactionCV.wait(mStateLock);
-        } else {
-            orientation = BAD_VALUE;
-        }
-    }
-    return orientation;
 }
 
 sp<ISurface> SurfaceFlinger::createSurface(
