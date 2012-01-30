@@ -234,8 +234,9 @@ public class NetworkTimeUpdateService {
             String action = intent.getAction();
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
                 // There is connectivity
-                NetworkInfo netInfo = (NetworkInfo)intent.getParcelableExtra(
-                        ConnectivityManager.EXTRA_NETWORK_INFO);
+                final ConnectivityManager connManager = (ConnectivityManager) context
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                final NetworkInfo netInfo = connManager.getActiveNetworkInfo();
                 if (netInfo != null) {
                     // Verify that it's a WIFI connection
                     if (netInfo.getState() == NetworkInfo.State.CONNECTED &&

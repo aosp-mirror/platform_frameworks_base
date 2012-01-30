@@ -850,8 +850,10 @@ public class NetworkController extends BroadcastReceiver {
             Slog.d(TAG, "updateConnectivity: intent=" + intent);
         }
 
-        NetworkInfo info = (NetworkInfo)(intent.getParcelableExtra(
-                ConnectivityManager.EXTRA_NETWORK_INFO));
+        final ConnectivityManager connManager = (ConnectivityManager) mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo info = connManager.getActiveNetworkInfo();
+
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
 
         if (CHATTY) {

@@ -1962,8 +1962,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } else {
                     mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 }
-                NetworkInfo info =
-                    (NetworkInfo)intent.getExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+
+                final ConnectivityManager connManager = (ConnectivityManager) context
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                final NetworkInfo info = connManager.getActiveNetworkInfo();
 
                 // Notify location providers of current network state
                 synchronized (mLock) {
