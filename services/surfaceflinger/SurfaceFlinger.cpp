@@ -296,6 +296,7 @@ status_t SurfaceFlinger::readyToRun()
 
     // start the EventThread
     mEventThread = new EventThread(this);
+    mEventQueue.setEventThread(mEventThread);
 
     /*
      *  We're now ready to accept clients...
@@ -383,8 +384,7 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 // ----------------------------------------------------------------------------
 
 sp<IDisplayEventConnection> SurfaceFlinger::createDisplayEventConnection() {
-    sp<DisplayEventConnection> result(new DisplayEventConnection(mEventThread));
-    return result;
+    return mEventThread->createEventConnection();
 }
 
 // ----------------------------------------------------------------------------
@@ -432,7 +432,6 @@ bool SurfaceFlinger::threadLoop()
     } else {
         // pretend we did the post
         hw.compositionComplete();
-        hw.waitForRefresh();
     }
     return true;
 }

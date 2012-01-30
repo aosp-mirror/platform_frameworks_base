@@ -94,6 +94,10 @@ status_t SurfaceTextureLayer::connect(int api,
             *outTransform = orientation;
         }
         switch(api) {
+            case NATIVE_WINDOW_API_CPU:
+                // SurfaceTextureClient supports only 2 buffers for CPU connections
+                this->setBufferCountServer(2);
+                break;
             case NATIVE_WINDOW_API_MEDIA:
             case NATIVE_WINDOW_API_CAMERA:
                 // Camera preview and videos are rate-limited on the producer

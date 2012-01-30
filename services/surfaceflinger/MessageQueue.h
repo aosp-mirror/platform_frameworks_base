@@ -25,9 +25,14 @@
 #include <utils/Timers.h>
 #include <utils/Looper.h>
 
+#include <gui/DisplayEventReceiver.h>
+
 #include "Barrier.h"
 
 namespace android {
+
+class IDisplayEventConnection;
+class EventThread;
 
 // ---------------------------------------------------------------------------
 
@@ -55,11 +60,20 @@ private:
 
 class MessageQueue {
     sp<Looper> mLooper;
-    volatile int32_t mWorkPending;
+    sp<EventThread> mEventThread;
+    sp<IDisplayEventConnection> mEvents;
+    sp<BitTube> mEventTube;
+    int32_t mWorkPending;
+
+    static int cb_eventReceiver(int fd, int events, void* data);
+    int eventReceiver(int fd, int events);
+    ssize_t getEvents(DisplayEventReceiver::Event* events, size_t count);
+    void scheduleWorkASAP();
 
 public:
     MessageQueue();
     ~MessageQueue();
+    void setEventThread(const sp<EventThread>& events);
 
     void waitMessage();
     status_t postMessage(const sp<MessageBase>& message, nsecs_t reltime=0);
