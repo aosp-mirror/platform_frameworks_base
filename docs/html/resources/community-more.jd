@@ -1,5 +1,5 @@
 community=true
-page.title=IRC and Twitter
+page.title=IRC, G+, Twitter
 @jd:body
 
 <p>In addition to the <a href="community-groups.html">Android developer forums</a>, you can participate in the Android developer community through IRC and you can follow us on Twitter. </p>
@@ -45,8 +45,27 @@ does not require any installation, to join discussions on the Android IRC channe
 </li>
 </ul>
 
+
+<h3 id="gplus">Google+</h3>
+<p>We use a Google+ page to host Hangouts for developers, talk about the latest
+releases, development and design tips, and much more.</p>
+
+<div style='margin-top:1em'><g:plus href='https://plus.google.com/108967384991768947849'
+size='badge'></g:plus></div>
+
+
 <h3 id="twitter">Twitter</h3>
 <p>You can follow us on Twitter at this account:</p>
 
 <p style="margin-left:2em;"><a href="http://twitter.com/androiddev">http://twitter.com/androiddev</a></p>
 
+<script type="text/javascript" src="https://plus.google.com/108967384991768947849"
+rel="publisher"></script>
+<script type="text/javascript">
+window.___gcfg = {lang: 'en'};
+(function() 
+{var po = document.createElement("script");
+po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
+var s = document.getElementsByTagName("script")[0];
+s.parentNode.insertBefore(po, s);
+})();</script>
