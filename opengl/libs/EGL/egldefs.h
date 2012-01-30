@@ -58,6 +58,7 @@ extern gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
 extern gl_hooks_t gHooksNoContext;
 extern pthread_key_t gGLWrapperKey;
 extern "C" void gl_unimplemented();
+extern "C" void gl_noop();
 
 extern char const * const gl_names[];
 extern char const * const egl_names[];
