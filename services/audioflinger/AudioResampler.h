@@ -72,9 +72,9 @@ protected:
     AudioResampler(const AudioResampler&);
     AudioResampler& operator=(const AudioResampler&);
 
-    int32_t mBitDepth;
-    int32_t mChannelCount;
-    int32_t mSampleRate;
+    const int32_t mBitDepth;
+    const int32_t mChannelCount;
+    const int32_t mSampleRate;
     int32_t mInSampleRate;
     AudioBufferProvider::Buffer mBuffer;
     union {
