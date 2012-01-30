@@ -1,7 +1,8 @@
 <ul>
   <li>
-    <h2><span class="en">Android Training</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Android Training</span>
+    </span>
     <ul>
       
       <li><a href="<?cs var:toroot ?>training/index.html">
@@ -237,8 +238,9 @@
       
       
   <li>
-    <h2><span class="en">Technical Resources</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Technical Resources</span>
+    </span>
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>resources/browser.html?tag=sample">
@@ -288,15 +290,16 @@
     </ul>
   </li>
   <li>
-    <h2><span class="en">Community</span>
-               <span style="display:none" class="de"></span>
-               <span style="display:none" class="es">Comunidad</span>
-               <span style="display:none" class="fr">Communauté</span>
-               <span style="display:none" class="it"></span>
-               <span style="display:none" class="ja">コミュニティ</span>
-               <span style="display:none" class="zh-CN">社区</span>
-               <span style="display:none" class="zh-TW">社群</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Community</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es">Comunidad</span>
+      <span style="display:none" class="fr">Communauté</span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja">コミュニティ</span>
+      <span style="display:none" class="zh-CN">社区</span>
+      <span style="display:none" class="zh-TW">社群</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>resources/community-groups.html">
             <span class="en">Developer Forums</span>
@@ -309,8 +312,9 @@
 <?cs
   if:android.whichdoc == "online" ?>
   <li>
-    <h2><span class="en">Device Dashboard</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Device Dashboard</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>resources/dashboard/platform-versions.html">
             <span class="en">Platform Versions</span>
@@ -327,7 +331,9 @@
 ?>
 
   <li>
-   <h2><span class="en">More</span></h2>
+    <span class="heading">
+      <span class="en">More</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>resources/faq/commontasks.html">
             <span class="en">Common Tasks </span>
