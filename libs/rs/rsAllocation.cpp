@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,11 +72,11 @@ void Allocation::read(void *data) {
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
-                         uint32_t count, const void *data, uint32_t sizeBytes) {
-    const uint32_t eSize = mHal.state.type->getElementSizeBytes();
+                         uint32_t count, const void *data, size_t sizeBytes) {
+    const size_t eSize = mHal.state.type->getElementSizeBytes();
 
     if ((count * eSize) != sizeBytes) {
-        ALOGE("Allocation::subData called with mismatched size expected %i, got %i",
+        ALOGE("Allocation::subData called with mismatched size expected %zu, got %zu",
              (count * eSize), sizeBytes);
         mHal.state.type->dumpLOGV("type info");
         return;
@@ -87,14 +87,14 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
-             uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
-    const uint32_t eSize = mHal.state.elementSizeBytes;
-    const uint32_t lineSize = eSize * w;
+             uint32_t w, uint32_t h, const void *data, size_t sizeBytes) {
+    const size_t eSize = mHal.state.elementSizeBytes;
+    const size_t lineSize = eSize * w;
 
     //ALOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
 
     if ((lineSize * h) != sizeBytes) {
-        ALOGE("Allocation size mismatch, expected %i, got %i", (lineSize * h), sizeBytes);
+        ALOGE("Allocation size mismatch, expected %zu, got %zu", (lineSize * h), sizeBytes);
         rsAssert(!"Allocation::subData called with mismatched size");
         return;
     }
@@ -105,12 +105,12 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
                       uint32_t lod, RsAllocationCubemapFace face,
-                      uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes) {
+                      uint32_t w, uint32_t h, uint32_t d, const void *data, size_t sizeBytes) {
 }
 
 void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
-                                uint32_t cIdx, uint32_t sizeBytes) {
-    uint32_t eSize = mHal.state.elementSizeBytes;
+                                uint32_t cIdx, size_t sizeBytes) {
+    size_t eSize = mHal.state.elementSizeBytes;
 
     if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
         ALOGE("Error Allocation::subElementData component %i out of range.", cIdx);
@@ -126,7 +126,7 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
     if (sizeBytes != e->getSizeBytes()) {
-        ALOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
+        ALOGE("Error Allocation::subElementData data size %zu does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
     }
@@ -136,8 +136,8 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
 }
 
 void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
-                                const void *data, uint32_t cIdx, uint32_t sizeBytes) {
-    uint32_t eSize = mHal.state.elementSizeBytes;
+                                const void *data, uint32_t cIdx, size_t sizeBytes) {
+    size_t eSize = mHal.state.elementSizeBytes;
 
     if (x >= mHal.state.dimensionX) {
         ALOGE("Error Allocation::subElementData X offset %i out of range.", x);
@@ -160,7 +160,7 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
 
     if (sizeBytes != e->getSizeBytes()) {
-        ALOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
+        ALOGE("Error Allocation::subElementData data size %zu does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
     }
@@ -250,7 +250,7 @@ void Allocation::writePackedData(const Type *type,
     delete[] sizeUnpadded;
 }
 
-void Allocation::unpackVec3Allocation(const void *data, uint32_t dataSize) {
+void Allocation::unpackVec3Allocation(const void *data, size_t dataSize) {
     const uint8_t *src = (const uint8_t*)data;
     uint8_t *dst = (uint8_t*)getPtr();
 
@@ -526,13 +526,13 @@ void rsi_Allocation1DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t
 }
 
 void rsi_Allocation2DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, uint32_t lod, RsAllocationCubemapFace face,
-                                 const void *data, size_t eoff, uint32_t sizeBytes) { // TODO: this seems wrong, eoff and sizeBytes may be swapped
+                                 const void *data, size_t sizeBytes, size_t eoff) {
     Allocation *a = static_cast<Allocation *>(va);
     a->elementData(rsc, x, y, data, eoff, sizeBytes);
 }
 
 void rsi_Allocation1DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t lod,
-                                 const void *data, size_t eoff, uint32_t sizeBytes) { // TODO: this seems wrong, eoff and sizeBytes may be swapped
+                                 const void *data, size_t sizeBytes, size_t eoff) {
     Allocation *a = static_cast<Allocation *>(va);
     a->elementData(rsc, x, data, eoff, sizeBytes);
 }
