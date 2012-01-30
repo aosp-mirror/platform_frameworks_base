@@ -7551,7 +7551,8 @@ void AudioFlinger::EffectChain::setEffectSuspendedAll_l(bool suspend)
             ALOGV("setEffectSuspendedAll_l() add entry for 0");
         }
         if (desc->mRefCount++ == 0) {
-            Vector< sp<EffectModule> > effects = getSuspendEligibleEffects();
+            Vector< sp<EffectModule> > effects;
+            getSuspendEligibleEffects(effects);
             for (size_t i = 0; i < effects.size(); i++) {
                 setEffectSuspended_l(&effects[i]->desc().type, true);
             }
@@ -7602,16 +7603,14 @@ bool AudioFlinger::EffectChain::isEffectEligibleForSuspend(const effect_descript
     return true;
 }
 
-Vector< sp<AudioFlinger::EffectModule> > AudioFlinger::EffectChain::getSuspendEligibleEffects()
+void AudioFlinger::EffectChain::getSuspendEligibleEffects(Vector< sp<AudioFlinger::EffectModule> > &effects)
 {
-    Vector< sp<EffectModule> > effects;
+    effects.clear();
     for (size_t i = 0; i < mEffects.size(); i++) {
-        if (!isEffectEligibleForSuspend(mEffects[i]->desc())) {
-            continue;
+        if (isEffectEligibleForSuspend(mEffects[i]->desc())) {
+            effects.add(mEffects[i]);
         }
-        effects.add(mEffects[i]);
     }
-    return effects;
 }
 
 sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectIfEnabled(

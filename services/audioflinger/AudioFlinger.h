@@ -1325,7 +1325,8 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
         // get a list of effect modules to suspend when an effect of the type
         // passed is enabled.
-        Vector< sp<EffectModule> > getSuspendEligibleEffects();
+        void                       getSuspendEligibleEffects(Vector< sp<EffectModule> > &effects);
+
         // get an effect module if it is currently enable
         sp<EffectModule> getEffectIfEnabled(const effect_uuid_t *type);
         // true if the effect whose descriptor is passed can be suspended
