@@ -17,9 +17,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <unistd.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include <cutils/log.h>
 
@@ -28,22 +29,24 @@
 namespace android {
 namespace gltrace {
 
-int acceptClientConnection(int serverPort) {
-    int serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+int acceptClientConnection(char *sockname) {
+    int serverSocket = socket(AF_LOCAL, SOCK_STREAM, 0);
     if (serverSocket < 0) {
         ALOGE("Error (%d) while creating socket. Check if app has network permissions.",
                                                                             serverSocket);
         return -1;
     }
 
-    struct sockaddr_in server, client;
+    struct sockaddr_un server, client;
 
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = htonl(INADDR_ANY);
-    server.sin_port = htons(serverPort);
+    memset(&server, 0, sizeof server);
+    server.sun_family = AF_UNIX;
+    // the first byte of sun_path should be '\0' for abstract namespace
+    strcpy(server.sun_path + 1, sockname);
 
-    socklen_t sockaddr_len = sizeof(sockaddr_in);
-    if (bind(serverSocket, (struct sockaddr *) &server, sizeof(server)) < 0) {
+    // note that sockaddr_len should be set to the exact size of the buffer that is used.
+    socklen_t sockaddr_len = sizeof(server.sun_family) + strlen(sockname) + 1;
+    if (bind(serverSocket, (struct sockaddr *) &server, sockaddr_len) < 0) {
         close(serverSocket);
         ALOGE("Failed to bind the server socket");
         return -1;
@@ -55,7 +58,7 @@ int acceptClientConnection(int serverPort) {
         return -1;
     }
 
-    ALOGD("gltrace::waitForClientConnection: server listening @ port %d", serverPort);
+    ALOGD("gltrace::waitForClientConnection: server listening @ path %s", sockname);
 
     int clientSocket = accept(serverSocket, (struct sockaddr *)&client, &sockaddr_len);
     if (clientSocket < 0) {
@@ -64,7 +67,7 @@ int acceptClientConnection(int serverPort) {
         return -1;
     }
 
-    ALOGD("gltrace::waitForClientConnection: client connected: %s", inet_ntoa(client.sin_addr));
+    ALOGD("gltrace::waitForClientConnection: client connected.");
 
     // do not accept any more incoming connections
     close(serverSocket);
