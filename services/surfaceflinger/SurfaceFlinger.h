@@ -170,7 +170,6 @@ public:
     virtual void                        bootFinished();
     virtual void                        setTransactionState(const Vector<ComposerState>& state,
                                                             int orientation, uint32_t flags);
-    virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual bool                        authenticateSurfaceTexture(const sp<ISurfaceTexture>& surface) const;
     virtual sp<IDisplayEventConnection> createDisplayEventConnection();
 
