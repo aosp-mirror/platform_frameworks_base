@@ -26,11 +26,11 @@
 #   module. The only reason to use pyratemp is that it is extremly
 #   simple to install:
 #   $ wget http://www.simple-is-better.org/template/pyratemp-current/pyratemp.py
-#   Put the file in the GLES2_trace/tools folder, or update PYTHONPATH
+#   Put the file in the GLES_trace/tools folder, or update PYTHONPATH
 #   to point to wherever it was downloaded.
 #
 # USAGE
-#   $ cd GLES2_trace      - run the program from GLES2_trace folder
+#   $ cd GLES_trace       - run the program from GLES2_trace folder
 #   $ ./tools/genapi.py   - generates a .cpp and .h file
 #   $ mv *.cpp *.h src/   - move the generated files into the src folder
 

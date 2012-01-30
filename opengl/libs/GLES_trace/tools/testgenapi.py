@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # USAGE
-#   $ cd GLES2_trace/tools
+#   $ cd GLES_trace/tools
 #   $ python testgenapi.py
 
 import unittest
@@ -45,9 +45,9 @@ class TestApiCall(unittest.TestCase):
         glext_apis = getApis('../../GLES_CM/glext_api.in', 'GL1Ext')
 
         self.assertEqual(len(gl2_apis), 142)
-        self.assertEqual(len(gl2ext_apis), 60)
+        self.assertEqual(len(gl2ext_apis), 121)
         self.assertEqual(len(gl_apis), 145)
-        self.assertEqual(len(glext_apis), 126)
+        self.assertEqual(len(glext_apis), 140)
 
     def test_parseArgs(self):
         args = parseArgs("void")
