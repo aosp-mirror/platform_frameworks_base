@@ -1,4 +1,5 @@
 home=true
+metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 @jd:body
 
 
@@ -153,7 +154,7 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 + "href='https://plus.google.com/108967384991768947849'>+Android Developers</a>. "
 + "We'll use it to host Hangouts for developers, talk about the latest releases, "
 + "development and design tips, and much more.</p>"
-+ "<div style='margin-top:.7em'><g:plus href='https://plus.google.com/108967384991768947849' "
++ "<div style='margin:.7em 0 0 -1.2em'><g:plus href='https://plus.google.com/108967384991768947849' "
 + "size=\"smallbadge\" width=\"275\"></g:plus></div>"
     },
 
@@ -213,6 +214,3 @@ po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/j
 var s = document.getElementsByTagName("script")[0];
 s.parentNode.insertBefore(po, s);
 })();</script>
-<style type="text/css">
-  #___plus_0, #___plus_0 iframe, #___plus_0 { width: 275px !important; }
-</style>
