@@ -302,7 +302,7 @@
             <span class="en">Developer Forums</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>resources/community-more.html">
-            <span class="en">IRC, Twitter</span>
+            <span class="en">IRC, G+, Twitter</span>
           </a></li>
     </ul>
   </li>
