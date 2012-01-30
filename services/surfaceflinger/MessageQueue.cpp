@@ -18,12 +18,17 @@
 #include <errno.h>
 #include <sys/types.h>
 
+#include <binder/IPCThreadState.h>
+
 #include <utils/threads.h>
 #include <utils/Timers.h>
 #include <utils/Log.h>
-#include <binder/IPCThreadState.h>
+
+#include <gui/IDisplayEventConnection.h>
+#include <gui/BitTube.h>
 
 #include "MessageQueue.h"
+#include "EventThread.h"
 
 namespace android {
 
@@ -49,6 +54,15 @@ MessageQueue::MessageQueue()
 }
 
 MessageQueue::~MessageQueue() {
+}
+
+void MessageQueue::setEventThread(const sp<EventThread>& eventThread)
+{
+    mEventThread = eventThread;
+    mEvents = eventThread->createEventConnection();
+    mEventTube = mEvents->getDataChannel();
+    mLooper->addFd(mEventTube->getFd(), 0, ALOOPER_EVENT_INPUT,
+            MessageQueue::cb_eventReceiver, this);
 }
 
 void MessageQueue::waitMessage() {
@@ -93,11 +107,52 @@ status_t MessageQueue::postMessage(
     return NO_ERROR;
 }
 
-status_t MessageQueue::invalidate() {
+void MessageQueue::scheduleWorkASAP() {
     if (android_atomic_or(1, &mWorkPending) == 0) {
         mLooper->wake();
-    }
+   }
+}
+
+status_t MessageQueue::invalidate() {
+    mEvents->requestNextVsync();
     return NO_ERROR;
+}
+
+int MessageQueue::cb_eventReceiver(int fd, int events, void* data) {
+    MessageQueue* queue = reinterpret_cast<MessageQueue *>(data);
+    return queue->eventReceiver(fd, events);
+}
+
+int MessageQueue::eventReceiver(int fd, int events) {
+    ssize_t n;
+    DisplayEventReceiver::Event buffer[8];
+    while ((n = getEvents(buffer, 8)) > 0) {
+        for (int i=0 ; i<n ; i++) {
+            if (buffer[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+                scheduleWorkASAP();
+                break;
+            }
+        }
+    }
+    return 1;
+}
+
+ssize_t MessageQueue::getEvents(
+        DisplayEventReceiver::Event* events, size_t count)
+{
+    ssize_t size = mEventTube->read(events, sizeof(events[0])*count);
+    ALOGE_IF(size<0, "MessageQueue::getEvents error (%s)", strerror(-size));
+    if (size >= 0) {
+        // Note: if (size % sizeof(events[0])) != 0, we've got a
+        // partial read. This can happen if the queue filed up (ie: if we
+        // didn't pull from it fast enough).
+        // We discard the partial event and rely on the sender to
+        // re-send the event if appropriate (some events, like VSYNC
+        // can be lost forever).
+        // returns number of events read
+        size /= sizeof(events[0]);
+    }
+    return size;
 }
 
 // ---------------------------------------------------------------------------
