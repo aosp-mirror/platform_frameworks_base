@@ -142,6 +142,20 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 + "href='{@docRoot}sdk/api_diff/15/changes.html'>diff report</a>. If you're new to Android, "
 + "get started with the <a href='/sdk/index.html'>SDK starter package</a>.</p>"
     },
+    
+    'plus': {
+      'layout':"imgLeft",
+      'icon':"google-plus-small.png",
+      'name':"Google+ Page",
+      'img':"google-plus.png",
+      'title':"Android Developers on Google+",
+      'desc': "<p>We now have a Google+ page for <a "
++ "href='https://plus.google.com/108967384991768947849'>+Android Developers</a>. "
++ "We'll use it to host Hangouts for developers, talk about the latest releases, "
++ "development and design tips, and much more.</p>"
++ "<div style='margin-top:.7em'><g:plus href='https://plus.google.com/108967384991768947849' "
++ "size=\"smallbadge\" width=\"275\"></g:plus></div>"
+    },
 
     'tv': {
       'layout':"imgLeft",
@@ -186,5 +200,19 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 </script>
 <script type="text/javascript" src="{@docRoot}assets/carousel.js"></script>
 <script type="text/javascript">
-  initCarousel("sdk");
+  initCarousel("plus");
 </script>
+
+<script type="text/javascript" src="https://plus.google.com/108967384991768947849"
+rel="publisher"></script>
+<script type="text/javascript">
+window.___gcfg = {lang: 'en'};
+(function() 
+{var po = document.createElement("script");
+po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
+var s = document.getElementsByTagName("script")[0];
+s.parentNode.insertBefore(po, s);
+})();</script>
+<style type="text/css">
+  #___plus_0, #___plus_0 iframe, #___plus_0 { width: 275px !important; }
+</style>
