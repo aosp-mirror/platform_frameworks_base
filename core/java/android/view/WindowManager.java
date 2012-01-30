@@ -423,6 +423,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_HIDDEN_NAV_CONSUMER = FIRST_SYSTEM_WINDOW+22;
 
         /**
+         * Window type: Dreams (screen saver) window, just above keyguard.
+         * @hide
+         */
+        public static final int TYPE_DREAM = FIRST_SYSTEM_WINDOW+23;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
