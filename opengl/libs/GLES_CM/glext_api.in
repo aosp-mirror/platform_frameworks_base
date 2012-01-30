@@ -280,14 +280,56 @@ void API_ENTRY(glGenVertexArraysOES)(GLsizei n, GLuint *arrays) {
 GLboolean API_ENTRY(glIsVertexArrayOES)(GLuint array) {
     CALL_GL_API_RETURN(glIsVertexArrayOES, array);
 }
+void API_ENTRY(glRenderbufferStorageMultisampleAPPLE)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glRenderbufferStorageMultisampleAPPLE, target, samples, internalformat, width, height);
+}
+void API_ENTRY(glResolveMultisampleFramebufferAPPLE)(void) {
+    CALL_GL_API(glResolveMultisampleFramebufferAPPLE);
+}
 void API_ENTRY(glDiscardFramebufferEXT)(GLenum target, GLsizei numAttachments, const GLenum *attachments) {
     CALL_GL_API(glDiscardFramebufferEXT, target, numAttachments, attachments);
+}
+void API_ENTRY(glRenderbufferStorageMultisampleEXT)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glRenderbufferStorageMultisampleEXT, target, samples, internalformat, width, height);
+}
+void API_ENTRY(glFramebufferTexture2DMultisampleEXT)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLsizei samples) {
+    CALL_GL_API(glFramebufferTexture2DMultisampleEXT, target, attachment, textarget, texture, level, samples);
 }
 void API_ENTRY(glMultiDrawArraysEXT)(GLenum mode, GLint *first, GLsizei *count, GLsizei primcount) {
     CALL_GL_API(glMultiDrawArraysEXT, mode, first, count, primcount);
 }
 void API_ENTRY(glMultiDrawElementsEXT)(GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount) {
     CALL_GL_API(glMultiDrawElementsEXT, mode, count, type, indices, primcount);
+}
+GLenum API_ENTRY(glGetGraphicsResetStatusEXT)(void) {
+    CALL_GL_API_RETURN(glGetGraphicsResetStatusEXT);
+}
+void API_ENTRY(glReadnPixelsEXT)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, void *data) {
+    CALL_GL_API(glReadnPixelsEXT, x, y, width, height, format, type, bufSize, data);
+}
+void API_ENTRY(glGetnUniformfvEXT)(GLuint program, GLint location, GLsizei bufSize, float *params) {
+    CALL_GL_API(glGetnUniformfvEXT, program, location, bufSize, params);
+}
+void API_ENTRY(glGetnUniformivEXT)(GLuint program, GLint location, GLsizei bufSize, GLint *params) {
+    CALL_GL_API(glGetnUniformivEXT, program, location, bufSize, params);
+}
+void API_ENTRY(glTexStorage1DEXT)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width) {
+    CALL_GL_API(glTexStorage1DEXT, target, levels, internalformat, width);
+}
+void API_ENTRY(glTexStorage2DEXT)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glTexStorage2DEXT, target, levels, internalformat, width, height);
+}
+void API_ENTRY(glTexStorage3DEXT)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
+    CALL_GL_API(glTexStorage3DEXT, target, levels, internalformat, width, height, depth);
+}
+void API_ENTRY(glTextureStorage1DEXT)(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width) {
+    CALL_GL_API(glTextureStorage1DEXT, texture, target, levels, internalformat, width);
+}
+void API_ENTRY(glTextureStorage2DEXT)(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
+    CALL_GL_API(glTextureStorage2DEXT, texture, target, levels, internalformat, width, height);
+}
+void API_ENTRY(glTextureStorage3DEXT)(GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
+    CALL_GL_API(glTextureStorage3DEXT, texture, target, levels, internalformat, width, height, depth);
 }
 void API_ENTRY(glClipPlanefIMG)(GLenum p, const GLfloat *eqn) {
     CALL_GL_API(glClipPlanefIMG, p, eqn);

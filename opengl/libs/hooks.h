@@ -37,7 +37,12 @@
 #endif
 #undef NELEM
 #define NELEM(x)                    (sizeof(x)/sizeof(*(x)))
-#define MAX_NUMBER_OF_GL_EXTENSIONS 64
+
+// maximum number of GL extensions that can be used simultaneously in
+// a given process. this limitation exists because we need to have
+// a static function for each extension and currently these static functions
+// are generated at compile time.
+#define MAX_NUMBER_OF_GL_EXTENSIONS 256
 
 
 #if defined(HAVE_ANDROID_OS) && !USE_SLOW_BINDING && __OPTIMIZE__
