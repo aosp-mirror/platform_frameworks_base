@@ -256,10 +256,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private float mShadowRadius, mShadowDx, mShadowDy;
 
-    private static final int PREDRAW_NOT_REGISTERED = 0;
-    private static final int PREDRAW_PENDING = 1;
-    private static final int PREDRAW_DONE = 2;
-    private int mPreDrawState = PREDRAW_NOT_REGISTERED;
+    private boolean mPreDrawRegistered;
 
     private TextUtils.TruncateAt mEllipsize = null;
 
@@ -4387,26 +4384,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void registerForPreDraw() {
-        final ViewTreeObserver observer = getViewTreeObserver();
-
-        if (mPreDrawState == PREDRAW_NOT_REGISTERED) {
-            observer.addOnPreDrawListener(this);
-            mPreDrawState = PREDRAW_PENDING;
-        } else if (mPreDrawState == PREDRAW_DONE) {
-            mPreDrawState = PREDRAW_PENDING;
+        if (!mPreDrawRegistered) {
+            getViewTreeObserver().addOnPreDrawListener(this);
+            mPreDrawRegistered = true;
         }
-
-        // else state is PREDRAW_PENDING, so keep waiting.
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean onPreDraw() {
-        if (mPreDrawState != PREDRAW_PENDING) {
-            return true;
-        }
-
         if (mLayout == null) {
             assumeLayout();
         }
@@ -4457,7 +4444,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             startSelectionActionMode();
         }
 
-        mPreDrawState = PREDRAW_DONE;
+        getViewTreeObserver().removeOnPreDrawListener(this);
+        mPreDrawRegistered = false;
+
         return !changed;
     }
 
@@ -4492,10 +4481,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        final ViewTreeObserver observer = getViewTreeObserver();
-        if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
-            observer.removeOnPreDrawListener(this);
-            mPreDrawState = PREDRAW_NOT_REGISTERED;
+        if (mPreDrawRegistered) {
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            mPreDrawRegistered = false;
         }
 
         if (mError != null) {
@@ -4768,12 +4756,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mPreDrawState == PREDRAW_DONE) {
-            final ViewTreeObserver observer = getViewTreeObserver();
-            observer.removeOnPreDrawListener(this);
-            mPreDrawState = PREDRAW_NOT_REGISTERED;
-        }
-
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
 
         restartMarqueeIfNeeded();
