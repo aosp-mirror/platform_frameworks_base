@@ -70,13 +70,13 @@ public class TransformParam extends ShaderParam {
         mRsFieldItem.type = getTypeFromName();
         mRsFieldItem.bufferOffset = mOffset;
         if (mTransform != null) {
-            mRsFieldItem.transform = mTransform.getRSData(rs).getAllocation();
+            mRsFieldItem.transform = mTransform.getRSData().getAllocation();
         }
         if (mCamera != null) {
-            mRsFieldItem.camera = mCamera.getRSData(rs).getAllocation();
+            mRsFieldItem.camera = mCamera.getRSData().getAllocation();
         }
         if (mLight != null) {
-            mRsFieldItem.light = mLight.getRSData(rs).getAllocation();
+            mRsFieldItem.light = mLight.getRSData().getAllocation();
         }
     }
 }

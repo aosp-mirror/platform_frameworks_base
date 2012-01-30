@@ -54,9 +54,15 @@ public class Texture2D extends TextureBase {
         mRsTexture = tex;
     }
 
-    Allocation getRsData(RenderScriptGL rs, Resources res) {
+    Allocation getRsData() {
         if (mRsTexture != null) {
             return mRsTexture;
+        }
+
+        RenderScriptGL rs = SceneManager.getRS();
+        Resources res = SceneManager.getRes();
+        if (rs == null || res == null) {
+            return null;
         }
 
         String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);

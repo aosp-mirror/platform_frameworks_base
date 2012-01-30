@@ -34,20 +34,23 @@ public class MatrixTransform extends Transform {
 
     public void setMatrix(Matrix4f matrix) {
         mLocalMatrix = matrix;
+        updateRSData();
+    }
+
+    public Matrix4f getMatrix() {
+        return new Matrix4f(mLocalMatrix.getArray());
     }
 
     void initLocalData() {
-        mTransformData = new ScriptField_SgTransform.Item();
         // "null" terminate the array
         mTransformData.transformTypes[0] = RS_ID_NONE;
         mTransformData.localMat = mLocalMatrix;
-
-        mTransformData.isDirty = 1;
-        mTransformData.children = null;
-        mTransformData.name = SceneManager.getStringAsAllocation(mRS, getName());
     }
 
-    public void updateRSData() {
+    void updateRSData() {
+        if (mField == null) {
+            return;
+        }
         mTransformData.localMat = mLocalMatrix;
         mTransformData.isDirty = 1;
         mField.set(mTransformData, 0, true);

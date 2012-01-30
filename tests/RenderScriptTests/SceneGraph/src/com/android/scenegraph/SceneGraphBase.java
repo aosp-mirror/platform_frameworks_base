@@ -19,15 +19,17 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import com.android.scenegraph.SceneManager;
+
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.Matrix4f;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
 import android.renderscript.ProgramVertex;
-import android.renderscript.RenderScript;
 import android.renderscript.RSRuntimeException;
-
+import android.renderscript.RenderScript;
+import android.renderscript.RenderScriptGL;
 import android.util.Log;
 
 /**
@@ -35,12 +37,21 @@ import android.util.Log;
  */
 public abstract class SceneGraphBase {
     String mName;
+    Allocation mNameAlloc;
     public void setName(String n) {
         mName = n;
+        mNameAlloc = null;
     }
 
     public String getName() {
         return mName;
+    }
+
+    Allocation getNameAlloc(RenderScriptGL rs) {
+        if (mNameAlloc == null)  {
+            mNameAlloc = SceneManager.getStringAsAllocation(rs, getName());
+        }
+        return mNameAlloc;
     }
 }
 

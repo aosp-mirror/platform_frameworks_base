@@ -19,9 +19,11 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import com.android.scenegraph.SceneManager;
+
+import android.renderscript.*;
 import android.renderscript.Matrix4f;
 import android.renderscript.RenderScriptGL;
-import android.renderscript.*;
 import android.util.Log;
 
 /**
@@ -44,34 +46,59 @@ public class Camera extends SceneGraphBase {
 
     public void setTransform(Transform t) {
         mTransform = t;
+        updateRSData();
     }
     public void setFOV(float fov) {
         mFOV = fov;
+        updateRSData();
     }
 
     public void setNear(float n) {
         mNear = n;
+        updateRSData();
     }
 
     public void setFar(float f) {
         mFar = f;
+        updateRSData();
     }
 
-    ScriptField_Camera_s getRSData(RenderScriptGL rs) {
+    public void setName(String n) {
+        super.setName(n);
+        updateRSData();
+    }
+
+    ScriptField_Camera_s getRSData() {
         if (mField != null) {
             return mField;
         }
 
+        RenderScriptGL rs = SceneManager.getRS();
+        if (rs == null) {
+            return null;
+        }
+
         mField = new ScriptField_Camera_s(rs, 1);
+        updateRSData();
+        return mField;
+    }
+
+    void updateRSData() {
+        if (mField == null) {
+            return;
+        }
+        RenderScriptGL rs = SceneManager.getRS();
+        if (rs == null) {
+            return;
+        }
+
         ScriptField_Camera_s.Item cam = new ScriptField_Camera_s.Item();
         cam.horizontalFOV = mFOV;
         cam.near = mNear;
         cam.far = mFar;
-        cam.transformMatrix = mTransform.getRSData(rs).getAllocation();
-        cam.name = SceneManager.getStringAsAllocation(rs, getName());
+        cam.transformMatrix = mTransform.getRSData().getAllocation();
+        cam.name = getNameAlloc(rs);
         mField.set(cam, 0, true);
-
-        return mField;
     }
 }
 

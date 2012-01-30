@@ -145,10 +145,10 @@ public class Float4Param extends ShaderParam {
         mRsFieldItem.float_value = mValue;
         mRsFieldItem.float_vecSize = mVecSize;
         if (mCamera != null) {
-            mRsFieldItem.camera = mCamera.getRSData(rs).getAllocation();
+            mRsFieldItem.camera = mCamera.getRSData().getAllocation();
         }
         if (mLight != null) {
-            mRsFieldItem.light = mLight.getRSData(rs).getAllocation();
+            mRsFieldItem.light = mLight.getRSData().getAllocation();
         }
     }
 }

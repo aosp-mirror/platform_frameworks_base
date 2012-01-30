@@ -41,6 +41,8 @@ import android.renderscript.RenderScriptGL;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.android.testapp.R;
+
 /**
  * @hide
  */
@@ -161,6 +163,20 @@ public class SceneManager extends SceneGraphBase {
 
     public void setActiveScene(Scene s) {
         mActiveScene = s;
+    }
+
+    static RenderScriptGL getRS() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        return sSceneManager.mRS;
+    }
+
+    static Resources getRes() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        return sSceneManager.mRes;
     }
 
     public static SceneManager getInstance() {

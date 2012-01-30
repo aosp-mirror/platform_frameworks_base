@@ -33,7 +33,6 @@ public abstract class Transform extends SceneGraphBase {
     static final int RS_ID_ROTATE = 2;
     static final int RS_ID_SCALE = 3;
 
-    RenderScriptGL mRS;
     Transform mParent;
     ArrayList<Transform> mChildren;
 
@@ -48,19 +47,16 @@ public abstract class Transform extends SceneGraphBase {
     public void appendChild(Transform t) {
         mChildren.add(t);
         t.mParent = this;
+        updateRSChildData(true);
     }
 
     abstract void initLocalData();
-    abstract void updateRSData();
 
-    ScriptField_SgTransform getRSData(RenderScriptGL rs) {
-        if (mField != null) {
-            return mField;
+    void updateRSChildData(boolean copyData) {
+        if (mField == null) {
+            return;
         }
-
-        mRS = rs;
-        initLocalData();
-
+        RenderScriptGL rs = SceneManager.getRS();
         if (mChildren.size() != 0) {
             Allocation childRSData = Allocation.createSized(rs, Element.ALLOCATION(rs),
                                                             mChildren.size());
@@ -69,14 +65,34 @@ public abstract class Transform extends SceneGraphBase {
             Allocation[] childrenAllocs = new Allocation[mChildren.size()];
             for (int i = 0; i < mChildren.size(); i ++) {
                 Transform child = mChildren.get(i);
-                childrenAllocs[i] = child.getRSData(rs).getAllocation();
+                childrenAllocs[i] = child.getRSData().getAllocation();
             }
             childRSData.copyFrom(childrenAllocs);
         }
+        if (copyData) {
+            mField.set(mTransformData, 0, true);
+        }
+    }
 
+    ScriptField_SgTransform getRSData() {
+        if (mField != null) {
+            return mField;
+        }
+
+        RenderScriptGL rs = SceneManager.getRS();
+        if (rs == null) {
+            return null;
+        }
         mField = new ScriptField_SgTransform(rs, 1);
-        mField.set(mTransformData, 0, true);
 
+        mTransformData = new ScriptField_SgTransform.Item();
+        mTransformData.name = getNameAlloc(rs);
+        mTransformData.isDirty = 1;
+
+        initLocalData();
+        updateRSChildData(false);
+
+        mField.set(mTransformData, 0, true);
         return mField;
     }
 }
