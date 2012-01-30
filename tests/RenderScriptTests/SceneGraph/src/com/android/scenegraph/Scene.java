@@ -58,7 +58,7 @@ public class Scene extends SceneGraphBase {
             long start = System.currentTimeMillis();
             for (int i = 0; i < objects[0].size(); i ++) {
                 FragmentShader sI = objects[0].get(i);
-                sI.updateTextures(mRS, mRes);
+                sI.updateTextures();
             }
             long end = System.currentTimeMillis();
             Log.v(TIMER_TAG, "Shader texture init time: " + (end - start));
@@ -266,7 +266,7 @@ public class Scene extends SceneGraphBase {
         Allocation[] shaderAllocs = new Allocation[mVertexShaders.size()];
         for (int i = 0; i < mVertexShaders.size(); i ++) {
             VertexShader sI = mVertexShaders.get(i);
-            shaderAllocs[i] = sI.getRSData(rs, res).getAllocation();
+            shaderAllocs[i] = sI.getRSData().getAllocation();
         }
         shaderData.copyFrom(shaderAllocs);
         sceneManager.mRenderLoop.set_gVertexShaders(shaderData);
@@ -275,7 +275,7 @@ public class Scene extends SceneGraphBase {
         shaderAllocs = new Allocation[mFragmentShaders.size()];
         for (int i = 0; i < mFragmentShaders.size(); i ++) {
             FragmentShader sI = mFragmentShaders.get(i);
-            shaderAllocs[i] = sI.getRSData(rs, res).getAllocation();
+            shaderAllocs[i] = sI.getRSData().getAllocation();
         }
         shaderData.copyFrom(shaderAllocs);
         sceneManager.mRenderLoop.set_gFragmentShaders(shaderData);
@@ -285,7 +285,7 @@ public class Scene extends SceneGraphBase {
         mRS = rs;
         mRes = res;
         long start = System.currentTimeMillis();
-        mTransformRSData = mRootTransforms.getRSData(rs);
+        mTransformRSData = mRootTransforms.getRSData();
         long end = System.currentTimeMillis();
         Log.v(TIMER_TAG, "Transform init time: " + (end - start));
 
@@ -312,7 +312,7 @@ public class Scene extends SceneGraphBase {
         Allocation cameraData = Allocation.createSized(rs, Element.ALLOCATION(rs), mCameras.size());
         Allocation[] cameraAllocs = new Allocation[mCameras.size()];
         for (int i = 0; i < mCameras.size(); i ++) {
-            cameraAllocs[i] = mCameras.get(i).getRSData(rs).getAllocation();
+            cameraAllocs[i] = mCameras.get(i).getRSData().getAllocation();
         }
         cameraData.copyFrom(cameraAllocs);
         sceneManager.mRenderLoop.set_gCameras(cameraData);
@@ -323,7 +323,7 @@ public class Scene extends SceneGraphBase {
                                                           mCameras.size());
             Allocation[] lightAllocs = new Allocation[mLights.size()];
             for (int i = 0; i < mLights.size(); i ++) {
-                lightAllocs[i] = mLights.get(i).getRSData(rs).getAllocation();
+                lightAllocs[i] = mLights.get(i).getRSData().getAllocation();
             }
             lightData.copyFrom(lightAllocs);
             sceneManager.mRenderLoop.set_gLights(lightData);

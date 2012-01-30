@@ -62,33 +62,50 @@ public class RenderState extends SceneGraphBase {
 
     public void setProgramVertex(VertexShader pv) {
         mVertex = pv;
+        updateRSData();
     }
 
     public void setProgramFragment(FragmentShader pf) {
         mFragment = pf;
+        updateRSData();
     }
 
     public void setProgramStore(ProgramStore ps) {
         mStore = ps;
+        updateRSData();
     }
 
     public void setProgramRaster(ProgramRaster pr) {
         mRaster = pr;
+        updateRSData();
     }
 
-    public ScriptField_RenderState_s getRSData(RenderScriptGL rs, Resources res) {
+    void updateRSData() {
+        if (mField == null) {
+            return;
+        }
+        ScriptField_RenderState_s.Item item = new ScriptField_RenderState_s.Item();
+        item.pv = mVertex.getRSData().getAllocation();
+        item.pf = mFragment.getRSData().getAllocation();
+        item.ps = mStore;
+        item.pr = mRaster;
+
+        mField.set(item, 0, true);
+    }
+
+    public ScriptField_RenderState_s getRSData() {
         if (mField != null) {
             return mField;
         }
 
-        ScriptField_RenderState_s.Item item = new ScriptField_RenderState_s.Item();
-        item.pv = mVertex.getRSData(rs, res).getAllocation();
-        item.pf = mFragment.getRSData(rs, res).getAllocation();
-        item.ps = mStore;
-        item.pr = mRaster;
+        RenderScriptGL rs = SceneManager.getRS();
+        if (rs == null) {
+            return null;
+        }
 
         mField = new ScriptField_RenderState_s(rs, 1);
-        mField.set(item, 0, true);
+        updateRSData();
+
         return mField;
     }
 }

@@ -91,26 +91,37 @@ public class FragmentShader extends Shader {
         return mProgram;
     }
 
-    public void updateTextures(RenderScriptGL rs, Resources res) {
+    public void updateTextures() {
+        RenderScriptGL rs = SceneManager.getRS();
+        Resources res = SceneManager.getRes();
+        if (rs == null || res == null) {
+            return;
+        }
         int shaderTextureStart = mTextureTypes.size();
         for (int i = 0; i < mShaderTextureNames.size(); i ++) {
             ShaderParam sp = mSourceParams.get(mShaderTextureNames.get(i));
             if (sp != null && sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                mProgram.bindTexture(p.getTexture().getRsData(rs, res), shaderTextureStart + i);
+                mProgram.bindTexture(p.getTexture().getRsData(), shaderTextureStart + i);
             }
         }
     }
 
-    public ScriptField_FragmentShader_s getRSData(RenderScriptGL rs, Resources res) {
+    ScriptField_FragmentShader_s getRSData() {
         if (mField != null) {
             return mField;
+        }
+
+        RenderScriptGL rs = SceneManager.getRS();
+        Resources res = SceneManager.getRes();
+        if (rs == null || res == null) {
+            return null;
         }
 
         ScriptField_FragmentShader_s.Item item = new ScriptField_FragmentShader_s.Item();
         item.program = mProgram;
 
-        linkConstants(rs, res);
+        linkConstants(rs);
         if (mPerShaderConstants != null) {
             item.shaderConst = mConstantBuffer;
             item.shaderConstParams = mConstantBufferParams;

@@ -29,7 +29,7 @@ import android.util.Log;
  */
 public abstract class TextureBase extends SceneGraphBase {
     protected Allocation mRsTexture;
-    abstract Allocation getRsData(RenderScriptGL rs, Resources res);
+    abstract Allocation getRsData();
 }
 
 

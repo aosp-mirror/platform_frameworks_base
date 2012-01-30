@@ -138,7 +138,7 @@ public class Renderable extends RenderableBase {
             ShaderParam sp = allParamsIter.next();
             if (sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                mRsFieldItem.pf_textures[paramIndex++] = p.getTexture().getRsData(rs, res);
+                mRsFieldItem.pf_textures[paramIndex++] = p.getTexture().getRsData();
             }
         }
         ProgramFragment pf = mRenderState.mFragment.mProgram;
@@ -228,10 +228,10 @@ public class Renderable extends RenderableBase {
         mRsFieldItem.pf_const = mFragmentConstants;
         mRsFieldItem.pf_constParams = pfParams != null ? pfParams.getAllocation() : null;
         if (mTransform != null) {
-            mRsFieldItem.transformMatrix = mTransform.getRSData(rs).getAllocation();
+            mRsFieldItem.transformMatrix = mTransform.getRSData().getAllocation();
         }
         mRsFieldItem.name = SceneManager.getStringAsAllocation(rs, getName());
-        mRsFieldItem.render_state = mRenderState.getRSData(rs, res).getAllocation();
+        mRsFieldItem.render_state = mRenderState.getRSData().getAllocation();
         mRsFieldItem.bVolInitialized = 0;
         mRsFieldItem.cullType = mCullType;
     }

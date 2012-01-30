@@ -44,43 +44,62 @@ public abstract class LightBase extends SceneGraphBase {
 
     public void setTransform(Transform t) {
         mTransform = t;
+        updateRSData();
     }
 
     public void setColor(float r, float g, float b) {
         mColor.x = r;
         mColor.y = g;
         mColor.z = b;
+        updateRSData();
     }
 
     public void setColor(Float3 c) {
-        mColor.x = c.x;
-        mColor.y = c.y;
-        mColor.z = c.z;
+        setColor(c.x, c.y, c.z);
     }
 
     public void setIntensity(float i) {
         mIntensity = i;
+        updateRSData();
+    }
+
+    public void setName(String n) {
+        super.setName(n);
+        updateRSData();
+    }
+
+    protected void updateRSData() {
+        if (mField == null) {
+            return;
+        }
+        RenderScriptGL rs = SceneManager.getRS();
+        mFieldData.transformMatrix = mTransform.getRSData().getAllocation();
+        mFieldData.name = getNameAlloc(rs);
+        mFieldData.color = mColor;
+        mFieldData.intensity = mIntensity;
+
+        initLocalData();
+
+        mField.set(mFieldData, 0, true);
     }
 
     abstract void initLocalData();
 
-    protected void updateBaseData(RenderScriptGL rs) {
+    ScriptField_Light_s getRSData() {
+        if (mField != null) {
+            return mField;
+        }
+
+        RenderScriptGL rs = SceneManager.getRS();
+        if (rs == null) {
+            return null;
+        }
         if (mField == null) {
             mField = new ScriptField_Light_s(rs, 1);
             mFieldData = new ScriptField_Light_s.Item();
         }
 
-        mFieldData.transformMatrix = mTransform.getRSData(rs).getAllocation();
-        mFieldData.name = SceneManager.getStringAsAllocation(rs, getName());
-        mFieldData.color = mColor;
-        mFieldData.intensity = mIntensity;
-    }
-
-    ScriptField_Light_s getRSData(RenderScriptGL rs) {
-        updateBaseData(rs);
-        initLocalData();
-
-        mField.set(mFieldData, 0, true);
+        updateRSData();
 
         return mField;
     }

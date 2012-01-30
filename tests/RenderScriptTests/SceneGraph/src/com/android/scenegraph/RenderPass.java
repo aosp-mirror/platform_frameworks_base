@@ -91,7 +91,7 @@ public class RenderPass extends SceneGraphBase {
         mRsField = new ScriptField_RenderPass_s.Item();
         mRsField.color_target = mColorTarget;
         mRsField.depth_target = mDepthTarget;
-        mRsField.camera = mCamera != null ? mCamera.getRSData(rs).getAllocation() : null;
+        mRsField.camera = mCamera != null ? mCamera.getRSData().getAllocation() : null;
 
         if (mObjectsToDraw.size() != 0) {
             Allocation drawableData = Allocation.createSized(rs,

@@ -31,9 +31,17 @@ public class CompoundTransform extends Transform {
 
     public static abstract class Component {
         String mName;
+        Allocation mNameAlloc;
         int mRsId;
         Float4 mValue;
         CompoundTransform mParent;
+
+        Allocation getNameAlloc(RenderScriptGL rs) {
+            if (mNameAlloc == null)  {
+                mNameAlloc = SceneManager.getStringAsAllocation(rs, getName());
+            }
+            return mNameAlloc;
+        }
 
         public String getName() {
             return mName;
@@ -53,7 +61,7 @@ public class CompoundTransform extends Transform {
             mValue.x = val.x;
             mValue.y = val.y;
             mValue.z = val.z;
-            mParent.updateRSData();
+            mParent.updateRSComponents(true);
         }
     }
 
@@ -73,11 +81,11 @@ public class CompoundTransform extends Transform {
             mValue.x = val.x;
             mValue.y = val.y;
             mValue.z = val.z;
-            mParent.updateRSData();
+            mParent.updateRSComponents(true);
         }
         public void setAngle(float val) {
             mValue.w = val;
-            mParent.updateRSData();
+            mParent.updateRSComponents(true);
         }
     }
 
@@ -94,7 +102,7 @@ public class CompoundTransform extends Transform {
             mValue.x = val.x;
             mValue.y = val.y;
             mValue.z = val.z;
-            mParent.updateRSData();
+            mParent.updateRSComponents(true);
         }
     }
 
@@ -113,6 +121,7 @@ public class CompoundTransform extends Transform {
         }
         c.mParent = this;
         mTransformComponents.add(c);
+        updateRSComponents(true);
     }
 
     public void setComponent(int index, Component c) {
@@ -121,40 +130,32 @@ public class CompoundTransform extends Transform {
         }
         c.mParent = this;
         mTransformComponents.set(index, c);
+        updateRSComponents(true);
     }
 
-    void initLocalData() {
-        mTransformData = new ScriptField_SgTransform.Item();
-        int numElements = mTransformComponents.size();
-        for (int i = 0; i < numElements; i ++) {
-            Component ith = mTransformComponents.get(i);
-            mTransformData.transforms[i] = ith.mValue;
-            mTransformData.transformTypes[i] = ith.mRsId;
-            mTransformData.transformNames[i] = SceneManager.getStringAsAllocation(mRS, ith.mName);
-        }
-        // "null" terminate the array
-        mTransformData.transformTypes[numElements] = RS_ID_NONE;
-
-        mTransformData.isDirty = 1;
-        mTransformData.children = null;
-        mTransformData.name = SceneManager.getStringAsAllocation(mRS, getName());
-    }
-
-    void updateRSData() {
+    // TODO: Will need to optimize this function a bit, we copy more data than we need to
+    void updateRSComponents(boolean copy) {
         if (mField == null) {
             return;
         }
+        RenderScriptGL rs = SceneManager.getRS();
         int numElements = mTransformComponents.size();
         for (int i = 0; i < numElements; i ++) {
             Component ith = mTransformComponents.get(i);
             mTransformData.transforms[i] = ith.mValue;
             mTransformData.transformTypes[i] = ith.mRsId;
-            mTransformData.transformNames[i] = SceneManager.getStringAsAllocation(mRS, ith.mName);
+            mTransformData.transformNames[i] = ith.getNameAlloc(rs);
         }
         // "null" terminate the array
         mTransformData.transformTypes[numElements] = RS_ID_NONE;
         mTransformData.isDirty = 1;
-        mField.set(mTransformData, 0, true);
+        if (copy) {
+            mField.set(mTransformData, 0, true);
+        }
+    }
+
+    void initLocalData() {
+        updateRSComponents(false);
     }
 }
 

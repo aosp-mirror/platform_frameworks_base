@@ -20,7 +20,6 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.content.res.Resources;
 import android.renderscript.*;
 import android.renderscript.ProgramFragment.Builder;
 import android.util.Log;
@@ -63,7 +62,7 @@ public abstract class Shader extends SceneGraphBase {
         return mPerObjConstants;
     }
 
-    void linkConstants(RenderScriptGL rs, Resources res) {
+    void linkConstants(RenderScriptGL rs) {
         if (mPerShaderConstants == null) {
             return;
         }

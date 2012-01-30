@@ -75,15 +75,21 @@ public class VertexShader extends Shader {
         return mProgram;
     }
 
-    public ScriptField_VertexShader_s getRSData(RenderScriptGL rs, Resources res) {
+    ScriptField_VertexShader_s getRSData() {
         if (mField != null) {
             return mField;
+        }
+
+        RenderScriptGL rs = SceneManager.getRS();
+        Resources res = SceneManager.getRes();
+        if (rs == null || res == null) {
+            return null;
         }
 
         ScriptField_VertexShader_s.Item item = new ScriptField_VertexShader_s.Item();
         item.program = mProgram;
 
-        linkConstants(rs, res);
+        linkConstants(rs);
         if (mPerShaderConstants != null) {
             item.shaderConst = mConstantBuffer;
             item.shaderConstParams = mConstantBufferParams;
