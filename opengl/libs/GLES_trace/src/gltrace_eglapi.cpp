@@ -77,12 +77,10 @@ static void *commandReceiveTask(void *arg) {
 }
 
 void GLTrace_start() {
-    char value[PROPERTY_VALUE_MAX];
+    char udsName[PROPERTY_VALUE_MAX];
 
-    property_get("debug.egl.debug_port", value, "5039");
-    const unsigned short port = (unsigned short)atoi(value);
-
-    int clientSocket = gltrace::acceptClientConnection(port);
+    property_get("debug.egl.debug_portname", udsName, "gltrace");
+    int clientSocket = gltrace::acceptClientConnection(udsName);
     if (clientSocket < 0) {
         ALOGE("Error creating GLTrace server socket. Quitting application.");
         exit(-1);
