@@ -25,6 +25,7 @@
 #include <aah_timesrv/cc_helper.h>
 #include <media/IMediaPlayer.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
@@ -184,7 +185,27 @@ status_t AAH_TXPlayer::setDataSource_l(
 }
 
 status_t AAH_TXPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
-    return INVALID_OPERATION;
+    Mutex::Autolock autoLock(mLock);
+
+    reset_l();
+
+    sp<DataSource> dataSource = new FileSource(dup(fd), offset, length);
+
+    status_t err = dataSource->initCheck();
+
+    if (err != OK) {
+        return err;
+    }
+
+    mFileSource = dataSource;
+
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+
+    if (extractor == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    return setDataSource_l(extractor);
 }
 
 status_t AAH_TXPlayer::setVideoSurface(const sp<Surface>& surface) {
@@ -379,7 +400,12 @@ void AAH_TXPlayer::onPrepareAsyncEvent() {
 
     mAudioSource->getFormat()->findInt64(kKeyDuration, &mDurationUs);
 
-    mAudioSource->start();
+    status_t err = mAudioSource->start();
+    if (err != OK) {
+        LOGI("failed to start audio source, err=%d", err);
+        abortPrepare(err);
+        return;
+    }
 
     mFlags |= PREPARING_CONNECTED;
 
@@ -650,6 +676,8 @@ void AAH_TXPlayer::reset_l() {
 
     mUri.setTo("");
     mUriHeaders.clear();
+
+    mFileSource.clear();
 
     mBitrate = -1;
 

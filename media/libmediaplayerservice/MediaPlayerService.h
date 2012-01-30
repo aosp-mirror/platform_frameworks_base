@@ -271,6 +271,7 @@ private:
         virtual status_t        attachAuxEffect(int effectId);
         virtual status_t        setParameter(int key, const Parcel &request);
         virtual status_t        getParameter(int key, Parcel *reply);
+        virtual status_t        setMediaPlayerType(int playerType);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
 
@@ -343,6 +344,9 @@ private:
         // set: no duplicate.
         // getMetadata clears this set.
         media::Metadata::Filter mMetadataUpdated;  // protected by mLock
+
+        bool mOverridePlayerType;
+        player_type mOverridePlayerTypeValue;
 
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;

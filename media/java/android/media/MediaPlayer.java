@@ -1486,6 +1486,18 @@ public class MediaPlayer
      */
     public native static int native_pullBatteryData(Parcel reply);
 
+    /**
+     * Override the choice of media player implementation the next time
+     * setDataSource is called.
+     *
+     * Only valid when the player is in the Idle state.
+     *
+     * @param playerType media player type (defined in MediaPlayerInterface.h)
+     * {@hide}
+     */
+    public native void setMediaPlayerType(int playerType)
+        throws IOException, IllegalStateException;
+
     @Override
     protected void finalize() { native_finalize(); }
 

@@ -55,6 +55,7 @@ enum {
     SET_VIDEO_SURFACETEXTURE,
     SET_PARAMETER,
     GET_PARAMETER,
+    SET_MEDIA_PLAYER_TYPE,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -291,6 +292,13 @@ public:
         return remote()->transact(GET_PARAMETER, data, reply);
     }
 
+    status_t setMediaPlayerType(int playerType) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeInt32(playerType);
+        remote()->transact(SET_MEDIA_PLAYER_TYPE, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -458,6 +466,11 @@ status_t BnMediaPlayer::onTransact(
         case GET_PARAMETER: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             return getParameter(data.readInt32(), reply);
+        } break;
+        case SET_MEDIA_PLAYER_TYPE: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(setMediaPlayerType(data.readInt32()));
+            return NO_ERROR;
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

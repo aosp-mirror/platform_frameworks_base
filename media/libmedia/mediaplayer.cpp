@@ -63,6 +63,8 @@ MediaPlayer::MediaPlayer()
     mAudioSessionId = AudioSystem::newAudioSessionId();
     AudioSystem::acquireAudioSessionId(mAudioSessionId);
     mSendLevel = 0;
+    mOverridePlayerType = false;
+    mOverridePlayerTypeValue = -1;
 }
 
 MediaPlayer::~MediaPlayer()
@@ -146,7 +148,14 @@ status_t MediaPlayer::setDataSource(
         const sp<IMediaPlayerService>& service(getMediaPlayerService());
         if (service != 0) {
             sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-            if (NO_ERROR != player->setDataSource(url, headers)) {
+
+            if (mOverridePlayerType) {
+                if (NO_ERROR != player->setMediaPlayerType(mOverridePlayerTypeValue)) {
+                    player.clear();
+                }
+            }
+
+            if (player != 0 && NO_ERROR != player->setDataSource(url, headers)) {
                 player.clear();
             }
             err = attachNewPlayer(player);
@@ -162,7 +171,14 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     const sp<IMediaPlayerService>& service(getMediaPlayerService());
     if (service != 0) {
         sp<IMediaPlayer> player(service->create(getpid(), this, mAudioSessionId));
-        if (NO_ERROR != player->setDataSource(fd, offset, length)) {
+
+        if (mOverridePlayerType) {
+            if (NO_ERROR != player->setMediaPlayerType(mOverridePlayerTypeValue)) {
+                player.clear();
+            }
+        }
+
+        if (player != 0 && NO_ERROR != player->setDataSource(fd, offset, length)) {
             player.clear();
         }
         err = attachNewPlayer(player);
@@ -597,6 +613,19 @@ status_t MediaPlayer::getParameter(int key, Parcel *reply)
     }
     LOGV("getParameter: no active player");
     return INVALID_OPERATION;
+}
+
+status_t MediaPlayer::setMediaPlayerType(int playerType) {
+    if (!((mCurrentState & MEDIA_PLAYER_IDLE) ||
+          (mCurrentState == MEDIA_PLAYER_STATE_ERROR))) {
+        LOGE("attachNewPlayer called in state %d", mCurrentState);
+        return INVALID_OPERATION;
+    }
+
+    mOverridePlayerType = true;
+    mOverridePlayerTypeValue = playerType;
+
+    return NO_ERROR;
 }
 
 void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
