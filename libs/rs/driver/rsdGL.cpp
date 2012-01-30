@@ -340,9 +340,9 @@ bool rsdGLInit(const Context *rsc) {
 
     dc->gl.gl.OES_texture_npot = NULL != strstr((const char *)dc->gl.gl.extensions,
                                                 "GL_OES_texture_npot");
-    dc->gl.gl.GL_IMG_texture_npot = NULL != strstr((const char *)dc->gl.gl.extensions,
+    dc->gl.gl.IMG_texture_npot = NULL != strstr((const char *)dc->gl.gl.extensions,
                                                    "GL_IMG_texture_npot");
-    dc->gl.gl.GL_NV_texture_npot_2D_mipmap = NULL != strstr((const char *)dc->gl.gl.extensions,
+    dc->gl.gl.NV_texture_npot_2D_mipmap = NULL != strstr((const char *)dc->gl.gl.extensions,
                                                             "GL_NV_texture_npot_2D_mipmap");
     dc->gl.gl.EXT_texture_max_aniso = 1.0f;
     bool hasAniso = NULL != strstr((const char *)dc->gl.gl.extensions,

@@ -349,8 +349,8 @@ void RsdShader::setupSampler(const Context *rsc, const Sampler *s, const Allocat
 
     if (!dc->gl.gl.OES_texture_npot && tex->getType()->getIsNp2()) {
         if (tex->getHasGraphicsMipmaps() &&
-            (dc->gl.gl.GL_NV_texture_npot_2D_mipmap || dc->gl.gl.GL_IMG_texture_npot)) {
-            if (dc->gl.gl.GL_NV_texture_npot_2D_mipmap) {
+            (dc->gl.gl.NV_texture_npot_2D_mipmap || dc->gl.gl.IMG_texture_npot)) {
+            if (dc->gl.gl.NV_texture_npot_2D_mipmap) {
                 RSD_CALL_GL(glTexParameteri, target, GL_TEXTURE_MIN_FILTER,
                             trans[s->mHal.state.minFilter]);
             } else {
