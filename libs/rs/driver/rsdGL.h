@@ -61,8 +61,8 @@ typedef struct RsdGLRec {
         int32_t maxVertexTextureUnits;
 
         bool OES_texture_npot;
-        bool GL_IMG_texture_npot;
-        bool GL_NV_texture_npot_2D_mipmap;
+        bool IMG_texture_npot;
+        bool NV_texture_npot_2D_mipmap;
         float EXT_texture_max_aniso;
     } gl;
 
