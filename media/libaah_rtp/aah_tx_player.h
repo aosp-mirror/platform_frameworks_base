@@ -136,6 +136,8 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     String8 mUri;
     KeyedVector<String8, String8> mUriHeaders;
 
+    sp<DataSource> mFileSource;
+
     sp<TimedEventQueue::Event> mAsyncPrepareEvent;
     Condition mPreparedCondition;
     status_t mPrepareResult;

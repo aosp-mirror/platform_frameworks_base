@@ -58,6 +58,7 @@ public:
     virtual status_t        attachAuxEffect(int effectId) = 0;
     virtual status_t        setParameter(int key, const Parcel& request) = 0;
     virtual status_t        getParameter(int key, Parcel* reply) = 0;
+    virtual status_t        setMediaPlayerType(int playerType) = 0;
 
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.

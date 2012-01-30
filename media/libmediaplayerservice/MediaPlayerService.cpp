@@ -497,6 +497,9 @@ MediaPlayerService::Client::Client(
     LOGD("create Antagonizer");
     mAntagonizer = new Antagonizer(notify, this);
 #endif
+
+    mOverridePlayerType = false;
+    mOverridePlayerTypeValue = static_cast<player_type>(-1);
 }
 
 MediaPlayerService::Client::~Client()
@@ -716,7 +719,8 @@ status_t MediaPlayerService::Client::setDataSource(
         close(fd);
         return mStatus;
     } else {
-        player_type playerType = getPlayerType(url);
+        player_type playerType = mOverridePlayerType ?
+                mOverridePlayerTypeValue : getPlayerType(url);
         LOGV("player type = %d", playerType);
 
         // create the right type of player
@@ -766,7 +770,8 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
         LOGV("calculated length = %lld", length);
     }
 
-    player_type playerType = getPlayerType(fd, offset, length);
+    player_type playerType = mOverridePlayerType ?
+            mOverridePlayerTypeValue : getPlayerType(fd, offset, length);
     LOGV("player type = %d", playerType);
 
     // create the right type of player
@@ -1098,6 +1103,13 @@ status_t MediaPlayerService::Client::getParameter(int key, Parcel *reply) {
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
     return p->getParameter(key, reply);
+}
+
+status_t MediaPlayerService::Client::setMediaPlayerType(int playerType) {
+    mOverridePlayerType = true;
+    mOverridePlayerTypeValue = static_cast<player_type>(playerType);
+
+    return NO_ERROR;
 }
 
 void MediaPlayerService::Client::notify(

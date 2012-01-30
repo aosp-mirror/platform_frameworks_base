@@ -755,6 +755,20 @@ android_media_MediaPlayer_getParameter(JNIEnv *env, jobject thiz, jint key, jobj
     process_media_player_call(env, thiz, mp->getParameter(key, reply), NULL, NULL );
 }
 
+static void
+android_media_MediaPlayer_setMediaPlayerType(JNIEnv *env, jobject thiz, jint playerType)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    process_media_player_call(env, thiz, mp->setMediaPlayerType(playerType),
+                              "java/io/IOException",
+                              "setMediaPlayerType failed");
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -799,6 +813,7 @@ static JNINativeMethod gMethods[] = {
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
     {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_setParameter},
     {"getParameter",        "(ILandroid/os/Parcel;)V",          (void *)android_media_MediaPlayer_getParameter},
+    {"setMediaPlayerType", "(I)V",                              (void *)android_media_MediaPlayer_setMediaPlayerType},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
