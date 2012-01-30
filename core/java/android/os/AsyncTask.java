@@ -135,6 +135,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>There are a few threading rules that must be followed for this class to
  * work properly:</p>
  * <ul>
+ *     <li>The AsyncTask class must be loaded on the UI thread. This is done
+ *     automatically as of {@link android.os.Build.VERSION_CODES#JELLY_BEAN}.</li>
  *     <li>The task instance must be created on the UI thread.</li>
  *     <li>{@link #execute} must be invoked on the UI thread.</li>
  *     <li>Do not call {@link #onPreExecute()}, {@link #onPostExecute},
