@@ -752,6 +752,29 @@ public class MtpDatabase {
             return MtpConstants.RESPONSE_GENERAL_ERROR;
         }
 
+        // check if nomedia status changed
+        if (newFile.isDirectory()) {
+            // for directories, check if renamed from something hidden to something non-hidden
+            if (oldFile.getName().startsWith(".") && !newPath.startsWith(".")) {
+                // directory was unhidden
+                try {
+                    mMediaProvider.call(MediaStore.UNHIDE_CALL, newPath, null);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "failed to unhide/rescan for " + newPath);
+                }
+            }
+        } else {
+            // for files, check if renamed from .nomedia to something else
+            if (oldFile.getName().toLowerCase(Locale.US).equals(".nomedia")
+                    && !newPath.toLowerCase(Locale.US).equals(".nomedia")) {
+                try {
+                    mMediaProvider.call(MediaStore.UNHIDE_CALL, oldFile.getParent(), null);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "failed to unhide/rescan for " + newPath);
+                }
+            }
+        }
+
         return MtpConstants.RESPONSE_OK;
     }
 
@@ -915,6 +938,15 @@ public class MtpDatabase {
 
             Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
             if (mMediaProvider.delete(uri, null, null) > 0) {
+                if (format != MtpConstants.FORMAT_ASSOCIATION
+                        && path.toLowerCase(Locale.US).endsWith("/.nomedia")) {
+                    try {
+                        String parentPath = path.substring(0, path.lastIndexOf("/"));
+                        mMediaProvider.call(MediaStore.UNHIDE_CALL, parentPath, null);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "failed to unhide/rescan for " + path);
+                    }
+                }
                 return MtpConstants.RESPONSE_OK;
             } else {
                 return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;

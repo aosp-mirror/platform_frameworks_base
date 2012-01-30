@@ -35,6 +35,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Files.FileColumns;
 import android.provider.Settings;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Internal service helper that no-one should use directly.
@@ -946,6 +948,22 @@ public class MediaScanner
                 // path should never change, and we want to avoid replacing mixed cased paths
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
+
+                int mediaType = 0;
+                if (!MediaScanner.isNoMediaPath(entry.mPath)) {
+                    int fileType = MediaFile.getFileTypeForMimeType(mMimeType);
+                    if (MediaFile.isAudioFileType(fileType)) {
+                        mediaType = FileColumns.MEDIA_TYPE_AUDIO;
+                    } else if (MediaFile.isVideoFileType(fileType)) {
+                        mediaType = FileColumns.MEDIA_TYPE_VIDEO;
+                    } else if (MediaFile.isImageFileType(fileType)) {
+                        mediaType = FileColumns.MEDIA_TYPE_IMAGE;
+                    } else if (MediaFile.isPlayListFileType(fileType)) {
+                        mediaType = FileColumns.MEDIA_TYPE_PLAYLIST;
+                    }
+                    values.put(FileColumns.MEDIA_TYPE, mediaType);
+                }
+
                 mMediaProvider.update(result, values, null, null);
             }
 
@@ -1180,6 +1198,10 @@ public class MediaScanner
                     mMediaProvider.delete(ContentUris.withAppendedId(mFilesUri, entry.mRowId),
                             null, null);
                     iterator.remove();
+                    if (entry.mPath.toLowerCase(Locale.US).endsWith("/.nomedia")) {
+                        File f = new File(path);
+                        mMediaProvider.call(MediaStore.UNHIDE_CALL, f.getParent(), null);
+                    }
                 }
             }
         }
