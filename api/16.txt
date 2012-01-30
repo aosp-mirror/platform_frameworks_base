@@ -41832,7 +41832,7 @@ package junit.framework {
     method public static void fail();
   }
 
-  public class AssertionFailedError extends java.lang.Error {
+  public class AssertionFailedError extends java.lang.AssertionError {
     ctor public AssertionFailedError();
     ctor public AssertionFailedError(java.lang.String);
   }
@@ -41890,9 +41890,9 @@ package junit.framework {
     method public synchronized void addListener(junit.framework.TestListener);
     method public void endTest(junit.framework.Test);
     method public synchronized int errorCount();
-    method public synchronized java.util.Enumeration errors();
+    method public synchronized java.util.Enumeration<junit.framework.TestFailure> errors();
     method public synchronized int failureCount();
-    method public synchronized java.util.Enumeration failures();
+    method public synchronized java.util.Enumeration<junit.framework.TestFailure> failures();
     method public synchronized void removeListener(junit.framework.TestListener);
     method protected void run(junit.framework.TestCase);
     method public synchronized int runCount();
@@ -41909,21 +41909,21 @@ package junit.framework {
 
   public class TestSuite implements junit.framework.Test {
     ctor public TestSuite();
-    ctor public TestSuite(java.lang.Class, java.lang.String);
-    ctor public TestSuite(java.lang.Class);
+    ctor public TestSuite(java.lang.Class<?>);
+    ctor public TestSuite(java.lang.Class<? extends junit.framework.TestCase>, java.lang.String);
     ctor public TestSuite(java.lang.String);
     method public void addTest(junit.framework.Test);
-    method public void addTestSuite(java.lang.Class);
+    method public void addTestSuite(java.lang.Class<? extends junit.framework.TestCase>);
     method public int countTestCases();
-    method public static junit.framework.Test createTest(java.lang.Class, java.lang.String);
+    method public static junit.framework.Test createTest(java.lang.Class<?>, java.lang.String);
     method public java.lang.String getName();
-    method public static java.lang.reflect.Constructor getTestConstructor(java.lang.Class) throws java.lang.NoSuchMethodException;
+    method public static java.lang.reflect.Constructor<?> getTestConstructor(java.lang.Class) throws java.lang.NoSuchMethodException;
     method public void run(junit.framework.TestResult);
     method public void runTest(junit.framework.Test, junit.framework.TestResult);
     method public void setName(java.lang.String);
     method public junit.framework.Test testAt(int);
     method public int testCount();
-    method public java.util.Enumeration tests();
+    method public java.util.Enumeration<junit.framework.Test> tests();
   }
 
 }
@@ -41946,7 +41946,7 @@ package junit.runner {
     method protected static java.util.Properties getPreferences();
     method public junit.framework.Test getTest(java.lang.String);
     method public static boolean inVAJava();
-    method protected java.lang.Class loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException;
+    method protected java.lang.Class<?> loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException;
     method protected java.lang.String processArguments(java.lang.String[]);
     method protected abstract void runFailed(java.lang.String);
     method public static void savePreferences() throws java.io.IOException;

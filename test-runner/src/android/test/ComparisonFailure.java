@@ -19,8 +19,7 @@ package android.test;
 /**
  * Thrown when an assert equals for Strings failed.
  * 
- * Note:  Most users of this class should simply use junit.framework.ComparisonFailure,
- * which provides the same functionality at a lighter weight.
+ * @deprecated use junit.framework.ComparisonFailure
  */
 public class ComparisonFailure extends AssertionFailedError {
     private junit.framework.ComparisonFailure mComparison;

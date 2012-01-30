@@ -1,10 +1,24 @@
 package junit.runner;
 
-import junit.framework.*;
-import java.lang.reflect.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.NumberFormat;
-import java.io.*;
-import java.util.*;
+import java.util.Properties;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestListener;
+import junit.framework.TestSuite;
 
 /**
  * Base class for all test runners.
@@ -19,8 +33,8 @@ public abstract class BaseTestRunner implements TestListener {
     boolean fLoading= true;
 
     /*
-    * Implementation of TestListener
-    */
+     * Implementation of TestListener
+     */
     public synchronized void startTest(Test test) {
         testStarted(test.toString());
     }
@@ -32,9 +46,9 @@ public abstract class BaseTestRunner implements TestListener {
     protected static Properties getPreferences() {
         if (fPreferences == null) {
             fPreferences= new Properties();
-             fPreferences.put("loading", "true");
-             fPreferences.put("filterstack", "true");
-              readPreferences();
+            fPreferences.put("loading", "true");
+            fPreferences.put("filterstack", "true");
+            readPreferences();
         }
         return fPreferences;
     }
@@ -48,8 +62,9 @@ public abstract class BaseTestRunner implements TestListener {
         }
     }
 
+    // android-changed remove 'static' qualifier for API compatibility
     public void setPreference(String key, String value) {
-        getPreferences().setProperty(key, value);
+        getPreferences().put(key, value);
     }
 
     public synchronized void endTest(Test test) {
@@ -97,8 +112,8 @@ public abstract class BaseTestRunner implements TestListener {
         Method suiteMethod= null;
         try {
             suiteMethod= testClass.getMethod(SUITE_METHODNAME, new Class[0]);
-         } catch(Exception e) {
-             // try to extract a test suite automatically
+        } catch(Exception e) {
+            // try to extract a test suite automatically
             clearStatus();
             return new TestSuite(testClass);
         }
@@ -108,7 +123,7 @@ public abstract class BaseTestRunner implements TestListener {
         }
         Test test= null;
         try {
-            test= (Test)suiteMethod.invoke(null); // static method
+            test= (Test)suiteMethod.invoke(null, (Object[])new Class[0]); // static method
             if (test == null)
                 return test;
         }
@@ -163,7 +178,7 @@ public abstract class BaseTestRunner implements TestListener {
         fLoading= enable;
     }
     /**
-     * Extract the class name from a String
+     * Extract the class name from a String in VA/Java style
      */
     public String extractClassName(String className) {
         if(className.startsWith("Default package for"))
@@ -186,11 +201,24 @@ public abstract class BaseTestRunner implements TestListener {
      */
     protected abstract void runFailed(String message);
 
+    // BEGIN android-changed - add back getLoader() for API compatibility
+    /**
+     * Returns the loader to be used.
+     * 
+     * @deprecated not present in JUnit4.10
+     */
+    public TestSuiteLoader getLoader() {
+        if (useReloadingTestSuiteLoader())
+            return new ReloadingTestSuiteLoader();
+        return new StandardTestSuiteLoader();
+    }
+    // END android-changed
+
     /**
      * Returns the loaded Class for a suite name.
      */
-    protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
-        return getLoader().load(suiteClassName);
+    protected Class<?> loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
+        return Class.forName(suiteClassName);
     }
 
     /**
@@ -199,29 +227,20 @@ public abstract class BaseTestRunner implements TestListener {
     protected void clearStatus() { // Belongs in the GUI TestRunner class
     }
 
-    /**
-     * Returns the loader to be used.
-     */
-    public TestSuiteLoader getLoader() {
-        if (useReloadingTestSuiteLoader())
-            return new ReloadingTestSuiteLoader();
-        return new StandardTestSuiteLoader();
-    }
-
     protected boolean useReloadingTestSuiteLoader() {
-        return getPreference("loading").equals("true") && !inVAJava() && fLoading;
+        return getPreference("loading").equals("true") && fLoading;
     }
 
     private static File getPreferencesFile() {
-         String home= System.getProperty("user.home");
-         return new File(home, "junit.properties");
-     }
+        String home= System.getProperty("user.home");
+        return new File(home, "junit.properties");
+    }
 
-     private static void readPreferences() {
-         InputStream is= null;
-         try {
-             is= new FileInputStream(getPreferencesFile());
-             setPreferences(new Properties(getPreferences()));
+    private static void readPreferences() {
+        InputStream is= null;
+        try {
+            is= new FileInputStream(getPreferencesFile());
+            setPreferences(new Properties(getPreferences()));
             getPreferences().load(is);
         } catch (IOException e) {
             try {
@@ -230,32 +249,22 @@ public abstract class BaseTestRunner implements TestListener {
             } catch (IOException e1) {
             }
         }
-     }
+    }
 
-     public static String getPreference(String key) {
-         return getPreferences().getProperty(key);
-     }
+    public static String getPreference(String key) {
+        return getPreferences().getProperty(key);
+    }
 
-     public static int getPreference(String key, int dflt) {
-         String value= getPreference(key);
-         int intValue= dflt;
-         if (value == null)
-             return intValue;
-         try {
-             intValue= Integer.parseInt(value);
-          } catch (NumberFormatException ne) {
-         }
-         return intValue;
-     }
-
-     public static boolean inVAJava() {
+    public static int getPreference(String key, int dflt) {
+        String value= getPreference(key);
+        int intValue= dflt;
+        if (value == null)
+            return intValue;
         try {
-            Class.forName("com.ibm.uvm.tools.DebugSupport");
+            intValue= Integer.parseInt(value);
+        } catch (NumberFormatException ne) {
         }
-        catch (Exception e) {
-            return false;
-        }
-        return true;
+        return intValue;
     }
 
     /**
@@ -269,6 +278,13 @@ public abstract class BaseTestRunner implements TestListener {
         String trace= buffer.toString();
         return BaseTestRunner.getFilteredTrace(trace);
     }
+
+    // BEGIN android-changed - add back this method for API compatibility
+    /** @deprecated not present in JUnit4.10 */
+    public static boolean inVAJava() {
+        return false;
+    }
+    // END android-changed
 
     /**
      * Filters stack frames from internal JUnit classes
@@ -303,14 +319,14 @@ public abstract class BaseTestRunner implements TestListener {
 
     static boolean filterLine(String line) {
         String[] patterns= new String[] {
-            "junit.framework.TestCase",
-            "junit.framework.TestResult",
-            "junit.framework.TestSuite",
-            "junit.framework.Assert.", // don't filter AssertionFailure
-            "junit.swingui.TestRunner",
-            "junit.awtui.TestRunner",
-            "junit.textui.TestRunner",
-            "java.lang.reflect.Method.invoke("
+                "junit.framework.TestCase",
+                "junit.framework.TestResult",
+                "junit.framework.TestSuite",
+                "junit.framework.Assert.", // don't filter AssertionFailure
+                "junit.swingui.TestRunner",
+                "junit.awtui.TestRunner",
+                "junit.textui.TestRunner",
+                "java.lang.reflect.Method.invoke("
         };
         for (int i= 0; i < patterns.length; i++) {
             if (line.indexOf(patterns[i]) > 0)
@@ -319,8 +335,8 @@ public abstract class BaseTestRunner implements TestListener {
         return false;
     }
 
-     static {
-         fgMaxMessageLength= getPreference("maxmessage", fgMaxMessageLength);
-     }
+    static {
+        fgMaxMessageLength= getPreference("maxmessage", fgMaxMessageLength);
+    }
 
 }
