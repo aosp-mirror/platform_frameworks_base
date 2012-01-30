@@ -140,7 +140,7 @@ extern "C" int EffectQueryEffect(uint32_t index,
     return 0;
 } /* end EffectQueryNext */
 
-extern "C" int EffectCreate(effect_uuid_t *uuid,
+extern "C" int EffectCreate(const effect_uuid_t *uuid,
                             int32_t sessionId,
                             int32_t ioId,
                             effect_handle_t *pHandle) {
@@ -195,7 +195,7 @@ extern "C" int EffectRelease(effect_handle_t handle) {
     return 0;
 } /* end EffectRelease */
 
-extern "C" int EffectGetDescriptor(effect_uuid_t       *uuid,
+extern "C" int EffectGetDescriptor(const effect_uuid_t *uuid,
                                    effect_descriptor_t *pDescriptor) {
 
     if (pDescriptor == NULL || uuid == NULL){

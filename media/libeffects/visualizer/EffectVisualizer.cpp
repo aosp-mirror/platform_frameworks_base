@@ -190,7 +190,7 @@ int VisualizerLib_QueryEffect(uint32_t index,
     return 0;
 }
 
-int VisualizerLib_Create(effect_uuid_t *uuid,
+int VisualizerLib_Create(const effect_uuid_t *uuid,
                          int32_t sessionId,
                          int32_t ioId,
                          effect_handle_t *pHandle) {
@@ -240,7 +240,7 @@ int VisualizerLib_Release(effect_handle_t handle) {
     return 0;
 }
 
-int VisualizerLib_GetDescriptor(effect_uuid_t       *uuid,
+int VisualizerLib_GetDescriptor(const effect_uuid_t *uuid,
                                 effect_descriptor_t *pDescriptor) {
 
     if (pDescriptor == NULL || uuid == NULL){

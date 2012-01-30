@@ -5382,7 +5382,7 @@ status_t AudioFlinger::queryEffect(uint32_t index, effect_descriptor_t *descript
     return EffectQueryEffect(index, descriptor);
 }
 
-status_t AudioFlinger::getEffectDescriptor(effect_uuid_t *pUuid,
+status_t AudioFlinger::getEffectDescriptor(const effect_uuid_t *pUuid,
         effect_descriptor_t *descriptor) const
 {
     Mutex::Autolock _l(mLock);
