@@ -169,7 +169,9 @@ class Network {
             if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction()))
                 return;
 
-            NetworkInfo info = (NetworkInfo)intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+            final ConnectivityManager connManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            final NetworkInfo info = connManager.getActiveNetworkInfo();
             if (info != null)
                 mRoaming = info.isRoaming();
         };

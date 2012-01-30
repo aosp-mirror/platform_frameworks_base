@@ -146,10 +146,10 @@ public class ConnectionUtil {
                 Log.v("ConnectivityReceiver", "onReceive() called with " + intent);
                 return;
             }
-            if (intent.hasExtra(ConnectivityManager.EXTRA_NETWORK_INFO)) {
-                mNetworkInfo = (NetworkInfo)
-                        intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-            }
+
+            final ConnectivityManager connManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            mNetworkInfo = connManager.getActiveNetworkInfo();
 
             if (intent.hasExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO)) {
                 mOtherNetworkInfo = (NetworkInfo)
