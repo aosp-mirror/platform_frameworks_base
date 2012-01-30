@@ -511,7 +511,7 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
     @SmallTest
     public void testFormatNumber() {
         assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("650 2910000", "US"));
-        assertEquals("123-4567", PhoneNumberUtils.formatNumber("1234567", "US"));
+        assertEquals("223-4567", PhoneNumberUtils.formatNumber("2234567", "US"));
         assertEquals("(800) 466-4114", PhoneNumberUtils.formatNumber("800-GOOG-114", "US"));
     }
 
