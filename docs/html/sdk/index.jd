@@ -1,4 +1,5 @@
 page.title=Android SDK
+page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 sdk.redirect=0
 
 sdk.win_installer=installer_r16-windows.exe
