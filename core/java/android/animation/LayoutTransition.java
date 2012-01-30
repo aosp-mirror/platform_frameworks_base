@@ -1024,18 +1024,25 @@ public class LayoutTransition {
      *
      * @param parent The ViewGroup to which the View is being added.
      * @param child The View being added to the ViewGroup.
+     * @param changesLayout Whether the removal will cause changes in the layout of other views
+     * in the container. INVISIBLE views becoming VISIBLE will not cause changes and thus will not
+     * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
-    public void addChild(ViewGroup parent, View child) {
+    private void addChild(ViewGroup parent, View child, boolean changesLayout) {
         // Want disappearing animations to finish up before proceeding
         cancel(DISAPPEARING);
-        // Also, cancel changing animations so that we start fresh ones from current locations
-        cancel(CHANGE_APPEARING);
+        if (changesLayout) {
+            // Also, cancel changing animations so that we start fresh ones from current locations
+            cancel(CHANGE_APPEARING);
+        }
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, APPEARING);
             }
         }
-        runChangeTransition(parent, child, APPEARING);
+        if (changesLayout) {
+            runChangeTransition(parent, child, APPEARING);
+        }
         runAppearingTransition(parent, child);
     }
 
@@ -1048,8 +1055,31 @@ public class LayoutTransition {
      * @param parent The ViewGroup to which the View is being added.
      * @param child The View being added to the ViewGroup.
      */
+    public void addChild(ViewGroup parent, View child) {
+        addChild(parent, child, true);
+    }
+
+    /**
+     * @deprecated Use {@link #showChild(android.view.ViewGroup, android.view.View, int)}.
+     */
+    @Deprecated
     public void showChild(ViewGroup parent, View child) {
-        addChild(parent, child);
+        addChild(parent, child, true);
+    }
+
+    /**
+     * This method is called by ViewGroup when a child view is about to be made visible in the
+     * container. This callback starts the process of a transition; we grab the starting
+     * values, listen for changes to all of the children of the container, and start appropriate
+     * animations.
+     *
+     * @param parent The ViewGroup in which the View is being made visible.
+     * @param child The View being made visible.
+     * @param oldVisibility The previous visibility value of the child View, either
+     * {@link View#GONE} or {@link View#INVISIBLE}.
+     */
+    public void showChild(ViewGroup parent, View child, int oldVisibility) {
+        addChild(parent, child, oldVisibility == View.GONE);
     }
 
     /**
@@ -1060,18 +1090,25 @@ public class LayoutTransition {
      *
      * @param parent The ViewGroup from which the View is being removed.
      * @param child The View being removed from the ViewGroup.
+     * @param changesLayout Whether the removal will cause changes in the layout of other views
+     * in the container. Views becoming INVISIBLE will not cause changes and thus will not
+     * affect CHANGE_APPEARING or CHANGE_DISAPPEARING animations.
      */
-    public void removeChild(ViewGroup parent, View child) {
+    private void removeChild(ViewGroup parent, View child, boolean changesLayout) {
         // Want appearing animations to finish up before proceeding
         cancel(APPEARING);
-        // Also, cancel changing animations so that we start fresh ones from current locations
-        cancel(CHANGE_DISAPPEARING);
+        if (changesLayout) {
+            // Also, cancel changing animations so that we start fresh ones from current locations
+            cancel(CHANGE_DISAPPEARING);
+        }
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, DISAPPEARING);
             }
         }
-        runChangeTransition(parent, child, DISAPPEARING);
+        if (changesLayout) {
+            runChangeTransition(parent, child, DISAPPEARING);
+        }
         runDisappearingTransition(parent, child);
     }
 
@@ -1084,8 +1121,31 @@ public class LayoutTransition {
      * @param parent The ViewGroup from which the View is being removed.
      * @param child The View being removed from the ViewGroup.
      */
+    public void removeChild(ViewGroup parent, View child) {
+        removeChild(parent, child, true);
+    }
+
+    /**
+     * @deprecated Use {@link #hideChild(android.view.ViewGroup, android.view.View, int)}.
+     */
+    @Deprecated
     public void hideChild(ViewGroup parent, View child) {
-        removeChild(parent, child);
+        removeChild(parent, child, true);
+    }
+
+    /**
+     * This method is called by ViewGroup when a child view is about to be hidden in
+     * container. This callback starts the process of a transition; we grab the starting
+     * values, listen for changes to all of the children of the container, and start appropriate
+     * animations.
+     *
+     * @param parent The parent ViewGroup of the View being hidden.
+     * @param child The View being hidden.
+     * @param newVisibility The new visibility value of the child View, either
+     * {@link View#GONE} or {@link View#INVISIBLE}.
+     */
+    public void hideChild(ViewGroup parent, View child, int newVisibility) {
+        removeChild(parent, child, newVisibility == View.GONE);
     }
 
     /**

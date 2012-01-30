@@ -2288,7 +2288,8 @@ package android.animation {
     method public long getStagger(int);
     method public long getStartDelay(int);
     method public java.util.List<android.animation.LayoutTransition.TransitionListener> getTransitionListeners();
-    method public void hideChild(android.view.ViewGroup, android.view.View);
+    method public deprecated void hideChild(android.view.ViewGroup, android.view.View);
+    method public void hideChild(android.view.ViewGroup, android.view.View, int);
     method public boolean isChangingLayout();
     method public boolean isRunning();
     method public void removeChild(android.view.ViewGroup, android.view.View);
@@ -2300,7 +2301,8 @@ package android.animation {
     method public void setInterpolator(int, android.animation.TimeInterpolator);
     method public void setStagger(int, long);
     method public void setStartDelay(int, long);
-    method public void showChild(android.view.ViewGroup, android.view.View);
+    method public deprecated void showChild(android.view.ViewGroup, android.view.View);
+    method public void showChild(android.view.ViewGroup, android.view.View, int);
     field public static final int APPEARING = 2; // 0x2
     field public static final int CHANGE_APPEARING = 0; // 0x0
     field public static final int CHANGE_DISAPPEARING = 1; // 0x1
