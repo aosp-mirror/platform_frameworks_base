@@ -138,7 +138,10 @@ public class Renderable extends RenderableBase {
             ShaderParam sp = allParamsIter.next();
             if (sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                mRsFieldItem.pf_textures[paramIndex++] = p.getTexture().getRsData();
+                TextureBase tex = p.getTexture();
+                if (tex != null) {
+                    mRsFieldItem.pf_textures[paramIndex++] = tex.getRsData();
+                }
             }
         }
         ProgramFragment pf = mRenderState.mFragment.mProgram;

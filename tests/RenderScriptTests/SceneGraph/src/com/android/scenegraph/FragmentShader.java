@@ -19,6 +19,8 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import com.android.scenegraph.TextureBase;
+
 import android.content.res.Resources;
 import android.renderscript.*;
 import android.renderscript.ProgramFragment.Builder;
@@ -102,7 +104,10 @@ public class FragmentShader extends Shader {
             ShaderParam sp = mSourceParams.get(mShaderTextureNames.get(i));
             if (sp != null && sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                mProgram.bindTexture(p.getTexture().getRsData(), shaderTextureStart + i);
+                TextureBase tex = p.getTexture();
+                if (tex != null) {
+                    mProgram.bindTexture(tex.getRsData(), shaderTextureStart + i);
+                }
             }
         }
     }
