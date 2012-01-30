@@ -1047,7 +1047,7 @@ public abstract class HardwareRenderer {
                     EGL_BLUE_SIZE, 8,
                     EGL_ALPHA_SIZE, 8,
                     EGL_DEPTH_SIZE, 0,
-                    EGL_STENCIL_SIZE, 0,
+                    EGL_STENCIL_SIZE, GLES20Canvas.getStencilSize(),
                     EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
                             (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
                     EGL_NONE

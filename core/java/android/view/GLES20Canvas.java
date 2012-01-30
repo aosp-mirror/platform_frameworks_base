@@ -189,7 +189,7 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native int nGetMaximumTextureWidth();
-    private static native int nGetMaximumTextureHeight();    
+    private static native int nGetMaximumTextureHeight();
 
     ///////////////////////////////////////////////////////////////////////////
     // Setup
@@ -268,13 +268,30 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native void nFinish(int renderer);
 
+    /**
+     * Returns the size of the stencil buffer required by the underlying
+     * implementation.
+     * 
+     * @return The minimum number of bits the stencil buffer must. Always >= 0.
+     * 
+     * @hide
+     */
+    public static int getStencilSize() {
+        return nGetStencilSize();
+    }
+
+    private static native int nGetStencilSize();
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Functor
+    ///////////////////////////////////////////////////////////////////////////
+
     @Override
     public boolean callDrawGLFunction(int drawGLFunction) {
         return nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 
     private static native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
-
 
     ///////////////////////////////////////////////////////////////////////////
     // Memory
