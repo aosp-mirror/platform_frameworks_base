@@ -212,6 +212,7 @@ public:
     virtual void dump(String8& result, char* scratch, size_t size) const;
     virtual void shortDump(String8& result, char* scratch, size_t size) const;
     virtual void dumpStats(String8& result, char* buffer, size_t SIZE) const;
+    virtual void clearStats();
 
 
     enum { // flags for doTransaction()

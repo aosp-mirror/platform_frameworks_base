@@ -553,8 +553,6 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 
     result.append(buffer);
 
-    LayerBase::dumpStats(result, buffer, SIZE);
-
     if (mSurfaceTexture != 0) {
         mSurfaceTexture->dump(result, "            ", buffer, SIZE);
     }
@@ -578,6 +576,12 @@ void Layer::dumpStats(String8& result, char* buffer, size_t SIZE) const
                 time_set);
     }
     result.append("\n");
+}
+
+void Layer::clearStats()
+{
+    LayerBaseClient::clearStats();
+    memset(mFrameStats, 0, sizeof(mFrameStats));
 }
 
 uint32_t Layer::getEffectiveUsage(uint32_t usage) const

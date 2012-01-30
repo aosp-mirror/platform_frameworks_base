@@ -489,13 +489,14 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
     result.append(buffer);
 }
 
-void LayerBase::shortDump(String8& result, char* scratch, size_t size) const
-{
+void LayerBase::shortDump(String8& result, char* scratch, size_t size) const {
     LayerBase::dump(result, scratch, size);
 }
 
-void LayerBase::dumpStats(String8& result, char* scratch, size_t SIZE) const
-{
+void LayerBase::dumpStats(String8& result, char* scratch, size_t SIZE) const {
+}
+
+void LayerBase::clearStats() {
 }
 
 // ---------------------------------------------------------------------------

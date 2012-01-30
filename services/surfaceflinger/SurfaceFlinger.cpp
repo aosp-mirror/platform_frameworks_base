@@ -1486,11 +1486,26 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
 
         bool dumpAll = true;
         size_t index = 0;
-        if (args.size()) {
+        size_t numArgs = args.size();
+        if (numArgs) {
             dumpAll = false;
-            if (args[index] == String16("--latency")) {
+
+            if ((index < numArgs) &&
+                    (args[index] == String16("--list"))) {
+                index++;
+                listLayersLocked(args, index, result, buffer, SIZE);
+            }
+
+            if ((index < numArgs) &&
+                    (args[index] == String16("--latency"))) {
                 index++;
                 dumpStatsLocked(args, index, result, buffer, SIZE);
+            }
+
+            if ((index < numArgs) &&
+                    (args[index] == String16("--latency-clear"))) {
+                index++;
+                clearStatsLocked(args, index, result, buffer, SIZE);
             }
         }
 
@@ -1504,6 +1519,18 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
     }
     write(fd, result.string(), result.size());
     return NO_ERROR;
+}
+
+void SurfaceFlinger::listLayersLocked(const Vector<String16>& args, size_t& index,
+        String8& result, char* buffer, size_t SIZE) const
+{
+    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    const size_t count = currentLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        snprintf(buffer, SIZE, "%s\n", layer->getName().string());
+        result.append(buffer);
+    }
 }
 
 void SurfaceFlinger::dumpStatsLocked(const Vector<String16>& args, size_t& index,
@@ -1525,6 +1552,25 @@ void SurfaceFlinger::dumpStatsLocked(const Vector<String16>& args, size_t& index
         }
         if (name.isEmpty() || (name == layer->getName())) {
             layer->dumpStats(result, buffer, SIZE);
+        }
+    }
+}
+
+void SurfaceFlinger::clearStatsLocked(const Vector<String16>& args, size_t& index,
+        String8& result, char* buffer, size_t SIZE) const
+{
+    String8 name;
+    if (index < args.size()) {
+        name = String8(args[index]);
+        index++;
+    }
+
+    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    const size_t count = currentLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        if (name.isEmpty() || (name == layer->getName())) {
+            layer->clearStats();
         }
     }
 }
