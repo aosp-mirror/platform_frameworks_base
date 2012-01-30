@@ -162,7 +162,7 @@ Allocation1DElementData {
 	param uint32_t x
 	param uint32_t lod
 	param const void *data
-	param uint32_t comp_offset
+	param size_t comp_offset
 	}
 
 Allocation2DData {
@@ -183,7 +183,7 @@ Allocation2DElementData {
 	param uint32_t lod
 	param RsAllocationCubemapFace face
 	param const void *data
-	param uint32_t element_offset
+	param size_t element_offset
 	}
 
 AllocationGenerateMipmaps {
