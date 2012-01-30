@@ -6822,7 +6822,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
         if ((changed & VISIBILITY_MASK) != 0) {
             if (mParent instanceof ViewGroup) {
-                ((ViewGroup) mParent).onChildVisibilityChanged(this, (flags & VISIBILITY_MASK));
+                ((ViewGroup) mParent).onChildVisibilityChanged(this, (changed & VISIBILITY_MASK),
+                        (flags & VISIBILITY_MASK));
                 ((View) mParent).invalidate(true);
             } else if (mParent != null) {
                 mParent.invalidateChild(this, null);
