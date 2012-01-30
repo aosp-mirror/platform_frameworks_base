@@ -1194,7 +1194,6 @@ public final class WebViewCore {
                                 mSettings.onDestroyed();
                                 mNativeClass = 0;
                                 mWebView = null;
-                                WebCoreThreadWatchdog.quit();
                             }
                             break;
 

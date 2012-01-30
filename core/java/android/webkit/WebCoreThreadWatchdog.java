@@ -40,9 +40,6 @@ class WebCoreThreadWatchdog implements Runnable {
     // WebCore thread unresponsive.
     private static final int TIMED_OUT = 101;
 
-    // Message to tell the Watchdog thread to terminate.
-    private static final int QUIT = 102;
-
     // Wait 10s after hearing back from the WebCore thread before checking it's still alive.
     private static final int HEARTBEAT_PERIOD = 10 * 1000;
 
@@ -57,7 +54,6 @@ class WebCoreThreadWatchdog implements Runnable {
     private Handler mWebCoreThreadHandler;
     private Handler mHandler;
     private boolean mPaused;
-    private boolean mPendingQuit;
 
     private static WebCoreThreadWatchdog sInstance;
 
@@ -88,12 +84,6 @@ class WebCoreThreadWatchdog implements Runnable {
         }
     }
 
-    public synchronized static void quit() {
-        if (sInstance != null) {
-            sInstance.quitWatchdog();
-        }
-    }
-
     private void setContext(Context context) {
         mContext = context;
     }
@@ -101,19 +91,6 @@ class WebCoreThreadWatchdog implements Runnable {
     private WebCoreThreadWatchdog(Context context, Handler webCoreThreadHandler) {
         mContext = context;
         mWebCoreThreadHandler = webCoreThreadHandler;
-    }
-
-    private void quitWatchdog() {
-        if (mHandler == null) {
-            // The thread hasn't started yet, so set a flag to stop it starting.
-            mPendingQuit = true;
-            return;
-        }
-        // Clear any pending messages, and then post a quit to the WatchDog handler.
-        mHandler.removeMessages(TIMED_OUT);
-        mHandler.removeMessages(IS_ALIVE);
-        mWebCoreThreadHandler.removeMessages(EventHub.HEARTBEAT);
-        mHandler.obtainMessage(QUIT).sendToTarget();
     }
 
     private void pauseWatchdog() {
@@ -146,12 +123,8 @@ class WebCoreThreadWatchdog implements Runnable {
         mHandler.sendMessageDelayed(mHandler.obtainMessage(TIMED_OUT), TIMEOUT_PERIOD);
     }
 
-    private boolean createHandler() {
+    private void createHandler() {
         synchronized (WebCoreThreadWatchdog.class) {
-            if (mPendingQuit) {
-                return false;
-            }
-
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
@@ -206,15 +179,9 @@ class WebCoreThreadWatchdog implements Runnable {
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .show();
                         break;
-
-                    case QUIT:
-                        Looper.myLooper().quit();
-                        break;
                     }
                 }
             };
-
-            return true;
         }
     }
 
@@ -222,9 +189,7 @@ class WebCoreThreadWatchdog implements Runnable {
     public void run() {
         Looper.prepare();
 
-        if (!createHandler()) {
-            return;
-        }
+        createHandler();
 
         // Send the initial control to WebViewCore and start the timeout timer as long as we aren't
         // paused.
