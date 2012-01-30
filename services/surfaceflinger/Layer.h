@@ -88,6 +88,7 @@ protected:
     virtual void onFirstRef();
     virtual void dump(String8& result, char* scratch, size_t size) const;
     virtual void dumpStats(String8& result, char* buffer, size_t SIZE) const;
+    virtual void clearStats();
 
 private:
     friend class SurfaceTextureLayer;
