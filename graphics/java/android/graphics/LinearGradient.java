@@ -28,8 +28,8 @@ public class LinearGradient extends Shader {
                             the the colors are distributed evenly along the gradient line.
         @param  tile        The Shader tiling mode
 	*/
-	public LinearGradient(float x0, float y0, float x1, float y1,
-                          int colors[], float positions[], TileMode tile) {
+	public LinearGradient(float x0, float y0, float x1, float y1, int colors[], float positions[],
+            TileMode tile) {
         if (colors.length < 2) {
             throw new IllegalArgumentException("needs >= 2 number of colors");
         }
@@ -50,8 +50,8 @@ public class LinearGradient extends Shader {
         @param  color1  The color at the end of the gradient line.
         @param  tile    The Shader tiling mode
 	*/
-	public LinearGradient(float x0, float y0, float x1, float y1,
-                          int color0, int color1, TileMode tile) {
+	public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
+            TileMode tile) {
         native_instance = nativeCreate2(x0, y0, x1, y1, color0, color1, tile.nativeInt);
         native_shader = nativePostCreate2(native_instance, x0, y0, x1, y1, color0, color1,
                 tile.nativeInt);
