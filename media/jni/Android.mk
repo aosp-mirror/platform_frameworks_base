@@ -28,7 +28,11 @@ LOCAL_SHARED_LIBRARIES := \
     libcamera_client \
     libmtp \
     libusbhost \
-    libexif
+    libexif \
+    libstagefright_amrnb_common \
+
+LOCAL_STATIC_LIBRARIES := \
+    libstagefright_amrnbenc
 
 LOCAL_C_INCLUDES += \
     external/jhead \
