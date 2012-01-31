@@ -124,7 +124,9 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void setSignalStrengthDefaultValues() {
-        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, false);
+        // TODO Make a constructor only has boolean gsm as parameter
+        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, SignalStrength.INVALID_SNR, -1, false);
     }
 
     @Override
@@ -429,8 +431,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             setSignalStrengthDefaultValues();
         } else {
             int[] ints = (int[])ar.result;
-            int lteCqi = 99, lteRsrp = -1;
-            int lteRssi = 99;
+
+            int lteRssi = -1;
+            int lteRsrp = -1;
+            int lteRsrq = -1;
+            int lteRssnr = SignalStrength.INVALID_SNR;
+            int lteCqi = -1;
+
             int offset = 2;
             int cdmaDbm = (ints[offset] > 0) ? -ints[offset] : -120;
             int cdmaEcio = (ints[offset + 1] > 0) ? -ints[offset + 1] : -160;
@@ -438,10 +445,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             int evdoEcio = (ints[offset + 3] > 0) ? -ints[offset + 3] : -1;
             int evdoSnr = ((ints[offset + 4] > 0) && (ints[offset + 4] <= 8)) ? ints[offset + 4]
                     : -1;
+
             if (networkType == ServiceState.RADIO_TECHNOLOGY_LTE) {
-                lteRssi = (ints[offset + 5] >= 0) ? ints[offset + 5] : 99;
-                lteRsrp = (ints[offset + 6] < 0) ? ints[offset + 6] : -1;
-                lteCqi = (ints[offset + 7] >= 0) ? ints[offset + 7] : 99;
+                lteRssi = ints[offset+5];
+                lteRsrp = ints[offset+6];
+                lteRsrq = ints[offset+7];
+                lteRssnr = ints[offset+8];
+                lteCqi = ints[offset+9];
             }
 
             if (networkType != ServiceState.RADIO_TECHNOLOGY_LTE) {
@@ -449,7 +459,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                         evdoSnr, false);
             } else {
                 mSignalStrength = new SignalStrength(99, -1, cdmaDbm, cdmaEcio, evdoRssi, evdoEcio,
-                        evdoSnr, lteRssi, lteRsrp, -1, -1, lteCqi, true);
+                        evdoSnr, lteRssi, lteRsrp, lteRsrq, lteRssnr, lteCqi, true);
             }
         }
 
