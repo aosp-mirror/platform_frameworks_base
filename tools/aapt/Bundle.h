@@ -14,6 +14,18 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
+enum {
+    SDK_CUPCAKE = 3,
+    SDK_DONUT = 4,
+    SDK_ECLAIR = 5,
+    SDK_ECLAIR_0_1 = 6,
+    SDK_MR1 = 7,
+    SDK_FROYO = 8,
+    SDK_HONEYCOMB_MR2 = 13,
+    SDK_ICE_CREAM_SANDWICH = 14,
+    SDK_ICE_CREAM_SANDWICH_MR1 = 15,
+};
+
 /*
  * Things we can do.
  */
@@ -82,7 +94,6 @@ public:
     void setRequireLocalization(bool val) { mRequireLocalization = val; }
     bool getPseudolocalize(void) const { return mPseudolocalize; }
     void setPseudolocalize(bool val) { mPseudolocalize = val; }
-    bool getWantUTF16(void) const { return mWantUTF16; }
     void setWantUTF16(bool val) { mWantUTF16 = val; }
     bool getValues(void) const { return mValues; }
     void setValues(bool val) { mValues = val; }
@@ -102,6 +113,10 @@ public:
     void setAutoAddOverlay(bool val) { mAutoAddOverlay = val; }
     bool getGenDependencies() { return mGenDependencies; }
     void setGenDependencies(bool val) { mGenDependencies = val; }
+
+    bool getUTF16StringsOption() {
+        return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
+    }
 
     /*
      * Input options.

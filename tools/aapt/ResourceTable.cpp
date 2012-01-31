@@ -2047,7 +2047,8 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
                                   uint32_t attrID,
                                   const Vector<StringPool::entry_style_span>* style,
                                   String16* outStr, void* accessorCookie,
-                                  uint32_t attrType)
+                                  uint32_t attrType, const String8* configTypeName,
+                                  const ConfigDescription* config)
 {
     String16 finalStr;
 
@@ -2075,10 +2076,19 @@ bool ResourceTable::stringToValue(Res_value* outValue, StringPool* pool,
     if (outValue->dataType == outValue->TYPE_STRING) {
         // Should do better merging styles.
         if (pool) {
-            if (style != NULL && style->size() > 0) {
-                outValue->data = pool->add(finalStr, *style);
+            String8 configStr;
+            if (config != NULL) {
+                configStr = config->toString();
             } else {
-                outValue->data = pool->add(finalStr, true);
+                configStr = "(null)";
+            }
+            NOISY(printf("Adding to pool string style #%d config %s: %s\n",
+                    style != NULL ? style->size() : 0,
+                    configStr.string(), String8(finalStr).string()));
+            if (style != NULL && style->size() > 0) {
+                outValue->data = pool->add(finalStr, *style, configTypeName, config);
+            } else {
+                outValue->data = pool->add(finalStr, true, configTypeName, config);
             }
         } else {
             // Caller will fill this in later.
@@ -2537,16 +2547,19 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
         return err;
     }
 
+    const ConfigDescription nullConfig;
+
     const size_t N = mOrderedPackages.size();
     size_t pi;
 
     const static String16 mipmap16("mipmap");
 
-    bool useUTF8 = !bundle->getWantUTF16() && bundle->isMinSdkAtLeast(SDK_FROYO);
+    bool useUTF8 = !bundle->getUTF16StringsOption();
 
     // Iterate through all data, collecting all values (strings,
     // references, etc).
     StringPool valueStrings = StringPool(false, useUTF8);
+    Vector<sp<Entry> > allEntries;
     for (pi=0; pi<N; pi++) {
         sp<Package> p = mOrderedPackages.itemAt(pi);
         if (p->getTypes().size() == 0) {
@@ -2567,6 +2580,19 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
             const String16 typeName(t->getName());
             typeStrings.add(typeName, false);
 
+            // This is a hack to tweak the sorting order of the final strings,
+            // to put stuff that is generally not language-specific first.
+            String8 configTypeName(typeName);
+            if (configTypeName == "drawable" || configTypeName == "layout"
+                    || configTypeName == "color" || configTypeName == "anim"
+                    || configTypeName == "interpolator" || configTypeName == "animator"
+                    || configTypeName == "xml" || configTypeName == "menu"
+                    || configTypeName == "mipmap" || configTypeName == "raw") {
+                configTypeName = "1complex";
+            } else {
+                configTypeName = "2value";
+            }
+
             const bool filterable = (typeName != mipmap16);
 
             const size_t N = t->getOrderedConfigs().size();
@@ -2586,16 +2612,38 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                         continue;
                     }
                     e->setNameIndex(keyStrings.add(e->getName(), true));
-                    status_t err = e->prepareFlatten(&valueStrings, this);
+
+                    // If this entry has no values for other configs,
+                    // and is the default config, then it is special.  Otherwise
+                    // we want to add it with the config info.
+                    ConfigDescription* valueConfig = NULL;
+                    if (N != 1 || config == nullConfig) {
+                        valueConfig = &config;
+                    }
+
+                    status_t err = e->prepareFlatten(&valueStrings, this,
+                            &configTypeName, &config);
                     if (err != NO_ERROR) {
                         return err;
                     }
+                    allEntries.add(e);
                 }
             }
         }
 
         p->setTypeStrings(typeStrings.createStringBlock());
         p->setKeyStrings(keyStrings.createStringBlock());
+    }
+
+    if (bundle->getOutputAPKFile() != NULL) {
+        // Now we want to sort the value strings for better locality.  This will
+        // cause the positions of the strings to change, so we need to go back
+        // through out resource entries and update them accordingly.  Only need
+        // to do this if actually writing the output file.
+        valueStrings.sortByConfig();
+        for (pi=0; pi<allEntries.size(); pi++) {
+            allEntries[pi]->remapStringValue(&valueStrings);
+        }
     }
 
     ssize_t strAmt = 0;
@@ -3137,14 +3185,16 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
     return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
 }
 
-status_t ResourceTable::Entry::prepareFlatten(StringPool* strings, ResourceTable* table)
+status_t ResourceTable::Entry::prepareFlatten(StringPool* strings, ResourceTable* table,
+        const String8* configTypeName, const ConfigDescription* config)
 {
     if (mType == TYPE_ITEM) {
         Item& it = mItem;
         AccessorCookie ac(it.sourcePos, String8(mName), String8(it.value));
         if (!table->stringToValue(&it.parsedValue, strings,
                                   it.value, false, true, 0,
-                                  &it.style, NULL, &ac, mItemFormat)) {
+                                  &it.style, NULL, &ac, mItemFormat,
+                                  configTypeName, config)) {
             return UNKNOWN_ERROR;
         }
     } else if (mType == TYPE_BAG) {
@@ -3155,8 +3205,32 @@ status_t ResourceTable::Entry::prepareFlatten(StringPool* strings, ResourceTable
             AccessorCookie ac(it.sourcePos, String8(key), String8(it.value));
             if (!table->stringToValue(&it.parsedValue, strings,
                                       it.value, false, true, it.bagKeyId,
-                                      &it.style, NULL, &ac, it.format)) {
+                                      &it.style, NULL, &ac, it.format,
+                                      configTypeName, config)) {
                 return UNKNOWN_ERROR;
+            }
+        }
+    } else {
+        mPos.error("Error: entry %s is not a single item or a bag.\n",
+                   String8(mName).string());
+        return UNKNOWN_ERROR;
+    }
+    return NO_ERROR;
+}
+
+status_t ResourceTable::Entry::remapStringValue(StringPool* strings)
+{
+    if (mType == TYPE_ITEM) {
+        Item& it = mItem;
+        if (it.parsedValue.dataType == Res_value::TYPE_STRING) {
+            it.parsedValue.data = strings->mapOriginalPosToNewPos(it.parsedValue.data);
+        }
+    } else if (mType == TYPE_BAG) {
+        const size_t N = mBag.size();
+        for (size_t i=0; i<N; i++) {
+            Item& it = mBag.editValueAt(i);
+            if (it.parsedValue.dataType == Res_value::TYPE_STRING) {
+                it.parsedValue.data = strings->mapOriginalPosToNewPos(it.parsedValue.data);
             }
         }
     } else {

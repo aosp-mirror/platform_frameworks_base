@@ -479,6 +479,11 @@ int doDump(Bundle* bundle)
 #ifndef HAVE_ANDROID_OS
         res.print(bundle->getValues());
 #endif
+
+    } else if (strcmp("strings", option) == 0) {
+        const ResStringPool* pool = res.getTableStringBlock(0);
+        printStringPool(pool);
+
     } else if (strcmp("xmltree", option) == 0) {
         if (bundle->getFileSpecCount() < 3) {
             fprintf(stderr, "ERROR: no dump xmltree resource file specified\n");
@@ -1382,7 +1387,7 @@ int doDump(Bundle* bundle)
                 delete dir;
             }
         } else if (strcmp("badger", option) == 0) {
-            printf(CONSOLE_DATA);
+            printf("%s", CONSOLE_DATA);
         } else if (strcmp("configurations", option) == 0) {
             Vector<ResTable_config> configs;
             res.getConfigurations(&configs);

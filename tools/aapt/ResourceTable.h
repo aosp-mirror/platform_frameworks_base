@@ -76,6 +76,37 @@ public:
     class Type;
     class Entry;
 
+    struct ConfigDescription : public ResTable_config {
+        ConfigDescription() {
+            memset(this, 0, sizeof(*this));
+            size = sizeof(ResTable_config);
+        }
+        ConfigDescription(const ResTable_config&o) {
+            *static_cast<ResTable_config*>(this) = o;
+            size = sizeof(ResTable_config);
+        }
+        ConfigDescription(const ConfigDescription&o) {
+            *static_cast<ResTable_config*>(this) = o;
+        }
+
+        ConfigDescription& operator=(const ResTable_config& o) {
+            *static_cast<ResTable_config*>(this) = o;
+            size = sizeof(ResTable_config);
+            return *this;
+        }
+        ConfigDescription& operator=(const ConfigDescription& o) {
+            *static_cast<ResTable_config*>(this) = o;
+            return *this;
+        }
+
+        inline bool operator<(const ConfigDescription& o) const { return compare(o) < 0; }
+        inline bool operator<=(const ConfigDescription& o) const { return compare(o) <= 0; }
+        inline bool operator==(const ConfigDescription& o) const { return compare(o) == 0; }
+        inline bool operator!=(const ConfigDescription& o) const { return compare(o) != 0; }
+        inline bool operator>=(const ConfigDescription& o) const { return compare(o) >= 0; }
+        inline bool operator>(const ConfigDescription& o) const { return compare(o) > 0; }
+    };
+
     ResourceTable(Bundle* bundle, const String16& assetsPackage);
 
     status_t addIncludedResources(Bundle* bundle, const sp<AaptAssets>& assets);
@@ -183,7 +214,9 @@ public:
                        uint32_t attrID,
                        const Vector<StringPool::entry_style_span>* style = NULL,
                        String16* outStr = NULL, void* accessorCookie = NULL,
-                       uint32_t attrType = ResTable_map::TYPE_ANY);
+                       uint32_t attrType = ResTable_map::TYPE_ANY,
+                       const String8* configTypeName = NULL,
+                       const ConfigDescription* config = NULL);
 
     status_t assignResourceIds();
     status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL);
@@ -305,7 +338,10 @@ public:
         status_t assignResourceIds(ResourceTable* table,
                                    const String16& package);
 
-        status_t prepareFlatten(StringPool* strings, ResourceTable* table);
+        status_t prepareFlatten(StringPool* strings, ResourceTable* table,
+               const String8* configTypeName, const ConfigDescription* config);
+
+        status_t remapStringValue(StringPool* strings);
 
         ssize_t flatten(Bundle*, const sp<AaptFile>& data, bool isPublic);
 
@@ -321,37 +357,6 @@ public:
         int32_t mNameIndex;
         uint32_t mParentId;
         SourcePos mPos;
-    };
-
-    struct ConfigDescription : public ResTable_config {
-        ConfigDescription() {
-            memset(this, 0, sizeof(*this));
-            size = sizeof(ResTable_config);
-        }
-        ConfigDescription(const ResTable_config&o) {
-            *static_cast<ResTable_config*>(this) = o;
-            size = sizeof(ResTable_config);
-        }
-        ConfigDescription(const ConfigDescription&o) {
-            *static_cast<ResTable_config*>(this) = o;
-        }
-        
-        ConfigDescription& operator=(const ResTable_config& o) {
-            *static_cast<ResTable_config*>(this) = o;
-            size = sizeof(ResTable_config);
-            return *this;
-        }
-        ConfigDescription& operator=(const ConfigDescription& o) {
-            *static_cast<ResTable_config*>(this) = o;
-            return *this;
-        }
-        
-        inline bool operator<(const ConfigDescription& o) const { return compare(o) < 0; }
-        inline bool operator<=(const ConfigDescription& o) const { return compare(o) <= 0; }
-        inline bool operator==(const ConfigDescription& o) const { return compare(o) == 0; }
-        inline bool operator!=(const ConfigDescription& o) const { return compare(o) != 0; }
-        inline bool operator>=(const ConfigDescription& o) const { return compare(o) >= 0; }
-        inline bool operator>(const ConfigDescription& o) const { return compare(o) > 0; }
     };
     
     class ConfigList : public RefBase {
