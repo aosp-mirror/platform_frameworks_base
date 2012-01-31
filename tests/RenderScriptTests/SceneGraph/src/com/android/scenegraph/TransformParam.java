@@ -49,19 +49,19 @@ public class TransformParam extends ShaderParam {
     }
 
     int getTypeFromName() {
-        int paramType = TRANSFORM_DATA;
+        int paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_DATA();
         if (mParamName.equalsIgnoreCase(view)) {
-            paramType = TRANSFORM_VIEW;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_VIEW();
         } else if(mParamName.equalsIgnoreCase(proj)) {
-            paramType = TRANSFORM_PROJ;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_PROJ();
         } else if(mParamName.equalsIgnoreCase(viewProj)) {
-            paramType = TRANSFORM_VIEW_PROJ;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_VIEW_PROJ();
         } else if(mParamName.equalsIgnoreCase(model)) {
-            paramType = TRANSFORM_MODEL;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL();
         } else if(mParamName.equalsIgnoreCase(modelView)) {
-            paramType = TRANSFORM_MODEL_VIEW;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL_VIEW();
         } else if(mParamName.equalsIgnoreCase(modelViewProj)) {
-            paramType = TRANSFORM_MODEL_VIEW_PROJ;
+            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL_VIEW_PROJ();
         }
         return paramType;
     }

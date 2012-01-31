@@ -92,11 +92,19 @@ public class Camera extends SceneGraphBase {
             return;
         }
 
+        if (mTransform == null) {
+            throw new RuntimeException("Cameras without transforms are invalid");
+        }
+
         ScriptField_Camera_s.Item cam = new ScriptField_Camera_s.Item();
         cam.horizontalFOV = mFOV;
         cam.near = mNear;
         cam.far = mFar;
+        cam.aspect = 0;
         cam.transformMatrix = mTransform.getRSData().getAllocation();
+        cam.transformTimestamp = 1;
+        cam.timestamp = 1;
+        cam.isDirty = 1;
         cam.name = getNameAlloc(rs);
         mField.set(cam, 0, true);
     }

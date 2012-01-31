@@ -88,6 +88,7 @@ public abstract class Transform extends SceneGraphBase {
         mTransformData = new ScriptField_SgTransform.Item();
         mTransformData.name = getNameAlloc(rs);
         mTransformData.isDirty = 1;
+        mTransformData.timestamp = 1;
 
         initLocalData();
         updateRSChildData(false);
