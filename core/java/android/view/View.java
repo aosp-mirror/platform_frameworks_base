@@ -10397,7 +10397,8 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
             // we copy in child display lists into ours in drawChild()
             mRecreateDisplayList = true;
             if (mDisplayList == null) {
-                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
+                final String name = getClass().getSimpleName();
+                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList(name);
                 // If we're creating a new display list, make sure our parent gets invalidated
                 // since they will need to recreate their display list to account for this
                 // new child display list.
