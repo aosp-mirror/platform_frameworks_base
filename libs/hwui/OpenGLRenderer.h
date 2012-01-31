@@ -143,6 +143,9 @@ public:
 
     ANDROID_API static uint32_t getStencilSize();
 
+    void startMark(const char* name) const;
+    void endMark() const;
+
 protected:
     /**
      * Compose the layer defined in the current snapshot with the layer

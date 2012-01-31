@@ -55,6 +55,16 @@ Caches::Caches(): Singleton<Caches>(), mInitialized(false) {
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 
+    if (extensions.hasDebugMarker()) {
+        eventMark = glInsertEventMarkerEXT;
+        startMark = glPushGroupMarkerEXT;
+        endMark = glPopGroupMarkerEXT;
+    } else {
+        eventMark = eventMarkNull;
+        startMark = startMarkNull;
+        endMark = endMarkNull;
+    }
+
     init();
 
     mDebugLevel = readDebugLevel();

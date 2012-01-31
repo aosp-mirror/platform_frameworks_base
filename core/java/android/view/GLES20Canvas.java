@@ -378,6 +378,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native int nGetDisplayListSize(int displayList);
 
+    static void setDisplayListName(int displayList, String name) {
+        nSetDisplayListName(displayList, name);
+    }
+
+    private static native void nSetDisplayListName(int displayList, String name);
+
     @Override
     public boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty) {
         return nDrawDisplayList(mRenderer,

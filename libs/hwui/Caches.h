@@ -240,7 +240,15 @@ public:
     GammaFontRenderer fontRenderer;
     ResourceCache resourceCache;
 
+    PFNGLINSERTEVENTMARKEREXTPROC eventMark;
+    PFNGLPUSHGROUPMARKEREXTPROC startMark;
+    PFNGLPOPGROUPMARKEREXTPROC endMark;
+
 private:
+    static void eventMarkNull(GLsizei length, const GLchar *marker) { }
+    static void startMarkNull(GLsizei length, const GLchar *marker) { }
+    static void endMarkNull() { }
+
     GLuint mCurrentBuffer;
     GLuint mCurrentIndicesBuffer;
     void* mCurrentPositionPointer;
