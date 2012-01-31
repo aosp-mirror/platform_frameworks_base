@@ -16,10 +16,6 @@
 
 package com.android.connectivitymanagertest.stress;
 
-import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
-import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
-import com.android.connectivitymanagertest.UtilHelper;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
@@ -31,14 +27,14 @@ import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.PowerManager;
-import android.os.IPowerManager;
-import android.os.SystemClock;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
-
 import android.util.Log;
+
+import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
+import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
+import com.android.connectivitymanagertest.UtilHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -79,6 +75,7 @@ public class WifiStressTest
     private String mPassword;
     private ConnectivityManagerStressTestRunner mRunner;
     private BufferedWriter mOutputWriter = null;
+    private boolean mIsWifiOnlyDevice;
 
     public WifiStressTest() {
         super(ConnectivityManagerTestActivity.class);
@@ -100,6 +97,7 @@ public class WifiStressTest
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
         mAct.turnScreenOn();
+        mIsWifiOnlyDevice = UtilHelper.isWifiOnly(mRunner.getTargetContext());
         if (!mAct.mWifiManager.isWifiEnabled()) {
             log("Enable wi-fi before stress tests.");
             if (!mAct.enableWifi()) {
@@ -271,7 +269,7 @@ public class WifiStressTest
             assertTrue("Wait for Wi-Fi to idle timeout",
                     mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
                     6 * ConnectivityManagerTestActivity.SHORT_TIMEOUT));
-            if (!UtilHelper.isWifiOnly()) {
+            if (!mIsWifiOnlyDevice) {
                 // use long timeout as the pppd startup may take several retries.
                 assertTrue("Wait for cellular connection timeout",
                         mAct.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
@@ -282,7 +280,7 @@ public class WifiStressTest
             assertEquals("Wi-Fi is reconnected", State.DISCONNECTED,
                     mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
 
-            if (!UtilHelper.isWifiOnly()) {
+            if (!mIsWifiOnlyDevice) {
                 assertEquals("Cellular connection is down", State.CONNECTED,
                              mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
                 assertTrue("Mobile is connected, but no data connection.", mAct.pingTest(null));

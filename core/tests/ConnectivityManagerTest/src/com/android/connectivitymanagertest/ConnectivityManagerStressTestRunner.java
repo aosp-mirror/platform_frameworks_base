@@ -46,7 +46,7 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        if (!UtilHelper.isWifiOnly()) {
+        if (!UtilHelper.isWifiOnly(getContext())) {
             suite.addTestSuite(WifiApStress.class);
             suite.addTestSuite(WifiStressTest.class);
         } else {
@@ -64,7 +64,7 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        if (!UtilHelper.isWifiOnly()) {
+        if (!UtilHelper.isWifiOnly(getContext())) {
             String valueStr = (String) icicle.get("softap_iterations");
             if (valueStr != null) {
                 int iteration = Integer.parseInt(valueStr);
