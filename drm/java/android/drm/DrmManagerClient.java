@@ -49,6 +49,8 @@ public class DrmManagerClient {
      */
     public static final int ERROR_UNKNOWN = -2000;
 
+    HandlerThread mInfoThread;
+    HandlerThread mEventThread;
     private static final String TAG = "DrmManagerClient";
 
     static {
@@ -105,6 +107,7 @@ public class DrmManagerClient {
 
     private int mUniqueId;
     private int mNativeContext;
+    private boolean mReleased;
     private Context mContext;
     private InfoHandler mInfoHandler;
     private EventHandler mEventHandler;
@@ -238,22 +241,62 @@ public class DrmManagerClient {
      */
     public DrmManagerClient(Context context) {
         mContext = context;
-
-        HandlerThread infoThread = new HandlerThread("DrmManagerClient.InfoHandler");
-        infoThread.start();
-        mInfoHandler = new InfoHandler(infoThread.getLooper());
-
-        HandlerThread eventThread = new HandlerThread("DrmManagerClient.EventHandler");
-        eventThread.start();
-        mEventHandler = new EventHandler(eventThread.getLooper());
+        mReleased = false;
 
         // save the unique id
-        mUniqueId = _initialize(new WeakReference<DrmManagerClient>(this));
+        mUniqueId = _initialize();
     }
 
     protected void finalize() {
-        _finalize(mUniqueId);
+        if (!mReleased) {
+            Log.w(TAG, "You should have called release()");
+            release();
+        }
     }
+
+    /**
+     * Releases resources associated with the current session of DrmManagerClient.
+     *
+     * It is considered good practice to call this method when the {@link DrmManagerClient} object
+     * is no longer needed in your application. After release() is called,
+     * {@link DrmManagerClient} is no longer usable since it has lost all of its required resource.
+     */
+    public void release() {
+        if (mReleased) {
+            Log.w(TAG, "You have already called release()");
+            return;
+        }
+        mReleased = true;
+        if (mEventHandler != null) {
+            mEventThread.quit();
+            mEventThread = null;
+        }
+        if (mInfoHandler != null) {
+            mInfoThread.quit();
+            mInfoThread = null;
+        }
+        mEventHandler = null;
+        mInfoHandler = null;
+        mOnEventListener = null;
+        mOnInfoListener = null;
+        mOnErrorListener = null;
+        _release(mUniqueId);
+    }
+
+
+    private void createListeners() {
+        if (mEventHandler == null && mInfoHandler == null) {
+            mInfoThread = new HandlerThread("DrmManagerClient.InfoHandler");
+            mInfoThread.start();
+            mInfoHandler = new InfoHandler(mInfoThread.getLooper());
+
+            mEventThread = new HandlerThread("DrmManagerClient.EventHandler");
+            mEventThread.start();
+            mEventHandler = new EventHandler(mEventThread.getLooper());
+            _setListeners(mUniqueId, new WeakReference<DrmManagerClient>(this));
+        }
+    }
+
 
     /**
      * Registers an {@link DrmManagerClient.OnInfoListener} callback, which is invoked when the 
@@ -262,8 +305,9 @@ public class DrmManagerClient {
      * @param infoListener Interface definition for the callback.
      */
     public synchronized void setOnInfoListener(OnInfoListener infoListener) {
+        mOnInfoListener = infoListener;
         if (null != infoListener) {
-            mOnInfoListener = infoListener;
+            createListeners();
         }
     }
 
@@ -274,8 +318,9 @@ public class DrmManagerClient {
      * @param eventListener Interface definition for the callback.
      */
     public synchronized void setOnEventListener(OnEventListener eventListener) {
+        mOnEventListener = eventListener;
         if (null != eventListener) {
-            mOnEventListener = eventListener;
+            createListeners();
         }
     }
 
@@ -286,8 +331,9 @@ public class DrmManagerClient {
      * @param errorListener Interface definition for the callback.
      */
     public synchronized void setOnErrorListener(OnErrorListener errorListener) {
+        mOnErrorListener = errorListener;
         if (null != errorListener) {
-            mOnErrorListener = errorListener;
+            createListeners();
         }
     }
 
@@ -792,9 +838,11 @@ public class DrmManagerClient {
     }
 
     // private native interfaces
-    private native int _initialize(Object weak_this);
+    private native int _initialize();
 
-    private native void _finalize(int uniqueId);
+    private native void _setListeners(int uniqueId, Object weak_this);
+
+    private native void _release(int uniqueId);
 
     private native void _installDrmEngine(int uniqueId, String engineFilepath);
 
