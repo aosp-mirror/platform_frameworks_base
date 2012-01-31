@@ -105,6 +105,13 @@ public abstract class ShaderParam extends SceneGraphBase {
 
         mRsFieldItem = new ScriptField_ShaderParam_s.Item();
         mRsFieldItem.transformTimestamp = 0;
+        if (mParamName != null) {
+            mRsFieldItem.paramName = SceneManager.getCachedAlloc(mParamName);
+            if (mRsFieldItem.paramName == null) {
+                mRsFieldItem.paramName = SceneManager.getStringAsAllocation(rs, mParamName);
+                SceneManager.cacheAlloc(mParamName, mRsFieldItem.paramName);
+            }
+        }
         initLocalData(rs);
         return mRsFieldItem;
     }

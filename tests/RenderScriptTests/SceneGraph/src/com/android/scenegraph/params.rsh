@@ -23,6 +23,9 @@
 static void debugParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
     rsDebug("____________ Param bufferOffset", p->bufferOffset);
     rsDebug("Param Type ", p->type);
+    if (rsIsObject(p->paramName)) {
+        printName(p->paramName);
+    }
 
     uint8_t *dataPtr = constantBuffer + p->bufferOffset;
     const SgTransform *pTransform = NULL;

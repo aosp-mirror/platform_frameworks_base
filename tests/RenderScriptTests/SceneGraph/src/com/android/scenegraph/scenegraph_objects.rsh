@@ -179,6 +179,7 @@ typedef struct ShaderParam_s {
     float4 float_value;
     // Use one param type to handle all vector types for now
     uint32_t float_vecSize;
+    rs_allocation paramName;
     rs_allocation camera;
     rs_allocation light;
     rs_allocation transform;
