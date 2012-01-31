@@ -67,7 +67,7 @@ public:
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
         SkImageRef_GlobalPool::SetRAMUsed(0);
-        SkGraphics::SetFontCacheUsed(0);
+        SkGraphics::PurgeFontCache();
     }
     
     static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
