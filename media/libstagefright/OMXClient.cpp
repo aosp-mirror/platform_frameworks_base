@@ -34,7 +34,7 @@ struct MuxOMX : public IOMX {
 
     virtual IBinder *onAsBinder() { return NULL; }
 
-    virtual bool livesLocally(pid_t pid);
+    virtual bool livesLocally(node_id node, pid_t pid);
 
     virtual status_t listNodes(List<ComponentInfo> *list);
 
@@ -155,8 +155,8 @@ const sp<IOMX> &MuxOMX::getOMX_l(node_id node) const {
     return isLocalNode_l(node) ? mLocalOMX : mRemoteOMX;
 }
 
-bool MuxOMX::livesLocally(pid_t pid) {
-    return true;
+bool MuxOMX::livesLocally(node_id node, pid_t pid) {
+    return getOMX(node)->livesLocally(node, pid);
 }
 
 status_t MuxOMX::listNodes(List<ComponentInfo> *list) {
@@ -326,7 +326,7 @@ status_t OMXClient::connect() {
     mOMX = service->getOMX();
     CHECK(mOMX.get() != NULL);
 
-    if (!mOMX->livesLocally(getpid())) {
+    if (!mOMX->livesLocally(NULL /* node */, getpid())) {
         ALOGI("Using client-side OMX mux.");
         mOMX = new MuxOMX(mOMX);
     }
