@@ -42,7 +42,7 @@ export signed (or unsigned) {@code .apk} files in order to distribute your appli
 
 <p>Developing in Eclipse with ADT is highly recommended and is the fastest way
 to get started. With the guided project setup it provides, as well as tools
-integration, custom XML editors, and debug ouput pane, ADT gives you an
+integration, custom XML editors, and debug output pane, ADT gives you an
 incredible boost in developing Android applications. </p>
 
 <p>This document provides step-by-step instructions on how to download the ADT
@@ -1104,7 +1104,7 @@ ADT installation as described in the steps below. </p>
 <h3 id="downloading">Downloading the ADT Plugin</h3>
 
 <p>Use the Update Manager feature of your Eclipse installation to install the latest
-revision of ADT on your development computer.<>
+revision of ADT on your development computer.</p>
 
 <p>Assuming that you have a compatible version of the Eclipse IDE installed, as
 described in <a href="#preparing">Preparing for Installation</a>, above, follow
