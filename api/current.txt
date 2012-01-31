@@ -9083,14 +9083,17 @@ package android.graphics.drawable {
     ctor public GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation, int[]);
     method public void draw(android.graphics.Canvas);
     method public int getOpacity();
+    method public android.graphics.drawable.GradientDrawable.Orientation getOrientation();
     method public void setAlpha(int);
     method public void setColor(int);
     method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setColors(int[]);
     method public void setCornerRadii(float[]);
     method public void setCornerRadius(float);
     method public void setGradientCenter(float, float);
     method public void setGradientRadius(float);
     method public void setGradientType(int);
+    method public void setOrientation(android.graphics.drawable.GradientDrawable.Orientation);
     method public void setShape(int);
     method public void setSize(int, int);
     method public void setStroke(int, int);
