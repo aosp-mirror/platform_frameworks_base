@@ -41,7 +41,7 @@ struct ISurfaceTexture;
 class DrmManagerClinet;
 class DecryptHandle;
 
-class TimedTextPlayer;
+class TimedTextDriver;
 struct WVMExtractor;
 
 struct AwesomeRenderer : public RefBase {
@@ -232,7 +232,7 @@ private:
     sp<DecryptHandle> mDecryptHandle;
 
     int64_t mLastVideoTimeUs;
-    TimedTextPlayer *mTextPlayer;
+    TimedTextDriver *mTextDriver;
     mutable Mutex mTimedTextLock;
 
     sp<WVMExtractor> mWVMExtractor;
@@ -326,4 +326,3 @@ private:
 }  // namespace android
 
 #endif  // AWESOME_PLAYER_H_
-

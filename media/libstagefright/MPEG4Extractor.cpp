@@ -20,7 +20,6 @@
 #include "include/MPEG4Extractor.h"
 #include "include/SampleTable.h"
 #include "include/ESDS.h"
-#include "timedtext/TimedTextPlayer.h"
 
 #include <arpa/inet.h>
 
@@ -2430,4 +2429,3 @@ bool SniffMPEG4(
 }
 
 }  // namespace android
-
