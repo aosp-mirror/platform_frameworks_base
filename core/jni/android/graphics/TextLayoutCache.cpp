@@ -37,6 +37,8 @@ namespace android {
 
 ANDROID_SINGLETON_STATIC_INSTANCE(TextLayoutEngine);
 
+static KeyedVector<UChar, UChar> gBidiMirrored;
+
 //--------------------------------------------------------------------------------------------------
 
 TextLayoutCache::TextLayoutCache(TextLayoutShaper* shaper) :
@@ -350,6 +352,23 @@ TextLayoutShaper::TextLayoutShaper() : mShaperItemGlyphArraySize(0) {
 
     mShaperItem.font = &mFontRec;
     mShaperItem.font->userData = &mShapingPaint;
+
+    // Fill the BiDi mirrored chars map
+    // See: http://www.unicode.org/Public/6.0.0/ucd/extracted/DerivedBinaryProperties.txt
+    gBidiMirrored.add('(', ')');
+    gBidiMirrored.add(')', '(');
+    gBidiMirrored.add('[', ']');
+    gBidiMirrored.add(']', '[');
+    gBidiMirrored.add('{', '}');
+    gBidiMirrored.add('}', '{');
+    gBidiMirrored.add('<', '>');
+    gBidiMirrored.add('>', '<');
+    gBidiMirrored.add(0x00ab, 0x00bb); // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+    gBidiMirrored.add(0x00bb, 0x00ab); // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+    gBidiMirrored.add(0x2039, 0x203a); // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+    gBidiMirrored.add(0x203a, 0x2039); // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+    gBidiMirrored.add(0x2264, 0x2265); // LESS-THAN OR EQUAL TO
+    gBidiMirrored.add(0x2265, 0x2264); // GREATER-THAN OR EQUAL TO
 }
 
 TextLayoutShaper::~TextLayoutShaper() {
@@ -574,6 +593,31 @@ void TextLayoutShaper::computeRunValues(const SkPaint* paint, const UChar* chars
                 }
             }
             i = j - 1;
+        }
+    }
+
+    // Reverse "BiDi mirrored chars" in RTL mode only
+    // See: http://www.unicode.org/Public/6.0.0/ucd/extracted/DerivedBinaryProperties.txt
+    // This is a workaround because Harfbuzz is not able to do mirroring in all cases and
+    // script-run splitting with Harfbuzz is splitting on parenthesis
+    if (isRTL) {
+        for (ssize_t i = 0; i < ssize_t(count); i++) {
+            UChar ch = chars[i];
+            ssize_t index = gBidiMirrored.indexOfKey(ch);
+            // Skip non "BiDi mirrored" chars
+            if (index < 0) {
+                continue;
+            }
+            if (!useNormalizedString) {
+                useNormalizedString = true;
+                mNormalizedString.setTo(false /* not terminated*/, chars, count);
+            }
+            UChar result = gBidiMirrored.valueAt(index);
+            mNormalizedString.setCharAt(i, result);
+#if DEBUG_GLYPHS
+            ALOGD("Rewriting codepoint '%d' to '%d' at position %d",
+                    ch, mNormalizedString[i], int(i));
+#endif
         }
     }
 
