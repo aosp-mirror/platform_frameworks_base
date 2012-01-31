@@ -39,6 +39,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 class egl_object_t;
+class egl_context_t;
 class egl_connection_t;
 
 // ----------------------------------------------------------------------------
@@ -84,9 +85,13 @@ public:
     // add reference to this object. returns true if this is a valid object.
     bool getObject(egl_object_t* object) const;
 
-
     static egl_display_t* get(EGLDisplay dpy);
     static EGLDisplay getFromNativeDisplay(EGLNativeDisplayType disp);
+
+    EGLBoolean makeCurrent(egl_context_t* c, egl_context_t* cur_c,
+            EGLSurface draw, EGLSurface read, EGLContext ctx,
+            EGLSurface impl_draw, EGLSurface impl_read, EGLContext impl_ctx);
+    static void loseCurrent(egl_context_t * cur_c);
 
     inline bool isReady() const { return (refs > 0); }
     inline bool isValid() const { return magic == '_dpy'; }
