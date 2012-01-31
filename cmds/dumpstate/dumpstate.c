@@ -122,7 +122,7 @@ static void dumpstate() {
     dump_file("NETWORK DEV INFO", "/proc/net/dev");
     dump_file("QTAGUID NETWORK INTERFACES INFO", "/proc/net/xt_qtaguid/iface_stat_all");
     dump_file("QTAGUID CTRL INFO", "/proc/net/xt_qtaguid/ctrl");
-    run_command("QTAGUID STATS INFO", 10, "su", "root", "cat", "/proc/net/xt_qtaguid/stats", NULL);
+    dump_file("QTAGUID STATS INFO", "/proc/net/xt_qtaguid/stats");
 
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* switch to non-root user and group */
-        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT, AID_INET };
+        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT, AID_INET, AID_NET_BW_STATS };
         if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
             ALOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
             return -1;
