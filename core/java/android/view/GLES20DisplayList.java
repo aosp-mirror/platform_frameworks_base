@@ -31,9 +31,16 @@ class GLES20DisplayList extends DisplayList {
     private GLES20RecordingCanvas mCanvas;
     private boolean mValid;
 
+    // Used for debugging
+    private final String mName;
+
     // The native display list will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
     private DisplayListFinalizer mFinalizer;
+
+    GLES20DisplayList(String name) {
+        mName = name;
+    }
 
     int getNativeDisplayList() {
         if (!mValid || mFinalizer == null) {
@@ -75,6 +82,7 @@ class GLES20DisplayList extends DisplayList {
                 mCanvas.end(mFinalizer.mNativeDisplayList);
             } else {
                 mFinalizer = new DisplayListFinalizer(mCanvas.end(0));
+                GLES20Canvas.setDisplayListName(mFinalizer.mNativeDisplayList, mName);
             }
             mCanvas.recycle();
             mCanvas = null;

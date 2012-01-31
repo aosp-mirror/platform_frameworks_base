@@ -283,9 +283,12 @@ public abstract class HardwareRenderer {
      * Creates a new display list that can be used to record batches of
      * drawing operations.
      * 
+     * @param name The name of the display list, used for debugging purpose.
+     *             May be null
+     * 
      * @return A new display list.
      */
-    public abstract DisplayList createDisplayList();
+    public abstract DisplayList createDisplayList(String name);
 
     /**
      * Creates a new hardware layer. A hardware layer built by calling this
@@ -1094,8 +1097,8 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        public DisplayList createDisplayList() {
-            return new GLES20DisplayList();
+        public DisplayList createDisplayList(String name) {
+            return new GLES20DisplayList(name);
         }
 
         @Override

@@ -28,6 +28,8 @@
 
 #include <cutils/compiler.h>
 
+#include <utils/String8.h>
+
 #include "DisplayListLogBuffer.h"
 #include "OpenGLRenderer.h"
 #include "utils/Functor.h"
@@ -128,6 +130,12 @@ public:
         return mIsRenderable;
     }
 
+    void setName(const char* name) {
+        if (name) {
+            mName.setTo(name);
+        }
+    }
+
 private:
     void init();
 
@@ -224,6 +232,8 @@ private:
     size_t mSize;
 
     bool mIsRenderable;
+
+    String8 mName;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

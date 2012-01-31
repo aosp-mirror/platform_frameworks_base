@@ -5022,7 +5022,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mTextDisplayList == null || !mTextDisplayList.isValid() ||
                     !mTextDisplayListIsValid) {
                 if (mTextDisplayList == null) {
-                    mTextDisplayList = getHardwareRenderer().createDisplayList();
+                    mTextDisplayList = getHardwareRenderer().createDisplayList("Text");
                 }
 
                 final HardwareCanvas hardwareCanvas = mTextDisplayList.start();

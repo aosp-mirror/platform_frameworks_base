@@ -626,6 +626,15 @@ static jint android_view_GLES20Canvas_getDisplayListSize(JNIEnv* env,
     return displayList->getSize();
 }
 
+static void android_view_GLES20Canvas_setDisplayListName(JNIEnv* env,
+        jobject clazz, DisplayList* displayList, jstring name) {
+    if (name != NULL) {
+        const char* textArray = env->GetStringUTFChars(name, NULL);
+        displayList->setName(textArray);
+        env->ReleaseStringUTFChars(name, textArray);
+    }
+}
+
 static OpenGLRenderer* android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
         jobject clazz) {
     return new DisplayListRenderer;
@@ -890,10 +899,14 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayList",         "(II)I",      (void*) android_view_GLES20Canvas_getDisplayList },
     { "nDestroyDisplayList",     "(I)V",       (void*) android_view_GLES20Canvas_destroyDisplayList },
     { "nGetDisplayListSize",     "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListSize },
-    { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
-    { "nResetDisplayListRenderer", "(I)V",     (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
+    { "nSetDisplayListName",     "(ILjava/lang/String;)V",
+                                               (void*) android_view_GLES20Canvas_setDisplayListName },
     { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;)Z",
                                                (void*) android_view_GLES20Canvas_drawDisplayList },
+
+    { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
+    { "nResetDisplayListRenderer",  "(I)V",    (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
+
     { "nOutputDisplayList",      "(II)V",      (void*) android_view_GLES20Canvas_outputDisplayList },
     { "nInterrupt",              "(I)V",       (void*) android_view_GLES20Canvas_interrupt },
     { "nResume",                 "(I)V",       (void*) android_view_GLES20Canvas_resume },

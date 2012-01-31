@@ -19,8 +19,9 @@
 
 #include "DisplayListLogBuffer.h"
 #include "DisplayListRenderer.h"
-#include <utils/String8.h>
 #include "Caches.h"
+
+#include <utils/String8.h>
 
 namespace android {
 namespace uirenderer {
@@ -217,7 +218,7 @@ void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
         indent[i] = ' ';
     }
     indent[count] = '\0';
-    ALOGD("%sStart display list (%p)", (char*) indent + 2, this);
+    ALOGD("%sStart display list (%p, %s)", (char*) indent + 2, this, mName.string());
 
     int saveCount = renderer.getSaveCount() - 1;
 
@@ -562,8 +563,10 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
         indent[i] = ' ';
     }
     indent[count] = '\0';
-    DISPLAY_LIST_LOGD("%sStart display list (%p)", (char*) indent + 2, this);
+    DISPLAY_LIST_LOGD("%sStart display list (%p, %s)", (char*) indent + 2, this, mName.string());
 #endif
+
+    renderer.startMark(mName.string());
 
     DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     int saveCount = renderer.getSaveCount() - 1;
@@ -575,7 +578,9 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             case DrawGLFunction: {
                 Functor *functor = (Functor *) getInt();
                 DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
+                renderer.startMark("GL functor");
                 needsInvalidate |= renderer.callDrawGLFunction(functor, dirty);
+                renderer.endMark();
             }
             break;
             case Save: {
@@ -933,6 +938,8 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 break;
         }
     }
+
+    renderer.endMark();
 
     DISPLAY_LIST_LOGD("%sDone, returning %d", (char*) indent + 2, needsInvalidate);
     return needsInvalidate;
