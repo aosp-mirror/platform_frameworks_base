@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Hex;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.OperationCanceledException;
 import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -107,6 +108,9 @@ public class DatabaseUtils {
             code = 9;
         } else if (e instanceof OperationApplicationException) {
             code = 10;
+        } else if (e instanceof OperationCanceledException) {
+            code = 11;
+            logException = false;
         } else {
             reply.writeException(e);
             Log.e(TAG, "Writing exception to parcel", e);
@@ -178,6 +182,8 @@ public class DatabaseUtils {
                 throw new SQLiteDiskIOException(msg);
             case 9:
                 throw new SQLiteException(msg);
+            case 11:
+                throw new OperationCanceledException(msg);
             default:
                 reply.readException(code, msg);
         }

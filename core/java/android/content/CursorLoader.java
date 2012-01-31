@@ -76,8 +76,8 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     @Override
-    protected void onCancelLoadInBackground() {
-        super.onCancelLoadInBackground();
+    public void cancelLoadInBackground() {
+        super.cancelLoadInBackground();
 
         synchronized (this) {
             if (mCancelationSignal != null) {
