@@ -56,13 +56,13 @@ import com.android.internal.R;
 /**
  * A widget that enables the user to select a number form a predefined range.
  * The widget presents an input field and up and down buttons for selecting the
- * current value. Pressing/long pressing the up and down buttons increments and
+ * current value. Pressing/long-pressing the up and down buttons increments and
  * decrements the current value respectively. Touching the input field shows a
- * scroll wheel, tapping on which while shown and not moving allows direct edit
- * of the current value. Sliding motions up or down hide the buttons and the
- * input field, show the scroll wheel, and rotate the latter. Flinging is
+ * scroll wheel, which when touched allows direct edit
+ * of the current value. Sliding gestures up or down hide the buttons and the
+ * input filed, show and rotate the scroll wheel. Flinging is
  * also supported. The widget enables mapping from positions to strings such
- * that instead the position index the corresponding string is displayed.
+ * that, instead of the position index, the corresponding string is displayed.
  * <p>
  * For an example of using this widget, see {@link android.widget.TimePicker}.
  * </p>
