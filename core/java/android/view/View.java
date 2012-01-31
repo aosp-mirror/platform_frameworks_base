@@ -3770,6 +3770,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         }
 
         if ((mPrivateFlags & FOCUSED) != 0) {
+            // If this is the first focusable do not clear focus since the we
+            // try to give it focus every time a view clears its focus. Hence,
+            // the view that would gain focus already has it.
+            View firstFocusable = getFirstFocusable();
+            if (firstFocusable == this) {
+                return;
+            }
+
             mPrivateFlags &= ~FOCUSED;
 
             if (mParent != null) {
@@ -3778,7 +3786,22 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
             onFocusChanged(false, 0, null);
             refreshDrawableState();
+
+            // The view cleared focus and invoked the callbacks, so  now is the
+            // time to give focus to the the first focusable to ensure that the
+            // gain focus is announced after clear focus.
+            if (firstFocusable != null) {
+                firstFocusable.requestFocus(FOCUS_FORWARD);
+            }
         }
+    }
+
+    private View getFirstFocusable() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot != null) {
+            return viewRoot.focusSearch(null, FOCUS_FORWARD);
+        }
+        return null;
     }
 
     /**
