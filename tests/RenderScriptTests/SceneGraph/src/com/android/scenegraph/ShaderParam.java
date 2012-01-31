@@ -34,22 +34,6 @@ import android.util.Log;
  * @hide
  */
 public abstract class ShaderParam extends SceneGraphBase {
-    static final int FLOAT4_DATA = 0;
-    static final int FLOAT4_CAMERA_POS = 1;
-    static final int FLOAT4_CAMERA_DIR = 2;
-    static final int FLOAT4_LIGHT_COLOR = 3;
-    static final int FLOAT4_LIGHT_POS = 4;
-    static final int FLOAT4_LIGHT_DIR = 5;
-
-    static final int TRANSFORM_DATA = 100;
-    static final int TRANSFORM_VIEW = 101;
-    static final int TRANSFORM_PROJ = 102;
-    static final int TRANSFORM_VIEW_PROJ = 103;
-    static final int TRANSFORM_MODEL = 104;
-    static final int TRANSFORM_MODEL_VIEW = 105;
-    static final int TRANSFORM_MODEL_VIEW_PROJ = 106;
-
-    static final int TEXTURE = 200;
 
     static final String cameraPos        = "cameraPos";
     static final String cameraDir        = "cameraDir";
@@ -120,6 +104,7 @@ public abstract class ShaderParam extends SceneGraphBase {
         }
 
         mRsFieldItem = new ScriptField_ShaderParam_s.Item();
+        mRsFieldItem.transformTimestamp = 0;
         initLocalData(rs);
         return mRsFieldItem;
     }

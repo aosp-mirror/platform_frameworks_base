@@ -23,26 +23,43 @@ void root(const rs_allocation *v_in, rs_allocation *v_out, const float *usrData)
 
     SgCamera *cam = (SgCamera *)rsGetElementAt(*v_in, 0);
     float aspect = *usrData;
-    cam->aspect = aspect;
+    if (cam->aspect != aspect) {
+        cam->isDirty = 1;
+        cam->aspect = aspect;
+    }
+    if (cam->isDirty) {
+        rsMatrixLoadPerspective(&cam->proj, cam->horizontalFOV, cam->aspect, cam->near, cam->far);
+    }
+
     const SgTransform *camTransform = (const SgTransform *)rsGetElementAt(cam->transformMatrix, 0);
+    //rsDebug("Camera stamp", cam->transformTimestamp);
+    //rsDebug("Transform stamp", camTransform->timestamp);
+    if (camTransform->timestamp != cam->transformTimestamp || cam->isDirty) {
+        cam->isDirty = 1;
+        rs_matrix4x4 camPosMatrix;
+        rsMatrixLoad(&camPosMatrix, &camTransform->globalMat);
+        float4 zero = {0.0f, 0.0f, 0.0f, 1.0f};
+        cam->position = rsMatrixMultiply(&camPosMatrix, zero);
 
-    rsMatrixLoadPerspective(&cam->proj, cam->horizontalFOV, cam->aspect, cam->near, cam->far);
+        rsMatrixInverse(&camPosMatrix);
+        rsMatrixLoad(&cam->view, &camPosMatrix);
 
-    rs_matrix4x4 camPosMatrix;
-    rsMatrixLoad(&camPosMatrix, &camTransform->globalMat);
-    float4 zero = {0.0f, 0.0f, 0.0f, 1.0f};
-    cam->position = rsMatrixMultiply(&camPosMatrix, zero);
+        rsMatrixLoad(&cam->viewProj, &cam->proj);
+        rsMatrixMultiply(&cam->viewProj, &cam->view);
 
-    rsMatrixInverse(&camPosMatrix);
-    rsMatrixLoad(&cam->view, &camPosMatrix);
+        rsExtractFrustumPlanes(&cam->viewProj,
+                               &cam->frustumPlanes[0], &cam->frustumPlanes[1],
+                               &cam->frustumPlanes[2], &cam->frustumPlanes[3],
+                               &cam->frustumPlanes[3], &cam->frustumPlanes[4]);
+    }
 
-    rsMatrixLoad(&cam->viewProj, &cam->proj);
-    rsMatrixMultiply(&cam->viewProj, &cam->view);
+    if (cam->isDirty) {
+        cam->timestamp ++;
+    }
 
-    rsExtractFrustumPlanes(&cam->viewProj,
-                           &cam->frustumPlanes[0], &cam->frustumPlanes[1],
-                           &cam->frustumPlanes[2], &cam->frustumPlanes[3],
-                           &cam->frustumPlanes[3], &cam->frustumPlanes[4]);
+    cam->isDirty = 0;
+    cam->transformTimestamp = camTransform->timestamp;
+
 #ifdef DEBUG_CAMERA
     printCameraInfo(cam);
 #endif //DEBUG_CAMERA

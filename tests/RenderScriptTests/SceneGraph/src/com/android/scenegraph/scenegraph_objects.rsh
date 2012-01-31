@@ -32,36 +32,52 @@
 #define LIGHT_POINT 0
 #define LIGHT_DIRECTIONAL 1
 
-#define SHADER_PARAM_FLOAT4_DATA 0
-#define SHADER_PARAM_FLOAT4_CAMERA_POS 1
-#define SHADER_PARAM_FLOAT4_CAMERA_DIR 2
-#define SHADER_PARAM_FLOAT4_LIGHT_COLOR 3
-#define SHADER_PARAM_FLOAT4_LIGHT_POS 4
-#define SHADER_PARAM_FLOAT4_LIGHT_DIR 5
+// Shader params that involve only data
+#define SHADER_PARAM_DATA_ONLY       10000
+#define SHADER_PARAM_FLOAT4_DATA     10001
+#define SHADER_PARAM_TRANSFORM_DATA  10002
+#define SHADER_PARAM_TRANSFORM_MODEL 10003
 
-#define SHADER_PARAM_TRANSFORM_DATA 100
-#define SHADER_PARAM_TRANSFORM_VIEW 101
-#define SHADER_PARAM_TRANSFORM_PROJ 102
-#define SHADER_PARAM_TRANSFORM_VIEW_PROJ 103
-#define SHADER_PARAM_TRANSFORM_MODEL 104
-#define SHADER_PARAM_TRANSFORM_MODEL_VIEW 105
-#define SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ 106
+// Shader params that involve camera
+#define SHADER_PARAM_CAMERA                    1000
+#define SHADER_PARAM_FLOAT4_CAMERA_POS         1001
+#define SHADER_PARAM_FLOAT4_CAMERA_DIR         1002
+#define SHADER_PARAM_TRANSFORM_VIEW            1003
+#define SHADER_PARAM_TRANSFORM_PROJ            1004
+#define SHADER_PARAM_TRANSFORM_VIEW_PROJ       1005
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW      1006
+#define SHADER_PARAM_TRANSFORM_MODEL_VIEW_PROJ 1007
 
-#define SHADER_PARAM_TEXTURE 200
+// Shader Params that only involve lights
+#define SHADER_PARAM_LIGHT                     100
+#define SHADER_PARAM_FLOAT4_LIGHT_COLOR        103
+#define SHADER_PARAM_FLOAT4_LIGHT_POS          104
+#define SHADER_PARAM_FLOAT4_LIGHT_DIR          105
+
+#define SHADER_PARAM_TEXTURE 10
+
+#define TEXTURE_NONE 0
+#define TEXTURE_2D 1
+#define TEXTURE_CUBE 2
+
+typedef struct TransformComponent_s {
+    float4 value;
+    int type;
+    rs_allocation name;
+} SgTransformComponent;
 
 typedef struct __attribute__((packed, aligned(4))) SgTransform {
     rs_matrix4x4 globalMat;
     rs_matrix4x4 localMat;
 
-    float4 transforms[16];
-    int transformTypes[16];
-    rs_allocation transformNames[16];
-
+    rs_allocation components;
     int isDirty;
 
     rs_allocation children;
-
     rs_allocation name;
+
+    // Used to check whether transform params need to be updated
+    uint32_t timestamp;
 } SgTransform;
 
 typedef struct VertexShader_s {
@@ -138,6 +154,12 @@ typedef struct __attribute__((packed, aligned(4))) Camera_s {
     rs_allocation name;
     rs_allocation transformMatrix;
     float4 frustumPlanes[6];
+
+    int isDirty;
+    // Timestamp of the camera itself to signal params if anything changes
+    uint32_t timestamp;
+    // Timestamp of our transform
+    uint32_t transformTimestamp;
 } SgCamera;
 
 typedef struct __attribute__((packed, aligned(4))) Light_s {
@@ -157,15 +179,21 @@ typedef struct ShaderParam_s {
     float4 float_value;
     // Use one param type to handle all vector types for now
     uint32_t float_vecSize;
-
     rs_allocation camera;
     rs_allocation light;
     rs_allocation transform;
+    // Used to check whether transform params need to be updated
+    uint32_t transformTimestamp;
     rs_allocation texture;
 } SgShaderParam;
 
+// This represents a texture object
+typedef struct Texture_s {
+    uint32_t type;
+    rs_allocation texture;
+} SgTexture;
+
 static void printName(rs_allocation name) {
-    rsDebug("Object Name: ", 0);
     if (!rsIsObject(name)) {
         rsDebug("no name", 0);
         return;

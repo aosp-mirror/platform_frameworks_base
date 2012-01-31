@@ -20,6 +20,27 @@
 
 //#define DEBUG_PARAMS
 
+static void debugParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
+    rsDebug("____________ Param bufferOffset", p->bufferOffset);
+    rsDebug("Param Type ", p->type);
+
+    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
+    const SgTransform *pTransform = NULL;
+    if (rsIsObject(p->transform)) {
+        pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
+
+        rsDebug("Param transform", pTransform);
+        printName(pTransform->name);
+    }
+
+    const SgLight *pLight = NULL;
+    if (rsIsObject(p->light)) {
+        pLight = (const SgLight *)rsGetElementAt(p->light, 0);
+        printLightInfo(pLight);
+    }
+}
+
+
 static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
 #ifdef DEBUG_PARAMS
     rsDebug("Writing value ", *input);
@@ -42,30 +63,24 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
     }
 }
 
-static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
-#ifdef DEBUG_PARAMS
-    rsDebug("____________ Param bufferOffset", p->bufferOffset);
-    rsDebug("Param Type ", p->type);
-#endif // DEBUG_PARAMS
-
-    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
+static bool processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
     const SgTransform *pTransform = NULL;
     if (rsIsObject(p->transform)) {
         pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
-
-#ifdef DEBUG_PARAMS
-        rsDebug("Param transform", pTransform);
-        printName(pTransform->name);
-#endif // DEBUG_PARAMS
+        // If we are a transform param and our transform is unchanged, nothing to do
+        bool isTransformOnly = (p->type > SHADER_PARAM_DATA_ONLY);
+        if (p->transformTimestamp == pTransform->timestamp && isTransformOnly) {
+            return false;
+        }
+        p->transformTimestamp = pTransform->timestamp;
     }
 
     const SgLight *pLight = NULL;
     if (rsIsObject(p->light)) {
         pLight = (const SgLight *)rsGetElementAt(p->light, 0);
-#ifdef DEBUG_PARAMS
-        printLightInfo(pLight);
-#endif // DEBUG_PARAMS
     }
+
+    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
 
     switch(p->type) {
     case SHADER_PARAM_FLOAT4_DATA:
@@ -111,6 +126,7 @@ static void processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCame
                              &pTransform->globalMat);
         break;
     }
+    return true;
 }
 
 static void processAllParams(rs_allocation shaderConst,
@@ -123,9 +139,13 @@ static void processAllParams(rs_allocation shaderConst,
         if (rsIsObject(allParams)) {
             numParams = rsAllocationGetDimX(allParams);
         }
+        bool updated = false;
         for (int i = 0; i < numParams; i ++) {
             SgShaderParam *current = (SgShaderParam*)rsGetElementAt(allParams, i);
-            processParam(current, constantBuffer, camera);
+#ifdef DEBUG_PARAMS
+            debugParam(current, constantBuffer, camera);
+#endif // DEBUG_PARAMS
+            updated = processParam(current, constantBuffer, camera) || updated;
         }
     }
 }

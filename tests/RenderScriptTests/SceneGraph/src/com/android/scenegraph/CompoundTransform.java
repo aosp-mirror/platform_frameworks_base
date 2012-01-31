@@ -19,6 +19,8 @@ package com.android.scenegraph;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import com.android.scenegraph.SceneManager;
+
 import android.renderscript.*;
 import android.renderscript.Float3;
 import android.renderscript.Matrix4f;
@@ -31,16 +33,37 @@ public class CompoundTransform extends Transform {
 
     public static abstract class Component {
         String mName;
-        Allocation mNameAlloc;
-        int mRsId;
-        Float4 mValue;
         CompoundTransform mParent;
+        int mParentIndex;
+        protected ScriptField_TransformComponent_s.Item mData;
 
-        Allocation getNameAlloc(RenderScriptGL rs) {
-            if (mNameAlloc == null)  {
-                mNameAlloc = SceneManager.getStringAsAllocation(rs, getName());
+        Component(int type, String name) {
+            mData = new ScriptField_TransformComponent_s.Item();
+            mData.type = type;
+            mName = name;
+        }
+
+        void setNameAlloc() {
+            RenderScriptGL rs = SceneManager.getRS();
+            if (mData.name != null)  {
+                return;
             }
-            return mNameAlloc;
+            mData.name = SceneManager.getCachedAlloc(getName());
+            if (mData.name == null) {
+                mData.name = SceneManager.getStringAsAllocation(rs, getName());
+                SceneManager.cacheAlloc(getName(), mData.name);
+            }
+        }
+
+        ScriptField_TransformComponent_s.Item getRSData() {
+            setNameAlloc();
+            return mData;
+        }
+
+        protected void update() {
+            if (mParent != null) {
+                mParent.updateRSComponent(this);
+            }
         }
 
         public String getName() {
@@ -50,66 +73,62 @@ public class CompoundTransform extends Transform {
 
     public static class TranslateComponent extends Component {
         public TranslateComponent(String name, Float3 translate) {
-            mRsId = RS_ID_TRANSLATE;
-            mName = name;
-            mValue = new Float4(translate.x, translate.y, translate.z, 0);
+            super(RS_ID_TRANSLATE, name);
+            setValue(translate);
         }
         public Float3 getValue() {
-            return new Float3(mValue.x, mValue.y, mValue.z);
+            return new Float3(mData.value.x, mData.value.y, mData.value.z);
         }
         public void setValue(Float3 val) {
-            mValue.x = val.x;
-            mValue.y = val.y;
-            mValue.z = val.z;
-            mParent.updateRSComponents(true);
+            mData.value.x = val.x;
+            mData.value.y = val.y;
+            mData.value.z = val.z;
+            update();
         }
     }
 
     public static class RotateComponent extends Component {
         public RotateComponent(String name, Float3 axis, float angle) {
-            mRsId = RS_ID_ROTATE;
-            mName = name;
-            mValue = new Float4(axis.x, axis.y, axis.z, angle);
+            super(RS_ID_ROTATE, name);
+            setAxis(axis);
+            setAngle(angle);
         }
         public Float3 getAxis() {
-            return new Float3(mValue.x, mValue.y, mValue.z);
+            return new Float3(mData.value.x, mData.value.y, mData.value.z);
         }
         public float getAngle() {
-            return mValue.w;
+            return mData.value.w;
         }
         public void setAxis(Float3 val) {
-            mValue.x = val.x;
-            mValue.y = val.y;
-            mValue.z = val.z;
-            mParent.updateRSComponents(true);
+            mData.value.x = val.x;
+            mData.value.y = val.y;
+            mData.value.z = val.z;
+            update();
         }
         public void setAngle(float val) {
-            mValue.w = val;
-            mParent.updateRSComponents(true);
+            mData.value.w = val;
+            update();
         }
     }
 
     public static class ScaleComponent extends Component {
         public ScaleComponent(String name, Float3 scale) {
-            mRsId = RS_ID_SCALE;
-            mName = name;
-            mValue = new Float4(scale.x, scale.y, scale.z, 0);
+            super(RS_ID_SCALE, name);
+            setValue(scale);
         }
         public Float3 getValue() {
-            return new Float3(mValue.x, mValue.y, mValue.z);
+            return new Float3(mData.value.x, mData.value.y, mData.value.z);
         }
         public void setValue(Float3 val) {
-            mValue.x = val.x;
-            mValue.y = val.y;
-            mValue.z = val.z;
-            mParent.updateRSComponents(true);
+            mData.value.x = val.x;
+            mData.value.y = val.y;
+            mData.value.z = val.z;
+            update();
         }
     }
 
+    ScriptField_TransformComponent_s mComponentField;
     public ArrayList<Component> mTransformComponents;
-
-    Matrix4f mLocalMatrix;
-    Matrix4f mGlobalMatrix;
 
     public CompoundTransform() {
         mTransformComponents = new ArrayList<Component>();
@@ -120,42 +139,55 @@ public class CompoundTransform extends Transform {
             throw new IllegalArgumentException("Transform components may not be shared");
         }
         c.mParent = this;
+        c.mParentIndex = mTransformComponents.size();
         mTransformComponents.add(c);
-        updateRSComponents(true);
+        updateRSComponentAllocation();
     }
 
     public void setComponent(int index, Component c) {
         if (c.mParent != null) {
             throw new IllegalArgumentException("Transform components may not be shared");
         }
+        if (index >= mTransformComponents.size()) {
+            throw new IllegalArgumentException("Invalid component index");
+        }
         c.mParent = this;
+        c.mParentIndex = index;
         mTransformComponents.set(index, c);
-        updateRSComponents(true);
+        updateRSComponent(c);
     }
 
-    // TODO: Will need to optimize this function a bit, we copy more data than we need to
-    void updateRSComponents(boolean copy) {
+    void updateRSComponent(Component c) {
+        if (mField == null || mComponentField == null) {
+            return;
+        }
+        mComponentField.set(c.getRSData(), c.mParentIndex, true);
+        mField.set_isDirty(0, 1, true);
+    }
+
+    void updateRSComponentAllocation() {
         if (mField == null) {
             return;
         }
-        RenderScriptGL rs = SceneManager.getRS();
-        int numElements = mTransformComponents.size();
-        for (int i = 0; i < numElements; i ++) {
-            Component ith = mTransformComponents.get(i);
-            mTransformData.transforms[i] = ith.mValue;
-            mTransformData.transformTypes[i] = ith.mRsId;
-            mTransformData.transformNames[i] = ith.getNameAlloc(rs);
-        }
-        // "null" terminate the array
-        mTransformData.transformTypes[numElements] = RS_ID_NONE;
-        mTransformData.isDirty = 1;
-        if (copy) {
-            mField.set(mTransformData, 0, true);
-        }
+        initLocalData();
+
+        mField.set_components(0, mTransformData.components, false);
+        mField.set_isDirty(0, 1, true);
     }
 
     void initLocalData() {
-        updateRSComponents(false);
+        RenderScriptGL rs = SceneManager.getRS();
+        int numComponenets = mTransformComponents.size();
+        if (numComponenets > 0) {
+            mComponentField = new ScriptField_TransformComponent_s(rs, numComponenets);
+            for (int i = 0; i < numComponenets; i ++) {
+                Component ith = mTransformComponents.get(i);
+                mComponentField.set(ith.getRSData(), i, false);
+            }
+            mComponentField.copyAll();
+
+            mTransformData.components = mComponentField.getAllocation();
+        }
     }
 }
 

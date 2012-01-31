@@ -42,8 +42,6 @@ public class MatrixTransform extends Transform {
     }
 
     void initLocalData() {
-        // "null" terminate the array
-        mTransformData.transformTypes[0] = RS_ID_NONE;
         mTransformData.localMat = mLocalMatrix;
     }
 
@@ -51,9 +49,8 @@ public class MatrixTransform extends Transform {
         if (mField == null) {
             return;
         }
-        mTransformData.localMat = mLocalMatrix;
-        mTransformData.isDirty = 1;
-        mField.set(mTransformData, 0, true);
+        mField.set_localMat(0, mLocalMatrix, false);
+        mField.set_isDirty(0, 1, true);
     }
 }
 

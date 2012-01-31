@@ -124,17 +124,17 @@ public class Float4Param extends ShaderParam {
     }
 
     int getTypeFromName() {
-        int paramType = FLOAT4_DATA;
+        int paramType = SceneManager.getConst().get_shaderParam_FLOAT4_DATA();
         if (mParamName.equalsIgnoreCase(cameraPos)) {
-            paramType = FLOAT4_CAMERA_POS;
+            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_CAMERA_POS();
         } else if(mParamName.equalsIgnoreCase(cameraDir)) {
-            paramType = FLOAT4_CAMERA_DIR;
+            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_CAMERA_DIR();
         } else if(mParamName.startsWith(lightColor) && findLight(lightColor)) {
-            paramType = FLOAT4_LIGHT_COLOR;
+            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_COLOR();
         } else if(mParamName.startsWith(lightPos) && findLight(lightPos)) {
-            paramType = FLOAT4_LIGHT_POS;
+            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_POS();
         } else if(mParamName.startsWith(lightDir) && findLight(lightDir)) {
-            paramType = FLOAT4_LIGHT_DIR;
+            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_DIR();
         }
         return paramType;
     }

@@ -48,6 +48,8 @@ import com.android.testapp.R;
  */
 public class SceneManager extends SceneGraphBase {
 
+    HashMap<String, Allocation> mAllocationMap;
+
     ScriptC_render mRenderLoop;
     ScriptC mCameraScript;
     ScriptC mLightScript;
@@ -56,6 +58,7 @@ public class SceneManager extends SceneGraphBase {
     ScriptC mVertexParamsScript;
     ScriptC mCullScript;
     ScriptC_transform mTransformScript;
+    ScriptC_export mExportScript;
 
     RenderScriptGL mRS;
     Resources mRes;
@@ -150,6 +153,20 @@ public class SceneManager extends SceneGraphBase {
         }
     }
 
+    static Allocation getCachedAlloc(String str) {
+        if (sSceneManager == null) {
+            throw new RuntimeException("Scene manager not initialized");
+        }
+        return sSceneManager.mAllocationMap.get(str);
+    }
+
+    static void cacheAlloc(String str, Allocation alloc) {
+        if (sSceneManager == null) {
+            throw new RuntimeException("Scene manager not initialized");
+        }
+        sSceneManager.mAllocationMap.put(str, alloc);
+    }
+
     public static class SceneLoadedCallback implements Runnable {
         public Scene mLoadedScene;
         public String mName;
@@ -177,6 +194,11 @@ public class SceneManager extends SceneGraphBase {
             return null;
         }
         return sSceneManager.mRes;
+    }
+
+    // Constants exported from native to java
+    static ScriptC_export getConst() {
+        return sSceneManager.mExportScript;
     }
 
     public static SceneManager getInstance() {
@@ -234,6 +256,10 @@ public class SceneManager extends SceneGraphBase {
     public void initRS(RenderScriptGL rs, Resources res, int w, int h) {
         mRS = rs;
         mRes = res;
+        mAllocationMap = new HashMap<String, Allocation>();
+
+        mExportScript = new ScriptC_export(rs, res, R.raw.export);
+
         mTransformScript = new ScriptC_transform(rs, res, R.raw.transform);
         mTransformScript.set_gTransformScript(mTransformScript);
 
