@@ -24,8 +24,8 @@
 #include <audio_effects/effect_aec.h>
 #include <audio_effects/effect_agc.h>
 #include <audio_effects/effect_ns.h>
-#include "modules/interface/module_common_types.h"
-#include "modules/audio_processing/main/interface/audio_processing.h"
+#include <module_common_types.h>
+#include <audio_processing.h>
 #include "speex/speex_resampler.h"
 
 
@@ -220,8 +220,8 @@ bool HasReverseStream(uint32_t procId)
 // Automatic Gain Control (AGC)
 //------------------------------------------------------------------------------
 
-static const int kAgcDefaultTargetLevel = 0;
-static const int kAgcDefaultCompGain = 90;
+static const int kAgcDefaultTargetLevel = 3;
+static const int kAgcDefaultCompGain = 9;
 static const bool kAgcDefaultLimiter = true;
 
 int  AgcInit (preproc_effect_t *effect)
