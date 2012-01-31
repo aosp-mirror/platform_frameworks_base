@@ -113,6 +113,10 @@ public class ViewPropertyAnimator {
      * on that list are added to the list of properties associated with that animator.
      */
     ArrayList<NameValuesHolder> mPendingAnimations = new ArrayList<NameValuesHolder>();
+    private Runnable mPendingSetupAction;
+    private Runnable mPendingCleanupAction;
+    private Runnable mPendingOnStartAction;
+    private Runnable mPendingOnEndAction;
 
     /**
      * Constants used to associate a property being requested and the mechanism used to set
@@ -199,6 +203,10 @@ public class ViewPropertyAnimator {
      */
     private HashMap<Animator, PropertyBundle> mAnimatorMap =
             new HashMap<Animator, PropertyBundle>();
+    private HashMap<Animator, Runnable> mAnimatorSetupMap;
+    private HashMap<Animator, Runnable> mAnimatorCleanupMap;
+    private HashMap<Animator, Runnable> mAnimatorOnStartMap;
+    private HashMap<Animator, Runnable> mAnimatorOnEndMap;
 
     /**
      * This is the information we need to set each property during the animation.
@@ -614,6 +622,93 @@ public class ViewPropertyAnimator {
     }
 
     /**
+     * The View associated with this ViewPropertyAnimator will have its
+     * {@link View#setLayerType(int, android.graphics.Paint) layer type} set to
+     * {@link View#LAYER_TYPE_HARDWARE} for the duration of the next animation. This state
+     * is not persistent, either on the View or on this ViewPropertyAnimator: the layer type
+     * of the View will be restored when the animation ends to what it was when this method was
+     * called, and this setting on ViewPropertyAnimator is only valid for the next animation.
+     * Note that calling this method and then independently setting the layer type of the View
+     * (by a direct call to {@link View#setLayerType(int, android.graphics.Paint)}) will result
+     * in some inconsistency, including having the layer type restored to its pre-withLayer()
+     * value when the animation ends.
+     *
+     * @see View#setLayerType(int, android.graphics.Paint)
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator withLayer() {
+         mPendingSetupAction= new Runnable() {
+            @Override
+            public void run() {
+                mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            }
+        };
+        final int currentLayerType = mView.getLayerType();
+        mPendingCleanupAction = new Runnable() {
+            @Override
+            public void run() {
+                mView.setLayerType(currentLayerType, null);
+            }
+        };
+        if (mAnimatorSetupMap == null) {
+            mAnimatorSetupMap = new HashMap<Animator, Runnable>();
+        }
+        if (mAnimatorCleanupMap == null) {
+            mAnimatorCleanupMap = new HashMap<Animator, Runnable>();
+        }
+
+        return this;
+    }
+
+    /**
+     * Specifies an action to take place when the next animation runs. If there is a
+     * {@link #setStartDelay(long) startDelay} set on this ViewPropertyAnimator, then the
+     * action will run after that startDelay expires, when the actual animation begins.
+     * This method, along with {@link #withEndAction(Runnable)}, is intended to help facilitate
+     * choreographing ViewPropertyAnimator animations with other animations or actions
+     * in the application.
+     *
+     * @param runnable The action to run when the next animation starts.
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator withStartAction(Runnable runnable) {
+        mPendingOnStartAction = runnable;
+        if (runnable != null && mAnimatorOnStartMap == null) {
+            mAnimatorOnStartMap = new HashMap<Animator, Runnable>();
+        }
+        return this;
+    }
+
+    /**
+     * Specifies an action to take place when the next animation ends. The action is only
+     * run if the animation ends normally; if the ViewPropertyAnimator is canceled during
+     * that animation, the runnable will not run.
+     * This method, along with {@link #withStartAction(Runnable)}, is intended to help facilitate
+     * choreographing ViewPropertyAnimator animations with other animations or actions
+     * in the application.
+     *
+     * <p>For example, the following code animates a view to x=200 and then back to 0:</p>
+     * <pre>
+     *     Runnable endAction = new Runnable() {
+     *         public void run() {
+     *             view.animate().x(0);
+     *         }
+     *     };
+     *     view.animate().x(200).onEnd(endAction);
+     * </pre>
+     *
+     * @param runnable The action to run when the next animation ends.
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator withEndAction(Runnable runnable) {
+        mPendingOnEndAction = runnable;
+        if (runnable != null && mAnimatorOnEndMap == null) {
+            mAnimatorOnEndMap = new HashMap<Animator, Runnable>();
+        }
+        return this;
+    }
+
+    /**
      * Starts the underlying Animator for a set of properties. We use a single animator that
      * simply runs from 0 to 1, and then use that fractional value to set each property
      * value accordingly.
@@ -630,6 +725,22 @@ public class ViewPropertyAnimator {
             propertyMask |= nameValuesHolder.mNameConstant;
         }
         mAnimatorMap.put(animator, new PropertyBundle(propertyMask, nameValueList));
+        if (mPendingSetupAction != null) {
+            mAnimatorSetupMap.put(animator, mPendingSetupAction);
+            mPendingSetupAction = null;
+        }
+        if (mPendingCleanupAction != null) {
+            mAnimatorCleanupMap.put(animator, mPendingCleanupAction);
+            mPendingCleanupAction = null;
+        }
+        if (mPendingOnStartAction != null) {
+            mAnimatorOnStartMap.put(animator, mPendingOnStartAction);
+            mPendingOnStartAction = null;
+        }
+        if (mPendingOnEndAction != null) {
+            mAnimatorOnEndMap.put(animator, mPendingOnEndAction);
+            mPendingOnEndAction = null;
+        }
         animator.addUpdateListener(mAnimatorEventListener);
         animator.addListener(mAnimatorEventListener);
         if (mStartDelaySet) {
@@ -800,6 +911,20 @@ public class ViewPropertyAnimator {
             implements Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
         @Override
         public void onAnimationStart(Animator animation) {
+            if (mAnimatorSetupMap != null) {
+                Runnable r = mAnimatorSetupMap.get(animation);
+                if (r != null) {
+                    r.run();
+                }
+                mAnimatorSetupMap.remove(animation);
+            }
+            if (mAnimatorOnStartMap != null) {
+                Runnable r = mAnimatorOnStartMap.get(animation);
+                if (r != null) {
+                    r.run();
+                }
+                mAnimatorOnStartMap.remove(animation);
+            }
             if (mListener != null) {
                 mListener.onAnimationStart(animation);
             }
@@ -809,6 +934,9 @@ public class ViewPropertyAnimator {
         public void onAnimationCancel(Animator animation) {
             if (mListener != null) {
                 mListener.onAnimationCancel(animation);
+            }
+            if (mAnimatorOnEndMap != null) {
+                mAnimatorOnEndMap.remove(animation);
             }
         }
 
@@ -823,6 +951,20 @@ public class ViewPropertyAnimator {
         public void onAnimationEnd(Animator animation) {
             if (mListener != null) {
                 mListener.onAnimationEnd(animation);
+            }
+            if (mAnimatorOnEndMap != null) {
+                Runnable r = mAnimatorOnEndMap.get(animation);
+                if (r != null) {
+                    r.run();
+                }
+                mAnimatorOnEndMap.remove(animation);
+            }
+            if (mAnimatorCleanupMap != null) {
+                Runnable r = mAnimatorCleanupMap.get(animation);
+                if (r != null) {
+                    r.run();
+                }
+                mAnimatorCleanupMap.remove(animation);
             }
             mAnimatorMap.remove(animation);
         }

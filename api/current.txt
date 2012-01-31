@@ -23828,6 +23828,9 @@ package android.view {
     method public android.view.ViewPropertyAnimator translationXBy(float);
     method public android.view.ViewPropertyAnimator translationY(float);
     method public android.view.ViewPropertyAnimator translationYBy(float);
+    method public android.view.ViewPropertyAnimator withEndAction(java.lang.Runnable);
+    method public android.view.ViewPropertyAnimator withLayer();
+    method public android.view.ViewPropertyAnimator withStartAction(java.lang.Runnable);
     method public android.view.ViewPropertyAnimator x(float);
     method public android.view.ViewPropertyAnimator xBy(float);
     method public android.view.ViewPropertyAnimator y(float);
