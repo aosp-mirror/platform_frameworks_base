@@ -1,7 +1,7 @@
 <?cs if:!sdk.redirect ?>
 <ul>
   <li>
-    <h2>
+    <span class="heading">
       <span class="en">Android SDK Starter Package</span>
       <span style="display:none" class="de">Aktuelle SDK-Version</span>
       <span style="display:none" class="es">Versión actual del SDK</span>
@@ -10,7 +10,7 @@
       <span style="display:none" class="ja">現在リリースされている SDK</span>
       <span style="display:none" class="zh-CN">当前的 SDK 版本</span>
       <span style="display:none" class="zh-TW">目前 SDK 發行版本</span>
-    </h2>
+    </span>
     <ul><?cs
   if:android.whichdoc == "online" ?>
       <li><a href="<?cs var:toroot ?>sdk/index.html">
@@ -37,7 +37,8 @@
     </ul>
   </li><?cs
   if:sdk.preview ?>
-  <li><h2>Android 3.0 Preview SDK</h2>
+  <li>
+    <span class="heading">Android 3.0 Preview SDK</span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/preview/start.html">Getting Started</a> <span
 class="new">new!</span></li>
@@ -46,13 +47,14 @@ class="new">new!</span></li>
   /if ?>
   <?cs
   if:sdk.preview ?>
-  <li><h2>Android x.x Preview</h2>
+  <li>
+    <span class="heading">Android x.x Preview</span>
     <ul>
     </ul>
   </li><?cs
   /if ?>
   <li>
-    <h2>
+    <span class="heading">
       <span class="en">Downloadable SDK Components</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
@@ -61,7 +63,7 @@ class="new">new!</span></li>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span>
-    </h2>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/adding-components.html">
       <span class="en">Adding SDK Components</span>
@@ -158,7 +160,7 @@ class="new">new!</span></li>
     </ul>
   </li>
   <li>
-      <h2>
+    <span class="heading">
       <span class="en">ADT Plugin for Eclipse</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
@@ -167,7 +169,7 @@ class="new">new!</span></li>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span>
-      </h2>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 16.0.1
       <span style="display:none" class="de"></span>
@@ -182,7 +184,8 @@ class="new">new!</span>
     </ul>
   </li>
   <li>
-    <h2><span class="en">Native Development Tools</span>
+    <span class="heading">
+      <span class="en">Native Development Tools</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -190,7 +193,7 @@ class="new">new!</span>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span>
-    </h2>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r7</a>
         <span class="new">new!</span>
@@ -200,7 +203,7 @@ class="new">new!</span>
   </li>
 
   <li>
-    <h2>
+    <span class="heading">
       <span class="en">More Information</span>
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
@@ -209,7 +212,7 @@ class="new">new!</span>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span>
-    </h2>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/oem-usb.html">
         <span class="en">OEM USB Drivers</span>

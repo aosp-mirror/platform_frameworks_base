@@ -8,15 +8,16 @@
 <ul>
 
   <li>
-    <h2><span class="en">Android Basics</span>
-        <span class="de" style="display:none">Einführung in Android</span>
-        <span class="es" style="display:none">Información básica sobre Android</span>
-        <span class="fr" style="display:none">Présentation d'Android</span>
-        <span class="it" style="display:none">Nozioni di base su Android</span>
-        <span class="ja" style="display:none">Android の基本</span>
-        <span class="zh-CN" style="display:none">Android 基础知识</span>
-        <span class="zh-TW" style="display:none">Android 簡介</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Android Basics</span>
+      <span class="de" style="display:none">Einführung in Android</span>
+      <span class="es" style="display:none">Información básica sobre Android</span>
+      <span class="fr" style="display:none">Présentation d'Android</span>
+      <span class="it" style="display:none">Nozioni di base su Android</span>
+      <span class="ja" style="display:none">Android の基本</span>
+      <span class="zh-CN" style="display:none">Android 基础知识</span>
+      <span class="zh-TW" style="display:none">Android 簡介</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/basics/what-is-android.html">
         <span class="en">What Is Android?</span>
@@ -46,7 +47,7 @@
   </li>
 
   <li>
-    <h2>
+    <span class="heading">
       <span class="en">Framework Topics</span>
       <span class="de" style="display:none">Framework-Themen</span>
       <span class="es" style="display:none">Temas sobre el framework</span>
@@ -55,7 +56,7 @@
       <span class="ja" style="display:none">フレームワーク トピック</span>
       <span class="zh-CN" style="display:none">框架主题</span>
       <span class="zh-TW" style="display:none">架構主題</span>
-    </h2>
+    </span>
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/activities.html">
@@ -443,9 +444,9 @@
   </li>
 
   <li>
-    <h2>
+    <span class="heading">
       <span class="en">Android Market Topics</span>
-    </h2>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
           <span class="en">Publishing on Android Market</span>
@@ -489,15 +490,16 @@
 
 
   <li>
-    <h2><span class="en">Developing</span>
-               <span class="de" style="display:none">Entwicklung</span>
-               <span class="es" style="display:none">Desarrollo</span>
-               <span class="fr" style="display:none">Développement</span>
-               <span class="it" style="display:none">Sviluppo</span>
-               <span class="ja" style="display:none">開発</span>
-               <span class="zh-CN" style="display:none">开发</span>
-               <span class="zh-TW" style="display:none">開發</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Developing</span>
+      <span class="de" style="display:none">Entwicklung</span>
+      <span class="es" style="display:none">Desarrollo</span>
+      <span class="fr" style="display:none">Développement</span>
+      <span class="it" style="display:none">Sviluppo</span>
+      <span class="ja" style="display:none">開発</span>
+      <span class="zh-CN" style="display:none">开发</span>
+      <span class="zh-TW" style="display:none">開發</span>
+    </span>
     <ul>
   <!--<li><a href="">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
@@ -683,15 +685,16 @@
   </li>
 
   <li>
-    <h2><span class="en">Publishing</span>
-        <span class="de" style="display:none">Veröffentlichung</span>
-        <span class="es" style="display:none">Publicación</span>
-        <span class="fr" style="display:none">Publication</span>
-        <span class="it" style="display:none">Pubblicazione</span>
-        <span class="ja" style="display:none">公開</span>
-        <span class="zh-CN" style="display:none">发布</span>
-        <span class="zh-TW" style="display:none">發佈</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Publishing</span>
+      <span class="de" style="display:none">Veröffentlichung</span>
+      <span class="es" style="display:none">Publicación</span>
+      <span class="fr" style="display:none">Publication</span>
+      <span class="it" style="display:none">Pubblicazione</span>
+      <span class="ja" style="display:none">公開</span>
+      <span class="zh-CN" style="display:none">发布</span>
+      <span class="zh-TW" style="display:none">發佈</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/publishing/publishing_overview.html">
             <span class="en">Publishing Overview</span>
@@ -733,15 +736,16 @@ applications</span>
   </li>
 
   <li>
-    <h2><span class="en">Best Practices</span>
-               <span class="de" style="display:none">Bewährte Verfahren</span>
-               <span class="es" style="display:none">Prácticas recomendadas</span>
-               <span class="fr" style="display:none">Meilleures pratiques</span>
-               <span class="it" style="display:none">Best practice</span>
-               <span class="ja" style="display:none">ベスト プラクティス</span>
-               <span class="zh-CN" style="display:none">最佳实践</span>
-               <span class="zh-TW" style="display:none">最佳實務</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Best Practices</span>
+      <span class="de" style="display:none">Bewährte Verfahren</span>
+      <span class="es" style="display:none">Prácticas recomendadas</span>
+      <span class="fr" style="display:none">Meilleures pratiques</span>
+      <span class="it" style="display:none">Best practice</span>
+      <span class="ja" style="display:none">ベスト プラクティス</span>
+      <span class="zh-CN" style="display:none">最佳实践</span>
+      <span class="zh-TW" style="display:none">最佳實務</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
             <span class="en">Compatibility</span>
@@ -837,8 +841,9 @@ applications</span>
   </li>
 
   <li>
-    <h2><span class="en">Web Applications</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Web Applications</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/webapps/index.html">
             <span class="en">Web Apps Overview</span>
@@ -859,15 +864,16 @@ applications</span>
   </li>
 
   <li>
-    <h2><span class="en">Appendix</span>
-               <span class="de" style="display:none">Anhang</span>
-               <span class="es" style="display:none">Apéndice</span>
-               <span class="fr" style="display:none">Annexes</span>
-               <span class="it" style="display:none">Appendice</span>
-               <span class="ja" style="display:none">付録</span>
-               <span class="zh-CN" style="display:none">附录</span>
-               <span class="zh-TW" style="display:none">附錄</span>
-    </h2>
+    <span class="heading">
+      <span class="en">Appendix</span>
+      <span class="de" style="display:none">Anhang</span>
+      <span class="es" style="display:none">Apéndice</span>
+      <span class="fr" style="display:none">Annexes</span>
+      <span class="it" style="display:none">Appendice</span>
+      <span class="ja" style="display:none">付録</span>
+      <span class="zh-CN" style="display:none">附录</span>
+      <span class="zh-TW" style="display:none">附錄</span>
+    </span>
     <ul>
       <li><a href="<?cs var:toroot ?>guide/appendix/api-levels.html">
             <span class="en">Android API Levels</span>
