@@ -3,7 +3,10 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                 \
         TextDescriptions.cpp      \
-        TimedTextParser.cpp       \
+        TimedTextDriver.cpp       \
+        TimedTextInBandSource.cpp \
+        TimedTextSource.cpp       \
+        TimedTextSRTSource.cpp    \
         TimedTextPlayer.cpp
 
 LOCAL_CFLAGS += -Wno-multichar
