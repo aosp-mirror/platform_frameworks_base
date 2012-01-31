@@ -59,9 +59,10 @@ public:
         : BpInterface<IOMX>(impl) {
     }
 
-    virtual bool livesLocally(pid_t pid) {
+    virtual bool livesLocally(node_id node, pid_t pid) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(pid);
         remote()->transact(LIVES_LOCALLY, data, &reply);
 
@@ -417,7 +418,9 @@ status_t BnOMX::onTransact(
         case LIVES_LOCALLY:
         {
             CHECK_INTERFACE(IOMX, data, reply);
-            reply->writeInt32(livesLocally((pid_t)data.readInt32()));
+            node_id node = (void *)data.readIntPtr();
+            pid_t pid = (pid_t)data.readInt32();
+            reply->writeInt32(livesLocally(node, pid));
 
             return OK;
         }

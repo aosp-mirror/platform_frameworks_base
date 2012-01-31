@@ -1479,7 +1479,7 @@ OMXCodec::OMXCodec(
         const sp<MediaSource> &source,
         const sp<ANativeWindow> &nativeWindow)
     : mOMX(omx),
-      mOMXLivesLocally(omx->livesLocally(getpid())),
+      mOMXLivesLocally(omx->livesLocally(node, getpid())),
       mNode(node),
       mQuirks(quirks),
       mFlags(flags),

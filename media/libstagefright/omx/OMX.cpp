@@ -185,7 +185,7 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
     instance->onObserverDied(mMaster);
 }
 
-bool OMX::livesLocally(pid_t pid) {
+bool OMX::livesLocally(node_id node, pid_t pid) {
     return pid == getpid();
 }
 
