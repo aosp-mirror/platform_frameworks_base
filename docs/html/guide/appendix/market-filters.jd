@@ -165,10 +165,10 @@ default.</li>
 
     <p><strong>Example 1</strong><br />
     The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"&gt;</code>
-    and does not does not include a <code>&lt;supports-screens&gt;</code> element.
-    <strong>Result</strong>: Android Market will not show the app to a user of a
-    small-screen device, but will show it to users of normal and large-screen
-    devices,  users, unless  other filters apply. </p>
+    and does not include a <code>&lt;supports-screens&gt;</code> element.
+    <strong>Result</strong>: Android Market does not show the app to a user of a
+    small-screen device, but does show it to users of normal and large-screen
+    devices, unless  other filters also exclude those devices. </p>
     <p><strong>Example 2<br />
     </strong>The manifest declares <code>&lt;uses-sdk android:minSdkVersion="3"
     android:targetSdkVersion="4"&gt;</code> and does not include a
