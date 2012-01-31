@@ -76,13 +76,21 @@ public final class Rect implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        Rect r = (Rect) obj;
-        if (r != null) {
-            return left == r.left && top == r.top && right == r.right
-                    && bottom == r.bottom;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Rect r = (Rect) o;
+        return left == r.left && top == r.top && right == r.right && bottom == r.bottom;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = left;
+        result = 31 * result + top;
+        result = 31 * result + right;
+        result = 31 * result + bottom;
+        return result;
     }
 
     @Override
