@@ -566,26 +566,6 @@ EGLBoolean eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
     return result;
 }
 
-static void loseCurrent(egl_context_t * cur_c)
-{
-    if (cur_c) {
-        egl_surface_t * cur_r = get_surface(cur_c->read);
-        egl_surface_t * cur_d = get_surface(cur_c->draw);
-
-        // by construction, these are either 0 or valid (possibly terminated)
-        // it should be impossible for these to be invalid
-        ContextRef _cur_c(cur_c);
-        SurfaceRef _cur_r(cur_r);
-        SurfaceRef _cur_d(cur_d);
-
-        cur_c->onLooseCurrent();
-
-        _cur_c.release();
-        _cur_r.release();
-        _cur_d.release();
-    }
-}
-
 EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                             EGLSurface read, EGLContext ctx)
 {
@@ -662,21 +642,13 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         impl_read = r->surface;
     }
 
-    EGLBoolean result;
 
-    if (c) {
-        result = c->cnx->egl.eglMakeCurrent(
-                dp->disp[c->impl].dpy, impl_draw, impl_read, impl_ctx);
-    } else {
-        result = cur_c->cnx->egl.eglMakeCurrent(
-                dp->disp[cur_c->impl].dpy, impl_draw, impl_read, impl_ctx);
-    }
+    EGLBoolean result = const_cast<egl_display_t*>(dp)->makeCurrent(c, cur_c,
+            draw, read, ctx,
+            impl_draw, impl_read, impl_ctx);
 
     if (result == EGL_TRUE) {
-
-        loseCurrent(cur_c);
-
-        if (ctx != EGL_NO_CONTEXT) {
+        if (c) {
             setGLHooksThreadSpecific(c->cnx->hooks[c->version]);
             egl_tls_t::setContext(ctx);
 #if EGL_TRACE
@@ -686,7 +658,6 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             _c.acquire();
             _r.acquire();
             _d.acquire();
-            c->onMakeCurrent(draw, read);
         } else {
             setGLHooksThreadSpecific(&gHooksNoContext);
             egl_tls_t::setContext(EGL_NO_CONTEXT);
@@ -1179,7 +1150,7 @@ EGLBoolean eglReleaseThread(void)
     clearError();
 
     // If there is context bound to the thread, release it
-    loseCurrent(get_context(getContext()));
+    egl_display_t::loseCurrent(get_context(getContext()));
 
     for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
