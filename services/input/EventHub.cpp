@@ -831,7 +831,7 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
 
     ALOGV("Opening device: %s", devicePath);
 
-    int fd = open(devicePath, O_RDWR);
+    int fd = open(devicePath, O_RDWR | O_CLOEXEC);
     if(fd < 0) {
         ALOGE("could not open %s, %s\n", devicePath, strerror(errno));
         return -1;
