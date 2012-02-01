@@ -17,8 +17,10 @@
 package android.accessibilityservice;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
@@ -218,9 +220,16 @@ public abstract class AccessibilityService extends Service {
 
     private static final String LOG_TAG = "AccessibilityService";
 
-    private AccessibilityServiceInfo mInfo;
+    interface Callbacks {
+        public void onAccessibilityEvent(AccessibilityEvent event);
+        public void onInterrupt();
+        public void onServiceConnected();
+        public void onSetConnectionId(int connectionId);
+    }
 
     private int mConnectionId;
+
+    private AccessibilityServiceInfo mInfo;
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -282,15 +291,37 @@ public abstract class AccessibilityService extends Service {
      */
     @Override
     public final IBinder onBind(Intent intent) {
-        return new IEventListenerWrapper(this);
+        return new IEventListenerWrapper(this, getMainLooper(), new Callbacks() {
+            @Override
+            public void onServiceConnected() {
+                AccessibilityService.this.onServiceConnected();
+            }
+
+            @Override
+            public void onInterrupt() {
+                AccessibilityService.this.onInterrupt();
+            }
+
+            @Override
+            public void onAccessibilityEvent(AccessibilityEvent event) {
+                AccessibilityService.this.onAccessibilityEvent(event);
+            }
+
+            @Override
+            public void onSetConnectionId( int connectionId) {
+                mConnectionId = connectionId;
+            }
+        });
     }
 
     /**
      * Implements the internal {@link IEventListener} interface to convert
      * incoming calls to it back to calls on an {@link AccessibilityService}.
      */
-    class IEventListenerWrapper extends IEventListener.Stub
+    static class IEventListenerWrapper extends IEventListener.Stub
             implements HandlerCaller.Callback {
+
+        static final int NO_ID = -1;
 
         private static final int DO_SET_SET_CONNECTION = 10;
         private static final int DO_ON_INTERRUPT = 20;
@@ -298,11 +329,11 @@ public abstract class AccessibilityService extends Service {
 
         private final HandlerCaller mCaller;
 
-        private final AccessibilityService mTarget;
+        private final Callbacks mCallback;
 
-        public IEventListenerWrapper(AccessibilityService context) {
-            mTarget = context;
-            mCaller = new HandlerCaller(context, this);
+        public IEventListenerWrapper(Context context, Looper looper, Callbacks callback) {
+            mCallback = callback;
+            mCaller = new HandlerCaller(context, looper, this);
         }
 
         public void setConnection(IAccessibilityServiceConnection connection, int connectionId) {
@@ -326,12 +357,13 @@ public abstract class AccessibilityService extends Service {
                 case DO_ON_ACCESSIBILITY_EVENT :
                     AccessibilityEvent event = (AccessibilityEvent) message.obj;
                     if (event != null) {
-                        mTarget.onAccessibilityEvent(event);
+                        AccessibilityInteractionClient.getInstance().onAccessibilityEvent(event);
+                        mCallback.onAccessibilityEvent(event);
                         event.recycle();
                     }
                     return;
                 case DO_ON_INTERRUPT :
-                    mTarget.onInterrupt();
+                    mCallback.onInterrupt();
                     return;
                 case DO_SET_SET_CONNECTION :
                     final int connectionId = message.arg1;
@@ -340,12 +372,11 @@ public abstract class AccessibilityService extends Service {
                     if (connection != null) {
                         AccessibilityInteractionClient.getInstance().addConnection(connectionId,
                                 connection);
-                        mConnectionId = connectionId;
-                        mTarget.onServiceConnected();
+                        mCallback.onSetConnectionId(connectionId);
+                        mCallback.onServiceConnected();
                     } else {
                         AccessibilityInteractionClient.getInstance().removeConnection(connectionId);
-                        mConnectionId = AccessibilityInteractionClient.NO_ID;
-                        // TODO: Do we need a onServiceDisconnected callback?
+                        mCallback.onSetConnectionId(AccessibilityInteractionClient.NO_ID);
                     }
                     return;
                 default :

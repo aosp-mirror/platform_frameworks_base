@@ -380,8 +380,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             return Collections.emptyList();
         }
         AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfosByText(mConnectionId, text, mWindowId,
-                mSourceNodeId);
+        return client.findAccessibilityNodeInfosByText(mConnectionId, mWindowId, mSourceNodeId,
+                text);
     }
 
     /**
@@ -900,6 +900,17 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Gets the id of the source node.
+     *
+     * @return The id.
+     *
+     * @hide
+     */
+    public long getSourceNodeId() {
+        return mSourceNodeId;
     }
 
     /**

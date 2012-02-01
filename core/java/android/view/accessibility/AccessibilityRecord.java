@@ -564,6 +564,17 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Gets the id of the source node.
+     *
+     * @return The id.
+     *
+     * @hide
+     */
+    public long getSourceNodeId() {
+        return mSourceNodeId;
+    }
+
+    /**
      * Sets the unique id of the IAccessibilityServiceConnection over which
      * this instance can send requests to the system.
      *

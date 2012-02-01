@@ -14,11 +14,11 @@
 
 package android.accessibilityservice;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Activity for testing the accessibility APIs for "interrogation" of
