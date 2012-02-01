@@ -29,15 +29,16 @@ please see themes_device_defaults.xml.
 ===============================================================
  -->
 <resources>
-    <!-- The default system theme. This is the theme used for activities
-         that have not explicitly set their own theme.
-         
+    <!-- The default theme for apps on API level 10 and lower. This is the theme used for
+         activities that have not explicitly set their own theme.
          <p>You can count on this being a dark
          background with light text on top, but should try to make no
          other assumptions about its appearance. In particular, the text
          inside of widgets using this theme may be completely different,
          with the widget container being a light color and the text on top
          of it a dark color.
+         <p>If you're developing for API level 11 and higher, you should instead use {@link
+         #Theme_Holo} or {@link #Theme_DeviceDefault}.</p>
     -->
     <style name="Theme">
 
@@ -370,13 +371,12 @@ please see themes_device_defaults.xml.
         <item name="pointerStyle">@android:style/Pointer</item>
     </style>
 
-    <!-- Variant of the default (dark) theme with no title bar -->
+    <!-- Variant of {@link #Theme} with no title bar -->
     <style name="Theme.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the default (dark) theme that has no title bar and
-         fills the entire screen -->
+    <!-- Variant of {@link #Theme} that has no title bar and no status bar -->
     <style name="Theme.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -385,7 +385,8 @@ please see themes_device_defaults.xml.
     <!-- Theme for a light background with dark text on top.  Set your activity
          to this theme if you would like such an appearance.  As with the
          default theme, you should try to assume little more than that the
-         background will be a light color. -->
+         background will be a light color.
+         <p>This is designed for API level 10 and lower.</p>-->
     <style name="Theme.Light">
         <item name="windowBackground">@android:drawable/screen_background_selector_light</item>
         <item name="colorBackground">@android:color/background_light</item>
@@ -457,19 +458,19 @@ please see themes_device_defaults.xml.
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_light</item>
     </style>
 
-    <!-- Variant of the light theme with no title bar -->
+    <!-- Variant of {@link #Theme_Light} with no title bar -->
     <style name="Theme.Light.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the light theme that has no title bar and
-         fills the entire screen -->
+    <!-- Variant of {@link #Theme_Light} that has no title bar and
+         no status bar -->
     <style name="Theme.Light.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
-    <!-- Special variation on the default theme that ensures the background is
+    <!-- Variant on {@link #Theme} that ensures the background is
          completely black.  This is useful for things like image viewers and
          media players.   If you want the normal (dark background) theme
          do <em>not</em> use this, use {@link #Theme}. -->
@@ -478,40 +479,40 @@ please see themes_device_defaults.xml.
         <item name="android:colorBackground">@android:color/black</item>
     </style>
     
-    <!-- Variant of the black theme with no title bar -->
+    <!-- Variant of {@link #Theme_Black} with no title bar -->
     <style name="Theme.Black.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the black theme that has no title bar and
-         fills the entire screen -->
+    <!-- Variant of {@link #Theme_Black} that has no title bar and
+         no status bar -->
     <style name="Theme.Black.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
-    <!-- Default theme for windows that want to have the user's selected
-         wallpaper appear behind them.  -->
+    <!-- Theme for windows that want to have the user's selected
+         wallpaper appear behind them (for API level 10 and lower).  -->
     <style name="Theme.Wallpaper">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
     </style>
 
-    <!-- Variant of the translucent theme with no title bar -->
+    <!-- Variant of {@link #Theme_Wallpaper} that has no title bar -->
     <style name="Theme.Wallpaper.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variant of the translucent theme that has no title bar and
-         fills the entire screen -->
+    <!-- Variant of {@link #Theme_Wallpaper} that
+         has no title bar or status bar. -->
     <style name="Theme.Wallpaper.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Theme for a wallpaper's setting activity that is designed to be on
-         top of a dark background. -->
+    <!-- Theme for a wallpaper's setting activity, which is designed to be a transparent
+         background with a dark shade, so the previous Activity is visible in the background. -->
     <style name="Theme.WallpaperSettings">
         <item name="android:windowBackground">@android:drawable/screen_background_dark_transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -519,8 +520,8 @@ please see themes_device_defaults.xml.
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
 
-    <!-- Theme for a wallpaper's setting activity that is designed to be on
-         top of a light background. -->
+    <!-- Theme for a wallpaper's setting activity, which is designed to be a transparent
+         background with a light shade, so the previous Activity is visible in the background. -->
     <style name="Theme.Light.WallpaperSettings">
         <item name="android:windowBackground">@android:drawable/screen_background_light_transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -538,8 +539,8 @@ please see themes_device_defaults.xml.
     <style name="PreviewWallpaperSettings">
     </style>
     
-    <!-- Default theme for translucent activities, that is windows that allow you
-         to see through them to the windows behind.  This sets up the translucent
+    <!-- Theme for translucent activities (on API level 10 and lower). That is, windows
+         that allow you to see through them to the windows behind.  This sets up the translucent
          flag and appropriate animations for your windows.  -->
     <style name="Theme.Translucent">
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -551,14 +552,14 @@ please see themes_device_defaults.xml.
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
 
-    <!-- Variant of the translucent theme with no title bar -->
+    <!-- Variant of {@link #Theme_Translucent} with no title bar -->
     <style name="Theme.Translucent.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Variant of the translucent theme that has no title bar and
-         fills the entire screen -->
+    <!-- Variant of {@link #Theme_Translucent} that has no title bar and
+         no status bar -->
     <style name="Theme.Translucent.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
     </style>
@@ -574,7 +575,8 @@ please see themes_device_defaults.xml.
         <item name="android:windowNoDisplay">true</item>
     </style>
 
-    <!-- Default theme for dialog windows and activities, which is used by the
+    <!-- Default theme for dialog windows and activities (on API level 10 and lower),
+         which is used by the
          {@link android.app.Dialog} class.  This changes the window to be
          floating (not fill the entire screen), and puts a frame around its
          contents.  You can set this theme on an activity if you would like to
@@ -622,7 +624,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemPaddingRight">10dip</item>
     </style>
 
-    <!-- Variation of Theme.Dialog that does not include a frame (or background).
+    <!-- Variant of {@link Theme_Dialog} that does not include a frame (or background).
          The view hierarchy of the dialog is responsible for drawing all of
          its pixels. -->
     <style name="Theme.Dialog.NoFrame">
@@ -636,7 +638,7 @@ please see themes_device_defaults.xml.
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
-    <!-- Default theme for alert dialog windows, which is used by the
+    <!-- Default theme for alert dialog windows (on API level 10 and lower), which is used by the
          {@link android.app.AlertDialog} class.  This is basically a dialog
          but sets the background to empty so it can do two-tone backgrounds. -->
     <style name="Theme.Dialog.Alert">
@@ -648,8 +650,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSmall">@android:style/TextAppearance.Large.Inverse</item>
     </style>
     
-    <!-- Default dark theme for panel windows.  This removes all extraneous
-         window decorations, so you basically have an empty rectangle in which
+    <!-- Default dark theme for panel windows (on API level 10 and lower).  This removes all
+         extraneous window decorations, so you basically have an empty rectangle in which
          to place your content.  It makes the window floating, with a transparent
          background, and turns off dimming behind the window. -->
     <style name="Theme.Panel">
@@ -664,8 +666,8 @@ please see themes_device_defaults.xml.
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Default light theme for panel windows.  This removes all extraneous
-         window decorations, so you basically have an empty rectangle in which
+    <!-- Default light theme for panel windows (on API level 10 and lower).  This removes all
+         extraneous window decorations, so you basically have an empty rectangle in which
          to place your content.  It makes the window floating, with a transparent
          background, and turns off dimming behind the window. -->
     <style name="Theme.Light.Panel">
@@ -712,7 +714,7 @@ please see themes_device_defaults.xml.
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Default theme for input methods, which is used by the
+    <!-- Default theme for input methods (on API level 10 and lower), which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations
          and a few custom attributes. -->
@@ -723,7 +725,7 @@ please see themes_device_defaults.xml.
         <item name="android:imeExtractExitAnimation">@android:anim/input_method_extract_exit</item>
     </style>
 
-    <!-- Default theme for modern holo style input methods, which is used by the
+    <!-- Default theme for holo style input methods, which is used by the
          {@link android.inputmethodservice.InputMethodService} class.
          this inherits from Theme.Panel, but sets up IME appropriate animations
          and a few custom attributes. -->
@@ -842,14 +844,23 @@ please see themes_device_defaults.xml.
         <item name="android:windowActionModeOverlay">true</item>
     </style>
     
-    <!-- New Honeycomb holographic theme. Dark version.  The widgets in the
-         holographic theme are translucent on their brackground, so applications
-         must ensure that any background they use with this theme is itself
-         dark; otherwise, it will be difficult to see the widgets.  The new
-         UI style also includes a full action bar by default.
+    <!-- Honeycomb holographic theme (dark version).
+         <p>This is the default system theme for apps that target API level 11 - 13. Starting
+         with API level 14, the default system theme is supplied by {@link #Theme_DeviceDefault},
+         which might apply a different style on different devices. If you want to ensure that your
+         app consistenly uses the Holo theme at all times, you must explicitly declare it in your
+         manifest. For example, {@code &lt;application android:theme="@android:style/Theme.Holo"&gt;}.
+         For more information, read <a
+         href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo
+         Everywhere</a>.</p>
+         <p>The widgets in the holographic theme are translucent on their brackground, so
+         applications must ensure that any background they use with this theme is itself
+         dark; otherwise, it will be difficult to see the widgets. This UI style also includes a
+         full action bar by default.</p>
 
-         Styles used by the Holo theme are named using the convention Type.Holo.Etc.
-         (For example, Widget.Holo.Button, TextAppearance.Holo.Widget.PopupMenu.Large.)
+         <p>Styles used by the Holo theme are named using the convention Type.Holo.Etc
+         (for example, {@code Widget.Holo.Button} and {@code
+         TextAppearance.Holo.Widget.PopupMenu.Large}).
          Specific resources used by Holo are named using the convention @type/foo_bar_baz_holo
          with trailing _dark or _light specifiers if they are not shared between both light and
          dark versions of the theme. -->
@@ -951,15 +962,12 @@ please see themes_device_defaults.xml.
         <item name="listDividerAlertDialog">@android:drawable/list_divider_holo_dark</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
-        <item name="expandableListPreferredChildPaddingLeft">
-                ?android:attr/expandableListPreferredItemPaddingLeft</item>
+        <item name="expandableListPreferredChildPaddingLeft">?android:attr/expandableListPreferredItemPaddingLeft</item>
 
         <item name="expandableListPreferredItemIndicatorLeft">3dip</item>
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
-        <item name="expandableListPreferredChildIndicatorLeft">
-                ?android:attr/expandableListPreferredItemIndicatorLeft</item>
-        <item name="expandableListPreferredChildIndicatorRight">
-                ?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="expandableListPreferredChildIndicatorLeft">?android:attr/expandableListPreferredItemIndicatorLeft</item>
+        <item name="expandableListPreferredChildIndicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
@@ -1156,10 +1164,10 @@ please see themes_device_defaults.xml.
 
     </style>
 
-    <!-- New Honeycomb holographic theme. Light version.  The widgets in the
+    <!-- Honeycomb holographic theme (light version).  The widgets in the
          holographic theme are translucent on their brackground, so applications
          must ensure that any background they use with this theme is itself
-         light; otherwise, it will be difficult to see the widgets.  The new
+         light; otherwise, it will be difficult to see the widgets.  This
          UI style also includes a full action bar by default. -->
     <style name="Theme.Holo.Light" parent="Theme.Light">
         <item name="colorForeground">@android:color/bright_foreground_holo_light</item>
@@ -1257,15 +1265,12 @@ please see themes_device_defaults.xml.
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_light</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
-        <item name="expandableListPreferredChildPaddingLeft">
-                ?android:attr/expandableListPreferredItemPaddingLeft</item>
+        <item name="expandableListPreferredChildPaddingLeft">?android:attr/expandableListPreferredItemPaddingLeft</item>
 
         <item name="expandableListPreferredItemIndicatorLeft">3dip</item>
         <item name="expandableListPreferredItemIndicatorRight">0dip</item>
-        <item name="expandableListPreferredChildIndicatorLeft">
-                ?android:attr/expandableListPreferredItemIndicatorLeft</item>
-        <item name="expandableListPreferredChildIndicatorRight">
-                ?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="expandableListPreferredChildIndicatorLeft">?android:attr/expandableListPreferredItemIndicatorLeft</item>
+        <item name="expandableListPreferredChildIndicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
 
         <item name="listDividerAlertDialog">@android:drawable/list_divider_holo_light</item>
 
@@ -1522,6 +1527,7 @@ please see themes_device_defaults.xml.
     </style>
  
     <!-- Dialog themes for Holo -->
+    <eat-comment />
 
     <!-- Holo theme for dialog windows and activities, which is used by the
          {@link android.app.Dialog} class.  This changes the window to be
@@ -1554,27 +1560,27 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemPaddingRight">16dip</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Dialog that has a nice minumum width for
+    <!-- Variant of Theme.Holo.Dialog that has a nice minimum width for
          a regular dialog. -->
     <style name="Theme.Holo.Dialog.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Dialog that does not include a title bar. -->
+    <!-- Variant of Theme.Holo.Dialog that does not include a title bar. -->
     <style name="Theme.Holo.Dialog.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Dialog.NoActionVar that has a nice minumum width for
+    <!-- Variant of Theme.Holo.Dialog.NoActionBar that has a nice minimum width for
          a regular dialog. -->
     <style name="Theme.Holo.Dialog.NoActionBar.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Dialog that does not include a frame (or background).
+    <!-- Variant of Theme.Holo.Dialog that does not include a frame (or background).
          The view hierarchy of the dialog is responsible for drawing all of
          its pixels. -->
     <style name="Theme.Holo.Dialog.NoFrame">
@@ -1646,20 +1652,20 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemPaddingRight">16dip</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Light.Dialog that has a nice minumum width for
+    <!-- Variant of Theme.Holo.Light.Dialog that has a nice minimum width for
          a regular dialog. -->
     <style name="Theme.Holo.Light.Dialog.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
         <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Light.Dialog that does not include a title bar. -->
+    <!-- Variant of Theme.Holo.Light.Dialog that does not include a title bar. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- Variation of Theme.Holo.Light.Dialog.NoActionBar that has a nice minumum width for
+    <!-- Variant of Theme.Holo.Light.Dialog.NoActionBar that has a nice minimum width for
          a regular dialog. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
@@ -1700,7 +1706,8 @@ please see themes_device_defaults.xml.
         <item name="android:windowShowWallpaper">true</item>
     </style>
 
-    <!-- Variant of the holographic (dark) theme with no title bar -->
+    <!--Default holographic (dark) for windows that want to have the user's selected
+         wallpaper appear behind them and without an action bar. -->
     <style name="Theme.Holo.Wallpaper.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>

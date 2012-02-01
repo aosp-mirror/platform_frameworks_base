@@ -112,7 +112,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Standard animations for a translucent window or activity.  This
-         style is <em>not<em> used by default for the translucent theme
+         style is <em>not</em> used by default for the translucent theme
          (since translucent activities are a special case that have no
          clear UI paradigm), but you can make your own specialized theme
          with this animation style if you would like to have the standard
