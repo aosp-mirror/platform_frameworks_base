@@ -24,7 +24,7 @@ Eclipse as your IDE, because we've provided a great plugin that handles your pro
 management to greatly speed up your development cycles.</p>
 
 <p>This tutorial assumes that you're using Eclipse. If you're using the command line, see
-<a href="{@docRoot}/guide/developing/building/building-cmdline.html">Building and Running from the
+<a href="{@docRoot}guide/developing/building/building-cmdline.html">Building and Running from the
 Command Line</a>. You can then return to this tutorial and ignore anything about Eclipse.</p>
 
 <p>Before you start, you should already have the SDK installed, and if you're
