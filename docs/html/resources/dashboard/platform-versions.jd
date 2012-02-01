@@ -52,7 +52,7 @@ Android Market within a 14-day period ending on the data collection date noted b
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="470"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.6,1.1,8.5,30.4,0.6,54.9,0.1,1.5,1.7,0.3,0.3&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.0|Android%203.1|Android%203.2|Android%204.0|Android%204.0.3&chco=c4df9b,6fad0c" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.6,1.0,7.6,27.8,0.5,58.1,0.1,1.4,1.9,0.3,0.7&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.0|Android%203.1|Android%203.2|Android%204.0|Android%204.0.3&chco=c4df9b,6fad0c" />
 
 <table>
 <tr>
@@ -62,24 +62,24 @@ src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:0.6,1.1,8.5,30.
   <th>Distribution</th>
 </tr>
 <tr><td><a href="{@docRoot}sdk/android-1.5.html">Android 1.5</a></td><td>Cupcake</td>  <td>3</td><td>0.6%</td></tr>
-<tr><td><a href="{@docRoot}sdk/android-1.6.html">Android 1.6</a></td><td>Donut</td>    <td>4</td><td>1.1%</td></tr>
-<tr><td><a href="{@docRoot}sdk/android-2.1.html">Android 2.1</a></td><td>Eclair</td>   <td>7</td><td>8.5%</td></tr>
-<tr><td><a href="{@docRoot}sdk/android-2.2.html">Android 2.2</a></td><td>Froyo</td>    <td>8</td><td>30.4%</td></tr>
+<tr><td><a href="{@docRoot}sdk/android-1.6.html">Android 1.6</a></td><td>Donut</td>    <td>4</td><td>1.0%</td></tr>
+<tr><td><a href="{@docRoot}sdk/android-2.1.html">Android 2.1</a></td><td>Eclair</td>   <td>7</td><td>7.6%</td></tr>
+<tr><td><a href="{@docRoot}sdk/android-2.2.html">Android 2.2</a></td><td>Froyo</td>    <td>8</td><td>27.8%</td></tr>
 <tr><td><a href="{@docRoot}sdk/android-2.3.html">Android 2.3 -<br/>
-                             Android 2.3.2</a></td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.6%</td></tr>
+                             Android 2.3.2</a></td><td rowspan="2">Gingerbread</td>    <td>9</td><td>0.5%</td></tr>
 <tr><td><a href="{@docRoot}sdk/android-2.3.3.html">Android 2.3.3 -<br/>
-      Android 2.3.7</a></td><!-- Gingerbread -->                                       <td>10</td><td>54.9%</td></tr>
+      Android 2.3.7</a></td><!-- Gingerbread -->                                       <td>10</td><td>58.1%</td></tr>
 <tr><td><a href="{@docRoot}sdk/android-3.0.html">Android 3.0</a></td>
                                                    <td rowspan="3">Honeycomb</td>      <td>11</td><td>0.1%</td></tr>
-<tr><td><a href="{@docRoot}sdk/android-3.1.html">Android 3.1</a></td><!-- Honeycomb --><td>12</td><td>1.5%</td></tr>
-<tr><td><a href="{@docRoot}sdk/android-3.2.html">Android 3.2</a></td><!-- Honeycomb --><td>13</td><td>1.7%</td></tr> 
+<tr><td><a href="{@docRoot}sdk/android-3.1.html">Android 3.1</a></td><!-- Honeycomb --><td>12</td><td>1.4%</td></tr>
+<tr><td><a href="{@docRoot}sdk/android-3.2.html">Android 3.2</a></td><!-- Honeycomb --><td>13</td><td>1.9%</td></tr> 
 <tr><td><a href="{@docRoot}sdk/android-4.0.html">Android 4.0 -<br/>
                                                Android 4.0.2</a></td>
                                                 <td rowspan="2">Ice Cream Sandwich</td><td>14</td><td>0.3%</td></tr> 
-<tr><td><a href="{@docRoot}sdk/android-4.0.3.html">Android 4.0.3</a></td><!-- ICS     --><td>15</td><td>0.3%</td></tr> 
+<tr><td><a href="{@docRoot}sdk/android-4.0.3.html">Android 4.0.3</a></td><!-- ICS     --><td>15</td><td>0.7%</td></tr> 
 </table>
 
-<p><em>Data collected during a 14-day period ending on January 3, 2012</em></p>
+<p><em>Data collected during a 14-day period ending on February 1, 2012</em></p>
 <!--
 <p style="font-size:.9em">* <em>Other: 0.1% of devices running obsolete versions</em></p>
 -->
@@ -108,9 +108,9 @@ Android Market within a 14-day period ending on the date indicated on the x-axis
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="660" style="padding:5px;background:#fff"
-src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C07/01%7C07/15%7C08/01%7C08/15%7C09/01%7C09/15%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C1%3A%7C2011%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C2012%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.2,99.0,98.8,98.7,98.5,98.5,98.2,98.1,98.0,99.9,99.9,99.7,99.2|97.7,97.6,97.5,97.5,97.5,97.5,97.1,97.1,97.0,99.1,99.1,99.0,98.6|95.5,95.5,95.5,95.6,95.7,95.8,95.6,95.9,95.7,97.7,97.8,97.8,97.5|77.6,79.0,80.2,81.1,82.4,83.3,83.8,84.9,85.1,87.5,88.2,88.6,89.0|17.8,20.6,24.3,27.5,31.2,34.7,38.3,41.3,44.0,48.9,52.9,55.7,58.5|16.8,20.0,23.7,26.9,30.6,34.1,37.8,40.8,43.5,48.4,52.4,55.2,57.9|0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.3,2.6,3.2|0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.2,1.3,1.7&chm=b,c3df9b,0,1,0|b,b8dc82,1,2,0|tAndroid 2.1,608920,2,0,15,,t::-5|b,addb67,2,3,0|tAndroid 2.2,517617,3,0,15,,t::-5|b,a3db4b,3,4,0|b,98dc2e,4,5,0|tAndroid 2.3.3,334d0a,5,0,15,,t::-5|b,8cd41b,5,6,0|b,7ec113,6,7,0|B,6fad0c,7,8,0&chg=7,25&chdl=Android 1.5|Android 1.6|Android 2.1|Android 2.2|Android 2.3|Android 2.3.3|Android 3.1|Android 3.2&chco=add274,a2d15a,97d13e,8bcb28,7dba1e,6ea715,5f920e,507d08" />
+src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C08/01%7C08/15%7C09/01%7C09/15%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C1%3A%7C2011%7C%7C%7C%7C%7C%7C%7C%7C%7C%7C2012%7C%7C2012%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:98.2,98.1,97.9,97.9,97.7,97.6,97.5,99.4,99.4,99.2,98.6,98.4,98.5|96.9,96.9,96.9,96.9,96.6,96.6,96.5,98.6,98.6,98.5,98.0,97.8,97.9|94.9,95.0,95.1,95.2,95.1,95.4,95.2,97.2,97.3,97.3,96.9,96.8,96.9|79.6,80.5,81.8,82.7,83.3,84.4,84.6,87.0,87.7,88.1,88.4,88.8,89.2|23.7,26.9,30.6,34.1,37.8,40.8,43.5,48.4,52.4,55.2,57.9,59.7,61.3|0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.3,2.6,3.2,3.2,3.3|0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.2,1.3,1.7,1.8,1.9&chm=b,c3df9b,0,1,0|b,b6dc7d,1,2,0|tAndroid%202.1,5b831d,2,0,15,,t::-5|b,aadb5e,2,3,0|tAndroid%202.2,496c13,3,0,15,,t::-5|b,9ddb3d,3,4,0|tAndroid%202.3.3,38540b,4,0,15,,t::-5|b,91da1e,4,5,0|b,80c414,5,6,0|B,6fad0c,6,7,0&chg=7,25&chdl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3.3|Android%203.1|Android%203.2&chco=add274,a0d155,94d134,84c323,73ad18,62960f,507d08" />
 
-<p><em>Last historical dataset collected during a 14-day period ending on January 3, 2012</em></p>
+<p><em>Last historical dataset collected during a 14-day period ending on February 1, 2012</em></p>
 
 
 </div><!-- end dashboard-panel -->
