@@ -74,3 +74,30 @@ LOCAL_CFLAGS := \
 LOCAL_MODULE := libstagefright_amrnbenc
 
 include $(BUILD_STATIC_LIBRARY)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftAMRNBEncoder.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+        $(LOCAL_PATH)/src \
+        $(LOCAL_PATH)/include \
+        $(LOCAL_PATH)/../common/include \
+        $(LOCAL_PATH)/../common
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_amrnbenc
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright_omx libstagefright_foundation libutils \
+        libstagefright_amrnb_common
+
+LOCAL_MODULE := libstagefright_soft_amrnbenc
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_SHARED_LIBRARY)
