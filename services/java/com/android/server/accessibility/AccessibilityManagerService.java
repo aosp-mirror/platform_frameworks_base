@@ -46,7 +46,6 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IWindow;
-import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -95,6 +94,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private static final int OWN_PROCESS_ID = android.os.Process.myPid();
 
     private static final int DO_SET_SERVICE_INFO = 10;
+
+    public static final int ACTIVE_WINDOW_ID = -1;
+
+    public static final long ROOT_NODE_ID = -1;
 
     private static int sNextWindowId;
 
@@ -467,7 +470,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    public void registerEventListener(IEventListener listener) {
+    public void registerUiTestAutomationService(IEventListener listener,
+            AccessibilityServiceInfo accessibilityServiceInfo) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_EVENT_LISTENER);
         ComponentName componentName = new ComponentName("foo.bar",
@@ -490,11 +494,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         // Hook the automation service up.
-        AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
-        accessibilityServiceInfo.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
-        accessibilityServiceInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         Service service = new Service(componentName, accessibilityServiceInfo, true);
         service.onServiceConnected(componentName, listener.asBinder());
+    }
+
+    public void unregisterUiTestAutomationService(IEventListener listener) {
+        synchronized (mLock) {
+            final int serviceCount = mServices.size();
+            for (int i = 0; i < serviceCount; i++) {
+                Service service = mServices.get(i);
+                if (service.mServiceInterface == listener && service.mIsAutomation) {
+                    // Automation service is not bound, so pretend it died to perform clean up.
+                    service.binderDied();
+                }
+            }
+        }
     }
 
     /**
@@ -1070,10 +1084,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        public float findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                long interrogatingTid)
+        public float findAccessibilityNodeInfoByViewId(int accessibilityWindowId,
+                long accessibilityNodeId, int viewId, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
@@ -1081,12 +1096,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!permissionGranted) {
                     return 0;
                 } else {
-                    connection = getConnectionToRetrievalAllowingWindowLocked();
+                    connection = getConnectionLocked(resolvedWindowId);
                     if (connection == null) {
-                        if (DEBUG) {
-                            Slog.e(LOG_TAG, "No interaction connection to a retrieve "
-                                    + "allowing window.");
-                        }
                         return 0;
                     }
                 }
@@ -1094,44 +1105,33 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfoByViewId(viewId, interactionId, callback,
-                        interrogatingPid, interrogatingTid);
+                connection.findAccessibilityNodeInfoByViewId(accessibilityNodeId, viewId,
+                        interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error finding node.");
+                    Slog.e(LOG_TAG, "Error findAccessibilityNodeInfoByViewId().");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return getCompatibilityScale(mSecurityPolicy.getRetrievalAllowingWindowLocked());
+            return getCompatibilityScale(resolvedWindowId);
         }
 
-        public float findAccessibilityNodeInfosByTextInActiveWindow(
-                String text, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, long threadId)
-                throws RemoteException {
-            return findAccessibilityNodeInfosByText(text,
-                    mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID, interactionId, callback,
-                    threadId);
-        }
-
-        public float findAccessibilityNodeInfosByText(String text,
-                int accessibilityWindowId, long accessibilityNodeId, int interactionId,
+        public float findAccessibilityNodeInfosByText(int accessibilityWindowId,
+                long accessibilityNodeId, String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
-                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
+                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
                 if (!permissionGranted) {
                     return 0;
                 } else {
-                    connection = getConnectionToRetrievalAllowingWindowLocked();
+                    connection = getConnectionLocked(resolvedWindowId);
                     if (connection == null) {
-                        if (DEBUG) {
-                            Slog.e(LOG_TAG, "No interaction connection to focused window.");
-                        }
                         return 0;
                     }
                 }
@@ -1139,40 +1139,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             try {
-                connection.findAccessibilityNodeInfosByText(text, accessibilityNodeId,
+                connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
                         interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error finding node.");
+                    Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfosByText()");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return getCompatibilityScale(accessibilityWindowId);
+            return getCompatibilityScale(resolvedWindowId);
         }
 
         public float findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
                 long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
                 throws RemoteException {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
-                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
+                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
                 if (!permissionGranted) {
                     return 0;
                 } else {
-                    AccessibilityConnectionWrapper wrapper =
-                        mWindowIdToInteractionConnectionWrapperMap.get(accessibilityWindowId);
-                    if (wrapper == null) {
-                        if (DEBUG) {
-                            Slog.e(LOG_TAG, "No interaction connection to window: "
-                                    + accessibilityWindowId);
-                        }
+                    connection = getConnectionLocked(resolvedWindowId);
+                    if (connection == null) {
                         return 0;
                     }
-                    connection = wrapper.mConnection;
                 }
             }
             final int interrogatingPid = Binder.getCallingPid();
@@ -1182,35 +1177,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         interactionId, callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error requesting node with accessibilityNodeId: "
-                            + accessibilityNodeId);
+                    Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
-            return getCompatibilityScale(accessibilityWindowId);
+            return getCompatibilityScale(resolvedWindowId);
         }
 
         public boolean performAccessibilityAction(int accessibilityWindowId,
                 long accessibilityNodeId, int action, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, long interrogatingTid) {
+            final int resolvedWindowId = resolveAccessibilityWindowId(accessibilityWindowId);
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
-                        accessibilityWindowId, action);
+                        resolvedWindowId, action);
                 if (!permissionGranted) {
                     return false;
                 } else {
-                    AccessibilityConnectionWrapper wrapper =
-                        mWindowIdToInteractionConnectionWrapperMap.get(accessibilityWindowId);
-                    if (wrapper == null) {
-                        if (DEBUG) {
-                            Slog.e(LOG_TAG, "No interaction connection to window: "
-                                    + accessibilityWindowId);
-                        }
+                    connection = getConnectionLocked(resolvedWindowId);
+                    if (connection == null) {
                         return false;
                     }
-                    connection = wrapper.mConnection;
                 }
             }
             final int interrogatingPid = Binder.getCallingPid();
@@ -1220,8 +1209,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         callback, interrogatingPid, interrogatingTid);
             } catch (RemoteException re) {
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error requesting node with accessibilityNodeId: "
-                            + accessibilityNodeId);
+                    Slog.e(LOG_TAG, "Error calling performAccessibilityAction()");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
@@ -1265,14 +1253,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        private IAccessibilityInteractionConnection getConnectionToRetrievalAllowingWindowLocked() {
-            final int windowId = mSecurityPolicy.getRetrievalAllowingWindowLocked();
+        private IAccessibilityInteractionConnection getConnectionLocked(int windowId) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Trying to get interaction connection to windowId: " + windowId);
             }
-            AccessibilityConnectionWrapper wrapper =
-                mWindowIdToInteractionConnectionWrapperMap.get(windowId);
-            return (wrapper != null) ? wrapper.mConnection : null;
+            AccessibilityConnectionWrapper wrapper = mWindowIdToInteractionConnectionWrapperMap.get(
+                    windowId);
+            if (wrapper != null && wrapper.mConnection != null) {
+                return wrapper.mConnection;
+            }
+            if (DEBUG) {
+                Slog.e(LOG_TAG, "No interaction connection to window: " + windowId);
+            }
+            return null;
+        }
+
+        private int resolveAccessibilityWindowId(int accessibilityWindowId) {
+            if (accessibilityWindowId == ACTIVE_WINDOW_ID) {
+                return mSecurityPolicy.mRetrievalAlowingWindowId;
+            }
+            return accessibilityWindowId;
         }
 
         private float getCompatibilityScale(int windowId) {

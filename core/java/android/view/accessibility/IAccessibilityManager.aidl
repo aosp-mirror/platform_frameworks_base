@@ -49,5 +49,7 @@ interface IAccessibilityManager {
 
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
-    void registerEventListener(IEventListener client);
+    void registerUiTestAutomationService(IEventListener listener, in AccessibilityServiceInfo info);
+
+    void unregisterUiTestAutomationService(IEventListener listener);
 }

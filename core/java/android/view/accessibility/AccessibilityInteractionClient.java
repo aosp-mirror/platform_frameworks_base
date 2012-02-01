@@ -24,7 +24,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
+import android.view.AccessibilityNodeInfoCache;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,6 +99,11 @@ public final class AccessibilityInteractionClient
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
         new SparseArray<IAccessibilityServiceConnection>();
 
+    // The connection cache is shared between all interrogating threads since
+    // at any given time there is only one window allowing querying.
+    private static final AccessibilityNodeInfoCache sAccessibilityNodeInfoCache =
+        AccessibilityNodeInfoCache.newSynchronizedAccessibilityNodeInfoCache();
+
     /**
      * @return The client for the current thread.
      */
@@ -145,7 +152,9 @@ public final class AccessibilityInteractionClient
      * Finds an {@link AccessibilityNodeInfo} by accessibility id.
      *
      * @param connectionId The id of a connection for interacting with the system.
-     * @param accessibilityWindowId A unique window id.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
      * @param accessibilityNodeId A unique node accessibility id
      *     (accessibility view and virtual descendant id).
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
@@ -155,16 +164,22 @@ public final class AccessibilityInteractionClient
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
+                AccessibilityNodeInfo cachedInfo = sAccessibilityNodeInfoCache.get(accessibilityNodeId); 
+                if (cachedInfo != null) {
+                    return cachedInfo;
+                }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final float windowScale = connection.findAccessibilityNodeInfoByAccessibilityId(
                         accessibilityWindowId, accessibilityNodeId, interactionId, this,
                         Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
                 if (windowScale > 0) {
-                    AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
+                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAccessibilityNodeInfo(info, connectionId, windowScale);
-                    return info;
+                    finalizeAccessibilityNodeInfos(infos, connectionId, windowScale);
+                    if (infos != null && !infos.isEmpty()) {
+                        return infos.get(0);
+                    }
                 }
             } else {
                 if (DEBUG) {
@@ -181,22 +196,30 @@ public final class AccessibilityInteractionClient
     }
 
     /**
-     * Finds an {@link AccessibilityNodeInfo} by View id. The search is performed
-     * in the currently active window and starts from the root View in the window.
+     * Finds an {@link AccessibilityNodeInfo} by View id. The search is performed in
+     * the window whose id is specified and starts from the node whose accessibility
+     * id is specified.
      *
      * @param connectionId The id of a connection for interacting with the system.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
+     * @param accessibilityNodeId A unique view id from where to start the search. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ROOT_NODE_ID}
+     *     to start from the root.
      * @param viewId The id of the view.
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
-    public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int connectionId,
-            int viewId) {
+    public AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int connectionId,
+            int accessibilityWindowId, long accessibilityNodeId, int viewId) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final float windowScale =
-                    connection.findAccessibilityNodeInfoByViewIdInActiveWindow(viewId,
-                            interactionId, this, Thread.currentThread().getId());
+                    connection.findAccessibilityNodeInfoByViewId(accessibilityWindowId,
+                            accessibilityNodeId, viewId, interactionId, this,
+                            Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
                 if (windowScale > 0) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
@@ -220,64 +243,27 @@ public final class AccessibilityInteractionClient
 
     /**
      * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
-     * insensitive containment. The search is performed in the currently
-     * active window and starts from the root View in the window.
-     *
-     * @param connectionId The id of a connection for interacting with the system.
-     * @param text The searched text.
-     * @return A list of found {@link AccessibilityNodeInfo}s.
-     */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByTextInActiveWindow(
-            int connectionId, String text) {
-        try {
-            IAccessibilityServiceConnection connection = getConnection(connectionId);
-            if (connection != null) {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale =
-                    connection.findAccessibilityNodeInfosByTextInActiveWindow(text,
-                            interactionId, this, Thread.currentThread().getId());
-                // If the scale is zero the call has failed.
-                if (windowScale > 0) {
-                    List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
-                            interactionId);
-                    finalizeAccessibilityNodeInfos(infos, connectionId, windowScale);
-                    return infos;
-                }
-            } else {
-                if (DEBUG) {
-                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
-                }
-            }
-        } catch (RemoteException re) {
-            if (DEBUG) {
-                Log.w(LOG_TAG, "Error while calling remote"
-                        + " findAccessibilityNodeInfosByViewTextInActiveWindow", re);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
      * insensitive containment. The search is performed in the window whose
-     * id is specified and starts from the View whose accessibility id is
+     * id is specified and starts from the node whose accessibility id is
      * specified.
      *
      * @param connectionId The id of a connection for interacting with the system.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
+     * @param accessibilityNodeId A unique view id from where to start the search. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ROOT_NODE_ID}
      * @param text The searched text.
-     * @param accessibilityWindowId A unique window id.
-     * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id) from
-     *        where to start the search. Use {@link android.view.View#NO_ID} to start from the root.
      * @return A list of found {@link AccessibilityNodeInfo}s.
      */
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(int connectionId,
-            String text, int accessibilityWindowId, long accessibilityNodeId) {
+            int accessibilityWindowId, long accessibilityNodeId, String text) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final float windowScale = connection.findAccessibilityNodeInfosByText(text,
-                        accessibilityWindowId, accessibilityNodeId, interactionId, this,
+                final float windowScale = connection.findAccessibilityNodeInfosByText(
+                        accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
                         Thread.currentThread().getId());
                 // If the scale is zero the call has failed.
                 if (windowScale > 0) {
@@ -304,7 +290,9 @@ public final class AccessibilityInteractionClient
      * Performs an accessibility action on an {@link AccessibilityNodeInfo}.
      *
      * @param connectionId The id of a connection for interacting with the system.
-     * @param accessibilityWindowId The id of the window.
+     * @param accessibilityWindowId A unique window id. Use
+     *     {@link com.android.server.accessibility.AccessibilityManagerService#ACTIVE_WINDOW_ID}
+     *     to query the currently active window.
      * @param accessibilityNodeId A unique node id (accessibility and virtual descendant id).
      * @param action The action to perform.
      * @return Whether the action was performed.
@@ -319,7 +307,7 @@ public final class AccessibilityInteractionClient
                         accessibilityWindowId, accessibilityNodeId, action, interactionId, this,
                         Thread.currentThread().getId());
                 if (success) {
-                    return getPerformAccessibilityActionResult(interactionId);
+                    return getPerformAccessibilityActionResultAndClear(interactionId);
                 }
             } else {
                 if (DEBUG) {
@@ -332,6 +320,24 @@ public final class AccessibilityInteractionClient
             }
         }
         return false;
+    }
+
+    public void clearCache() {
+        if (DEBUG) {
+            Log.w(LOG_TAG, "clearCache()");
+        }
+        sAccessibilityNodeInfoCache.clear();
+    }
+
+    public void removeCachedNode(long accessibilityNodeId) {
+        if (DEBUG) {
+            Log.w(LOG_TAG, "removeCachedNode(" + accessibilityNodeId +")");
+        }
+        sAccessibilityNodeInfoCache.remove(accessibilityNodeId);
+    }
+
+    public void onAccessibilityEvent(AccessibilityEvent event) {
+        sAccessibilityNodeInfoCache.onAccessibilityEvent(event);
     }
 
     /**
@@ -358,6 +364,9 @@ public final class AccessibilityInteractionClient
             if (interactionId > mInteractionId) {
                 mFindAccessibilityNodeInfoResult = info;
                 mInteractionId = interactionId;
+                if (info != null) {
+                    sAccessibilityNodeInfoCache.put(info.getSourceNodeId(), info);
+                }
             }
             mInstanceLock.notifyAll();
         }
@@ -386,8 +395,20 @@ public final class AccessibilityInteractionClient
                 int interactionId) {
         synchronized (mInstanceLock) {
             if (interactionId > mInteractionId) {
-                mFindAccessibilityNodeInfosResult = infos;
+                // If the call is not an IPC, i.e. it is made from the same process, we need to
+                // instantiate new result list to avoid passing internal instances to clients.
+                final boolean isIpcCall = (queryLocalInterface(getInterfaceDescriptor()) == null);
+                if (!isIpcCall) {
+                    mFindAccessibilityNodeInfosResult = new ArrayList<AccessibilityNodeInfo>(infos);
+                } else {
+                    mFindAccessibilityNodeInfosResult = infos;
+                }
                 mInteractionId = interactionId;
+                final int infoCount = infos.size();
+                for (int i = 0; i < infoCount; i ++) {
+                    AccessibilityNodeInfo info = infos.get(i);
+                    sAccessibilityNodeInfoCache.put(info.getSourceNodeId(), info);
+                }
             }
             mInstanceLock.notifyAll();
         }
@@ -399,7 +420,7 @@ public final class AccessibilityInteractionClient
      * @param interactionId The interaction id to match the result with the request.
      * @return Whether the action was performed.
      */
-    private boolean getPerformAccessibilityActionResult(int interactionId) {
+    private boolean getPerformAccessibilityActionResultAndClear(int interactionId) {
         synchronized (mInstanceLock) {
             final boolean success = waitForResultTimedLocked(interactionId);
             final boolean result = success ? mPerformAccessibilityActionResult : false;
