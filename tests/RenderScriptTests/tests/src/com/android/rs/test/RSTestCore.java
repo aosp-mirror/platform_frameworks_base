@@ -78,6 +78,7 @@ public class RSTestCore {
         unitTests.add(new UT_refcount(this, mRes, mCtx));
         unitTests.add(new UT_foreach(this, mRes, mCtx));
         unitTests.add(new UT_atomic(this, mRes, mCtx));
+        unitTests.add(new UT_struct(this, mRes, mCtx));
         unitTests.add(new UT_math(this, mRes, mCtx));
         unitTests.add(new UT_fp_mad(this, mRes, mCtx));
         /*
