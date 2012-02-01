@@ -92,8 +92,7 @@ public class UT_primitives extends UnitTest {
         ScriptC_primitives s = new ScriptC_primitives(pRS, mRes, R.raw.primitives);
         pRS.setMessageHandler(mRsMessage);
         if (!initializeGlobals(s)) {
-            // initializeGlobals failed
-            result = -1;
+            failTest();
         } else {
             s.invoke_primitives_test(0, 0);
             pRS.finish();

@@ -21,7 +21,7 @@ import android.renderscript.RenderScript.RSMessageHandler;
 
 public class UnitTest extends Thread {
     public String name;
-    public int result;
+    private int result;
     private ScriptField_ListAllocs_s.Item mItem;
     private RSTestCore mRSTC;
     private boolean msgHandled;
@@ -63,7 +63,7 @@ public class UnitTest extends Thread {
         }
     }
 
-    protected void updateUI() {
+    private void updateUI() {
         if (mItem != null) {
             mItem.result = result;
             msgHandled = true;
@@ -102,6 +102,22 @@ public class UnitTest extends Thread {
         while (!msgHandled) {
             yield();
         }
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public void failTest() {
+        result = -1;
+        updateUI();
+    }
+
+    public void passTest() {
+        if (result != -1) {
+            result = 1;
+        }
+        updateUI();
     }
 
     public void setItem(ScriptField_ListAllocs_s.Item item) {
