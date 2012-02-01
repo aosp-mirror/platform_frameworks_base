@@ -37,68 +37,65 @@ import android.util.Log;
 public class Float4Param extends ShaderParam {
     private static String TAG = "Float4Param";
 
-    Float4 mValue;
-    Camera mCamera;
     LightBase mLight;
-    int mVecSize;
 
     public Float4Param(String name) {
         super(name);
-        mValue = new Float4();
     }
 
-    public Float4Param(String name, float value) {
+    public Float4Param(String name, float x) {
         super(name);
-        mValue = new Float4();
-        mValue.x = value;
-        mVecSize = 1;
+        set(x, 0, 0, 0, 1);
     }
 
     public Float4Param(String name, float x, float y) {
         super(name);
-        mValue = new Float4();
-        mValue.x = x;
-        mValue.y = y;
-        mVecSize = 2;
+        set(x, y, 0, 0, 2);
     }
 
     public Float4Param(String name, float x, float y, float z) {
         super(name);
-        mValue = new Float4();
-        mValue.x = x;
-        mValue.y = y;
-        mValue.z = z;
-        mVecSize = 3;
+        set(x, y, z, 0, 3);
     }
 
     public Float4Param(String name, float x, float y, float z, float w) {
         super(name);
-        mValue = new Float4();
-        mValue.x = x;
-        mValue.y = y;
-        mValue.z = z;
-        mValue.w = w;
-        mVecSize = 4;
+        set(x, y, z, w, 4);
+    }
+
+    void set(float x, float y, float z, float w, int vecSize) {
+        mData.float_value.x = x;
+        mData.float_value.y = y;
+        mData.float_value.z = z;
+        mData.float_value.w = w;
+        mData.float_vecSize = vecSize;
+        if (mField != null) {
+            mField.set_float_value(0, mData.float_value, false);
+            mField.set_float_vecSize(0, mData.float_vecSize, true);
+        }
     }
 
     public void setValue(Float4 v) {
-        mValue = v;
+        set(v.x, v.y, v.z, v.w, mData.float_vecSize);
     }
 
     public Float4 getValue() {
-        return mValue;
+        return mData.float_value;
     }
 
     public void setVecSize(int vecSize) {
-        mVecSize = vecSize;
-    }
-
-    public void setCamera(Camera c) {
-        mCamera = c;
+        mData.float_vecSize = vecSize;
+        if (mField != null) {
+            mField.set_float_vecSize(0, mData.float_vecSize, true);
+        }
     }
 
     public void setLight(LightBase l) {
         mLight = l;
+        if (mField != null) {
+            mData.light = mLight.getRSData().getAllocation();
+            mField.set_light(0, mData.light, true);
+        }
     }
 
     boolean findLight(String property) {
@@ -139,16 +136,13 @@ public class Float4Param extends ShaderParam {
         return paramType;
     }
 
-    void initLocalData(RenderScriptGL rs) {
-        mRsFieldItem.type = getTypeFromName();
-        mRsFieldItem.bufferOffset = mOffset;
-        mRsFieldItem.float_value = mValue;
-        mRsFieldItem.float_vecSize = mVecSize;
+    void initLocalData() {
+        mData.type = getTypeFromName();
         if (mCamera != null) {
-            mRsFieldItem.camera = mCamera.getRSData().getAllocation();
+            mData.camera = mCamera.getRSData().getAllocation();
         }
         if (mLight != null) {
-            mRsFieldItem.light = mLight.getRSData().getAllocation();
+            mData.light = mLight.getRSData().getAllocation();
         }
     }
 }

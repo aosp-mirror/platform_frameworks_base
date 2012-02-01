@@ -49,9 +49,6 @@ public class Renderable extends RenderableBase {
 
     HashMap<String, ShaderParam> mSourceParams;
 
-    ArrayList<ShaderParam> mVertexParamList;
-    ArrayList<ShaderParam> mFragmentParamList;
-
     Mesh mMesh;
     int mMeshIndex;
 
@@ -74,8 +71,6 @@ public class Renderable extends RenderableBase {
 
     public Renderable() {
         mSourceParams = new HashMap<String, ShaderParam>();
-        mVertexParamList = new ArrayList<ShaderParam>();
-        mFragmentParamList = new ArrayList<ShaderParam>();
     }
 
     public void setCullType(int cull) {
@@ -160,20 +155,6 @@ public class Renderable extends RenderableBase {
         mRsField.set(mRsFieldItem, 0, true);
     }
 
-    void linkConstants() {
-        // Assign all the fragment params
-        if (mFragmentConstants != null) {
-            Element fragmentConst = mFragmentConstants.getType().getElement();
-            ShaderParam.fillInParams(fragmentConst, mSourceParams, mTransform, mFragmentParamList);
-        }
-
-        // Assign all the vertex params
-        if (mVertexConstants != null) {
-            Element vertexConst = mVertexConstants.getType().getElement();
-            ShaderParam.fillInParams(vertexConst, mSourceParams, mTransform, mVertexParamList);
-        }
-    }
-
     ScriptField_Renderable_s getRsField(RenderScriptGL rs, Resources res) {
         if (mRsField != null) {
             return mRsField;
@@ -202,25 +183,18 @@ public class Renderable extends RenderableBase {
 
         // Very important step that links available inputs and the constants vertex and
         // fragment shader request
-        linkConstants();
-
-        ScriptField_ShaderParam_s pvParams = null, pfParams = null;
-        int paramCount = mVertexParamList.size();
-        if (paramCount != 0) {
-            pvParams = new ScriptField_ShaderParam_s(rs, paramCount);
-            for (int i = 0; i < paramCount; i++) {
-                pvParams.set(mVertexParamList.get(i).getRSData(rs), i, false);
-            }
-            pvParams.copyAll();
+        ScriptField_ShaderParam_s pvParams = null;
+        // Assign all the vertex params
+        if (mVertexConstants != null) {
+            Element vertexConst = mVertexConstants.getType().getElement();
+            pvParams = ShaderParam.fillInParams(vertexConst, mSourceParams, mTransform);
         }
 
-        paramCount = mFragmentParamList.size();
-        if (paramCount != 0) {
-            pfParams = new ScriptField_ShaderParam_s(rs, paramCount);
-            for (int i = 0; i < paramCount; i++) {
-                pfParams.set(mFragmentParamList.get(i).getRSData(rs), i, false);
-            }
-            pfParams.copyAll();
+        ScriptField_ShaderParam_s pfParams = null;
+        // Assign all the fragment params
+        if (mFragmentConstants != null) {
+            Element fragmentConst = mFragmentConstants.getType().getElement();
+            pfParams = ShaderParam.fillInParams(fragmentConst, mSourceParams, mTransform);
         }
 
         mRsFieldItem = new ScriptField_Renderable_s.Item();

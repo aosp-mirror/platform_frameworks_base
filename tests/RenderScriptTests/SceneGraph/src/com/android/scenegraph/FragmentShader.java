@@ -129,7 +129,7 @@ public class FragmentShader extends Shader {
         linkConstants(rs);
         if (mPerShaderConstants != null) {
             item.shaderConst = mConstantBuffer;
-            item.shaderConstParams = mConstantBufferParams;
+            item.shaderConstParams = mConstantBufferParams.getAllocation();
             mProgram.bindConstants(item.shaderConst, 0);
         }
 

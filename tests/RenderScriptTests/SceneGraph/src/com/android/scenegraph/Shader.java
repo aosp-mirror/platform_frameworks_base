@@ -20,6 +20,9 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.android.scenegraph.SceneGraphBase;
+import com.android.scenegraph.ShaderParam;
+
 import android.renderscript.*;
 import android.renderscript.ProgramFragment.Builder;
 import android.util.Log;
@@ -32,18 +35,16 @@ public abstract class Shader extends SceneGraphBase {
     protected Type mPerShaderConstants;
 
     protected HashMap<String, ShaderParam> mSourceParams;
-    protected ArrayList<ShaderParam> mParamList;
     protected ArrayList<String> mShaderTextureNames;
     protected ArrayList<Program.TextureType > mShaderTextureTypes;
     protected ArrayList<String> mTextureNames;
     protected ArrayList<Program.TextureType > mTextureTypes;
 
     protected Allocation mConstantBuffer;
-    protected Allocation mConstantBufferParams;
+    protected ScriptField_ShaderParam_s mConstantBufferParams;
 
     public Shader() {
         mSourceParams = new HashMap<String, ShaderParam>();
-        mParamList = new ArrayList<ShaderParam>();
         mShaderTextureNames = new ArrayList<String>();
         mShaderTextureTypes = new ArrayList<Program.TextureType>();
         mTextureNames = new ArrayList<String>();
@@ -68,19 +69,8 @@ public abstract class Shader extends SceneGraphBase {
         }
 
         Element constElem = mPerShaderConstants.getElement();
-        ShaderParam.fillInParams(constElem, mSourceParams, null, mParamList);
+        mConstantBufferParams  = ShaderParam.fillInParams(constElem, mSourceParams, null);
 
         mConstantBuffer = Allocation.createTyped(rs, mPerShaderConstants);
-
-        ScriptField_ShaderParam_s rsParams = null;
-        int paramCount = mParamList.size();
-        if (paramCount != 0) {
-            rsParams = new ScriptField_ShaderParam_s(rs, paramCount);
-            for (int i = 0; i < paramCount; i++) {
-                rsParams.set(mParamList.get(i).getRSData(rs), i, false);
-            }
-            rsParams.copyAll();
-            mConstantBufferParams = rsParams.getAllocation();
-        }
     }
 }

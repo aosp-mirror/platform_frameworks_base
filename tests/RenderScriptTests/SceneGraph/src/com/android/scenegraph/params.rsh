@@ -20,25 +20,26 @@
 
 //#define DEBUG_PARAMS
 
-static void debugParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
+static void debugParam(SgShaderParam *p, SgShaderParamData *pData,
+                       uint8_t *constantBuffer, const SgCamera *currentCam) {
     rsDebug("____________ Param bufferOffset", p->bufferOffset);
-    rsDebug("Param Type ", p->type);
-    if (rsIsObject(p->paramName)) {
-        printName(p->paramName);
+    rsDebug("Param Type ", pData->type);
+    if (rsIsObject(pData->paramName)) {
+        printName(pData->paramName);
     }
 
     uint8_t *dataPtr = constantBuffer + p->bufferOffset;
     const SgTransform *pTransform = NULL;
-    if (rsIsObject(p->transform)) {
-        pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
+    if (rsIsObject(pData->transform)) {
+        pTransform = (const SgTransform *)rsGetElementAt(pData->transform, 0);
 
         rsDebug("Param transform", pTransform);
         printName(pTransform->name);
     }
 
     const SgLight *pLight = NULL;
-    if (rsIsObject(p->light)) {
-        pLight = (const SgLight *)rsGetElementAt(p->light, 0);
+    if (rsIsObject(pData->light)) {
+        pLight = (const SgLight *)rsGetElementAt(pData->light, 0);
         printLightInfo(pLight);
     }
 }
@@ -66,12 +67,13 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
     }
 }
 
-static bool processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCamera *currentCam) {
+static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
+                         uint8_t *constantBuffer, const SgCamera *currentCam) {
     const SgTransform *pTransform = NULL;
-    if (rsIsObject(p->transform)) {
-        pTransform = (const SgTransform *)rsGetElementAt(p->transform, 0);
+    if (rsIsObject(pData->transform)) {
+        pTransform = (const SgTransform *)rsGetElementAt(pData->transform, 0);
         // If we are a transform param and our transform is unchanged, nothing to do
-        bool isTransformOnly = (p->type > SHADER_PARAM_DATA_ONLY);
+        bool isTransformOnly = (pData->type > SHADER_PARAM_DATA_ONLY);
         if (p->transformTimestamp == pTransform->timestamp && isTransformOnly) {
             return false;
         }
@@ -79,25 +81,25 @@ static bool processParam(SgShaderParam *p, uint8_t *constantBuffer, const SgCame
     }
 
     const SgLight *pLight = NULL;
-    if (rsIsObject(p->light)) {
-        pLight = (const SgLight *)rsGetElementAt(p->light, 0);
+    if (rsIsObject(pData->light)) {
+        pLight = (const SgLight *)rsGetElementAt(pData->light, 0);
     }
 
     uint8_t *dataPtr = constantBuffer + p->bufferOffset;
 
-    switch(p->type) {
+    switch(pData->type) {
     case SHADER_PARAM_FLOAT4_DATA:
-        writeFloatData((float*)dataPtr, &p->float_value, p->float_vecSize);
+        writeFloatData((float*)dataPtr, &pData->float_value, pData->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_CAMERA_POS:
-        writeFloatData((float*)dataPtr, &currentCam->position, p->float_vecSize);
+        writeFloatData((float*)dataPtr, &currentCam->position, pData->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_CAMERA_DIR: break;
     case SHADER_PARAM_FLOAT4_LIGHT_COLOR:
-        writeFloatData((float*)dataPtr, &pLight->color, p->float_vecSize);
+        writeFloatData((float*)dataPtr, &pLight->color, pData->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_LIGHT_POS:
-        writeFloatData((float*)dataPtr, &pLight->position, p->float_vecSize);
+        writeFloatData((float*)dataPtr, &pLight->position, pData->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_LIGHT_DIR: break;
 
@@ -145,10 +147,11 @@ static void processAllParams(rs_allocation shaderConst,
         bool updated = false;
         for (int i = 0; i < numParams; i ++) {
             SgShaderParam *current = (SgShaderParam*)rsGetElementAt(allParams, i);
+            SgShaderParamData *currentData = (SgShaderParamData*)rsGetElementAt(current->data, 0);
 #ifdef DEBUG_PARAMS
-            debugParam(current, constantBuffer, camera);
+            debugParam(current, currentData, constantBuffer, camera);
 #endif // DEBUG_PARAMS
-            updated = processParam(current, constantBuffer, camera) || updated;
+            updated = processParam(current, currentData, constantBuffer, camera) || updated;
         }
     }
 }

@@ -53,7 +53,7 @@ public class TextureParam extends ShaderParam {
         return mTexture;
     }
 
-    void initLocalData(RenderScriptGL rs) {
+    void initLocalData() {
     }
 }
 
