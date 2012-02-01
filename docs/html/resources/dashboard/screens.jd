@@ -60,7 +60,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="400" height="250"
-src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi|Large%20/%20ldpi|Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Small%20/%20hdpi|Small%20/%20ldpi&chd=t%3A3.1,0.1,3.1,71.0,1.0,17.5,2.9,1.3" />
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi|Large%20/%20ldpi|Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Normal%20/%20xhdpi|Small%20/%20hdpi|Small%20/%20ldpi&chd=t%3A4.8,0.2,2.9,67.1,0.7,18.4,1.8,2.5,1.6" />
 
 <table>
 <tr>
@@ -71,31 +71,31 @@ src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=
 <th scope="col">xhdpi</th>
 </tr>
 <tr><th scope="row">small</th> 
-<td>1.3%</td>     <!-- small/ldpi -->
+<td>1.6%</td>     <!-- small/ldpi -->
 <td></td>     <!-- small/mdpi -->
-<td>2.9%</td> <!-- small/hdpi -->
+<td>2.5%</td> <!-- small/hdpi -->
 <td></td>     <!-- small/xhdpi -->
 </tr> 
 <tr><th scope="row">normal</th> 
-<td>1.0%</td>  <!-- normal/ldpi -->
-<td>17.5%</td> <!-- normal/mdpi -->
-<td>71%</td> <!-- normal/hdpi -->
-<td></td>      <!-- normal/xhdpi -->
+<td>0.7%</td>  <!-- normal/ldpi -->
+<td>18.4%</td> <!-- normal/mdpi -->
+<td>67.1%</td> <!-- normal/hdpi -->
+<td>1.8%</td>      <!-- normal/xhdpi -->
 </tr> 
 <tr><th scope="row">large</th> 
-<td>0.1%</td>     <!-- large/ldpi -->
-<td>3.1%</td> <!-- large/mdpi -->
+<td>0.2%</td>     <!-- large/ldpi -->
+<td>2.9%</td> <!-- large/mdpi -->
 <td></td>     <!-- large/hdpi -->
 <td></td>     <!-- large/xhdpi -->
 </tr> 
 <tr><th scope="row">xlarge</th> 
 <td></td>     <!-- xlarge/ldpi -->
-<td>3.1%</td> <!-- xlarge/mdpi -->
+<td>4.8%</td> <!-- xlarge/mdpi -->
 <td></td>     <!-- xlarge/hdpi -->
 <td></td>     <!-- xlarge/xhdpi -->
 </tr> 
 </table>
 
-<p><em>Data collected during a 7-day period ending on December 1, 2011</em></p>
+<p><em>Data collected during a 7-day period ending on February 1, 2012</em></p>
 </div>
 
