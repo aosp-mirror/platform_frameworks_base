@@ -63,7 +63,9 @@ public:
 public:
     /*
      * DisplayEventReceiver creates and registers an event connection with
-     * SurfaceFlinger. Events start being delivered immediately.
+     * SurfaceFlinger. VSync events are disabled by default. Call setVSyncRate
+     * or requestNextVsync to receive them.
+     * Other events start being delivered immediately.
      */
     DisplayEventReceiver();
 

@@ -151,9 +151,9 @@ bool EventThread::threadLoop() {
             mLastVSyncTimestamp = timestamp;
 
             // now see if we still need to report this VSYNC event
-            bool reportVsync = false;
-            size_t count = mDisplayEventConnections.size();
+            const size_t count = mDisplayEventConnections.size();
             for (size_t i=0 ; i<count ; i++) {
+                bool reportVsync = false;
                 const ConnectionInfo& info(
                         mDisplayEventConnections.valueAt(i));
                 if (info.count >= 1) {
@@ -174,11 +174,7 @@ bool EventThread::threadLoop() {
                     displayEventConnections.add(mDisplayEventConnections.keyAt(i));
                 }
             }
-
-            if (reportVsync) {
-                break;
-            }
-        } while (true);
+        } while (!displayEventConnections.size());
 
         // dispatch vsync events to listeners...
         vsync.header.type = DisplayEventReceiver::DISPLAY_EVENT_VSYNC;

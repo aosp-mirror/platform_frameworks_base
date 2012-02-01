@@ -55,6 +55,8 @@ int main(int argc, char** argv)
     loop->addFd(myDisplayEvent.getFd(), 0, ALOOPER_EVENT_INPUT, receiver,
             &myDisplayEvent);
 
+    myDisplayEvent.setVsyncRate(1);
+
     do {
         //printf("about to poll...\n");
         int32_t ret = loop->pollOnce(-1);
