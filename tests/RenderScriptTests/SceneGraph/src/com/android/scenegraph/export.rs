@@ -51,5 +51,6 @@ SgRenderPass *pExport;
 SgCamera *exportPtrCam;
 SgLight *exportPtrLight;
 SgShaderParam *spExport;
+SgShaderParamData *spDataExport;
 SgVertexShader *pvExport;
 SgFragmentShader *pfExport;

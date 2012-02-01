@@ -33,7 +33,6 @@ import android.util.Log;
 public class TransformParam extends ShaderParam {
 
     Transform mTransform;
-    Camera mCamera;
     LightBase mLight;
 
     public TransformParam(String name) {
@@ -42,10 +41,6 @@ public class TransformParam extends ShaderParam {
 
     public void setTransform(Transform t) {
         mTransform = t;
-    }
-
-    public void setCamera(Camera c) {
-        mCamera = c;
     }
 
     int getTypeFromName() {
@@ -66,17 +61,16 @@ public class TransformParam extends ShaderParam {
         return paramType;
     }
 
-    void initLocalData(RenderScriptGL rs) {
-        mRsFieldItem.type = getTypeFromName();
-        mRsFieldItem.bufferOffset = mOffset;
+    void initLocalData() {
+        mData.type = getTypeFromName();
         if (mTransform != null) {
-            mRsFieldItem.transform = mTransform.getRSData().getAllocation();
+            mData.transform = mTransform.getRSData().getAllocation();
         }
         if (mCamera != null) {
-            mRsFieldItem.camera = mCamera.getRSData().getAllocation();
+            mData.camera = mCamera.getRSData().getAllocation();
         }
         if (mLight != null) {
-            mRsFieldItem.light = mLight.getRSData().getAllocation();
+            mData.light = mLight.getRSData().getAllocation();
         }
     }
 }

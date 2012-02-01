@@ -21,15 +21,15 @@
 
 #include "rs_graphics.rsh"
 
-#define TRANSFORM_NONE 0
+#define TRANSFORM_NONE      0
 #define TRANSFORM_TRANSLATE 1
-#define TRANSFORM_ROTATE 2
-#define TRANSFORM_SCALE 3
+#define TRANSFORM_ROTATE    2
+#define TRANSFORM_SCALE     3
 
 #define CULL_FRUSTUM 0
-#define CULL_ALWAYS 2
+#define CULL_ALWAYS  2
 
-#define LIGHT_POINT 0
+#define LIGHT_POINT       0
 #define LIGHT_DIRECTIONAL 1
 
 // Shader params that involve only data
@@ -142,7 +142,7 @@ typedef struct RenderPass_s {
     bool should_clear_depth;
 } SgRenderPass;
 
-typedef struct __attribute__((packed, aligned(4))) Camera_s {
+typedef struct Camera_s {
     rs_matrix4x4 proj;
     rs_matrix4x4 view;
     rs_matrix4x4 viewProj;
@@ -162,7 +162,7 @@ typedef struct __attribute__((packed, aligned(4))) Camera_s {
     uint32_t transformTimestamp;
 } SgCamera;
 
-typedef struct __attribute__((packed, aligned(4))) Light_s {
+typedef struct Light_s {
     float4 position;
     float4 color;
     float intensity;
@@ -171,21 +171,29 @@ typedef struct __attribute__((packed, aligned(4))) Light_s {
     rs_allocation transformMatrix;
 } SgLight;
 
-// This represents a shader parameter that knows for to update itself
-typedef struct ShaderParam_s {
-    uint32_t type;
-    uint32_t bufferOffset;
+// This represents the shader parameter data needed to set a float or transform data
+typedef struct ShaderParamData_s {
+    int type;
 
     float4 float_value;
     // Use one param type to handle all vector types for now
-    uint32_t float_vecSize;
+    int float_vecSize;
     rs_allocation paramName;
     rs_allocation camera;
     rs_allocation light;
     rs_allocation transform;
+    rs_allocation texture;
+} SgShaderParamData;
+
+// This represents a shader parameter that knows how to update itself for a given
+// renderable or shader and contains a timestamp for the last time this buffer was updated
+typedef struct ShaderParam_s {
     // Used to check whether transform params need to be updated
     uint32_t transformTimestamp;
-    rs_allocation texture;
+    // Specifies where in the constant buffer data gets written to
+    int bufferOffset;
+    // An instance of SgShaderParamData that could be shared by multiple objects
+    rs_allocation data;
 } SgShaderParam;
 
 // This represents a texture object

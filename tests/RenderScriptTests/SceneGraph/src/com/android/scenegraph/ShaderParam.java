@@ -20,6 +20,7 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.android.scenegraph.SceneManager;
 import com.android.scenegraph.Transform;
 
 import android.renderscript.Element;
@@ -49,15 +50,19 @@ public abstract class ShaderParam extends SceneGraphBase {
     static final String modelView        = "modelView";
     static final String modelViewProj    = "modelViewProj";
 
-    ScriptField_ShaderParam_s.Item mRsFieldItem;
+    ScriptField_ShaderParamData_s.Item mData;
+    ScriptField_ShaderParamData_s mField;
 
     String mParamName;
-    int mOffset;
+    Camera mCamera;
 
-    static void fillInParams(Element constantElem,
-                             HashMap<String, ShaderParam> sourceParams,
-                             Transform transform,
-                             ArrayList<ShaderParam> paramList) {
+    static ScriptField_ShaderParam_s fillInParams(Element constantElem,
+                                                  HashMap<String, ShaderParam> sourceParams,
+                                                  Transform transform) {
+        RenderScriptGL rs = SceneManager.getRS();
+        ArrayList<ScriptField_ShaderParam_s.Item> paramList;
+        paramList = new ArrayList<ScriptField_ShaderParam_s.Item>();
+
         int subElemCount = constantElem.getSubElementCount();
         for (int i = 0; i < subElemCount; i ++) {
             String inputName = constantElem.getSubElementName(i);
@@ -75,45 +80,68 @@ public abstract class ShaderParam extends SceneGraphBase {
                     matchingParam = trParam;
                 }
             }
-            matchingParam.setOffset(offset);
             if (subElem.getDataType() == Element.DataType.FLOAT_32) {
                 Float4Param fParam = (Float4Param)matchingParam;
                 fParam.setVecSize(subElem.getVectorSize());
             }
-            paramList.add(matchingParam);
+            ScriptField_ShaderParam_s.Item paramRS = new ScriptField_ShaderParam_s.Item();
+            paramRS.bufferOffset = offset;
+            paramRS.transformTimestamp = 0;
+            paramRS.data = matchingParam.getRSData().getAllocation();
+
+            paramList.add(paramRS);
         }
+
+        ScriptField_ShaderParam_s rsParams = null;
+        int paramCount = paramList.size();
+        if (paramCount != 0) {
+            rsParams = new ScriptField_ShaderParam_s(rs, paramCount);
+            for (int i = 0; i < paramCount; i++) {
+                rsParams.set(paramList.get(i), i, false);
+            }
+            rsParams.copyAll();
+        }
+        return rsParams;
     }
 
     public ShaderParam(String name) {
         mParamName = name;
+        mData = new ScriptField_ShaderParamData_s.Item();
     }
 
     public String getParamName() {
         return mParamName;
     }
 
-    void setOffset(int offset) {
-        mOffset = offset;
+    public void setCamera(Camera c) {
+        mCamera = c;
+        if (mField != null) {
+            mData.camera = mCamera.getRSData().getAllocation();
+            mField.set_camera(0, mData.camera, true);
+        }
     }
 
-    abstract void initLocalData(RenderScriptGL rs);
+    abstract void initLocalData();
 
-    public ScriptField_ShaderParam_s.Item getRSData(RenderScriptGL rs) {
-        if (mRsFieldItem != null) {
-            return mRsFieldItem;
+    public ScriptField_ShaderParamData_s getRSData() {
+        if (mField != null) {
+            return mField;
         }
 
-        mRsFieldItem = new ScriptField_ShaderParam_s.Item();
-        mRsFieldItem.transformTimestamp = 0;
+        RenderScriptGL rs = SceneManager.getRS();
+        mField = new ScriptField_ShaderParamData_s(rs, 1);
+
         if (mParamName != null) {
-            mRsFieldItem.paramName = SceneManager.getCachedAlloc(mParamName);
-            if (mRsFieldItem.paramName == null) {
-                mRsFieldItem.paramName = SceneManager.getStringAsAllocation(rs, mParamName);
-                SceneManager.cacheAlloc(mParamName, mRsFieldItem.paramName);
+            mData.paramName = SceneManager.getCachedAlloc(mParamName);
+            if (mData.paramName == null) {
+                mData.paramName = SceneManager.getStringAsAllocation(rs, mParamName);
+                SceneManager.cacheAlloc(mParamName, mData.paramName);
             }
         }
-        initLocalData(rs);
-        return mRsFieldItem;
+        initLocalData();
+
+        mField.set(mData, 0, true);
+        return mField;
     }
 }
 
