@@ -6,77 +6,129 @@ parent.link=index.html
 <div id="qv-wrapper">
 <div id="qv">
   <h2>In this document</h2>
-  <ol>
-    <li><a href="#xml">Creating a Menu Resource</a></li>
-    <li><a href="#Inflating">Inflating a Menu Resource</a>
-    <li><a href="#options-menu">Creating an Options Menu</a>
-      <ol>
-        <li><a href="#ChangingTheMenu">Changing menu items at runtime</a></li>
-      </ol>
-    </li>
-    <li><a href="#context-menu">Creating a Context Menu</a></li>
-    <li><a href="#submenu">Creating a Submenu</a></li>
-    <li><a href="#features">Other Menu Features</a>
-      <ol>
-        <li><a href="#groups">Menu groups</a></li>
-        <li><a href="#checkable">Checkable menu items</a></li>
-        <li><a href="#shortcuts">Shortcut keys</a></li>
-        <li><a href="#intents">Dynamically adding menu intents</a></li>
-      </ol>
-    </li>
-  </ol>
+<ol>
+  <li><a href="#xml">Defining a Menu in XML</a></li>
+  <li><a href="#options-menu">Creating an Options Menu</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">Handling click events</a></li>
+      <li><a href="#ChangingTheMenu">Changing menu items at runtime</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">Creating Contextual Menus</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">Creating a floating context menu</a></li>
+      <li><a href="#CAB">Using the contextual action bar</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">Creating a Popup Menu</a>
+    <ol>
+      <li><a href="#PopupEvents">Handling click events</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">Creating Menu Groups</a>
+    <ol>
+      <li><a href="#checkable">Using checkable menu items</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">Adding Menu Items Based on an Intent</a>
+    <ol>
+      <li><a href="#AllowingToAdd">Allowing your activity to be added to other menus</a></li>
+    </ol>
+  </li>
+</ol>
 
   <h2>Key classes</h2>
   <ol>
     <li>{@link android.view.Menu}</li>
     <li>{@link android.view.MenuItem}</li>
     <li>{@link android.view.ContextMenu}</li>
-    <li>{@link android.view.SubMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
   </ol>
 
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
     <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a></li>
+    <li><a
+href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Say
+Goodbye to the Menu Button</a></li>
   </ol>
 </div>
 </div>
 
-<p>Menus are an important part of an activity's user interface, which provide users a familiar
-way to perform actions. Android offers a simple framework for you to add standard
-menus to your application.</p>
+<p>Menus are a common user interface component in many types of applications. To provide a familiar
+and consistent user experience, you should use the {@link android.view.Menu} APIs to present user
+actions and other options in your activities.</p>
 
-<p>There are three types of application menus:</p>
+<p>Beginning with Android 3.0 (API level 11), Android-powered devices are no longer required to
+provide a dedicated <em>Menu</em> button. With this change, Android apps should migrate away from a
+dependence on the traditional 6-item menu panel and instead provide an action bar to present common
+user actions.</p>
+
+<p>Although the design and user experience for some menu items have changed, the semantics to define
+a set of actions and options is still based on the {@link android.view.Menu} APIs. This
+guide shows how to create the three fundamental types of menus or action presentations on all
+versions of Android:</p>
+
 <dl>
-  <dt><strong>Options Menu</strong></dt>
-    <dd>The primary collection of menu items for an activity, which appears when the user touches
-the MENU button. When your application is running on Android 3.0 or later, you can provide
-quick access to select menu items by placing them directly in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>, as "action items."</dd>
-  <dt><strong>Context Menu</strong></dt>
-    <dd>A floating list of menu items that appears when the user touches and holds a view
-that's registered to provide a context menu.
+  <dt><strong>Options menu and action bar</strong></dt>
+    <dd>The <a href="#options-menu">options menu</a> is the primary collection of menu items for an
+activity. It's where you should place actions that have a global impact on the app, such as
+"Search," "Compose email," and "Settings."
+  <p>If you're developing for Android 2.3 or lower, users can
+reveal the options menu panel by pressing the <em>Menu</em> button.</p>
+  <p>On Android 3.0 and higher, items from the options menu are presented by the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a> as a combination of on-screen action
+items and overflow options. Beginning with Android 3.0, the <em>Menu</em> button is deprecated (some
+devices
+don't have one), so you should migrate toward using the action bar to provide access to actions and
+other options.</p>
+  <p>See the section about <a href="#options-menu">Creating an Options Menu</a>.</p>
+    </dd>
+    
+  <dt><strong>Context menu and contextual action mode</strong></dt>
+  
+   <dd>A context menu is a <a href="#FloatingContextMenu">floating menu</a> that appears when the
+user performs a long-click on an element. It provides actions that affect the selected content or
+context frame.
+  <p>When developing for Android 3.0 and higher, you should instead use the <a
+href="#CAB">contextual action mode</a> to enable actions on selected content. This mode displays
+action items that affect the selected content in a bar at the top of the screen and allows the user
+to select multiple items.</p>
+  <p>See the section about <a href="#context-menu">Creating Contextual Menus</a>.</p>
 </dd>
-  <dt><strong>Submenu</strong></dt>
-    <dd>A floating list of menu items that appears when the user touches a menu item that contains
-a nested menu.</dd>
+    
+  <dt><strong>Popup menu</strong></dt>
+    <dd>A popup menu displays a list of items in a vertical list that's anchored to the view that
+invoked the menu. It's good for providing an overflow of actions that relate to specific content or
+to provide options for a second part of a command. Actions in a popup menu should
+<strong>not</strong> directly affect the corresponding content&mdash;that's what contextual actions
+are for. Rather, the popup menu is for extended actions that relate to regions of content in your
+activity.
+  <p>See the section about <a href="#PopupMenu">Creating a Popup Menu</a>.</p>
+</dd>
 </dl>
 
-<p>This document shows you how to create each type of menu, using XML to define the content of
-the menu and callback methods in your activity to respond when the user selects an item.</p>
 
 
+<h2 id="xml">Defining a Menu in XML</h2>
 
-<h2 id="xml">Creating a Menu Resource</h2>
+<p>For all menu types, Android provides a standard XML format to define menu items.
+Instead of building a menu in your activity's code, you should define a menu and all its items in an
+XML <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. You can then
+inflate the menu resource (load it as a {@link android.view.Menu} object) in your activity or
+fragment.</p>
 
-<p>Instead of instantiating a {@link android.view.Menu} in your application code, you should
-define a menu and all its items in an XML <a
-href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>, then inflate the menu
-resource (load it as a programmable object) in your application code. Using a menu resource to
-define your menu is a good practice because it separates the content for the menu from your
-application code. It's also easier to visualize the structure and content of a menu in XML.</p>
+<p>Using a menu resource is a good practice for a few reasons:</p>
+<ul>
+  <li>It's easier to visualize the menu structure in XML.</li>
+  <li>It separates the content for the menu from your application's behavioral code.</li>
+  <li>It allows you to create alternative menu configurations for different platform versions,
+screen sizes, and other configurations by leveraging the <a
+href="{@docRoot}guide/topics/resources/index.html">app resources</a> framework.</li>
+</ul>
 
-<p>To create a menu resource, create an XML file inside your project's <code>res/menu/</code>
+<p>To define the menu, create an XML file inside your project's <code>res/menu/</code>
 directory and build the menu with the following elements:</p>
 <dl>
   <dt><code>&lt;menu></code></dt>
@@ -90,8 +142,8 @@ element may contain a nested <code>&lt;menu></code> element in order to create a
     
   <dt><code>&lt;group></code></dt>
     <dd>An optional, invisible container for {@code &lt;item&gt;} elements. It allows you to
-categorize menu items so they share properties such as active state and visibility. See the
-section about <a href="#groups">Menu groups</a>.</dd>
+categorize menu items so they share properties such as active state and visibility. For more
+information, see the section about <a href="#groups">Creating Menu Groups</a>.</dd>
 </dl>
 
 
@@ -101,14 +153,17 @@ section about <a href="#groups">Menu groups</a>.</dd>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;item android:id="@+id/new_game"
           android:icon="@drawable/ic_new_game"
-          android:title="@string/new_game" /&gt;
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
     &lt;item android:id="@+id/help"
           android:icon="@drawable/ic_help"
           android:title="@string/help" /&gt;
 &lt;/menu&gt;
 </pre>
 
-<p>This example defines a menu with two items. Each item includes the attributes:</p>
+<p>The <code>&lt;item></code> element supports several attributes you can use to define an item's
+appearance and behavior. The items in the above menu include the following attributes:</p>
+
 <dl>
   <dt>{@code android:id}</dt>
     <dd>A resource ID that's unique to the item, which allows the application can recognize the item
@@ -117,312 +172,24 @@ when the user selects it.</dd>
     <dd>A reference to a drawable to use as the item's icon.</dd>
   <dt>{@code android:title}</dt>
     <dd>A reference to a string to use as the item's title.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>Specifies when and how this item should appear as an action item in the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.</dd>
 </dl>
 
-<p>There are many more attributes you can include in an {@code &lt;item&gt;}, including some that
- specify how the item may appear in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>. For more information about the XML
-syntax and attributes for a menu resource, see the <a
-href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a> reference.</p>
+<p>These are the most important attributes you should use, but there are many more available.
+For information about all the supported attributes, see the <a
+href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a> document.</p>
 
-
-
-<h2 id="Inflating">Inflating a Menu Resource</h2>
-
-<p>From your application code, you can inflate a menu resource (convert the XML resource into a
-programmable object) using
-{@link android.view.MenuInflater#inflate(int,Menu) MenuInflater.inflate()}. For
-example, the following code inflates the <code>game_menu.xml</code> file defined above, during the
-{@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} callback method, to
-use the menu as the activity's Options Menu:</p>
-
-<pre>
-&#64;Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.game_menu, menu);
-    return true;
-}
-</pre>
-
-<p>The {@link android.app.Activity#getMenuInflater()} method returns a {@link
-android.view.MenuInflater} for the activity. With this object, you can call {@link
-android.view.MenuInflater#inflate(int,Menu) inflate()}, which inflates a menu resource into a
-{@link android.view.Menu} object. In this example, the menu resource defined by
-<code>game_menu.xml</code>
-is inflated into the {@link android.view.Menu} that was passed into {@link
-android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}. (This callback method for
-the Options Menu is discussed more in the next section.)</p>
-
-
-
-<h2 id="options-menu">Creating an Options Menu</h2>
-
-<div class="figure" style="width:200px">
-  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
-  <p class="img-caption"><strong>Figure 1.</strong> Screenshot of the Options Menu in the
-Browser.</p>
-</div>
-
-<p>The Options Menu is where you should include basic activity actions and necessary navigation
-items (for example, a button to open the application settings). Items in the Options Menu are
-accessible in two distinct ways: the MENU button or in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> (on devices running Android 3.0
-or higher).</p>
-
-<p>When running on a device with Android 2.3 and lower, the Options Menu appears at the bottom of
-the screen, as shown in figure 1. When opened, the first visible portion of the Options Menu is
-the icon menu. It holds the first six menu items. If you add more than six items to the
-Options Menu, Android places the sixth item and those after it into the overflow menu, which the
-user can open by touching the "More" menu item.</p>
-
-<p>On Android 3.0 and higher, items from the Options Menu is placed in the Action Bar, which appears
-at the top of the activity in place of the traditional title bar. By default all items from the
-Options Menu are placed in the overflow menu, which the user can open by touching the menu icon
-on the right side of the Action Bar. However, you can place select menu items directly in the
-Action Bar as "action items," for instant access, as shown in figure 2.</p>
-
-<p>When the Android system creates the Options Menu for the first time, it calls your
-activity's {@link android.app.Activity#onCreateOptionsMenu(Menu)
-onCreateOptionsMenu()} method. Override this method in your activity
-and populate the {@link android.view.Menu} that is passed into the method,
-{@link android.view.Menu} by inflating a menu resource as described above in <a
-href="#Inflating">Inflating a Menu Resource</a>. For example:</p>
-
-<pre>
-&#64;Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.game_menu, menu);
-    return true;
-}
-</pre>
-
-<div class="figure" style="width:450px">
-<img src="{@docRoot}images/ui/actionbar.png" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> Action bar from the <a
-href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app, including
-navigation tabs and a camera action item (plus the overflow menu button).</p>
-</div>
-
-<p>You can also populate the menu in code, using {@link android.view.Menu#add(int,int,int,int)
-add()} to add items to the {@link android.view.Menu}.</p>
-
-<p class="note"><strong>Note:</strong> On Android 2.3 and lower, the system calls {@link
-android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} to create the Options Menu
-when the user opens it for the first time, but on Android 3.0 and greater, the system creates it as
-soon as the activity is created, in order to populate the Action Bar.</p>
-
-
-<h3 id="RespondingOptionsMenu">Responding to user action</h3>
-
-<p>When the user selects a menu item from the Options Menu (including action items in the
-Action Bar), the system calls your activity's
-{@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}
-method. This method passes the
-{@link android.view.MenuItem} that the user selected. You can identify the menu item by calling
-{@link android.view.MenuItem#getItemId()}, which returns the unique ID for the menu
-item (defined by the {@code android:id} attribute in the menu resource or with an integer
-given to the {@link android.view.Menu#add(int,int,int,int) add()} method). You can match this ID
-against known menu items and perform the appropriate action. For example:</p>
-
-<pre>
-&#64;Override
-public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle item selection
-    switch (item.getItemId()) {
-    case R.id.new_game:
-        newGame();
-        return true;
-    case R.id.help:
-        showHelp();
-        return true;
-    default:
-        return super.onOptionsItemSelected(item);
-    }
-}
-</pre>
-
-<p>In this example, {@link android.view.MenuItem#getItemId()} queries the ID for the selected menu
-item and the switch statement compares the ID against the resource IDs that were assigned to menu
-items in the XML resource. When a switch case successfully handles the menu item, it
-returns {@code true} to indicate that the item selection was handled. Otherwise, the default
-statement passes the menu item to the super class, in
-case it can handle the item selected. (If you've directly extended the {@link android.app.Activity}
-class, then the super class returns {@code false}, but it's a good practice to
-pass unhandled menu items to the super class instead of directly returning {@code false}.)</p>
-
-<p>Additionally, Android 3.0 adds the ability for you to define the on-click behavior for a menu
-item in the <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> XML,
-using the {@code android:onClick} attribute. So you don't need to implement {@link
-android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}. Using the {@code
-android:onClick} attribute, you can specify a method to call when the user selects the menu item.
-Your activity must then implement the method specified in the {@code android:onClick} attribute so 
-that it accepts a single {@link android.view.MenuItem} parameter&mdash;when the system calls this
-method, it passes the menu item selected.</p>
-
-<p class="note"><strong>Tip:</strong> If your application contains multiple activities and
-some of them provide the same Options Menu, consider creating
-an activity that implements nothing except the {@link android.app.Activity#onCreateOptionsMenu(Menu)
-onCreateOptionsMenu()} and {@link android.app.Activity#onOptionsItemSelected(MenuItem)
-onOptionsItemSelected()} methods. Then extend this class for each activity that should share the
-same Options Menu. This way, you have to manage only one set of code for handling menu
-actions and each descendant class inherits the menu behaviors.<br/><br/>
-If you want to add menu items to one of your descendant activities,
-override {@link android.app.Activity#onCreateOptionsMenu(Menu)
-onCreateOptionsMenu()} in that activity. Call {@code super.onCreateOptionsMenu(menu)} so the
-original menu items are created, then add new menu items with {@link
-android.view.Menu#add(int,int,int,int) menu.add()}. You can also override the super class's
-behavior for individual menu items.</p>
-
-
-<h3 id="ChangingTheMenu">Changing menu items at runtime</h3>
-
-<p>Once the activity is created, the {@link android.app.Activity#onCreateOptionsMenu(Menu)
-onCreateOptionsMenu()} method is
-called only once, as described above. The system keeps and re-uses the {@link
-android.view.Menu} you define in this method until your activity is destroyed. If you want to change
-the Options Menu any time after it's first created, you must override the
-{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} method. This passes
-you the {@link android.view.Menu} object as it currently exists. This is useful if you'd like to
-remove, add, disable, or enable menu items depending on the current state of your application.</p>
-
-<p>On Android 2.3 and lower, the system calls {@link android.app.Activity#onPrepareOptionsMenu(Menu)
-onPrepareOptionsMenu()} each time the user opens the Options Menu.</p>
-
-<p>On Android 3.0 and higher, you must call {@link android.app.Activity#invalidateOptionsMenu
-invalidateOptionsMenu()} when you want to update the menu, because the menu is always open. The
-system will then call {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}
-so you can update the menu items.</p>
-
-<p class="note"><strong>Note:</strong> 
-You should never change items in the Options Menu based on the {@link android.view.View} currently
-in focus. When in touch mode (when the user is not using a trackball or d-pad), views
-cannot take focus, so you should never use focus as the basis for modifying
-items in the Options Menu. If you want to provide menu items that are context-sensitive to a {@link
-android.view.View}, use a <a href="#context-menu">Context Menu</a>.</p>
-
-<p>If you're developing for Android 3.0 or higher, be sure to also read the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</p>
-
-
-
-
-<h2 id="context-menu">Creating a Context Menu</h2>
-
-<p>A context menu is conceptually similar to the menu displayed when the user performs a
-"right-click" on a PC. You should use a context menu to provide the user access to
-actions that pertain to a specific item in the user interface. On Android, a context menu is
-displayed when the user performs a "long press" (press and hold) on an item.</p>
-
-<p>You can create a context menu for any View, though context menus are most often used for items in
-a {@link android.widget.ListView}. When the user performs a long-press on an item in a ListView and
-the list is registered to provide a context menu, the list item signals to the user that a context
-menu is available by animating its background color&mdash;it transitions from
-orange to white before opening the context menu. (The Contacts application demonstrates this
-feature.)</p>
-
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<h3>Register a ListView</h3>
-<p>If your activity uses a {@link android.widget.ListView} and
-you want all list items to provide a context menu, register all items for a context
-menu by passing the {@link android.widget.ListView} to {@link
-android.app.Activity#registerForContextMenu(View) registerForContextMenu()}. For
-example, if you're using a {@link android.app.ListActivity}, register all list items like this:</p>
-<p><code>registerForContextMenu({@link android.app.ListActivity#getListView()});</code></p>
-</div>
-</div>
-
-<p>In order for a View to provide a context menu, you must "register" the view for a context
-menu. Call {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} and
-pass it the {@link android.view.View} you want to give a context menu. When this View then
-receives a long-press, it displays a context menu.</p>
-
-<p>To define the context menu's appearance and behavior, override your activity's context menu
-callback methods, {@link android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
-onCreateContextMenu()} and
-{@link android.app.Activity#onContextItemSelected(MenuItem) onContextItemSelected()}.</p>
-
-<p>For example, here's an {@link
-android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
-onCreateContextMenu()} that uses the {@code context_menu.xml} menu resource:</p>
-<pre>
-&#64;Override
-public void onCreateContextMenu(ContextMenu menu, View v,
-                                ContextMenuInfo menuInfo) {
-  super.onCreateContextMenu(menu, v, menuInfo);
-  MenuInflater inflater = getMenuInflater();
-  inflater.inflate(R.menu.context_menu, menu);
-}
-</pre>
-
-<p>{@link android.view.MenuInflater} is used to inflate the context menu from a <a
-href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. (You can also use
-{@link android.view.Menu#add(int,int,int,int) add()} to add menu items.) The callback method
-parameters include the {@link android.view.View}
-that the user selected and a {@link android.view.ContextMenu.ContextMenuInfo} object that provides
-additional information about the item selected. You might use these parameters to determine
-which context menu should be created, but in this example, all context menus for the activity are
-the same.</p>
-
-<p>Then when the user selects an item from the context menu, the system calls {@link
-android.app.Activity#onContextItemSelected(MenuItem) onContextItemSelected()}. Here is an example
-of how you can handle selected items:</p>
-
-<pre>
-&#64;Override
-public boolean onContextItemSelected(MenuItem item) {
-  AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-  switch (item.getItemId()) {
-  case R.id.edit:
-    editNote(info.id);
-    return true;
-  case R.id.delete:
-    deleteNote(info.id);
-    return true;
-  default:
-    return super.onContextItemSelected(item);
-  }
-}
-</pre>
-
-<p>The structure of this code is similar to the example for <a href="#options-menu">Creating an
-Options Menu</a>, in which {@link android.view.MenuItem#getItemId()} queries the ID for the selected
-menu item and a switch statement matches the item to the IDs that are defined in the menu resource.
-And like the options menu example, the default statement calls the super class in case it
-can handle menu items not handled here, if necessary.</p>
-
-<p>In this example, the selected item is an item from a {@link android.widget.ListView}. To
-perform an action on the selected item, the application needs to know the list
-ID for the selected item (it's position in the ListView). To get the ID, the application calls
-{@link android.view.MenuItem#getMenuInfo()}, which returns a {@link
-android.widget.AdapterView.AdapterContextMenuInfo} object that includes the list ID for the
-selected item in the {@link android.widget.AdapterView.AdapterContextMenuInfo#id id} field. The
-local methods <code>editNote()</code> and <code>deleteNote()</code> methods accept this list ID to
-perform an action on the data specified by the list ID.</p>
-
-<p class="note"><strong>Note:</strong> Items in a context menu do not support icons or shortcut
-keys.</p>
-
-
-
-<h2 id="submenu">Creating Submenus</h2>
-
-<p>A submenu is a menu that the user can open by selecting an item in another menu. You can add a
-submenu to any menu (except a submenu). Submenus are useful when your application has a lot of
-functions that can be organized into topics, like items in a PC application's menu bar (File, Edit,
-View, etc.).</p>
-
-<p>When creating your <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu
-resource</a>, you can create a submenu by adding a {@code &lt;menu&gt;} element as the child of an
-{@code &lt;item&gt;}. For example:</p>
+<p>You can add a submenu to an item in any menu (except a submenu) by adding a {@code &lt;menu&gt;}
+element as the child of an {@code &lt;item&gt;}. Submenus are useful when your application has a lot
+of functions that can be organized into topics, like items in a PC application's menu bar (File,
+Edit, View, etc.). For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
     &lt;item android:id="@+id/file"
-          android:icon="@drawable/file"
           android:title="@string/file" &gt;
         &lt;!-- "file" submenu --&gt;
         &lt;menu&gt;
@@ -435,23 +202,625 @@ resource</a>, you can create a submenu by adding a {@code &lt;menu&gt;} element 
 &lt;/menu&gt;
 </pre>
 
-<p>When the user selects an item from a submenu, the parent menu's respective on-item-selected
-callback method receives the event. For instance, if the above menu is applied as an Options Menu,
-then the {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} method
-is called when a submenu item is selected.</p>
-
-<p>You can also use {@link android.view.Menu#addSubMenu(int,int,int,int) addSubMenu()} to
-dynamically add a {@link android.view.SubMenu} to an existing {@link android.view.Menu}. This
-returns the new {@link android.view.SubMenu} object, to which you can add
-submenu items, using {@link android.view.Menu#add(int,int,int,int) add()}</p>
+<p>To use the menu in your activity, you need to inflate the menu resource (convert the XML
+resource into a programmable object) using {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}. In the following sections, you'll see how to inflate a menu for each
+menu type.</p>
 
 
 
-<h2 id="features">Other Menu Features</h2>
+<h2 id="options-menu">Creating an Options Menu</h2>
 
-<p>Here are some other features that you can apply to most menu items.</p>
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> Options menu in the
+Browser, on Android 2.3.</p>
+</div>
 
-<h3 id="groups">Menu groups</h3>
+<p>The options menu is where you should include actions and other options that are relevant to the
+current activity context, such as "Search," "Compose email," and "Settings."</p>
+
+<p>Where the items in your options menu appear on the screen depends on the version for which you've
+developed your application:</p>
+
+<ul>
+  <li>If you've developed your application for <strong>Android 2.3.x (API level 10) or
+lower</strong>, the contents of your options menu appear at the bottom of the screen when the user
+presses the <em>Menu</em> button, as shown in figure 1. When opened, the first visible portion is
+the icon
+menu, which holds up to six menu items. If your menu includes more than six items, Android places
+the sixth item and the rest into the overflow menu, which the user can open by selecting
+<em>More</em>.</li>
+
+  <li>If you've developed your application for <strong>Android 3.0 (API level 11) and
+higher</strong>, items from the options menu are available in the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>. By default, the system
+places all items in the action overflow, which the user can reveal with the action overflow icon on
+the right side of the action bar (or by pressing the device <em>Menu</em> button, if available). To
+enable
+quick access to important actions, you can promote a few items to appear in the action bar by adding
+{@code android:showAsAction="ifRoom"} to the corresponding {@code &lt;item&gt;} elements (see figure
+2). <p>For more information about action items and other action bar behaviors, see the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> guide. </p>
+<p class="note"><strong>Note:</strong> Even if you're <em>not</em> developing for Android 3.0 or
+higher, you can build your own action bar layout for a similar effect. For an example of how you can
+support older versions of Android with an action bar, see the <a
+href="{@docRoot}resources/samples/ActionBarCompat/index.html">Action Bar Compatibility</a>
+sample.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> Action bar from the <a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> app, showing
+navigation tabs and a camera action item (plus the action overflow button).</p>
+
+<p>You can declare items for the options menu from either your {@link android.app.Activity}
+subclass or a {@link android.app.Fragment} subclass. If both your activity and fragment(s)
+declare items for the options menu, they are combined in the UI. The activity's items appear
+first, followed by those of each fragment in the order in which each fragment is added to the
+activity. If necessary, you can re-order the menu items with the {@code android:orderInCategory}
+attribute in each {@code &lt;item&gt;} you need to move.</p>
+
+<p>To specify the options menu for an activity, override {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragments provide their
+own {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} callback). In this
+method, you can inflate your menu resource (<a href="#xml">defined in XML</a>) into the {@link
+android.view.Menu} provided in the callback. For example:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>You can also add menu items using {@link android.view.Menu#add(int,int,int,int)
+add()} and retrieve items with {@link android.view.Menu#findItem findItem()} to revise their
+properties with {@link android.view.MenuItem} APIs.</p>
+
+<p>If you've developed your application for Android 2.3.x and lower, the system calls {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} to create the options menu
+when the user opens the menu for the first time. If you've developed for Android 3.0 and higher, the
+system calls {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} when
+starting the activity, in order to show items to the action bar.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">Handling click events</h3>
+
+<p>When the user selects an item from the options menu (including action items in the action bar),
+the system calls your activity's {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} method. This method passes the {@link android.view.MenuItem} selected. You
+can identify the item by calling {@link android.view.MenuItem#getItemId()}, which returns the unique
+ID for the menu item (defined by the {@code android:id} attribute in the menu resource or with an
+integer given to the {@link android.view.Menu#add(int,int,int,int) add()} method). You can match
+this ID against known menu items to perform the appropriate action. For example:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>When you successfully handle a menu item, return {@code true}. If you don't handle the menu
+item, you should call the superclass implementation of {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} (the default
+implementation returns false).</p>
+
+<p>If your activity includes fragments, the system first calls {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} for the activity then
+for each fragment (in the order each fragment was added) until one returns
+{@code true} or all fragments have been called.</p>
+
+<p class="note"><strong>Tip:</strong> Android 3.0 adds the ability for you to define the on-click
+behavior for a menu item in XML, using the {@code android:onClick} attribute. The value for the
+attribute must be the name of a method defined by the activity using the menu. The method
+must be public and accept a single {@link android.view.MenuItem} parameter&mdash;when the system
+calls this method, it passes the menu item selected. For more information and an example, see the <a
+href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a> document.</p>
+
+<p class="note"><strong>Tip:</strong> If your application contains multiple activities and
+some of them provide the same options menu, consider creating
+an activity that implements nothing except the {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} and {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} methods. Then extend this class for each activity that should share the
+same options menu. This way, you can manage one set of code for handling menu
+actions and each descendant class inherits the menu behaviors.
+If you want to add menu items to one of the descendant activities,
+override {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} in that activity. Call {@code super.onCreateOptionsMenu(menu)} so the
+original menu items are created, then add new menu items with {@link
+android.view.Menu#add(int,int,int,int) menu.add()}. You can also override the super class's
+behavior for individual menu items.</p>
+
+
+<h3 id="ChangingTheMenu">Changing menu items at runtime</h3>
+
+<p>After the system calls {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}, it retains an instance of the {@link android.view.Menu} you populate and
+will not call {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+again unless the menu is invalidated for some reason. However, you should use {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} only to create the initial
+menu state and not to make changes during the activity lifecycle.</p>
+
+<p>If you want to modify the options menu based on 
+events that occur during the activity lifecycle, you can do so in
+the {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} method. This
+method passes you the {@link android.view.Menu} object as it currently exists so you can modify it,
+such as add, remove, or disable items. (Fragments also provide an {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()} callback.)</p>
+
+<p>On Android 2.3.x and lower, the system calls {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()} each time the user opens the options menu (presses the <em>Menu</em>
+button).</p>
+
+<p>On Android 3.0 and higher, the options menu is considered to always be open when menu items are
+presented in the action bar. When an event occurs and you want to perform a menu update, you must
+call {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} to request that the
+system call {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
+
+<p class="note"><strong>Note:</strong> 
+You should never change items in the options menu based on the {@link android.view.View} currently
+in focus. When in touch mode (when the user is not using a trackball or d-pad), views
+cannot take focus, so you should never use focus as the basis for modifying
+items in the options menu. If you want to provide menu items that are context-sensitive to a {@link
+android.view.View}, use a <a href="#context-menu">Context Menu</a>.</p>
+
+
+
+
+<h2 id="context-menu">Creating Contextual Menus</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>Figure 3.</strong> Screenshots of a floating context menu (left)
+and the contextual action bar (right).</p>
+</div>
+
+<p>A contextual menu offers actions that affect a specific item or context frame in the UI. You
+can provide a context menu for any view, but they are most often used for items in a {@link
+android.widget.ListView}, {@link android.widget.GridView}, or other view collections in which
+the user can perform direct actions on each item.</p>
+
+<p>There are two ways to provide contextual actions:</p>
+<ul>
+  <li>In a <a href="#FloatingContextMenu">floating context menu</a>. A menu appears as a
+floating list of menu items (similar to a dialog) when the user performs a long-click (press and
+hold) on a view that declares support for a context menu. Users can perform a contextual
+action on one item at a time.</li>
+
+  <li>In the <a href="#CAB">contextual action mode</a>. This mode is a system implementation of
+{@link android.view.ActionMode} that displays a <em>contextual action bar</em> at the top of the
+screen with action items that affect the selected item(s). When this mode is active, users
+can perform an action on multiple items at once (if your app allows it).</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> The contextual action mode is available on Android 3.0 (API
+level 11) and higher and is the preferred technique for displaying contextual actions when
+available. If your app supports versions lower than 3.0 then you should fall back to a floating
+context menu on those devices.</p>
+
+
+<h3 id="FloatingContextMenu">Creating a floating context menu</h3>
+
+<p>To provide a floating context menu:</p>
+<ol>
+  <li>Register the {@link android.view.View} to which the context menu should be associated by
+calling {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} and pass
+it the {@link android.view.View}.
+  <p>If your activity uses a {@link android.widget.ListView} or {@link android.widget.GridView} and
+you want each item to provide the same context menu, register all items for a context menu by
+passing the {@link android.widget.ListView} or {@link android.widget.GridView} to {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
+</li>
+
+  <li>Implement the {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} method
+in your {@link android.app.Activity} or {@link android.app.Fragment}.
+  <p>When the registered view receives a long-click event, the system calls your {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+method. This is where you define the menu items, usually by inflating a menu resource. For
+example:</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} allows you to inflate the context menu from a <a
+href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. The callback method
+parameters include the {@link android.view.View}
+that the user selected and a {@link android.view.ContextMenu.ContextMenuInfo} object that provides
+additional information about the item selected. If your activity has several views that each provide
+a different context menu, you might use these parameters to determine which context menu to
+inflate.</p>
+</li>
+
+<li>Implement {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}.
+  <p>When the user selects a menu item, the system calls this method so you can perform the
+appropriate action. For example:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>The {@link android.view.MenuItem#getItemId()} method queries the ID for
+the selected menu item, which you should assign to each menu item in XML using the {@code
+android:id} attribute, as shown in the section about <a href="#xml">Defining a Menu in
+XML</a>.</p>
+
+<p>When you successfully handle a menu item, return {@code true}. If you don't handle the menu item,
+you should pass the menu item to the superclass implementation. If your activity includes fragments,
+the activity receives this callback first. By calling the superclass when unhandled, the system
+passes the event to the respective callback method in each fragment, one at a time (in the order
+each fragment was added) until {@code true} or {@code false} is returned. (The default
+implementation for {@link android.app.Activity} and {@code android.app.Fragment} return {@code
+false}, so you should always call the superclass when unhandled.)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">Using the contextual action mode</h3>
+
+<p>The contextual action mode is a system implementation of {@link android.view.ActionMode} that
+focuses user interaction toward performing contextual actions. When a
+user enables this mode by selecting an item, a <em>contextual action bar</em> appears at the top of
+the screen to present actions the user can perform on the currently selected item(s). While this
+mode is enabled, the user can select multiple items (if you allow it), deselect items, and continue
+to navigate within the activity (as much as you're willing to allow). The action mode is disabled
+and the contextual action bar disappears when the user deselects all items, presses the BACK button,
+or selects the <em>Done</em> action on the left side of the bar.</p>
+
+<p class="note"><strong>Note:</strong> The contextual action bar is not necessarily
+associated with the <a href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>. They operate
+independently, even though the contextual action bar visually overtakes the action bar
+position.</p>
+
+<p>If you're developing for Android 3.0 (API level 11) or higher, you
+should usually use the contextual action mode to present contextual actions, instead of the <a
+href="#FloatingContextMenu">floating context menu</a>.</p>
+
+<p>For views that provide contextual actions, you should usually invoke the contextual action mode
+upon one of two events (or both):</p>
+<ul>
+  <li>The user performs a long-click on the view.</li>
+  <li>The user selects a checkbox or similar UI component within the view.</li>
+</ul>
+
+<p>How your application invokes the contextual action mode and defines the behavior for each
+action depends on your design. There are basically two designs:</p>
+<ul>
+  <li>For contextual actions on individual, arbitrary views.</li>
+  <li>For batch contextual actions on groups of items in a {@link
+android.widget.ListView} or {@link android.widget.GridView} (allowing the user to select multiple
+items and perform an action on them all).</li>
+</ul>
+
+<p>The following sections describe the setup required for each scenario.</p>
+
+
+<h4 id="CABforViews">Enabling the contextual action mode for individual views</h4>
+
+<p>If you want to invoke the contextual action mode only when the user selects specific
+views, you should:</p>
+<ol>
+  <li>Implement the {@link android.view.ActionMode.Callback} interface. In its callback methods, you
+can specify the actions for the contextual action bar, respond to click events on action items, and
+handle other lifecycle events for the action mode.</li>
+  <li>Call {@link android.app.Activity#startActionMode startActionMode()} when you want to show the
+bar (such as when the user long-clicks the view).</li>
+</ol>
+
+<p>For example:</p>
+
+<ol>
+  <li>Implement the {@link android.view.ActionMode.Callback ActionMode.Callback} interface:
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>Notice that these event callbacks are almost exactly the same as the callbacks for the <a
+href="#options-menu">options menu</a>, except each of these also pass the {@link
+android.view.ActionMode} object associated with the event. You can use {@link
+android.view.ActionMode} APIs to make various changes to the CAB, such as revise the title and
+subtitle with {@link android.view.ActionMode#setTitle setTitle()} and {@link
+android.view.ActionMode#setSubtitle setSubtitle()} (useful to indicate how many items are
+selected).</p>
+
+<p>Also notice that the above sample sets the {@code mActionMode} variable null when the
+action mode is destroyed. In the next step, you'll see how it's initialized and how saving
+the member variable in your activity or fragment can be useful.</p>
+</li>
+
+  <li>Call {@link android.app.Activity#startActionMode startActionMode()} to enable the contextual
+action mode when appropriate, such as in response to a long-click on a {@link
+android.view.View}:</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>When you call {@link android.app.Activity#startActionMode startActionMode()}, the system returns
+the {@link android.view.ActionMode} created. By saving this in a member variable, you can
+make changes to the contextual action bar in response to other events. In the above sample, the
+{@link android.view.ActionMode} is used to ensure that the {@link android.view.ActionMode} instance
+is not recreated if it's already active, by checking whether the member is null before starting the
+action mode.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">Enabling batch contextual actions in a ListView or GridView</h4>
+
+<p>If you have a collection of items in a {@link android.widget.ListView} or {@link
+android.widget.GridView} (or another extension of {@link android.widget.AbsListView}) and want to
+allow users to perform batch actions, you should:</p>
+
+<ul>
+  <li>Implement the {@link android.widget.AbsListView.MultiChoiceModeListener} interface and set it
+for the view group with {@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}. In the listener's callback methods, you can specify the actions
+for the contextual action bar, respond to click events on action items, and handle other callbacks
+inherited from the {@link android.view.ActionMode.Callback} interface.</li>
+
+  <li>Call {@link android.widget.AbsListView#setChoiceMode setChoiceMode()} with the {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} argument.</li>
+</ul>
+
+<p>For example:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>That's it. Now when the user selects an item with a long-click, the system calls the {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+method and displays the contextual action bar with the specified actions. While the contextual
+action bar is visible, users can select additional items.</p>
+
+<p>In some cases in which the contextual actions provide common action items, you might
+want to add a checkbox or a similar UI element that allows users to select items, because they
+might not discover the long-click behavior. When a user selects the checkbox, you
+can invoke the contextual action mode by setting the respective list item to the checked
+state with {@link android.widget.AbsListView#setItemChecked setItemChecked()}.</p>
+
+
+
+
+<h2 id="PopupMenu">Creating a Popup Menu</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>Figure 4.</strong> A popup menu in the Gmail app, anchored to the overflow
+button at the top-right.</p>
+</div>
+
+<p>A {@link android.widget.PopupMenu} is a modal menu anchored to a {@link android.view.View}.
+It appears below the anchor view if there is room, or above the view otherwise. It's useful for:</p>
+<ul>
+  <li>Providing an overflow-style menu for actions that <em>relate to</em> specific content (such as
+Gmail's email headers, shown in figure 4).
+    <p class="note"><strong>Note:</strong> This is not the same as a context menu, which is
+generally for actions that <em>affect</em> selected content. For actions that affect selected
+content, use the <a href="#CAB">contextual action mode</a> or <a
+href="#FloatingContextMenu">floating context menu</a>.</p></li>
+  <li>Providing a second part of a command sentence (such as a button marked "Add"
+that produces a popup menu with different "Add" options).</li>
+  <li>Providing a drop-down similar to {@link android.widget.Spinner} that does not retain
+a persistent selection.</li>
+</ul>
+
+
+<p class="note"><strong>Note:</strong> {@link android.widget.PopupMenu} is available with API
+level 11 and higher.</p>
+
+<p>If you <a href="#xml">define your menu in XML</a>, here's how you can show the popup menu:</p>
+<ol>
+  <li>Instantate a {@link android.widget.PopupMenu} with its constructor, which takes the
+current application {@link android.content.Context} and the {@link android.view.View} to which the
+menu should be anchored.</li>
+  <li>Use {@link android.view.MenuInflater} to inflate your menu resource into the {@link
+android.view.Menu} object returned by {@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. On API level 14 and above, you can use
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()} instead.</li>
+  <li>Call {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
+</ol>
+
+<p>For example, here's a button with the {@link android.R.attr#onClick android:onClick} attribute
+that shows a popup menu:</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>The activity can then show the popup menu like this:</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>In API level 14 and higher, you can combine the two lines that inflate the menu with {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}.</p>
+
+<p>The menu is dismissed when the user selects an item or touches outside the menu
+area. You can listen for the dismiss event using {@link
+android.widget.PopupMenu.OnDismissListener}.</p>
+
+<h3 id="PopupEvents">Handling click events</h3>
+
+<p>To perform an
+action when the user selects a menu item, you must implement the {@link
+android.widget.PopupMenu.OnMenuItemClickListener} interface and register it with your {@link
+android.widget.PopupMenu} by calling {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}. When the user selects an item, the system calls the {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} callback in
+your interface.</p>
+
+<p>For example:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">Creating Menu Groups</h2>
 
 <p>A menu group is a collection of menu items that share certain traits. With a group, you
 can:</p>
@@ -473,38 +842,41 @@ android.view.Menu#add(int,int,int,int) add()} method.</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
-    &lt;item android:id="@+id/item1"
-          android:icon="@drawable/item1"
-          android:title="@string/item1" /&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
     &lt;!-- menu group --&gt;
-    &lt;group android:id="@+id/group1"&gt;
-        &lt;item android:id="@+id/groupItem1"
-              android:title="@string/groupItem1" /&gt;
-        &lt;item android:id="@+id/groupItem2"
-              android:title="@string/groupItem2" /&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
     &lt;/group&gt;
 &lt;/menu&gt;
 </pre>
 
-<p>The items that are in the group appear the same as the first item that is not in a
-group&mdash;all three items in the menu are siblings. However, you can modify the traits of the two
-items in the group by referencing the group ID and using the methods listed above.</p>
+<p>The items that are in the group appear at the same level as the first item&mdash;all three items
+in the menu are siblings. However, you can modify the traits of the two
+items in the group by referencing the group ID and using the methods listed above. The system
+will also never separate grouped items. For example, if you declare {@code
+android:showAsAction="ifRoom"} for each item, they will either both appear in the action
+bar or both appear in the action overflow.</p>
 
 
-<h3 id="checkable">Checkable menu items</h3>
+<h3 id="checkable">Using checkable menu items</h3>
 
 <div class="figure" style="width:200px">
   <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
-  <p class="img-caption"><strong>Figure 3.</strong> Screenshot of a submenu with checkable
+  <p class="img-caption"><strong>Figure 5.</strong> Screenshot of a submenu with checkable
 items.</p>
 </div>
 
 <p>A menu can be useful as an interface for turning options on and off, using a checkbox for
 stand-alone options, or radio buttons for groups of
-mutually exclusive options. Figure 2 shows a submenu with items that are checkable with radio
+mutually exclusive options. Figure 5 shows a submenu with items that are checkable with radio
 buttons.</p>
 
-<p class="note"><strong>Note:</strong> Menu items in the Icon Menu (from the Options Menu) cannot
+<p class="note"><strong>Note:</strong> Menu items in the Icon Menu (from the options menu) cannot
 display a checkbox or radio button. If you choose to make items in the Icon Menu checkable,
 you must manually indicate the checked state by swapping the icon and/or text
 each time the state changes.</p>
@@ -550,15 +922,15 @@ user selected it) with {@link android.view.MenuItem#isChecked()} and then set th
 <pre>
 &#64;Override
 public boolean onOptionsItemSelected(MenuItem item) {
-  switch (item.getItemId()) {
-  case R.id.vibrate:
-  case R.id.dont_vibrate:
-    if (item.isChecked()) item.setChecked(false);
-    else item.setChecked(true);
-    return true;
-  default:
-    return super.onOptionsItemSelected(item);
-  }
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
 }
 </pre>
 
@@ -575,30 +947,8 @@ you should store the data using <a
 href="{@docRoot}guide/topics/data/data-storage.html#pref">Shared Preferences</a>.</p>
 
 
-<h3 id="shortcuts">Shortcut keys</h3>
 
-<p>To facilitate quick access to items in the Options Menu when the user's device has a hardware
-keyboard, you can add quick-access shortcut keys using letters and/or numbers, with the
-{@code android:alphabeticShortcut} and {@code android:numericShortcut} attributes in the {@code
-&lt;item&gt;} element. You can also use the methods {@link
-android.view.MenuItem#setAlphabeticShortcut(char)} and {@link
-android.view.MenuItem#setNumericShortcut(char)}. Shortcut keys are <em>not</em>
-case sensitive.</p>
-
-<p>For example, if you apply the "s" character as an alphabetic shortcut to a "save" menu item, then
-when the menu is open (or while the user holds the MENU button) and the user presses the "s" key,
-the "save" menu item is selected.</p>
-
-<p>This shortcut key is displayed as a tip in the menu item, below the menu item name
-(except for items in the Icon Menu, which are displayed only if the user holds the MENU
-button).</p>
-
-<p class="note"><strong>Note:</strong> Shortcut keys for menu items only work on devices with a
-hardware keyboard. Shortcuts cannot be added to items in a Context Menu.</p>
-
-
-
-<h3 id="intents">Dynamically adding menu intents</h3>
+<h2 id="intents">Adding Menu Items Based on an Intent</h2>
 
 <p>Sometimes you'll want a menu item to launch an activity using an {@link android.content.Intent}
 (whether it's an activity in your application or another application). When you know the intent you
@@ -671,7 +1021,7 @@ addIntentOptions()}, it overrides any and all menu items by the menu group speci
 argument.</p>
 
 
-<h4>Allowing your activity to be added to other menus</h4>
+<h3 id="AllowingToAdd">Allowing your activity to be added to other menus</h3>
 
 <p>You can also offer the services of your activity to other applications, so your
 application can be included in the menu of others (reverse the roles described above).</p>
@@ -681,7 +1031,7 @@ filter as usual, but be sure to include the {@link android.content.Intent#CATEGO
 and/or {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} values for the intent filter
 category. For example:</p>
 <pre>
-&lt;intent-filter label="Resize Image">
+&lt;intent-filter label="&#64;string/resize_image">
     ...
     &lt;category android:name="android.intent.category.ALTERNATIVE" />
     &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
