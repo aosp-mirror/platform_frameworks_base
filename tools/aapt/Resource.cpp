@@ -847,8 +847,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
      * request UTF-16 encoding and the parameters of this package
      * allow UTF-8 to be used.
      */
-    if (!bundle->getWantUTF16()
-            && bundle->isMinSdkAtLeast(SDK_FROYO)) {
+    if (!bundle->getUTF16StringsOption()) {
         xmlFlags |= XML_COMPILE_UTF8;
     }
 

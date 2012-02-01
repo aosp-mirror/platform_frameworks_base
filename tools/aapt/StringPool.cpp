@@ -5,8 +5,10 @@
 //
 
 #include "StringPool.h"
+#include "ResourceTable.h"
 
 #include <utils/ByteOrder.h>
+#include <utils/SortedVector.h>
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
@@ -30,16 +32,70 @@ void strcpy16_htod(uint16_t* dst, const uint16_t* src)
 
 void printStringPool(const ResStringPool* pool)
 {
+    SortedVector<const void*> uniqueStrings;
+    const size_t N = pool->size();
+    for (size_t i=0; i<N; i++) {
+        size_t len;
+        if (pool->isUTF8()) {
+            uniqueStrings.add(pool->string8At(i, &len));
+        } else {
+            uniqueStrings.add(pool->stringAt(i, &len));
+        }
+    }
+
+    printf("String pool of " ZD " unique %s %s strings, " ZD " entries and "
+            ZD " styles using " ZD " bytes:\n",
+            (ZD_TYPE)uniqueStrings.size(), pool->isUTF8() ? "UTF-8" : "UTF-16",
+            pool->isSorted() ? "sorted" : "non-sorted",
+            (ZD_TYPE)N, (ZD_TYPE)pool->styleCount(), (ZD_TYPE)pool->bytes());
+
     const size_t NS = pool->size();
     for (size_t s=0; s<NS; s++) {
-        size_t len;
-        const char *str = (const char*)pool->string8At(s, &len);
-        if (str == NULL) {
-            str = String8(pool->stringAt(s, &len)).string();
-        }
-
-        printf("String #" ZD ": %s\n", (ZD_TYPE) s, str);
+        String8 str = pool->string8ObjectAt(s);
+        printf("String #" ZD ": %s\n", (ZD_TYPE) s, str.string());
     }
+}
+
+String8 StringPool::entry::makeConfigsString() const {
+    String8 configStr(configTypeName);
+    if (configStr.size() > 0) configStr.append(" ");
+    if (configs.size() > 0) {
+        for (size_t j=0; j<configs.size(); j++) {
+            if (j > 0) configStr.append(", ");
+            configStr.append(configs[j].toString());
+        }
+    } else {
+        configStr = "(none)";
+    }
+    return configStr;
+}
+
+int StringPool::entry::compare(const entry& o) const {
+    // Strings with styles go first, to reduce the size of the
+    // styles array.
+    if (hasStyles) {
+        return o.hasStyles ? 0 : -1;
+    }
+    if (o.hasStyles) {
+        return 1;
+    }
+    int comp = configTypeName.compare(o.configTypeName);
+    if (comp != 0) {
+        return comp;
+    }
+    const size_t LHN = configs.size();
+    const size_t RHN = o.configs.size();
+    size_t i=0;
+    while (i < LHN && i < RHN) {
+        comp = configs[i].compareLogical(o.configs[i]);
+        if (comp != 0) {
+            return comp;
+        }
+        i++;
+    }
+    if (LHN < RHN) return -1;
+    else if (LHN > RHN) return 1;
+    return 0;
 }
 
 StringPool::StringPool(bool sorted, bool utf8)
@@ -47,14 +103,16 @@ StringPool::StringPool(bool sorted, bool utf8)
 {
 }
 
-ssize_t StringPool::add(const String16& value, bool mergeDuplicates)
+ssize_t StringPool::add(const String16& value, bool mergeDuplicates,
+        const String8* configTypeName, const ResTable_config* config)
 {
-    return add(String16(), value, mergeDuplicates);
+    return add(String16(), value, mergeDuplicates, configTypeName, config);
 }
 
-ssize_t StringPool::add(const String16& value, const Vector<entry_style_span>& spans)
+ssize_t StringPool::add(const String16& value, const Vector<entry_style_span>& spans,
+        const String8* configTypeName, const ResTable_config* config)
 {
-    ssize_t res = add(String16(), value, false);
+    ssize_t res = add(String16(), value, false, configTypeName, config);
     if (res >= 0) {
         addStyleSpans(res, spans);
     }
@@ -62,7 +120,7 @@ ssize_t StringPool::add(const String16& value, const Vector<entry_style_span>& s
 }
 
 ssize_t StringPool::add(const String16& ident, const String16& value,
-                        bool mergeDuplicates)
+        bool mergeDuplicates, const String8* configTypeName, const ResTable_config* config)
 {
     if (ident.size() > 0) {
         ssize_t idx = mIdents.valueFor(ident);
@@ -84,20 +142,43 @@ ssize_t StringPool::add(const String16& ident, const String16& value,
         }
     }
 
+    if (configTypeName != NULL) {
+        entry& ent = mEntries.editItemAt(eidx);
+        NOISY(printf("*** adding config type name %s, was %s\n",
+                configTypeName->string(), ent.configTypeName.string()));
+        if (ent.configTypeName.size() <= 0) {
+            ent.configTypeName = *configTypeName;
+        } else if (ent.configTypeName != *configTypeName) {
+            ent.configTypeName = " ";
+        }
+    }
+
+    if (config != NULL) {
+        // Add this to the set of configs associated with the string.
+        entry& ent = mEntries.editItemAt(eidx);
+        size_t addPos;
+        for (addPos=0; addPos<ent.configs.size(); addPos++) {
+            int cmp = ent.configs.itemAt(addPos).compareLogical(*config);
+            if (cmp >= 0) {
+                if (cmp > 0) {
+                    NOISY(printf("*** inserting config: %s\n", config->toString().string()));
+                    ent.configs.insertAt(*config, addPos);
+                }
+                break;
+            }
+        }
+        if (addPos >= ent.configs.size()) {
+            NOISY(printf("*** adding config: %s\n", config->toString().string()));
+            ent.configs.add(*config);
+        }
+    }
+
     const bool first = vidx < 0;
     if (first || !mergeDuplicates) {
         pos = mEntryArray.add(eidx);
         if (first) {
             vidx = mValues.add(value, pos);
-            const size_t N = mEntryArrayToValues.size();
-            for (size_t i=0; i<N; i++) {
-                size_t& e = mEntryArrayToValues.editItemAt(i);
-                if ((ssize_t)e >= vidx) {
-                    e++;
-                }
-            }
         }
-        mEntryArrayToValues.add(vidx);
         if (!mSorted) {
             entry& ent = mEntries.editItemAt(eidx);
             ent.indices.add(pos);
@@ -147,6 +228,7 @@ status_t StringPool::addStyleSpan(size_t idx, const entry_style_span& span)
 
     entry_style& style = mEntryStyleArray.editItemAt(idx);
     style.spans.add(span);
+    mEntries.editItemAt(mEntryArray[idx]).hasStyles = true;
     return NO_ERROR;
 }
 
@@ -167,6 +249,132 @@ const StringPool::entry& StringPool::entryAt(size_t idx) const
 size_t StringPool::countIdentifiers() const
 {
     return mIdents.size();
+}
+
+int StringPool::config_sort(const size_t* lhs, const size_t* rhs, void* state)
+{
+    StringPool* pool = (StringPool*)state;
+    const entry& lhe = pool->mEntries[pool->mEntryArray[*lhs]];
+    const entry& rhe = pool->mEntries[pool->mEntryArray[*rhs]];
+    return lhe.compare(rhe);
+}
+
+void StringPool::sortByConfig()
+{
+    LOG_ALWAYS_FATAL_IF(mSorted, "Can't sort string pool containing identifiers.");
+    LOG_ALWAYS_FATAL_IF(mIdents.size() > 0, "Can't sort string pool containing identifiers.");
+    LOG_ALWAYS_FATAL_IF(mOriginalPosToNewPos.size() > 0, "Can't sort string pool after already sorted.");
+
+    const size_t N = mEntryArray.size();
+
+    // This is a vector that starts out with a 1:1 mapping to entries
+    // in the array, which we will sort to come up with the desired order.
+    // At that point it maps from the new position in the array to the
+    // original position the entry appeared.
+    Vector<size_t> newPosToOriginalPos;
+    for (size_t i=0; i<mEntryArray.size(); i++) {
+        newPosToOriginalPos.add(i);
+    }
+
+    // Sort the array.
+    NOISY(printf("SORTING STRINGS BY CONFIGURATION...\n"));
+    newPosToOriginalPos.sort(config_sort, this);
+    NOISY(printf("DONE SORTING STRINGS BY CONFIGURATION.\n"));
+
+    // Create the reverse mapping from the original position in the array
+    // to the new position where it appears in the sorted array.  This is
+    // so that clients can re-map any positions they had previously stored.
+    mOriginalPosToNewPos = newPosToOriginalPos;
+    for (size_t i=0; i<N; i++) {
+        mOriginalPosToNewPos.editItemAt(newPosToOriginalPos[i]) = i;
+    }
+
+#if 0
+    SortedVector<entry> entries;
+
+    for (size_t i=0; i<N; i++) {
+        printf("#%d was %d: %s\n", i, newPosToOriginalPos[i],
+                mEntries[mEntryArray[newPosToOriginalPos[i]]].makeConfigsString().string());
+        entries.add(mEntries[mEntryArray[i]]);
+    }
+
+    for (size_t i=0; i<entries.size(); i++) {
+        printf("Sorted config #%d: %s\n", i,
+                entries[i].makeConfigsString().string());
+    }
+#endif
+
+    // Now we rebuild the arrays.
+    Vector<entry> newEntries;
+    Vector<size_t> newEntryArray;
+    Vector<entry_style> newEntryStyleArray;
+    DefaultKeyedVector<size_t, size_t> origOffsetToNewOffset;
+
+    for (size_t i=0; i<N; i++) {
+        // We are filling in new offset 'i'; oldI is where we can find it
+        // in the original data structure.
+        size_t oldI = newPosToOriginalPos[i];
+        // This is the actual entry associated with the old offset.
+        const entry& oldEnt = mEntries[mEntryArray[oldI]];
+        // This is the same entry the last time we added it to the
+        // new entry array, if any.
+        ssize_t newIndexOfOffset = origOffsetToNewOffset.indexOfKey(oldI);
+        size_t newOffset;
+        if (newIndexOfOffset < 0) {
+            // This is the first time we have seen the entry, so add
+            // it.
+            newOffset = newEntries.add(oldEnt);
+            newEntries.editItemAt(newOffset).indices.clear();
+        } else {
+            // We have seen this entry before, use the existing one
+            // instead of adding it again.
+            newOffset = origOffsetToNewOffset.valueAt(newIndexOfOffset);
+        }
+        // Update the indices to include this new position.
+        newEntries.editItemAt(newOffset).indices.add(i);
+        // And add the offset of the entry to the new entry array.
+        newEntryArray.add(newOffset);
+        // Add any old style to the new style array.
+        if (mEntryStyleArray.size() > 0) {
+            if (oldI < mEntryStyleArray.size()) {
+                newEntryStyleArray.add(mEntryStyleArray[oldI]);
+            } else {
+                newEntryStyleArray.add(entry_style());
+            }
+        }
+    }
+
+    // Now trim any entries at the end of the new style array that are
+    // not needed.
+    for (ssize_t i=newEntryStyleArray.size()-1; i>=0; i--) {
+        const entry_style& style = newEntryStyleArray[i];
+        if (style.spans.size() > 0) {
+            // That's it.
+            break;
+        }
+        // This one is not needed; remove.
+        newEntryStyleArray.removeAt(i);
+    }
+
+    // All done, install the new data structures and upate mValues with
+    // the new positions.
+    mEntries = newEntries;
+    mEntryArray = newEntryArray;
+    mEntryStyleArray = newEntryStyleArray;
+    mValues.clear();
+    for (size_t i=0; i<mEntries.size(); i++) {
+        const entry& ent = mEntries[i];
+        mValues.add(ent.value, ent.indices[0]);
+    }
+
+#if 0
+    printf("FINAL SORTED STRING CONFIGS:\n");
+    for (size_t i=0; i<mEntries.size(); i++) {
+        const entry& ent = mEntries[i];
+        printf("#" ZD " %s: %s\n", (ZD_TYPE)i, ent.makeConfigsString().string(),
+                String8(ent.value).string());
+    }
+#endif
 }
 
 sp<AaptFile> StringPool::createStringBlock()

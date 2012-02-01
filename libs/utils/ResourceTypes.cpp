@@ -221,7 +221,7 @@ static void deserializeInternal(const void* inData, Res_png_9patch* outData) {
 static bool assertIdmapHeader(const uint32_t* map, size_t sizeBytes)
 {
     if (sizeBytes < ResTable::IDMAP_HEADER_SIZE_BYTES) {
-        ALOGW("idmap assertion failed: size=%d bytes\n", sizeBytes);
+        ALOGW("idmap assertion failed: size=%d bytes\n", (int)sizeBytes);
         return false;
     }
     if (*map != htodl(IDMAP_MAGIC)) { // htodl: map data expected to be in correct endianess
@@ -250,7 +250,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
         return UNKNOWN_ERROR;
     }
     if (typeCount > size) {
-        ALOGW("Resource ID map: number of types=%d exceeds size of map=%d\n", typeCount, size);
+        ALOGW("Resource ID map: number of types=%d exceeds size of map=%d\n", typeCount, (int)size);
         return UNKNOWN_ERROR;
     }
     const uint32_t typeOffset = map[type];
@@ -260,7 +260,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
     }
     if (typeOffset + 1 > size) {
         ALOGW("Resource ID map: type offset=%d exceeds reasonable value, size of map=%d\n",
-             typeOffset, size);
+             typeOffset, (int)size);
         return UNKNOWN_ERROR;
     }
     const uint32_t entryCount = map[typeOffset];
@@ -271,7 +271,7 @@ static status_t idmapLookup(const uint32_t* map, size_t sizeBytes, uint32_t key,
     }
     const uint32_t index = typeOffset + 2 + entry - entryOffset;
     if (index > size) {
-        ALOGW("Resource ID map: entry index=%d exceeds size of map=%d\n", index, size);
+        ALOGW("Resource ID map: entry index=%d exceeds size of map=%d\n", index, (int)size);
         *outValue = 0;
         return NO_ERROR;
     }
@@ -659,6 +659,16 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
     return NULL;
 }
 
+const String8 ResStringPool::string8ObjectAt(size_t idx) const
+{
+    size_t len;
+    const char *str = (const char*)string8At(idx, &len);
+    if (str != NULL) {
+        return String8(str);
+    }
+    return String8(stringAt(idx, &len));
+}
+
 const ResStringPool_span* ResStringPool::styleAt(const ResStringPool_ref& ref) const
 {
     return styleAt(ref.index);
@@ -738,12 +748,25 @@ size_t ResStringPool::size() const
     return (mError == NO_ERROR) ? mHeader->stringCount : 0;
 }
 
-#ifndef HAVE_ANDROID_OS
+size_t ResStringPool::styleCount() const
+{
+    return (mError == NO_ERROR) ? mHeader->styleCount : 0;
+}
+
+size_t ResStringPool::bytes() const
+{
+    return (mError == NO_ERROR) ? mHeader->header.size : 0;
+}
+
+bool ResStringPool::isSorted() const
+{
+    return (mHeader->flags&ResStringPool_header::SORTED_FLAG)!=0;
+}
+
 bool ResStringPool::isUTF8() const
 {
     return (mHeader->flags&ResStringPool_header::UTF8_FLAG)!=0;
 }
-#endif
 
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
@@ -1361,6 +1384,873 @@ status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const
             (int)headerSize);
     return BAD_TYPE;
 #endif
+}
+
+// --------------------------------------------------------------------
+// --------------------------------------------------------------------
+// --------------------------------------------------------------------
+
+void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
+    const size_t size = dtohl(o.size);
+    if (size >= sizeof(ResTable_config)) {
+        *this = o;
+    } else {
+        memcpy(this, &o, size);
+        memset(((uint8_t*)this)+size, 0, sizeof(ResTable_config)-size);
+    }
+}
+
+void ResTable_config::copyFromDtoH(const ResTable_config& o) {
+    copyFromDeviceNoSwap(o);
+    size = sizeof(ResTable_config);
+    mcc = dtohs(mcc);
+    mnc = dtohs(mnc);
+    density = dtohs(density);
+    screenWidth = dtohs(screenWidth);
+    screenHeight = dtohs(screenHeight);
+    sdkVersion = dtohs(sdkVersion);
+    minorVersion = dtohs(minorVersion);
+    smallestScreenWidthDp = dtohs(smallestScreenWidthDp);
+    screenWidthDp = dtohs(screenWidthDp);
+    screenHeightDp = dtohs(screenHeightDp);
+}
+
+void ResTable_config::swapHtoD() {
+    size = htodl(size);
+    mcc = htods(mcc);
+    mnc = htods(mnc);
+    density = htods(density);
+    screenWidth = htods(screenWidth);
+    screenHeight = htods(screenHeight);
+    sdkVersion = htods(sdkVersion);
+    minorVersion = htods(minorVersion);
+    smallestScreenWidthDp = htods(smallestScreenWidthDp);
+    screenWidthDp = htods(screenWidthDp);
+    screenHeightDp = htods(screenHeightDp);
+}
+
+int ResTable_config::compare(const ResTable_config& o) const {
+    int32_t diff = (int32_t)(imsi - o.imsi);
+    if (diff != 0) return diff;
+    diff = (int32_t)(locale - o.locale);
+    if (diff != 0) return diff;
+    diff = (int32_t)(screenType - o.screenType);
+    if (diff != 0) return diff;
+    diff = (int32_t)(input - o.input);
+    if (diff != 0) return diff;
+    diff = (int32_t)(screenSize - o.screenSize);
+    if (diff != 0) return diff;
+    diff = (int32_t)(version - o.version);
+    if (diff != 0) return diff;
+    diff = (int32_t)(screenLayout - o.screenLayout);
+    if (diff != 0) return diff;
+    diff = (int32_t)(uiMode - o.uiMode);
+    if (diff != 0) return diff;
+    diff = (int32_t)(smallestScreenWidthDp - o.smallestScreenWidthDp);
+    if (diff != 0) return diff;
+    diff = (int32_t)(screenSizeDp - o.screenSizeDp);
+    return (int)diff;
+}
+
+int ResTable_config::compareLogical(const ResTable_config& o) const {
+    if (mcc != o.mcc) {
+        return mcc < o.mcc ? -1 : 1;
+    }
+    if (mnc != o.mnc) {
+        return mnc < o.mnc ? -1 : 1;
+    }
+    if (language[0] != o.language[0]) {
+        return language[0] < o.language[0] ? -1 : 1;
+    }
+    if (language[1] != o.language[1]) {
+        return language[1] < o.language[1] ? -1 : 1;
+    }
+    if (country[0] != o.country[0]) {
+        return country[0] < o.country[0] ? -1 : 1;
+    }
+    if (country[1] != o.country[1]) {
+        return country[1] < o.country[1] ? -1 : 1;
+    }
+    if (smallestScreenWidthDp != o.smallestScreenWidthDp) {
+        return smallestScreenWidthDp < o.smallestScreenWidthDp ? -1 : 1;
+    }
+    if (screenWidthDp != o.screenWidthDp) {
+        return screenWidthDp < o.screenWidthDp ? -1 : 1;
+    }
+    if (screenHeightDp != o.screenHeightDp) {
+        return screenHeightDp < o.screenHeightDp ? -1 : 1;
+    }
+    if (screenWidth != o.screenWidth) {
+        return screenWidth < o.screenWidth ? -1 : 1;
+    }
+    if (screenHeight != o.screenHeight) {
+        return screenHeight < o.screenHeight ? -1 : 1;
+    }
+    if (density != o.density) {
+        return density < o.density ? -1 : 1;
+    }
+    if (orientation != o.orientation) {
+        return orientation < o.orientation ? -1 : 1;
+    }
+    if (touchscreen != o.touchscreen) {
+        return touchscreen < o.touchscreen ? -1 : 1;
+    }
+    if (input != o.input) {
+        return input < o.input ? -1 : 1;
+    }
+    if (screenLayout != o.screenLayout) {
+        return screenLayout < o.screenLayout ? -1 : 1;
+    }
+    if (uiMode != o.uiMode) {
+        return uiMode < o.uiMode ? -1 : 1;
+    }
+    if (version != o.version) {
+        return version < o.version ? -1 : 1;
+    }
+    return 0;
+}
+
+int ResTable_config::diff(const ResTable_config& o) const {
+    int diffs = 0;
+    if (mcc != o.mcc) diffs |= CONFIG_MCC;
+    if (mnc != o.mnc) diffs |= CONFIG_MNC;
+    if (locale != o.locale) diffs |= CONFIG_LOCALE;
+    if (orientation != o.orientation) diffs |= CONFIG_ORIENTATION;
+    if (density != o.density) diffs |= CONFIG_DENSITY;
+    if (touchscreen != o.touchscreen) diffs |= CONFIG_TOUCHSCREEN;
+    if (((inputFlags^o.inputFlags)&(MASK_KEYSHIDDEN|MASK_NAVHIDDEN)) != 0)
+            diffs |= CONFIG_KEYBOARD_HIDDEN;
+    if (keyboard != o.keyboard) diffs |= CONFIG_KEYBOARD;
+    if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
+    if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
+    if (version != o.version) diffs |= CONFIG_VERSION;
+    if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
+    if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
+    if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
+    if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
+    return diffs;
+}
+
+bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
+    // The order of the following tests defines the importance of one
+    // configuration parameter over another.  Those tests first are more
+    // important, trumping any values in those following them.
+    if (imsi || o.imsi) {
+        if (mcc != o.mcc) {
+            if (!mcc) return false;
+            if (!o.mcc) return true;
+        }
+
+        if (mnc != o.mnc) {
+            if (!mnc) return false;
+            if (!o.mnc) return true;
+        }
+    }
+
+    if (locale || o.locale) {
+        if (language[0] != o.language[0]) {
+            if (!language[0]) return false;
+            if (!o.language[0]) return true;
+        }
+
+        if (country[0] != o.country[0]) {
+            if (!country[0]) return false;
+            if (!o.country[0]) return true;
+        }
+    }
+
+    if (smallestScreenWidthDp || o.smallestScreenWidthDp) {
+        if (smallestScreenWidthDp != o.smallestScreenWidthDp) {
+            if (!smallestScreenWidthDp) return false;
+            if (!o.smallestScreenWidthDp) return true;
+        }
+    }
+
+    if (screenSizeDp || o.screenSizeDp) {
+        if (screenWidthDp != o.screenWidthDp) {
+            if (!screenWidthDp) return false;
+            if (!o.screenWidthDp) return true;
+        }
+
+        if (screenHeightDp != o.screenHeightDp) {
+            if (!screenHeightDp) return false;
+            if (!o.screenHeightDp) return true;
+        }
+    }
+
+    if (screenLayout || o.screenLayout) {
+        if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0) {
+            if (!(screenLayout & MASK_SCREENSIZE)) return false;
+            if (!(o.screenLayout & MASK_SCREENSIZE)) return true;
+        }
+        if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0) {
+            if (!(screenLayout & MASK_SCREENLONG)) return false;
+            if (!(o.screenLayout & MASK_SCREENLONG)) return true;
+        }
+    }
+
+    if (orientation != o.orientation) {
+        if (!orientation) return false;
+        if (!o.orientation) return true;
+    }
+
+    if (uiMode || o.uiMode) {
+        if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0) {
+            if (!(uiMode & MASK_UI_MODE_TYPE)) return false;
+            if (!(o.uiMode & MASK_UI_MODE_TYPE)) return true;
+        }
+        if (((uiMode^o.uiMode) & MASK_UI_MODE_NIGHT) != 0) {
+            if (!(uiMode & MASK_UI_MODE_NIGHT)) return false;
+            if (!(o.uiMode & MASK_UI_MODE_NIGHT)) return true;
+        }
+    }
+
+    // density is never 'more specific'
+    // as the default just equals 160
+
+    if (touchscreen != o.touchscreen) {
+        if (!touchscreen) return false;
+        if (!o.touchscreen) return true;
+    }
+
+    if (input || o.input) {
+        if (((inputFlags^o.inputFlags) & MASK_KEYSHIDDEN) != 0) {
+            if (!(inputFlags & MASK_KEYSHIDDEN)) return false;
+            if (!(o.inputFlags & MASK_KEYSHIDDEN)) return true;
+        }
+
+        if (((inputFlags^o.inputFlags) & MASK_NAVHIDDEN) != 0) {
+            if (!(inputFlags & MASK_NAVHIDDEN)) return false;
+            if (!(o.inputFlags & MASK_NAVHIDDEN)) return true;
+        }
+
+        if (keyboard != o.keyboard) {
+            if (!keyboard) return false;
+            if (!o.keyboard) return true;
+        }
+
+        if (navigation != o.navigation) {
+            if (!navigation) return false;
+            if (!o.navigation) return true;
+        }
+    }
+
+    if (screenSize || o.screenSize) {
+        if (screenWidth != o.screenWidth) {
+            if (!screenWidth) return false;
+            if (!o.screenWidth) return true;
+        }
+
+        if (screenHeight != o.screenHeight) {
+            if (!screenHeight) return false;
+            if (!o.screenHeight) return true;
+        }
+    }
+
+    if (version || o.version) {
+        if (sdkVersion != o.sdkVersion) {
+            if (!sdkVersion) return false;
+            if (!o.sdkVersion) return true;
+        }
+
+        if (minorVersion != o.minorVersion) {
+            if (!minorVersion) return false;
+            if (!o.minorVersion) return true;
+        }
+    }
+    return false;
+}
+
+bool ResTable_config::isBetterThan(const ResTable_config& o,
+        const ResTable_config* requested) const {
+    if (requested) {
+        if (imsi || o.imsi) {
+            if ((mcc != o.mcc) && requested->mcc) {
+                return (mcc);
+            }
+
+            if ((mnc != o.mnc) && requested->mnc) {
+                return (mnc);
+            }
+        }
+
+        if (locale || o.locale) {
+            if ((language[0] != o.language[0]) && requested->language[0]) {
+                return (language[0]);
+            }
+
+            if ((country[0] != o.country[0]) && requested->country[0]) {
+                return (country[0]);
+            }
+        }
+
+        if (smallestScreenWidthDp || o.smallestScreenWidthDp) {
+            // The configuration closest to the actual size is best.
+            // We assume that larger configs have already been filtered
+            // out at this point.  That means we just want the largest one.
+            return smallestScreenWidthDp >= o.smallestScreenWidthDp;
+        }
+
+        if (screenSizeDp || o.screenSizeDp) {
+            // "Better" is based on the sum of the difference between both
+            // width and height from the requested dimensions.  We are
+            // assuming the invalid configs (with smaller dimens) have
+            // already been filtered.  Note that if a particular dimension
+            // is unspecified, we will end up with a large value (the
+            // difference between 0 and the requested dimension), which is
+            // good since we will prefer a config that has specified a
+            // dimension value.
+            int myDelta = 0, otherDelta = 0;
+            if (requested->screenWidthDp) {
+                myDelta += requested->screenWidthDp - screenWidthDp;
+                otherDelta += requested->screenWidthDp - o.screenWidthDp;
+            }
+            if (requested->screenHeightDp) {
+                myDelta += requested->screenHeightDp - screenHeightDp;
+                otherDelta += requested->screenHeightDp - o.screenHeightDp;
+            }
+            //ALOGI("Comparing this %dx%d to other %dx%d in %dx%d: myDelta=%d otherDelta=%d",
+            //    screenWidthDp, screenHeightDp, o.screenWidthDp, o.screenHeightDp,
+            //    requested->screenWidthDp, requested->screenHeightDp, myDelta, otherDelta);
+            return (myDelta <= otherDelta);
+        }
+
+        if (screenLayout || o.screenLayout) {
+            if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0
+                    && (requested->screenLayout & MASK_SCREENSIZE)) {
+                // A little backwards compatibility here: undefined is
+                // considered equivalent to normal.  But only if the
+                // requested size is at least normal; otherwise, small
+                // is better than the default.
+                int mySL = (screenLayout & MASK_SCREENSIZE);
+                int oSL = (o.screenLayout & MASK_SCREENSIZE);
+                int fixedMySL = mySL;
+                int fixedOSL = oSL;
+                if ((requested->screenLayout & MASK_SCREENSIZE) >= SCREENSIZE_NORMAL) {
+                    if (fixedMySL == 0) fixedMySL = SCREENSIZE_NORMAL;
+                    if (fixedOSL == 0) fixedOSL = SCREENSIZE_NORMAL;
+                }
+                // For screen size, the best match is the one that is
+                // closest to the requested screen size, but not over
+                // (the not over part is dealt with in match() below).
+                if (fixedMySL == fixedOSL) {
+                    // If the two are the same, but 'this' is actually
+                    // undefined, then the other is really a better match.
+                    if (mySL == 0) return false;
+                    return true;
+                }
+                return fixedMySL >= fixedOSL;
+            }
+            if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0
+                    && (requested->screenLayout & MASK_SCREENLONG)) {
+                return (screenLayout & MASK_SCREENLONG);
+            }
+        }
+
+        if ((orientation != o.orientation) && requested->orientation) {
+            return (orientation);
+        }
+
+        if (uiMode || o.uiMode) {
+            if (((uiMode^o.uiMode) & MASK_UI_MODE_TYPE) != 0
+                    && (requested->uiMode & MASK_UI_MODE_TYPE)) {
+                return (uiMode & MASK_UI_MODE_TYPE);
+            }
+            if (((uiMode^o.uiMode) & MASK_UI_MODE_NIGHT) != 0
+                    && (requested->uiMode & MASK_UI_MODE_NIGHT)) {
+                return (uiMode & MASK_UI_MODE_NIGHT);
+            }
+        }
+
+        if (screenType || o.screenType) {
+            if (density != o.density) {
+                // density is tough.  Any density is potentially useful
+                // because the system will scale it.  Scaling down
+                // is generally better than scaling up.
+                // Default density counts as 160dpi (the system default)
+                // TODO - remove 160 constants
+                int h = (density?density:160);
+                int l = (o.density?o.density:160);
+                bool bImBigger = true;
+                if (l > h) {
+                    int t = h;
+                    h = l;
+                    l = t;
+                    bImBigger = false;
+                }
+
+                int reqValue = (requested->density?requested->density:160);
+                if (reqValue >= h) {
+                    // requested value higher than both l and h, give h
+                    return bImBigger;
+                }
+                if (l >= reqValue) {
+                    // requested value lower than both l and h, give l
+                    return !bImBigger;
+                }
+                // saying that scaling down is 2x better than up
+                if (((2 * l) - reqValue) * h > reqValue * reqValue) {
+                    return !bImBigger;
+                } else {
+                    return bImBigger;
+                }
+            }
+
+            if ((touchscreen != o.touchscreen) && requested->touchscreen) {
+                return (touchscreen);
+            }
+        }
+
+        if (input || o.input) {
+            const int keysHidden = inputFlags & MASK_KEYSHIDDEN;
+            const int oKeysHidden = o.inputFlags & MASK_KEYSHIDDEN;
+            if (keysHidden != oKeysHidden) {
+                const int reqKeysHidden =
+                        requested->inputFlags & MASK_KEYSHIDDEN;
+                if (reqKeysHidden) {
+
+                    if (!keysHidden) return false;
+                    if (!oKeysHidden) return true;
+                    // For compatibility, we count KEYSHIDDEN_NO as being
+                    // the same as KEYSHIDDEN_SOFT.  Here we disambiguate
+                    // these by making an exact match more specific.
+                    if (reqKeysHidden == keysHidden) return true;
+                    if (reqKeysHidden == oKeysHidden) return false;
+                }
+            }
+
+            const int navHidden = inputFlags & MASK_NAVHIDDEN;
+            const int oNavHidden = o.inputFlags & MASK_NAVHIDDEN;
+            if (navHidden != oNavHidden) {
+                const int reqNavHidden =
+                        requested->inputFlags & MASK_NAVHIDDEN;
+                if (reqNavHidden) {
+
+                    if (!navHidden) return false;
+                    if (!oNavHidden) return true;
+                }
+            }
+
+            if ((keyboard != o.keyboard) && requested->keyboard) {
+                return (keyboard);
+            }
+
+            if ((navigation != o.navigation) && requested->navigation) {
+                return (navigation);
+            }
+        }
+
+        if (screenSize || o.screenSize) {
+            // "Better" is based on the sum of the difference between both
+            // width and height from the requested dimensions.  We are
+            // assuming the invalid configs (with smaller sizes) have
+            // already been filtered.  Note that if a particular dimension
+            // is unspecified, we will end up with a large value (the
+            // difference between 0 and the requested dimension), which is
+            // good since we will prefer a config that has specified a
+            // size value.
+            int myDelta = 0, otherDelta = 0;
+            if (requested->screenWidth) {
+                myDelta += requested->screenWidth - screenWidth;
+                otherDelta += requested->screenWidth - o.screenWidth;
+            }
+            if (requested->screenHeight) {
+                myDelta += requested->screenHeight - screenHeight;
+                otherDelta += requested->screenHeight - o.screenHeight;
+            }
+            return (myDelta <= otherDelta);
+        }
+
+        if (version || o.version) {
+            if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
+                return (sdkVersion > o.sdkVersion);
+            }
+
+            if ((minorVersion != o.minorVersion) &&
+                    requested->minorVersion) {
+                return (minorVersion);
+            }
+        }
+
+        return false;
+    }
+    return isMoreSpecificThan(o);
+}
+
+bool ResTable_config::match(const ResTable_config& settings) const {
+    if (imsi != 0) {
+        if (mcc != 0 && mcc != settings.mcc) {
+            return false;
+        }
+        if (mnc != 0 && mnc != settings.mnc) {
+            return false;
+        }
+    }
+    if (locale != 0) {
+        if (language[0] != 0
+            && (language[0] != settings.language[0]
+                || language[1] != settings.language[1])) {
+            return false;
+        }
+        if (country[0] != 0
+            && (country[0] != settings.country[0]
+                || country[1] != settings.country[1])) {
+            return false;
+        }
+    }
+    if (screenConfig != 0) {
+        const int screenSize = screenLayout&MASK_SCREENSIZE;
+        const int setScreenSize = settings.screenLayout&MASK_SCREENSIZE;
+        // Any screen sizes for larger screens than the setting do not
+        // match.
+        if (screenSize != 0 && screenSize > setScreenSize) {
+            return false;
+        }
+
+        const int screenLong = screenLayout&MASK_SCREENLONG;
+        const int setScreenLong = settings.screenLayout&MASK_SCREENLONG;
+        if (screenLong != 0 && screenLong != setScreenLong) {
+            return false;
+        }
+
+        const int uiModeType = uiMode&MASK_UI_MODE_TYPE;
+        const int setUiModeType = settings.uiMode&MASK_UI_MODE_TYPE;
+        if (uiModeType != 0 && uiModeType != setUiModeType) {
+            return false;
+        }
+
+        const int uiModeNight = uiMode&MASK_UI_MODE_NIGHT;
+        const int setUiModeNight = settings.uiMode&MASK_UI_MODE_NIGHT;
+        if (uiModeNight != 0 && uiModeNight != setUiModeNight) {
+            return false;
+        }
+
+        if (smallestScreenWidthDp != 0
+                && smallestScreenWidthDp > settings.smallestScreenWidthDp) {
+            return false;
+        }
+    }
+    if (screenSizeDp != 0) {
+        if (screenWidthDp != 0 && screenWidthDp > settings.screenWidthDp) {
+            //ALOGI("Filtering out width %d in requested %d", screenWidthDp, settings.screenWidthDp);
+            return false;
+        }
+        if (screenHeightDp != 0 && screenHeightDp > settings.screenHeightDp) {
+            //ALOGI("Filtering out height %d in requested %d", screenHeightDp, settings.screenHeightDp);
+            return false;
+        }
+    }
+    if (screenType != 0) {
+        if (orientation != 0 && orientation != settings.orientation) {
+            return false;
+        }
+        // density always matches - we can scale it.  See isBetterThan
+        if (touchscreen != 0 && touchscreen != settings.touchscreen) {
+            return false;
+        }
+    }
+    if (input != 0) {
+        const int keysHidden = inputFlags&MASK_KEYSHIDDEN;
+        const int setKeysHidden = settings.inputFlags&MASK_KEYSHIDDEN;
+        if (keysHidden != 0 && keysHidden != setKeysHidden) {
+            // For compatibility, we count a request for KEYSHIDDEN_NO as also
+            // matching the more recent KEYSHIDDEN_SOFT.  Basically
+            // KEYSHIDDEN_NO means there is some kind of keyboard available.
+            //ALOGI("Matching keysHidden: have=%d, config=%d\n", keysHidden, setKeysHidden);
+            if (keysHidden != KEYSHIDDEN_NO || setKeysHidden != KEYSHIDDEN_SOFT) {
+                //ALOGI("No match!");
+                return false;
+            }
+        }
+        const int navHidden = inputFlags&MASK_NAVHIDDEN;
+        const int setNavHidden = settings.inputFlags&MASK_NAVHIDDEN;
+        if (navHidden != 0 && navHidden != setNavHidden) {
+            return false;
+        }
+        if (keyboard != 0 && keyboard != settings.keyboard) {
+            return false;
+        }
+        if (navigation != 0 && navigation != settings.navigation) {
+            return false;
+        }
+    }
+    if (screenSize != 0) {
+        if (screenWidth != 0 && screenWidth > settings.screenWidth) {
+            return false;
+        }
+        if (screenHeight != 0 && screenHeight > settings.screenHeight) {
+            return false;
+        }
+    }
+    if (version != 0) {
+        if (sdkVersion != 0 && sdkVersion > settings.sdkVersion) {
+            return false;
+        }
+        if (minorVersion != 0 && minorVersion != settings.minorVersion) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void ResTable_config::getLocale(char str[6]) const {
+    memset(str, 0, 6);
+    if (language[0]) {
+        str[0] = language[0];
+        str[1] = language[1];
+        if (country[0]) {
+            str[2] = '_';
+            str[3] = country[0];
+            str[4] = country[1];
+        }
+    }
+}
+
+String8 ResTable_config::toString() const {
+    String8 res;
+
+    if (mcc != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("%dmcc", dtohs(mcc));
+    }
+    if (mnc != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("%dmnc", dtohs(mnc));
+    }
+    if (language[0] != 0) {
+        if (res.size() > 0) res.append("-");
+        res.append(language, 2);
+    }
+    if (country[0] != 0) {
+        if (res.size() > 0) res.append("-");
+        res.append(country, 2);
+    }
+    if (smallestScreenWidthDp != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("sw%ddp", dtohs(smallestScreenWidthDp));
+    }
+    if (screenWidthDp != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("w%ddp", dtohs(screenWidthDp));
+    }
+    if (screenHeightDp != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("h%ddp", dtohs(screenHeightDp));
+    }
+    if ((screenLayout&MASK_SCREENSIZE) != SCREENSIZE_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (screenLayout&ResTable_config::MASK_SCREENSIZE) {
+            case ResTable_config::SCREENSIZE_SMALL:
+                res.append("small");
+                break;
+            case ResTable_config::SCREENSIZE_NORMAL:
+                res.append("normal");
+                break;
+            case ResTable_config::SCREENSIZE_LARGE:
+                res.append("large");
+                break;
+            case ResTable_config::SCREENSIZE_XLARGE:
+                res.append("xlarge");
+                break;
+            default:
+                res.appendFormat("screenLayoutSize=%d",
+                        dtohs(screenLayout&ResTable_config::MASK_SCREENSIZE));
+                break;
+        }
+    }
+    if ((screenLayout&MASK_SCREENLONG) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (screenLayout&ResTable_config::MASK_SCREENLONG) {
+            case ResTable_config::SCREENLONG_NO:
+                res.append("notlong");
+                break;
+            case ResTable_config::SCREENLONG_YES:
+                res.append("long");
+                break;
+            default:
+                res.appendFormat("screenLayoutLong=%d",
+                        dtohs(screenLayout&ResTable_config::MASK_SCREENLONG));
+                break;
+        }
+    }
+    if (orientation != ORIENTATION_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (orientation) {
+            case ResTable_config::ORIENTATION_PORT:
+                res.append("port");
+                break;
+            case ResTable_config::ORIENTATION_LAND:
+                res.append("land");
+                break;
+            case ResTable_config::ORIENTATION_SQUARE:
+                res.append("square");
+                break;
+            default:
+                res.appendFormat("orientation=%d", dtohs(orientation));
+                break;
+        }
+    }
+    if ((uiMode&MASK_UI_MODE_TYPE) != UI_MODE_TYPE_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (uiMode&ResTable_config::MASK_UI_MODE_TYPE) {
+            case ResTable_config::UI_MODE_TYPE_DESK:
+                res.append("desk");
+                break;
+            case ResTable_config::UI_MODE_TYPE_CAR:
+                res.append("car");
+                break;
+            case ResTable_config::UI_MODE_TYPE_TELEVISION:
+                res.append("television");
+                break;
+            case ResTable_config::UI_MODE_TYPE_APPLIANCE:
+                res.append("appliance");
+                break;
+            default:
+                res.appendFormat("uiModeType=%d",
+                        dtohs(screenLayout&ResTable_config::MASK_UI_MODE_TYPE));
+                break;
+        }
+    }
+    if ((uiMode&MASK_UI_MODE_NIGHT) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (uiMode&ResTable_config::MASK_UI_MODE_NIGHT) {
+            case ResTable_config::UI_MODE_NIGHT_NO:
+                res.append("notnight");
+                break;
+            case ResTable_config::UI_MODE_NIGHT_YES:
+                res.append("night");
+                break;
+            default:
+                res.appendFormat("uiModeNight=%d",
+                        dtohs(uiMode&MASK_UI_MODE_NIGHT));
+                break;
+        }
+    }
+    if (density != DENSITY_DEFAULT) {
+        if (res.size() > 0) res.append("-");
+        switch (density) {
+            case ResTable_config::DENSITY_LOW:
+                res.append("ldpi");
+                break;
+            case ResTable_config::DENSITY_MEDIUM:
+                res.append("mdpi");
+                break;
+            case ResTable_config::DENSITY_TV:
+                res.append("tvdpi");
+                break;
+            case ResTable_config::DENSITY_HIGH:
+                res.append("hdpi");
+                break;
+            case ResTable_config::DENSITY_XHIGH:
+                res.append("xhdpi");
+                break;
+            case ResTable_config::DENSITY_XXHIGH:
+                res.append("xxhdpi");
+                break;
+            case ResTable_config::DENSITY_NONE:
+                res.append("nodpi");
+                break;
+            default:
+                res.appendFormat("density=%d", dtohs(density));
+                break;
+        }
+    }
+    if (touchscreen != TOUCHSCREEN_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (touchscreen) {
+            case ResTable_config::TOUCHSCREEN_NOTOUCH:
+                res.append("notouch");
+                break;
+            case ResTable_config::TOUCHSCREEN_FINGER:
+                res.append("finger");
+                break;
+            case ResTable_config::TOUCHSCREEN_STYLUS:
+                res.append("stylus");
+                break;
+            default:
+                res.appendFormat("touchscreen=%d", dtohs(touchscreen));
+                break;
+        }
+    }
+    if (keyboard != KEYBOARD_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (keyboard) {
+            case ResTable_config::KEYBOARD_NOKEYS:
+                res.append("nokeys");
+                break;
+            case ResTable_config::KEYBOARD_QWERTY:
+                res.append("qwerty");
+                break;
+            case ResTable_config::KEYBOARD_12KEY:
+                res.append("12key");
+                break;
+            default:
+                res.appendFormat("keyboard=%d", dtohs(keyboard));
+                break;
+        }
+    }
+    if ((inputFlags&MASK_KEYSHIDDEN) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (inputFlags&MASK_KEYSHIDDEN) {
+            case ResTable_config::KEYSHIDDEN_NO:
+                res.append("keysexposed");
+                break;
+            case ResTable_config::KEYSHIDDEN_YES:
+                res.append("keyshidden");
+                break;
+            case ResTable_config::KEYSHIDDEN_SOFT:
+                res.append("keyssoft");
+                break;
+        }
+    }
+    if (navigation != NAVIGATION_ANY) {
+        if (res.size() > 0) res.append("-");
+        switch (navigation) {
+            case ResTable_config::NAVIGATION_NONAV:
+                res.append("nonav");
+                break;
+            case ResTable_config::NAVIGATION_DPAD:
+                res.append("dpad");
+                break;
+            case ResTable_config::NAVIGATION_TRACKBALL:
+                res.append("trackball");
+                break;
+            case ResTable_config::NAVIGATION_WHEEL:
+                res.append("wheel");
+                break;
+            default:
+                res.appendFormat("navigation=%d", dtohs(navigation));
+                break;
+        }
+    }
+    if ((inputFlags&MASK_NAVHIDDEN) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (inputFlags&MASK_NAVHIDDEN) {
+            case ResTable_config::NAVHIDDEN_NO:
+                res.append("navsexposed");
+                break;
+            case ResTable_config::NAVHIDDEN_YES:
+                res.append("navhidden");
+                break;
+            default:
+                res.appendFormat("inputFlagsNavHidden=%d",
+                        dtohs(inputFlags&MASK_NAVHIDDEN));
+                break;
+        }
+    }
+    if (screenSize != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("%dx%d", dtohs(screenWidth), dtohs(screenHeight));
+    }
+    if (version != 0) {
+        if (res.size() > 0) res.append("-");
+        res.appendFormat("v%d", dtohs(sdkVersion));
+        if (minorVersion != 0) {
+            res.appendFormat(".%d", dtohs(minorVersion));
+        }
+    }
+
+    return res;
 }
 
 // --------------------------------------------------------------------
@@ -3953,43 +4843,9 @@ ssize_t ResTable::getEntry(
         ResTable_config thisConfig;
         thisConfig.copyFromDtoH(thisType->config);
 
-        TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): imsi:%d/%d=%d/%d "
-                            "lang:%c%c=%c%c cnt:%c%c=%c%c orien:%d=%d touch:%d=%d "
-                            "density:%d=%d key:%d=%d inp:%d=%d nav:%d=%d w:%d=%d h:%d=%d "
-                            "swdp:%d=%d wdp:%d=%d hdp:%d=%d\n",
+        TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): %s\n",
                            entryIndex, typeIndex+1, dtohl(thisType->config.size),
-                           thisConfig.mcc, thisConfig.mnc,
-                           config ? config->mcc : 0, config ? config->mnc : 0,
-                           thisConfig.language[0] ? thisConfig.language[0] : '-',
-                           thisConfig.language[1] ? thisConfig.language[1] : '-',
-                           config && config->language[0] ? config->language[0] : '-',
-                           config && config->language[1] ? config->language[1] : '-',
-                           thisConfig.country[0] ? thisConfig.country[0] : '-',
-                           thisConfig.country[1] ? thisConfig.country[1] : '-',
-                           config && config->country[0] ? config->country[0] : '-',
-                           config && config->country[1] ? config->country[1] : '-',
-                           thisConfig.orientation,
-                           config ? config->orientation : 0,
-                           thisConfig.touchscreen,
-                           config ? config->touchscreen : 0,
-                           thisConfig.density,
-                           config ? config->density : 0,
-                           thisConfig.keyboard,
-                           config ? config->keyboard : 0,
-                           thisConfig.inputFlags,
-                           config ? config->inputFlags : 0,
-                           thisConfig.navigation,
-                           config ? config->navigation : 0,
-                           thisConfig.screenWidth,
-                           config ? config->screenWidth : 0,
-                           thisConfig.screenHeight,
-                           config ? config->screenHeight : 0,
-                           thisConfig.smallestScreenWidthDp,
-                           config ? config->smallestScreenWidthDp : 0,
-                           thisConfig.screenWidthDp,
-                           config ? config->screenWidthDp : 0,
-                           thisConfig.screenHeightDp,
-                           config ? config->screenHeightDp : 0));
+                           thisConfig.toString().string()));
         
         // Check to make sure this one is valid for the current parameters.
         if (config && !thisConfig.match(*config)) {
@@ -4273,26 +5129,8 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             TABLE_GETENTRY(
                 ResTable_config thisConfig;
                 thisConfig.copyFromDtoH(type->config);
-                ALOGI("Adding config to type %d: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d "
-                     "swdp:%d wdp:%d hdp:%d\n",
-                      type->id,
-                      thisConfig.mcc, thisConfig.mnc,
-                      thisConfig.language[0] ? thisConfig.language[0] : '-',
-                      thisConfig.language[1] ? thisConfig.language[1] : '-',
-                      thisConfig.country[0] ? thisConfig.country[0] : '-',
-                      thisConfig.country[1] ? thisConfig.country[1] : '-',
-                      thisConfig.orientation,
-                      thisConfig.touchscreen,
-                      thisConfig.density,
-                      thisConfig.keyboard,
-                      thisConfig.inputFlags,
-                      thisConfig.navigation,
-                      thisConfig.screenWidth,
-                      thisConfig.screenHeight,
-                      thisConfig.smallestScreenWidthDp,
-                      thisConfig.screenWidthDp,
-                      thisConfig.screenHeightDp));
+                ALOGI("Adding config to type %d: %s\n",
+                      type->id, thisConfig.toString().string()));
             t->configs.add(type);
         } else {
             status_t err = validate_chunk(chunk, sizeof(ResChunk_header),
@@ -4622,186 +5460,9 @@ void ResTable::print(bool inclValues) const
                         printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
                         continue;
                     }
-                    char density[16];
-                    uint16_t dval = dtohs(type->config.density);
-                    if (dval == ResTable_config::DENSITY_DEFAULT) {
-                        strcpy(density, "def");
-                    } else if (dval == ResTable_config::DENSITY_NONE) {
-                        strcpy(density, "no");
-                    } else {
-                        sprintf(density, "%d", (int)dval);
-                    }
-                    printf("      config %d", (int)configIndex);
-                    if (type->config.mcc != 0) {
-                        printf(" mcc=%d", dtohs(type->config.mcc));
-                    }
-                    if (type->config.mnc != 0) {
-                        printf(" mnc=%d", dtohs(type->config.mnc));
-                    }
-                    if (type->config.locale != 0) {
-                        printf(" lang=%c%c cnt=%c%c",
-                               type->config.language[0] ? type->config.language[0] : '-',
-                               type->config.language[1] ? type->config.language[1] : '-',
-                               type->config.country[0] ? type->config.country[0] : '-',
-                               type->config.country[1] ? type->config.country[1] : '-');
-                    }
-                    if (type->config.screenLayout != 0) {
-                        printf(" sz=%d",
-                                type->config.screenLayout&ResTable_config::MASK_SCREENSIZE);
-                        switch (type->config.screenLayout&ResTable_config::MASK_SCREENSIZE) {
-                            case ResTable_config::SCREENSIZE_SMALL:
-                                printf(" (small)");
-                                break;
-                            case ResTable_config::SCREENSIZE_NORMAL:
-                                printf(" (normal)");
-                                break;
-                            case ResTable_config::SCREENSIZE_LARGE:
-                                printf(" (large)");
-                                break;
-                            case ResTable_config::SCREENSIZE_XLARGE:
-                                printf(" (xlarge)");
-                                break;
-                        }
-                        printf(" lng=%d",
-                                type->config.screenLayout&ResTable_config::MASK_SCREENLONG);
-                        switch (type->config.screenLayout&ResTable_config::MASK_SCREENLONG) {
-                            case ResTable_config::SCREENLONG_NO:
-                                printf(" (notlong)");
-                                break;
-                            case ResTable_config::SCREENLONG_YES:
-                                printf(" (long)");
-                                break;
-                        }
-                    }
-                    if (type->config.orientation != 0) {
-                        printf(" orient=%d", type->config.orientation);
-                        switch (type->config.orientation) {
-                            case ResTable_config::ORIENTATION_PORT:
-                                printf(" (port)");
-                                break;
-                            case ResTable_config::ORIENTATION_LAND:
-                                printf(" (land)");
-                                break;
-                            case ResTable_config::ORIENTATION_SQUARE:
-                                printf(" (square)");
-                                break;
-                        }
-                    }
-                    if (type->config.uiMode != 0) {
-                        printf(" type=%d",
-                                type->config.uiMode&ResTable_config::MASK_UI_MODE_TYPE);
-                        switch (type->config.uiMode&ResTable_config::MASK_UI_MODE_TYPE) {
-                            case ResTable_config::UI_MODE_TYPE_NORMAL:
-                                printf(" (normal)");
-                                break;
-                            case ResTable_config::UI_MODE_TYPE_CAR:
-                                printf(" (car)");
-                                break;
-                        }
-                        printf(" night=%d",
-                                type->config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT);
-                        switch (type->config.uiMode&ResTable_config::MASK_UI_MODE_NIGHT) {
-                            case ResTable_config::UI_MODE_NIGHT_NO:
-                                printf(" (no)");
-                                break;
-                            case ResTable_config::UI_MODE_NIGHT_YES:
-                                printf(" (yes)");
-                                break;
-                        }
-                    }
-                    if (dval != 0) {
-                        printf(" density=%s", density);
-                    }
-                    if (type->config.touchscreen != 0) {
-                        printf(" touch=%d", type->config.touchscreen);
-                        switch (type->config.touchscreen) {
-                            case ResTable_config::TOUCHSCREEN_NOTOUCH:
-                                printf(" (notouch)");
-                                break;
-                            case ResTable_config::TOUCHSCREEN_STYLUS:
-                                printf(" (stylus)");
-                                break;
-                            case ResTable_config::TOUCHSCREEN_FINGER:
-                                printf(" (finger)");
-                                break;
-                        }
-                    }
-                    if (type->config.inputFlags != 0) {
-                        printf(" keyhid=%d", type->config.inputFlags&ResTable_config::MASK_KEYSHIDDEN);
-                        switch (type->config.inputFlags&ResTable_config::MASK_KEYSHIDDEN) {
-                            case ResTable_config::KEYSHIDDEN_NO:
-                                printf(" (no)");
-                                break;
-                            case ResTable_config::KEYSHIDDEN_YES:
-                                printf(" (yes)");
-                                break;
-                            case ResTable_config::KEYSHIDDEN_SOFT:
-                                printf(" (soft)");
-                                break;
-                        }
-                        printf(" navhid=%d", type->config.inputFlags&ResTable_config::MASK_NAVHIDDEN);
-                        switch (type->config.inputFlags&ResTable_config::MASK_NAVHIDDEN) {
-                            case ResTable_config::NAVHIDDEN_NO:
-                                printf(" (no)");
-                                break;
-                            case ResTable_config::NAVHIDDEN_YES:
-                                printf(" (yes)");
-                                break;
-                        }
-                    }
-                    if (type->config.keyboard != 0) {
-                        printf(" kbd=%d", type->config.keyboard);
-                        switch (type->config.keyboard) {
-                            case ResTable_config::KEYBOARD_NOKEYS:
-                                printf(" (nokeys)");
-                                break;
-                            case ResTable_config::KEYBOARD_QWERTY:
-                                printf(" (qwerty)");
-                                break;
-                            case ResTable_config::KEYBOARD_12KEY:
-                                printf(" (12key)");
-                                break;
-                        }
-                    }
-                    if (type->config.navigation != 0) {
-                        printf(" nav=%d", type->config.navigation);
-                        switch (type->config.navigation) {
-                            case ResTable_config::NAVIGATION_NONAV:
-                                printf(" (nonav)");
-                                break;
-                            case ResTable_config::NAVIGATION_DPAD:
-                                printf(" (dpad)");
-                                break;
-                            case ResTable_config::NAVIGATION_TRACKBALL:
-                                printf(" (trackball)");
-                                break;
-                            case ResTable_config::NAVIGATION_WHEEL:
-                                printf(" (wheel)");
-                                break;
-                        }
-                    }
-                    if (type->config.screenWidth != 0) {
-                        printf(" w=%d", dtohs(type->config.screenWidth));
-                    }
-                    if (type->config.screenHeight != 0) {
-                        printf(" h=%d", dtohs(type->config.screenHeight));
-                    }
-                    if (type->config.smallestScreenWidthDp != 0) {
-                        printf(" swdp=%d", dtohs(type->config.smallestScreenWidthDp));
-                    }
-                    if (type->config.screenWidthDp != 0) {
-                        printf(" wdp=%d", dtohs(type->config.screenWidthDp));
-                    }
-                    if (type->config.screenHeightDp != 0) {
-                        printf(" hdp=%d", dtohs(type->config.screenHeightDp));
-                    }
-                    if (type->config.sdkVersion != 0) {
-                        printf(" sdk=%d", dtohs(type->config.sdkVersion));
-                    }
-                    if (type->config.minorVersion != 0) {
-                        printf(" mver=%d", dtohs(type->config.minorVersion));
-                    }
-                    printf("\n");
+                    String8 configStr = type->config.toString();
+                    printf("      config %s:\n", configStr.size() > 0
+                            ? configStr.string() : "(default)");
                     size_t entryCount = dtohl(type->entryCount);
                     uint32_t entriesStart = dtohl(type->entriesStart);
                     if ((entriesStart&0x3) != 0) {
