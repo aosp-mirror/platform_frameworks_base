@@ -63,13 +63,13 @@ public class UT_mesh extends UnitTest {
     }
 
     private void testJavaSide(RenderScript RS) {
-        updateUI();
     }
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
         testScriptSide(pRS);
         testJavaSide(pRS);
+        passTest();
         pRS.destroy();
     }
 }

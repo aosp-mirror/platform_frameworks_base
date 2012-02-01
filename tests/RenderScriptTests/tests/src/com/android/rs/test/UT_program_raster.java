@@ -69,14 +69,13 @@ public class UT_program_raster extends UnitTest {
                     cullMode.getPointSpriteEnabled() == false);
         _RS_ASSERT("cullMode.getCullMode() == ProgramRaster.CullMode.FRONT",
                     cullMode.getCullMode() == ProgramRaster.CullMode.FRONT);
-
-        updateUI();
     }
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
         testScriptSide(pRS);
         testJavaSide(pRS);
+        passTest();
         pRS.destroy();
     }
 }

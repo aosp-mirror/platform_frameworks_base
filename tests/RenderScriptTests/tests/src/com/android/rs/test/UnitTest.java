@@ -58,8 +58,8 @@ public class UnitTest extends Thread {
 
     protected void _RS_ASSERT(String message, boolean b) {
         if(b == false) {
-            result = -1;
             Log.e(name, message + " FAILED");
+            failTest();
         }
     }
 

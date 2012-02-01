@@ -138,14 +138,13 @@ public class UT_sampler extends UnitTest {
                     anisotropy.getWrapT() == Sampler.Value.CLAMP);
         _RS_ASSERT("anisotropy.getAnisotropy() == 1.0f",
                     anisotropy.getAnisotropy() == 8.0f);
-
-        updateUI();
     }
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
         testScriptSide(pRS);
         testJavaSide(pRS);
+        passTest();
         pRS.destroy();
     }
 }

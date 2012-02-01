@@ -120,14 +120,13 @@ public class UT_element extends UnitTest {
             _RS_ASSERT("complexElem.getSubElementOffsetBytes(i) == subElemOffsets[i]",
                        complexElem.getSubElementOffsetBytes(i) == subElemOffsets[i]);
         }
-
-        updateUI();
     }
 
     public void run() {
         RenderScript pRS = RenderScript.create(mCtx);
         testScriptSide(pRS);
         testJavaSide(pRS);
+        passTest();
         pRS.destroy();
     }
 }
