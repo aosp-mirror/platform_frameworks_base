@@ -32,40 +32,57 @@ import android.util.Log;
 public class Camera extends SceneGraphBase {
 
     Transform mTransform;
-    float mFOV;
-    float mNear;
-    float mFar;
 
+    ScriptField_Camera_s.Item mData;
     ScriptField_Camera_s mField;
 
     public Camera() {
-        mFOV = 60.0f;
-        mNear = 0.1f;
-        mFar = 100.0f;
+        mData = new ScriptField_Camera_s.Item();
+        mData.near = 0.1f;
+        mData.far = 100.0f;
+        mData.horizontalFOV = 60.0f;
+        mData.aspect = 0;
     }
 
     public void setTransform(Transform t) {
         mTransform = t;
-        updateRSData();
+        if (mField != null) {
+            mField.set_transformMatrix(0, mTransform.getRSData().getAllocation(), false);
+            mField.set_isDirty(0, 1, true);
+        }
     }
     public void setFOV(float fov) {
-        mFOV = fov;
-        updateRSData();
+        mData.horizontalFOV = fov;
+        if (mField != null) {
+            mField.set_horizontalFOV(0, fov, false);
+            mField.set_isDirty(0, 1, true);
+        }
     }
 
     public void setNear(float n) {
-        mNear = n;
-        updateRSData();
+        mData.near = n;
+        if (mField != null) {
+            mField.set_near(0, n, false);
+            mField.set_isDirty(0, 1, true);
+        }
     }
 
     public void setFar(float f) {
-        mFar = f;
-        updateRSData();
+        mData.far = f;
+        if (mField != null) {
+            mField.set_far(0, f, false);
+            mField.set_isDirty(0, 1, true);
+        }
     }
 
     public void setName(String n) {
         super.setName(n);
-        updateRSData();
+        if (mField != null) {
+            RenderScriptGL rs = SceneManager.getRS();
+            mData.name = getNameAlloc(rs);
+            mField.set_name(0, mData.name, false);
+            mField.set_isDirty(0, 1, true);
+        }
     }
 
     ScriptField_Camera_s getRSData() {
@@ -78,35 +95,20 @@ public class Camera extends SceneGraphBase {
             return null;
         }
 
-        mField = new ScriptField_Camera_s(rs, 1);
-        updateRSData();
-        return mField;
-    }
-
-    void updateRSData() {
-        if (mField == null) {
-            return;
-        }
-        RenderScriptGL rs = SceneManager.getRS();
-        if (rs == null) {
-            return;
-        }
-
         if (mTransform == null) {
             throw new RuntimeException("Cameras without transforms are invalid");
         }
 
-        ScriptField_Camera_s.Item cam = new ScriptField_Camera_s.Item();
-        cam.horizontalFOV = mFOV;
-        cam.near = mNear;
-        cam.far = mFar;
-        cam.aspect = 0;
-        cam.transformMatrix = mTransform.getRSData().getAllocation();
-        cam.transformTimestamp = 1;
-        cam.timestamp = 1;
-        cam.isDirty = 1;
-        cam.name = getNameAlloc(rs);
-        mField.set(cam, 0, true);
+        mField = new ScriptField_Camera_s(rs, 1);
+
+        mData.transformMatrix = mTransform.getRSData().getAllocation();
+        mData.transformTimestamp = 1;
+        mData.timestamp = 1;
+        mData.isDirty = 1;
+        mData.name = getNameAlloc(rs);
+        mField.set(mData, 0, true);
+
+        return mField;
     }
 }
 

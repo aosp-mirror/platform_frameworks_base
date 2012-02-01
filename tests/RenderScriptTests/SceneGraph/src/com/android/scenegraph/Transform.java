@@ -27,12 +27,6 @@ import android.util.Log;
  * @hide
  */
 public abstract class Transform extends SceneGraphBase {
-
-    static final int RS_ID_NONE = 0;
-    static final int RS_ID_TRANSLATE = 1;
-    static final int RS_ID_ROTATE = 2;
-    static final int RS_ID_SCALE = 3;
-
     Transform mParent;
     ArrayList<Transform> mChildren;
 

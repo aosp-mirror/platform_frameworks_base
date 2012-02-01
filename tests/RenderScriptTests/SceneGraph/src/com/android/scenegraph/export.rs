@@ -39,6 +39,10 @@ const int shaderParam_FLOAT4_LIGHT_DIR = SHADER_PARAM_FLOAT4_LIGHT_DIR;
 
 const int shaderParam_TEXTURE = SHADER_PARAM_TEXTURE;
 
+const int transform_TRANSLATE = TRANSFORM_TRANSLATE;
+const int transform_ROTATE = TRANSFORM_ROTATE;
+const int transform_SCALE = TRANSFORM_SCALE;
+
 SgTransform *exportPtr;
 SgTransformComponent *componentPtr;
 SgRenderState *sExport;
