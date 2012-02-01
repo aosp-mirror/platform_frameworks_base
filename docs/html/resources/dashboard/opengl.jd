@@ -57,7 +57,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="400" height="250"
-src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1|GL%202.0%20%26%201.1&chd=t%3A9.5,90.5" />
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1%20only|GL%202.0%20%26%201.1&chd=t%3A10.7,89.3" />
 
 <table>
 <tr>
@@ -65,15 +65,15 @@ src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=
 <th scope="col">Distribution</th>
 </tr>
 <tr>
-<td>1.1</th>
-<td>9.5%</td>
+<td>1.1 only</th>
+<td>10.7%</td>
 </tr>
 <tr>
-<td>2.0</th>
-<td>90.5%</td>
+<td>2.0 &amp; 1.1</th>
+<td>89.3%</td>
 </tr>
 </table>
 
-<p><em>Data collected during a 7-day period ending on January 3, 2012</em></p>
+<p><em>Data collected during a 7-day period ending on February 1, 2012</em></p>
 </div>
 
