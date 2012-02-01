@@ -2402,6 +2402,16 @@ package android.animation {
 
 }
 
+package android.annotation {
+
+  public abstract class SuppressLint implements java.lang.annotation.Annotation {
+  }
+
+  public abstract class TargetApi implements java.lang.annotation.Annotation {
+  }
+
+}
+
 package android.app {
 
   public abstract class ActionBar {
