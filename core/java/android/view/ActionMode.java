@@ -18,9 +18,15 @@ package android.view;
 
 
 /**
- * Represents a contextual mode of the user interface. Action modes can be used for
- * modal interactions with content and replace parts of the normal UI until finished.
- * Examples of good action modes include selection modes, search, content editing, etc.
+ * Represents a contextual mode of the user interface. Action modes can be used to provide
+ * alternative interaction modes and replace parts of the normal UI until finished.
+ * Examples of good action modes include text selection and contextual actions.
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For information about how to provide contextual actions with {@code ActionMode},
+ * read the <a href="{@docRoot}guide/topics/ui/menu.html#context-menu">Menus</a>
+ * developer guide.</p>
+ * </div>
  */
 public abstract class ActionMode {
     private Object mTag;
