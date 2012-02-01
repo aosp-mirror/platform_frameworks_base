@@ -510,7 +510,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void forceUpdate() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
-        performPoll(FLAG_PERSIST_ALL);
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            performPoll(FLAG_PERSIST_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
