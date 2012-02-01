@@ -84,7 +84,7 @@ public class ImageProcessingTest extends ActivityInstrumentationTestCase2<ImageP
                 Log.v(TAG, "RenderScript framew time core: " + t + " ms");
             }
             long avgValue = sum/ITERATION;
-            rsWriter.write("Averge frame time: " + avgValue + " ms\n");
+            rsWriter.write("Average frame time: " + avgValue + " ms\n");
             Log.v(TAG, "Average frame time: " + avgValue + " ms");
             rsWriter.close();
         } catch (IOException e) {
