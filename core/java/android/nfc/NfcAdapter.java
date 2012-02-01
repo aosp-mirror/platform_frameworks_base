@@ -903,6 +903,17 @@ public final class NfcAdapter {
     /**
      * @hide
      */
+    public void setP2pModes(int initiatorModes, int targetModes) {
+        try {
+            sService.setP2pModes(initiatorModes, targetModes);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * @hide
+     */
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
         if (mContext == null) {
             throw new UnsupportedOperationException("You need a context on NfcAdapter to use the "

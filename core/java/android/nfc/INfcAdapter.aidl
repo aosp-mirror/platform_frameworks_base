@@ -45,4 +45,6 @@ interface INfcAdapter
     void setForegroundNdefPush(in NdefMessage msg, in INdefPushCallback callback);
 
     void dispatch(in Tag tag);
+
+    void setP2pModes(int initatorModes, int targetModes);
 }
