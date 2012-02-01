@@ -1421,7 +1421,7 @@ href="#ActionView">action views</a>. (Added in API level 14.)</dd>
     &lt;/style>
 
     &lt;!-- style for the action bar tab text -->
-    &lt;style name="CustomTabTextStyle">
+    &lt;style name="CustomTabTextStyle" parent="@android:style/TextAppearance.Holo">
         &lt;item name="android:textColor">#2456c2&lt;/item>
     &lt;/style>
 &lt;/resources>
@@ -1437,8 +1437,7 @@ action bar styles you want to change without re-implementing the styles you want
 manifest file like this:</p>
 
 <pre>
-&lt;application android:theme="&#64;style/CustomActivityTheme"
-             ... />
+&lt;application android:theme="&#64;style/CustomActivityTheme" ... />
 </pre>
 
 <p>For more information about using style and theme resources in your application, read <a
@@ -1457,7 +1456,7 @@ android:backgroundStacked}. If you override these action bar styles, be sure tha
 parent action bar style such as {@link android.R.style#Widget_Holo_ActionBar
 Widget.Holo.ActionBar}.</p>
 
-<p>For example, if you want to change the action bar's background, you could use the following
+<p>For example, if you want to change the action bar's background, you can use the following
 styles:</p>
 
 <pre>
@@ -1465,14 +1464,15 @@ styles:</p>
 &lt;resources>
     &lt;!-- the theme applied to the application or activity -->
     &lt;style name="CustomActivityTheme" parent="@android:style/Theme.Holo">
-        &lt;item name="android:actionBarTabTextStyle">@style/customTabTextStyle&lt;/item>
+        &lt;item name="android:actionBarStyle">@style/MyActionBar&lt;/item>
         &lt;!-- other activity and action bar styles here -->
     &lt;/style>
 
-    &lt;!-- style for the action bar, simply to change the background -->
-    &lt;style parent="@android:style/Widget.Holo.ActionBar">
+    &lt;!-- style for the action bar backgrounds -->
+    &lt;style name="MyActionBar" parent="@android:style/Widget.Holo.ActionBar">
         &lt;item name="android:background">@drawable/ab_background&lt;/item>
-        &lt;item name="android:backgroundSplit">@drawable/ab_background&lt;/item>
+        &lt;item name="android:backgroundStacked">@drawable/ab_background&lt;/item>
+        &lt;item name="android:backgroundSplit">@drawable/ab_split_background&lt;/item>
     &lt;/style>
 &lt;/resources>
 </pre>
