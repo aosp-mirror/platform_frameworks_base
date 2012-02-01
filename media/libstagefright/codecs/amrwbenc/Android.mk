@@ -117,4 +117,26 @@ endif
 
 include $(BUILD_STATIC_LIBRARY)
 
+################################################################################
 
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftAMRWBEncoder.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+	frameworks/base/media/libstagefright/codecs/common/include \
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_amrwbenc
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright_omx libstagefright_foundation libutils \
+        libstagefright_enc_common
+
+LOCAL_MODULE := libstagefright_soft_amrwbenc
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_SHARED_LIBRARY)
