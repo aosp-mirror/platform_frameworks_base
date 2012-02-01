@@ -6350,8 +6350,9 @@ public class WebView extends AbsoluteLayout
                         EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
                     }
-                    if (mSelectingText) {
-                        mSelectionStarted = false;
+                    mSelectionStarted = false;
+                    if (mSelectingText && mSelectHandleLeft != null
+                            && mSelectHandleRight != null) {
                         int shiftedY = y - getTitleHeight() + mScrollY;
                         int shiftedX = x + mScrollX;
                         if (mSelectHandleLeft.getBounds()
