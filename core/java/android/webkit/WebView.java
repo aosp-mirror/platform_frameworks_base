@@ -5724,8 +5724,7 @@ public class WebView extends AbsoluteLayout
      * @hide This is an implementation detail.
      */
     public void selectAll() {
-        // TODO
-        //mWebViewCore.sendMessage(EventHub.SELECT_ALL);
+        mWebViewCore.sendMessage(EventHub.SELECT_ALL);
     }
 
     /**
