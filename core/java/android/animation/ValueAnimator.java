@@ -19,6 +19,7 @@ package android.animation;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.view.Choreographer;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -52,6 +53,8 @@ public class ValueAnimator extends Animator {
     /**
      * Internal constants
      */
+    private static float sDurationScale = 1.0f;
+    private static boolean sDurationScaleInitialized = false;
 
     /**
      * Messages sent to timing handler: START is sent when an animation first begins.
@@ -159,9 +162,11 @@ public class ValueAnimator extends Animator {
 
     // How long the animation should last in ms
     private long mDuration = 300;
+    private long mUnscaledDuration = 300;
 
     // The amount of time in ms to delay starting the animation after start() is called
     private long mStartDelay = 0;
+    private long mUnscaledStartDelay = 0;
 
     // The number of times the animation will repeat. The default is 0, which means the animation
     // will play only once
@@ -223,6 +228,15 @@ public class ValueAnimator extends Animator {
      * useful.
      */
     public ValueAnimator() {
+        if (!sDurationScaleInitialized) {
+            // Scale value initialized per-process when first animator is constructed
+            String scaleString = SystemProperties.get("persist.sys.ui.animation");
+            if (!scaleString.isEmpty()) {
+                sDurationScale = Float.parseFloat(scaleString);
+            }
+            sDurationScaleInitialized = true;
+        }
+        mDuration *= sDurationScale;
     }
 
     /**
@@ -453,7 +467,8 @@ public class ValueAnimator extends Animator {
             throw new IllegalArgumentException("Animators cannot have negative duration: " +
                     duration);
         }
-        mDuration = duration;
+        mUnscaledDuration = duration;
+        mDuration = (long)(duration * sDurationScale);
         return this;
     }
 
@@ -463,7 +478,7 @@ public class ValueAnimator extends Animator {
      * @return The length of the animation, in milliseconds.
      */
     public long getDuration() {
-        return mDuration;
+        return mUnscaledDuration;
     }
 
     /**
@@ -658,7 +673,7 @@ public class ValueAnimator extends Animator {
      * @return the number of milliseconds to delay running the animation
      */
     public long getStartDelay() {
-        return mStartDelay;
+        return mUnscaledStartDelay;
     }
 
     /**
@@ -668,7 +683,8 @@ public class ValueAnimator extends Animator {
      * @param startDelay The amount of the delay, in milliseconds
      */
     public void setStartDelay(long startDelay) {
-        this.mStartDelay = startDelay;
+        this.mStartDelay = (long)(startDelay * sDurationScale);
+        mUnscaledStartDelay = startDelay;
     }
 
     /**
