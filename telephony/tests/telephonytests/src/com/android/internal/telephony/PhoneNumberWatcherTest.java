@@ -64,7 +64,7 @@ public class PhoneNumberWatcherTest extends AndroidTestCase {
         assertEquals(result1, number.toString());
         assertEquals(result1.length(), Selection.getSelectionEnd(number));
         // Remove last 5 chars
-        final String result2 = "(650) 123";
+        final String result2 = "650-123";
         textWatcher.beforeTextChanged(number, number.length() - 4, 4, 0);
         number.delete(number.length() - 5, number.length());
         Selection.setSelection(number, number.length());
@@ -75,26 +75,26 @@ public class PhoneNumberWatcherTest extends AndroidTestCase {
     }
 
     public void testInsertChars() {
-        final String init = "(650) 23";
-        final String expected1 = "(650) 123";
+        final String init = "650-23";
+        final String expected1 = "650-123";
         TextWatcher textWatcher = getTextWatcher();
 
         // Insert one char
         SpannableStringBuilder number = new SpannableStringBuilder(init);
-        textWatcher.beforeTextChanged(number, 4, 0, 1);
-        number.insert(4, "1"); // (6501) 23
-        Selection.setSelection(number, 5); // make the cursor at right of 1
-        textWatcher.onTextChanged(number, 4, 0, 1);
+        textWatcher.beforeTextChanged(number, 3, 0, 1);
+        number.insert(3, "1"); // 6501-23
+        Selection.setSelection(number, 4); // make the cursor at right of 1
+        textWatcher.onTextChanged(number, 3, 0, 1);
         textWatcher.afterTextChanged(number);
         assertEquals(expected1, number.toString());
         // the cursor should still at the right of '1'
-        assertEquals(7, Selection.getSelectionEnd(number));
+        assertEquals(5, Selection.getSelectionEnd(number));
 
         // Insert multiple chars
         final String expected2 = "(650) 145-6723";
-        textWatcher.beforeTextChanged(number, 7, 0, 4);
-        number.insert(7, "4567"); // change to (650) 1456723
-        Selection.setSelection(number, 11); // the cursor is at the right of '7'.
+        textWatcher.beforeTextChanged(number, 5, 0, 4);
+        number.insert(5, "4567"); // change to 650-1456723
+        Selection.setSelection(number, 9); // the cursor is at the right of '7'.
         textWatcher.onTextChanged(number, 7, 0, 4);
         textWatcher.afterTextChanged(number);
         assertEquals(expected2, number.toString());
@@ -168,7 +168,7 @@ public class PhoneNumberWatcherTest extends AndroidTestCase {
         textWatcher.onTextChanged(number, 0, len, 0);
         textWatcher.afterTextChanged(number);
 
-        final String expected2 = "(650) 123-4";
+        final String expected2 = "650-1234";
         number = new SpannableStringBuilder(init);
         textWatcher.beforeTextChanged(number, 9, 0, 1);
         number.insert(9, "4"); // (650) 1234
