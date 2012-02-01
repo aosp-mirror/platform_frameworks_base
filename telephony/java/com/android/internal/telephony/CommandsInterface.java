@@ -93,11 +93,6 @@ public interface CommandsInterface {
     static final int USSD_MODE_NOTIFY       = 0;
     static final int USSD_MODE_REQUEST      = 1;
 
-    // SIM Refresh results, passed up from RIL.
-    static final int SIM_REFRESH_FILE_UPDATED   = 0;  // Single file updated
-    static final int SIM_REFRESH_INIT           = 1;  // SIM initialized; reload all
-    static final int SIM_REFRESH_RESET          = 2;  // SIM reset; may be locked
-
     // GSM SMS fail cause for acknowledgeLastIncomingSMS. From TS 23.040, 9.2.3.22.
     static final int GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED    = 0xD3;
     static final int GSM_SMS_FAIL_CAUSE_USIM_APP_TOOLKIT_BUSY       = 0xD4;

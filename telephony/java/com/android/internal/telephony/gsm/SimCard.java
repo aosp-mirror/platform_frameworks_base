@@ -39,4 +39,11 @@ public final class SimCard extends IccCard {
         return mPhone.mIccRecords.getServiceProviderName();
     }
 
+    @Override
+    protected int getCurrentApplicationIndex() {
+        if (mIccCardStatus == null) {
+            return -1;
+        }
+        return mIccCardStatus.getGsmUmtsSubscriptionAppIndex();
+    }
 }

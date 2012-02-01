@@ -48,7 +48,7 @@ public abstract class IccCard {
     protected String mLogTag;
     protected boolean mDbg;
 
-    private IccCardStatus mIccCardStatus = null;
+    protected IccCardStatus mIccCardStatus = null;
     protected State mState = null;
     private final Object mStateMonitor = new Object();
 
@@ -910,5 +910,25 @@ public abstract class IccCard {
 
     private void log(String msg) {
         Log.d(mLogTag, "[IccCard] " + msg);
+    }
+
+    protected abstract int getCurrentApplicationIndex();
+
+    public String getAid() {
+        String aid = "";
+        int appIndex = getCurrentApplicationIndex();
+
+        if (appIndex >= 0 && appIndex < IccCardStatus.CARD_MAX_APPS) {
+            IccCardApplication app = mIccCardStatus.getApplication(appIndex);
+            if (app != null) {
+                aid = app.aid;
+            } else {
+                Log.e(mLogTag, "[IccCard] getAid: no current application index=" + appIndex);
+            }
+        } else {
+            Log.e(mLogTag, "[IccCard] getAid: Invalid Subscription Application index=" + appIndex);
+        }
+
+        return aid;
     }
 }
