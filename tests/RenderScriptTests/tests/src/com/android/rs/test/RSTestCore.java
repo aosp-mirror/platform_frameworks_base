@@ -70,6 +70,7 @@ public class RSTestCore {
         unitTests.add(new UT_program_store(this, mRes, mCtx));
         unitTests.add(new UT_program_raster(this, mRes, mCtx));
         unitTests.add(new UT_primitives(this, mRes, mCtx));
+        unitTests.add(new UT_constant(this, mRes, mCtx));
         unitTests.add(new UT_vector(this, mRes, mCtx));
         unitTests.add(new UT_rsdebug(this, mRes, mCtx));
         unitTests.add(new UT_rstime(this, mRes, mCtx));
@@ -98,7 +99,7 @@ public class RSTestCore {
         for (int i = 0; i < uta.length; i++) {
             ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
             listElem.text = Allocation.createFromString(mRS, uta[i].name, Allocation.USAGE_SCRIPT);
-            listElem.result = uta[i].result;
+            listElem.result = uta[i].getResult();
             mListAllocs.set(listElem, i, false);
             uta[i].setItem(listElem);
         }
