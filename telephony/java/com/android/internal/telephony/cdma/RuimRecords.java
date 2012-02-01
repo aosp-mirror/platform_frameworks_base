@@ -29,6 +29,7 @@ import com.android.internal.telephony.AdnRecord;
 import com.android.internal.telephony.AdnRecordCache;
 import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.IccRefreshResponse;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.RuimCard;
 import com.android.internal.telephony.MccTable;
@@ -300,7 +301,7 @@ public final class RuimRecords extends IccRecords {
                 isRecordLoadResponse = false;
                 ar = (AsyncResult)msg.obj;
                 if (ar.exception == null) {
-                    handleRuimRefresh((int[])(ar.result));
+                    handleRuimRefresh((IccRefreshResponse)ar.result);
                 }
                 break;
 
@@ -409,24 +410,30 @@ public final class RuimRecords extends IccRecords {
         ((CDMAPhone) phone).notifyMessageWaitingIndicator();
     }
 
-    private void handleRuimRefresh(int[] result) {
-        if (result == null || result.length == 0) {
-            if (DBG) log("handleRuimRefresh without input");
+    private void handleRuimRefresh(IccRefreshResponse refreshResponse) {
+        if (refreshResponse == null) {
+            if (DBG) log("handleRuimRefresh received without input");
             return;
         }
 
-        switch ((result[0])) {
-            case CommandsInterface.SIM_REFRESH_FILE_UPDATED:
+        if (refreshResponse.aid != null &&
+                !refreshResponse.aid.equals(phone.getIccCard().getAid())) {
+            // This is for different app. Ignore.
+            return;
+        }
+
+        switch (refreshResponse.refreshResult) {
+            case IccRefreshResponse.REFRESH_RESULT_FILE_UPDATE:
                 if (DBG) log("handleRuimRefresh with SIM_REFRESH_FILE_UPDATED");
                 adnCache.reset();
                 fetchRuimRecords();
                 break;
-            case CommandsInterface.SIM_REFRESH_INIT:
+            case IccRefreshResponse.REFRESH_RESULT_INIT:
                 if (DBG) log("handleRuimRefresh with SIM_REFRESH_INIT");
                 // need to reload all files (that we care about)
                 fetchRuimRecords();
                 break;
-            case CommandsInterface.SIM_REFRESH_RESET:
+            case IccRefreshResponse.REFRESH_RESULT_RESET:
                 if (DBG) log("handleRuimRefresh with SIM_REFRESH_RESET");
                 phone.mCM.setRadioPower(false, null);
                 /* Note: no need to call setRadioPower(true).  Assuming the desired
