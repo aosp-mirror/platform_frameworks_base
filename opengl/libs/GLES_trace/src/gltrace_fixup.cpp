@@ -358,6 +358,14 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
             fixup_addFBContents(context, glmsg, CURRENTLY_BOUND_FB);
         }
         break;
+    case GLMessage::glPushGroupMarkerEXT:
+        /* void PushGroupMarkerEXT(sizei length, const char *marker); */
+        fixup_CStringPtr(1, glmsg);
+        break;
+    case GLMessage::glInsertEventMarkerEXT:
+        /* void InsertEventMarkerEXT(sizei length, const char *marker); */
+        fixup_CStringPtr(1, glmsg);
+        break;
     default:
         break;
     }
