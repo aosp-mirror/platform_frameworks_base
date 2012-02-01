@@ -78,8 +78,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
-        libstagefright_amrnbenc \
-        libstagefright_amrwbenc \
         libstagefright_avcenc \
         libstagefright_m4vh263enc \
         libstagefright_matroska \
@@ -141,7 +139,6 @@ endif  # ifeq ($(HTTP_STACK),chrome)
 ################################################################################
 
 LOCAL_SHARED_LIBRARIES += \
-        libstagefright_amrnb_common \
         libstagefright_enc_common \
         libstagefright_avc_common \
         libstagefright_foundation \
