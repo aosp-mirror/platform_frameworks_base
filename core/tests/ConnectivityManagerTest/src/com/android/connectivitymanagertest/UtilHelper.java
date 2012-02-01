@@ -16,12 +16,31 @@
 
 package com.android.connectivitymanagertest;
 
-import android.os.SystemProperties;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.util.Log;
 
 public class UtilHelper {
-    public static boolean isWifiOnly() {
-        return "wifi-only".equals(SystemProperties.get("ro.carrier"));
+
+    private static Boolean mIsWifiOnly = null;
+    private static final Object sLock = new Object();
+
+    /**
+     * Return true if device is a wifi only device.
+     */
+    public static boolean isWifiOnly(Context context) {
+        synchronized (sLock) {
+            // cache the result from pkgMgr statically. It will never change, since its a
+            // device configuration setting
+            if (mIsWifiOnly == null) {
+                PackageManager pkgMgr = context.getPackageManager();
+                mIsWifiOnly = Boolean.valueOf(!pkgMgr
+                        .hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                        && pkgMgr.hasSystemFeature(PackageManager.FEATURE_WIFI));
+                String deviceType = mIsWifiOnly ? "wifi-only" : "telephony";
+                Log.d("ConnectivityManagerTest", String.format("detected a %s device", deviceType));
+            }
+        }
+        return mIsWifiOnly;
     }
-
-
 }
