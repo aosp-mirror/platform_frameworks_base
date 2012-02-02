@@ -7312,6 +7312,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * 
      * @return The degrees of rotation.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotation() {
         return mTransformationInfo != null ? mTransformationInfo.mRotation : 0;
     }
@@ -7353,6 +7354,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * 
      * @return The degrees of Y rotation.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotationY() {
         return mTransformationInfo != null ? mTransformationInfo.mRotationY : 0;
     }
@@ -7399,6 +7401,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * 
      * @return The degrees of X rotation.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getRotationX() {
         return mTransformationInfo != null ? mTransformationInfo.mRotationX : 0;
     }
@@ -7446,6 +7449,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getPivotY()
      * @return The scaling factor.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getScaleX() {
         return mTransformationInfo != null ? mTransformationInfo.mScaleX : 1;
     }
@@ -7484,6 +7488,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getPivotY()
      * @return The scaling factor.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getScaleY() {
         return mTransformationInfo != null ? mTransformationInfo.mScaleY : 1;
     }
@@ -7522,6 +7527,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getPivotY()
      * @return The x location of the pivot point.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotX() {
         return mTransformationInfo != null ? mTransformationInfo.mPivotX : 0;
     }
@@ -7566,6 +7572,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @see #getPivotY()
      * @return The y location of the pivot point.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getPivotY() {
         return mTransformationInfo != null ? mTransformationInfo.mPivotY : 0;
     }
@@ -7606,6 +7613,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * <p>By default this is 1.0f.
      * @return The opacity of the view.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getAlpha() {
         return mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
     }
@@ -7618,6 +7626,10 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * responsible for applying the opacity itself. Otherwise, calling this method is
      * equivalent to calling {@link #setLayerType(int, android.graphics.Paint)} and
      * setting a hardware layer.</p>
+     *
+     * <p>Note that setting alpha to a translucent value (0 < alpha < 1) may have
+     * performance implications. It is generally best to use the alpha property sparingly and
+     * transiently, as in the case of fading animations.</p>
      *
      * @param alpha The opacity of the view.
      *
@@ -7916,6 +7928,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return The visual x position of this view, in pixels.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getX() {
         return mLeft + (mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0);
     }
@@ -7938,6 +7951,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return The visual y position of this view, in pixels.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getY() {
         return mTop + (mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0);
     }
@@ -7961,6 +7975,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      *
      * @return The horizontal position of this view relative to its left position, in pixels.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationX() {
         return mTransformationInfo != null ? mTransformationInfo.mTranslationX : 0;
     }
@@ -7997,6 +8012,7 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * @return The vertical position of this view relative to its top position,
      * in pixels.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public float getTranslationY() {
         return mTransformationInfo != null ? mTransformationInfo.mTranslationY : 0;
     }

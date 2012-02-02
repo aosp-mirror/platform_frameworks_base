@@ -960,17 +960,17 @@ public class LayoutTransition {
         if (anim instanceof ObjectAnimator) {
             ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
-        if (mListeners != null) {
-            anim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator anim) {
-                    currentAppearingAnimations.remove(child);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                currentAppearingAnimations.remove(child);
+                if (mListeners != null) {
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
                     }
                 }
-            });
-        }
+            }
+        });
         currentAppearingAnimations.put(child, anim);
         anim.start();
     }
@@ -998,17 +998,19 @@ public class LayoutTransition {
         anim.setStartDelay(mDisappearingDelay);
         anim.setDuration(mDisappearingDuration);
         anim.setTarget(child);
-        if (mListeners != null) {
-            anim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator anim) {
-                    currentDisappearingAnimations.remove(child);
+        final float preAnimAlpha = child.getAlpha();
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                currentDisappearingAnimations.remove(child);
+                child.setAlpha(preAnimAlpha);
+                if (mListeners != null) {
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
                     }
                 }
-            });
-        }
+            }
+        });
         if (anim instanceof ObjectAnimator) {
             ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
