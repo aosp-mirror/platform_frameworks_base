@@ -532,6 +532,7 @@ public class Allocation extends BaseObj {
 
         final byte[] data = fp.getData();
         int eSize = mType.mElement.mElements[component_number].getSizeBytes();
+        eSize *= mType.mElement.mArraySizes[component_number];
 
         if (data.length != eSize) {
             throw new RSIllegalArgumentException("Field packer sizelength " + data.length +

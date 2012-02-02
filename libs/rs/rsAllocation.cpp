@@ -125,7 +125,8 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
     }
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
-    if (sizeBytes != e->getSizeBytes()) {
+    uint32_t elemArraySize = mHal.state.type->getElement()->getFieldArraySize(cIdx);
+    if (sizeBytes != e->getSizeBytes() * elemArraySize) {
         ALOGE("Error Allocation::subElementData data size %zu does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
@@ -158,8 +159,8 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
     }
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
-
-    if (sizeBytes != e->getSizeBytes()) {
+    uint32_t elemArraySize = mHal.state.type->getElement()->getFieldArraySize(cIdx);
+    if (sizeBytes != e->getSizeBytes() * elemArraySize) {
         ALOGE("Error Allocation::subElementData data size %zu does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
