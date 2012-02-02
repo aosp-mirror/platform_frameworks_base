@@ -4670,10 +4670,9 @@ package android.content {
 
   public abstract class AsyncTaskLoader extends android.content.Loader {
     ctor public AsyncTaskLoader(android.content.Context);
-    method public boolean cancelLoad();
-    method protected boolean isLoadInBackgroundCanceled();
+    method public void cancelLoadInBackground();
+    method public boolean isLoadInBackgroundCanceled();
     method public abstract D loadInBackground();
-    method protected void onCancelLoadInBackground();
     method public void onCanceled(D);
     method protected D onLoadInBackground();
     method public void setUpdateThrottle(long);
@@ -5765,7 +5764,9 @@ package android.content {
   public class Loader {
     ctor public Loader(android.content.Context);
     method public void abandon();
+    method public boolean cancelLoad();
     method public java.lang.String dataToString(D);
+    method public void deliverCancellation();
     method public void deliverResult(D);
     method public void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public void forceLoad();
@@ -5775,21 +5776,28 @@ package android.content {
     method public boolean isReset();
     method public boolean isStarted();
     method protected void onAbandon();
+    method protected boolean onCancelLoad();
     method public void onContentChanged();
     method protected void onForceLoad();
     method protected void onReset();
     method protected void onStartLoading();
     method protected void onStopLoading();
     method public void registerListener(int, android.content.Loader.OnLoadCompleteListener<D>);
+    method public void registerOnLoadCanceledListener(android.content.Loader.OnLoadCanceledListener<D>);
     method public void reset();
     method public final void startLoading();
     method public void stopLoading();
     method public boolean takeContentChanged();
     method public void unregisterListener(android.content.Loader.OnLoadCompleteListener<D>);
+    method public void unregisterOnLoadCanceledListener(android.content.Loader.OnLoadCanceledListener<D>);
   }
 
   public final class Loader.ForceLoadContentObserver extends android.database.ContentObserver {
     ctor public Loader.ForceLoadContentObserver();
+  }
+
+  public static abstract interface Loader.OnLoadCanceledListener {
+    method public abstract void onLoadCanceled(android.content.Loader<D>);
   }
 
   public static abstract interface Loader.OnLoadCompleteListener {
