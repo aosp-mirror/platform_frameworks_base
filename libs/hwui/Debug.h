@@ -62,6 +62,9 @@
 // Turn on to display debug info about the layer renderer
 #define DEBUG_LAYER_RENDERER 0
 
+// Turn on to enable additional debugging in the font renderers
+#define DEBUG_FONT_RENDERER 0
+
 // Turn on to dump display list state
 #define DEBUG_DISPLAY_LIST 0
 

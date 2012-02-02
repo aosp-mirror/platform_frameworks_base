@@ -151,10 +151,12 @@ void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y,
     int32_t bX = 0, bY = 0;
     for (cacheX = glyph->mStartX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
         for (cacheY = glyph->mStartY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
+#if DEBUG_FONT_RENDERER
             if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
                 ALOGE("Skipping invalid index");
                 continue;
             }
+#endif
             uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
             bitmap[bY * bitmapW + bX] = tempCol;
         }
@@ -226,7 +228,7 @@ void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len
     };
     RenderGlyph render = gRenderGlyph[mode];
 
-    if (positions == NULL) {
+    if (CC_LIKELY(positions == NULL)) {
         SkFixed prevRsbDelta = 0;
 
         float penX = x;
