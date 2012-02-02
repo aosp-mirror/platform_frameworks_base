@@ -105,6 +105,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
             mTileModeY = tileModeY;
         }
 
+        @Override
         public java.awt.PaintContext createContext(
                 java.awt.image.ColorModel      colorModel,
                 java.awt.Rectangle             deviceBounds,
@@ -148,13 +149,16 @@ public class BitmapShader_Delegate extends Shader_Delegate {
                 mColorModel = colorModel;
             }
 
+            @Override
             public void dispose() {
             }
 
+            @Override
             public java.awt.image.ColorModel getColorModel() {
                 return mColorModel;
             }
 
+            @Override
             public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
                 java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(w, h,
                         java.awt.image.BufferedImage.TYPE_INT_ARGB);
@@ -240,6 +244,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
         }
 
 
+        @Override
         public int getTransparency() {
             return java.awt.Paint.TRANSLUCENT;
         }

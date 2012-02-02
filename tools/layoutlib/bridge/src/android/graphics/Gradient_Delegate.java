@@ -87,6 +87,7 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
             mTileMode = tileMode;
         }
 
+        @Override
         public int getTransparency() {
             return java.awt.Paint.TRANSLUCENT;
         }

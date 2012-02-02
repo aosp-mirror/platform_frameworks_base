@@ -27,6 +27,7 @@ public final class CreateInfo implements ICreateInfo {
      * Returns the list of class from layoutlib_create to inject in layoutlib.
      * The list can be empty but must not be null.
      */
+    @Override
     public Class<?>[] getInjectedClasses() {
         return INJECTED_CLASSES;
     }
@@ -35,6 +36,7 @@ public final class CreateInfo implements ICreateInfo {
      * Returns the list of methods to rewrite as delegates.
      * The list can be empty but must not be null.
      */
+    @Override
     public String[] getDelegateMethods() {
         return DELEGATE_METHODS;
     }
@@ -43,6 +45,7 @@ public final class CreateInfo implements ICreateInfo {
      * Returns the list of classes on which to delegate all native methods.
      * The list can be empty but must not be null.
      */
+    @Override
     public String[] getDelegateClassNatives() {
         return DELEGATE_CLASS_NATIVES;
     }
@@ -54,6 +57,7 @@ public final class CreateInfo implements ICreateInfo {
      * <p/>
      * This usage is deprecated. Please use method 'delegates' instead.
      */
+    @Override
     public String[] getOverriddenMethods() {
         return OVERRIDDEN_METHODS;
     }
@@ -63,6 +67,7 @@ public final class CreateInfo implements ICreateInfo {
      * of class to replace followed by the new FQCN.
      * The list can be empty but must not be null.
      */
+    @Override
     public String[] getRenamedClasses() {
         return RENAMED_CLASSES;
     }
@@ -74,6 +79,7 @@ public final class CreateInfo implements ICreateInfo {
      * the methods to delete.
      * The list can be empty but must not be null.
      */
+    @Override
     public String[] getDeleteReturns() {
         return DELETE_RETURNS;
     }

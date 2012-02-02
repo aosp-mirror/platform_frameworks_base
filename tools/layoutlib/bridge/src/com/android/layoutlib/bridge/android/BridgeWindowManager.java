@@ -67,288 +67,345 @@ public class BridgeWindowManager implements IWindowManager {
 
     // ---- implementation of IWindowManager that we care about ----
 
+    @Override
     public int getRotation() throws RemoteException {
         return mRotation;
     }
 
+    @Override
     public int getMaximumSizeDimension() throws RemoteException {
         return 0;
     }
 
+    @Override
     public void getDisplaySize(Point arg0) throws RemoteException {
     }
 
+    @Override
     public void getRealDisplaySize(Point arg0) throws RemoteException {
     }
 
     // ---- unused implementation of IWindowManager ----
 
+    @Override
     public boolean canStatusBarHide() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, boolean arg4)
             throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void addWindowToken(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void clearForcedDisplaySize() throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void closeSystemDialogs(String arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void disableKeyguard(IBinder arg0, String arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void executeAppTransition() throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void exitKeyguardSecurely(IOnKeyguardExitResult arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void freezeRotation(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public float getAnimationScale(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public float[] getAnimationScales() throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getAppOrientation(IApplicationToken arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getDPadKeycodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getDPadScancodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
 
+    @Override
     public InputDevice getInputDevice(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int[] getInputDeviceIds() throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getKeycodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getKeycodeStateForDevice(int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
 
+    @Override
     public int getPendingAppTransition() throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
 
+    @Override
     public int getScancodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getScancodeStateForDevice(int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getSwitchState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getSwitchStateForDevice(int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getTrackballKeycodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getTrackballScancodeState(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public boolean hasKeys(int[] arg0, boolean[] arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean inKeyguardRestrictedInputMode() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean injectInputEventNoWait(InputEvent arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean injectKeyEvent(KeyEvent arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean injectPointerEvent(MotionEvent arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean injectTrackballEvent(MotionEvent arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean inputMethodClientHasFocus(IInputMethodClient arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isKeyguardLocked() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isKeyguardSecure() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isViewServerRunning() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public InputChannel monitorInput(String arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void moveAppToken(int arg0, IBinder arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void moveAppTokensToBottom(List<IBinder> arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void moveAppTokensToTop(List<IBinder> arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public IWindowSession openSession(IInputMethodClient arg0, IInputContext arg1)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void overridePendingAppTransition(String arg0, int arg1, int arg2)
             throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void pauseKeyDispatching(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void prepareAppTransition(int arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void reenableKeyguard(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void removeAppToken(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void removeWindowToken(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void resumeKeyDispatching(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public Bitmap screenshotApplications(IBinder arg0, int arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setAnimationScale(int arg0, float arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setAnimationScales(float[] arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setAppGroupId(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setAppOrientation(IApplicationToken arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setAppStartingWindow(IBinder arg0, String arg1, int arg2, CompatibilityInfo arg3,
             CharSequence arg4, int arg5, int arg6, int arg7, IBinder arg8, boolean arg9)
             throws RemoteException {
@@ -356,122 +413,147 @@ public class BridgeWindowManager implements IWindowManager {
 
     }
 
+    @Override
     public void setAppVisibility(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setAppWillBeHidden(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setEventDispatching(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setFocusedApp(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setForcedDisplaySize(int arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setInTouchMode(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setNewConfiguration(Configuration arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setPointerSpeed(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void updateRotation(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setStrictModeVisualIndicatorPreference(String arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void showStrictModeViolation(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void startAppFreezingScreen(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public boolean startViewServer(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public void statusBarVisibilityChanged(int arg0) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void stopAppFreezingScreen(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public boolean stopViewServer() throws RemoteException {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public void thawRotation() throws RemoteException {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public Configuration updateOrientationFromAppTokens(Configuration arg0, IBinder arg1)
             throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int watchRotation(IRotationWatcher arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public void waitForWindowDrawn(IBinder token, IRemoteCallback callback) {
         // TODO Auto-generated method stub
     }
-    
+
+    @Override
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getPreferredOptionsPanelGravity() throws RemoteException {
         return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
     }
 
+    @Override
     public void dismissKeyguard() {
     }
 
+    @Override
     public boolean hasNavigationBar() {
         return false; // should this return something else?
     }
 
+    @Override
     public void lockNow() {
         // TODO Auto-generated method stub
     }
