@@ -174,10 +174,8 @@ typedef struct Light_s {
 // This represents the shader parameter data needed to set a float or transform data
 typedef struct ShaderParamData_s {
     int type;
-
     float4 float_value;
-    // Use one param type to handle all vector types for now
-    int float_vecSize;
+    uint32_t timestamp;
     rs_allocation paramName;
     rs_allocation camera;
     rs_allocation light;
@@ -190,10 +188,15 @@ typedef struct ShaderParamData_s {
 typedef struct ShaderParam_s {
     // Used to check whether transform params need to be updated
     uint32_t transformTimestamp;
+    // Used to check whether data params need to be updated
+    // These are used when somebody set the matrix of float value directly in java
+    uint32_t dataTimestamp;
     // Specifies where in the constant buffer data gets written to
     int bufferOffset;
     // An instance of SgShaderParamData that could be shared by multiple objects
     rs_allocation data;
+    // How many components of the vector we need to write
+    int float_vecSize;
 } SgShaderParam;
 
 // This represents a texture object

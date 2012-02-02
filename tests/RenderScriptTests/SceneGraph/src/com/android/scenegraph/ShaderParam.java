@@ -50,6 +50,8 @@ public abstract class ShaderParam extends SceneGraphBase {
     static final String modelView        = "modelView";
     static final String modelViewProj    = "modelViewProj";
 
+    static final long sMaxTimeStamp = 0xffffffffL;
+
     ScriptField_ShaderParamData_s.Item mData;
     ScriptField_ShaderParamData_s mField;
 
@@ -80,14 +82,14 @@ public abstract class ShaderParam extends SceneGraphBase {
                     matchingParam = trParam;
                 }
             }
-            if (subElem.getDataType() == Element.DataType.FLOAT_32) {
-                Float4Param fParam = (Float4Param)matchingParam;
-                fParam.setVecSize(subElem.getVectorSize());
-            }
             ScriptField_ShaderParam_s.Item paramRS = new ScriptField_ShaderParam_s.Item();
             paramRS.bufferOffset = offset;
             paramRS.transformTimestamp = 0;
+            paramRS.dataTimestamp = 0;
             paramRS.data = matchingParam.getRSData().getAllocation();
+            if (subElem.getDataType() == Element.DataType.FLOAT_32) {
+                paramRS.float_vecSize = subElem.getVectorSize();
+            }
 
             paramList.add(paramRS);
         }
@@ -121,6 +123,14 @@ public abstract class ShaderParam extends SceneGraphBase {
         }
     }
 
+    protected void incTimestamp() {
+        if (mField != null) {
+            mData.timestamp ++;
+            mData.timestamp %= sMaxTimeStamp;
+            mField.set_timestamp(0, mData.timestamp, true);
+        }
+    }
+
     abstract void initLocalData();
 
     public ScriptField_ShaderParamData_s getRSData() {
@@ -139,6 +149,7 @@ public abstract class ShaderParam extends SceneGraphBase {
             }
         }
         initLocalData();
+        mData.timestamp = 1;
 
         mField.set(mData, 0, true);
         return mField;

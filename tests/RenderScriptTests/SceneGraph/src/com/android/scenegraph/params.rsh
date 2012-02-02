@@ -19,22 +19,24 @@
 #include "scenegraph_objects.rsh"
 
 //#define DEBUG_PARAMS
-
 static void debugParam(SgShaderParam *p, SgShaderParamData *pData,
                        uint8_t *constantBuffer, const SgCamera *currentCam) {
-    rsDebug("____________ Param bufferOffset", p->bufferOffset);
-    rsDebug("Param Type ", pData->type);
-    if (rsIsObject(pData->paramName)) {
-        printName(pData->paramName);
-    }
+    rsDebug("____________ Param ____________", p);
+    printName(pData->paramName);
+    rsDebug("bufferOffset", p->bufferOffset);
+    rsDebug("type ", pData->type);
+    rsDebug("data timestamp ", pData->timestamp);
+    rsDebug("param timestamp", p->dataTimestamp);
 
     uint8_t *dataPtr = constantBuffer + p->bufferOffset;
     const SgTransform *pTransform = NULL;
     if (rsIsObject(pData->transform)) {
         pTransform = (const SgTransform *)rsGetElementAt(pData->transform, 0);
 
-        rsDebug("Param transform", pTransform);
+        rsDebug("transform", pTransform);
         printName(pTransform->name);
+        rsDebug("timestamp", pTransform->timestamp);
+        rsDebug("param timestamp", p->transformTimestamp);
     }
 
     const SgLight *pLight = NULL;
@@ -69,15 +71,25 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
 
 static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
                          uint8_t *constantBuffer, const SgCamera *currentCam) {
+    bool isDataOnly = (pData->type > SHADER_PARAM_DATA_ONLY);
     const SgTransform *pTransform = NULL;
     if (rsIsObject(pData->transform)) {
         pTransform = (const SgTransform *)rsGetElementAt(pData->transform, 0);
+    }
+
+    if (isDataOnly) {
         // If we are a transform param and our transform is unchanged, nothing to do
-        bool isTransformOnly = (pData->type > SHADER_PARAM_DATA_ONLY);
-        if (p->transformTimestamp == pTransform->timestamp && isTransformOnly) {
-            return false;
+        if (pTransform) {
+            if (p->transformTimestamp == pTransform->timestamp) {
+                return false;
+            }
+            p->transformTimestamp = pTransform->timestamp;
+        } else {
+            if (p->dataTimestamp == pData->timestamp) {
+                return false;
+            }
+            p->dataTimestamp = pData->timestamp;
         }
-        p->transformTimestamp = pTransform->timestamp;
     }
 
     const SgLight *pLight = NULL;
@@ -89,17 +101,17 @@ static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
 
     switch(pData->type) {
     case SHADER_PARAM_FLOAT4_DATA:
-        writeFloatData((float*)dataPtr, &pData->float_value, pData->float_vecSize);
+        writeFloatData((float*)dataPtr, &pData->float_value, p->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_CAMERA_POS:
-        writeFloatData((float*)dataPtr, &currentCam->position, pData->float_vecSize);
+        writeFloatData((float*)dataPtr, &currentCam->position, p->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_CAMERA_DIR: break;
     case SHADER_PARAM_FLOAT4_LIGHT_COLOR:
-        writeFloatData((float*)dataPtr, &pLight->color, pData->float_vecSize);
+        writeFloatData((float*)dataPtr, &pLight->color, p->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_LIGHT_POS:
-        writeFloatData((float*)dataPtr, &pLight->position, pData->float_vecSize);
+        writeFloatData((float*)dataPtr, &pLight->position, p->float_vecSize);
         break;
     case SHADER_PARAM_FLOAT4_LIGHT_DIR: break;
 
