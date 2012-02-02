@@ -18,6 +18,7 @@ package android.view;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
+import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
@@ -323,8 +324,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (!mInitialized) {
                 try {
                     InputMethodManager imm = InputMethodManager.getInstance(mainLooper);
-                    sWindowSession = Display.getWindowManager().openSession(
+                    IWindowManager windowManager = Display.getWindowManager();
+                    sWindowSession = windowManager.openSession(
                             imm.getClient(), imm.getInputContext());
+                    float animatorScale = windowManager.getAnimationScale(2);
+                    ValueAnimator.setDurationScale(animatorScale);
                     mInitialized = true;
                 } catch (RemoteException e) {
                 }
