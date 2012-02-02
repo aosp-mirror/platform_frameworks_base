@@ -226,7 +226,7 @@ private:
     public:
                             Client(const sp<AudioFlinger>& audioFlinger, pid_t pid);
         virtual             ~Client();
-        const sp<MemoryDealer>&     heap() const;
+        sp<MemoryDealer>    heap() const;
         pid_t               pid() const { return mPid; }
         sp<AudioFlinger>    audioFlinger() { return mAudioFlinger; }
 
@@ -1107,7 +1107,7 @@ private:
         void        setThread(const wp<ThreadBase>& thread) { mThread = thread; }
         wp<ThreadBase>& thread() { return mThread; }
 
-        status_t addHandle(sp<EffectHandle>& handle);
+        status_t addHandle(const sp<EffectHandle>& handle);
         void disconnect(const wp<EffectHandle>& handle, bool unpiniflast);
         size_t removeHandle (const wp<EffectHandle>& handle);
 
