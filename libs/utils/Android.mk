@@ -98,7 +98,8 @@ endif
 
 LOCAL_C_INCLUDES += \
 		external/zlib \
-		external/icu4c/common
+		external/icu4c/common \
+		bionic/libc/private
 
 LOCAL_LDLIBS += -lpthread
 
@@ -114,7 +115,10 @@ include $(BUILD_SHARED_LIBRARY)
 
 ifeq ($(TARGET_OS),linux)
 include $(CLEAR_VARS)
-LOCAL_C_INCLUDES += external/zlib external/icu4c/common
+LOCAL_C_INCLUDES += \
+		external/zlib \
+		external/icu4c/common \
+		bionic/libc/private
 LOCAL_LDLIBS := -lrt -ldl -lpthread
 LOCAL_MODULE := libutils
 LOCAL_SRC_FILES := $(commonSources) BackupData.cpp BackupHelpers.cpp
