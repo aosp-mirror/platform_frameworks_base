@@ -1740,7 +1740,7 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
 
     // FIXME - Current mixer implementation only supports stereo output: Always
     // Allocate a stereo buffer even if HW output is mono.
-    if (mMixBuffer != NULL) delete[] mMixBuffer;
+    delete[] mMixBuffer;
     mMixBuffer = new int16_t[mFrameCount * 2];
     memset(mMixBuffer, 0, mFrameCount * 2 * sizeof(int16_t));
 
@@ -2461,6 +2461,8 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             }
             if (status == NO_ERROR && reconfig) {
                 delete mAudioMixer;
+                // for safety in case readOutputParameters() accesses mAudioMixer (it doesn't)
+                mAudioMixer = NULL;
                 readOutputParameters();
                 mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
                 for (size_t i = 0; i < mTracks.size() ; i++) {
@@ -4282,10 +4284,8 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
 AudioFlinger::RecordThread::~RecordThread()
 {
     delete[] mRsmpInBuffer;
-    if (mResampler != NULL) {
-        delete mResampler;
-        delete[] mRsmpOutBuffer;
-    }
+    delete mResampler;
+    delete[] mRsmpOutBuffer;
 }
 
 void AudioFlinger::RecordThread::onFirstRef()
@@ -4829,9 +4829,11 @@ void AudioFlinger::RecordThread::audioConfigChanged_l(int event, int param) {
 
 void AudioFlinger::RecordThread::readInputParameters()
 {
-    if (mRsmpInBuffer) delete mRsmpInBuffer;
-    if (mRsmpOutBuffer) delete mRsmpOutBuffer;
-    if (mResampler) delete mResampler;
+    delete mRsmpInBuffer;
+    // mRsmpInBuffer is always assigned a new[] below
+    delete mRsmpOutBuffer;
+    mRsmpOutBuffer = NULL;
+    delete mResampler;
     mResampler = NULL;
 
     mSampleRate = mInput->stream->common.get_sample_rate(&mInput->stream->common);
