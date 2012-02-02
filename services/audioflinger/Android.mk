@@ -6,9 +6,9 @@ LOCAL_SRC_FILES:=               \
     AudioFlinger.cpp            \
     AudioMixer.cpp.arm          \
     AudioResampler.cpp.arm      \
-    AudioResamplerSinc.cpp.arm  \
-    AudioResamplerCubic.cpp.arm \
     AudioPolicyService.cpp
+#   AudioResamplerSinc.cpp.arm
+#   AudioResamplerCubic.cpp.arm
 
 LOCAL_C_INCLUDES := \
     system/media/audio_effects/include \
