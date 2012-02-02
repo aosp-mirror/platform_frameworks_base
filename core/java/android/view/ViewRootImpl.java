@@ -23,6 +23,7 @@ import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -82,7 +83,6 @@ import com.android.internal.view.RootViewSurfaceTaker;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,6 +139,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
+
+    private static boolean sUseRenderThread = false;
+    private static boolean sRenderThreadQueried = false;
+    private static final Object[] sRenderThreadQueryLock = new Object[0];
 
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
@@ -381,6 +385,31 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         mChoreographer = Choreographer.getInstance();
     }
 
+    /**
+     * @return True if the application requests the use of a separate render thread,
+     *         false otherwise
+     */
+    private static boolean isRenderThreadRequested(Context context) {
+        synchronized (sRenderThreadQueryLock) {
+            if (!sRenderThreadQueried) {
+                final PackageManager packageManager = context.getPackageManager();
+                final String packageName = context.getApplicationInfo().packageName;
+                try {
+                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName,
+                            PackageManager.GET_META_DATA);
+                    if (applicationInfo.metaData != null) {
+                        sUseRenderThread = applicationInfo.metaData.getBoolean(
+                                "android.graphics.renderThread", false);
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                } finally {
+                    sRenderThreadQueried = true;
+                }
+            }
+            return sUseRenderThread;
+        }
+    }
+
     public static void addFirstDrawHandler(Runnable callback) {
         synchronized (sFirstDrawHandlers) {
             if (!sFirstDrawComplete) {
@@ -451,7 +480,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {
-                    enableHardwareAcceleration(attrs);
+                    enableHardwareAcceleration(mView.getContext(), attrs);
                 }
 
                 boolean restore = false;
@@ -611,7 +640,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
-    private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
+    private void enableHardwareAcceleration(Context context, WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
 
@@ -644,20 +673,27 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (!HardwareRenderer.sRendererDisabled || (HardwareRenderer.sSystemRendererDisabled
                     && forceHwAccelerated)) {
                 // Don't enable hardware acceleration when we're not on the main thread
-                if (!HardwareRenderer.sSystemRendererDisabled
-                        && Looper.getMainLooper() != Looper.myLooper()) {
-                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
+                if (!HardwareRenderer.sSystemRendererDisabled &&
+                        Looper.getMainLooper() != Looper.myLooper()) {
+                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware " 
                             + "acceleration outside of the main thread, aborting");
                     return;
                 }
 
-                final boolean translucent = attrs.format != PixelFormat.OPAQUE;
+                boolean renderThread = isRenderThreadRequested(context);
+                if (renderThread) {
+                    Log.i(HardwareRenderer.LOG_TAG, "Render threat initiated");
+                }
+
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.destroy(true);
-                }                
+                }
+
+                final boolean translucent = attrs.format != PixelFormat.OPAQUE;
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
                 mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
                         = mAttachInfo.mHardwareRenderer != null;
+
             } else if (fakeHwAccelerated) {
                 // The window had wanted to use hardware acceleration, but this
                 // is not allowed in its process.  By setting this flag, it can
@@ -3444,11 +3480,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         if (args.localChanges != 0) {
             if (mAttachInfo != null) {
                 mAttachInfo.mSystemUiVisibility =
-                        (mAttachInfo.mSystemUiVisibility&~args.localChanges)
-                        | (args.localValue&args.localChanges);
+                        (mAttachInfo.mSystemUiVisibility & ~args.localChanges) |
+                                (args.localValue & args.localChanges);
+                mAttachInfo.mRecomputeGlobalAttributes = true;
             }
             mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
-            mAttachInfo.mRecomputeGlobalAttributes = true;
             scheduleTraversals();            
         }
         mView.dispatchSystemUiVisibilityChanged(args.globalVisibility);
@@ -3602,7 +3638,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         mView.debug();
     }
     
-    public void dumpGfxInfo(PrintWriter pw, int[] info) {
+    public void dumpGfxInfo(int[] info) {
         if (mView != null) {
             getGfxInfo(mView, info);
         } else {
@@ -3714,7 +3750,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
      * Represents a pending input event that is waiting in a queue.
      *
      * Input events are processed in serial order by the timestamp specified by
-     * {@link InputEvent#getEventTime()}.  In general, the input dispatcher delivers
+     * {@link InputEvent#getEventTimeNano()}.  In general, the input dispatcher delivers
      * one input event to the application at a time and waits for the application
      * to finish handling it before delivering the next one.
      *
@@ -3723,7 +3759,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
      * needing a queue on the application's side.
      */
     private static final class QueuedInputEvent {
-        public static final int FLAG_DELIVER_POST_IME = 1 << 0;
+        public static final int FLAG_DELIVER_POST_IME = 1;
 
         public QueuedInputEvent mNext;
 
@@ -4842,7 +4878,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             mPool.release(args);
             List<AccessibilityNodeInfo> infos = null;
             try {
-                View target = null;
+                View target;
                 if (accessibilityViewId != View.NO_ID) {
                     target = findViewByAccessibilityId(accessibilityViewId);
                 } else {

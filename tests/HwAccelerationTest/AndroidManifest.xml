@@ -30,6 +30,8 @@
         android:label="HwUi"
         android:hardwareAccelerated="true">
 
+        <meta-data android:name="android.graphics.renderThread" android:value="true" />
+
         <activity
                 android:name="PaintDrawFilterActivity"
                 android:label="_DrawFilter">
