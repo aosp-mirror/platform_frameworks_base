@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
-#include <linux/kd.h>
-#include <linux/vt.h>
 #include "Barrier.h"
 
 namespace android {
@@ -31,11 +29,11 @@ class SurfaceFlinger;
 class DisplayHardwareBase
 {
 public:
-                DisplayHardwareBase(
-                        const sp<SurfaceFlinger>& flinger,
-                        uint32_t displayIndex);
+    DisplayHardwareBase(
+            const sp<SurfaceFlinger>& flinger,
+            uint32_t displayIndex);
 
-                ~DisplayHardwareBase();
+    ~DisplayHardwareBase();
 
     // console management
     void releaseScreen() const;
@@ -46,34 +44,22 @@ public:
 
 
 private:
-    class DisplayEventThreadBase : public Thread {
-    protected:
+    class DisplayEventThread : public Thread {
         wp<SurfaceFlinger> mFlinger;
-    public:
-        DisplayEventThreadBase(const sp<SurfaceFlinger>& flinger);
-        virtual ~DisplayEventThreadBase();
-        virtual void onFirstRef() {
-            run("DisplayEventThread", PRIORITY_URGENT_DISPLAY);
-        }
-        virtual status_t acquireScreen() const { return NO_ERROR; };
-        virtual status_t releaseScreen() const { return NO_ERROR; };
-        virtual status_t initCheck() const = 0;
-    };
-
-    class DisplayEventThread : public DisplayEventThreadBase 
-    {
         mutable Barrier mBarrier;
+        status_t waitForFbSleep();
+        status_t waitForFbWake();
     public:
-                DisplayEventThread(const sp<SurfaceFlinger>& flinger);
+        DisplayEventThread(const sp<SurfaceFlinger>& flinger);
         virtual ~DisplayEventThread();
+        virtual void onFirstRef();
         virtual bool threadLoop();
-        virtual status_t readyToRun();
-        virtual status_t releaseScreen() const;
-        virtual status_t initCheck() const;
+        status_t releaseScreen() const;
+        status_t initCheck() const;
     };
 
-    sp<DisplayEventThreadBase>  mDisplayEventThread;
-    mutable int                 mScreenAcquired;
+    sp<DisplayEventThread>  mDisplayEventThread;
+    mutable int             mScreenAcquired;
 };
 
 }; // namespace android
