@@ -512,6 +512,9 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
     public void testFormatNumber() {
         assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("650 2910000", "US"));
         assertEquals("223-4567", PhoneNumberUtils.formatNumber("2234567", "US"));
+        assertEquals("011 86 10 8888 0000",
+                     PhoneNumberUtils.formatNumber("011861088880000", "US"));
+        assertEquals("010 8888 0000", PhoneNumberUtils.formatNumber("01088880000", "CN"));
         // formatNumber doesn't format alpha numbers, but keep them as they are.
         assertEquals("800-GOOG-114", PhoneNumberUtils.formatNumber("800-GOOG-114", "US"));
     }
@@ -542,6 +545,16 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         // Using the phoneNumberE164's country code
         assertEquals("(650) 291-0000",
                 PhoneNumberUtils.formatNumber("6502910000", "+16502910000", "CN"));
+        // Using the default country code for a phone number containing the IDD
+        assertEquals("011 86 10 8888 0000",
+                PhoneNumberUtils.formatNumber("011861088880000", "+861088880000", "US"));
+        assertEquals("00 86 10 8888 0000",
+                PhoneNumberUtils.formatNumber("00861088880000", "+861088880000", "GB"));
+        assertEquals("+86 10 8888 0000",
+                PhoneNumberUtils.formatNumber("+861088880000", "+861088880000", "GB"));
+        // Wrong default country, so no formatting is done
+        assertEquals("011861088880000",
+                PhoneNumberUtils.formatNumber("011861088880000", "+861088880000", "GB"));
         // The phoneNumberE164 is null
         assertEquals("(650) 291-0000", PhoneNumberUtils.formatNumber("6502910000", null, "US"));
         // The given number has a country code.
@@ -553,7 +566,11 @@ public class PhoneNumberUtilsTest extends AndroidTestCase {
         // An invalid Polish number should be left as it is. Note Poland doesn't use '0' as a
         // national prefix; therefore, the leading '0' makes the number invalid.
         assertEquals("0506128687", PhoneNumberUtils.formatNumber("0506128687", null, "PL"));
+        // Wrong default country, so no formatting is done
+        assertEquals("011861088880000",
+                PhoneNumberUtils.formatNumber("011861088880000", "", "GB"));
     }
+
     @SmallTest
     public void testIsEmergencyNumber() {
         // There are two parallel sets of tests here: one for the
