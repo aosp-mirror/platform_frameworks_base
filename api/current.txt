@@ -10926,11 +10926,12 @@ package android.media {
   }
 
   public final class MediaRecorder.OutputFormat {
+    field public static final int AAC_ADTS = 6; // 0x6
     field public static final int AMR_NB = 3; // 0x3
     field public static final int AMR_WB = 4; // 0x4
     field public static final int DEFAULT = 0; // 0x0
     field public static final int MPEG_4 = 2; // 0x2
-    field public static final int RAW_AMR = 3; // 0x3
+    field public static final deprecated int RAW_AMR = 3; // 0x3
     field public static final int THREE_GPP = 1; // 0x1
   }
 
