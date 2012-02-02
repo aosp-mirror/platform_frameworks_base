@@ -121,6 +121,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private static final int MSG_PERFORM_POLL = 1;
     private static final int MSG_UPDATE_IFACES = 2;
+    private static final int MSG_REGISTER_GLOBAL_ALERT = 3;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
@@ -600,7 +601,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mHandler.obtainMessage(MSG_PERFORM_POLL, flags, 0).sendToTarget();
 
                 // re-arm global alert for next update
-                registerGlobalAlert();
+                mHandler.obtainMessage(MSG_REGISTER_GLOBAL_ALERT).sendToTarget();
             }
         }
     };
@@ -949,6 +950,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
                 case MSG_UPDATE_IFACES: {
                     updateIfaces();
+                    return true;
+                }
+                case MSG_REGISTER_GLOBAL_ALERT: {
+                    registerGlobalAlert();
                     return true;
                 }
                 default: {
