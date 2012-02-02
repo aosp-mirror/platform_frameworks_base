@@ -754,7 +754,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 
     // TODO: See LayerRenderer.cpp::generateMesh() for important
     //       information about this implementation
-    if (!layer->region.isEmpty()) {
+    if (CC_LIKELY(!layer->region.isEmpty())) {
         size_t count;
         const android::Rect* rects = layer->region.getArray(&count);
 
@@ -1398,7 +1398,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    if (bitmap->getConfig() == SkBitmap::kA8_Config) {
+    if (CC_UNLIKELY(bitmap->getConfig() == SkBitmap::kA8_Config)) {
         drawAlphaBitmap(texture, left, top, paint);
     } else {
         drawTextureRect(left, top, right, bottom, texture, paint);
@@ -1454,9 +1454,9 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
     float bottom = FLT_MIN;
 
 #if RENDER_LAYERS_AS_REGIONS
-    bool hasActiveLayer = hasLayer();
+    const bool hasActiveLayer = hasLayer();
 #else
-    bool hasActiveLayer = false;
+    const bool hasActiveLayer = false;
 #endif
 
     // TODO: Support the colors array
@@ -1541,7 +1541,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
-    if (mSnapshot->transform->isPureTranslate()) {
+    if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
         const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
 
@@ -1587,7 +1587,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
-    if (mesh && mesh->verticesCount > 0) {
+    if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
         const bool pureTranslate = mSnapshot->transform->isPureTranslate();
 #if RENDER_LAYERS_AS_REGIONS
         // Mark the current layer dirty where we are going to draw the patch
@@ -1597,7 +1597,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
                 const Rect& bounds = mesh->quads.itemAt(i);
-                if (pureTranslate) {
+                if (CC_LIKELY(pureTranslate)) {
                     const float x = (int) floorf(bounds.left + offsetX + 0.5f);
                     const float y = (int) floorf(bounds.top + offsetY + 0.5f);
                     dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
@@ -1609,7 +1609,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
         }
 #endif
 
-        if (pureTranslate) {
+        if (CC_LIKELY(pureTranslate)) {
             const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
             const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
 
@@ -1637,7 +1637,7 @@ void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
     // The quad that we use needs to account for scaling.
-    if (!mSnapshot->transform->isPureTranslate()) {
+    if (CC_UNLIKELY(!mSnapshot->transform->isPureTranslate())) {
         Matrix4 *mat = mSnapshot->transform;
         float m00 = mat->data[Matrix4::kScaleX];
         float m01 = mat->data[Matrix4::kSkewY];
@@ -1743,7 +1743,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         // The quad that we use for AA and hairlines needs to account for scaling. For hairlines
         // the line on the screen should always be one pixel wide regardless of scale. For
         // AA lines, we only want one pixel of translucent boundary around the quad.
-        if (!mSnapshot->transform->isPureTranslate()) {
+        if (CC_UNLIKELY(!mSnapshot->transform->isPureTranslate())) {
             Matrix4 *mat = mSnapshot->transform;
             float m00 = mat->data[Matrix4::kScaleX];
             float m01 = mat->data[Matrix4::kSkewY];
@@ -1751,8 +1751,8 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             float m10 = mat->data[Matrix4::kSkewX];
             float m11 = mat->data[Matrix4::kScaleX];
             float m12 = mat->data[6];
-            float scaleX = sqrt(m00*m00 + m01*m01);
-            float scaleY = sqrt(m10*m10 + m11*m11);
+            float scaleX = sqrtf(m00 * m00 + m01 * m01);
+            float scaleY = sqrtf(m10 * m10 + m11 * m11);
             inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
             inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
             if (inverseScaleX != 1.0f || inverseScaleY != 1.0f) {
@@ -1770,11 +1770,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     setupDrawColor(paint->getColor(), alpha);
     setupDrawColorFilter();
     setupDrawShader();
-    if (isAA) {
-        setupDrawBlending(true, mode);
-    } else {
-        setupDrawBlending(mode);
-    }
+    setupDrawBlending(isAA, mode);
     setupDrawProgram();
     setupDrawModelViewIdentity(true);
     setupDrawColorUniforms();
@@ -1792,7 +1788,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     Vertex* vertices = &lines[0];
     AAVertex wLines[verticesCount];
     AAVertex* aaVertices = &wLines[0];
-    if (!isAA) {
+    if (CC_UNLIKELY(!isAA)) {
         setupDrawVertices(vertices);
     } else {
         void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
@@ -2152,9 +2148,9 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
 #if RENDER_LAYERS_AS_REGIONS
-    bool hasActiveLayer = hasLayer();
+    const bool hasActiveLayer = hasLayer();
 #else
-    bool hasActiveLayer = false;
+    const bool hasActiveLayer = false;
 #endif
 
     if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
@@ -2201,7 +2197,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     const float oldX = x;
     const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();
-    if (pureTranslate) {
+    if (CC_LIKELY(pureTranslate)) {
         x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
         y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
     }
@@ -2218,7 +2214,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    if (mHasShadow) {
+    if (CC_UNLIKELY(mHasShadow)) {
         mCaches.activeTexture(0);
 
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
@@ -2277,9 +2273,9 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
 #if RENDER_LAYERS_AS_REGIONS
-    bool hasActiveLayer = hasLayer();
+    const bool hasActiveLayer = hasLayer();
 #else
-    bool hasActiveLayer = false;
+    const bool hasActiveLayer = false;
 #endif
 
     if (fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
@@ -2326,7 +2322,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     layer->setAlpha(alpha, mode);
 
 #if RENDER_LAYERS_AS_REGIONS
-    if (!layer->region.isEmpty()) {
+    if (CC_LIKELY(!layer->region.isEmpty())) {
         if (layer->region.isRect()) {
             composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
@@ -2342,7 +2338,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->getTexture());
-            if (mSnapshot->transform->isPureTranslate()) {
+            if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
                 x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
                 y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
 
@@ -2502,7 +2498,7 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
                 break;
         }
 
-        if (underlineWidth > 0.0f) {
+        if (CC_LIKELY(underlineWidth > 0.0f)) {
             const float textSize = paintCopy.getTextSize();
             const float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
 
@@ -2571,7 +2567,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
-    if (mSnapshot->transform->isPureTranslate()) {
+    if (CC_LIKELY(mSnapshot->transform->isPureTranslate())) {
         const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
 
@@ -2631,8 +2627,8 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         // the blending, turn blending off here
         // If the blend mode cannot be implemented using shaders, fall
         // back to the default SrcOver blend mode instead
-        if (mode > SkXfermode::kScreen_Mode) {
-            if (mCaches.extensions.hasFramebufferFetch()) {
+        if CC_UNLIKELY((mode > SkXfermode::kScreen_Mode)) {
+            if (CC_UNLIKELY(mCaches.extensions.hasFramebufferFetch())) {
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;
 

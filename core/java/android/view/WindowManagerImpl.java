@@ -490,7 +490,7 @@ public class WindowManagerImpl implements WindowManager {
 
                     for (int i = 0; i < count; i++) {
                         ViewRootImpl root = mRoots[i];
-                        root.dumpGfxInfo(pw, info);
+                        root.dumpGfxInfo(info);
 
                         String name = root.getClass().getName() + '@' +
                                 Integer.toHexString(hashCode());                        
