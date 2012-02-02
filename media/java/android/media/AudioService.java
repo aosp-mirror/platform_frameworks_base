@@ -733,8 +733,10 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setMasterMute(boolean, IBinder) */
     public void setMasterMute(boolean state, IBinder cb) {
-        AudioSystem.setMasterMute(state);
-        sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
+        if (state != AudioSystem.getMasterMute()) {
+            AudioSystem.setMasterMute(state);
+            sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
+        }
     }
 
     /** get master mute state. */
@@ -762,10 +764,14 @@ public class AudioService extends IAudioService.Stub {
         if (!AudioSystem.getMasterMute()) {
             int oldVolume = getMasterVolume();
             AudioSystem.setMasterVolume(volume);
-            // Post a persist master volume msg
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, 0, SENDMSG_REPLACE,
-                    Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
-            sendMasterVolumeUpdate(flags, oldVolume, getMasterVolume());
+
+            int newVolume = getMasterVolume();
+            if (newVolume != oldVolume) {
+                // Post a persist master volume msg
+                sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, 0, SENDMSG_REPLACE,
+                        Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
+                sendMasterVolumeUpdate(flags, oldVolume, newVolume);
+            }
         }
     }
 
