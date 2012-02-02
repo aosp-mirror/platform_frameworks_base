@@ -341,7 +341,7 @@ private:
     private:
         friend class AudioRecord;
         virtual bool        threadLoop();
-        virtual status_t    readyToRun() { return NO_ERROR; }
+        virtual status_t    readyToRun();
         virtual void        onFirstRef() {}
         AudioRecord& mReceiver;
     };
@@ -359,7 +359,9 @@ private:
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;
     sp<ClientRecordThread>  mClientRecordThread;
+    status_t                mReadyToRun;
     Mutex                   mLock;
+    Condition               mCondition;
 
     uint32_t                mFrameCount;
 

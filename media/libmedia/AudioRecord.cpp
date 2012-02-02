@@ -304,10 +304,25 @@ status_t AudioRecord::start()
     if (mActive == 0) {
         mActive = 1;
 
+        pid_t tid;
+        if (t != 0) {
+            mReadyToRun = WOULD_BLOCK;
+            t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
+            tid = t->getTid();  // pid_t is unknown until run()
+            ALOGV("getTid=%d", tid);
+            if (tid == -1) {
+                tid = 0;
+            }
+            // thread blocks in readyToRun()
+        } else {
+            tid = 0;    // not gettid()
+        }
+
         cblk->lock.lock();
         if (!(cblk->flags & CBLK_INVALID_MSK)) {
             cblk->lock.unlock();
-            ret = mAudioRecord->start();
+            ALOGV("mAudioRecord->start(tid=%d)", tid);
+            ret = mAudioRecord->start(tid);
             cblk->lock.lock();
             if (ret == DEAD_OBJECT) {
                 android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
@@ -322,7 +337,9 @@ status_t AudioRecord::start()
             cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
             cblk->waitTimeMs = 0;
             if (t != 0) {
-                t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
+                // thread unblocks in readyToRun() and returns NO_ERROR
+                mReadyToRun = NO_ERROR;
+                mCondition.signal();
             } else {
                 mPreviousPriority = getpriority(PRIO_PROCESS, 0);
                 mPreviousSchedulingGroup = androidGetThreadSchedulingGroup(0);
@@ -330,6 +347,9 @@ status_t AudioRecord::start()
             }
         } else {
             mActive = 0;
+            // thread unblocks in readyToRun() and returns NO_INIT
+            mReadyToRun = NO_INIT;
+            mCondition.signal();
         }
     }
 
@@ -522,7 +542,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                     ALOGW(   "obtainBuffer timed out (is the CPU pegged?) "
                             "user=%08x, server=%08x", cblk->user, cblk->server);
                     cblk->lock.unlock();
-                    result = mAudioRecord->start();
+                    result = mAudioRecord->start(0);    // callback thread hasn't changed
                     cblk->lock.lock();
                     if (result == DEAD_OBJECT) {
                         android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
@@ -760,7 +780,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         result = openRecord_l(cblk->sampleRate, mFormat, mChannelMask,
                 mFrameCount, mFlags, getInput_l());
         if (result == NO_ERROR) {
-            result = mAudioRecord->start();
+            result = mAudioRecord->start(0);    // callback thread hasn't changed
         }
         if (result != NO_ERROR) {
             mActive = false;
@@ -809,6 +829,15 @@ AudioRecord::ClientRecordThread::ClientRecordThread(AudioRecord& receiver, bool 
 bool AudioRecord::ClientRecordThread::threadLoop()
 {
     return mReceiver.processAudioBuffer(this);
+}
+
+status_t AudioRecord::ClientRecordThread::readyToRun()
+{
+    AutoMutex(mReceiver.mLock);
+    while (mReceiver.mReadyToRun == WOULD_BLOCK) {
+        mReceiver.mCondition.wait(mReceiver.mLock);
+    }
+    return mReceiver.mReadyToRun;
 }
 
 // -------------------------------------------------------------------------

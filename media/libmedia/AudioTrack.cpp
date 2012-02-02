@@ -362,18 +362,26 @@ void AudioTrack::start()
         cblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         cblk->waitTimeMs = 0;
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
+        pid_t tid;
         if (t != 0) {
             t->run("AudioTrackThread", ANDROID_PRIORITY_AUDIO);
+            tid = t->getTid();  // pid_t is unknown until run()
+            ALOGV("getTid=%d", tid);
+            if (tid == -1) {
+                tid = 0;
+            }
         } else {
             mPreviousPriority = getpriority(PRIO_PROCESS, 0);
             mPreviousSchedulingGroup = androidGetThreadSchedulingGroup(0);
             androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
+            tid = 0;    // not gettid()
         }
 
         ALOGV("start %p before lock cblk %p", this, mCblk);
         if (!(cblk->flags & CBLK_INVALID_MSK)) {
             cblk->lock.unlock();
-            status = mAudioTrack->start();
+            ALOGV("mAudioTrack->start(tid=%d)", tid);
+            status = mAudioTrack->start(tid);
             cblk->lock.lock();
             if (status == DEAD_OBJECT) {
                 android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
@@ -895,7 +903,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                                 "user=%08x, server=%08x", this, cblk->user, cblk->server);
                         //unlock cblk mutex before calling mAudioTrack->start() (see issue #1617140)
                         cblk->lock.unlock();
-                        result = mAudioTrack->start();
+                        result = mAudioTrack->start(0); // callback thread hasn't changed
                         cblk->lock.lock();
                         if (result == DEAD_OBJECT) {
                             android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
@@ -927,7 +935,7 @@ create_new_track:
     if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
         ALOGW("obtainBuffer() track %p disabled, restarting", this);
-        mAudioTrack->start();
+        mAudioTrack->start(0);  // callback thread hasn't changed
     }
 
     cblk->waitTimeMs = 0;
@@ -1218,7 +1226,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
                 }
             }
             if (mActive) {
-                result = mAudioTrack->start();
+                result = mAudioTrack->start(0); // callback thread hasn't changed
                 ALOGW_IF(result != NO_ERROR, "restoreTrack_l() start() failed status %d", result);
             }
             if (fromStart && result == NO_ERROR) {

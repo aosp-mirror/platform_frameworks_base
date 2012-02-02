@@ -314,7 +314,7 @@ private:
                                         int sessionId);
             virtual             ~TrackBase();
 
-            virtual status_t    start() = 0;
+            virtual status_t    start(pid_t tid) = 0;
             virtual void        stop() = 0;
                     sp<IMemory> getCblk() const { return mCblkMemory; }
                     audio_track_cblk_t* cblk() const { return mCblk; }
@@ -586,7 +586,7 @@ private:
             virtual             ~Track();
 
                     void        dump(char* buffer, size_t size);
-            virtual status_t    start();
+            virtual status_t    start(pid_t tid);
             virtual void        stop();
                     void        pause();
 
@@ -668,7 +668,7 @@ private:
                                         int frameCount);
             virtual             ~OutputTrack();
 
-            virtual status_t    start();
+            virtual status_t    start(pid_t tid);
             virtual void        stop();
                     bool        write(int16_t* data, uint32_t frames);
                     bool        bufferQueueEmpty() const { return (mBufferQueue.size() == 0) ? true : false; }
@@ -905,7 +905,7 @@ private:
                             TrackHandle(const sp<PlaybackThread::Track>& track);
         virtual             ~TrackHandle();
         virtual sp<IMemory> getCblk() const;
-        virtual status_t    start();
+        virtual status_t    start(pid_t tid);
         virtual void        stop();
         virtual void        flush();
         virtual void        mute(bool);
@@ -943,7 +943,7 @@ private:
                                         int sessionId);
             virtual             ~RecordTrack();
 
-            virtual status_t    start();
+            virtual status_t    start(pid_t tid);
             virtual void        stop();
 
                     bool        overflow() { bool tmp = mOverflow; mOverflow = false; return tmp; }
@@ -988,6 +988,7 @@ private:
                         status_t *status);
 
                 status_t    start(RecordTrack* recordTrack);
+                status_t    start(RecordTrack* recordTrack, pid_t tid);
                 void        stop(RecordTrack* recordTrack);
                 status_t    dump(int fd, const Vector<String16>& args);
                 AudioStreamIn* getInput() const;
@@ -1028,7 +1029,7 @@ private:
         RecordHandle(const sp<RecordThread::RecordTrack>& recordTrack);
         virtual             ~RecordHandle();
         virtual sp<IMemory> getCblk() const;
-        virtual status_t    start();
+        virtual status_t    start(pid_t tid);
         virtual void        stop();
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
