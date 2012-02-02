@@ -199,33 +199,32 @@ void AudioResamplerSinc::resample(int32_t* out, size_t outFrameCount,
     size_t outputSampleCount = outFrameCount * 2;
     size_t inFrameCount = (outFrameCount*mInSampleRate)/mSampleRate;
 
-    AudioBufferProvider::Buffer& buffer(mBuffer);
     while (outputIndex < outputSampleCount) {
         // buffer is empty, fetch a new one
-        while (buffer.frameCount == 0) {
-            buffer.frameCount = inFrameCount;
-            provider->getNextBuffer(&buffer);
-            if (buffer.raw == NULL) {
+        while (mBuffer.frameCount == 0) {
+            mBuffer.frameCount = inFrameCount;
+            provider->getNextBuffer(&mBuffer);
+            if (mBuffer.raw == NULL) {
                 goto resample_exit;
             }
             const uint32_t phaseIndex = phaseFraction >> kNumPhaseBits;
             if (phaseIndex == 1) {
                 // read one frame
-                read<CHANNELS>(impulse, phaseFraction, buffer.i16, inputIndex);
+                read<CHANNELS>(impulse, phaseFraction, mBuffer.i16, inputIndex);
             } else if (phaseIndex == 2) {
                 // read 2 frames
-                read<CHANNELS>(impulse, phaseFraction, buffer.i16, inputIndex);
+                read<CHANNELS>(impulse, phaseFraction, mBuffer.i16, inputIndex);
                 inputIndex++;
                 if (inputIndex >= mBuffer.frameCount) {
                     inputIndex -= mBuffer.frameCount;
-                    provider->releaseBuffer(&buffer);
+                    provider->releaseBuffer(&mBuffer);
                 } else {
-                    read<CHANNELS>(impulse, phaseFraction, buffer.i16, inputIndex);
+                    read<CHANNELS>(impulse, phaseFraction, mBuffer.i16, inputIndex);
                 }
            }
         }
-        int16_t *in = buffer.i16;
-        const size_t frameCount = buffer.frameCount;
+        int16_t *in = mBuffer.i16;
+        const size_t frameCount = mBuffer.frameCount;
 
         // Always read-in the first samples from the input buffer
         int16_t* head = impulse + halfNumCoefs*CHANNELS;
@@ -264,7 +263,7 @@ void AudioResamplerSinc::resample(int32_t* out, size_t outFrameCount,
         // if done with buffer, save samples
         if (inputIndex >= frameCount) {
             inputIndex -= frameCount;
-            provider->releaseBuffer(&buffer);
+            provider->releaseBuffer(&mBuffer);
         }
     }
 
