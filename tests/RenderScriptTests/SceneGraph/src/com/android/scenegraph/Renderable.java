@@ -41,21 +41,9 @@ import android.util.Log;
  * @hide
  */
 public class Renderable extends RenderableBase {
-    Allocation mVertexConstants;
-    Allocation mVertexParams;
-    Allocation mFragmentConstants;
-    Allocation mFragmentParams;
-    ArrayList<Allocation> mFragmentTextures;
-
     HashMap<String, ShaderParam> mSourceParams;
 
-    Mesh mMesh;
-    int mMeshIndex;
-
-    int mCullType;
-
     RenderState mRenderState;
-
     Transform mTransform;
 
     String mMeshName;
@@ -63,18 +51,16 @@ public class Renderable extends RenderableBase {
 
     public String mMaterialName;
 
-    // quick hack to prototype
-    int sceneIndex;
-
-    ScriptField_Renderable_s mRsField;
-    ScriptField_Renderable_s.Item mRsFieldItem;
+    ScriptField_Renderable_s mField;
+    ScriptField_Renderable_s.Item mData;
 
     public Renderable() {
         mSourceParams = new HashMap<String, ShaderParam>();
+        mData = new ScriptField_Renderable_s.Item();
     }
 
     public void setCullType(int cull) {
-        mCullType = cull;
+        mData.cullType = cull;
     }
 
     public void setRenderState(RenderState renderState) {
@@ -82,7 +68,7 @@ public class Renderable extends RenderableBase {
     }
 
     public void setMesh(Mesh mesh) {
-        mMesh = mesh;
+        mData.mesh = mesh;
     }
 
     public void setMesh(String mesh, String indexName) {
@@ -102,28 +88,26 @@ public class Renderable extends RenderableBase {
         mSourceParams.put(p.getParamName(), p);
     }
 
-    public void resolveMeshData(Mesh mMesh) {
-        mMesh = mMesh;
-        if (mMesh == null) {
+    public void resolveMeshData(Mesh mesh) {
+        mData.mesh = mesh;
+        if (mData.mesh == null) {
             Log.v("DRAWABLE: ", "*** NO MESH *** " + mMeshName);
             return;
         }
-        int subIndexCount = mMesh.getPrimitiveCount();
+        int subIndexCount = mData.mesh.getPrimitiveCount();
         if (subIndexCount == 1 || mMeshIndexName == null) {
-            mMeshIndex = 0;
+            mData.meshIndex = 0;
         } else {
             for (int i = 0; i < subIndexCount; i ++) {
-                if (mMesh.getIndexSetAllocation(i).getName().equals(mMeshIndexName)) {
-                    mMeshIndex = i;
+                if (mData.mesh.getIndexSetAllocation(i).getName().equals(mMeshIndexName)) {
+                    mData.meshIndex = i;
                     break;
                 }
             }
         }
-
-        mRsFieldItem.mesh = mMesh;
-        mRsFieldItem.meshIndex = mMeshIndex;
-
-        mRsField.set(mRsFieldItem, 0, true);
+        if (mField != null) {
+            mField.set(mData, 0, true);
+        }
     }
 
     void updateTextures(RenderScriptGL rs, Resources res) {
@@ -135,82 +119,62 @@ public class Renderable extends RenderableBase {
                 TextureParam p = (TextureParam)sp;
                 TextureBase tex = p.getTexture();
                 if (tex != null) {
-                    mRsFieldItem.pf_textures[paramIndex++] = tex.getRsData();
+                    mData.pf_textures[paramIndex++] = tex.getRsData();
                 }
             }
         }
         ProgramFragment pf = mRenderState.mFragment.mProgram;
-        mRsFieldItem.pf_num_textures = pf != null ? Math.min(pf.getTextureCount(), paramIndex) : 0;
-        mRsField.set(mRsFieldItem, 0, true);
+        mData.pf_num_textures = pf != null ? Math.min(pf.getTextureCount(), paramIndex) : 0;
+        mField.set(mData, 0, true);
     }
 
-    void updateTextures(RenderScriptGL rs, Allocation a, int slot) {
-        getRsFieldItem(rs, null);
-        mRsFieldItem.pf_textures[slot] = a;
-    }
-
-    public void setVisible(RenderScriptGL rs, boolean vis) {
-        getRsField(rs, null);
-        mRsFieldItem.cullType = vis ? 0 : 2;
-        mRsField.set(mRsFieldItem, 0, true);
+    public void setVisible(boolean vis) {
+        mData.cullType = vis ? 0 : 2;
+        if (mField != null) {
+            mField.set_cullType(0, mData.cullType, true);
+        }
     }
 
     ScriptField_Renderable_s getRsField(RenderScriptGL rs, Resources res) {
-        if (mRsField != null) {
-            return mRsField;
+        if (mField != null) {
+            return mField;
         }
         getRsFieldItem(rs, res);
 
-        mRsField = new ScriptField_Renderable_s(rs, 1);
-        mRsField.set(mRsFieldItem, 0, true);
+        mField = new ScriptField_Renderable_s(rs, 1);
+        mField.set(mData, 0, true);
 
-        return mRsField;
+        return mField;
     }
 
     void getRsFieldItem(RenderScriptGL rs, Resources res) {
-        if (mRsFieldItem != null) {
-            return;
-        }
-
+        Allocation pvParams = null, pfParams = null;
+        Allocation vertexConstants = null, fragmentConstants = null;
         VertexShader pv = mRenderState.mVertex;
         if (pv != null && pv.getObjectConstants() != null) {
-            mVertexConstants = Allocation.createTyped(rs, pv.getObjectConstants());
+            vertexConstants = Allocation.createTyped(rs, pv.getObjectConstants());
+            Element vertexConst = vertexConstants.getType().getElement();
+            pvParams = ShaderParam.fillInParams(vertexConst, mSourceParams,
+                                                mTransform).getAllocation();
         }
         FragmentShader pf = mRenderState.mFragment;
         if (pf != null && pf.getObjectConstants() != null) {
-            mFragmentConstants = Allocation.createTyped(rs, pf.getObjectConstants());
+            fragmentConstants = Allocation.createTyped(rs, pf.getObjectConstants());
+            Element fragmentConst = fragmentConstants.getType().getElement();
+            pfParams = ShaderParam.fillInParams(fragmentConst, mSourceParams,
+                                                mTransform).getAllocation();
         }
 
-        // Very important step that links available inputs and the constants vertex and
-        // fragment shader request
-        ScriptField_ShaderParam_s pvParams = null;
-        // Assign all the vertex params
-        if (mVertexConstants != null) {
-            Element vertexConst = mVertexConstants.getType().getElement();
-            pvParams = ShaderParam.fillInParams(vertexConst, mSourceParams, mTransform);
-        }
-
-        ScriptField_ShaderParam_s pfParams = null;
-        // Assign all the fragment params
-        if (mFragmentConstants != null) {
-            Element fragmentConst = mFragmentConstants.getType().getElement();
-            pfParams = ShaderParam.fillInParams(fragmentConst, mSourceParams, mTransform);
-        }
-
-        mRsFieldItem = new ScriptField_Renderable_s.Item();
-        mRsFieldItem.mesh = mMesh;
-        mRsFieldItem.meshIndex = mMeshIndex;
-        mRsFieldItem.pv_const = mVertexConstants;
-        mRsFieldItem.pv_constParams = pvParams != null ? pvParams.getAllocation() : null;
-        mRsFieldItem.pf_const = mFragmentConstants;
-        mRsFieldItem.pf_constParams = pfParams != null ? pfParams.getAllocation() : null;
+        mData.pv_const = vertexConstants;
+        mData.pv_constParams = pvParams;
+        mData.pf_const = fragmentConstants;
+        mData.pf_constParams = pfParams;
         if (mTransform != null) {
-            mRsFieldItem.transformMatrix = mTransform.getRSData().getAllocation();
+            mData.transformMatrix = mTransform.getRSData().getAllocation();
         }
-        mRsFieldItem.name = SceneManager.getStringAsAllocation(rs, getName());
-        mRsFieldItem.render_state = mRenderState.getRSData().getAllocation();
-        mRsFieldItem.bVolInitialized = 0;
-        mRsFieldItem.cullType = mCullType;
+        mData.name = SceneManager.getStringAsAllocation(rs, getName());
+        mData.render_state = mRenderState.getRSData().getAllocation();
+        mData.bVolInitialized = 0;
     }
 }
 

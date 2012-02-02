@@ -86,7 +86,7 @@ public class TestAppRS {
         // to make things look a bit better. This could be deleted in the cleanup
         Renderable plane = (Renderable)mActiveScene.getRenderableByName("pPlaneShape1");
         if (plane != null) {
-            plane.setVisible(mRS, !mUseBlur);
+            plane.setVisible(!mUseBlur);
         }
     }
 
@@ -252,7 +252,7 @@ public class TestAppRS {
         if (plane != null) {
             RenderState texState = new RenderState(mGenericV, mTextureF, null, null);
             plane.setRenderState(texState);
-            plane.setVisible(mRS, !mUseBlur);
+            plane.setVisible(!mUseBlur);
         }
 
         mTouchHandler.init(mActiveScene);

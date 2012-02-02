@@ -70,7 +70,7 @@ public class Float4Param extends ShaderParam {
         mData.float_value.w = w;
         mData.float_vecSize = vecSize;
         if (mField != null) {
-            mField.set_float_value(0, mData.float_value, false);
+            mField.set_float_value(0, mData.float_value, true);
             mField.set_float_vecSize(0, mData.float_vecSize, true);
         }
     }
@@ -121,17 +121,17 @@ public class Float4Param extends ShaderParam {
     }
 
     int getTypeFromName() {
-        int paramType = SceneManager.getConst().get_shaderParam_FLOAT4_DATA();
+        int paramType = ScriptC_export.const_ShaderParam_FLOAT4_DATA;
         if (mParamName.equalsIgnoreCase(cameraPos)) {
-            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_CAMERA_POS();
+            paramType = ScriptC_export.const_ShaderParam_FLOAT4_CAMERA_POS;
         } else if(mParamName.equalsIgnoreCase(cameraDir)) {
-            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_CAMERA_DIR();
+            paramType = ScriptC_export.const_ShaderParam_FLOAT4_CAMERA_DIR;
         } else if(mParamName.startsWith(lightColor) && findLight(lightColor)) {
-            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_COLOR();
+            paramType = ScriptC_export.const_ShaderParam_FLOAT4_LIGHT_COLOR;
         } else if(mParamName.startsWith(lightPos) && findLight(lightPos)) {
-            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_POS();
+            paramType = ScriptC_export.const_ShaderParam_FLOAT4_LIGHT_POS;
         } else if(mParamName.startsWith(lightDir) && findLight(lightDir)) {
-            paramType = SceneManager.getConst().get_shaderParam_FLOAT4_LIGHT_DIR();
+            paramType = ScriptC_export.const_ShaderParam_FLOAT4_LIGHT_DIR;
         }
         return paramType;
     }

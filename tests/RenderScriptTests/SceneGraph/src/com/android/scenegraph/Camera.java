@@ -47,14 +47,14 @@ public class Camera extends SceneGraphBase {
     public void setTransform(Transform t) {
         mTransform = t;
         if (mField != null) {
-            mField.set_transformMatrix(0, mTransform.getRSData().getAllocation(), false);
+            mField.set_transformMatrix(0, mTransform.getRSData().getAllocation(), true);
             mField.set_isDirty(0, 1, true);
         }
     }
     public void setFOV(float fov) {
         mData.horizontalFOV = fov;
         if (mField != null) {
-            mField.set_horizontalFOV(0, fov, false);
+            mField.set_horizontalFOV(0, fov, true);
             mField.set_isDirty(0, 1, true);
         }
     }
@@ -62,7 +62,7 @@ public class Camera extends SceneGraphBase {
     public void setNear(float n) {
         mData.near = n;
         if (mField != null) {
-            mField.set_near(0, n, false);
+            mField.set_near(0, n, true);
             mField.set_isDirty(0, 1, true);
         }
     }
@@ -70,7 +70,7 @@ public class Camera extends SceneGraphBase {
     public void setFar(float f) {
         mData.far = f;
         if (mField != null) {
-            mField.set_far(0, f, false);
+            mField.set_far(0, f, true);
             mField.set_isDirty(0, 1, true);
         }
     }
@@ -80,7 +80,7 @@ public class Camera extends SceneGraphBase {
         if (mField != null) {
             RenderScriptGL rs = SceneManager.getRS();
             mData.name = getNameAlloc(rs);
-            mField.set_name(0, mData.name, false);
+            mField.set_name(0, mData.name, true);
             mField.set_isDirty(0, 1, true);
         }
     }

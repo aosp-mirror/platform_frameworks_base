@@ -44,19 +44,19 @@ public class TransformParam extends ShaderParam {
     }
 
     int getTypeFromName() {
-        int paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_DATA();
+        int paramType = ScriptC_export.const_ShaderParam_TRANSFORM_DATA;
         if (mParamName.equalsIgnoreCase(view)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_VIEW();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_VIEW;
         } else if(mParamName.equalsIgnoreCase(proj)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_PROJ();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_PROJ;
         } else if(mParamName.equalsIgnoreCase(viewProj)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_VIEW_PROJ();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_VIEW_PROJ;
         } else if(mParamName.equalsIgnoreCase(model)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_MODEL;
         } else if(mParamName.equalsIgnoreCase(modelView)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL_VIEW();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_MODEL_VIEW;
         } else if(mParamName.equalsIgnoreCase(modelViewProj)) {
-            paramType = SceneManager.getConst().get_shaderParam_TRANSFORM_MODEL_VIEW_PROJ();
+            paramType = ScriptC_export.const_ShaderParam_TRANSFORM_MODEL_VIEW_PROJ;
         }
         return paramType;
     }
