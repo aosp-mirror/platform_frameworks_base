@@ -1651,6 +1651,7 @@ public class ListView extends AbsListView {
                 // are focusable
                 if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
                     final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
+                            focusLayoutRestoreView != null &&
                             focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
                     if (!focusWasTaken) {
                         // selected item didn't take focus, fine, but still want
