@@ -314,10 +314,8 @@ public class MediaScanner
 
     private final String mExternalStoragePath;
 
-    // WARNING: Bulk inserts sounded like a great idea and gave us a good performance improvement,
-    // but unfortunately it also introduced a number of bugs. All the known bugs were fixed,
-    // but we need more testing before enabling.
-    private static final boolean ENABLE_BULK_INSERTS = false;
+    /** whether to use bulk inserts or individual inserts for each item */
+    private static final boolean ENABLE_BULK_INSERTS = true;
 
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
