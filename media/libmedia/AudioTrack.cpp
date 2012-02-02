@@ -345,7 +345,6 @@ void AudioTrack::start()
                 return;
             }
         }
-        t->mLock.lock();
      }
 
     AutoMutex lock(mLock);
@@ -396,9 +395,6 @@ void AudioTrack::start()
         }
     }
 
-    if (t != 0) {
-        t->mLock.unlock();
-    }
 }
 
 void AudioTrack::stop()
@@ -406,9 +402,6 @@ void AudioTrack::stop()
     sp<AudioTrackThread> t = mAudioTrackThread;
 
     ALOGV("stop %p", this);
-    if (t != 0) {
-        t->mLock.lock();
-    }
 
     AutoMutex lock(mLock);
     if (mActive) {
@@ -434,9 +427,6 @@ void AudioTrack::stop()
         }
     }
 
-    if (t != 0) {
-        t->mLock.unlock();
-    }
 }
 
 bool AudioTrack::stopped() const

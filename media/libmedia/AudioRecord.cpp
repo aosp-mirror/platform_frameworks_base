@@ -293,7 +293,6 @@ status_t AudioRecord::start()
                 return WOULD_BLOCK;
             }
         }
-        t->mLock.lock();
      }
 
     AutoMutex lock(mLock);
@@ -334,10 +333,6 @@ status_t AudioRecord::start()
         }
     }
 
-    if (t != 0) {
-        t->mLock.unlock();
-    }
-
     return ret;
 }
 
@@ -346,10 +341,6 @@ status_t AudioRecord::stop()
     sp<ClientRecordThread> t = mClientRecordThread;
 
     ALOGV("stop");
-
-    if (t != 0) {
-        t->mLock.lock();
-    }
 
     AutoMutex lock(mLock);
     if (mActive == 1) {
@@ -365,10 +356,6 @@ status_t AudioRecord::stop()
             setpriority(PRIO_PROCESS, 0, mPreviousPriority);
             androidSetThreadSchedulingGroup(0, mPreviousSchedulingGroup);
         }
-    }
-
-    if (t != 0) {
-        t->mLock.unlock();
     }
 
     return NO_ERROR;
