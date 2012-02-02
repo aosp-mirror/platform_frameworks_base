@@ -333,8 +333,9 @@ OMX_ERRORTYPE SimpleSoftOMXComponent::getState(OMX_STATETYPE *state) {
 
 void SimpleSoftOMXComponent::onMessageReceived(const sp<AMessage> &msg) {
     Mutex::Autolock autoLock(mLock);
-
-    switch (msg->what()) {
+    uint32_t msgType = msg->what();
+    ALOGV("msgType = %d", msgType);
+    switch (msgType) {
         case kWhatSendCommand:
         {
             int32_t cmd, param;
@@ -354,27 +355,27 @@ void SimpleSoftOMXComponent::onMessageReceived(const sp<AMessage> &msg) {
             CHECK(mState == OMX_StateExecuting && mTargetState == mState);
 
             bool found = false;
-            for (size_t i = 0; i < mPorts.size(); ++i) {
-                PortInfo *port = &mPorts.editItemAt(i);
+            size_t portIndex = (kWhatEmptyThisBuffer == msgType)?
+                    header->nInputPortIndex: header->nOutputPortIndex;
+            PortInfo *port = &mPorts.editItemAt(portIndex);
 
-                for (size_t j = 0; j < port->mBuffers.size(); ++j) {
-                    BufferInfo *buffer = &port->mBuffers.editItemAt(j);
+            for (size_t j = 0; j < port->mBuffers.size(); ++j) {
+                BufferInfo *buffer = &port->mBuffers.editItemAt(j);
 
-                    if (buffer->mHeader == header) {
-                        CHECK(!buffer->mOwnedByUs);
+                if (buffer->mHeader == header) {
+                    CHECK(!buffer->mOwnedByUs);
 
-                        buffer->mOwnedByUs = true;
+                    buffer->mOwnedByUs = true;
 
-                        CHECK((msg->what() == kWhatEmptyThisBuffer
-                                    && port->mDef.eDir == OMX_DirInput)
-                                || (port->mDef.eDir == OMX_DirOutput));
+                    CHECK((msgType == kWhatEmptyThisBuffer
+                            && port->mDef.eDir == OMX_DirInput)
+                            || (port->mDef.eDir == OMX_DirOutput));
 
-                        port->mQueue.push_back(buffer);
-                        onQueueFilled(i);
+                    port->mQueue.push_back(buffer);
+                    onQueueFilled(portIndex);
 
-                        found = true;
-                        break;
-                    }
+                    found = true;
+                    break;
                 }
             }
 
