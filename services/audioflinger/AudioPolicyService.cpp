@@ -116,19 +116,7 @@ AudioPolicyService::~AudioPolicyService()
 
     // release audio pre processing resources
     for (size_t i = 0; i < mInputSources.size(); i++) {
-        InputSourceDesc *source = mInputSources.valueAt(i);
-        Vector <EffectDesc *> effects = source->mEffects;
-        for (size_t j = 0; j < effects.size(); j++) {
-            delete effects[j]->mName;
-            Vector <effect_param_t *> params = effects[j]->mParams;
-            for (size_t k = 0; k < params.size(); k++) {
-                delete params[k];
-            }
-            params.clear();
-            delete effects[j];
-        }
-        effects.clear();
-        delete source;
+        delete mInputSources.valueAt(i);
     }
     mInputSources.clear();
 
@@ -1243,7 +1231,7 @@ AudioPolicyService::InputSourceDesc *AudioPolicyService::loadInputSource(
             node = node->next;
             continue;
         }
-        EffectDesc *effect = new EffectDesc(*effects[i]);
+        EffectDesc *effect = new EffectDesc(*effects[i]);   // deep copy
         loadEffectParameters(node, effect->mParams);
         ALOGV("loadInputSource() adding effect %s uuid %08x", effect->mName, effect->mUuid.timeLow);
         source->mEffects.add(effect);
@@ -1294,11 +1282,7 @@ AudioPolicyService::EffectDesc *AudioPolicyService::loadEffect(cnode *root)
         ALOGW("loadEffect() invalid uuid %s", node->value);
         return NULL;
     }
-    EffectDesc *effect = new EffectDesc();
-    effect->mName = strdup(root->name);
-    memcpy(&effect->mUuid, &uuid, sizeof(effect_uuid_t));
-
-    return effect;
+    return new EffectDesc(root->name, uuid);
 }
 
 status_t AudioPolicyService::loadEffects(cnode *root, Vector <EffectDesc *>& effects)
