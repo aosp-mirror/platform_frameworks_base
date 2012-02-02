@@ -248,7 +248,7 @@ private:
     static sp<IAudioPolicyService> gAudioPolicyService;
 
     // mapping between stream types and outputs
-    static DefaultKeyedVector<int, audio_io_handle_t> gStreamOutputMap;
+    static DefaultKeyedVector<audio_stream_type_t, audio_io_handle_t> gStreamOutputMap;
     // list of output descriptors containing cached parameters
     // (sampling rate, framecount, channel count...)
     static DefaultKeyedVector<audio_io_handle_t, OutputDescriptor *> gOutputs;
