@@ -526,6 +526,12 @@ public:
     // Do not call from this object's thread; will return WOULD_BLOCK in that case.
             status_t    join();
 
+#ifdef HAVE_ANDROID_OS
+    // Return the thread's kernel ID, same as the thread itself calling gettid() or
+    // androidGetTid(), or -1 if the thread is not running.
+            pid_t       getTid() const;
+#endif
+
 protected:
     // exitPending() returns true if requestExit() has been called.
             bool        exitPending() const;
@@ -551,8 +557,10 @@ private:
     volatile bool           mExitPending;
     volatile bool           mRunning;
             sp<Thread>      mHoldSelf;
-#if HAVE_ANDROID_OS
-            int             mTid;
+#ifdef HAVE_ANDROID_OS
+    // legacy for debugging, not used by getTid() as it is set by the child thread
+    // and so is not initialized until the child reaches that point
+            pid_t           mTid;
 #endif
 };
 
