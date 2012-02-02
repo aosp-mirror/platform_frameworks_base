@@ -54,7 +54,6 @@ public class ValueAnimator extends Animator {
      * Internal constants
      */
     private static float sDurationScale = 1.0f;
-    private static boolean sDurationScaleInitialized = false;
 
     /**
      * Messages sent to timing handler: START is sent when an animation first begins.
@@ -161,7 +160,7 @@ public class ValueAnimator extends Animator {
     //
 
     // How long the animation should last in ms
-    private long mDuration = 300;
+    private long mDuration = (long)(300 * sDurationScale);
     private long mUnscaledDuration = 300;
 
     // The amount of time in ms to delay starting the animation after start() is called
@@ -222,21 +221,20 @@ public class ValueAnimator extends Animator {
      */
     public static final int INFINITE = -1;
 
+
+    /**
+     * @hide
+     */
+    public static void setDurationScale(float durationScale) {
+        sDurationScale = durationScale;
+    }
+
     /**
      * Creates a new ValueAnimator object. This default constructor is primarily for
      * use internally; the factory methods which take parameters are more generally
      * useful.
      */
     public ValueAnimator() {
-        if (!sDurationScaleInitialized) {
-            // Scale value initialized per-process when first animator is constructed
-            String scaleString = SystemProperties.get("persist.sys.ui.animation");
-            if (!scaleString.isEmpty()) {
-                sDurationScale = Float.parseFloat(scaleString);
-            }
-            sDurationScaleInitialized = true;
-        }
-        mDuration *= sDurationScale;
     }
 
     /**

@@ -559,6 +559,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     float mWindowAnimationScale = 1.0f;
     float mTransitionAnimationScale = 1.0f;
+    float mAnimatorDurationScale = 1.0f;
 
     final InputManager mInputManager;
 
@@ -774,6 +775,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.System.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
         mTransitionAnimationScale = Settings.System.getFloat(context.getContentResolver(),
                 Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+        mAnimatorDurationScale = Settings.System.getFloat(context.getContentResolver(),
+                Settings.System.ANIMATOR_DURATION_SCALE, mTransitionAnimationScale);
 
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         IntentFilter filter = new IntentFilter();
@@ -4657,6 +4660,7 @@ public class WindowManagerService extends IWindowManager.Stub
         switch (which) {
             case 0: mWindowAnimationScale = fixScale(scale); break;
             case 1: mTransitionAnimationScale = fixScale(scale); break;
+            case 2: mAnimatorDurationScale = fixScale(scale); break;
         }
 
         // Persist setting
@@ -4676,6 +4680,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (scales.length >= 2) {
                 mTransitionAnimationScale = fixScale(scales[1]);
             }
+            if (scales.length >= 3) {
+                mAnimatorDurationScale = fixScale(scales[2]);
+            }
         }
 
         // Persist setting
@@ -4686,12 +4693,14 @@ public class WindowManagerService extends IWindowManager.Stub
         switch (which) {
             case 0: return mWindowAnimationScale;
             case 1: return mTransitionAnimationScale;
+            case 2: return mAnimatorDurationScale;
         }
         return 0;
     }
 
     public float[] getAnimationScales() {
-        return new float[] { mWindowAnimationScale, mTransitionAnimationScale };
+        return new float[] { mWindowAnimationScale, mTransitionAnimationScale,
+                mAnimatorDurationScale };
     }
 
     public int getSwitchState(int sw) {
@@ -6825,6 +6834,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             Settings.System.WINDOW_ANIMATION_SCALE, mWindowAnimationScale);
                     Settings.System.putFloat(mContext.getContentResolver(),
                             Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
+                    Settings.System.putFloat(mContext.getContentResolver(),
+                            Settings.System.ANIMATOR_DURATION_SCALE, mAnimatorDurationScale);
                     break;
                 }
 
@@ -9762,6 +9773,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mAnimationPending="); pw.print(mAnimationPending);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
+                    pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
             pw.print("  mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);

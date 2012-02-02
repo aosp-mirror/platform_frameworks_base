@@ -1678,6 +1678,13 @@ public final class Settings {
         public static final String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
 
         /**
+         * Scaling factor for Animator-based animations. This affects both the start delay and
+         * duration of all such animations. Setting to 0 will cause animations to end immediately.
+         * The default value is 1.
+         */
+        public static final String ANIMATOR_DURATION_SCALE = "animator_duration_scale";
+
+        /**
          * Scaling factor for normal window animations. Setting to 0 will disable window
          * animations.
          * @hide
