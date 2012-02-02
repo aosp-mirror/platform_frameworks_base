@@ -29,7 +29,10 @@ extern "C" {
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-#define TYPEFACE_ARABIC "/system/fonts/DroidNaskh-Regular.ttf"
+// Using DroidSansArabic for shaping Arabic with Harfbuzz because its metrics are more compatible
+// with the "Roboto" metrics (compared to DroidNaskh-Regular). When we will have an Arabic font
+// whose metrics are similar to the Roboto ones, then we will need to use it for shaping.
+#define TYPEFACE_ARABIC "/system/fonts/DroidSansArabic.ttf"
 #define TYPE_FACE_HEBREW_REGULAR "/system/fonts/DroidSansHebrew-Regular.ttf"
 #define TYPE_FACE_HEBREW_BOLD "/system/fonts/DroidSansHebrew-Bold.ttf"
 #define TYPEFACE_BENGALI "/system/fonts/Lohit-Bengali.ttf"
