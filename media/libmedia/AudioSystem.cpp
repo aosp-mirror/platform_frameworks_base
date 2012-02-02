@@ -35,7 +35,8 @@ sp<IAudioFlinger> AudioSystem::gAudioFlinger;
 sp<AudioSystem::AudioFlingerClient> AudioSystem::gAudioFlingerClient;
 audio_error_callback AudioSystem::gAudioErrorCallback = NULL;
 // Cached values
-DefaultKeyedVector<int, audio_io_handle_t> AudioSystem::gStreamOutputMap(0);
+
+DefaultKeyedVector<audio_stream_type_t, audio_io_handle_t> AudioSystem::gStreamOutputMap(0);
 DefaultKeyedVector<audio_io_handle_t, AudioSystem::OutputDescriptor *> AudioSystem::gOutputs(0);
 
 // Cached values for recording queries, all protected by gLock
@@ -404,7 +405,7 @@ void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
 void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, void *param2) {
     ALOGV("ioConfigChanged() event %d", event);
     OutputDescriptor *desc;
-    uint32_t stream;
+    audio_stream_type_t stream;
 
     if (ioHandle == 0) return;
 
@@ -413,7 +414,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, v
     switch (event) {
     case STREAM_CONFIG_CHANGED:
         if (param2 == 0) break;
-        stream = *(uint32_t *)param2;
+        stream = *(audio_stream_type_t *)param2;
         ALOGV("ioConfigChanged() STREAM_CONFIG_CHANGED stream %d, output %d", stream, ioHandle);
         if (gStreamOutputMap.indexOfKey(stream) >= 0) {
             gStreamOutputMap.replaceValueFor(stream, ioHandle);
