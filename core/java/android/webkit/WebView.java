@@ -2613,7 +2613,7 @@ public class WebView extends AbsoluteLayout
         checkThread();
         mContentWidth = 0;
         mContentHeight = 0;
-        setBaseLayer(0, null, false, false, false);
+        setBaseLayer(0, null, false, false);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -4480,6 +4480,8 @@ public class WebView extends AbsoluteLayout
 
         if (canvas.isHardwareAccelerated()) {
             mZoomManager.setHardwareAccelerated();
+        } else {
+            mWebViewCore.resumeWebKitDraw();
         }
 
         int saveCount = canvas.save();
@@ -4722,11 +4724,19 @@ public class WebView extends AbsoluteLayout
     }
 
     void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator,
-            boolean isPictureAfterFirstLayout, boolean registerPageSwapCallback) {
+            boolean isPictureAfterFirstLayout) {
         if (mNativeClass == 0)
             return;
-        nativeSetBaseLayer(mNativeClass, layer, invalRegion, showVisualIndicator,
-                isPictureAfterFirstLayout, registerPageSwapCallback);
+        boolean queueFull;
+        queueFull = nativeSetBaseLayer(mNativeClass, layer, invalRegion,
+                                       showVisualIndicator, isPictureAfterFirstLayout);
+
+        if (layer == 0 || isPictureAfterFirstLayout) {
+            mWebViewCore.resumeWebKitDraw();
+        } else if (queueFull) {
+            mWebViewCore.pauseWebKitDraw();
+        }
+
         if (mHTML5VideoViewProxy != null) {
             mHTML5VideoViewProxy.setBaseLayer(layer);
         }
@@ -9009,6 +9019,7 @@ public class WebView extends AbsoluteLayout
     /** @hide Called by JNI when pages are swapped (only occurs with hardware
      * acceleration) */
     protected void pageSwapCallback(boolean notifyAnimationStarted) {
+        mWebViewCore.resumeWebKitDraw();
         if (inEditingMode()) {
             didUpdateWebTextViewDimensions(ANYWHERE);
         }
@@ -9031,13 +9042,9 @@ public class WebView extends AbsoluteLayout
         boolean isPictureAfterFirstLayout = viewState != null;
 
         if (updateBaseLayer) {
-            // Request a callback on pageSwap (to reposition the webtextview)
-            boolean registerPageSwapCallback =
-                !mZoomManager.isFixedLengthAnimationInProgress() && inEditingMode();
-
             setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
                     getSettings().getShowVisualIndicator(),
-                    isPictureAfterFirstLayout, registerPageSwapCallback);
+                    isPictureAfterFirstLayout);
         }
         final Point viewSize = draw.mViewSize;
         // We update the layout (i.e. request a layout from the
@@ -9715,11 +9722,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /** @hide call pageSwapCallback upon next page swap */
-    protected void registerPageSwapCallback() {
-        nativeRegisterPageSwapCallback(mNativeClass);
-    }
-
     /** @hide discard all textures from tiles */
     protected void discardAllTextures() {
         nativeDiscardAllTextures();
@@ -9882,10 +9884,9 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetBaseLayer(int nativeInstance,
+    private native boolean  nativeSetBaseLayer(int nativeInstance,
             int layer, Region invalRegion,
-            boolean showVisualIndicator, boolean isPictureAfterFirstLayout,
-            boolean registerPageSwapCallback);
+            boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
     private native int      nativeGetBaseLayer();
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
@@ -9897,7 +9898,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
-    private native void     nativeRegisterPageSwapCallback(int nativeInstance);
     private native void     nativeDiscardAllTextures();
     private native void     nativeTileProfilingStart();
     private native float    nativeTileProfilingStop();
