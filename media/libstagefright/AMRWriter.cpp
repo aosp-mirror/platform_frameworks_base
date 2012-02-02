@@ -52,7 +52,7 @@ AMRWriter::AMRWriter(int fd)
 
 AMRWriter::~AMRWriter() {
     if (mStarted) {
-        stop();
+        reset();
     }
 
     if (mFd != -1) {
@@ -152,7 +152,7 @@ status_t AMRWriter::pause() {
     return OK;
 }
 
-status_t AMRWriter::stop() {
+status_t AMRWriter::reset() {
     if (!mStarted) {
         return OK;
     }
