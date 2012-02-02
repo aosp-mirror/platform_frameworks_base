@@ -196,11 +196,6 @@ public class SceneManager extends SceneGraphBase {
         return sSceneManager.mRes;
     }
 
-    // Constants exported from native to java
-    static ScriptC_export getConst() {
-        return sSceneManager.mExportScript;
-    }
-
     public static SceneManager getInstance() {
         if (sSceneManager == null) {
             sSceneManager = new SceneManager();

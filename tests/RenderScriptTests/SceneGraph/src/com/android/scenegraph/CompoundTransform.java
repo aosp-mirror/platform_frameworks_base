@@ -37,8 +37,9 @@ public class CompoundTransform extends Transform {
         int mParentIndex;
         protected ScriptField_TransformComponent_s.Item mData;
 
-        Component(String name) {
+        Component(int type, String name) {
             mData = new ScriptField_TransformComponent_s.Item();
+            mData.type = type;
             mName = name;
         }
 
@@ -54,7 +55,10 @@ public class CompoundTransform extends Transform {
             }
         }
 
-        abstract ScriptField_TransformComponent_s.Item getRSData();
+        ScriptField_TransformComponent_s.Item getRSData() {
+            setNameAlloc();
+            return mData;
+        }
 
         protected void update() {
             if (mParent != null) {
@@ -69,7 +73,7 @@ public class CompoundTransform extends Transform {
 
     public static class TranslateComponent extends Component {
         public TranslateComponent(String name, Float3 translate) {
-            super(name);
+            super(ScriptC_export.const_Transform_TRANSLATE, name);
             setValue(translate);
         }
         public Float3 getValue() {
@@ -81,16 +85,11 @@ public class CompoundTransform extends Transform {
             mData.value.z = val.z;
             update();
         }
-        ScriptField_TransformComponent_s.Item getRSData() {
-            setNameAlloc();
-            mData.type = SceneManager.getConst().get_transform_TRANSLATE();
-            return mData;
-        }
     }
 
     public static class RotateComponent extends Component {
         public RotateComponent(String name, Float3 axis, float angle) {
-            super(name);
+            super(ScriptC_export.const_Transform_ROTATE, name);
             setAxis(axis);
             setAngle(angle);
         }
@@ -110,16 +109,11 @@ public class CompoundTransform extends Transform {
             mData.value.w = val;
             update();
         }
-        ScriptField_TransformComponent_s.Item getRSData() {
-            setNameAlloc();
-            mData.type = SceneManager.getConst().get_transform_ROTATE();
-            return mData;
-        }
     }
 
     public static class ScaleComponent extends Component {
         public ScaleComponent(String name, Float3 scale) {
-            super(name);
+            super(ScriptC_export.const_Transform_SCALE, name);
             setValue(scale);
         }
         public Float3 getValue() {
@@ -130,11 +124,6 @@ public class CompoundTransform extends Transform {
             mData.value.y = val.y;
             mData.value.z = val.z;
             update();
-        }
-        ScriptField_TransformComponent_s.Item getRSData() {
-            setNameAlloc();
-            mData.type = SceneManager.getConst().get_transform_SCALE();
-            return mData;
         }
     }
 

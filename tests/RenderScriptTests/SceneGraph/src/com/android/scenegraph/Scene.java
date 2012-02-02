@@ -193,7 +193,6 @@ public class Scene extends SceneGraphBase {
         for (int i = 0; i < numEntries; i++) {
             Renderable d = entries.get(i);
             d.resolveMeshData(m);
-            //mRenderablesField.set(d.getRsField(mRS, mRes), d.sceneIndex, true);
         }
     }
 
@@ -250,7 +249,6 @@ public class Scene extends SceneGraphBase {
         Allocation[] drawableAllocs = new Allocation[mRenderables.size()];
         for (int i = 0; i < mRenderables.size(); i ++) {
             Renderable dI = (Renderable)mRenderables.get(i);
-            dI.sceneIndex = i;
             addToMeshMap(dI);
             drawableAllocs[i] = dI.getRsField(rs, res).getAllocation();
         }
