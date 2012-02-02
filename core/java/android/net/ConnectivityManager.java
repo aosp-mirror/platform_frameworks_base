@@ -142,8 +142,19 @@ public class ConnectivityManager {
      * If an application uses the network in the background, it should listen
      * for this broadcast and stop using the background data if the value is
      * {@code false}.
+     * <p>
+     *
+     * @deprecated As of {@link VERSION_CODES#ICE_CREAM_SANDWICH}, availability
+     *             of background data depends on several combined factors, and
+     *             this broadcast is no longer sent. Instead, when background
+     *             data is unavailable, {@link #getActiveNetworkInfo()} will now
+     *             appear disconnected. During first boot after a platform
+     *             upgrade, this broadcast will be sent once if
+     *             {@link #getBackgroundDataSetting()} was {@code false} before
+     *             the upgrade.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_BACKGROUND_DATA_SETTING_CHANGED =
             "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
