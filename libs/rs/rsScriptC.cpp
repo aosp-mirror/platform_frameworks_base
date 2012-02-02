@@ -322,7 +322,7 @@ RsScript rsi_ScriptCCreate(Context *rsc,
 
     if (!s->runCompiler(rsc, resName, cacheDir, (uint8_t *)text, text_length)) {
         // Error during compile, destroy s and return null.
-        delete s;
+        ObjectBase::checkDelete(s);
         return NULL;
     }
 
