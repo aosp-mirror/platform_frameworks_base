@@ -2482,6 +2482,11 @@ public final class Settings {
             Uri.parse("content://" + AUTHORITY + "/secure");
 
         /**
+         * Whether user has enabled development settings.
+         */
+        public static final String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
+
+        /**
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";

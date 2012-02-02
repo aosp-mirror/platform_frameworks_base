@@ -17505,6 +17505,7 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_ROAMING = "data_roaming";
     field public static final java.lang.String DEFAULT_INPUT_METHOD = "default_input_method";
+    field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
     field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
     field public static final java.lang.String ENABLED_ACCESSIBILITY_SERVICES = "enabled_accessibility_services";
     field public static final java.lang.String ENABLED_INPUT_METHODS = "enabled_input_methods";
