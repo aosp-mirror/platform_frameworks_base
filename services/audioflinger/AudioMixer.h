@@ -83,7 +83,7 @@ public:
 
     uint32_t    trackNames() const { return mTrackNames; }
 
-    size_t      getUnreleasedFrames(int name);
+    size_t      getUnreleasedFrames(int name) const;
 
 private:
 
@@ -153,10 +153,11 @@ private:
         int32_t*           auxBuffer;
 
         bool        setResampler(uint32_t sampleRate, uint32_t devSampleRate);
-        bool        doesResample() const;
-        void        resetResampler();
+        bool        doesResample() const { return resampler != NULL; }
+        void        resetResampler() { if (resampler != NULL) resampler->reset(); }
         void        adjustVolumeRamp(bool aux);
-        size_t      getUnreleasedFrames();
+        size_t      getUnreleasedFrames() const { return resampler != NULL ?
+                                                    resampler->getUnreleasedFrames() : 0; };
     };
 
     // pad to 32-bytes to fill cache line

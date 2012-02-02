@@ -296,18 +296,6 @@ bool AudioMixer::track_t::setResampler(uint32_t value, uint32_t devSampleRate)
     return false;
 }
 
-bool AudioMixer::track_t::doesResample() const
-{
-    return resampler != NULL;
-}
-
-void AudioMixer::track_t::resetResampler()
-{
-    if (resampler != NULL) {
-        resampler->reset();
-    }
-}
-
 inline
 void AudioMixer::track_t::adjustVolumeRamp(bool aux)
 {
@@ -327,20 +315,11 @@ void AudioMixer::track_t::adjustVolumeRamp(bool aux)
     }
 }
 
-size_t AudioMixer::track_t::getUnreleasedFrames()
-{
-    if (resampler != NULL) {
-        return resampler->getUnreleasedFrames();
-    }
-    return 0;
-}
-
-size_t AudioMixer::getUnreleasedFrames(int name)
+size_t AudioMixer::getUnreleasedFrames(int name) const
 {
     name -= TRACK0;
     if (uint32_t(name) < MAX_NUM_TRACKS) {
-        track_t& track(mState.tracks[name]);
-        return track.getUnreleasedFrames();
+        return mState.tracks[name].getUnreleasedFrames();
     }
     return 0;
 }

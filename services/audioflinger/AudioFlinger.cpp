@@ -1027,26 +1027,6 @@ void AudioFlinger::ThreadBase::exit()
     requestExitAndWait();
 }
 
-uint32_t AudioFlinger::ThreadBase::sampleRate() const
-{
-    return mSampleRate;
-}
-
-int AudioFlinger::ThreadBase::channelCount() const
-{
-    return (int)mChannelCount;
-}
-
-audio_format_t AudioFlinger::ThreadBase::format() const
-{
-    return mFormat;
-}
-
-size_t AudioFlinger::ThreadBase::frameCount() const
-{
-    return mFrameCount;
-}
-
 status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
 {
     status_t status;
@@ -1609,16 +1589,6 @@ status_t AudioFlinger::PlaybackThread::setMasterMute(bool muted)
 {
     mMasterMute = muted;
     return NO_ERROR;
-}
-
-float AudioFlinger::PlaybackThread::masterVolume() const
-{
-    return mMasterVolume;
-}
-
-bool AudioFlinger::PlaybackThread::masterMute() const
-{
-    return mMasterMute;
 }
 
 status_t AudioFlinger::PlaybackThread::setStreamVolume(audio_stream_type_t stream, float value)
@@ -3368,21 +3338,8 @@ void AudioFlinger::ThreadBase::TrackBase::reset() {
     ALOGV("TrackBase::reset");
 }
 
-sp<IMemory> AudioFlinger::ThreadBase::TrackBase::getCblk() const
-{
-    return mCblkMemory;
-}
-
 int AudioFlinger::ThreadBase::TrackBase::sampleRate() const {
     return (int)mCblk->sampleRate;
-}
-
-int AudioFlinger::ThreadBase::TrackBase::channelCount() const {
-    return (const int)mChannelCount;
-}
-
-uint32_t AudioFlinger::ThreadBase::TrackBase::channelMask() const {
-    return mChannelMask;
 }
 
 void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
@@ -6622,7 +6579,7 @@ status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
     return NO_ERROR;
 }
 
-bool AudioFlinger::EffectModule::isEnabled()
+bool AudioFlinger::EffectModule::isEnabled() const
 {
     switch (mState) {
     case RESTART:
@@ -6638,7 +6595,7 @@ bool AudioFlinger::EffectModule::isEnabled()
     }
 }
 
-bool AudioFlinger::EffectModule::isProcessEnabled()
+bool AudioFlinger::EffectModule::isProcessEnabled() const
 {
     switch (mState) {
     case RESTART:
@@ -7052,10 +7009,6 @@ status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
     }
 
     return mEffect->command(cmdCode, cmdSize, pCmdData, replySize, pReplyData);
-}
-
-sp<IMemory> AudioFlinger::EffectHandle::getCblk() const {
-    return mCblkMemory;
 }
 
 void AudioFlinger::EffectHandle::setControl(bool hasControl, bool signal, bool enabled)
