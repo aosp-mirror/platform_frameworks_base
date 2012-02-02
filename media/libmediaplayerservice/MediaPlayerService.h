@@ -95,6 +95,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual void            close();
                 void            setAudioStreamType(audio_stream_type_t streamType) { mStreamType = streamType; }
                 void            setVolume(float left, float right);
+        virtual status_t        setPlaybackRatePermille(int32_t ratePermille);
                 status_t        setAuxEffectSendLevel(float level);
                 status_t        attachAuxEffect(int effectId);
         virtual status_t        dump(int fd, const Vector<String16>& args) const;
@@ -112,6 +113,8 @@ class MediaPlayerService : public BnMediaPlayerService
         audio_stream_type_t     mStreamType;
         float                   mLeftVolume;
         float                   mRightVolume;
+        int32_t                 mPlaybackRatePermille;
+        uint32_t                mSampleRateHz; // sample rate of the content, as set in open()
         float                   mMsecsPerFrame;
         uint32_t                mLatency;
         int                     mSessionId;
@@ -152,6 +155,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual void            close() {}
                 void            setAudioStreamType(audio_stream_type_t streamType) {}
                 void            setVolume(float left, float right) {}
+        virtual status_t        setPlaybackRatePermille(int32_t ratePermille) { return INVALID_OPERATION; }
                 uint32_t        sampleRate() const { return mSampleRate; }
                 audio_format_t  format() const { return mFormat; }
                 size_t          size() const { return mSize; }

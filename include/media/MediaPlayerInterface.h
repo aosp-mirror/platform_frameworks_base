@@ -96,6 +96,8 @@ public:
         virtual void        flush() = 0;
         virtual void        pause() = 0;
         virtual void        close() = 0;
+
+        virtual status_t    setPlaybackRatePermille(int32_t rate) { return INVALID_OPERATION; }
     };
 
                         MediaPlayerBase() : mCookie(0), mNotify(0) {}
