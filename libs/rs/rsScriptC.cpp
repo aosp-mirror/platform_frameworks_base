@@ -206,7 +206,6 @@ bool ScriptC::runCompiler(Context *rsc,
         return false;
     }
 
-    rsAssert(bcWrapper.getHeaderVersion() == 0);
     if (bcWrapper.getBCFileType() == bcinfo::BC_WRAPPER) {
         sdkVersion = bcWrapper.getTargetAPI();
     }
