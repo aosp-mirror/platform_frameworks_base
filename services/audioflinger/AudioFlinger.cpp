@@ -4067,7 +4067,7 @@ AudioFlinger::Client::~Client()
     mAudioFlinger->removeClient_l(mPid);
 }
 
-const sp<MemoryDealer>& AudioFlinger::Client::heap() const
+sp<MemoryDealer> AudioFlinger::Client::heap() const
 {
     return mMemoryDealer;
 }
@@ -6181,7 +6181,7 @@ AudioFlinger::EffectModule::~EffectModule()
     }
 }
 
-status_t AudioFlinger::EffectModule::addHandle(sp<EffectHandle>& handle)
+status_t AudioFlinger::EffectModule::addHandle(const sp<EffectHandle>& handle)
 {
     status_t status;
 
