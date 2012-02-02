@@ -803,6 +803,7 @@ public class WebView extends AbsoluteLayout
     static final int HANDLE_ID_EXTENT = 3;
 
     static boolean sDisableNavcache = false;
+    static boolean sEnableWebTextView = false;
     // the color used to highlight the touch rectangles
     static final int HIGHLIGHT_COLOR = 0x6633b5e5;
     // the region indicating where the user touched on the screen
@@ -1424,7 +1425,6 @@ public class WebView extends AbsoluteLayout
     private void init() {
         OnTrimMemoryListener.init(getContext());
         sDisableNavcache = nativeDisableNavcache();
-
         setWillNotDraw(false);
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -5091,6 +5091,9 @@ public class WebView extends AbsoluteLayout
      * multiline, and what text it contains.  It also removes it if necessary.
      */
     /* package */ void rebuildWebTextView() {
+        if (!sEnableWebTextView) {
+            return; // always use WebKit's text entry
+        }
         // If the WebView does not have focus, do nothing until it gains focus.
         if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())) {
             return;
