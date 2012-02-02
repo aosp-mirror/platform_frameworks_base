@@ -781,8 +781,10 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setMasterMute(boolean, IBinder) */
     public void setMasterMute(boolean state, IBinder cb) {
-        AudioSystem.setMasterMute(state);
-        sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
+        if (state != AudioSystem.getMasterMute()) {
+            AudioSystem.setMasterMute(state);
+            sendMasterMuteUpdate(state, AudioManager.FLAG_SHOW_UI);
+        }
     }
 
     /** get master mute state. */
