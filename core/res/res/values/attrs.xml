@@ -2061,7 +2061,7 @@
         </attr>
         <!-- Direction of the text. A heuristic is used to determine the resolved text direction
              of paragraphs. -->
-        <attr name="textDirection" format="integer">
+         <attr name="textDirection" format="integer">
             <!-- Default -->
             <enum name="inherit" value="0" />
             <!-- Default for the root view. The first strong directional character determines the
@@ -2072,16 +2072,12 @@
                  it is LTR if it contains any strong LTR characters.  If there are neither, the
                  paragraph direction is the view’s resolved layout direction. -->
             <enum name="anyRtl" value="2" />
-            <!-- The paragraph direction is the same as the one held by a 60% majority of the
-                 characters. If there is no majority then the paragraph direction is the resolved
-                 layout direction of the View. -->
-            <enum name="charCount" value="3" />
             <!-- The paragraph direction is left to right. -->
-            <enum name="ltr" value="4" />
+            <enum name="ltr" value="3" />
             <!-- The paragraph direction is right to left. -->
-            <enum name="rtl" value="5" />
+            <enum name="rtl" value="4" />
             <!-- The paragraph direction is coming from the system Locale. -->
-            <enum name="locale" value="6" />
+            <enum name="locale" value="5" />
         </attr>
     </declare-styleable>
 
