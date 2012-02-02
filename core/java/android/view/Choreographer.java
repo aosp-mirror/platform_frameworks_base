@@ -26,7 +26,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 /**
- * Coodinates animations and drawing for UI on a particular thread.
+ * Coordinates animations and drawing for UI on a particular thread.
  * @hide
  */
 public final class Choreographer extends Handler {
@@ -94,8 +94,8 @@ public final class Choreographer extends Handler {
     }
 
     /**
-     * Gets the choreographer for this thread.
-     * Must be called on the UI thread.
+     * Gets the choreographer for the calling thread.  Must be called from
+     * a thread that already has a {@link android.os.Looper} associated with it.
      *
      * @return The choreographer for this thread.
      * @throws IllegalStateException if the thread does not have a looper.
@@ -163,6 +163,15 @@ public final class Choreographer extends Handler {
     }
 
     /**
+     * Return true if {@link #scheduleAnimation()} has been called but
+     * {@link OnAnimateListener#onAnimate() OnAnimateListener.onAnimate()} has
+     * not yet been called.
+     */
+    public boolean isAnimationScheduled() {
+        return mAnimationScheduled;
+    }
+
+    /**
      * Schedules drawing to occur on the next frame synchronization boundary.
      * Must be called on the UI thread.
      */
@@ -178,6 +187,15 @@ public final class Choreographer extends Handler {
                 sendEmptyMessage(MSG_DO_DRAW);
             }
         }
+    }
+
+    /**
+     * Return true if {@link #scheduleDraw()} has been called but
+     * {@link OnDrawListener#onDraw() OnDrawListener.onDraw()} has
+     * not yet been called.
+     */
+    public boolean isDrawScheduled() {
+        return mDrawScheduled;
     }
 
     @Override

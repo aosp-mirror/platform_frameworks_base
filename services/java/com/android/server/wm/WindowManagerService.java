@@ -95,6 +95,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -141,7 +142,8 @@ import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs,
+        Choreographer.OnAnimateListener {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_ADD_REMOVE = false;
@@ -456,7 +458,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mDeferredRotationPauseCount;
 
     boolean mLayoutNeeded = true;
-    boolean mAnimationPending = false;
+    boolean mTraversalScheduled = false;
     boolean mDisplayFrozen = false;
     boolean mWaitingForConfig = false;
     boolean mWindowsFreezingScreen = false;
@@ -503,7 +505,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
-    H mH = new H();
+    final H mH = new H();
+
+    final Choreographer mChoreographer = Choreographer.getInstance();
 
     WindowState mCurrentFocus = null;
     WindowState mLastFocus = null;
@@ -691,6 +695,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Looper.prepare();
             WindowManagerService s = new WindowManagerService(mContext, mPM,
                     mHaveInputMethods, mAllowBootMessages);
+            s.mChoreographer.addOnAnimateListener(s);
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_DISPLAY);
             android.os.Process.setCanSelfBackground(false);
@@ -5390,7 +5395,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mScreenRotationAnimation.setRotation(rotation, mFxSession,
                         MAX_ANIMATION_DURATION, mTransitionAnimationScale,
                         mCurDisplayWidth, mCurDisplayHeight)) {
-                    requestAnimationLocked(0);
+                    mChoreographer.scheduleAnimation();
                 }
             }
             Surface.setOrientation(0, rotation);
@@ -6513,7 +6518,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final class H extends Handler {
         public static final int REPORT_FOCUS_CHANGE = 2;
         public static final int REPORT_LOSING_FOCUS = 3;
-        public static final int ANIMATE = 4;
+        public static final int DO_TRAVERSAL = 4;
         public static final int ADD_STARTING = 5;
         public static final int REMOVE_STARTING = 6;
         public static final int FINISHED_STARTING = 7;
@@ -6607,9 +6612,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } break;
 
-                case ANIMATE: {
+                case DO_TRAVERSAL: {
                     synchronized(mWindowMap) {
-                        mAnimationPending = false;
+                        mTraversalScheduled = false;
                         performLayoutAndPlaceSurfacesLocked();
                     }
                 } break;
@@ -6830,7 +6835,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case FORCE_GC: {
                     synchronized(mWindowMap) {
-                        if (mAnimationPending) {
+                        if (mChoreographer.isAnimationScheduled()) {
                             // If we are animating, don't do the gc now but
                             // delay a bit so we don't interrupt the animation.
                             mH.sendMessageDelayed(mH.obtainMessage(H.FORCE_GC),
@@ -7389,7 +7394,7 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 mInLayout = false;
                 if (mLayoutNeeded) {
-                    requestAnimationLocked(0);
+                    requestTraversalLocked();
                 }
             }
             if (mWindowsChanged && !mWindowChangeListeners.isEmpty()) {
@@ -8822,10 +8827,9 @@ public class WindowManagerService extends IWindowManager.Stub
             needRelayout = adjustWallpaperWindowsLocked() != 0;
         }
         if (needRelayout) {
-            requestAnimationLocked(0);
+            requestTraversalLocked();
         } else if (animating) {
-            final int refreshTimeUs = (int)(1000 / mDisplay.getRefreshRate());
-            requestAnimationLocked(currentTime + refreshTimeUs - SystemClock.uptimeMillis());
+            mChoreographer.scheduleAnimation();
         }
 
         // Finally update all input windows now that the window changes have stabilized.
@@ -8944,10 +8948,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void requestAnimationLocked(long delay) {
-        if (!mAnimationPending) {
-            mAnimationPending = true;
-            mH.sendMessageDelayed(mH.obtainMessage(H.ANIMATE), delay);
+    void requestTraversalLocked() {
+        if (!mTraversalScheduled) {
+            mTraversalScheduled = true;
+            mH.sendEmptyMessage(H.DO_TRAVERSAL);
+        }
+    }
+
+    @Override
+    public void onAnimate() {
+        synchronized(mWindowMap) {
+            performLayoutAndPlaceSurfacesLocked();
         }
     }
 
@@ -9267,7 +9278,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_ORIENTATION) Slog.i(TAG, "**** Dismissing screen rotation animation");
             if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                     mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
-                requestAnimationLocked(0);
+                mChoreographer.scheduleAnimation();
             } else {
                 mScreenRotationAnimation = null;
                 updateRotation = true;
@@ -9759,7 +9770,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
-            pw.print("  mAnimationPending="); pw.print(mAnimationPending);
+            pw.print("  mTraversalScheduled="); pw.print(mTraversalScheduled);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
             pw.print("  mNextAppTransition=0x");
