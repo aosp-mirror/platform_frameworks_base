@@ -3761,8 +3761,14 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     }
 
     /**
-     * Called when this view wants to give up focus. This will cause
-     * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} to be called.
+     * Called when this view wants to give up focus. If focus is cleared
+     * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} is called.
+     * <p>
+     * <strong>Note:</strong> When a View clears focus the framework is trying
+     * to give focus to the first focusable View from the top. Hence, if this
+     * View is the first from the top that can take focus, then its focus will
+     * not be cleared nor will the focus change callback be invoked.
+     * </p>
      */
     public void clearFocus() {
         if (DBG) {
