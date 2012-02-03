@@ -144,9 +144,9 @@ AudioPolicyService::~AudioPolicyService()
     }
     mInputs.clear();
 
-    if (mpAudioPolicy && mpAudioPolicyDev)
+    if (mpAudioPolicy != NULL && mpAudioPolicyDev != NULL)
         mpAudioPolicyDev->destroy_audio_policy(mpAudioPolicyDev, mpAudioPolicy);
-    if (mpAudioPolicyDev)
+    if (mpAudioPolicyDev != NULL)
         audio_policy_dev_close(mpAudioPolicyDev);
 }
 
@@ -1159,7 +1159,7 @@ effect_param_t *AudioPolicyService::loadEffectParameter(cnode *root)
     if (param == NULL && value == NULL) {
         // try to parse simple parameter form {int int}
         param = root->first_child;
-        if (param) {
+        if (param != NULL) {
             // Note: that a pair of random strings is read as 0 0
             int *ptr = (int *)fx_param->data;
             int *ptr2 = (int *)((char *)param + sizeof(effect_param_t));

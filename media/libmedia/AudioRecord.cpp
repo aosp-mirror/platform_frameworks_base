@@ -206,7 +206,7 @@ status_t AudioRecord::set(
         return status;
     }
 
-    if (cbf != 0) {
+    if (cbf != NULL) {
         mClientRecordThread = new ClientRecordThread(*this, threadCanCallJava);
     }
 
@@ -387,7 +387,7 @@ uint32_t AudioRecord::getSampleRate()
 
 status_t AudioRecord::setMarkerPosition(uint32_t marker)
 {
-    if (mCbf == 0) return INVALID_OPERATION;
+    if (mCbf == NULL) return INVALID_OPERATION;
 
     mMarkerPosition = marker;
     mMarkerReached = false;
@@ -397,7 +397,7 @@ status_t AudioRecord::setMarkerPosition(uint32_t marker)
 
 status_t AudioRecord::getMarkerPosition(uint32_t *marker)
 {
-    if (marker == 0) return BAD_VALUE;
+    if (marker == NULL) return BAD_VALUE;
 
     *marker = mMarkerPosition;
 
@@ -406,7 +406,7 @@ status_t AudioRecord::getMarkerPosition(uint32_t *marker)
 
 status_t AudioRecord::setPositionUpdatePeriod(uint32_t updatePeriod)
 {
-    if (mCbf == 0) return INVALID_OPERATION;
+    if (mCbf == NULL) return INVALID_OPERATION;
 
     uint32_t curPosition;
     getPosition(&curPosition);
@@ -418,7 +418,7 @@ status_t AudioRecord::setPositionUpdatePeriod(uint32_t updatePeriod)
 
 status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod)
 {
-    if (updatePeriod == 0) return BAD_VALUE;
+    if (updatePeriod == NULL) return BAD_VALUE;
 
     *updatePeriod = mUpdatePeriod;
 
@@ -427,7 +427,7 @@ status_t AudioRecord::getPositionUpdatePeriod(uint32_t *updatePeriod)
 
 status_t AudioRecord::getPosition(uint32_t *position)
 {
-    if (position == 0) return BAD_VALUE;
+    if (position == NULL) return BAD_VALUE;
 
     AutoMutex lock(mLock);
     *position = mCblk->user;

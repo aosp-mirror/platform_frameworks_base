@@ -1712,7 +1712,7 @@ String8 AudioFlinger::PlaybackThread::getParameters(const String8& keys)
 // audioConfigChanged_l() must be called with AudioFlinger::mLock held
 void AudioFlinger::PlaybackThread::audioConfigChanged_l(int event, int param) {
     AudioSystem::OutputDescriptor desc;
-    void *param2 = 0;
+    void *param2 = NULL;
 
     ALOGV("PlaybackThread::audioConfigChanged_l, thread %p, event %d, param %d", this, event, param);
 
@@ -1765,7 +1765,7 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
 
 status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames)
 {
-    if (halFrames == 0 || dspFrames == 0) {
+    if (halFrames == NULL || dspFrames == NULL) {
         return BAD_VALUE;
     }
     Mutex::Autolock _l(mLock);
@@ -3280,7 +3280,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
         mCblkMemory = client->heap()->allocate(size);
         if (mCblkMemory != 0) {
             mCblk = static_cast<audio_track_cblk_t *>(mCblkMemory->pointer());
-            if (mCblk) { // construct the shared structure in-place.
+            if (mCblk != NULL) { // construct the shared structure in-place.
                 new(mCblk) audio_track_cblk_t();
                 // clear all buffers
                 mCblk->frameCount = frameCount;
@@ -3323,7 +3323,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
 
 AudioFlinger::ThreadBase::TrackBase::~TrackBase()
 {
-    if (mCblk) {
+    if (mCblk != NULL) {
         mCblk->~audio_track_cblk_t();   // destroy our shared-structure.
         if (mClient == NULL) {
             delete mCblk;
@@ -3398,7 +3398,7 @@ void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t f
                 server %d, serverBase %d, user %d, userBase %d",
                 bufferStart, bufferEnd, mBuffer, mBufferEnd,
                 cblk->server, cblk->serverBase, cblk->user, cblk->userBase);
-        return 0;
+        return NULL;
     }
 
     return bufferStart;
@@ -4819,7 +4819,7 @@ String8 AudioFlinger::RecordThread::getParameters(const String8& keys)
 
 void AudioFlinger::RecordThread::audioConfigChanged_l(int event, int param) {
     AudioSystem::OutputDescriptor desc;
-    void *param2 = 0;
+    void *param2 = NULL;
 
     switch (event) {
     case AudioSystem::INPUT_OPENED:
@@ -4997,10 +4997,10 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
         }
         mPlaybackThreads.add(id, thread);
 
-        if (pSamplingRate) *pSamplingRate = samplingRate;
-        if (pFormat) *pFormat = format;
-        if (pChannels) *pChannels = channels;
-        if (pLatencyMs) *pLatencyMs = thread->latency();
+        if (pSamplingRate != NULL) *pSamplingRate = samplingRate;
+        if (pFormat != NULL) *pFormat = format;
+        if (pChannels != NULL) *pChannels = channels;
+        if (pLatencyMs != NULL) *pLatencyMs = thread->latency();
 
         // notify client processes of the new output creation
         thread->audioConfigChanged_l(AudioSystem::OUTPUT_OPENED);
@@ -5052,7 +5052,7 @@ status_t AudioFlinger::closeOutput(int output)
                 }
             }
         }
-        void *param2 = 0;
+        void *param2 = NULL;
         audioConfigChanged_l(AudioSystem::OUTPUT_CLOSED, output, param2);
         mPlaybackThreads.removeItem(output);
     }
@@ -5168,9 +5168,9 @@ int AudioFlinger::openInput(uint32_t *pDevices,
                                   device);
         mRecordThreads.add(id, thread);
         ALOGV("openInput() created record thread: ID %d thread %p", id, thread);
-        if (pSamplingRate) *pSamplingRate = reqSamplingRate;
-        if (pFormat) *pFormat = format;
-        if (pChannels) *pChannels = reqChannels;
+        if (pSamplingRate != NULL) *pSamplingRate = reqSamplingRate;
+        if (pFormat != NULL) *pFormat = format;
+        if (pChannels != NULL) *pChannels = reqChannels;
 
         input->stream->common.standby(&input->stream->common);
 
@@ -5195,7 +5195,7 @@ status_t AudioFlinger::closeInput(int input)
         }
 
         ALOGV("closeInput() %d", input);
-        void *param2 = 0;
+        void *param2 = NULL;
         audioConfigChanged_l(AudioSystem::INPUT_CLOSED, input, param2);
         mRecordThreads.removeItem(input);
     }
@@ -5802,7 +5802,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::ThreadBase::createEffect_l(
         // create effect handle and connect it to effect module
         handle = new EffectHandle(effect, client, effectClient, priority);
         lStatus = effect->addHandle(handle);
-        if (enabled) {
+        if (enabled != NULL) {
             *enabled = (int)effect->isEnabled();
         }
     }
@@ -6236,7 +6236,7 @@ size_t AudioFlinger::EffectModule::removeHandle(const wp<EffectHandle>& handle)
 
     bool enabled = false;
     EffectHandle *hdl = handle.unsafe_get();
-    if (hdl) {
+    if (hdl != NULL) {
         ALOGV("removeHandle() unsafe_get OK");
         enabled = hdl->enabled();
     }
@@ -6872,7 +6872,7 @@ AudioFlinger::EffectHandle::EffectHandle(const sp<EffectModule>& effect,
     if (mCblkMemory != 0) {
         mCblk = static_cast<effect_param_cblk_t *>(mCblkMemory->pointer());
 
-        if (mCblk) {
+        if (mCblk != NULL) {
             new(mCblk) effect_param_cblk_t();
             mBuffer = (uint8_t *)mCblk + bufOffset;
          }
@@ -6969,7 +6969,7 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
     // release sp on module => module destructor can be called now
     mEffect.clear();
     if (mClient != 0) {
-        if (mCblk) {
+        if (mCblk != NULL) {
             mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
         }
         mCblkMemory.clear();            // and free the shared memory
@@ -7099,7 +7099,7 @@ status_t AudioFlinger::EffectHandle::onTransact(
 
 void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 {
-    bool locked = mCblk ? tryLock(mCblk->lock) : false;
+    bool locked = mCblk != NULL && tryLock(mCblk->lock);
 
     snprintf(buffer, size, "\t\t\t%05d %05d    %01u    %01u      %05u  %05u\n",
             (mClient == NULL) ? getpid() : mClient->pid(),

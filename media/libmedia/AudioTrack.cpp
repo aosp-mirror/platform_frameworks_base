@@ -257,7 +257,7 @@ status_t AudioTrack::set(
         return status;
     }
 
-    if (cbf != 0) {
+    if (cbf != NULL) {
         mAudioTrackThread = new AudioTrackThread(*this, threadCanCallJava);
     }
 
@@ -604,13 +604,13 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
 status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount)
 {
     AutoMutex lock(mLock);
-    if (loopStart != 0) {
+    if (loopStart != NULL) {
         *loopStart = mCblk->loopStart;
     }
-    if (loopEnd != 0) {
+    if (loopEnd != NULL) {
         *loopEnd = mCblk->loopEnd;
     }
-    if (loopCount != 0) {
+    if (loopCount != NULL) {
         if (mCblk->loopCount < 0) {
             *loopCount = -1;
         } else {
@@ -623,7 +623,7 @@ status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCo
 
 status_t AudioTrack::setMarkerPosition(uint32_t marker)
 {
-    if (mCbf == 0) return INVALID_OPERATION;
+    if (mCbf == NULL) return INVALID_OPERATION;
 
     mMarkerPosition = marker;
     mMarkerReached = false;
@@ -633,7 +633,7 @@ status_t AudioTrack::setMarkerPosition(uint32_t marker)
 
 status_t AudioTrack::getMarkerPosition(uint32_t *marker)
 {
-    if (marker == 0) return BAD_VALUE;
+    if (marker == NULL) return BAD_VALUE;
 
     *marker = mMarkerPosition;
 
@@ -642,7 +642,7 @@ status_t AudioTrack::getMarkerPosition(uint32_t *marker)
 
 status_t AudioTrack::setPositionUpdatePeriod(uint32_t updatePeriod)
 {
-    if (mCbf == 0) return INVALID_OPERATION;
+    if (mCbf == NULL) return INVALID_OPERATION;
 
     uint32_t curPosition;
     getPosition(&curPosition);
@@ -654,7 +654,7 @@ status_t AudioTrack::setPositionUpdatePeriod(uint32_t updatePeriod)
 
 status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod)
 {
-    if (updatePeriod == 0) return BAD_VALUE;
+    if (updatePeriod == NULL) return BAD_VALUE;
 
     *updatePeriod = mUpdatePeriod;
 
@@ -679,7 +679,7 @@ status_t AudioTrack::setPosition(uint32_t position)
 
 status_t AudioTrack::getPosition(uint32_t *position)
 {
-    if (position == 0) return BAD_VALUE;
+    if (position == NULL) return BAD_VALUE;
     AutoMutex lock(mLock);
     *position = mFlushed ? 0 : mCblk->server;
 
@@ -1319,7 +1319,7 @@ void AudioTrack::AudioTrackThread::onFirstRef()
 
 audio_track_cblk_t::audio_track_cblk_t()
     : lock(Mutex::SHARED), cv(Condition::SHARED), user(0), server(0),
-    userBase(0), serverBase(0), buffers(0), frameCount(0),
+    userBase(0), serverBase(0), buffers(NULL), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), mVolumeLR(0x10001000),
     mSendLevel(0), flags(0)
 {
