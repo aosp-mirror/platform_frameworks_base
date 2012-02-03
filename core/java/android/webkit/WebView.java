@@ -2781,6 +2781,34 @@ public class WebView extends AbsoluteLayout
         return result;
     }
 
+    int getBlockLeftEdge(int x, int y, float readingScale) {
+        if (!sDisableNavcache) {
+            return nativeGetBlockLeftEdge(x, y, readingScale);
+        }
+
+        float invReadingScale = 1.0f / readingScale;
+        int readingWidth = (int) (getViewWidth() * invReadingScale);
+        int left = NO_LEFTEDGE;
+        if (mFocusedNode != null) {
+            final int length = mFocusedNode.mEnclosingParentRects.length;
+            for (int i = 0; i < length; i++) {
+                Rect rect = mFocusedNode.mEnclosingParentRects[i];
+                if (rect.width() < mFocusedNode.mHitTestSlop) {
+                    // ignore bounding boxes that are too small
+                    continue;
+                } else if (left != NO_LEFTEDGE && rect.width() > readingWidth) {
+                    // stop when bounding box doesn't fit the screen width
+                    // at reading scale
+                    break;
+                }
+
+                left = rect.left;
+            }
+        }
+
+        return left;
+    }
+
     // Called by JNI when the DOM has changed the focus.  Clear the focus so
     // that new keys will go to the newly focused field
     private void domChangedFocus() {
