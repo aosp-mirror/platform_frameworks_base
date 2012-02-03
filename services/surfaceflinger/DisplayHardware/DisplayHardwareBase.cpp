@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,15 +21,6 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/resource.h>
-
-#include <linux/unistd.h>
 
 #include <utils/Log.h>
 
@@ -45,39 +35,30 @@ static char const * const kWakeFileName  = "/sys/power/wait_for_fb_wake";
 
 // ----------------------------------------------------------------------------
 
-DisplayHardwareBase::DisplayEventThreadBase::DisplayEventThreadBase(
+DisplayHardwareBase::DisplayEventThread::DisplayEventThread(
         const sp<SurfaceFlinger>& flinger)
     : Thread(false), mFlinger(flinger) {
 }
 
-DisplayHardwareBase::DisplayEventThreadBase::~DisplayEventThreadBase() {
+DisplayHardwareBase::DisplayEventThread::~DisplayEventThread() {
 }
 
-// ----------------------------------------------------------------------------
-
-DisplayHardwareBase::DisplayEventThread::DisplayEventThread(
-        const sp<SurfaceFlinger>& flinger)
-    : DisplayEventThreadBase(flinger)
-{
+void DisplayHardwareBase::DisplayEventThread::onFirstRef() {
+    if (initCheck() == NO_ERROR) {
+        run("DisplayEventThread", PRIORITY_URGENT_DISPLAY);
+    } else {
+        ALOGW("/sys/power/wait_for_fb_{wake|sleep} don't exist");
+    }
 }
 
-DisplayHardwareBase::DisplayEventThread::~DisplayEventThread()
-{
+status_t DisplayHardwareBase::DisplayEventThread::initCheck() const {
+    return ((access(kSleepFileName, R_OK) == 0 &&
+            access(kWakeFileName, R_OK) == 0)) ? NO_ERROR : NO_INIT;
 }
 
-bool DisplayHardwareBase::DisplayEventThread::threadLoop()
-{
-    int err = 0;
-    char buf;
-    int fd;
+bool DisplayHardwareBase::DisplayEventThread::threadLoop() {
 
-    fd = open(kSleepFileName, O_RDONLY, 0);
-    do {
-      err = read(fd, &buf, 1);
-    } while (err < 0 && errno == EINTR);
-    close(fd);
-    ALOGW_IF(err<0, "ANDROID_WAIT_FOR_FB_SLEEP failed (%s)", strerror(errno));
-    if (err >= 0) {
+    if (waitForFbSleep() == NO_ERROR) {
         sp<SurfaceFlinger> flinger = mFlinger.promote();
         ALOGD("About to give-up screen, flinger = %p", flinger.get());
         if (flinger != 0) {
@@ -85,37 +66,49 @@ bool DisplayHardwareBase::DisplayEventThread::threadLoop()
             flinger->screenReleased(0);
             mBarrier.wait();
         }
+        if (waitForFbWake() == NO_ERROR) {
+            sp<SurfaceFlinger> flinger = mFlinger.promote();
+            ALOGD("Screen about to return, flinger = %p", flinger.get());
+            if (flinger != 0) {
+                flinger->screenAcquired(0);
+            }
+            return true;
+        }
     }
-    fd = open(kWakeFileName, O_RDONLY, 0);
+
+    // error, exit the thread
+    return false;
+}
+
+status_t DisplayHardwareBase::DisplayEventThread::waitForFbSleep() {
+    int err = 0;
+    char buf;
+    int fd = open(kSleepFileName, O_RDONLY, 0);
+    // if the file doesn't exist, the error will be caught in read() below
     do {
-      err = read(fd, &buf, 1);
+        err = read(fd, &buf, 1);
     } while (err < 0 && errno == EINTR);
     close(fd);
-    ALOGW_IF(err<0, "ANDROID_WAIT_FOR_FB_WAKE failed (%s)", strerror(errno));
-    if (err >= 0) {
-        sp<SurfaceFlinger> flinger = mFlinger.promote();
-        ALOGD("Screen about to return, flinger = %p", flinger.get());
-        if (flinger != 0)
-            flinger->screenAcquired(0);
-    }
-    return true;
+    ALOGE_IF(err<0, "*** ANDROID_WAIT_FOR_FB_SLEEP failed (%s)", strerror(errno));
+    return err < 0 ? -errno : int(NO_ERROR);
 }
 
-status_t DisplayHardwareBase::DisplayEventThread::releaseScreen() const
-{
+status_t DisplayHardwareBase::DisplayEventThread::waitForFbWake() {
+    int err = 0;
+    char buf;
+    int fd = open(kWakeFileName, O_RDONLY, 0);
+    // if the file doesn't exist, the error will be caught in read() below
+    do {
+        err = read(fd, &buf, 1);
+    } while (err < 0 && errno == EINTR);
+    close(fd);
+    ALOGE_IF(err<0, "*** ANDROID_WAIT_FOR_FB_WAKE failed (%s)", strerror(errno));
+    return err < 0 ? -errno : int(NO_ERROR);
+}
+
+status_t DisplayHardwareBase::DisplayEventThread::releaseScreen() const {
     mBarrier.open();
     return NO_ERROR;
-}
-
-status_t DisplayHardwareBase::DisplayEventThread::readyToRun()
-{
-    return NO_ERROR;
-}
-
-status_t DisplayHardwareBase::DisplayEventThread::initCheck() const
-{
-    return ((access(kSleepFileName, R_OK) == 0 &&
-            access(kWakeFileName, R_OK) == 0)) ? NO_ERROR : NO_INIT;
 }
 
 // ----------------------------------------------------------------------------
@@ -127,35 +120,27 @@ DisplayHardwareBase::DisplayHardwareBase(const sp<SurfaceFlinger>& flinger,
     mDisplayEventThread = new DisplayEventThread(flinger);
 }
 
-DisplayHardwareBase::~DisplayHardwareBase()
-{
+DisplayHardwareBase::~DisplayHardwareBase() {
     // request exit
     mDisplayEventThread->requestExitAndWait();
 }
 
-bool DisplayHardwareBase::canDraw() const
-{
+bool DisplayHardwareBase::canDraw() const {
     return mScreenAcquired;
 }
 
-void DisplayHardwareBase::releaseScreen() const
-{
+void DisplayHardwareBase::releaseScreen() const {
     status_t err = mDisplayEventThread->releaseScreen();
     if (err >= 0) {
         mScreenAcquired = false;
     }
 }
 
-void DisplayHardwareBase::acquireScreen() const
-{
-    status_t err = mDisplayEventThread->acquireScreen();
-    if (err >= 0) {
-        mScreenAcquired = true;
-    }
+void DisplayHardwareBase::acquireScreen() const {
+    mScreenAcquired = true;
 }
 
-bool DisplayHardwareBase::isScreenAcquired() const
-{
+bool DisplayHardwareBase::isScreenAcquired() const {
     return mScreenAcquired;
 }
 
