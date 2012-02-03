@@ -398,6 +398,9 @@ private:
     struct Link {
         T* next;
         T* prev;
+
+    protected:
+        inline Link() : next(NULL), prev(NULL) { }
     };
 
     struct InjectionState {
@@ -490,18 +493,8 @@ private:
         virtual ~KeyEntry();
     };
 
-    struct MotionSample {
-        MotionSample* next;
-
-        nsecs_t eventTime; // may be updated during coalescing
-        nsecs_t eventTimeBeforeCoalescing; // not updated during coalescing
-        PointerCoords pointerCoords[MAX_POINTERS];
-
-        MotionSample(nsecs_t eventTime, const PointerCoords* pointerCoords,
-                uint32_t pointerCount);
-    };
-
     struct MotionEntry : EventEntry {
+        nsecs_t eventTime;
         int32_t deviceId;
         uint32_t source;
         int32_t action;
@@ -514,10 +507,7 @@ private:
         nsecs_t downTime;
         uint32_t pointerCount;
         PointerProperties pointerProperties[MAX_POINTERS];
-
-        // Linked list of motion samples associated with this motion event.
-        MotionSample firstSample;
-        MotionSample* lastSample;
+        PointerCoords pointerCoords[MAX_POINTERS];
 
         MotionEntry(nsecs_t eventTime,
                 int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
@@ -525,14 +515,6 @@ private:
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
                 const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
-
-        uint32_t countSamples() const;
-
-        // Checks whether we can append samples, assuming the device id and source are the same.
-        bool canAppendSamples(int32_t action, uint32_t pointerCount,
-                const PointerProperties* pointerProperties) const;
-
-        void appendSample(nsecs_t eventTime, const PointerCoords* pointerCoords);
 
     protected:
         virtual ~MotionEntry();
@@ -552,19 +534,6 @@ private:
         // Set to the resolved action and flags when the event is enqueued.
         int32_t resolvedAction;
         int32_t resolvedFlags;
-
-        // For motion events:
-        //   Pointer to the first motion sample to dispatch in this cycle.
-        //   Usually NULL to indicate that the list of motion samples begins at
-        //   MotionEntry::firstSample.  Otherwise, some samples were dispatched in a previous
-        //   cycle and this pointer indicates the location of the first remainining sample
-        //   to dispatch during the current cycle.
-        MotionSample* headMotionSample;
-        //   Pointer to a motion sample to dispatch in the next cycle if the dispatcher was
-        //   unable to send all motion samples during this cycle.  On the next cycle,
-        //   headMotionSample will be initialized to tailMotionSample and tailMotionSample
-        //   will be set to NULL.
-        MotionSample* tailMotionSample;
 
         DispatchEntry(EventEntry* eventEntry,
                 int32_t targetFlags, float xOffset, float yOffset, float scaleFactor);
@@ -869,11 +838,6 @@ private:
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
     void dispatchIdleLocked();
 
-    // Batches a new sample onto a motion entry.
-    // Assumes that the we have already checked that we can append samples.
-    void batchMotionLocked(MotionEntry* entry, nsecs_t eventTime, int32_t metaState,
-            const PointerCoords* pointerCoords, const char* eventDescription);
-
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
     bool enqueueInboundEventLocked(EventEntry* entry);
 
@@ -993,8 +957,7 @@ private:
     bool dispatchMotionLocked(
             nsecs_t currentTime, MotionEntry* entry,
             DropReason* dropReason, nsecs_t* nextWakeupTime);
-    void dispatchEventToCurrentInputTargetsLocked(
-            nsecs_t currentTime, EventEntry* entry, bool resumeWithAppendedMotionSample);
+    void dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime, EventEntry* entry);
 
     void logOutboundKeyDetailsLocked(const char* prefix, const KeyEntry* entry);
     void logOutboundMotionDetailsLocked(const char* prefix, const MotionEntry* entry);
@@ -1033,8 +996,7 @@ private:
     int32_t findFocusedWindowTargetsLocked(nsecs_t currentTime, const EventEntry* entry,
             nsecs_t* nextWakeupTime);
     int32_t findTouchedWindowTargetsLocked(nsecs_t currentTime, const MotionEntry* entry,
-            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions,
-            const MotionSample** outSplitBatchAfterSample);
+            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions);
 
     void addWindowTargetLocked(const sp<InputWindowHandle>& windowHandle,
             int32_t targetFlags, BitSet32 pointerIds);
@@ -1053,14 +1015,11 @@ private:
     // with the mutex held makes it easier to ensure that connection invariants are maintained.
     // If needed, the methods post commands to run later once the critical bits are done.
     void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
-            EventEntry* eventEntry, const InputTarget* inputTarget,
-            bool resumeWithAppendedMotionSample);
+            EventEntry* eventEntry, const InputTarget* inputTarget);
     void enqueueDispatchEntriesLocked(nsecs_t currentTime, const sp<Connection>& connection,
-            EventEntry* eventEntry, const InputTarget* inputTarget,
-            bool resumeWithAppendedMotionSample);
+            EventEntry* eventEntry, const InputTarget* inputTarget);
     void enqueueDispatchEntryLocked(const sp<Connection>& connection,
-            EventEntry* eventEntry, const InputTarget* inputTarget,
-            bool resumeWithAppendedMotionSample, int32_t dispatchMode);
+            EventEntry* eventEntry, const InputTarget* inputTarget, int32_t dispatchMode);
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool handled);

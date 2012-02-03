@@ -24,17 +24,11 @@
 // Log detailed debug messages about each outbound event processed by the dispatcher.
 #define DEBUG_OUTBOUND_EVENT_DETAILS 0
 
-// Log debug messages about batching.
-#define DEBUG_BATCHING 0
-
 // Log debug messages about the dispatch cycle.
 #define DEBUG_DISPATCH_CYCLE 0
 
 // Log debug messages about registrations.
 #define DEBUG_REGISTRATION 0
-
-// Log debug messages about performance statistics.
-#define DEBUG_PERFORMANCE_STATISTICS 0
 
 // Log debug messages about input event injection.
 #define DEBUG_INJECTION 0
@@ -75,22 +69,6 @@ const nsecs_t APP_SWITCH_TIMEOUT = 500 * 1000000LL; // 0.5sec
 // Amount of time to allow for an event to be dispatched (measured since its eventTime)
 // before considering it stale and dropping it.
 const nsecs_t STALE_EVENT_TIMEOUT = 10000 * 1000000LL; // 10sec
-
-// Motion samples that are received within this amount of time are simply coalesced
-// when batched instead of being appended.  This is done because some drivers update
-// the location of pointers one at a time instead of all at once.
-// For example, when there are 10 fingers down, the input dispatcher may receive 10
-// samples in quick succession with only one finger's location changed in each sample.
-//
-// This value effectively imposes an upper bound on the touch sampling rate.
-// Touch sensors typically have a 50Hz - 200Hz sampling rate, so we expect distinct
-// samples to become available 5-20ms apart but individual finger reports can trickle
-// in over a period of 2-4ms or so.
-//
-// Empirical testing shows that a 2ms coalescing interval (500Hz) is not enough,
-// a 3ms coalescing interval (333Hz) works well most of the time and doesn't introduce
-// significant quantization noise on current hardware.
-const nsecs_t MOTION_SAMPLE_COALESCE_INTERVAL = 3 * 1000000LL; // 3ms, 333Hz
 
 
 static inline nsecs_t now() {
@@ -441,9 +419,9 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
                 && (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER)
                 && mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY
                 && mInputTargetWaitApplicationHandle != NULL) {
-            int32_t x = int32_t(motionEntry->firstSample.pointerCoords[0].
+            int32_t x = int32_t(motionEntry->pointerCoords[0].
                     getAxisValue(AMOTION_EVENT_AXIS_X));
-            int32_t y = int32_t(motionEntry->firstSample.pointerCoords[0].
+            int32_t y = int32_t(motionEntry->pointerCoords[0].
                     getAxisValue(AMOTION_EVENT_AXIS_Y));
             sp<InputWindowHandle> touchedWindowHandle = findTouchedWindowAtLocked(x, y);
             if (touchedWindowHandle != NULL
@@ -789,7 +767,7 @@ bool InputDispatcher::dispatchKeyLocked(nsecs_t currentTime, KeyEntry* entry,
     }
 
     // Dispatch the key.
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    dispatchEventToCurrentInputTargetsLocked(currentTime, entry);
     return true;
 }
 
@@ -829,11 +807,10 @@ bool InputDispatcher::dispatchMotionLocked(
     bool conflictingPointerActions = false;
     if (! mCurrentInputTargetsValid) {
         int32_t injectionResult;
-        const MotionSample* splitBatchAfterSample = NULL;
         if (isPointerEvent) {
             // Pointer event.  (eg. touchscreen)
             injectionResult = findTouchedWindowTargetsLocked(currentTime,
-                    entry, nextWakeupTime, &conflictingPointerActions, &splitBatchAfterSample);
+                    entry, nextWakeupTime, &conflictingPointerActions);
         } else {
             // Non touch event.  (eg. trackball)
             injectionResult = findFocusedWindowTargetsLocked(currentTime,
@@ -850,42 +827,6 @@ bool InputDispatcher::dispatchMotionLocked(
 
         addMonitoringTargetsLocked();
         commitTargetsLocked();
-
-        // Unbatch the event if necessary by splitting it into two parts after the
-        // motion sample indicated by splitBatchAfterSample.
-        if (splitBatchAfterSample && splitBatchAfterSample->next) {
-#if DEBUG_BATCHING
-            uint32_t originalSampleCount = entry->countSamples();
-#endif
-            MotionSample* nextSample = splitBatchAfterSample->next;
-            MotionEntry* nextEntry = new MotionEntry(nextSample->eventTime,
-                    entry->deviceId, entry->source, entry->policyFlags,
-                    entry->action, entry->flags,
-                    entry->metaState, entry->buttonState, entry->edgeFlags,
-                    entry->xPrecision, entry->yPrecision, entry->downTime,
-                    entry->pointerCount, entry->pointerProperties, nextSample->pointerCoords);
-            if (nextSample != entry->lastSample) {
-                nextEntry->firstSample.next = nextSample->next;
-                nextEntry->lastSample = entry->lastSample;
-            }
-            delete nextSample;
-
-            entry->lastSample = const_cast<MotionSample*>(splitBatchAfterSample);
-            entry->lastSample->next = NULL;
-
-            if (entry->injectionState) {
-                nextEntry->injectionState = entry->injectionState;
-                entry->injectionState->refCount += 1;
-            }
-
-#if DEBUG_BATCHING
-            ALOGD("Split batch of %d samples into two parts, first part has %d samples, "
-                    "second part has %d samples.", originalSampleCount,
-                    entry->countSamples(), nextEntry->countSamples());
-#endif
-
-            mInboundQueue.enqueueAtHead(nextEntry);
-        }
     }
 
     // Dispatch the motion.
@@ -894,7 +835,7 @@ bool InputDispatcher::dispatchMotionLocked(
                 "conflicting pointer actions");
         synthesizeCancelationEventsForAllConnectionsLocked(options);
     }
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
+    dispatchEventToCurrentInputTargetsLocked(currentTime, entry);
     return true;
 }
 
@@ -912,12 +853,6 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
             entry->edgeFlags, entry->xPrecision, entry->yPrecision,
             entry->downTime);
 
-    // Print the most recent sample that we have available, this may change due to batching.
-    size_t sampleCount = 1;
-    const MotionSample* sample = & entry->firstSample;
-    for (; sample->next != NULL; sample = sample->next) {
-        sampleCount += 1;
-    }
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
         ALOGD("  Pointer %d: id=%d, toolType=%d, "
                 "x=%f, y=%f, pressure=%f, size=%f, "
@@ -925,31 +860,23 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
                 "orientation=%f",
                 i, entry->pointerProperties[i].id,
                 entry->pointerProperties[i].toolType,
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
-                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
-    }
-
-    // Keep in mind that due to batching, it is possible for the number of samples actually
-    // dispatched to change before the application finally consumed them.
-    if (entry->action == AMOTION_EVENT_ACTION_MOVE) {
-        ALOGD("  ... Total movement samples currently batched %d ...", sampleCount);
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
+                entry->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
     }
 #endif
 }
 
 void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime,
-        EventEntry* eventEntry, bool resumeWithAppendedMotionSample) {
+        EventEntry* eventEntry) {
 #if DEBUG_DISPATCH_CYCLE
-    ALOGD("dispatchEventToCurrentInputTargets - "
-            "resumeWithAppendedMotionSample=%s",
-            toString(resumeWithAppendedMotionSample));
+    ALOGD("dispatchEventToCurrentInputTargets");
 #endif
 
     ALOG_ASSERT(eventEntry->dispatchInProgress); // should already have been set to true
@@ -962,8 +889,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
         ssize_t connectionIndex = getConnectionIndexLocked(inputTarget.inputChannel);
         if (connectionIndex >= 0) {
             sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-            prepareDispatchCycleLocked(currentTime, connection, eventEntry, & inputTarget,
-                    resumeWithAppendedMotionSample);
+            prepareDispatchCycleLocked(currentTime, connection, eventEntry, &inputTarget);
         } else {
 #if DEBUG_FOCUS
             ALOGD("Dropping event delivery to target with channel '%s' because it "
@@ -1168,8 +1094,7 @@ Unresponsive:
 }
 
 int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
-        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions,
-        const MotionSample** outSplitBatchAfterSample) {
+        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions) {
     enum InjectionPermission {
         INJECTION_PERMISSION_UNKNOWN,
         INJECTION_PERMISSION_GRANTED,
@@ -1249,11 +1174,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     if (newGesture || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
         /* Case 1: New splittable pointer going down, or need target for hover or scroll. */
 
-        const MotionSample* sample = &entry->firstSample;
         int32_t pointerIndex = getMotionEventActionPointerIndex(action);
-        int32_t x = int32_t(sample->pointerCoords[pointerIndex].
+        int32_t x = int32_t(entry->pointerCoords[pointerIndex].
                 getAxisValue(AMOTION_EVENT_AXIS_X));
-        int32_t y = int32_t(sample->pointerCoords[pointerIndex].
+        int32_t y = int32_t(entry->pointerCoords[pointerIndex].
                 getAxisValue(AMOTION_EVENT_AXIS_Y));
         sp<InputWindowHandle> newTouchedWindowHandle;
         sp<InputWindowHandle> topErrorWindowHandle;
@@ -1353,21 +1277,6 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         // Update hover state.
         if (isHoverAction) {
             newHoverWindowHandle = newTouchedWindowHandle;
-
-            // Ensure all subsequent motion samples are also within the touched window.
-            // Set *outSplitBatchAfterSample to the sample before the first one that is not
-            // within the touched window.
-            if (!isTouchModal) {
-                while (sample->next) {
-                    if (!newHoverWindowHandle->getInfo()->touchableRegionContainsPoint(
-                            sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
-                            sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y))) {
-                        *outSplitBatchAfterSample = sample;
-                        break;
-                    }
-                    sample = sample->next;
-                }
-            }
         } else if (maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
             newHoverWindowHandle = mLastHoverWindowHandle;
         }
@@ -1396,9 +1305,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         if (maskedAction == AMOTION_EVENT_ACTION_MOVE
                 && entry->pointerCount == 1
                 && mTempTouchState.isSlippery()) {
-            const MotionSample* sample = &entry->firstSample;
-            int32_t x = int32_t(sample->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X));
-            int32_t y = int32_t(sample->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
+            int32_t x = int32_t(entry->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X));
+            int32_t y = int32_t(entry->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
 
             sp<InputWindowHandle> oldTouchedWindowHandle =
                     mTempTouchState.getFirstForegroundWindowHandle();
@@ -1433,17 +1341,11 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                     pointerIds.markBit(entry->pointerProperties[0].id);
                 }
                 mTempTouchState.addOrUpdateWindow(newTouchedWindowHandle, targetFlags, pointerIds);
-
-                // Split the batch here so we send exactly one sample.
-                *outSplitBatchAfterSample = &entry->firstSample;
             }
         }
     }
 
     if (newHoverWindowHandle != mLastHoverWindowHandle) {
-        // Split the batch here so we send exactly one sample as part of ENTER or EXIT.
-        *outSplitBatchAfterSample = &entry->firstSample;
-
         // Let the previous window know that the hover sequence is over.
         if (mLastHoverWindowHandle != NULL) {
 #if DEBUG_HOVER
@@ -1798,22 +1700,15 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
 }
 
 void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
-        bool resumeWithAppendedMotionSample) {
+        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget) {
 #if DEBUG_DISPATCH_CYCLE
     ALOGD("channel '%s' ~ prepareDispatchCycle - flags=0x%08x, "
             "xOffset=%f, yOffset=%f, scaleFactor=%f, "
-            "pointerIds=0x%x, "
-            "resumeWithAppendedMotionSample=%s",
+            "pointerIds=0x%x",
             connection->getInputChannelName(), inputTarget->flags,
             inputTarget->xOffset, inputTarget->yOffset,
-            inputTarget->scaleFactor, inputTarget->pointerIds.value,
-            toString(resumeWithAppendedMotionSample));
+            inputTarget->scaleFactor, inputTarget->pointerIds.value);
 #endif
-
-    // Make sure we are never called for streaming when splitting across multiple windows.
-    bool isSplit = inputTarget->flags & InputTarget::FLAG_SPLIT;
-    ALOG_ASSERT(! (resumeWithAppendedMotionSample && isSplit));
 
     // Skip this event if the connection status is not normal.
     // We don't want to enqueue additional outbound events if the connection is broken.
@@ -1826,7 +1721,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
     }
 
     // Split a motion event if needed.
-    if (isSplit) {
+    if (inputTarget->flags & InputTarget::FLAG_SPLIT) {
         ALOG_ASSERT(eventEntry->type == EventEntry::TYPE_MOTION);
 
         MotionEntry* originalMotionEntry = static_cast<MotionEntry*>(eventEntry);
@@ -1842,134 +1737,33 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
             logOutboundMotionDetailsLocked("  ", splitMotionEntry);
 #endif
             enqueueDispatchEntriesLocked(currentTime, connection,
-                    splitMotionEntry, inputTarget, resumeWithAppendedMotionSample);
+                    splitMotionEntry, inputTarget);
             splitMotionEntry->release();
             return;
         }
     }
 
     // Not splitting.  Enqueue dispatch entries for the event as is.
-    enqueueDispatchEntriesLocked(currentTime, connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample);
+    enqueueDispatchEntriesLocked(currentTime, connection, eventEntry, inputTarget);
 }
 
 void InputDispatcher::enqueueDispatchEntriesLocked(nsecs_t currentTime,
-        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
-        bool resumeWithAppendedMotionSample) {
-    // Resume the dispatch cycle with a freshly appended motion sample.
-    // First we check that the last dispatch entry in the outbound queue is for the same
-    // motion event to which we appended the motion sample.  If we find such a dispatch
-    // entry, and if it is currently in progress then we try to stream the new sample.
+        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget) {
     bool wasEmpty = connection->outboundQueue.isEmpty();
-
-    if (! wasEmpty && resumeWithAppendedMotionSample) {
-        DispatchEntry* motionEventDispatchEntry =
-                connection->findQueuedDispatchEntryForEvent(eventEntry);
-        if (motionEventDispatchEntry) {
-            // If the dispatch entry is not in progress, then we must be busy dispatching an
-            // earlier event.  Not a problem, the motion event is on the outbound queue and will
-            // be dispatched later.
-            if (! motionEventDispatchEntry->inProgress) {
-#if DEBUG_BATCHING
-                ALOGD("channel '%s' ~ Not streaming because the motion event has "
-                        "not yet been dispatched.  "
-                        "(Waiting for earlier events to be consumed.)",
-                        connection->getInputChannelName());
-#endif
-                return;
-            }
-
-            // If the dispatch entry is in progress but it already has a tail of pending
-            // motion samples, then it must mean that the shared memory buffer filled up.
-            // Not a problem, when this dispatch cycle is finished, we will eventually start
-            // a new dispatch cycle to process the tail and that tail includes the newly
-            // appended motion sample.
-            if (motionEventDispatchEntry->tailMotionSample) {
-#if DEBUG_BATCHING
-                ALOGD("channel '%s' ~ Not streaming because no new samples can "
-                        "be appended to the motion event in this dispatch cycle.  "
-                        "(Waiting for next dispatch cycle to start.)",
-                        connection->getInputChannelName());
-#endif
-                return;
-            }
-
-            // If the motion event was modified in flight, then we cannot stream the sample.
-            if ((motionEventDispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_MASK)
-                    != InputTarget::FLAG_DISPATCH_AS_IS) {
-#if DEBUG_BATCHING
-                ALOGD("channel '%s' ~ Not streaming because the motion event was not "
-                        "being dispatched as-is.  "
-                        "(Waiting for next dispatch cycle to start.)",
-                        connection->getInputChannelName());
-#endif
-                return;
-            }
-
-            // The dispatch entry is in progress and is still potentially open for streaming.
-            // Try to stream the new motion sample.  This might fail if the consumer has already
-            // consumed the motion event (or if the channel is broken).
-            MotionEntry* motionEntry = static_cast<MotionEntry*>(eventEntry);
-            MotionSample* appendedMotionSample = motionEntry->lastSample;
-            status_t status;
-            if (motionEventDispatchEntry->scaleFactor == 1.0f) {
-                status = connection->inputPublisher.appendMotionSample(
-                        appendedMotionSample->eventTime, appendedMotionSample->pointerCoords);
-            } else {
-                PointerCoords scaledCoords[MAX_POINTERS];
-                for (size_t i = 0; i < motionEntry->pointerCount; i++) {
-                    scaledCoords[i] = appendedMotionSample->pointerCoords[i];
-                    scaledCoords[i].scale(motionEventDispatchEntry->scaleFactor);
-                }
-                status = connection->inputPublisher.appendMotionSample(
-                        appendedMotionSample->eventTime, scaledCoords);
-            }
-            if (status == OK) {
-#if DEBUG_BATCHING
-                ALOGD("channel '%s' ~ Successfully streamed new motion sample.",
-                        connection->getInputChannelName());
-#endif
-                return;
-            }
-
-#if DEBUG_BATCHING
-            if (status == NO_MEMORY) {
-                ALOGD("channel '%s' ~ Could not append motion sample to currently "
-                        "dispatched move event because the shared memory buffer is full.  "
-                        "(Waiting for next dispatch cycle to start.)",
-                        connection->getInputChannelName());
-            } else if (status == status_t(FAILED_TRANSACTION)) {
-                ALOGD("channel '%s' ~ Could not append motion sample to currently "
-                        "dispatched move event because the event has already been consumed.  "
-                        "(Waiting for next dispatch cycle to start.)",
-                        connection->getInputChannelName());
-            } else {
-                ALOGD("channel '%s' ~ Could not append motion sample to currently "
-                        "dispatched move event due to an error, status=%d.  "
-                        "(Waiting for next dispatch cycle to start.)",
-                        connection->getInputChannelName(), status);
-            }
-#endif
-            // Failed to stream.  Start a new tail of pending motion samples to dispatch
-            // in the next cycle.
-            motionEventDispatchEntry->tailMotionSample = appendedMotionSample;
-            return;
-        }
-    }
 
     // Enqueue dispatch entries for the requested modes.
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT);
+            InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_OUTSIDE);
+            InputTarget::FLAG_DISPATCH_AS_OUTSIDE);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER);
+            InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_IS);
+            InputTarget::FLAG_DISPATCH_AS_IS);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT);
+            InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
-            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER);
+            InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER);
 
     // If the outbound queue was previously empty, start the dispatch cycle going.
     if (wasEmpty && !connection->outboundQueue.isEmpty()) {
@@ -1980,7 +1774,7 @@ void InputDispatcher::enqueueDispatchEntriesLocked(nsecs_t currentTime,
 
 void InputDispatcher::enqueueDispatchEntryLocked(
         const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
-        bool resumeWithAppendedMotionSample, int32_t dispatchMode) {
+        int32_t dispatchMode) {
     int32_t inputTargetFlags = inputTarget->flags;
     if (!(inputTargetFlags & dispatchMode)) {
         return;
@@ -1992,20 +1786,6 @@ void InputDispatcher::enqueueDispatchEntryLocked(
     DispatchEntry* dispatchEntry = new DispatchEntry(eventEntry, // increments ref
             inputTargetFlags, inputTarget->xOffset, inputTarget->yOffset,
             inputTarget->scaleFactor);
-
-    // Handle the case where we could not stream a new motion sample because the consumer has
-    // already consumed the motion event (otherwise the corresponding dispatch entry would
-    // still be in the outbound queue for this connection).  We set the head motion sample
-    // to the list starting with the newly appended motion sample.
-    if (resumeWithAppendedMotionSample) {
-#if DEBUG_BATCHING
-        ALOGD("channel '%s' ~ Preparing a new dispatch cycle for additional motion samples "
-                "that cannot be streamed because the motion event has already been consumed.",
-                connection->getInputChannelName());
-#endif
-        MotionSample* appendedMotionSample = static_cast<MotionEntry*>(eventEntry)->lastSample;
-        dispatchEntry->headMotionSample = appendedMotionSample;
-    }
 
     // Apply target flags and update the connection's input state.
     switch (eventEntry->type) {
@@ -2121,17 +1901,8 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     case EventEntry::TYPE_MOTION: {
         MotionEntry* motionEntry = static_cast<MotionEntry*>(eventEntry);
 
-        // If headMotionSample is non-NULL, then it points to the first new sample that we
-        // were unable to dispatch during the previous cycle so we resume dispatching from
-        // that point in the list of motion samples.
-        // Otherwise, we just start from the first sample of the motion event.
-        MotionSample* firstMotionSample = dispatchEntry->headMotionSample;
-        if (! firstMotionSample) {
-            firstMotionSample = & motionEntry->firstSample;
-        }
-
         PointerCoords scaledCoords[MAX_POINTERS];
-        const PointerCoords* usingCoords = firstMotionSample->pointerCoords;
+        const PointerCoords* usingCoords = motionEntry->pointerCoords;
 
         // Set the X and Y offset depending on the input source.
         float xOffset, yOffset, scaleFactor;
@@ -2142,7 +1913,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             yOffset = dispatchEntry->yOffset * scaleFactor;
             if (scaleFactor != 1.0f) {
                 for (size_t i = 0; i < motionEntry->pointerCount; i++) {
-                    scaledCoords[i] = firstMotionSample->pointerCoords[i];
+                    scaledCoords[i] = motionEntry->pointerCoords[i];
                     scaledCoords[i].scale(scaleFactor);
                 }
                 usingCoords = scaledCoords;
@@ -2161,14 +1932,14 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             }
         }
 
-        // Publish the motion event and the first motion sample.
+        // Publish the motion event.
         status = connection->inputPublisher.publishMotionEvent(
                 motionEntry->deviceId, motionEntry->source,
                 dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags,
                 motionEntry->edgeFlags, motionEntry->metaState, motionEntry->buttonState,
                 xOffset, yOffset,
                 motionEntry->xPrecision, motionEntry->yPrecision,
-                motionEntry->downTime, firstMotionSample->eventTime,
+                motionEntry->downTime, motionEntry->eventTime,
                 motionEntry->pointerCount, motionEntry->pointerProperties,
                 usingCoords);
 
@@ -2177,45 +1948,6 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
                     "status=%d", connection->getInputChannelName(), status);
             abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
             return;
-        }
-
-        if (dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_MOVE
-                || dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
-            // Append additional motion samples.
-            MotionSample* nextMotionSample = firstMotionSample->next;
-            for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
-                if (usingCoords == scaledCoords) {
-                    if (!(dispatchEntry->targetFlags & InputTarget::FLAG_ZERO_COORDS)) {
-                        for (size_t i = 0; i < motionEntry->pointerCount; i++) {
-                            scaledCoords[i] = nextMotionSample->pointerCoords[i];
-                            scaledCoords[i].scale(scaleFactor);
-                        }
-                    }
-                } else {
-                    usingCoords = nextMotionSample->pointerCoords;
-                }
-                status = connection->inputPublisher.appendMotionSample(
-                        nextMotionSample->eventTime, usingCoords);
-                if (status == NO_MEMORY) {
-#if DEBUG_DISPATCH_CYCLE
-                    ALOGD("channel '%s' ~ Shared memory buffer full.  Some motion samples will "
-                            "be sent in the next dispatch cycle.",
-                            connection->getInputChannelName());
-#endif
-                    break;
-                }
-                if (status != OK) {
-                    ALOGE("channel '%s' ~ Could not append motion sample "
-                            "for a reason other than out of memory, status=%d",
-                            connection->getInputChannelName(), status);
-                    abortBrokenDispatchCycleLocked(currentTime, connection, true /*notify*/);
-                    return;
-                }
-            }
-
-            // Remember the next motion sample that we could not dispatch, in case we ran out
-            // of space in the shared memory buffer.
-            dispatchEntry->tailMotionSample = nextMotionSample;
         }
         break;
     }
@@ -2279,16 +2011,6 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
     while (! connection->outboundQueue.isEmpty()) {
         DispatchEntry* dispatchEntry = connection->outboundQueue.head;
         if (dispatchEntry->inProgress) {
-             // Finish or resume current event in progress.
-            if (dispatchEntry->tailMotionSample) {
-                // We have a tail of undispatched motion samples.
-                // Reuse the same DispatchEntry and start a new cycle.
-                dispatchEntry->inProgress = false;
-                dispatchEntry->headMotionSample = dispatchEntry->tailMotionSample;
-                dispatchEntry->tailMotionSample = NULL;
-                startDispatchCycleLocked(currentTime, connection);
-                return;
-            }
             // Finished.
             connection->outboundQueue.dequeueAtHead();
             if (dispatchEntry->hasForegroundTarget()) {
@@ -2458,7 +2180,7 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
             target.flags = InputTarget::FLAG_DISPATCH_AS_IS;
 
             enqueueDispatchEntryLocked(connection, cancelationEventEntry, // increments ref
-                    &target, false, InputTarget::FLAG_DISPATCH_AS_IS);
+                    &target, InputTarget::FLAG_DISPATCH_AS_IS);
 
             cancelationEventEntry->release();
         }
@@ -2489,7 +2211,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             splitPointerIndexMap[splitPointerCount] = originalPointerIndex;
             splitPointerProperties[splitPointerCount].copyFrom(pointerProperties);
             splitPointerCoords[splitPointerCount].copyFrom(
-                    originalMotionEntry->firstSample.pointerCoords[originalPointerIndex]);
+                    originalMotionEntry->pointerCoords[originalPointerIndex]);
             splitPointerCount += 1;
         }
     }
@@ -2549,18 +2271,6 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             originalMotionEntry->yPrecision,
             originalMotionEntry->downTime,
             splitPointerCount, splitPointerProperties, splitPointerCoords);
-
-    for (MotionSample* originalMotionSample = originalMotionEntry->firstSample.next;
-            originalMotionSample != NULL; originalMotionSample = originalMotionSample->next) {
-        for (uint32_t splitPointerIndex = 0; splitPointerIndex < splitPointerCount;
-                splitPointerIndex++) {
-            uint32_t originalPointerIndex = splitPointerIndexMap[splitPointerIndex];
-            splitPointerCoords[splitPointerIndex].copyFrom(
-                    originalMotionSample->pointerCoords[originalPointerIndex]);
-        }
-
-        splitMotionEntry->appendSample(originalMotionSample->eventTime, splitPointerCoords);
-    }
 
     if (originalMotionEntry->injectionState) {
         splitMotionEntry->injectionState = originalMotionEntry->injectionState;
@@ -2722,163 +2432,6 @@ void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
             mLock.lock();
         }
 
-        // Attempt batching and streaming of move events.
-        if (args->action == AMOTION_EVENT_ACTION_MOVE
-                || args->action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
-            // BATCHING CASE
-            //
-            // Try to append a move sample to the tail of the inbound queue for this device.
-            // Give up if we encounter a non-move motion event for this device since that
-            // means we cannot append any new samples until a new motion event has started.
-            for (EventEntry* entry = mInboundQueue.tail; entry; entry = entry->prev) {
-                if (entry->type != EventEntry::TYPE_MOTION) {
-                    // Keep looking for motion events.
-                    continue;
-                }
-
-                MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-                if (motionEntry->deviceId != args->deviceId
-                        || motionEntry->source != args->source) {
-                    // Keep looking for this device and source.
-                    continue;
-                }
-
-                if (!motionEntry->canAppendSamples(args->action,
-                        args->pointerCount, args->pointerProperties)) {
-                    // Last motion event in the queue for this device and source is
-                    // not compatible for appending new samples.  Stop here.
-                    goto NoBatchingOrStreaming;
-                }
-
-                // Do the batching magic.
-                batchMotionLocked(motionEntry, args->eventTime,
-                        args->metaState, args->pointerCoords,
-                        "most recent motion event for this device and source in the inbound queue");
-                mLock.unlock();
-                return; // done!
-            }
-
-            // BATCHING ONTO PENDING EVENT CASE
-            //
-            // Try to append a move sample to the currently pending event, if there is one.
-            // We can do this as long as we are still waiting to find the targets for the
-            // event.  Once the targets are locked-in we can only do streaming.
-            if (mPendingEvent
-                    && (!mPendingEvent->dispatchInProgress || !mCurrentInputTargetsValid)
-                    && mPendingEvent->type == EventEntry::TYPE_MOTION) {
-                MotionEntry* motionEntry = static_cast<MotionEntry*>(mPendingEvent);
-                if (motionEntry->deviceId == args->deviceId
-                        && motionEntry->source == args->source) {
-                    if (!motionEntry->canAppendSamples(args->action,
-                            args->pointerCount, args->pointerProperties)) {
-                        // Pending motion event is for this device and source but it is
-                        // not compatible for appending new samples.  Stop here.
-                        goto NoBatchingOrStreaming;
-                    }
-
-                    // Do the batching magic.
-                    batchMotionLocked(motionEntry, args->eventTime,
-                            args->metaState, args->pointerCoords,
-                            "pending motion event");
-                    mLock.unlock();
-                    return; // done!
-                }
-            }
-
-            // STREAMING CASE
-            //
-            // There is no pending motion event (of any kind) for this device in the inbound queue.
-            // Search the outbound queue for the current foreground targets to find a dispatched
-            // motion event that is still in progress.  If found, then, appen the new sample to
-            // that event and push it out to all current targets.  The logic in
-            // prepareDispatchCycleLocked takes care of the case where some targets may
-            // already have consumed the motion event by starting a new dispatch cycle if needed.
-            if (mCurrentInputTargetsValid) {
-                for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
-                    const InputTarget& inputTarget = mCurrentInputTargets[i];
-                    if ((inputTarget.flags & InputTarget::FLAG_FOREGROUND) == 0) {
-                        // Skip non-foreground targets.  We only want to stream if there is at
-                        // least one foreground target whose dispatch is still in progress.
-                        continue;
-                    }
-
-                    ssize_t connectionIndex = getConnectionIndexLocked(inputTarget.inputChannel);
-                    if (connectionIndex < 0) {
-                        // Connection must no longer be valid.
-                        continue;
-                    }
-
-                    sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
-                    if (connection->outboundQueue.isEmpty()) {
-                        // This foreground target has an empty outbound queue.
-                        continue;
-                    }
-
-                    DispatchEntry* dispatchEntry = connection->outboundQueue.head;
-                    if (! dispatchEntry->inProgress
-                            || dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION
-                            || dispatchEntry->isSplit()) {
-                        // No motion event is being dispatched, or it is being split across
-                        // windows in which case we cannot stream.
-                        continue;
-                    }
-
-                    MotionEntry* motionEntry = static_cast<MotionEntry*>(
-                            dispatchEntry->eventEntry);
-                    if (motionEntry->action != args->action
-                            || motionEntry->deviceId != args->deviceId
-                            || motionEntry->source != args->source
-                            || motionEntry->pointerCount != args->pointerCount
-                            || motionEntry->isInjected()) {
-                        // The motion event is not compatible with this move.
-                        continue;
-                    }
-
-                    if (args->action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
-                        if (mLastHoverWindowHandle == NULL) {
-#if DEBUG_BATCHING
-                            ALOGD("Not streaming hover move because there is no "
-                                    "last hovered window.");
-#endif
-                            goto NoBatchingOrStreaming;
-                        }
-
-                        sp<InputWindowHandle> hoverWindowHandle = findTouchedWindowAtLocked(
-                                args->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
-                                args->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
-                        if (mLastHoverWindowHandle != hoverWindowHandle) {
-#if DEBUG_BATCHING
-                            ALOGD("Not streaming hover move because the last hovered window "
-                                    "is '%s' but the currently hovered window is '%s'.",
-                                    mLastHoverWindowHandle->getName().string(),
-                                    hoverWindowHandle != NULL
-                                            ? hoverWindowHandle->getName().string() : "<null>");
-#endif
-                            goto NoBatchingOrStreaming;
-                        }
-                    }
-
-                    // Hurray!  This foreground target is currently dispatching a move event
-                    // that we can stream onto.  Append the motion sample and resume dispatch.
-                    motionEntry->appendSample(args->eventTime, args->pointerCoords);
-#if DEBUG_BATCHING
-                    ALOGD("Appended motion sample onto batch for most recently dispatched "
-                            "motion event for this device and source in the outbound queues.  "
-                            "Attempting to stream the motion sample.");
-#endif
-                    nsecs_t currentTime = now();
-                    dispatchEventToCurrentInputTargetsLocked(currentTime, motionEntry,
-                            true /*resumeWithAppendedMotionSample*/);
-
-                    runCommandsLockedInterruptible();
-                    mLock.unlock();
-                    return; // done!
-                }
-            }
-
-NoBatchingOrStreaming:;
-        }
-
         // Just enqueue a new motion event.
         MotionEntry* newEntry = new MotionEntry(args->eventTime,
                 args->deviceId, args->source, policyFlags,
@@ -2893,36 +2446,6 @@ NoBatchingOrStreaming:;
     if (needWake) {
         mLooper->wake();
     }
-}
-
-void InputDispatcher::batchMotionLocked(MotionEntry* entry, nsecs_t eventTime,
-        int32_t metaState, const PointerCoords* pointerCoords, const char* eventDescription) {
-    // Combine meta states.
-    entry->metaState |= metaState;
-
-    // Coalesce this sample if not enough time has elapsed since the last sample was
-    // initially appended to the batch.
-    MotionSample* lastSample = entry->lastSample;
-    long interval = eventTime - lastSample->eventTimeBeforeCoalescing;
-    if (interval <= MOTION_SAMPLE_COALESCE_INTERVAL) {
-        uint32_t pointerCount = entry->pointerCount;
-        for (uint32_t i = 0; i < pointerCount; i++) {
-            lastSample->pointerCoords[i].copyFrom(pointerCoords[i]);
-        }
-        lastSample->eventTime = eventTime;
-#if DEBUG_BATCHING
-        ALOGD("Coalesced motion into last sample of batch for %s, events were %0.3f ms apart",
-                eventDescription, interval * 0.000001f);
-#endif
-        return;
-    }
-
-    // Append the sample.
-    entry->appendSample(eventTime, pointerCoords);
-#if DEBUG_BATCHING
-    ALOGD("Appended motion sample onto batch for %s, events were %0.3f ms apart",
-            eventDescription, interval * 0.000001f);
-#endif
 }
 
 void InputDispatcher::notifySwitch(const NotifySwitchArgs* args) {
@@ -2973,7 +2496,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         policyFlags |= POLICY_FLAG_TRUSTED;
     }
 
-    EventEntry* injectedEntry;
+    EventEntry* firstInjectedEntry;
+    EventEntry* lastInjectedEntry;
     switch (event->getType()) {
     case AINPUT_EVENT_TYPE_KEY: {
         const KeyEvent* keyEvent = static_cast<const KeyEvent*>(event);
@@ -2996,11 +2520,12 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         }
 
         mLock.lock();
-        injectedEntry = new KeyEntry(keyEvent->getEventTime(),
+        firstInjectedEntry = new KeyEntry(keyEvent->getEventTime(),
                 keyEvent->getDeviceId(), keyEvent->getSource(),
                 policyFlags, action, flags,
                 keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
                 keyEvent->getRepeatCount(), keyEvent->getDownTime());
+        lastInjectedEntry = firstInjectedEntry;
         break;
     }
 
@@ -3021,7 +2546,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         mLock.lock();
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();
         const PointerCoords* samplePointerCoords = motionEvent->getSamplePointerCoords();
-        MotionEntry* motionEntry = new MotionEntry(*sampleEventTimes,
+        firstInjectedEntry = new MotionEntry(*sampleEventTimes,
                 motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
                 action, motionEvent->getFlags(),
                 motionEvent->getMetaState(), motionEvent->getButtonState(),
@@ -3029,12 +2554,21 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                 motionEvent->getDownTime(), uint32_t(pointerCount),
                 pointerProperties, samplePointerCoords);
+        lastInjectedEntry = firstInjectedEntry;
         for (size_t i = motionEvent->getHistorySize(); i > 0; i--) {
             sampleEventTimes += 1;
             samplePointerCoords += pointerCount;
-            motionEntry->appendSample(*sampleEventTimes, samplePointerCoords);
+            MotionEntry* nextInjectedEntry = new MotionEntry(*sampleEventTimes,
+                    motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
+                    action, motionEvent->getFlags(),
+                    motionEvent->getMetaState(), motionEvent->getButtonState(),
+                    motionEvent->getEdgeFlags(),
+                    motionEvent->getXPrecision(), motionEvent->getYPrecision(),
+                    motionEvent->getDownTime(), uint32_t(pointerCount),
+                    pointerProperties, samplePointerCoords);
+            lastInjectedEntry->next = nextInjectedEntry;
+            lastInjectedEntry = nextInjectedEntry;
         }
-        injectedEntry = motionEntry;
         break;
     }
 
@@ -3049,9 +2583,15 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
     }
 
     injectionState->refCount += 1;
-    injectedEntry->injectionState = injectionState;
+    lastInjectedEntry->injectionState = injectionState;
 
-    bool needWake = enqueueInboundEventLocked(injectedEntry);
+    bool needWake = false;
+    for (EventEntry* entry = firstInjectedEntry; entry != NULL; ) {
+        EventEntry* nextEntry = entry->next;
+        needWake |= enqueueInboundEventLocked(entry);
+        entry = nextEntry;
+    }
+
     mLock.unlock();
 
     if (needWake) {
@@ -4136,17 +3676,6 @@ void InputDispatcher::KeyEntry::recycle() {
 }
 
 
-// --- InputDispatcher::MotionSample ---
-
-InputDispatcher::MotionSample::MotionSample(nsecs_t eventTime,
-        const PointerCoords* pointerCoords, uint32_t pointerCount) :
-        next(NULL), eventTime(eventTime), eventTimeBeforeCoalescing(eventTime) {
-    for (uint32_t i = 0; i < pointerCount; i++) {
-        this->pointerCoords[i].copyFrom(pointerCoords[i]);
-    }
-}
-
-
 // --- InputDispatcher::MotionEntry ---
 
 InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
@@ -4156,54 +3685,18 @@ InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
         nsecs_t downTime, uint32_t pointerCount,
         const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) :
         EventEntry(TYPE_MOTION, eventTime, policyFlags),
+        eventTime(eventTime),
         deviceId(deviceId), source(source), action(action), flags(flags),
         metaState(metaState), buttonState(buttonState), edgeFlags(edgeFlags),
         xPrecision(xPrecision), yPrecision(yPrecision),
-        downTime(downTime), pointerCount(pointerCount),
-        firstSample(eventTime, pointerCoords, pointerCount),
-        lastSample(&firstSample) {
+        downTime(downTime), pointerCount(pointerCount) {
     for (uint32_t i = 0; i < pointerCount; i++) {
         this->pointerProperties[i].copyFrom(pointerProperties[i]);
+        this->pointerCoords[i].copyFrom(pointerCoords[i]);
     }
 }
 
 InputDispatcher::MotionEntry::~MotionEntry() {
-    for (MotionSample* sample = firstSample.next; sample != NULL; ) {
-        MotionSample* next = sample->next;
-        delete sample;
-        sample = next;
-    }
-}
-
-uint32_t InputDispatcher::MotionEntry::countSamples() const {
-    uint32_t count = 1;
-    for (MotionSample* sample = firstSample.next; sample != NULL; sample = sample->next) {
-        count += 1;
-    }
-    return count;
-}
-
-bool InputDispatcher::MotionEntry::canAppendSamples(int32_t action, uint32_t pointerCount,
-        const PointerProperties* pointerProperties) const {
-    if (this->action != action
-            || this->pointerCount != pointerCount
-            || this->isInjected()) {
-        return false;
-    }
-    for (uint32_t i = 0; i < pointerCount; i++) {
-        if (this->pointerProperties[i] != pointerProperties[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void InputDispatcher::MotionEntry::appendSample(
-        nsecs_t eventTime, const PointerCoords* pointerCoords) {
-    MotionSample* sample = new MotionSample(eventTime, pointerCoords, pointerCount);
-
-    lastSample->next = sample;
-    lastSample = sample;
 }
 
 
@@ -4214,8 +3707,7 @@ InputDispatcher::DispatchEntry::DispatchEntry(EventEntry* eventEntry,
         eventEntry(eventEntry), targetFlags(targetFlags),
         xOffset(xOffset), yOffset(yOffset), scaleFactor(scaleFactor),
         inProgress(false),
-        resolvedAction(0), resolvedFlags(0),
-        headMotionSample(NULL), tailMotionSample(NULL) {
+        resolvedAction(0), resolvedFlags(0) {
     eventEntry->refCount += 1;
 }
 
@@ -4433,7 +3925,7 @@ void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* 
     pointerCount = entry->pointerCount;
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
         pointerProperties[i].copyFrom(entry->pointerProperties[i]);
-        pointerCoords[i].copyFrom(entry->lastSample->pointerCoords[i]);
+        pointerCoords[i].copyFrom(entry->pointerCoords[i]);
     }
 }
 
