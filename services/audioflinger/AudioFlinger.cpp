@@ -748,7 +748,7 @@ status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& 
 {
     status_t result;
 
-    ALOGV("setParameters(): io %d, keyvalue %s, tid %d, calling tid %d",
+    ALOGV("setParameters(): io %d, keyvalue %s, tid %d, calling pid %d",
             ioHandle, keyValuePairs.string(), gettid(), IPCThreadState::self()->getCallingPid());
     // check calling permissions
     if (!settingsAllowed()) {
@@ -821,7 +821,7 @@ status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& 
 
 String8 AudioFlinger::getParameters(audio_io_handle_t ioHandle, const String8& keys) const
 {
-//    ALOGV("getParameters() io %d, keys %s, tid %d, calling tid %d",
+//    ALOGV("getParameters() io %d, keys %s, tid %d, calling pid %d",
 //            ioHandle, keys.string(), gettid(), IPCThreadState::self()->getCallingPid());
 
     if (ioHandle == 0) {
@@ -3391,7 +3391,7 @@ AudioFlinger::PlaybackThread::Track::Track(
             mName = playbackThread->getTrackName_l();
             mMainBuffer = playbackThread->mixBuffer();
         }
-        ALOGV("Track constructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
+        ALOGV("Track constructor name %d, calling pid %d", mName, IPCThreadState::self()->getCallingPid());
         if (mName < 0) {
             ALOGE("no more track names available");
         }
@@ -3523,7 +3523,7 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
 status_t AudioFlinger::PlaybackThread::Track::start()
 {
     status_t status = NO_ERROR;
-    ALOGV("start(%d), calling thread %d session %d",
+    ALOGV("start(%d), calling pid %d session %d",
             mName, IPCThreadState::self()->getCallingPid(), mSessionId);
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
@@ -3565,7 +3565,7 @@ status_t AudioFlinger::PlaybackThread::Track::start()
 
 void AudioFlinger::PlaybackThread::Track::stop()
 {
-    ALOGV("stop(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
+    ALOGV("stop(%d), calling pid %d", mName, IPCThreadState::self()->getCallingPid());
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
@@ -3594,7 +3594,7 @@ void AudioFlinger::PlaybackThread::Track::stop()
 
 void AudioFlinger::PlaybackThread::Track::pause()
 {
-    ALOGV("pause(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
+    ALOGV("pause(%d), calling pid %d", mName, IPCThreadState::self()->getCallingPid());
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
