@@ -19,7 +19,7 @@ package android.content;
 /**
  * An exception type that is thrown when an operation in progress is canceled.
  *
- * @see CancelationSignal
+ * @see CancellationSignal
  */
 public class OperationCanceledException extends RuntimeException {
     public OperationCanceledException() {

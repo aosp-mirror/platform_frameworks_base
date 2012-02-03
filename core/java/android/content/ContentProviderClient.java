@@ -52,15 +52,15 @@ public class ContentProviderClient {
 
     /** See {@link ContentProvider#query ContentProvider.query} */
     public Cursor query(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, CancelationSignal cancelationSignal)
+            String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal)
                     throws RemoteException {
-        ICancelationSignal remoteCancelationSignal = null;
-        if (cancelationSignal != null) {
-            remoteCancelationSignal = mContentProvider.createCancelationSignal();
-            cancelationSignal.setRemote(remoteCancelationSignal);
+        ICancellationSignal remoteCancellationSignal = null;
+        if (cancellationSignal != null) {
+            remoteCancellationSignal = mContentProvider.createCancellationSignal();
+            cancellationSignal.setRemote(remoteCancellationSignal);
         }
         return mContentProvider.query(url, projection, selection,  selectionArgs, sortOrder,
-                remoteCancelationSignal);
+                remoteCancellationSignal);
     }
 
     /** See {@link ContentProvider#getType ContentProvider.getType} */

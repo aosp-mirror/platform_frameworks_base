@@ -19,7 +19,7 @@ package com.android.layoutlib.bridge.android;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
-import android.content.ICancelationSignal;
+import android.content.ICancellationSignal;
 import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.res.AssetFileDescriptor;
@@ -92,7 +92,7 @@ public final class BridgeContentProvider implements IContentProvider {
 
     @Override
     public Cursor query(Uri arg0, String[] arg1, String arg2, String[] arg3, String arg4,
-            ICancelationSignal arg5) throws RemoteException {
+            ICancellationSignal arg5) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -124,7 +124,7 @@ public final class BridgeContentProvider implements IContentProvider {
     }
 
     @Override
-    public ICancelationSignal createCancelationSignal() throws RemoteException {
+    public ICancellationSignal createCancellationSignal() throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }

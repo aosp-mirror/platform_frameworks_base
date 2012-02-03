@@ -21,15 +21,15 @@ import android.os.RemoteException;
 /**
  * Provides the ability to cancel an operation in progress.
  */
-public final class CancelationSignal {
+public final class CancellationSignal {
     private boolean mIsCanceled;
     private OnCancelListener mOnCancelListener;
-    private ICancelationSignal mRemote;
+    private ICancellationSignal mRemote;
 
     /**
-     * Creates a cancelation signal, initially not canceled.
+     * Creates a cancellation signal, initially not canceled.
      */
-    public CancelationSignal() {
+    public CancellationSignal() {
     }
 
     /**
@@ -55,7 +55,7 @@ public final class CancelationSignal {
     }
 
     /**
-     * Cancels the operation and signals the cancelation listener.
+     * Cancels the operation and signals the cancellation listener.
      * If the operation has not yet started, then it will be canceled as soon as it does.
      */
     public void cancel() {
@@ -76,17 +76,23 @@ public final class CancelationSignal {
     }
 
     /**
-     * Sets the cancelation listener to be called when canceled.
-     * If {@link CancelationSignal#cancel} has already been called, then the provided
+     * Sets the cancellation listener to be called when canceled.
+     *
+     * This method is intended to be used by the recipient of a cancellation signal
+     * such as a database or a content provider to handle cancellation requests
+     * while performing a long-running operation.  This method is not intended to be
+     * used by applications themselves.
+     *
+     * If {@link CancellationSignal#cancel} has already been called, then the provided
      * listener is invoked immediately.
      *
-     * The listener is called while holding the cancelation signal's lock which is
+     * The listener is called while holding the cancellation signal's lock which is
      * also held while registering or unregistering the listener.  Because of the lock,
      * it is not possible for the listener to run after it has been unregistered.
-     * This design choice makes it easier for clients of {@link CancelationSignal} to
+     * This design choice makes it easier for clients of {@link CancellationSignal} to
      * prevent race conditions related to listener registration and unregistration.
      *
-     * @param listener The cancelation listener, or null to remove the current listener.
+     * @param listener The cancellation listener, or null to remove the current listener.
      */
     public void setOnCancelListener(OnCancelListener listener) {
         synchronized (this) {
@@ -104,7 +110,7 @@ public final class CancelationSignal {
      *
      * @hide
      */
-    public void setRemote(ICancelationSignal remote) {
+    public void setRemote(ICancellationSignal remote) {
         synchronized (this) {
             mRemote = remote;
             if (mIsCanceled && remote != null) {
@@ -118,47 +124,47 @@ public final class CancelationSignal {
 
     /**
      * Creates a transport that can be returned back to the caller of
-     * a Binder function and subsequently used to dispatch a cancelation signal.
+     * a Binder function and subsequently used to dispatch a cancellation signal.
      *
-     * @return The new cancelation signal transport.
+     * @return The new cancellation signal transport.
      *
      * @hide
      */
-    public static ICancelationSignal createTransport() {
+    public static ICancellationSignal createTransport() {
         return new Transport();
     }
 
     /**
-     * Given a locally created transport, returns its associated cancelation signal.
+     * Given a locally created transport, returns its associated cancellation signal.
      *
      * @param transport The locally created transport, or null if none.
-     * @return The associated cancelation signal, or null if none.
+     * @return The associated cancellation signal, or null if none.
      *
      * @hide
      */
-    public static CancelationSignal fromTransport(ICancelationSignal transport) {
+    public static CancellationSignal fromTransport(ICancellationSignal transport) {
         if (transport instanceof Transport) {
-            return ((Transport)transport).mCancelationSignal;
+            return ((Transport)transport).mCancellationSignal;
         }
         return null;
     }
 
     /**
-     * Listens for cancelation.
+     * Listens for cancellation.
      */
     public interface OnCancelListener {
         /**
-         * Called when {@link CancelationSignal#cancel} is invoked.
+         * Called when {@link CancellationSignal#cancel} is invoked.
          */
         void onCancel();
     }
 
-    private static final class Transport extends ICancelationSignal.Stub {
-        final CancelationSignal mCancelationSignal = new CancelationSignal();
+    private static final class Transport extends ICancellationSignal.Stub {
+        final CancellationSignal mCancellationSignal = new CancellationSignal();
 
         @Override
         public void cancel() throws RemoteException {
-            mCancelationSignal.cancel();
+            mCancellationSignal.cancel();
         }
     }
 }
