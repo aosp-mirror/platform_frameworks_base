@@ -145,8 +145,9 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
             = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid, recordNum, onLoaded));
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
-                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
+                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null,
+                        phone.getIccCard().getAid(), response);
     }
 
     /**
@@ -164,9 +165,10 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
                         onLoaded));
 
         // TODO(): Verify when path changes are done.
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, IccConstants.EF_IMG, "img",
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, IccConstants.EF_IMG, "img",
                 recordNum, READ_RECORD_MODE_ABSOLUTE,
-                GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null, response);
+                GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null,
+                phone.getIccCard().getAid(), response);
     }
 
     /**
@@ -182,8 +184,9 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
         Message response
                 = obtainMessage(EVENT_GET_EF_LINEAR_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid, onLoaded));
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
-                    0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
+                    0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, phone.getIccCard().getAid(),
+                    response);
     }
 
     /**
@@ -199,8 +202,9 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
         Message response = obtainMessage(EVENT_GET_RECORD_SIZE_DONE,
                         new LoadLinearFixedContext(fileid,onLoaded));
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
-                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
+                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null,
+                        phone.getIccCard().getAid(), response);
     }
 
     /**
@@ -217,8 +221,9 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
         Message response = obtainMessage(EVENT_GET_BINARY_SIZE_DONE,
                         fileid, 0, onLoaded);
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
-                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, getEFPath(fileid),
+                        0, 0, GET_RESPONSE_EF_SIZE_BYTES, null, null,
+                        phone.getIccCard().getAid(), response);
     }
 
     /**
@@ -236,8 +241,8 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
         Message response = obtainMessage(EVENT_READ_ICON_DONE, fileid, 0,
                 onLoaded);
 
-        phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, "img", highOffset, lowOffset,
-                length, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_READ_BINARY, fileid, "img", highOffset, lowOffset,
+                length, null, null, phone.getIccCard().getAid(), response);
     }
 
     /**
@@ -251,9 +256,10 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
      */
     public void updateEFLinearFixed(int fileid, int recordNum, byte[] data,
             String pin2, Message onComplete) {
-        phone.mCM.iccIO(COMMAND_UPDATE_RECORD, fileid, getEFPath(fileid),
+        phone.mCM.iccIOForApp(COMMAND_UPDATE_RECORD, fileid, getEFPath(fileid),
                         recordNum, READ_RECORD_MODE_ABSOLUTE, data.length,
-                        IccUtils.bytesToHexString(data), pin2, onComplete);
+                        IccUtils.bytesToHexString(data), pin2,
+                        phone.getIccCard().getAid(), onComplete);
     }
 
     /**
@@ -262,9 +268,10 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
      * @param data must be exactly as long as the EF
      */
     public void updateEFTransparent(int fileid, byte[] data, Message onComplete) {
-        phone.mCM.iccIO(COMMAND_UPDATE_BINARY, fileid, getEFPath(fileid),
+        phone.mCM.iccIOForApp(COMMAND_UPDATE_BINARY, fileid, getEFPath(fileid),
                         0, 0, data.length,
-                        IccUtils.bytesToHexString(data), null, onComplete);
+                        IccUtils.bytesToHexString(data), null,
+                        phone.getIccCard().getAid(), onComplete);
     }
 
 
@@ -395,10 +402,11 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
                      lc.results = new ArrayList<byte[]>(lc.countRecords);
                  }
 
-                 phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
+                 phone.mCM.iccIOForApp(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
                          lc.recordNum,
                          READ_RECORD_MODE_ABSOLUTE,
                          lc.recordSize, null, null,
+                         phone.getIccCard().getAid(),
                          obtainMessage(EVENT_READ_RECORD_DONE, lc));
                  break;
             case EVENT_GET_BINARY_SIZE_DONE:
@@ -433,8 +441,9 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
                 size = ((data[RESPONSE_DATA_FILE_SIZE_1] & 0xff) << 8)
                        + (data[RESPONSE_DATA_FILE_SIZE_2] & 0xff);
 
-                phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
+                phone.mCM.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
                                 0, 0, size, null, null,
+                                phone.getIccCard().getAid(),
                                 obtainMessage(EVENT_READ_BINARY_DONE,
                                               fileid, 0, response));
             break;
@@ -468,10 +477,11 @@ public abstract class IccFileHandler extends Handler implements IccConstants {
                     if (lc.recordNum > lc.countRecords) {
                         sendResult(response, lc.results, null);
                     } else {
-                        phone.mCM.iccIO(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
+                        phone.mCM.iccIOForApp(COMMAND_READ_RECORD, lc.efid, getEFPath(lc.efid),
                                     lc.recordNum,
                                     READ_RECORD_MODE_ABSOLUTE,
                                     lc.recordSize, null, null,
+                                    phone.getIccCard().getAid(),
                                     obtainMessage(EVENT_READ_RECORD_DONE, lc));
                     }
                 }

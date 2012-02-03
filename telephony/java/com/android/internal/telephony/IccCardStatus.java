@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * {@hide}
  */
 public class IccCardStatus {
-    static final int CARD_MAX_APPS = 8;
+    public static final int CARD_MAX_APPS = 8;
 
     public enum CardState {
         CARDSTATE_ABSENT,

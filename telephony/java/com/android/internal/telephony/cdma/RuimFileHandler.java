@@ -57,8 +57,9 @@ public final class RuimFileHandler extends IccFileHandler {
         Message response = obtainMessage(EVENT_READ_ICON_DONE, fileid, 0,
                 onLoaded);
 
-        phone.mCM.iccIO(COMMAND_GET_RESPONSE, fileid, "img", 0, 0,
-                GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null, response);
+        phone.mCM.iccIOForApp(COMMAND_GET_RESPONSE, fileid, "img", 0, 0,
+                GET_RESPONSE_EF_IMG_SIZE_BYTES, null, null,
+                phone.getIccCard().getAid(), response);
     }
 
     @Override
