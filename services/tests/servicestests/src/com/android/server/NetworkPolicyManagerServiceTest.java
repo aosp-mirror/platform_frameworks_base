@@ -21,7 +21,6 @@ import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
-import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
@@ -256,41 +255,49 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     public void testPidForegroundCombined() throws Exception {
+        IdleFuture idle;
+
         // push all uid into background
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_3, UID_B, false);
-        waitUntilIdle();
+        idle.get();
         assertFalse(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // push one of the shared pids into foreground
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, true);
-        waitUntilIdle();
+        idle.get();
         assertTrue(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // and swap another uid into foreground
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
         mProcessObserver.onForegroundActivitiesChanged(PID_3, UID_B, true);
-        waitUntilIdle();
+        idle.get();
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
 
         // push both pid into foreground
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, true);
-        waitUntilIdle();
+        idle.get();
         assertTrue(mService.isUidForeground(UID_A));
 
         // pull one out, should still be foreground
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
-        waitUntilIdle();
+        idle.get();
         assertTrue(mService.isUidForeground(UID_A));
 
         // pull final pid out, should now be background
+        idle = expectIdle();
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
-        waitUntilIdle();
+        idle.get();
         assertFalse(mService.isUidForeground(UID_A));
     }
 
@@ -434,7 +441,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 5, 1024L, 1024L, SNOOZE_NEVER, false);
+                sTemplateWifi, 5, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -445,7 +452,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 20, 1024L, 1024L, SNOOZE_NEVER, false);
+                sTemplateWifi, 20, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -456,7 +463,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER, false);
+                sTemplateWifi, 30, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
@@ -467,14 +474,14 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long expectedCycle = parseTime("2007-02-28T23:59:59.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER, false);
+                sTemplateWifi, 30, 1024L, 1024L, false);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
     public void testNextCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, false);
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk forwards, ensuring that cycle boundaries don't get stuck
@@ -489,7 +496,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     public void testLastCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
-                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, false);
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, false);
         final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
 
         // walk backwards, ensuring that cycle boundaries look sane
@@ -547,7 +554,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         replay();
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, SNOOZE_NEVER, false));
+                sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
         future.get();
         verifyAndReset();
     }
@@ -604,9 +611,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged();
 
             replay();
-            setNetworkPolicies(
-                    new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES,
-                            SNOOZE_NEVER, false));
+            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1 * MB_IN_BYTES,
+                    2 * MB_IN_BYTES, false));
             future.get();
             verifyAndReset();
         }
@@ -698,7 +704,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             tagFuture = expectEnqueueNotification();
 
             replay();
-            mService.snoozePolicy(sTemplateWifi);
+            mService.snoozeLimit(sTemplateWifi);
             assertNotificationType(TYPE_LIMIT_SNOOZED, tagFuture.get());
             future.get();
             verifyAndReset();
@@ -736,9 +742,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             future = expectMeteredIfacesChanged(TEST_IFACE);
 
             replay();
-            setNetworkPolicies(
-                    new NetworkPolicy(sTemplateWifi, CYCLE_DAY, WARNING_DISABLED, LIMIT_DISABLED,
-                            SNOOZE_NEVER, true));
+            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, WARNING_DISABLED,
+                    LIMIT_DISABLED, true));
             future.get();
             verifyAndReset();
         }
@@ -890,10 +895,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     /**
      * Wait until {@link #mService} internal {@link Handler} is idle.
      */
-    private void waitUntilIdle() throws Exception {
+    private IdleFuture expectIdle() {
         final IdleFuture future = new IdleFuture();
         mService.addIdleHandler(future);
-        future.get();
+        return future;
     }
 
     private static void assertTimeEquals(long expected, long actual) {
