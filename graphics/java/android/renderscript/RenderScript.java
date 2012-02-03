@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -837,7 +837,8 @@ public class RenderScript {
                         mRS.mErrorCallback.mErrorNum = subID;
                         mRS.mErrorCallback.run();
                     } else {
-                        throw new RSRuntimeException("Received error num " + subID + ", details: " + e);
+                        // Do not throw here. In these cases, we do not have
+                        // a fatal error.
                     }
                     continue;
                 }
