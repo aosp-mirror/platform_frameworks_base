@@ -282,7 +282,7 @@ MPEG4Writer::MPEG4Writer(int fd)
 }
 
 MPEG4Writer::~MPEG4Writer() {
-    stop();
+    reset();
 
     while (!mTracks.empty()) {
         List<Track *>::iterator it = mTracks.begin();
@@ -616,7 +616,7 @@ void MPEG4Writer::release() {
     mStarted = false;
 }
 
-status_t MPEG4Writer::stop() {
+status_t MPEG4Writer::reset() {
     if (mInitCheck != OK) {
         return OK;
     } else {

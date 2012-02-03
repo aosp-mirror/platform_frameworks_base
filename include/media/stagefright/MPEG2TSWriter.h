@@ -37,7 +37,7 @@ struct MPEG2TSWriter : public MediaWriter {
 
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual status_t start(MetaData *param = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual status_t pause();
     virtual bool reachedEOS();
     virtual status_t dump(int fd, const Vector<String16>& args);
@@ -78,6 +78,7 @@ private:
     void writeAccessUnit(int32_t sourceIndex, const sp<ABuffer> &buffer);
 
     ssize_t internalWrite(const void *data, size_t size);
+    status_t reset();
 
     DISALLOW_EVIL_CONSTRUCTORS(MPEG2TSWriter);
 };

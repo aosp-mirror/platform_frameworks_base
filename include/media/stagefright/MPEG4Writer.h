@@ -37,7 +37,7 @@ public:
 
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual status_t start(MetaData *param = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual status_t pause();
     virtual bool reachedEOS();
     virtual status_t dump(int fd, const Vector<String16>& args);
@@ -184,6 +184,7 @@ private:
     void writeLongitude(int degreex10000);
     void sendSessionSummary();
     void release();
+    status_t reset();
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);
