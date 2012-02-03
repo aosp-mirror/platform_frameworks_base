@@ -41,6 +41,10 @@ public class TransformParam extends ShaderParam {
 
     public void setTransform(Transform t) {
         mTransform = t;
+        if (mField != null && mTransform != null) {
+            mData.transform = mTransform.getRSData().getAllocation();
+        }
+        incTimestamp();
     }
 
     int getTypeFromName() {

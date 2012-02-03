@@ -45,49 +45,41 @@ public class Float4Param extends ShaderParam {
 
     public Float4Param(String name, float x) {
         super(name);
-        set(x, 0, 0, 0, 1);
+        set(x, 0, 0, 0);
     }
 
     public Float4Param(String name, float x, float y) {
         super(name);
-        set(x, y, 0, 0, 2);
+        set(x, y, 0, 0);
     }
 
     public Float4Param(String name, float x, float y, float z) {
         super(name);
-        set(x, y, z, 0, 3);
+        set(x, y, z, 0);
     }
 
     public Float4Param(String name, float x, float y, float z, float w) {
         super(name);
-        set(x, y, z, w, 4);
+        set(x, y, z, w);
     }
 
-    void set(float x, float y, float z, float w, int vecSize) {
+    void set(float x, float y, float z, float w) {
         mData.float_value.x = x;
         mData.float_value.y = y;
         mData.float_value.z = z;
         mData.float_value.w = w;
-        mData.float_vecSize = vecSize;
         if (mField != null) {
             mField.set_float_value(0, mData.float_value, true);
-            mField.set_float_vecSize(0, mData.float_vecSize, true);
         }
+        incTimestamp();
     }
 
     public void setValue(Float4 v) {
-        set(v.x, v.y, v.z, v.w, mData.float_vecSize);
+        set(v.x, v.y, v.z, v.w);
     }
 
     public Float4 getValue() {
         return mData.float_value;
-    }
-
-    public void setVecSize(int vecSize) {
-        mData.float_vecSize = vecSize;
-        if (mField != null) {
-            mField.set_float_vecSize(0, mData.float_vecSize, true);
-        }
     }
 
     public void setLight(LightBase l) {
@@ -96,6 +88,7 @@ public class Float4Param extends ShaderParam {
             mData.light = mLight.getRSData().getAllocation();
             mField.set_light(0, mData.light, true);
         }
+        incTimestamp();
     }
 
     boolean findLight(String property) {

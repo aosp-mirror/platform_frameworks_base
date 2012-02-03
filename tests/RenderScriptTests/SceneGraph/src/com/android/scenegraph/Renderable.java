@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.android.scenegraph.Float4Param;
+import com.android.scenegraph.SceneManager;
 import com.android.scenegraph.ShaderParam;
 import com.android.scenegraph.TransformParam;
 
@@ -65,10 +66,18 @@ public class Renderable extends RenderableBase {
 
     public void setRenderState(RenderState renderState) {
         mRenderState = renderState;
+        if (mField != null) {
+            RenderScriptGL rs = SceneManager.getRS();
+            updateFieldItem(rs);
+            mField.set(mData, 0, true);
+        }
     }
 
     public void setMesh(Mesh mesh) {
         mData.mesh = mesh;
+        if (mField != null) {
+            mField.set_mesh(0, mData.mesh, true);
+        }
     }
 
     public void setMesh(String mesh, String indexName) {
@@ -82,10 +91,19 @@ public class Renderable extends RenderableBase {
 
     public void setTransform(Transform t) {
         mTransform = t;
+        if (mField != null) {
+            RenderScriptGL rs = SceneManager.getRS();
+            updateFieldItem(rs);
+            mField.set(mData, 0, true);
+        }
     }
 
     public void appendSourceParams(ShaderParam p) {
         mSourceParams.put(p.getParamName(), p);
+        // Possibly lift this restriction later
+        if (mField != null) {
+            throw new RuntimeException("Can't add source params to objects that are rendering");
+        }
     }
 
     public void resolveMeshData(Mesh mesh) {
@@ -125,7 +143,10 @@ public class Renderable extends RenderableBase {
         }
         ProgramFragment pf = mRenderState.mFragment.mProgram;
         mData.pf_num_textures = pf != null ? Math.min(pf.getTextureCount(), paramIndex) : 0;
-        mField.set(mData, 0, true);
+        if (mField != null) {
+            mField.set_pf_textures(0, mData.pf_textures, true);
+            mField.set_pf_num_textures(0, mData.pf_num_textures, true);
+        }
     }
 
     public void setVisible(boolean vis) {
@@ -139,7 +160,7 @@ public class Renderable extends RenderableBase {
         if (mField != null) {
             return mField;
         }
-        getRsFieldItem(rs, res);
+        updateFieldItem(rs);
 
         mField = new ScriptField_Renderable_s(rs, 1);
         mField.set(mData, 0, true);
@@ -147,9 +168,8 @@ public class Renderable extends RenderableBase {
         return mField;
     }
 
-    void getRsFieldItem(RenderScriptGL rs, Resources res) {
-        Allocation pvParams = null, pfParams = null;
-        Allocation vertexConstants = null, fragmentConstants = null;
+    void updateVertexConstants(RenderScriptGL rs) {
+        Allocation pvParams = null, vertexConstants = null;
         VertexShader pv = mRenderState.mVertex;
         if (pv != null && pv.getObjectConstants() != null) {
             vertexConstants = Allocation.createTyped(rs, pv.getObjectConstants());
@@ -157,6 +177,12 @@ public class Renderable extends RenderableBase {
             pvParams = ShaderParam.fillInParams(vertexConst, mSourceParams,
                                                 mTransform).getAllocation();
         }
+        mData.pv_const = vertexConstants;
+        mData.pv_constParams = pvParams;
+    }
+
+    void updateFragmentConstants(RenderScriptGL rs) {
+        Allocation pfParams = null, fragmentConstants = null;
         FragmentShader pf = mRenderState.mFragment;
         if (pf != null && pf.getObjectConstants() != null) {
             fragmentConstants = Allocation.createTyped(rs, pf.getObjectConstants());
@@ -164,15 +190,18 @@ public class Renderable extends RenderableBase {
             pfParams = ShaderParam.fillInParams(fragmentConst, mSourceParams,
                                                 mTransform).getAllocation();
         }
-
-        mData.pv_const = vertexConstants;
-        mData.pv_constParams = pvParams;
         mData.pf_const = fragmentConstants;
         mData.pf_constParams = pfParams;
+    }
+
+    void updateFieldItem(RenderScriptGL rs) {
+        updateVertexConstants(rs);
+        updateFragmentConstants(rs);
+
         if (mTransform != null) {
             mData.transformMatrix = mTransform.getRSData().getAllocation();
         }
-        mData.name = SceneManager.getStringAsAllocation(rs, getName());
+        mData.name = getNameAlloc(rs);
         mData.render_state = mRenderState.getRSData().getAllocation();
         mData.bVolInitialized = 0;
     }
