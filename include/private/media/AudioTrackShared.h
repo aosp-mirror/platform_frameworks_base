@@ -54,6 +54,7 @@ namespace android {
 #define CBLK_RESTORED_ON        0x0040  // track has been restored after invalidation
 #define CBLK_RESTORED_OFF       0x0040  // by AudioFlinger
 
+// Important: do not add any virtual methods, including ~
 struct audio_track_cblk_t
 {
 
