@@ -19,7 +19,7 @@ package android.database.sqlite;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 
-import android.content.CancelationSignal;
+import android.content.CancellationSignal;
 import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -84,7 +84,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-public final class SQLiteConnection implements CancelationSignal.OnCancelListener {
+public final class SQLiteConnection implements CancellationSignal.OnCancelListener {
     private static final String TAG = "SQLiteConnection";
     private static final boolean DEBUG = false;
 
@@ -110,11 +110,11 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
 
     private boolean mOnlyAllowReadOnlyOperations;
 
-    // The number of times attachCancelationSignal has been called.
+    // The number of times attachCancellationSignal has been called.
     // Because SQLite statement execution can be re-entrant, we keep track of how many
-    // times we have attempted to attach a cancelation signal to the connection so that
+    // times we have attempted to attach a cancellation signal to the connection so that
     // we can ensure that we detach the signal at the right time.
-    private int mCancelationSignalAttachCount;
+    private int mCancellationSignalAttachCount;
 
     private static native int nativeOpen(String path, int openFlags, String label,
             boolean enableTrace, boolean enableProfile);
@@ -355,14 +355,14 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
      * or invalid number of bind arguments.
      * @throws OperationCanceledException if the operation was canceled.
      */
     public void execute(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -374,11 +374,11 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     nativeExecute(mConnectionPtr, statement.mStatementPtr);
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -396,7 +396,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The value of the first column in the first row of the result set
      * as a <code>long</code>, or zero if none.
      *
@@ -405,7 +405,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * @throws OperationCanceledException if the operation was canceled.
      */
     public long executeForLong(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -417,11 +417,11 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     return nativeExecuteForLong(mConnectionPtr, statement.mStatementPtr);
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -439,7 +439,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The value of the first column in the first row of the result set
      * as a <code>String</code>, or null if none.
      *
@@ -448,7 +448,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * @throws OperationCanceledException if the operation was canceled.
      */
     public String executeForString(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -460,11 +460,11 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     return nativeExecuteForString(mConnectionPtr, statement.mStatementPtr);
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -483,7 +483,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The file descriptor for a shared memory region that contains
      * the value of the first column in the first row of the result set as a BLOB,
      * or null if none.
@@ -493,7 +493,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * @throws OperationCanceledException if the operation was canceled.
      */
     public ParcelFileDescriptor executeForBlobFileDescriptor(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -506,13 +506,13 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     int fd = nativeExecuteForBlobFileDescriptor(
                             mConnectionPtr, statement.mStatementPtr);
                     return fd >= 0 ? ParcelFileDescriptor.adoptFd(fd) : null;
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -531,7 +531,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The number of rows that were changed.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
@@ -539,7 +539,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * @throws OperationCanceledException if the operation was canceled.
      */
     public int executeForChangedRowCount(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -552,12 +552,12 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     return nativeExecuteForChangedRowCount(
                             mConnectionPtr, statement.mStatementPtr);
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -576,7 +576,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      *
      * @param sql The SQL statement to execute.
      * @param bindArgs The arguments to bind, or null if none.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The row id of the last row that was inserted, or 0 if none.
      *
      * @throws SQLiteException if an error occurs, such as a syntax error
@@ -584,7 +584,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * @throws OperationCanceledException if the operation was canceled.
      */
     public long executeForLastInsertedRowId(String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -597,12 +597,12 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     return nativeExecuteForLastInsertedRowId(
                             mConnectionPtr, statement.mStatementPtr);
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -629,7 +629,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      * so that it does.  Must be greater than or equal to <code>startPos</code>.
      * @param countAllRows True to count all rows that the query would return
      * regagless of whether they fit in the window.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The number of rows that were counted during query execution.  Might
      * not be all rows in the result set unless <code>countAllRows</code> is true.
      *
@@ -639,7 +639,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
      */
     public int executeForCursorWindow(String sql, Object[] bindArgs,
             CursorWindow window, int startPos, int requiredPos, boolean countAllRows,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         if (sql == null) {
             throw new IllegalArgumentException("sql must not be null.");
         }
@@ -658,7 +658,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                 throwIfStatementForbidden(statement);
                 bindArguments(statement, bindArgs);
                 applyBlockGuardPolicy(statement);
-                attachCancelationSignal(cancelationSignal);
+                attachCancellationSignal(cancellationSignal);
                 try {
                     final long result = nativeExecuteForCursorWindow(
                             mConnectionPtr, statement.mStatementPtr, window.mWindowPtr,
@@ -669,7 +669,7 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
                     window.setStartPosition(actualPos);
                     return countedRows;
                 } finally {
-                    detachCancelationSignal(cancelationSignal);
+                    detachCancellationSignal(cancellationSignal);
                 }
             } finally {
                 releasePreparedStatement(statement);
@@ -751,40 +751,40 @@ public final class SQLiteConnection implements CancelationSignal.OnCancelListene
         recyclePreparedStatement(statement);
     }
 
-    private void attachCancelationSignal(CancelationSignal cancelationSignal) {
-        if (cancelationSignal != null) {
-            cancelationSignal.throwIfCanceled();
+    private void attachCancellationSignal(CancellationSignal cancellationSignal) {
+        if (cancellationSignal != null) {
+            cancellationSignal.throwIfCanceled();
 
-            mCancelationSignalAttachCount += 1;
-            if (mCancelationSignalAttachCount == 1) {
-                // Reset cancelation flag before executing the statement.
+            mCancellationSignalAttachCount += 1;
+            if (mCancellationSignalAttachCount == 1) {
+                // Reset cancellation flag before executing the statement.
                 nativeResetCancel(mConnectionPtr, true /*cancelable*/);
 
                 // After this point, onCancel() may be called concurrently.
-                cancelationSignal.setOnCancelListener(this);
+                cancellationSignal.setOnCancelListener(this);
             }
         }
     }
 
-    private void detachCancelationSignal(CancelationSignal cancelationSignal) {
-        if (cancelationSignal != null) {
-            assert mCancelationSignalAttachCount > 0;
+    private void detachCancellationSignal(CancellationSignal cancellationSignal) {
+        if (cancellationSignal != null) {
+            assert mCancellationSignalAttachCount > 0;
 
-            mCancelationSignalAttachCount -= 1;
-            if (mCancelationSignalAttachCount == 0) {
+            mCancellationSignalAttachCount -= 1;
+            if (mCancellationSignalAttachCount == 0) {
                 // After this point, onCancel() cannot be called concurrently.
-                cancelationSignal.setOnCancelListener(null);
+                cancellationSignal.setOnCancelListener(null);
 
-                // Reset cancelation flag after executing the statement.
+                // Reset cancellation flag after executing the statement.
                 nativeResetCancel(mConnectionPtr, false /*cancelable*/);
             }
         }
     }
 
-    // CancelationSignal.OnCancelationListener callback.
+    // CancellationSignal.OnCancelListener callback.
     // This method may be called on a different thread than the executing statement.
-    // However, it will only be called between calls to attachCancelationSignal and
-    // detachCancelationSignal, while a statement is executing.  We can safely assume
+    // However, it will only be called between calls to attachCancellationSignal and
+    // detachCancellationSignal, while a statement is executing.  We can safely assume
     // that the SQLite connection is still alive.
     @Override
     public void onCancel() {

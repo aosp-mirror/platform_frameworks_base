@@ -178,10 +178,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public Cursor query(Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder,
-                ICancelationSignal cancelationSignal) {
+                ICancellationSignal cancellationSignal) {
             enforceReadPermission(uri);
             return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
-                    CancelationSignal.fromTransport(cancelationSignal));
+                    CancellationSignal.fromTransport(cancellationSignal));
         }
 
         @Override
@@ -263,8 +263,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public ICancelationSignal createCancelationSignal() throws RemoteException {
-            return CancelationSignal.createTransport();
+        public ICancellationSignal createCancellationSignal() throws RemoteException {
+            return CancellationSignal.createTransport();
         }
 
         private void enforceReadPermission(Uri uri) {
@@ -557,7 +557,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             String selection, String[] selectionArgs, String sortOrder);
 
     /**
-     * Implement this to handle query requests from clients with support for cancelation.
+     * Implement this to handle query requests from clients with support for cancellation.
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
@@ -597,9 +597,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         return c;</pre>
      * <p>
      * If you implement this method then you must also implement the version of
-     * {@link #query(Uri, String[], String, String[], String)} that does not take a cancelation
-     * provider to ensure correct operation on older versions of the Android Framework in
-     * which the cancelation signal overload was not available.
+     * {@link #query(Uri, String[], String, String[], String)} that does not take a cancellation
+     * signal to ensure correct operation on older versions of the Android Framework in
+     * which the cancellation signal overload was not available.
      *
      * @param uri The URI to query. This will be the full URI sent by the client;
      *      if the client is requesting a specific record, the URI will end in a record number
@@ -614,14 +614,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *      The values will be bound as Strings.
      * @param sortOrder How the rows in the cursor should be sorted.
      *      If null then the provider is free to define the sort order.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return a Cursor or null.
      */
     public Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         return query(uri, projection, selection, selectionArgs, sortOrder);
     }
 

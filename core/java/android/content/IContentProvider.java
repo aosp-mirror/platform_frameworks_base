@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 public interface IContentProvider extends IInterface {
     public Cursor query(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, ICancelationSignal cancelationSignal)
+            String[] selectionArgs, String sortOrder, ICancellationSignal cancellationSignal)
                     throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(Uri url, ContentValues initialValues)
@@ -51,7 +51,7 @@ public interface IContentProvider extends IInterface {
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
     public Bundle call(String method, String arg, Bundle extras) throws RemoteException;
-    public ICancelationSignal createCancelationSignal() throws RemoteException;
+    public ICancellationSignal createCancellationSignal() throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;

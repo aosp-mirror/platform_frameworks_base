@@ -117,6 +117,8 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/fonts/DroidSans*)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/media/audio/)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/content)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/src/android/content)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************

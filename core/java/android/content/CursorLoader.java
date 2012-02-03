@@ -48,7 +48,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     String mSortOrder;
 
     Cursor mCursor;
-    CancelationSignal mCancelationSignal;
+    CancellationSignal mCancellationSignal;
 
     /* Runs on a worker thread */
     @Override
@@ -57,11 +57,11 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
             if (isLoadInBackgroundCanceled()) {
                 throw new OperationCanceledException();
             }
-            mCancelationSignal = new CancelationSignal();
+            mCancellationSignal = new CancellationSignal();
         }
         try {
             Cursor cursor = getContext().getContentResolver().query(mUri, mProjection, mSelection,
-                    mSelectionArgs, mSortOrder, mCancelationSignal);
+                    mSelectionArgs, mSortOrder, mCancellationSignal);
             if (cursor != null) {
                 // Ensure the cursor window is filled
                 cursor.getCount();
@@ -70,7 +70,7 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
             return cursor;
         } finally {
             synchronized (this) {
-                mCancelationSignal = null;
+                mCancellationSignal = null;
             }
         }
     }
@@ -80,8 +80,8 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
         super.cancelLoadInBackground();
 
         synchronized (this) {
-            if (mCancelationSignal != null) {
-                mCancelationSignal.cancel();
+            if (mCancellationSignal != null) {
+                mCancellationSignal.cancel();
             }
         }
     }
