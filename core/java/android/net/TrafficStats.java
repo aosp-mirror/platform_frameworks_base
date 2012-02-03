@@ -44,6 +44,13 @@ public class TrafficStats {
      */
     public final static int UNSUPPORTED = -1;
 
+    /** @hide */
+    public static final long KB_IN_BYTES = 1024;
+    /** @hide */
+    public static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
+    /** @hide */
+    public static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
+
     /**
      * Special UID value used when collecting {@link NetworkStatsHistory} for
      * removed applications.

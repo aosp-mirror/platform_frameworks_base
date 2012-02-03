@@ -48,6 +48,7 @@ import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
 import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
@@ -155,10 +156,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
     private static final int VERSION_ADDED_METERED = 4;
     private static final int VERSION_SPLIT_SNOOZE = 5;
-
-    private static final long KB_IN_BYTES = 1024;
-    private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
-    private static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
 
     // @VisibleForTesting
     public static final int TYPE_WARNING = 0x1;

@@ -31,6 +31,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -91,10 +92,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private static final String IMSI_1 = "310004";
     private static final String IMSI_2 = "310260";
-
-    private static final long KB_IN_BYTES = 1024;
-    private static final long MB_IN_BYTES = 1024 * KB_IN_BYTES;
-    private static final long GB_IN_BYTES = 1024 * MB_IN_BYTES;
 
     private static NetworkTemplate sTemplateWifi = buildTemplateWifi();
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
