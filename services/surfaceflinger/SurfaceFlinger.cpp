@@ -125,9 +125,32 @@ void SurfaceFlinger::init()
     ALOGI_IF(mDebugDDMS,         "DDMS debugging enabled");
 }
 
+void SurfaceFlinger::onFirstRef()
+{
+    mEventQueue.init(this);
+
+    run("SurfaceFlinger", PRIORITY_URGENT_DISPLAY);
+
+    // Wait for the main thread to be done with its initialization
+    mReadyToRunBarrier.wait();
+}
+
+
 SurfaceFlinger::~SurfaceFlinger()
 {
     glDeleteTextures(1, &mWormholeTexName);
+}
+
+void SurfaceFlinger::binderDied(const wp<IBinder>& who)
+{
+    // the window manager died on us. prepare its eulogy.
+
+    // reset screen orientation
+    Vector<ComposerState> state;
+    setTransactionState(state, eOrientationDefault, 0);
+
+    // restart the boot-animation
+    property_set("ctl.start", "bootanim");
 }
 
 sp<IMemoryHeap> SurfaceFlinger::getCblk() const
@@ -181,26 +204,6 @@ void SurfaceFlinger::bootFinished()
 
     // stop boot animation
     property_set("ctl.stop", "bootanim");
-}
-
-void SurfaceFlinger::binderDied(const wp<IBinder>& who)
-{
-    // the window manager died on us. prepare its eulogy.
-
-    // reset screen orientation
-    Vector<ComposerState> state;
-    setTransactionState(state, eOrientationDefault, 0);
-
-    // restart the boot-animation
-    property_set("ctl.start", "bootanim");
-}
-
-void SurfaceFlinger::onFirstRef()
-{
-    run("SurfaceFlinger", PRIORITY_URGENT_DISPLAY);
-
-    // Wait for the main thread to be done with its initialization
-    mReadyToRunBarrier.wait();
 }
 
 static inline uint16_t pack565(int r, int g, int b) {
@@ -311,34 +314,6 @@ status_t SurfaceFlinger::readyToRun()
 }
 
 // ----------------------------------------------------------------------------
-#if 0
-#pragma mark -
-#pragma mark Events Handler
-#endif
-
-void SurfaceFlinger::waitForEvent() {
-    mEventQueue.waitMessage();
-}
-
-void SurfaceFlinger::signalEvent() {
-    mEventQueue.invalidate();
-}
-
-status_t SurfaceFlinger::postMessageAsync(const sp<MessageBase>& msg,
-        nsecs_t reltime, uint32_t flags) {
-    return mEventQueue.postMessage(msg, reltime);
-}
-
-status_t SurfaceFlinger::postMessageSync(const sp<MessageBase>& msg,
-        nsecs_t reltime, uint32_t flags) {
-    status_t res = mEventQueue.postMessage(msg, reltime);
-    if (res == NO_ERROR) {
-        msg->wait();
-    }
-    return res;
-}
-
-// ----------------------------------------------------------------------------
 
 bool SurfaceFlinger::authenticateSurfaceTexture(
         const sp<ISurfaceTexture>& surfaceTexture) const {
@@ -388,52 +363,91 @@ sp<IDisplayEventConnection> SurfaceFlinger::createDisplayEventConnection() {
 }
 
 // ----------------------------------------------------------------------------
-#if 0
-#pragma mark -
-#pragma mark Main loop
-#endif
+
+void SurfaceFlinger::waitForEvent() {
+    mEventQueue.waitMessage();
+}
+
+void SurfaceFlinger::signalTransaction() {
+    mEventQueue.invalidate();
+}
+
+void SurfaceFlinger::signalLayerUpdate() {
+    mEventQueue.invalidate();
+}
+
+void SurfaceFlinger::signalRefresh() {
+    mEventQueue.refresh();
+}
+
+status_t SurfaceFlinger::postMessageAsync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags) {
+    return mEventQueue.postMessage(msg, reltime);
+}
+
+status_t SurfaceFlinger::postMessageSync(const sp<MessageBase>& msg,
+        nsecs_t reltime, uint32_t flags) {
+    status_t res = mEventQueue.postMessage(msg, reltime);
+    if (res == NO_ERROR) {
+        msg->wait();
+    }
+    return res;
+}
 
 bool SurfaceFlinger::threadLoop()
 {
     waitForEvent();
-
-    // check for transactions
-    if (CC_UNLIKELY(mConsoleSignals)) {
-        handleConsoleEvents();
-    }
-
-    // if we're in a global transaction, don't do anything.
-    const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
-    uint32_t transactionFlags = peekTransactionFlags(mask);
-    if (CC_UNLIKELY(transactionFlags)) {
-        handleTransaction(transactionFlags);
-    }
-
-    // post surfaces (if needed)
-    handlePageFlip();
-
-    if (mDirtyRegion.isEmpty()) {
-        // nothing new to do.
-        return true;
-    }
-
-    if (CC_UNLIKELY(mHwWorkListDirty)) {
-        // build the h/w work list
-        handleWorkList();
-    }
-
-    const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    if (CC_LIKELY(hw.canDraw())) {
-        // repaint the framebuffer (if needed)
-        handleRepaint();
-        // inform the h/w that we're done compositing
-        hw.compositionComplete();
-        postFramebuffer();
-    } else {
-        // pretend we did the post
-        hw.compositionComplete();
-    }
     return true;
+}
+
+void SurfaceFlinger::onMessageReceived(int32_t what)
+{
+    switch (what) {
+        case MessageQueue::INVALIDATE: {
+            // check for transactions
+            if (CC_UNLIKELY(mConsoleSignals)) {
+                handleConsoleEvents();
+            }
+
+            // if we're in a global transaction, don't do anything.
+            const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
+            uint32_t transactionFlags = peekTransactionFlags(mask);
+            if (CC_UNLIKELY(transactionFlags)) {
+                handleTransaction(transactionFlags);
+            }
+
+            // post surfaces (if needed)
+            handlePageFlip();
+
+            if (!mDirtyRegion.isEmpty()) {
+                signalRefresh();
+            }
+        } break;
+
+        case MessageQueue::REFRESH: {
+            if (!mDirtyRegion.isEmpty()) {
+                // NOTE: it is mandatory to call hw.compositionComplete()
+                // after handleRefresh()
+                handleRefresh();
+
+                const DisplayHardware& hw(graphicPlane(0).displayHardware());
+                if (CC_UNLIKELY(mHwWorkListDirty)) {
+                    // build the h/w work list
+                    handleWorkList();
+                }
+                if (CC_LIKELY(hw.canDraw())) {
+                    // repaint the framebuffer (if needed)
+                    handleRepaint();
+                    // inform the h/w that we're done compositing
+                    hw.compositionComplete();
+                    postFramebuffer();
+                } else {
+                    // pretend we did the post
+                    hw.compositionComplete();
+                }
+            }
+        } break;
+    }
 }
 
 void SurfaceFlinger::postFramebuffer()
@@ -717,13 +731,13 @@ void SurfaceFlinger::commitTransaction()
 
 void SurfaceFlinger::handlePageFlip()
 {
-    bool visibleRegions = mVisibleRegionsDirty;
-    const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
-    visibleRegions |= lockPageFlip(currentLayers);
+    const DisplayHardware& hw = graphicPlane(0).displayHardware();
+    const Region screenRegion(hw.bounds());
 
-        const DisplayHardware& hw = graphicPlane(0).displayHardware();
-        const Region screenRegion(hw.bounds());
-        if (visibleRegions) {
+    const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
+    const bool visibleRegions = lockPageFlip(currentLayers);
+
+        if (visibleRegions || mVisibleRegionsDirty) {
             Region opaqueRegion;
             computeVisibleRegions(currentLayers, mDirtyRegion, opaqueRegion);
 
@@ -770,13 +784,30 @@ void SurfaceFlinger::unlockPageFlip(const LayerVector& currentLayers)
 {
     const GraphicPlane& plane(graphicPlane(0));
     const Transform& planeTransform(plane.transform());
-    size_t count = currentLayers.size();
+    const size_t count = currentLayers.size();
     sp<LayerBase> const* layers = currentLayers.array();
     for (size_t i=0 ; i<count ; i++) {
         const sp<LayerBase>& layer(layers[i]);
         layer->unlockPageFlip(planeTransform, mDirtyRegion);
     }
 }
+
+void SurfaceFlinger::handleRefresh()
+{
+    bool needInvalidate = false;
+    const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
+    const size_t count = currentLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        if (layer->onPreComposition()) {
+            needInvalidate = true;
+        }
+    }
+    if (needInvalidate) {
+        signalLayerUpdate();
+    }
+}
+
 
 void SurfaceFlinger::handleWorkList()
 {
@@ -1175,7 +1206,7 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
 {
     uint32_t old = android_atomic_or(flags, &mTransactionFlags);
     if ((old & flags)==0) { // wake the server up
-        signalEvent();
+        signalTransaction();
     }
     return old;
 }
@@ -1426,14 +1457,14 @@ void SurfaceFlinger::screenReleased(int dpy)
 {
     // this may be called by a signal handler, we can't do too much in here
     android_atomic_or(eConsoleReleased, &mConsoleSignals);
-    signalEvent();
+    signalTransaction();
 }
 
 void SurfaceFlinger::screenAcquired(int dpy)
 {
     // this may be called by a signal handler, we can't do too much in here
     android_atomic_or(eConsoleAcquired, &mConsoleSignals);
-    signalEvent();
+    signalTransaction();
 }
 
 status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
@@ -1769,7 +1800,7 @@ void SurfaceFlinger::repaintEverything() {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const Rect bounds(hw.getBounds());
     setInvalidateRegion(Region(bounds));
-    signalEvent();
+    signalTransaction();
 }
 
 void SurfaceFlinger::setInvalidateRegion(const Region& reg) {
@@ -2245,7 +2276,7 @@ status_t SurfaceFlinger::turnElectronBeamOnImplLocked(int32_t mode)
 
     // make sure to redraw the whole screen when the animation is done
     mDirtyRegion.set(hw.bounds());
-    signalEvent();
+    signalTransaction();
 
     return NO_ERROR;
 }

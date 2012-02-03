@@ -47,8 +47,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
       mOrientation(0),
       mPlaneOrientation(0),
       mTransactionFlags(0),
-      mPremultipliedAlpha(true), mName("unnamed"), mDebug(false),
-      mInvalidate(0)
+      mPremultipliedAlpha(true), mName("unnamed"), mDebug(false)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
     mFlags = hw.getFlags();
@@ -262,23 +261,11 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     mTransformedBounds = tr.makeBounds(w, h);
 }
 
-void LayerBase::lockPageFlip(bool& recomputeVisibleRegions)
-{
+void LayerBase::lockPageFlip(bool& recomputeVisibleRegions) {
 }
 
 void LayerBase::unlockPageFlip(
-        const Transform& planeTransform, Region& outDirtyRegion)
-{
-    if ((android_atomic_and(~1, &mInvalidate)&1) == 1) {
-        outDirtyRegion.orSelf(visibleRegionScreen);
-    }
-}
-
-void LayerBase::invalidate()
-{
-    if ((android_atomic_or(1, &mInvalidate)&1) == 0) {
-        mFlinger->signalEvent();
-    }
+        const Transform& planeTransform, Region& outDirtyRegion) {
 }
 
 void LayerBase::drawRegion(const Region& reg) const

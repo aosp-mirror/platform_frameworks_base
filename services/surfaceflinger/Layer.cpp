@@ -55,6 +55,7 @@ Layer::Layer(SurfaceFlinger* flinger,
         mCurrentTransform(0),
         mCurrentScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
         mCurrentOpacity(true),
+        mRefreshPending(0),
         mFrameLatencyNeeded(false),
         mFrameLatencyOffset(0),
         mFormat(PIXEL_FORMAT_NONE),
@@ -97,12 +98,7 @@ void Layer::onFirstRef()
     mSurfaceTexture = new SurfaceTextureLayer(mTextureName, this);
     mSurfaceTexture->setFrameAvailableListener(new FrameQueuedListener(this));
     mSurfaceTexture->setSynchronousMode(true);
-#ifdef USE_TRIPLE_BUFFERING
-#warning "using triple buffering"
-    mSurfaceTexture->setBufferCountServer(3);
-#else
     mSurfaceTexture->setBufferCountServer(2);
-#endif
 }
 
 Layer::~Layer()
@@ -113,7 +109,7 @@ Layer::~Layer()
 
 void Layer::onFrameQueued() {
     android_atomic_inc(&mQueuedFrames);
-    mFlinger->signalEvent();
+    mFlinger->signalLayerUpdate();
 }
 
 // called with SurfaceFlinger::mStateLock as soon as the layer is entered
@@ -407,16 +403,37 @@ bool Layer::isCropped() const {
 // pageflip handling...
 // ----------------------------------------------------------------------------
 
+bool Layer::onPreComposition()
+{
+    // if there was more than one pending update, request a refresh
+    if (mRefreshPending >= 2) {
+        mRefreshPending = 0;
+        return true;
+    }
+    mRefreshPending = 0;
+    return false;
+}
+
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
     if (mQueuedFrames > 0) {
+
+        // if we've already called updateTexImage() without going through
+        // a composition step, we have to skip this layer at this point
+        // because we cannot call updateTeximage() without a corresponding
+        // compositionComplete() call.
+        // we'll trigger an update in onPreComposition().
+        if (mRefreshPending++) {
+            return;
+        }
+
         // Capture the old state of the layer for comparisons later
         const bool oldOpacity = isOpaque();
         sp<GraphicBuffer> oldActiveBuffer = mActiveBuffer;
 
         // signal another event if we have more frames pending
         if (android_atomic_dec(&mQueuedFrames) > 1) {
-            mFlinger->signalEvent();
+            mFlinger->signalLayerUpdate();
         }
 
         if (mSurfaceTexture->updateTexImage() < NO_ERROR) {
@@ -519,6 +536,10 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 void Layer::unlockPageFlip(
         const Transform& planeTransform, Region& outDirtyRegion)
 {
+    if (mRefreshPending >= 2) {
+        return;
+    }
+
     Region dirtyRegion(mPostedDirtyRegion);
     if (!dirtyRegion.isEmpty()) {
         mPostedDirtyRegion.clear();
@@ -552,9 +573,9 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
     snprintf(buffer, SIZE,
             "      "
             "format=%2d, activeBuffer=[%4ux%4u:%4u,%3X],"
-            " transform-hint=0x%02x, queued-frames=%d\n",
+            " transform-hint=0x%02x, queued-frames=%d, mRefreshPending=%d\n",
             mFormat, w0, h0, s0,f0,
-            getTransformHint(), mQueuedFrames);
+            getTransformHint(), mQueuedFrames, mRefreshPending);
 
     result.append(buffer);
 
