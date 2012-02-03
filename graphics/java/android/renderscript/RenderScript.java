@@ -848,7 +848,7 @@ public class RenderScript {
                         mRS.mErrorCallback.mErrorNum = subID;
                         mRS.mErrorCallback.run();
                     } else {
-                        //throw new RSRuntimeException("Received error num " + subID + ", details: " + e);
+                        throw new RSRuntimeException("Received error num " + subID + ", details: " + e);
                     }
                     continue;
                 }
