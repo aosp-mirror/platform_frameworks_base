@@ -225,7 +225,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, audio_stream_type
 
     gLock.lock();
     outputDesc = AudioSystem::gOutputs.valueFor(output);
-    if (outputDesc == 0) {
+    if (outputDesc == NULL) {
         ALOGV("getOutputSamplingRate() no output descriptor for output %d in gOutputs", output);
         gLock.unlock();
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -263,7 +263,7 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, audio_stream_type_t s
 
     gLock.lock();
     outputDesc = AudioSystem::gOutputs.valueFor(output);
-    if (outputDesc == 0) {
+    if (outputDesc == NULL) {
         gLock.unlock();
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
         if (af == 0) return PERMISSION_DENIED;
@@ -294,7 +294,7 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, audio_stream_type_t st
 
     gLock.lock();
     outputDesc = AudioSystem::gOutputs.valueFor(output);
-    if (outputDesc == 0) {
+    if (outputDesc == NULL) {
         gLock.unlock();
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
         if (af == 0) return PERMISSION_DENIED;
@@ -413,7 +413,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, v
 
     switch (event) {
     case STREAM_CONFIG_CHANGED:
-        if (param2 == 0) break;
+        if (param2 == NULL) break;
         stream = *(audio_stream_type_t *)param2;
         ALOGV("ioConfigChanged() STREAM_CONFIG_CHANGED stream %d, output %d", stream, ioHandle);
         if (gStreamOutputMap.indexOfKey(stream) >= 0) {
@@ -425,7 +425,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, v
             ALOGV("ioConfigChanged() opening already existing output! %d", ioHandle);
             break;
         }
-        if (param2 == 0) break;
+        if (param2 == NULL) break;
         desc = (OutputDescriptor *)param2;
 
         OutputDescriptor *outputDesc =  new OutputDescriptor(*desc);
@@ -454,7 +454,7 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, v
             ALOGW("ioConfigChanged() modifying unknow output! %d", ioHandle);
             break;
         }
-        if (param2 == 0) break;
+        if (param2 == NULL) break;
         desc = (OutputDescriptor *)param2;
 
         ALOGV("ioConfigChanged() new config for output %d samplingRate %d, format %d channels %d frameCount %d latency %d",

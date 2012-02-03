@@ -155,8 +155,8 @@ public:
                                     uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                                     int frameCount      = 0,
                                     uint32_t flags      = 0,
-                                    callback_t cbf = 0,
-                                    void* user = 0,
+                                    callback_t cbf = NULL,
+                                    void* user = NULL,
                                     int notificationFrames = 0,
                                     int sessionId = 0);
 
@@ -181,8 +181,8 @@ public:
                             uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
-                            callback_t cbf = 0,
-                            void* user = 0,
+                            callback_t cbf = NULL,
+                            void* user = NULL,
                             int notificationFrames = 0,
                             bool threadCanCallJava = false,
                             int sessionId = 0);

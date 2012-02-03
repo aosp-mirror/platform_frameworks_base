@@ -125,7 +125,7 @@ void AudioMixer::deleteTrackName(int name)
         track.enabled = 0;
         invalidateState(1<<name);
     }
-    if (track.resampler) {
+    if (track.resampler != NULL) {
         // delete  the resampler
         delete track.resampler;
         track.resampler = NULL;
@@ -809,7 +809,7 @@ void AudioMixer::process__nop(state_t* state)
             while (outFrames) {
                 t1.buffer.frameCount = outFrames;
                 t1.bufferProvider->getNextBuffer(&t1.buffer);
-                if (!t1.buffer.raw) break;
+                if (t1.buffer.raw == NULL) break;
                 outFrames -= t1.buffer.frameCount;
                 t1.bufferProvider->releaseBuffer(&t1.buffer);
             }
