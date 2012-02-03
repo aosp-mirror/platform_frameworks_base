@@ -18,6 +18,7 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
+#include "include/AACEncoder.h"
 #include "include/AVCEncoder.h"
 #include "include/M4vH263Encoder.h"
 
@@ -68,6 +69,7 @@ static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaDa
 
 #define FACTORY_REF(name) { #name, Make##name },
 
+FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
 FACTORY_CREATE_ENCODER(M4vH263Encoder)
 
@@ -80,6 +82,7 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
     };
 
     static const FactoryInfo kFactoryInfo[] = {
+        FACTORY_REF(AACEncoder)
         FACTORY_REF(AVCEncoder)
         FACTORY_REF(M4vH263Encoder)
     };
@@ -145,6 +148,7 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.google.amrwb.encoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.encoder" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "AACEncoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.DUCATI1.VIDEO.MPEG4E" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
