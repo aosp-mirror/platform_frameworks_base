@@ -55,8 +55,8 @@ public final class CdmaLteUiccFileHandler extends IccFileHandler {
         if (fileid == EF_CSIM_EPRL) {
             // Entire PRL could be huge. We are only interested in
             // the first 4 bytes of the record.
-            phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
-                            0, 0, 4, null, null,
+            phone.mCM.iccIOForApp(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
+                            0, 0, 4, null, null, phone.getIccCard().getAid(),
                             obtainMessage(EVENT_READ_BINARY_DONE,
                                           fileid, 0, onLoaded));
         } else {

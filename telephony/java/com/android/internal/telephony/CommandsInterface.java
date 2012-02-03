@@ -759,6 +759,15 @@ public interface CommandsInterface {
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
+     *  ar.result is String containing IMSI on success
+     */
+    void getIMSIForApp(String aid, Message result);
+
+    /**
+     *  returned message
+     *  retMsg.obj = AsyncResult ar
+     *  ar.exception carries exception on failure
+     *  ar.userObject contains the orignal value of result.obj
      *  ar.result is String containing IMEI on success
      */
     void getIMEI(Message result);
@@ -1048,6 +1057,14 @@ public interface CommandsInterface {
      */
     void iccIO (int command, int fileid, String path, int p1, int p2, int p3,
             String data, String pin2, Message response);
+
+    /**
+     * parameters equivalent to 27.007 AT+CRSM command
+     * response.obj will be an AsyncResult
+     * response.obj.userObj will be a IccIoResult on success
+     */
+    void iccIOForApp (int command, int fileid, String path, int p1, int p2, int p3,
+            String data, String pin2, String aid, Message response);
 
     /**
      * (AsyncResult)response.obj).result is an int[] with element [0] set to

@@ -880,9 +880,19 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     public void
     getIMSI(Message result) {
+        getIMSIForApp(null, result);
+    }
+
+    public void
+    getIMSIForApp(String aid, Message result) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_GET_IMSI, result);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+        rr.mp.writeInt(1);
+        rr.mp.writeString(aid);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() +
+                              "> getIMSI: " + requestToString(rr.mRequest)
+                              + " aid: " + aid);
 
         send(rr);
     }
@@ -1435,6 +1445,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     public void
     iccIO (int command, int fileid, String path, int p1, int p2, int p3,
             String data, String pin2, Message result) {
+        iccIOForApp(command, fileid, path, p1, p2, p3, data, pin2, null, result);
+    }
+    public void
+    iccIOForApp (int command, int fileid, String path, int p1, int p2, int p3,
+            String data, String pin2, String aid, Message result) {
         //Note: This RIL request has not been renamed to ICC,
         //       but this request is also valid for SIM and RUIM
         RILRequest rr
@@ -1448,12 +1463,15 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(p3);
         rr.mp.writeString(data);
         rr.mp.writeString(pin2);
+        rr.mp.writeString(aid);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> iccIO: " + requestToString(rr.mRequest)
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> iccIO: "
+                + requestToString(rr.mRequest)
                 + " 0x" + Integer.toHexString(command)
                 + " 0x" + Integer.toHexString(fileid) + " "
                 + " path: " + path + ","
-                + p1 + "," + p2 + "," + p3);
+                + p1 + "," + p2 + "," + p3
+                + " aid: " + aid);
 
         send(rr);
     }

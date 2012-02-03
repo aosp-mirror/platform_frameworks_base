@@ -504,6 +504,9 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, null);
     }
 
+    public void getIMSI(Message result) {
+        getIMSIForApp(null, result);
+    }
     /**
      *  returned message
      *  retMsg.obj = AsyncResult ar
@@ -511,7 +514,7 @@ public final class SimulatedCommands extends BaseCommands
      *  ar.userObject contains the original value of result.obj
      *  ar.result is String containing IMSI on success
      */
-    public void getIMSI(Message result) {
+    public void getIMSIForApp(String aid, Message result) {
         resultSuccess(result, "012345678901234");
     }
 
@@ -1042,13 +1045,18 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
+    public void iccIO(int command, int fileid, String path, int p1, int p2, int p3, String data,
+            String pin2, Message response) {
+        iccIOForApp(command, fileid, path, p1, p2, p3, data,pin2, null, response);
+    }
+
     /**
      * parameters equivalent to 27.007 AT+CRSM command
      * response.obj will be an AsyncResult
      * response.obj.userObj will be a SimIoResult on success
      */
-    public void iccIO (int command, int fileid, String path, int p1, int p2,
-                       int p3, String data, String pin2, Message result) {
+    public void iccIOForApp (int command, int fileid, String path, int p1, int p2,
+                       int p3, String data, String pin2, String aid, Message result) {
         unimplemented(result);
     }
 

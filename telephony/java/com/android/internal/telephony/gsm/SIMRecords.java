@@ -1309,7 +1309,7 @@ public class SIMRecords extends IccRecords {
 
         logv("fetchSimRecords " + recordsToLoad);
 
-        phone.mCM.getIMSI(obtainMessage(EVENT_GET_IMSI_DONE));
+        phone.mCM.getIMSIForApp(phone.getIccCard().getAid(), obtainMessage(EVENT_GET_IMSI_DONE));
         recordsToLoad++;
 
         iccFh.loadEFTransparent(EF_ICCID, obtainMessage(EVENT_GET_ICCID_DONE));
