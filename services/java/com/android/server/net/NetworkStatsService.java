@@ -34,6 +34,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.provider.Settings.Secure.NETSTATS_DEV_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_DEV_DELETE_AGE;
 import static android.provider.Settings.Secure.NETSTATS_DEV_PERSIST_BYTES;
@@ -152,10 +153,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             "com.android.server.action.NETWORK_STATS_UPDATED";
 
     private PendingIntent mPollIntent;
-
-    private static final long KB_IN_BYTES = 1024;
-    private static final long MB_IN_BYTES = 1024 * KB_IN_BYTES;
-    private static final long GB_IN_BYTES = 1024 * MB_IN_BYTES;
 
     private static final String PREFIX_DEV = "dev";
     private static final String PREFIX_UID = "uid";

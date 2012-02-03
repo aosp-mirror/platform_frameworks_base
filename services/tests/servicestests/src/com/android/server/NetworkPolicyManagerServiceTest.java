@@ -28,6 +28,8 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.computeNextCycleBoundary;
+import static android.net.TrafficStats.KB_IN_BYTES;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
@@ -99,10 +101,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
-
-    private static final long KB_IN_BYTES = 1024;
-    private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
-    private static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi();
 
