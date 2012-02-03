@@ -28,7 +28,10 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.android.scenegraph.Camera;
+import com.android.scenegraph.MatrixTransform;
 import com.android.scenegraph.Scene;
+import com.android.testapp.R;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -40,8 +43,6 @@ import android.renderscript.Mesh;
 import android.renderscript.RenderScriptGL;
 import android.util.Log;
 import android.view.SurfaceHolder;
-
-import com.android.testapp.R;
 
 /**
  * @hide
@@ -180,6 +181,20 @@ public class SceneManager extends SceneGraphBase {
 
     public void setActiveScene(Scene s) {
         mActiveScene = s;
+
+        // Do some sanity checking
+        if (mActiveScene.getCameras().size() == 0) {
+            Matrix4f camPos = new Matrix4f();
+            camPos.translate(0, 0, 10);
+            MatrixTransform cameraTransform = new MatrixTransform();
+            cameraTransform.setName("_DefaultCameraTransform");
+            cameraTransform.setMatrix(camPos);
+            mActiveScene.appendTransform(cameraTransform);
+            Camera cam = new Camera();
+            cam.setName("_DefaultCamera");
+            cam.setTransform(cameraTransform);
+            mActiveScene.appendCamera(cam);
+        }
     }
 
     static RenderScriptGL getRS() {
