@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.content.CancelationSignal;
+import android.content.CancellationSignal;
 import android.database.DatabaseUtils;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     private final Object[] mBindArgs;
 
     SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,
-            CancelationSignal cancelationSignalForPrepare) {
+            CancellationSignal cancellationSignalForPrepare) {
         mDatabase = db;
         mSql = sql.trim();
 
@@ -57,7 +57,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 SQLiteStatementInfo info = new SQLiteStatementInfo();
                 db.getThreadSession().prepare(mSql,
                         db.getThreadDefaultConnectionFlags(assumeReadOnly),
-                        cancelationSignalForPrepare, info);
+                        cancellationSignalForPrepare, info);
                 mReadOnly = info.readOnly;
                 mColumnNames = info.columnNames;
                 mNumParameters = info.numParameters;

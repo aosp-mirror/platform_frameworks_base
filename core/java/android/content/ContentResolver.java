@@ -335,7 +335,7 @@ public abstract class ContentResolver {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY
      *         clause (excluding the ORDER BY itself). Passing null will use the
      *         default sort order, which may be unordered.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A Cursor object, which is positioned before the first entry, or null
@@ -343,7 +343,7 @@ public abstract class ContentResolver {
      */
     public final Cursor query(final Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         IContentProvider provider = acquireProvider(uri);
         if (provider == null) {
             return null;
@@ -351,14 +351,14 @@ public abstract class ContentResolver {
         try {
             long startTime = SystemClock.uptimeMillis();
 
-            ICancelationSignal remoteCancelationSignal = null;
-            if (cancelationSignal != null) {
-                cancelationSignal.throwIfCanceled();
-                remoteCancelationSignal = provider.createCancelationSignal();
-                cancelationSignal.setRemote(remoteCancelationSignal);
+            ICancellationSignal remoteCancellationSignal = null;
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
+                remoteCancellationSignal = provider.createCancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
             }
             Cursor qCursor = provider.query(uri, projection,
-                    selection, selectionArgs, sortOrder, remoteCancelationSignal);
+                    selection, selectionArgs, sortOrder, remoteCancellationSignal);
             if (qCursor == null) {
                 releaseProvider(provider);
                 return null;

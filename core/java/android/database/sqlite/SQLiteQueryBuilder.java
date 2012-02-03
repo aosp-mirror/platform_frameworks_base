@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.content.CancelationSignal;
+import android.content.CancellationSignal;
 import android.content.OperationCanceledException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -292,7 +292,7 @@ public class SQLiteQueryBuilder
             String selection, String[] selectionArgs, String groupBy,
             String having, String sortOrder) {
         return query(db, projectionIn, selection, selectionArgs, groupBy, having, sortOrder,
-                null /* limit */, null /* cancelationSignal */);
+                null /* limit */, null /* cancellationSignal */);
     }
 
     /**
@@ -362,7 +362,7 @@ public class SQLiteQueryBuilder
      *   will use the default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *   formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return a cursor over the result set
@@ -371,7 +371,7 @@ public class SQLiteQueryBuilder
      */
     public Cursor query(SQLiteDatabase db, String[] projectionIn,
             String selection, String[] selectionArgs, String groupBy,
-            String having, String sortOrder, String limit, CancelationSignal cancelationSignal) {
+            String having, String sortOrder, String limit, CancellationSignal cancellationSignal) {
         if (mTables == null) {
             return null;
         }
@@ -387,7 +387,7 @@ public class SQLiteQueryBuilder
             String sqlForValidation = buildQuery(projectionIn, "(" + selection + ")", groupBy,
                     having, sortOrder, limit);
             validateQuerySql(db, sqlForValidation,
-                    cancelationSignal); // will throw if query is invalid
+                    cancellationSignal); // will throw if query is invalid
         }
 
         String sql = buildQuery(
@@ -400,7 +400,7 @@ public class SQLiteQueryBuilder
         return db.rawQueryWithFactory(
                 mFactory, sql, selectionArgs,
                 SQLiteDatabase.findEditTable(mTables),
-                cancelationSignal); // will throw if query is invalid
+                cancellationSignal); // will throw if query is invalid
     }
 
     /**
@@ -408,9 +408,9 @@ public class SQLiteQueryBuilder
      * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
      */
     private void validateQuerySql(SQLiteDatabase db, String sql,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         db.getThreadSession().prepare(sql,
-                db.getThreadDefaultConnectionFlags(true /*readOnly*/), cancelationSignal, null);
+                db.getThreadDefaultConnectionFlags(true /*readOnly*/), cancellationSignal, null);
     }
 
     /**

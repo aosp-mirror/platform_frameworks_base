@@ -18,7 +18,7 @@ package android.database.sqlite;
 
 import dalvik.system.CloseGuard;
 
-import android.content.CancelationSignal;
+import android.content.CancellationSignal;
 import android.content.OperationCanceledException;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.SystemClock;
@@ -284,7 +284,7 @@ public final class SQLiteConnectionPool implements Closeable {
      * @param sql If not null, try to find a connection that already has
      * the specified SQL statement in its prepared statement cache.
      * @param connectionFlags The connection request flags.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * @return The connection that was acquired, never null.
      *
      * @throws IllegalStateException if the pool has been closed.
@@ -292,8 +292,8 @@ public final class SQLiteConnectionPool implements Closeable {
      * @throws OperationCanceledException if the operation was canceled.
      */
     public SQLiteConnection acquireConnection(String sql, int connectionFlags,
-            CancelationSignal cancelationSignal) {
-        return waitForConnection(sql, connectionFlags, cancelationSignal);
+            CancellationSignal cancellationSignal) {
+        return waitForConnection(sql, connectionFlags, cancellationSignal);
     }
 
     /**
@@ -503,7 +503,7 @@ public final class SQLiteConnectionPool implements Closeable {
 
     // Might throw.
     private SQLiteConnection waitForConnection(String sql, int connectionFlags,
-            CancelationSignal cancelationSignal) {
+            CancellationSignal cancellationSignal) {
         final boolean wantPrimaryConnection =
                 (connectionFlags & CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY) != 0;
 
@@ -512,8 +512,8 @@ public final class SQLiteConnectionPool implements Closeable {
             throwIfClosedLocked();
 
             // Abort if canceled.
-            if (cancelationSignal != null) {
-                cancelationSignal.throwIfCanceled();
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
             }
 
             // Try to acquire a connection.
@@ -550,9 +550,9 @@ public final class SQLiteConnectionPool implements Closeable {
                 mConnectionWaiterQueue = waiter;
             }
 
-            if (cancelationSignal != null) {
+            if (cancellationSignal != null) {
                 final int nonce = waiter.mNonce;
-                cancelationSignal.setOnCancelListener(new CancelationSignal.OnCancelListener() {
+                cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
                     @Override
                     public void onCancel() {
                         synchronized (mLock) {
@@ -588,8 +588,8 @@ public final class SQLiteConnectionPool implements Closeable {
                 final SQLiteConnection connection = waiter.mAssignedConnection;
                 final RuntimeException ex = waiter.mException;
                 if (connection != null || ex != null) {
-                    if (cancelationSignal != null) {
-                        cancelationSignal.setOnCancelListener(null);
+                    if (cancellationSignal != null) {
+                        cancellationSignal.setOnCancelListener(null);
                     }
                     recycleConnectionWaiterLocked(waiter);
                     if (connection != null) {

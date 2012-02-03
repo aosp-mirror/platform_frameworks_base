@@ -19,6 +19,6 @@ package android.content;
 /**
  * @hide
  */
-interface ICancelationSignal {
+interface ICancellationSignal {
     oneway void cancel();
 }

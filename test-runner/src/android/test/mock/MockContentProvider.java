@@ -21,7 +21,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.ICancelationSignal;
+import android.content.ICancellationSignal;
 import android.content.IContentProvider;
 import android.content.OperationApplicationException;
 import android.content.pm.PathPermission;
@@ -93,7 +93,7 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
-                String sortOrder, ICancelationSignal cancelationSignal) throws RemoteException {
+                String sortOrder, ICancellationSignal cancellationSignal) throws RemoteException {
             return MockContentProvider.this.query(url, projection, selection,
                     selectionArgs, sortOrder);
         }
@@ -127,7 +127,7 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public ICancelationSignal createCancelationSignal() throws RemoteException {
+        public ICancellationSignal createCancellationSignal() throws RemoteException {
             return null;
         }
     }

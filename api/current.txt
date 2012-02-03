@@ -4714,15 +4714,15 @@ package android.content {
     method public final void setResultExtras(android.os.Bundle);
   }
 
-  public final class CancelationSignal {
-    ctor public CancelationSignal();
+  public final class CancellationSignal {
+    ctor public CancellationSignal();
     method public void cancel();
     method public boolean isCanceled();
-    method public void setOnCancelListener(android.content.CancelationSignal.OnCancelListener);
+    method public void setOnCancelListener(android.content.CancellationSignal.OnCancelListener);
     method public void throwIfCanceled();
   }
 
-  public static abstract interface CancelationSignal.OnCancelListener {
+  public static abstract interface CancellationSignal.OnCancelListener {
     method public abstract void onCancel();
   }
 
@@ -4845,7 +4845,7 @@ package android.content {
     method public android.os.ParcelFileDescriptor openPipeHelper(android.net.Uri, java.lang.String, android.os.Bundle, T, android.content.ContentProvider.PipeDataWriter<T>) throws java.io.FileNotFoundException;
     method public android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle) throws java.io.FileNotFoundException;
     method public abstract android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
-    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancelationSignal);
+    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancellationSignal);
     method protected final void setPathPermissions(android.content.pm.PathPermission[]);
     method protected final void setReadPermission(java.lang.String);
     method protected final void setWritePermission(java.lang.String);
@@ -4869,7 +4869,7 @@ package android.content {
     method public android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException, android.os.RemoteException;
     method public final android.content.res.AssetFileDescriptor openTypedAssetFileDescriptor(android.net.Uri, java.lang.String, android.os.Bundle) throws java.io.FileNotFoundException, android.os.RemoteException;
     method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) throws android.os.RemoteException;
-    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancelationSignal) throws android.os.RemoteException;
+    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancellationSignal) throws android.os.RemoteException;
     method public boolean release();
     method public int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]) throws android.os.RemoteException;
   }
@@ -4956,7 +4956,7 @@ package android.content {
     method public final java.io.OutputStream openOutputStream(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
     method public final android.content.res.AssetFileDescriptor openTypedAssetFileDescriptor(android.net.Uri, java.lang.String, android.os.Bundle) throws java.io.FileNotFoundException;
     method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
-    method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancelationSignal);
+    method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.content.CancellationSignal);
     method public final void registerContentObserver(android.net.Uri, boolean, android.database.ContentObserver);
     method public static void removePeriodicSync(android.accounts.Account, java.lang.String, android.os.Bundle);
     method public static void removeStatusChangeListener(java.lang.Object);
@@ -7268,15 +7268,15 @@ package android.database.sqlite {
     method public static android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public static android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler);
     method public android.database.Cursor query(boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String);
-    method public android.database.Cursor query(boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancelationSignal);
+    method public android.database.Cursor query(boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancellationSignal);
     method public android.database.Cursor query(java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String);
     method public android.database.Cursor query(java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public android.database.Cursor queryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String);
-    method public android.database.Cursor queryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancelationSignal);
+    method public android.database.Cursor queryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancellationSignal);
     method public android.database.Cursor rawQuery(java.lang.String, java.lang.String[]);
-    method public android.database.Cursor rawQuery(java.lang.String, java.lang.String[], android.content.CancelationSignal);
+    method public android.database.Cursor rawQuery(java.lang.String, java.lang.String[], android.content.CancellationSignal);
     method public android.database.Cursor rawQueryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, java.lang.String, java.lang.String[], java.lang.String);
-    method public android.database.Cursor rawQueryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, java.lang.String, java.lang.String[], java.lang.String, android.content.CancelationSignal);
+    method public android.database.Cursor rawQueryWithFactory(android.database.sqlite.SQLiteDatabase.CursorFactory, java.lang.String, java.lang.String[], java.lang.String, android.content.CancellationSignal);
     method public static int releaseMemory();
     method public long replace(java.lang.String, java.lang.String, android.content.ContentValues);
     method public long replaceOrThrow(java.lang.String, java.lang.String, android.content.ContentValues) throws android.database.SQLException;
@@ -7398,7 +7398,7 @@ package android.database.sqlite {
     method public java.lang.String getTables();
     method public android.database.Cursor query(android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String);
     method public android.database.Cursor query(android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String);
-    method public android.database.Cursor query(android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancelationSignal);
+    method public android.database.Cursor query(android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.content.CancellationSignal);
     method public void setCursorFactory(android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public void setDistinct(boolean);
     method public void setProjectionMap(java.util.Map<java.lang.String, java.lang.String>);

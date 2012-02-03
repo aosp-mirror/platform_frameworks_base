@@ -105,11 +105,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String sortOrder = data.readString();
                     IContentObserver observer = IContentObserver.Stub.asInterface(
                             data.readStrongBinder());
-                    ICancelationSignal cancelationSignal = ICancelationSignal.Stub.asInterface(
+                    ICancellationSignal cancellationSignal = ICancellationSignal.Stub.asInterface(
                             data.readStrongBinder());
 
                     Cursor cursor = query(url, projection, selection, selectionArgs, sortOrder,
-                            cancelationSignal);
+                            cancellationSignal);
                     if (cursor != null) {
                         CursorToBulkCursorAdaptor adaptor = new CursorToBulkCursorAdaptor(
                                 cursor, observer, getProviderName());
@@ -300,9 +300,9 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
 
-                    ICancelationSignal cancelationSignal = createCancelationSignal();
+                    ICancellationSignal cancellationSignal = createCancellationSignal();
                     reply.writeNoException();
-                    reply.writeStrongBinder(cancelationSignal.asBinder());
+                    reply.writeStrongBinder(cancellationSignal.asBinder());
                     return true;
                 }
             }
@@ -334,7 +334,7 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     public Cursor query(Uri url, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder, ICancelationSignal cancelationSignal)
+            String[] selectionArgs, String sortOrder, ICancellationSignal cancellationSignal)
                     throws RemoteException {
         BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
         Parcel data = Parcel.obtain();
@@ -363,7 +363,7 @@ final class ContentProviderProxy implements IContentProvider
             }
             data.writeString(sortOrder);
             data.writeStrongBinder(adaptor.getObserver().asBinder());
-            data.writeStrongBinder(cancelationSignal != null ? cancelationSignal.asBinder() : null);
+            data.writeStrongBinder(cancellationSignal != null ? cancellationSignal.asBinder() : null);
 
             mRemote.transact(IContentProvider.QUERY_TRANSACTION, data, reply, 0);
 
@@ -632,7 +632,7 @@ final class ContentProviderProxy implements IContentProvider
         }
     }
 
-    public ICancelationSignal createCancelationSignal() throws RemoteException {
+    public ICancellationSignal createCancellationSignal() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
@@ -642,9 +642,9 @@ final class ContentProviderProxy implements IContentProvider
                     data, reply, 0);
 
             DatabaseUtils.readExceptionFromParcel(reply);
-            ICancelationSignal cancelationSignal = ICancelationSignal.Stub.asInterface(
+            ICancellationSignal cancellationSignal = ICancellationSignal.Stub.asInterface(
                     reply.readStrongBinder());
-            return cancelationSignal;
+            return cancellationSignal;
         } finally {
             data.recycle();
             reply.recycle();

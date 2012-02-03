@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.content.CancelationSignal;
+import android.content.CancellationSignal;
 import android.content.ContentValues;
 import android.content.OperationCanceledException;
 import android.content.res.Resources;
@@ -967,7 +967,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
@@ -976,9 +976,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public Cursor query(boolean distinct, String table, String[] columns,
             String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit, CancelationSignal cancelationSignal) {
+            String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
         return queryWithFactory(null, distinct, table, columns, selection, selectionArgs,
-                groupBy, having, orderBy, limit, cancelationSignal);
+                groupBy, having, orderBy, limit, cancellationSignal);
     }
 
     /**
@@ -1049,7 +1049,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *            default sort order, which may be unordered.
      * @param limit Limits the number of rows returned by the query,
      *            formatted as LIMIT clause. Passing null denotes no LIMIT clause.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
@@ -1059,13 +1059,13 @@ public class SQLiteDatabase extends SQLiteClosable {
     public Cursor queryWithFactory(CursorFactory cursorFactory,
             boolean distinct, String table, String[] columns,
             String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit, CancelationSignal cancelationSignal) {
+            String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
         throwIfNotOpen(); // fail fast
         String sql = SQLiteQueryBuilder.buildQueryString(
                 distinct, table, columns, selection, groupBy, having, orderBy, limit);
 
         return rawQueryWithFactory(cursorFactory, sql, selectionArgs,
-                findEditTable(table), cancelationSignal);
+                findEditTable(table), cancellationSignal);
     }
 
     /**
@@ -1163,15 +1163,15 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
      *     values will be bound as Strings.
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
     public Cursor rawQuery(String sql, String[] selectionArgs,
-            CancelationSignal cancelationSignal) {
-        return rawQueryWithFactory(null, sql, selectionArgs, null, cancelationSignal);
+            CancellationSignal cancellationSignal) {
+        return rawQueryWithFactory(null, sql, selectionArgs, null, cancellationSignal);
     }
 
     /**
@@ -1201,7 +1201,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      *     which will be replaced by the values from selectionArgs. The
      *     values will be bound as Strings.
      * @param editTable the name of the first table, which is editable
-     * @param cancelationSignal A signal to cancel the operation in progress, or null if none.
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
@@ -1209,11 +1209,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public Cursor rawQueryWithFactory(
             CursorFactory cursorFactory, String sql, String[] selectionArgs,
-            String editTable, CancelationSignal cancelationSignal) {
+            String editTable, CancellationSignal cancellationSignal) {
         throwIfNotOpen(); // fail fast
 
         SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable,
-                cancelationSignal);
+                cancellationSignal);
         return driver.query(cursorFactory != null ? cursorFactory : mCursorFactory,
                 selectionArgs);
     }
