@@ -27,6 +27,10 @@ import android.util.Log;
 
 /**
  * Coordinates animations and drawing for UI on a particular thread.
+ *
+ * This object is thread-safe.  Other threads can add and remove listeners
+ * or schedule work to occur at a later time on the UI thread.
+ *
  * @hide
  */
 public final class Choreographer extends Handler {
@@ -44,7 +48,7 @@ public final class Choreographer extends Handler {
     private static final long DEFAULT_FRAME_DELAY = 10;
 
     // The number of milliseconds between animation frames.
-    private static long sFrameDelay = DEFAULT_FRAME_DELAY;
+    private static volatile long sFrameDelay = DEFAULT_FRAME_DELAY;
 
     // Thread local storage for the choreographer.
     private static final ThreadLocal<Choreographer> sThreadInstance =
@@ -74,6 +78,8 @@ public final class Choreographer extends Handler {
 
     private static final int MSG_DO_ANIMATION = 0;
     private static final int MSG_DO_DRAW = 1;
+
+    private final Object mLock = new Object();
 
     private final Looper mLooper;
 
@@ -138,9 +144,14 @@ public final class Choreographer extends Handler {
 
     /**
      * Schedules animation (and drawing) to occur on the next frame synchronization boundary.
-     * Must be called on the UI thread.
      */
     public void scheduleAnimation() {
+        synchronized (mLock) {
+            scheduleAnimationLocked();
+        }
+    }
+
+    private void scheduleAnimationLocked() {
         if (!mAnimationScheduled) {
             mAnimationScheduled = true;
             if (USE_VSYNC) {
@@ -163,12 +174,14 @@ public final class Choreographer extends Handler {
     }
 
     /**
-     * Return true if {@link #scheduleAnimation()} has been called but
+     * Returns true if {@link #scheduleAnimation()} has been called but
      * {@link OnAnimateListener#onAnimate() OnAnimateListener.onAnimate()} has
      * not yet been called.
      */
     public boolean isAnimationScheduled() {
-        return mAnimationScheduled;
+        synchronized (mLock) {
+            return mAnimationScheduled;
+        }
     }
 
     /**
@@ -176,26 +189,30 @@ public final class Choreographer extends Handler {
      * Must be called on the UI thread.
      */
     public void scheduleDraw() {
-        if (!mDrawScheduled) {
-            mDrawScheduled = true;
-            if (USE_ANIMATION_TIMER_FOR_DRAW) {
-                scheduleAnimation();
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, "Scheduling draw immediately.");
+        synchronized (mLock) {
+            if (!mDrawScheduled) {
+                mDrawScheduled = true;
+                if (USE_ANIMATION_TIMER_FOR_DRAW) {
+                    scheduleAnimationLocked();
+                } else {
+                    if (DEBUG) {
+                        Log.d(TAG, "Scheduling draw immediately.");
+                    }
+                    sendEmptyMessage(MSG_DO_DRAW);
                 }
-                sendEmptyMessage(MSG_DO_DRAW);
             }
         }
     }
 
     /**
-     * Return true if {@link #scheduleDraw()} has been called but
+     * Returns true if {@link #scheduleDraw()} has been called but
      * {@link OnDrawListener#onDraw() OnDrawListener.onDraw()} has
      * not yet been called.
      */
     public boolean isDrawScheduled() {
-        return mDrawScheduled;
+        synchronized (mLock) {
+            return mDrawScheduled;
+        }
     }
 
     @Override
@@ -211,60 +228,75 @@ public final class Choreographer extends Handler {
     }
 
     private void doAnimation() {
-        if (mAnimationScheduled) {
-            mAnimationScheduled = false;
-
-            final long start = SystemClock.uptimeMillis();
-            if (DEBUG) {
-                Log.d(TAG, "Performing animation: " + Math.max(0, start - mLastAnimationTime)
-                        + " ms have elapsed since previous animation.");
-            }
-            mLastAnimationTime = start;
-
-            final OnAnimateListener[] listeners = mOnAnimateListeners;
-            if (listeners != null) {
-                for (int i = 0; i < listeners.length; i++) {
-                    listeners[i].onAnimate();
-                }
-            }
-
-            if (DEBUG) {
-                Log.d(TAG, "Animation took " + (SystemClock.uptimeMillis() - start) + " ms.");
-            }
-        }
+        doAnimationInner();
 
         if (USE_ANIMATION_TIMER_FOR_DRAW) {
             doDraw();
         }
     }
 
+    private void doAnimationInner() {
+        final long start;
+        final OnAnimateListener[] listeners;
+        synchronized (mLock) {
+            if (!mAnimationScheduled) {
+                return; // no work to do
+            }
+            mAnimationScheduled = false;
+
+            start = SystemClock.uptimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Performing animation: " + Math.max(0, start - mLastAnimationTime)
+                        + " ms have elapsed since previous animation.");
+            }
+            mLastAnimationTime = start;
+
+            listeners = mOnAnimateListeners;
+        }
+
+        if (listeners != null) {
+            for (int i = 0; i < listeners.length; i++) {
+                listeners[i].onAnimate();
+            }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Animation took " + (SystemClock.uptimeMillis() - start) + " ms.");
+        }
+    }
+
     private void doDraw() {
-        if (mDrawScheduled) {
+        final long start;
+        final OnDrawListener[] listeners;
+        synchronized (mLock) {
+            if (!mDrawScheduled) {
+                return; // no work to do
+            }
             mDrawScheduled = false;
 
-            final long start = SystemClock.uptimeMillis();
+            start = SystemClock.uptimeMillis();
             if (DEBUG) {
                 Log.d(TAG, "Performing draw: " + Math.max(0, start - mLastDrawTime)
                         + " ms have elapsed since previous draw.");
             }
             mLastDrawTime = start;
 
-            final OnDrawListener[] listeners = mOnDrawListeners;
-            if (listeners != null) {
-                for (int i = 0; i < listeners.length; i++) {
-                    listeners[i].onDraw();
-                }
-            }
+            listeners = mOnDrawListeners;
+        }
 
-            if (DEBUG) {
-                Log.d(TAG, "Draw took " + (SystemClock.uptimeMillis() - start) + " ms.");
+        if (listeners != null) {
+            for (int i = 0; i < listeners.length; i++) {
+                listeners[i].onDraw();
             }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Draw took " + (SystemClock.uptimeMillis() - start) + " ms.");
         }
     }
 
     /**
      * Adds an animation listener.
-     * Must be called on the UI thread.
      *
      * @param listener The listener to add.
      */
@@ -277,13 +309,14 @@ public final class Choreographer extends Handler {
             Log.d(TAG, "Adding onAnimate listener: " + listener);
         }
 
-        mOnAnimateListeners = ArrayUtils.appendElement(OnAnimateListener.class,
-                mOnAnimateListeners, listener);
+        synchronized (mLock) {
+            mOnAnimateListeners = ArrayUtils.appendElement(OnAnimateListener.class,
+                    mOnAnimateListeners, listener);
+        }
     }
 
     /**
      * Removes an animation listener.
-     * Must be called on the UI thread.
      *
      * @param listener The listener to remove.
      */
@@ -296,14 +329,15 @@ public final class Choreographer extends Handler {
             Log.d(TAG, "Removing onAnimate listener: " + listener);
         }
 
-        mOnAnimateListeners = ArrayUtils.removeElement(OnAnimateListener.class,
-                mOnAnimateListeners, listener);
-        stopTimingLoopIfNoListeners();
+        synchronized (mLock) {
+            mOnAnimateListeners = ArrayUtils.removeElement(OnAnimateListener.class,
+                    mOnAnimateListeners, listener);
+            stopTimingLoopIfNoListenersLocked();
+        }
     }
 
     /**
      * Adds a draw listener.
-     * Must be called on the UI thread.
      *
      * @param listener The listener to add.
      */
@@ -316,8 +350,10 @@ public final class Choreographer extends Handler {
             Log.d(TAG, "Adding onDraw listener: " + listener);
         }
 
-        mOnDrawListeners = ArrayUtils.appendElement(OnDrawListener.class,
-                mOnDrawListeners, listener);
+        synchronized (mLock) {
+            mOnDrawListeners = ArrayUtils.appendElement(OnDrawListener.class,
+                    mOnDrawListeners, listener);
+        }
     }
 
     /**
@@ -335,12 +371,14 @@ public final class Choreographer extends Handler {
             Log.d(TAG, "Removing onDraw listener: " + listener);
         }
 
-        mOnDrawListeners = ArrayUtils.removeElement(OnDrawListener.class,
-                mOnDrawListeners, listener);
-        stopTimingLoopIfNoListeners();
+        synchronized (mLock) {
+            mOnDrawListeners = ArrayUtils.removeElement(OnDrawListener.class,
+                    mOnDrawListeners, listener);
+            stopTimingLoopIfNoListenersLocked();
+        }
     }
 
-    private void stopTimingLoopIfNoListeners() {
+    private void stopTimingLoopIfNoListenersLocked() {
         if (mOnDrawListeners == null && mOnAnimateListeners == null) {
             if (DEBUG) {
                 Log.d(TAG, "Stopping timing loop.");
