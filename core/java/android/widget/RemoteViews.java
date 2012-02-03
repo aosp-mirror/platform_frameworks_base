@@ -427,13 +427,22 @@ public class RemoteViews implements Parcelable, Filter {
 
         public SetOnClickPendingIntent(Parcel parcel) {
             viewId = parcel.readInt();
-            pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+
+            // We check a flag to determine if the parcel contains a PendingIntent.
+            if (parcel.readInt() != 0) {
+                pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+            }
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
-            pendingIntent.writeToParcel(dest, 0 /* no flags */);
+
+            // We use a flag to indicate whether the parcel contains a valid object.
+            dest.writeInt(pendingIntent != null ? 1 : 0);
+            if (pendingIntent != null) {
+                pendingIntent.writeToParcel(dest, 0 /* no flags */);
+            }
         }
 
         @Override
@@ -445,35 +454,39 @@ public class RemoteViews implements Parcelable, Filter {
             // sense, do they mean to set a PendingIntent template for the AdapterView's children?
             if (mIsWidgetCollectionChild) {
                 Log.e("RemoteViews", "Cannot setOnClickPendingIntent for collection item " +
-				"(id: " + viewId + ")");
+                        "(id: " + viewId + ")");
                 // TODO: return; We'll let this slide until apps are up to date.
             }
 
-            if (target != null && pendingIntent != null) {
-                OnClickListener listener = new OnClickListener() {
-                    public void onClick(View v) {
-                        // Find target view location in screen coordinates and
-                        // fill into PendingIntent before sending.
-                        final float appScale = v.getContext().getResources()
-                                .getCompatibilityInfo().applicationScale;
-                        final int[] pos = new int[2];
-                        v.getLocationOnScreen(pos);
-
-                        final Rect rect = new Rect();
-                        rect.left = (int) (pos[0] * appScale + 0.5f);
-                        rect.top = (int) (pos[1] * appScale + 0.5f);
-                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
-                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
-
-                        final Intent intent = new Intent();
-                        intent.setSourceBounds(rect);
-                        startIntentSafely(v.getContext(), pendingIntent, intent);
-                    }
-                };
+            if (target != null) {
+                // If the pendingIntent is null, we clear the onClickListener
+                OnClickListener listener = null;
+                if (pendingIntent != null) {
+                    listener = new OnClickListener() {
+                        public void onClick(View v) {
+                            // Find target view location in screen coordinates and
+                            // fill into PendingIntent before sending.
+                            final float appScale = v.getContext().getResources()
+                                    .getCompatibilityInfo().applicationScale;
+                            final int[] pos = new int[2];
+                            v.getLocationOnScreen(pos);
+    
+                            final Rect rect = new Rect();
+                            rect.left = (int) (pos[0] * appScale + 0.5f);
+                            rect.top = (int) (pos[1] * appScale + 0.5f);
+                            rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+                            rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+    
+                            final Intent intent = new Intent();
+                            intent.setSourceBounds(rect);
+                            startIntentSafely(v.getContext(), pendingIntent, intent);
+                        }
+                    };
+                }
                 target.setOnClickListener(listener);
             }
         }
-        
+
         int viewId;
         PendingIntent pendingIntent;
 
@@ -667,6 +680,9 @@ public class RemoteViews implements Parcelable, Filter {
                 Log.d("RemoteViews", "read viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
+
+            // For some values that may have been null, we first check a flag to see if they were
+            // written to the parcel.
             switch (this.type) {
                 case BOOLEAN:
                     this.value = in.readInt() != 0;
@@ -699,16 +715,22 @@ public class RemoteViews implements Parcelable, Filter {
                     this.value = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
                     break;
                 case URI:
-                    this.value = Uri.CREATOR.createFromParcel(in);
+                    if (in.readInt() != 0) {
+                        this.value = Uri.CREATOR.createFromParcel(in);
+                    }
                     break;
                 case BITMAP:
-                    this.value = Bitmap.CREATOR.createFromParcel(in);
+                    if (in.readInt() != 0) {
+                        this.value = Bitmap.CREATOR.createFromParcel(in);
+                    }
                     break;
                 case BUNDLE:
                     this.value = in.readBundle();
                     break;
                 case INTENT:
-                    this.value = Intent.CREATOR.createFromParcel(in);
+                    if (in.readInt() != 0) {
+                        this.value = Intent.CREATOR.createFromParcel(in);
+                    }
                     break;
                 default:
                     break;
@@ -725,6 +747,9 @@ public class RemoteViews implements Parcelable, Filter {
                 Log.d("RemoteViews", "write viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
+
+            // For some values which are null, we record an integer flag to indicate whether
+            // we have written a valid value to the parcel.
             switch (this.type) {
                 case BOOLEAN:
                     out.writeInt((Boolean) this.value ? 1 : 0);
@@ -757,16 +782,25 @@ public class RemoteViews implements Parcelable, Filter {
                     TextUtils.writeToParcel((CharSequence)this.value, out, flags);   
                     break;
                 case URI:
-                    ((Uri)this.value).writeToParcel(out, flags);
+                    out.writeInt(this.value != null ? 1 : 0);
+                    if (this.value != null) {
+                        ((Uri)this.value).writeToParcel(out, flags);
+                    }
                     break;
                 case BITMAP:
-                    ((Bitmap)this.value).writeToParcel(out, flags);
+                    out.writeInt(this.value != null ? 1 : 0);
+                    if (this.value != null) {
+                        ((Bitmap)this.value).writeToParcel(out, flags);
+                    }
                     break;
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
                     break;
                 case INTENT:
-                    ((Intent)this.value).writeToParcel(out, flags);
+                    out.writeInt(this.value != null ? 1 : 0);
+                    if (this.value != null) {
+                        ((Intent)this.value).writeToParcel(out, flags);
+                    }
                     break;
                 default:
                     break;
