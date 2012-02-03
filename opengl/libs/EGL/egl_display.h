@@ -64,6 +64,7 @@ struct egl_config_t {
 class EGLAPI egl_display_t { // marked as EGLAPI for testing purposes
     static egl_display_t sDisplay[NUM_DISPLAYS];
     EGLDisplay getDisplay(EGLNativeDisplayType display);
+    void loseCurrentImpl(egl_context_t * cur_c);
 
 public:
     enum {

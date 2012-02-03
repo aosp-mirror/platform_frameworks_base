@@ -345,42 +345,73 @@ EGLBoolean egl_display_t::terminate() {
 void egl_display_t::loseCurrent(egl_context_t * cur_c)
 {
     if (cur_c) {
-        egl_surface_t * cur_r = get_surface(cur_c->read);
-        egl_surface_t * cur_d = get_surface(cur_c->draw);
+        egl_display_t* display = cur_c->getDisplay();
+        if (display) {
+            display->loseCurrentImpl(cur_c);
+        }
+    }
+}
 
-        // by construction, these are either 0 or valid (possibly terminated)
-        // it should be impossible for these to be invalid
-        ContextRef _cur_c(cur_c);
-        SurfaceRef _cur_r(cur_r);
-        SurfaceRef _cur_d(cur_d);
+void egl_display_t::loseCurrentImpl(egl_context_t * cur_c)
+{
+    // by construction, these are either 0 or valid (possibly terminated)
+    // it should be impossible for these to be invalid
+    ContextRef _cur_c(cur_c);
+    SurfaceRef _cur_r(cur_c ? get_surface(cur_c->read) : NULL);
+    SurfaceRef _cur_d(cur_c ? get_surface(cur_c->draw) : NULL);
 
+    { // scope for the lock
+        Mutex::Autolock _l(lock);
         cur_c->onLooseCurrent();
 
-        _cur_c.release();
-        _cur_r.release();
-        _cur_d.release();
     }
+
+    // This cannot be called with the lock held because it might end-up
+    // calling back into EGL (in particular when a surface is destroyed
+    // it calls ANativeWindow::disconnect
+    _cur_c.release();
+    _cur_r.release();
+    _cur_d.release();
 }
 
 EGLBoolean egl_display_t::makeCurrent(egl_context_t* c, egl_context_t* cur_c,
         EGLSurface draw, EGLSurface read, EGLContext ctx,
         EGLSurface impl_draw, EGLSurface impl_read, EGLContext impl_ctx)
 {
-    Mutex::Autolock _l(lock);
     EGLBoolean result;
-    if (c) {
-        result = c->cnx->egl.eglMakeCurrent(
-                disp[c->impl].dpy, impl_draw, impl_read, impl_ctx);
-    } else {
-        result = cur_c->cnx->egl.eglMakeCurrent(
-                disp[cur_c->impl].dpy, impl_draw, impl_read, impl_ctx);
-    }
-    if (result == EGL_TRUE) {
-        loseCurrent(cur_c);
+
+    // by construction, these are either 0 or valid (possibly terminated)
+    // it should be impossible for these to be invalid
+    ContextRef _cur_c(cur_c);
+    SurfaceRef _cur_r(cur_c ? get_surface(cur_c->read) : NULL);
+    SurfaceRef _cur_d(cur_c ? get_surface(cur_c->draw) : NULL);
+
+    { // scope for the lock
+        Mutex::Autolock _l(lock);
         if (c) {
-            c->onMakeCurrent(draw, read);
+            result = c->cnx->egl.eglMakeCurrent(
+                    disp[c->impl].dpy, impl_draw, impl_read, impl_ctx);
+            if (result == EGL_TRUE) {
+                c->onMakeCurrent(draw, read);
+            }
+        } else {
+            result = cur_c->cnx->egl.eglMakeCurrent(
+                    disp[cur_c->impl].dpy, impl_draw, impl_read, impl_ctx);
+            if (result == EGL_TRUE) {
+                cur_c->onLooseCurrent();
+            }
         }
     }
+
+    if (result == EGL_TRUE) {
+        // This cannot be called with the lock held because it might end-up
+        // calling back into EGL (in particular when a surface is destroyed
+        // it calls ANativeWindow::disconnect
+        _cur_c.release();
+        _cur_r.release();
+        _cur_d.release();
+    }
+
     return result;
 }
 
