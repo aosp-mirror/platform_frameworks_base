@@ -190,6 +190,8 @@ public:
             status_t renderScreenToTextureLocked(DisplayID dpy,
                     GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
 
+            void onMessageReceived(int32_t what);
+
             status_t postMessageAsync(const sp<MessageBase>& msg,
                     nsecs_t reltime=0, uint32_t flags = 0);
 
@@ -283,7 +285,10 @@ private:
 public:     // hack to work around gcc 4.0.3 bug
     const GraphicPlane&     graphicPlane(int dpy) const;
           GraphicPlane&     graphicPlane(int dpy);
-          void              signalEvent();
+
+          void              signalTransaction();
+          void              signalLayerUpdate();
+          void              signalRefresh();
           void              repaintEverything();
 
 private:
@@ -300,6 +305,7 @@ private:
             void        handlePageFlip();
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
+            void        handleRefresh();
             void        handleWorkList();
             void        handleRepaint();
             void        postFramebuffer();

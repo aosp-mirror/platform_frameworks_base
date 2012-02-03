@@ -29,6 +29,7 @@
 
 #include "MessageQueue.h"
 #include "EventThread.h"
+#include "SurfaceFlinger.h"
 
 namespace android {
 
@@ -48,12 +49,45 @@ void MessageBase::handleMessage(const Message&) {
 
 // ---------------------------------------------------------------------------
 
+void MessageQueue::Handler::signalRefresh() {
+    if ((android_atomic_or(eventMaskRefresh, &mEventMask) & eventMaskRefresh) == 0) {
+        mQueue.mLooper->sendMessage(this, Message(MessageQueue::REFRESH));
+    }
+}
+
+void MessageQueue::Handler::signalInvalidate() {
+    if ((android_atomic_or(eventMaskInvalidate, &mEventMask) & eventMaskInvalidate) == 0) {
+        mQueue.mLooper->sendMessage(this, Message(MessageQueue::INVALIDATE));
+    }
+}
+
+void MessageQueue::Handler::handleMessage(const Message& message) {
+    switch (message.what) {
+        case INVALIDATE:
+            android_atomic_and(~eventMaskInvalidate, &mEventMask);
+            mQueue.mFlinger->onMessageReceived(message.what);
+            break;
+        case REFRESH:
+            android_atomic_and(~eventMaskRefresh, &mEventMask);
+            mQueue.mFlinger->onMessageReceived(message.what);
+            break;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 MessageQueue::MessageQueue()
-    : mLooper(new Looper(true)), mWorkPending(0)
 {
 }
 
 MessageQueue::~MessageQueue() {
+}
+
+void MessageQueue::init(const sp<SurfaceFlinger>& flinger)
+{
+    mFlinger = flinger;
+    mLooper = new Looper(true);
+    mHandler = new Handler(*this);
 }
 
 void MessageQueue::setEventThread(const sp<EventThread>& eventThread)
@@ -68,25 +102,16 @@ void MessageQueue::setEventThread(const sp<EventThread>& eventThread)
 void MessageQueue::waitMessage() {
     do {
         IPCThreadState::self()->flushCommands();
-
         int32_t ret = mLooper->pollOnce(-1);
         switch (ret) {
             case ALOOPER_POLL_WAKE:
             case ALOOPER_POLL_CALLBACK:
-                // callback and/or wake
-                if (android_atomic_and(0, &mWorkPending)) {
-                    return;
-                }
                 continue;
-
+            case ALOOPER_POLL_ERROR:
+                ALOGE("ALOOPER_POLL_ERROR");
             case ALOOPER_POLL_TIMEOUT:
                 // timeout (should not happen)
                 continue;
-
-            case ALOOPER_POLL_ERROR:
-                ALOGE("ALOOPER_POLL_ERROR");
-                continue;
-
             default:
                 // should not happen
                 ALOGE("Looper::pollOnce() returned unknown status %d", ret);
@@ -107,15 +132,12 @@ status_t MessageQueue::postMessage(
     return NO_ERROR;
 }
 
-void MessageQueue::scheduleWorkASAP() {
-    if (android_atomic_or(1, &mWorkPending) == 0) {
-        mLooper->wake();
-   }
+void MessageQueue::invalidate() {
+    mHandler->signalInvalidate();
 }
 
-status_t MessageQueue::invalidate() {
+void MessageQueue::refresh() {
     mEvents->requestNextVsync();
-    return NO_ERROR;
 }
 
 int MessageQueue::cb_eventReceiver(int fd, int events, void* data) {
@@ -126,33 +148,15 @@ int MessageQueue::cb_eventReceiver(int fd, int events, void* data) {
 int MessageQueue::eventReceiver(int fd, int events) {
     ssize_t n;
     DisplayEventReceiver::Event buffer[8];
-    while ((n = getEvents(buffer, 8)) > 0) {
+    while ((n = DisplayEventReceiver::getEvents(mEventTube, buffer, 8)) > 0) {
         for (int i=0 ; i<n ; i++) {
             if (buffer[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
-                scheduleWorkASAP();
+                mHandler->signalRefresh();
                 break;
             }
         }
     }
     return 1;
-}
-
-ssize_t MessageQueue::getEvents(
-        DisplayEventReceiver::Event* events, size_t count)
-{
-    ssize_t size = mEventTube->read(events, sizeof(events[0])*count);
-    ALOGE_IF(size<0, "MessageQueue::getEvents error (%s)", strerror(-size));
-    if (size >= 0) {
-        // Note: if (size % sizeof(events[0])) != 0, we've got a
-        // partial read. This can happen if the queue filed up (ie: if we
-        // didn't pull from it fast enough).
-        // We discard the partial event and rely on the sender to
-        // re-send the event if appropriate (some events, like VSYNC
-        // can be lost forever).
-        // returns number of events read
-        size /= sizeof(events[0]);
-    }
-    return size;
 }
 
 // ---------------------------------------------------------------------------

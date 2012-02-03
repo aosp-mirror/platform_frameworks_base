@@ -95,6 +95,8 @@ public:
      * should be destroyed and getEvents() shouldn't be called again.
      */
     ssize_t getEvents(Event* events, size_t count);
+    static ssize_t getEvents(const sp<BitTube>& dataChannel,
+            Event* events, size_t count);
 
     /*
      * setVsyncRate() sets the Event::VSync delivery rate. A value of

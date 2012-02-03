@@ -33,6 +33,7 @@ namespace android {
 
 class IDisplayEventConnection;
 class EventThread;
+class SurfaceFlinger;
 
 // ---------------------------------------------------------------------------
 
@@ -59,25 +60,48 @@ private:
 // ---------------------------------------------------------------------------
 
 class MessageQueue {
+    class Handler : public MessageHandler {
+        enum {
+            eventMaskInvalidate = 0x1,
+            eventMaskRefresh    = 0x2
+        };
+        MessageQueue& mQueue;
+        int32_t mEventMask;
+    public:
+        Handler(MessageQueue& queue) : mQueue(queue), mEventMask(0) { }
+        virtual void handleMessage(const Message& message);
+        void signalRefresh();
+        void signalInvalidate();
+    };
+
+    friend class Handler;
+
+    sp<SurfaceFlinger> mFlinger;
     sp<Looper> mLooper;
     sp<EventThread> mEventThread;
     sp<IDisplayEventConnection> mEvents;
     sp<BitTube> mEventTube;
-    int32_t mWorkPending;
+    sp<Handler> mHandler;
+
 
     static int cb_eventReceiver(int fd, int events, void* data);
     int eventReceiver(int fd, int events);
-    ssize_t getEvents(DisplayEventReceiver::Event* events, size_t count);
-    void scheduleWorkASAP();
 
 public:
+    enum {
+        INVALIDATE = 0,
+        REFRESH    = 1,
+    };
+
     MessageQueue();
     ~MessageQueue();
+    void init(const sp<SurfaceFlinger>& flinger);
     void setEventThread(const sp<EventThread>& events);
 
     void waitMessage();
     status_t postMessage(const sp<MessageBase>& message, nsecs_t reltime=0);
-    status_t invalidate();
+    void invalidate();
+    void refresh();
 };
 
 // ---------------------------------------------------------------------------
