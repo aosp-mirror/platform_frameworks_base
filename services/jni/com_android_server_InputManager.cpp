@@ -71,7 +71,6 @@ static struct {
     jmethodID getExcludedDeviceNames;
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
-    jmethodID getMaxEventsPerSecond;
     jmethodID getHoverTapTimeout;
     jmethodID getHoverTapSlop;
     jmethodID getDoubleTapTimeout;
@@ -585,12 +584,6 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
             gCallbacksClassInfo.getKeyRepeatDelay);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
         outConfig->keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
-    }
-
-    jint maxEventsPerSecond = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getMaxEventsPerSecond);
-    if (!checkAndClearExceptionFromCallback(env, "getMaxEventsPerSecond")) {
-        outConfig->maxEventsPerSecond = maxEventsPerSecond;
     }
 }
 
@@ -1479,9 +1472,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.getLongPressTimeout, clazz,
             "getLongPressTimeout", "()I");
-
-    GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, clazz,
-            "getMaxEventsPerSecond", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getPointerLayer, clazz,
             "getPointerLayer", "()I");

@@ -39,9 +39,6 @@
 // Log debug messages about input event injection.
 #define DEBUG_INJECTION 0
 
-// Log debug messages about input event throttling.
-#define DEBUG_THROTTLING 0
-
 // Log debug messages about input focus tracking.
 #define DEBUG_FOCUS 0
 
@@ -210,14 +207,6 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mKeyRepeatState.lastKeyEntry = NULL;
 
     policy->getDispatcherConfiguration(&mConfig);
-
-    mThrottleState.minTimeBetweenEvents = 1000000000LL / mConfig.maxEventsPerSecond;
-    mThrottleState.lastDeviceId = -1;
-
-#if DEBUG_THROTTLING
-    mThrottleState.originalSampleCount = 0;
-    ALOGD("Throttling - Max events per second = %d", mConfig.maxEventsPerSecond);
-#endif
 }
 
 InputDispatcher::~InputDispatcher() {
@@ -310,63 +299,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
             }
         } else {
             // Inbound queue has at least one entry.
-            EventEntry* entry = mInboundQueue.head;
-
-            // Throttle the entry if it is a move event and there are no
-            // other events behind it in the queue.  Due to movement batching, additional
-            // samples may be appended to this event by the time the throttling timeout
-            // expires.
-            // TODO Make this smarter and consider throttling per device independently.
-            if (entry->type == EventEntry::TYPE_MOTION
-                    && !isAppSwitchDue
-                    && mDispatchEnabled
-                    && (entry->policyFlags & POLICY_FLAG_PASS_TO_USER)
-                    && !entry->isInjected()) {
-                MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-                int32_t deviceId = motionEntry->deviceId;
-                uint32_t source = motionEntry->source;
-                if (! isAppSwitchDue
-                        && !motionEntry->next // exactly one event, no successors
-                        && (motionEntry->action == AMOTION_EVENT_ACTION_MOVE
-                                || motionEntry->action == AMOTION_EVENT_ACTION_HOVER_MOVE)
-                        && deviceId == mThrottleState.lastDeviceId
-                        && source == mThrottleState.lastSource) {
-                    nsecs_t nextTime = mThrottleState.lastEventTime
-                            + mThrottleState.minTimeBetweenEvents;
-                    if (currentTime < nextTime) {
-                        // Throttle it!
-#if DEBUG_THROTTLING
-                        ALOGD("Throttling - Delaying motion event for "
-                                "device %d, source 0x%08x by up to %0.3fms.",
-                                deviceId, source, (nextTime - currentTime) * 0.000001);
-#endif
-                        if (nextTime < *nextWakeupTime) {
-                            *nextWakeupTime = nextTime;
-                        }
-                        if (mThrottleState.originalSampleCount == 0) {
-                            mThrottleState.originalSampleCount =
-                                    motionEntry->countSamples();
-                        }
-                        return;
-                    }
-                }
-
-#if DEBUG_THROTTLING
-                if (mThrottleState.originalSampleCount != 0) {
-                    uint32_t count = motionEntry->countSamples();
-                    ALOGD("Throttling - Motion event sample count grew by %d from %d to %d.",
-                            count - mThrottleState.originalSampleCount,
-                            mThrottleState.originalSampleCount, count);
-                    mThrottleState.originalSampleCount = 0;
-                }
-#endif
-
-                mThrottleState.lastEventTime = currentTime;
-                mThrottleState.lastDeviceId = deviceId;
-                mThrottleState.lastSource = source;
-            }
-
-            mInboundQueue.dequeue(entry);
+            EventEntry* entry = mInboundQueue.dequeueAtHead();
             mPendingEvent = entry;
         }
 
@@ -4080,7 +4013,6 @@ void InputDispatcher::dump(String8& dump) {
     dumpDispatchStateLocked(dump);
 
     dump.append(INDENT "Configuration:\n");
-    dump.appendFormat(INDENT2 "MaxEventsPerSecond: %d\n", mConfig.maxEventsPerSecond);
     dump.appendFormat(INDENT2 "KeyRepeatDelay: %0.1fms\n", mConfig.keyRepeatDelay * 0.000001f);
     dump.appendFormat(INDENT2 "KeyRepeatTimeout: %0.1fms\n", mConfig.keyRepeatTimeout * 0.000001f);
 }

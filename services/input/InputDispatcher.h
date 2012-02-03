@@ -172,15 +172,9 @@ struct InputDispatcherConfiguration {
     // The key repeat inter-key delay.
     nsecs_t keyRepeatDelay;
 
-    // The maximum suggested event delivery rate per second.
-    // This value is used to throttle motion event movement actions on a per-device
-    // basis.  It is not intended to be a hard limit.
-    int32_t maxEventsPerSecond;
-
     InputDispatcherConfiguration() :
             keyRepeatTimeout(500 * 1000000LL),
-            keyRepeatDelay(50 * 1000000LL),
-            maxEventsPerSecond(60) { }
+            keyRepeatDelay(50 * 1000000LL) { }
 };
 
 
@@ -926,17 +920,6 @@ private:
     Condition mInjectionSyncFinishedCondition;
     void incrementPendingForegroundDispatchesLocked(EventEntry* entry);
     void decrementPendingForegroundDispatchesLocked(EventEntry* entry);
-
-    // Throttling state.
-    struct ThrottleState {
-        nsecs_t minTimeBetweenEvents;
-
-        nsecs_t lastEventTime;
-        int32_t lastDeviceId;
-        uint32_t lastSource;
-
-        uint32_t originalSampleCount; // only collected during debugging
-    } mThrottleState;
 
     // Key repeat tracking.
     struct KeyRepeatState {
