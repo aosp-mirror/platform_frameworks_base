@@ -48,9 +48,10 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     mState.enabledTracks= 0;
     mState.needsChanged = 0;
     mState.frameCount   = frameCount;
+    mState.hook         = process__nop;
     mState.outputTemp   = NULL;
     mState.resampleTemp = NULL;
-    mState.hook         = process__nop;
+    // mState.reserved
     track_t* t = mState.tracks;
     for (unsigned i=0 ; i < MAX_NUM_TRACKS ; i++) {
         t->needs = 0;
@@ -70,12 +71,13 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         t->enabled = 0;
         t->format = 16;
         t->channelMask = AUDIO_CHANNEL_OUT_STEREO;
-        t->buffer.raw = 0;
         t->bufferProvider = NULL;
+        t->buffer.raw = NULL;
+        // t->buffer.frameCount
         t->hook = NULL;
+        t->in = NULL;
         t->resampler = NULL;
         t->sampleRate = mSampleRate;
-        t->in = NULL;
         t->mainBuffer = NULL;
         t->auxBuffer = NULL;
         t++;
