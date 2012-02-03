@@ -5103,7 +5103,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
                                 uint32_t *pSamplingRate,
                                 audio_format_t *pFormat,
                                 uint32_t *pChannels,
-                                uint32_t acoustics)
+                                audio_in_acoustics_t acoustics)
 {
     status_t status;
     RecordThread *thread = NULL;
@@ -5128,7 +5128,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
 
     status = inHwDev->open_input_stream(inHwDev, *pDevices, &format,
                                         &channels, &samplingRate,
-                                        (audio_in_acoustics_t)acoustics,
+                                        acoustics,
                                         &inStream);
     ALOGV("openInput() openInputStream returned input %p, SamplingRate %d, Format %d, Channels %x, acoustics %x, status %d",
             inStream,
@@ -5148,7 +5148,7 @@ int AudioFlinger::openInput(uint32_t *pDevices,
         ALOGV("openInput() reopening with proposed sampling rate and channels");
         status = inHwDev->open_input_stream(inHwDev, *pDevices, &format,
                                             &channels, &samplingRate,
-                                            (audio_in_acoustics_t)acoustics,
+                                            acoustics,
                                             &inStream);
     }
 
