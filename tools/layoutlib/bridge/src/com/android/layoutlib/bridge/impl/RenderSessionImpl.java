@@ -33,10 +33,10 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
-import com.android.ide.common.rendering.api.SessionParams;
-import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.rendering.api.Result.Status;
+import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
+import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -69,8 +69,8 @@ import android.util.TypedValue;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.AbsListView;
@@ -82,8 +82,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TabHost;
-import android.widget.TabWidget;
 import android.widget.TabHost.TabSpec;
+import android.widget.TabWidget;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -835,6 +835,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 previousTransition.addTransitionListener(new TransitionListener() {
                     private int mChangeDisappearingCount = 0;
 
+                    @Override
                     public void startTransition(LayoutTransition transition, ViewGroup container,
                             View view, int transitionType) {
                         if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
@@ -842,6 +843,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         }
                     }
 
+                    @Override
                     public void endTransition(LayoutTransition transition, ViewGroup container,
                             View view, int transitionType) {
                         if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
@@ -1227,6 +1229,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             TabSpec spec = tabHost.newTabSpec("tag").setIndicator("Tab Label",
                     tabHost.getResources().getDrawable(android.R.drawable.ic_menu_info_details))
                     .setContent(new TabHost.TabContentFactory() {
+                        @Override
                         public View createTabContent(String tag) {
                             return new LinearLayout(getContext());
                         }

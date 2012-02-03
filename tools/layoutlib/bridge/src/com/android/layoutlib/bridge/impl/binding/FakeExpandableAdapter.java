@@ -99,23 +99,28 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
 
     // ---- ExpandableListAdapter
 
+    @Override
     public int getGroupCount() {
         return mItems.size();
     }
 
+    @Override
     public int getChildrenCount(int groupPosition) {
         AdapterItem item = mItems.get(groupPosition);
         return item.getChildren().size();
     }
 
+    @Override
     public Object getGroup(int groupPosition) {
         return mItems.get(groupPosition);
     }
 
+    @Override
     public Object getChild(int groupPosition, int childPosition) {
         return getChildItem(groupPosition, childPosition);
     }
 
+    @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
             ViewGroup parent) {
         // we don't care about recycling here because we never scroll.
@@ -123,6 +128,7 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
         return getView(item, null /*parentItem*/, convertView, parent);
     }
 
+    @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
             View convertView, ViewGroup parent) {
         // we don't care about recycling here because we never scroll.
@@ -131,48 +137,59 @@ public class FakeExpandableAdapter extends BaseAdapter implements ExpandableList
         return getView(item, parentItem, convertView, parent);
     }
 
+    @Override
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
 
+    @Override
     public long getChildId(int groupPosition, int childPosition) {
         return childPosition;
     }
 
+    @Override
     public long getCombinedGroupId(long groupId) {
         return groupId << 16 | 0x0000FFFF;
     }
 
+    @Override
     public long getCombinedChildId(long groupId, long childId) {
         return groupId << 16 | childId;
     }
 
+    @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
 
+    @Override
     public void onGroupCollapsed(int groupPosition) {
         // pass
     }
 
+    @Override
     public void onGroupExpanded(int groupPosition) {
         // pass
     }
 
     // ---- HeterogeneousExpandableList
 
+    @Override
     public int getChildType(int groupPosition, int childPosition) {
         return getChildItem(groupPosition, childPosition).getType();
     }
 
+    @Override
     public int getChildTypeCount() {
         return mChildrenTypes.size();
     }
 
+    @Override
     public int getGroupType(int groupPosition) {
         return mItems.get(groupPosition).getType();
     }
 
+    @Override
     public int getGroupTypeCount() {
         return mGroupTypes.size();
     }
