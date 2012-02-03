@@ -40,7 +40,7 @@ struct AudioSource : public MediaSource, public MediaBufferObserver {
     status_t initCheck() const;
 
     virtual status_t start(MetaData *params = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual sp<MetaData> getFormat();
 
     // Returns the maximum amplitude since last call.
@@ -97,6 +97,7 @@ private:
 
     void releaseQueuedFrames_l();
     void waitOutstandingEncodingFrames_l();
+    status_t reset();
 
     AudioSource(const AudioSource &);
     AudioSource &operator=(const AudioSource &);

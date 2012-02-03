@@ -79,7 +79,7 @@ public:
     virtual ~CameraSource();
 
     virtual status_t start(MetaData *params = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
@@ -163,7 +163,6 @@ protected:
                  bool storeMetaDataInVideoBuffers);
 
     virtual void startCameraRecording();
-    virtual void stopCameraRecording();
     virtual void releaseRecordingFrame(const sp<IMemory>& frame);
 
     // Returns true if need to skip the current frame.
@@ -220,7 +219,9 @@ private:
     status_t checkFrameRate(const CameraParameters& params,
                     int32_t frameRate);
 
+    void stopCameraRecording();
     void releaseCamera();
+    status_t reset();
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);

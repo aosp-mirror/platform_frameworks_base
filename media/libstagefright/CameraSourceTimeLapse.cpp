@@ -87,6 +87,10 @@ CameraSourceTimeLapse::CameraSourceTimeLapse(
 }
 
 CameraSourceTimeLapse::~CameraSourceTimeLapse() {
+    if (mLastReadBufferCopy) {
+        mLastReadBufferCopy->release();
+        mLastReadBufferCopy = NULL;
+    }
 }
 
 void CameraSourceTimeLapse::startQuickReadReturns() {
@@ -201,15 +205,6 @@ status_t CameraSourceTimeLapse::read(
         (*buffer) = mLastReadBufferCopy;
         (*buffer)->add_ref();
         return mLastReadStatus;
-    }
-}
-
-void CameraSourceTimeLapse::stopCameraRecording() {
-    ALOGV("stopCameraRecording");
-    CameraSource::stopCameraRecording();
-    if (mLastReadBufferCopy) {
-        mLastReadBufferCopy->release();
-        mLastReadBufferCopy = NULL;
     }
 }
 

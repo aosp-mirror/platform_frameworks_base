@@ -72,7 +72,7 @@ AudioSource::AudioSource(
 
 AudioSource::~AudioSource() {
     if (mStarted) {
-        stop();
+        reset();
     }
 
     delete mRecord;
@@ -130,7 +130,7 @@ void AudioSource::waitOutstandingEncodingFrames_l() {
     }
 }
 
-status_t AudioSource::stop() {
+status_t AudioSource::reset() {
     Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
         return UNKNOWN_ERROR;

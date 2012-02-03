@@ -121,9 +121,6 @@ private:
     // Wrapper over CameraSource::read() to implement quick stop.
     virtual status_t read(MediaBuffer **buffer, const ReadOptions *options = NULL);
 
-    // For video camera case, just stops the camera's video recording.
-    virtual void stopCameraRecording();
-
     // mSkipCurrentFrame is set to true in dataCallbackTimestamp() if the current
     // frame needs to be skipped and this function just returns the value of mSkipCurrentFrame.
     virtual bool skipCurrentFrame(int64_t timestampUs);
