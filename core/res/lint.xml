@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- temporary until we add frameworks support -->
+    <issue id="UnusedResources" severity="ignore" />
+
+    <issue id="PrivateResource" severity="ignore" />
+</lint>
