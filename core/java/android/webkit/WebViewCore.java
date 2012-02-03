@@ -2746,12 +2746,16 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    private void initEditField(String text, int start, int end) {
+    private void initEditField(int pointer, String text, int start, int end) {
         if (mWebView == null) {
             return;
         }
         Message.obtain(mWebView.mPrivateHandler,
-                WebView.INIT_EDIT_FIELD, start, end, text).sendToTarget();
+                WebView.INIT_EDIT_FIELD, pointer, 0, text).sendToTarget();
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
+                0, new TextSelectionData(start, end, 0))
+                .sendToTarget();
     }
 
     private native void nativeUpdateFrameCacheIfLoading(int nativeClass);
@@ -2786,17 +2790,6 @@ public final class WebViewCore {
             mWebView.requestListBox(array, enabledArray, selection);
         }
 
-    }
-
-    // called by JNI
-    private void requestKeyboardWithSelection(int pointer, int selStart,
-            int selEnd, int textGeneration) {
-        if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler,
-                    WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
-                    textGeneration, new TextSelectionData(selStart, selEnd, 0))
-                    .sendToTarget();
-        }
     }
 
     // called by JNI

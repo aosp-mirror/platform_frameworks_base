@@ -367,9 +367,49 @@ public class WebView extends AbsoluteLayout
     private class WebViewInputConnection extends BaseInputConnection {
         // Used for mapping characters to keys typed.
         private KeyCharacterMap mKeyCharacterMap;
+        private boolean mIsKeySentByMe;
 
         public WebViewInputConnection() {
             super(WebView.this, true);
+        }
+
+        @Override
+        public boolean sendKeyEvent(KeyEvent event) {
+            // Latin IME occasionally sends delete codes directly using
+            // sendKeyEvents. WebViewInputConnection should treat this
+            // as a deleteSurroundingText.
+            if (!mIsKeySentByMe
+                    && event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
+                Editable editable = getEditable();
+                int selectionStart = Selection.getSelectionStart(editable);
+                int selectionEnd = Selection.getSelectionEnd(editable);
+                if (selectionEnd > 0 && (selectionStart == selectionEnd)) {
+                    int action = event.getAction();
+                    if (action == KeyEvent.ACTION_UP) {
+                        return deleteSurroundingText(1, 0);
+                    } else if (action == KeyEvent.ACTION_DOWN) {
+                        return true; // the delete will happen in ACTION_UP
+                    }
+                }
+            }
+            return super.sendKeyEvent(event);
+        }
+
+        public void setTextAndKeepSelection(CharSequence text) {
+            Editable editable = getEditable();
+            int selectionStart = Selection.getSelectionStart(editable);
+            int selectionEnd = Selection.getSelectionEnd(editable);
+            editable.replace(0, editable.length(), text);
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) {
+                // Since the text has changed, do not allow the IME to replace the
+                // existing text as though it were a completion.
+                imm.restartInput(WebView.this);
+            }
+            // Keep the previous selection.
+            selectionStart = Math.min(selectionStart, editable.length());
+            selectionEnd = Math.min(selectionEnd, editable.length());
+            setSelection(selectionStart, selectionEnd);
         }
 
         @Override
@@ -393,7 +433,8 @@ public class WebView extends AbsoluteLayout
         @Override
         public boolean commitText(CharSequence text, int newCursorPosition) {
             setComposingText(text, newCursorPosition);
-            finishComposingText();
+            int cursorPosition = Selection.getSelectionEnd(getEditable());
+            setComposingRegion(cursorPosition, cursorPosition);
             return true;
         }
 
@@ -417,6 +458,7 @@ public class WebView extends AbsoluteLayout
          * @param text The new text to replace the changed text.
          */
         private void setNewText(int start, int end, CharSequence text) {
+            mIsKeySentByMe = true;
             Editable editable = getEditable();
             CharSequence original = editable.subSequence(start, end);
             boolean isCharacterAdd = false;
@@ -434,10 +476,8 @@ public class WebView extends AbsoluteLayout
             }
             if (isCharacterAdd) {
                 sendCharacter(text.charAt(textLength - 1));
-                mTextGeneration++;
             } else if (isCharacterDelete) {
                 sendDeleteKey();
-                mTextGeneration++;
             } else if (textLength != originalLength ||
                     !TextUtils.regionMatches(text, 0, original, 0,
                             textLength)) {
@@ -447,6 +487,7 @@ public class WebView extends AbsoluteLayout
                         REPLACE_TEXT, start,  end, text.toString());
                 mPrivateHandler.sendMessage(replaceMessage);
             }
+            mIsKeySentByMe = false;
         }
 
         /**
@@ -509,7 +550,7 @@ public class WebView extends AbsoluteLayout
     private final RectF mVisibleContentRect = new RectF();
     private boolean mGLViewportEmpty = false;
     WebViewInputConnection mInputConnection = null;
-
+    private int mFieldPointer;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -8653,14 +8694,17 @@ public class WebView extends AbsoluteLayout
                 case UPDATE_TEXTFIELD_TEXT_MSG_ID:
                     // Make sure that the textfield is currently focused
                     // and representing the same node as the pointer.
-                    if (inEditingMode() &&
-                            mWebTextView.isSameTextField(msg.arg1)) {
-                        if (msg.arg2 == mTextGeneration) {
-                            String text = (String) msg.obj;
-                            if (null == text) {
-                                text = "";
-                            }
+                    if (msg.arg2 == mTextGeneration) {
+                        String text = (String) msg.obj;
+                        if (null == text) {
+                            text = "";
+                        }
+                        if (inEditingMode() &&
+                                mWebTextView.isSameTextField(msg.arg1)) {
                             mWebTextView.setTextAndKeepSelection(text);
+                        } else if (mInputConnection != null &&
+                                mFieldPointer == msg.arg1) {
+                            mInputConnection.setTextAndKeepSelection(text);
                         }
                     }
                     break;
@@ -8951,15 +8995,8 @@ public class WebView extends AbsoluteLayout
                 case INIT_EDIT_FIELD:
                     if (mInputConnection != null) {
                         mTextGeneration = 0;
-                        String text = (String)msg.obj;
-                        mInputConnection.beginBatchEdit();
-                        Editable editable = mInputConnection.getEditable();
-                        editable.replace(0, editable.length(), text);
-                        int start = msg.arg1;
-                        int end = msg.arg2;
-                        mInputConnection.setComposingRegion(end, end);
-                        mInputConnection.setSelection(start, end);
-                        mInputConnection.endBatchEdit();
+                        mFieldPointer = msg.arg1;
+                        mInputConnection.setTextAndKeepSelection((String) msg.obj);
                     }
                     break;
 
@@ -9102,7 +9139,7 @@ public class WebView extends AbsoluteLayout
             if (inEditingMode()
                     && mWebTextView.isSameTextField(nodePointer)) {
                 mWebTextView.setSelectionFromWebKit(data.mStart, data.mEnd);
-            } else if (mInputConnection != null){
+            } else if (mInputConnection != null && mFieldPointer == nodePointer) {
                 mInputConnection.setSelection(data.mStart, data.mEnd);
             }
         }
