@@ -154,6 +154,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_SNOOZE = 2;
     private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
     private static final int VERSION_ADDED_METERED = 4;
+    private static final int VERSION_SPLIT_SNOOZE = 5;
 
     private static final long KB_IN_BYTES = 1024;
     private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
@@ -176,6 +177,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_WARNING_BYTES = "warningBytes";
     private static final String ATTR_LIMIT_BYTES = "limitBytes";
     private static final String ATTR_LAST_SNOOZE = "lastSnooze";
+    private static final String ATTR_LAST_WARNING_SNOOZE = "lastWarningSnooze";
+    private static final String ATTR_LAST_LIMIT_SNOOZE = "lastLimitSnooze";
     private static final String ATTR_METERED = "metered";
     private static final String ATTR_UID = "uid";
     private static final String ATTR_POLICY = "policy";
@@ -184,7 +187,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // @VisibleForTesting
     public static final String ACTION_ALLOW_BACKGROUND =
-            "com.android.server.action.ACTION_ALLOW_BACKGROUND";
+            "com.android.server.net.action.ALLOW_BACKGROUND";
+    public static final String ACTION_SNOOZE_WARNING =
+            "com.android.server.net.action.SNOOZE_WARNING";
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
@@ -333,6 +338,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
         mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler);
 
+        // listen for snooze warning from notifications
+        final IntentFilter snoozeWarningFilter = new IntentFilter(ACTION_SNOOZE_WARNING);
+        mContext.registerReceiver(mSnoozeWarningReceiver, snoozeWarningFilter,
+                MANAGE_NETWORK_POLICY, mHandler);
+
     }
 
     private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
@@ -418,6 +428,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
+     * Receiver that watches for {@link Notification} control of
+     * {@link NetworkPolicy#lastWarningSnooze}.
+     */
+    private BroadcastReceiver mSnoozeWarningReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified MANAGE_NETWORK_POLICY
+            // permission above.
+
+            final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE);
+            performSnooze(template, TYPE_WARNING);
+        }
+    };
+
+    /**
      * Observer that watches for {@link INetworkManagementService} alerts.
      */
     private INetworkManagementEventObserver mAlertObserver = new NetworkAlertObserver() {
@@ -458,7 +483,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
             if (policy.isOverLimit(totalBytes)) {
-                if (policy.lastSnooze >= start) {
+                if (policy.lastLimitSnooze >= start) {
                     enqueueNotification(policy, TYPE_LIMIT_SNOOZED, totalBytes);
                 } else {
                     enqueueNotification(policy, TYPE_LIMIT, totalBytes);
@@ -468,7 +493,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             } else {
                 notifyUnderLimitLocked(policy.template);
 
-                if (policy.warningBytes != WARNING_DISABLED && totalBytes >= policy.warningBytes) {
+                if (policy.isOverWarning(totalBytes) && policy.lastWarningSnooze < start) {
                     enqueueNotification(policy, TYPE_WARNING, totalBytes);
                 }
             }
@@ -534,7 +559,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final String tag = buildNotificationTag(policy, type);
         final Notification.Builder builder = new Notification.Builder(mContext);
         builder.setOnlyAlertOnce(true);
-        builder.setOngoing(true);
+        builder.setWhen(0L);
 
         final Resources res = mContext.getResources();
         switch (type) {
@@ -547,9 +572,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setContentTitle(title);
                 builder.setContentText(body);
 
-                final Intent intent = buildViewDataUsageIntent(policy.template);
+                final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
+                builder.setDeleteIntent(PendingIntent.getBroadcast(
+                        mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+
+                final Intent viewIntent = buildViewDataUsageIntent(policy.template);
                 builder.setContentIntent(PendingIntent.getActivity(
-                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                        mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+
                 break;
             }
             case TYPE_LIMIT: {
@@ -574,6 +604,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         break;
                 }
 
+                builder.setOngoing(true);
                 builder.setSmallIcon(R.drawable.stat_notify_disabled);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
@@ -608,6 +639,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         break;
                 }
 
+                builder.setOngoing(true);
                 builder.setSmallIcon(R.drawable.stat_notify_error);
                 builder.setTicker(title);
                 builder.setContentTitle(title);
@@ -720,10 +752,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long totalBytes = getTotalBytes(policy.template, start, end);
 
             // disable data connection when over limit and not snoozed
-            final boolean overLimit = policy.isOverLimit(totalBytes) && policy.lastSnooze < start;
-            final boolean enabled = !overLimit;
+            final boolean overLimitWithoutSnooze = policy.isOverLimit(totalBytes)
+                    && policy.lastLimitSnooze < start;
+            final boolean networkEnabled = !overLimitWithoutSnooze;
 
-            setNetworkTemplateEnabled(policy.template, enabled);
+            setNetworkTemplateEnabled(policy.template, networkEnabled);
         }
     }
 
@@ -827,7 +860,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // metered network, but no policy limit; we still need to
                     // restrict apps, so push really high quota.
                     quotaBytes = Long.MAX_VALUE;
-                } else if (policy.lastSnooze >= start) {
+                } else if (policy.lastLimitSnooze >= start) {
                     // snoozing past quota, but we still need to restrict apps,
                     // so push really high quota.
                     quotaBytes = Long.MAX_VALUE;
@@ -896,8 +929,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int cycleDay = time.monthDay;
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-            mNetworkPolicy.put(template, new NetworkPolicy(
-                    template, cycleDay, warningBytes, LIMIT_DISABLED, SNOOZE_NEVER, true));
+            mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay, warningBytes,
+                    LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER, true));
             writePolicyLocked();
         }
     }
@@ -935,11 +968,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
                         final long warningBytes = readLongAttribute(in, ATTR_WARNING_BYTES);
                         final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES);
-                        final long lastSnooze;
-                        if (version >= VERSION_ADDED_SNOOZE) {
-                            lastSnooze = readLongAttribute(in, ATTR_LAST_SNOOZE);
+                        final long lastLimitSnooze;
+                        if (version >= VERSION_SPLIT_SNOOZE) {
+                            lastLimitSnooze = readLongAttribute(in, ATTR_LAST_LIMIT_SNOOZE);
+                        } else if (version >= VERSION_ADDED_SNOOZE) {
+                            lastLimitSnooze = readLongAttribute(in, ATTR_LAST_SNOOZE);
                         } else {
-                            lastSnooze = SNOOZE_NEVER;
+                            lastLimitSnooze = SNOOZE_NEVER;
                         }
                         final boolean metered;
                         if (version >= VERSION_ADDED_METERED) {
@@ -955,11 +990,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                     metered = false;
                             }
                         }
+                        final long lastWarningSnooze;
+                        if (version >= VERSION_SPLIT_SNOOZE) {
+                            lastWarningSnooze = readLongAttribute(in, ATTR_LAST_WARNING_SNOOZE);
+                        } else {
+                            lastWarningSnooze = SNOOZE_NEVER;
+                        }
 
                         final NetworkTemplate template = new NetworkTemplate(
                                 networkTemplate, subscriberId);
-                        mNetworkPolicy.put(template, new NetworkPolicy(
-                                template, cycleDay, warningBytes, limitBytes, lastSnooze, metered));
+                        mNetworkPolicy.put(template, new NetworkPolicy(template, cycleDay,
+                                warningBytes, limitBytes, lastWarningSnooze, lastLimitSnooze,
+                                metered));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -1014,7 +1056,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_METERED);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_SPLIT_SNOOZE);
             writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
@@ -1030,7 +1072,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
                 writeLongAttribute(out, ATTR_LIMIT_BYTES, policy.limitBytes);
-                writeLongAttribute(out, ATTR_LAST_SNOOZE, policy.lastSnooze);
+                writeLongAttribute(out, ATTR_LAST_WARNING_SNOOZE, policy.lastWarningSnooze);
+                writeLongAttribute(out, ATTR_LAST_LIMIT_SNOOZE, policy.lastLimitSnooze);
                 writeBooleanAttribute(out, ATTR_METERED, policy.metered);
                 out.endTag(null, TAG_NETWORK_POLICY);
             }
@@ -1141,9 +1184,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void snoozePolicy(NetworkTemplate template) {
+    public void snoozeLimit(NetworkTemplate template) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        performSnooze(template, TYPE_LIMIT);
+    }
 
+    private void performSnooze(NetworkTemplate template, int type) {
         maybeRefreshTrustedTime();
         final long currentTime = currentTimeMillis();
         synchronized (mRulesLock) {
@@ -1153,7 +1199,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 throw new IllegalArgumentException("unable to find policy for " + template);
             }
 
-            policy.lastSnooze = currentTime;
+            switch (type) {
+                case TYPE_WARNING:
+                    policy.lastWarningSnooze = currentTime;
+                    break;
+                case TYPE_LIMIT:
+                    policy.lastLimitSnooze = currentTime;
+                    break;
+                default:
+                    throw new IllegalArgumentException("unexpected type");
+            }
 
             updateNetworkEnabledLocked();
             updateNetworkRulesLocked();
@@ -1246,12 +1301,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         synchronized (mRulesLock) {
-            if (argSet.contains("unsnooze")) {
+            if (argSet.contains("--unsnooze")) {
                 for (NetworkPolicy policy : mNetworkPolicy.values()) {
-                    policy.lastSnooze = SNOOZE_NEVER;
+                    policy.clearSnooze();
                 }
+
+                updateNetworkEnabledLocked();
+                updateNetworkRulesLocked();
+                updateNotificationsLocked();
                 writePolicyLocked();
-                fout.println("Wiped snooze timestamps");
+
+                fout.println("Cleared snooze timestamps");
                 return;
             }
 
@@ -1597,6 +1657,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static Intent buildAllowBackgroundDataIntent() {
         return new Intent(ACTION_ALLOW_BACKGROUND);
+    }
+
+    private static Intent buildSnoozeWarningIntent(NetworkTemplate template) {
+        final Intent intent = new Intent(ACTION_SNOOZE_WARNING);
+        intent.putExtra(EXTRA_NETWORK_TEMPLATE, template);
+        return intent;
     }
 
     private static Intent buildNetworkOverLimitIntent(NetworkTemplate template) {

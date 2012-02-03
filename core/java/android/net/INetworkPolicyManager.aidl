@@ -43,7 +43,7 @@ interface INetworkPolicyManager {
     NetworkPolicy[] getNetworkPolicies();
 
     /** Snooze limit on policy matching given template. */
-    void snoozePolicy(in NetworkTemplate template);
+    void snoozeLimit(in NetworkTemplate template);
 
     /** Control if background data is restricted system-wide. */
     void setRestrictBackground(boolean restrictBackground);
