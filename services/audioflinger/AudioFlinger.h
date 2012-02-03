@@ -277,16 +277,16 @@ private:
 
     class ThreadBase : public Thread {
     public:
-        ThreadBase (const sp<AudioFlinger>& audioFlinger, int id, uint32_t device);
-        virtual             ~ThreadBase();
 
-
-        enum type {
+        enum type_t {
             MIXER,              // Thread class is MixerThread
             DIRECT,             // Thread class is DirectOutputThread
             DUPLICATING,        // Thread class is DuplicatingThread
             RECORD              // Thread class is RecordThread
         };
+
+        ThreadBase (const sp<AudioFlinger>& audioFlinger, int id, uint32_t device, type_t type);
+        virtual             ~ThreadBase();
 
         status_t dumpBase(int fd, const Vector<String16>& args);
         status_t dumpEffectChains(int fd, const Vector<String16>& args);
@@ -408,7 +408,7 @@ private:
         };
 
         virtual     status_t    initCheck() const = 0;
-                    int         type() const { return mType; }
+                    type_t      type() const { return mType; }
                     uint32_t    sampleRate() const;
                     int         channelCount() const;
                     audio_format_t format() const;
@@ -530,7 +530,7 @@ private:
         friend class RecordThread;
         friend class RecordTrack;
 
-                    int                     mType;
+                    const type_t            mType;
                     Condition               mWaitWorkCV;
                     sp<AudioFlinger>        mAudioFlinger;
                     uint32_t                mSampleRate;
@@ -691,7 +691,8 @@ private:
             DuplicatingThread*          mSourceThread;
         };  // end of OutputTrack
 
-        PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device);
+        PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id,
+                        uint32_t device, type_t type);
         virtual             ~PlaybackThread();
 
         virtual     status_t    dump(int fd, const Vector<String16>& args);
@@ -817,7 +818,8 @@ private:
         MixerThread (const sp<AudioFlinger>& audioFlinger,
                      AudioStreamOut* output,
                      int id,
-                     uint32_t device);
+                     uint32_t device,
+                     type_t type = MIXER);
         virtual             ~MixerThread();
 
         // Thread virtuals
