@@ -60,6 +60,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -274,6 +275,8 @@ final class ActivityStack {
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
+    private int mCurrentUser;
+
     static final int SLEEP_TIMEOUT_MSG = 8;
     static final int PAUSE_TIMEOUT_MSG = 9;
     static final int IDLE_TIMEOUT_MSG = 10;
@@ -365,6 +368,7 @@ final class ActivityStack {
     }
     
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
+        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
@@ -377,6 +381,7 @@ final class ActivityStack {
     }
 
     final ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
+        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
@@ -398,6 +403,7 @@ final class ActivityStack {
      * @return Returns the HistoryRecord of the next activity on the stack.
      */
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
+        // TODO: Don't look for any tasks from other users
         int i = mHistory.size()-1;
         while (i >= 0) {
             ActivityRecord r = mHistory.get(i);
@@ -444,10 +450,11 @@ final class ActivityStack {
 
         TaskRecord cp = null;
 
+        final int userId = UserId.getUserId(info.applicationInfo.uid);
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
-            if (!r.finishing && r.task != cp
+            if (!r.finishing && r.task != cp && r.userId == userId
                     && r.launchMode != ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 cp = r.task;
                 //Slog.i(TAG, "Comparing existing cls=" + r.task.intent.getComponent().flattenToShortString()
@@ -487,12 +494,13 @@ final class ActivityStack {
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
         }
+        final int userId = UserId.getUserId(info.applicationInfo.uid);
 
         final int N = mHistory.size();
         for (int i=(N-1); i>=0; i--) {
             ActivityRecord r = mHistory.get(i);
             if (!r.finishing) {
-                if (r.intent.getComponent().equals(cls)) {
+                if (r.intent.getComponent().equals(cls) && r.userId == userId) {
                     //Slog.i(TAG, "Found matching class!");
                     //dump();
                     //Slog.i(TAG, "For Intent " + intent + " bringing to top: " + r.intent);
@@ -509,6 +517,43 @@ final class ActivityStack {
         msg.what = ActivityManagerService.SHOW_COMPAT_MODE_DIALOG_MSG;
         msg.obj = r.task.askedCompatMode ? null : r;
         mService.mHandler.sendMessage(msg);
+    }
+
+    /*
+     * Move the activities around in the stack to bring a user to the foreground.
+     * @return whether there are any activities for the specified user.
+     */
+    final boolean switchUser(int userId) {
+        synchronized (mService) {
+            mCurrentUser = userId;
+
+            // Only one activity? Nothing to do...
+            if (mHistory.size() < 2)
+                return false;
+
+            boolean haveActivities = false;
+            // Check if the top activity is from the new user.
+            ActivityRecord top = mHistory.get(mHistory.size() - 1);
+            if (top.userId == userId) return true;
+            // Otherwise, move the user's activities to the top.
+            int N = mHistory.size();
+            int i = 0;
+            while (i < N) {
+                ActivityRecord r = mHistory.get(i);
+                if (r.userId == userId) {
+                    ActivityRecord moveToTop = mHistory.remove(i);
+                    mHistory.add(moveToTop);
+                    // No need to check the top one now
+                    N--;
+                    haveActivities = true;
+                } else {
+                    i++;
+                }
+            }
+            // Transition from the old top to the new top
+            resumeTopActivityLocked(top);
+            return haveActivities;
+        }
     }
 
     final boolean realStartActivityLocked(ActivityRecord r,
@@ -1272,7 +1317,7 @@ final class ActivityStack {
             // There are no more activities!  Let's just start up the
             // Launcher...
             if (mMainStack) {
-                return mService.startHomeActivityLocked();
+                return mService.startHomeActivityLocked(0);
             }
         }
 
@@ -1384,6 +1429,7 @@ final class ActivityStack {
         // Launching this app's activity, make sure the app is no longer
         // considered stopped.
         try {
+            // TODO: Apply to the correct userId
             AppGlobals.getPackageManager().setPackageStoppedState(
                     next.packageName, false);
         } catch (RemoteException e1) {
@@ -2354,7 +2400,7 @@ final class ActivityStack {
                 }
             }
         }
-        
+
         ActivityRecord r = new ActivityRecord(mService, this, callerApp, callingUid,
                 intent, resolvedType, aInfo, mService.mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
@@ -2420,7 +2466,8 @@ final class ActivityStack {
             int grantedMode, boolean onlyIfNeeded, boolean doResume) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
-        
+        final int userId = r.userId;
+
         int launchFlags = intent.getFlags();
         
         // We'll invoke onUserLeaving before onPause only if the launching
@@ -2648,7 +2695,7 @@ final class ActivityStack {
             // once.
             ActivityRecord top = topRunningNonDelayedActivityLocked(notTop);
             if (top != null && r.resultTo == null) {
-                if (top.realActivity.equals(r.realActivity)) {
+                if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
                     if (top.app != null && top.app.thread != null) {
                         if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP
@@ -2821,12 +2868,12 @@ final class ActivityStack {
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug, String profileFile, ParcelFileDescriptor profileFd,
-            boolean autoStopProfiler, WaitResult outResult, Configuration config) {
+            boolean autoStopProfiler,
+            WaitResult outResult, Configuration config, int userId) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-
         boolean componentSpecified = intent.getComponent() != null;
 
         // Don't modify the client's object!
@@ -2835,6 +2882,7 @@ final class ActivityStack {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug,
                 profileFile, profileFd, autoStopProfiler);
+        aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
         synchronized (mService) {
             int callingPid;
@@ -2915,6 +2963,7 @@ final class ActivityStack {
                                         PackageManager.MATCH_DEFAULT_ONLY
                                         | ActivityManagerService.STOCK_PM_FLAGS);
                             aInfo = rInfo != null ? rInfo.activityInfo : null;
+                            aInfo = mService.getActivityInfoForUser(aInfo, userId);
                         } catch (RemoteException e) {
                             aInfo = null;
                         }
@@ -2977,7 +3026,8 @@ final class ActivityStack {
     }
     
     final int startActivities(IApplicationThread caller, int callingUid,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+            Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, int userId) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -3022,6 +3072,8 @@ final class ActivityStack {
                     // Collect information about the target of the Intent.
                     ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false,
                             null, null, false);
+                    // TODO: New, check if this is correct
+                    aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
                     if (mMainStack && aInfo != null && (aInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {

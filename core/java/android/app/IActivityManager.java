@@ -114,8 +114,8 @@ public interface IActivityManager extends IInterface {
     public int broadcastIntent(IApplicationThread caller, Intent intent,
             String resolvedType, IIntentReceiver resultTo, int resultCode,
             String resultData, Bundle map, String requiredPermission,
-            boolean serialized, boolean sticky) throws RemoteException;
-    public void unbroadcastIntent(IApplicationThread caller, Intent intent) throws RemoteException;
+            boolean serialized, boolean sticky, int userId) throws RemoteException;
+    public void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) throws RemoteException;
     /* oneway */
     public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map, boolean abortBroadcast) throws RemoteException;
     public void attachApplication(IApplicationThread app) throws RemoteException;
@@ -209,7 +209,7 @@ public interface IActivityManager extends IInterface {
             int flags) throws RemoteException;
     public void cancelIntentSender(IIntentSender sender) throws RemoteException;
     public boolean clearApplicationUserData(final String packageName,
-            final IPackageDataObserver observer) throws RemoteException;
+            final IPackageDataObserver observer, int userId) throws RemoteException;
     public String getPackageForIntentSender(IIntentSender sender) throws RemoteException;
     
     public void setProcessLimit(int max) throws RemoteException;

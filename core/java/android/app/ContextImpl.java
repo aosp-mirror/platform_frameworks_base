@@ -75,6 +75,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserId;
 import android.os.Vibrator;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
@@ -896,7 +897,8 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, false, false);
+                Activity.RESULT_OK, null, null, null, false, false,
+                Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -908,7 +910,8 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, false, false);
+                Activity.RESULT_OK, null, null, receiverPermission, false, false,
+                Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -921,7 +924,8 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, true, false);
+                Activity.RESULT_OK, null, null, receiverPermission, true, false,
+                Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -954,7 +958,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermission,
-                true, false);
+                true, false, Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -966,7 +970,8 @@ class ContextImpl extends Context {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, null, false, true);
+                Activity.RESULT_OK, null, null, null, false, true,
+                Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -999,7 +1004,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
-                true, true);
+                true, true, Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -1014,7 +1019,7 @@ class ContextImpl extends Context {
         try {
             intent.setAllowFds(false);
             ActivityManagerNative.getDefault().unbroadcastIntent(
-                mMainThread.getApplicationThread(), intent);
+                    mMainThread.getApplicationThread(), intent, Binder.getOrigCallingUser());
         } catch (RemoteException e) {
         }
     }
@@ -1215,8 +1220,7 @@ class ContextImpl extends Context {
 
         int pid = Binder.getCallingPid();
         if (pid != Process.myPid()) {
-            return checkPermission(permission, pid,
-                    Binder.getCallingUid());
+            return checkPermission(permission, pid, Binder.getCallingUid());
         }
         return PackageManager.PERMISSION_DENIED;
     }
@@ -1384,7 +1388,8 @@ class ContextImpl extends Context {
             Uri uri, int modeFlags, String message) {
         enforceForUri(
                 modeFlags, checkCallingUriPermission(uri, modeFlags),
-                false, Binder.getCallingUid(), uri, message);
+                false,
+                Binder.getCallingUid(), uri, message);
     }
 
     public void enforceCallingOrSelfUriPermission(

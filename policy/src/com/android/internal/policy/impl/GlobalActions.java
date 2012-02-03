@@ -16,16 +16,23 @@
 
 package com.android.internal.policy.impl;
 
-import android.app.Activity;
+import com.android.internal.app.ShutdownThread;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.R;
+
+import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
@@ -39,13 +46,9 @@ import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.android.internal.R;
-import com.android.internal.app.ShutdownThread;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
-import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
@@ -101,9 +104,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
-        if (mDialog == null) {
-            mDialog = createDialog();
+        if (mDialog != null) {
+            mDialog.dismiss();
         }
+        mDialog = createDialog();
         prepareDialog();
 
         mDialog.show();
@@ -187,6 +191,31 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mItems.add(mSilentModeAction);
         }
 
+        List<UserInfo> users = mContext.getPackageManager().getUsers();
+        if (users.size() > 1) {
+            for (final UserInfo user : users) {
+                SinglePressAction switchToUser = new SinglePressAction(
+                        com.android.internal.R.drawable.ic_menu_cc,
+                        user.name != null ? user.name : "Primary") {
+                    public void onPress() {
+                        try {
+                            ActivityManagerNative.getDefault().switchUser(user.id);
+                        } catch (RemoteException re) {
+                            Log.e(TAG, "Couldn't switch user " + re);
+                        }
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                };
+                mItems.add(switchToUser);
+            }
+        }
         mAdapter = new MyAdapter();
 
         final AlertDialog.Builder ab = new AlertDialog.Builder(mContext);
@@ -341,12 +370,19 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static abstract class SinglePressAction implements Action {
         private final int mIconResId;
         private final int mMessageResId;
+        private final CharSequence mMessage;
 
         protected SinglePressAction(int iconResId, int messageResId) {
             mIconResId = iconResId;
             mMessageResId = messageResId;
+            mMessage = null;
         }
 
+        protected SinglePressAction(int iconResId, CharSequence message) {
+            mIconResId = iconResId;
+            mMessageResId = 0;
+            mMessage = message;
+        }
         public boolean isEnabled() {
             return true;
         }
@@ -363,7 +399,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             v.findViewById(R.id.status).setVisibility(View.GONE);
 
             icon.setImageDrawable(context.getResources().getDrawable(mIconResId));
-            messageView.setText(mMessageResId);
+            if (mMessage != null) {
+                messageView.setText(mMessage);
+            } else {
+                messageView.setText(mMessageResId);
+            }
 
             return v;
         }

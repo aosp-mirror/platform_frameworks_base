@@ -148,6 +148,48 @@ int delete_persona(uid_t persona)
     return delete_dir_contents(pkgdir, 1, NULL);
 }
 
+int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy)
+{
+    char src_data_dir[PKG_PATH_MAX];
+    char pkg_path[PKG_PATH_MAX];
+    DIR *d;
+    struct dirent *de;
+    struct stat s;
+    uid_t uid;
+
+    if (create_persona_path(src_data_dir, src_persona)) {
+        return -1;
+    }
+
+    d = opendir(src_data_dir);
+    if (d != NULL) {
+        while ((de = readdir(d))) {
+            const char *name = de->d_name;
+
+            if (de->d_type == DT_DIR) {
+                int subfd;
+                    /* always skip "." and ".." */
+                if (name[0] == '.') {
+                    if (name[1] == 0) continue;
+                    if ((name[1] == '.') && (name[2] == 0)) continue;
+                }
+                /* Create the full path to the package's data dir */
+                create_pkg_path(pkg_path, name, PKG_DIR_POSTFIX, src_persona);
+                /* Get the file stat */
+                if (stat(pkg_path, &s) < 0) continue;
+                /* Get the uid of the package */
+                ALOGI("Adding datadir for uid = %d\n", s.st_uid);
+                uid = (uid_t) s.st_uid % PER_USER_RANGE;
+                /* Create the directory for the target */
+                make_user_data(name, uid + target_persona * PER_USER_RANGE,
+                               target_persona);
+            }
+        }
+        closedir(d);
+    }
+    return 0;
+}
+
 int delete_cache(const char *pkgname)
 {
     char cachedir[PKG_PATH_MAX];

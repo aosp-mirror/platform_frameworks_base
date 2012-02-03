@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -135,6 +136,8 @@ public class Am {
             runToUri(false);
         } else if (op.equals("to-intent-uri")) {
             runToUri(true);
+        } else if (op.equals("switch-profile")) {
+            runSwitchUser();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -531,7 +534,8 @@ public class Am {
         Intent intent = makeIntent();
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
-        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false);
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false,
+                Binder.getOrigCallingUser());
         receiver.waitForFinish();
     }
 
@@ -720,6 +724,14 @@ public class Am {
 
     private void runClearDebugApp() throws Exception {
         mAm.setDebugApp(null, false, true);
+    }
+
+    private void runSwitchUser() throws Exception {
+        if (android.os.Process.myUid() != 0) {
+            throw new RuntimeException("switchuser can only be run as root");
+        }
+        String user = nextArgRequired();
+        mAm.switchUser(Integer.parseInt(user));
     }
 
     class MyActivityController extends IActivityController.Stub {

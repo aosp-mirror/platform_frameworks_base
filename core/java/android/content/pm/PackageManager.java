@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
@@ -751,13 +752,6 @@ public abstract class PackageManager {
      * package verifier does not vote to allow the installation to proceed.
      */
     public static final int VERIFICATION_REJECT = -1;
-
-    /**
-     * Range of IDs allocated for a user.
-     *
-     * @hide
-     */
-    public static final int PER_USER_RANGE = 100000;
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device's
@@ -2615,39 +2609,6 @@ public abstract class PackageManager {
     public abstract void updateUserFlags(int id, int flags);
 
     /**
-     * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
-     * user.
-     * @hide
-     */
-    public static boolean isSameUser(int uid1, int uid2) {
-        return getUserId(uid1) == getUserId(uid2);
-    }
-
-    /**
-     * Returns the user id for a given uid.
-     * @hide
-     */
-    public static int getUserId(int uid) {
-        return uid / PER_USER_RANGE;
-    }
-
-    /**
-     * Returns the uid that is composed from the userId and the appId.
-     * @hide
-     */
-    public static int getUid(int userId, int appId) {
-        return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
-    }
-
-    /**
-     * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
-     * @hide
-     */
-    public static int getAppId(int uid) {
-        return uid % PER_USER_RANGE;
-    }
-
-    /**
      * Returns the device identity that verifiers can use to associate their
      * scheme to a particular device. This should not be used by anything other
      * than a package verifier.
@@ -2656,4 +2617,17 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract VerifierDeviceIdentity getVerifierDeviceIdentity();
+
+    /**
+     * Returns the data directory for a particular user and package, given the uid of the package.
+     * @param uid uid of the package, including the userId and appId
+     * @param packageName name of the package
+     * @return the user-specific data directory for the package
+     * @hide
+     */
+    public static String getDataDirForUser(int userId, String packageName) {
+        // TODO: This should be shared with Installer's knowledge of user directory
+        return Environment.getDataDirectory().toString() + "/user/" + userId
+                + "/" + packageName;
+    }
 }

@@ -24,6 +24,7 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -169,9 +170,10 @@ public class UserManager {
      * </user>
      */
     private void writeUser(UserInfo userInfo) {
+        FileOutputStream fos = null;
         try {
             final File mUserFile = new File(mUsersDir, userInfo.id + ".xml");
-            final FileOutputStream fos = new FileOutputStream(mUserFile);
+            fos = new FileOutputStream(mUserFile);
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
@@ -193,6 +195,13 @@ public class UserManager {
             serializer.endDocument();
         } catch (IOException ioe) {
             Slog.e(LOG_TAG, "Error writing user info " + userInfo.id + "\n" + ioe);
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException ioe) {
+                }
+            }
         }
     }
 
@@ -205,8 +214,9 @@ public class UserManager {
      * </users>
      */
     private void writeUserList() {
+        FileOutputStream fos = null;
         try {
-            final FileOutputStream fos = new FileOutputStream(mUserListFile);
+            fos = new FileOutputStream(mUserListFile);
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
@@ -229,6 +239,13 @@ public class UserManager {
             serializer.endDocument();
         } catch (IOException ioe) {
             Slog.e(LOG_TAG, "Error writing user list");
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException ioe) {
+                }
+            }
         }
     }
 
@@ -330,7 +347,7 @@ public class UserManager {
             // Don't do it for the primary user, it will become recursive.
             if (userId == 0)
                 continue;
-            mInstaller.createUserData(packageName, PackageManager.getUid(userId, uid),
+            mInstaller.createUserData(packageName, UserId.getUid(userId, uid),
                     userId);
         }
     }
@@ -367,6 +384,8 @@ public class UserManager {
 
     /**
      * Returns the next available user id, filling in any holes in the ids.
+     * TODO: May not be a good idea to recycle ids, in case it results in confusion
+     * for data and battery stats collection, or unexpected cross-talk.
      * @return
      */
     private int getNextAvailableId() {
@@ -390,14 +409,8 @@ public class UserManager {
         FileUtils.setPermissions(userPath.toString(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
                 | FileUtils.S_IXOTH, -1, -1);
 
-        // Create the individual data directories
-        for (ApplicationInfo app : apps) {
-            if (app.uid > android.os.Process.FIRST_APPLICATION_UID
-                    && app.uid < PackageManager.PER_USER_RANGE) {
-                mInstaller.createUserData(app.packageName,
-                        PackageManager.getUid(id, app.uid), id);
-            }
-        }
+        mInstaller.cloneUserData(0, id, false);
+
         final long stopTime = SystemClock.elapsedRealtime();
         Log.i(LOG_TAG,
                 "Time to create " + apps.size() + " packages = " + (stopTime - startTime) + "ms");

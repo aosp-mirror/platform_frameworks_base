@@ -16,8 +16,6 @@
 
 package com.android.commands.pm;
 
-import com.android.internal.content.PackageHelper;
-
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
@@ -33,13 +31,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.UserInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Parcel;
+import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+
+import com.android.internal.content.PackageHelper;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -135,13 +136,18 @@ public final class Pm {
             return;
         }
 
-        if ("createUser".equals(op)) {
-            runCreateUser();
+        if ("create-profile".equals(op)) {
+            runCreateProfile();
             return;
         }
 
-        if ("removeUser".equals(op)) {
-            runRemoveUser();
+        if ("remove-profile".equals(op)) {
+            runRemoveProfile();
+            return;
+        }
+
+        if ("list-profiles".equals(op)) {
+            runListProfiles();
             return;
         }
 
@@ -829,10 +835,10 @@ public final class Pm {
         }
     }
 
-    public void runCreateUser() {
+    public void runCreateProfile() {
         // Need to be run as root
         if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: createUser must be run as root");
+            System.err.println("Error: create-profile must be run as root");
             return;
         }
         String name;
@@ -845,7 +851,7 @@ public final class Pm {
         name = arg;
         try {
             if (mPm.createUser(name, 0) == null) {
-                System.err.println("Error: couldn't create user.");
+                System.err.println("Error: couldn't create profile.");
                 showUsage();
             }
         } catch (RemoteException e) {
@@ -855,10 +861,10 @@ public final class Pm {
 
     }
 
-    public void runRemoveUser() {
+    public void runRemoveProfile() {
         // Need to be run as root
         if (Process.myUid() != ROOT_UID) {
-            System.err.println("Error: removeUser must be run as root");
+            System.err.println("Error: remove-profile must be run as root");
             return;
         }
         int userId;
@@ -877,7 +883,7 @@ public final class Pm {
         }
         try {
             if (!mPm.removeUser(userId)) {
-                System.err.println("Error: couldn't remove user.");
+                System.err.println("Error: couldn't remove profile.");
                 showUsage();
             }
         } catch (RemoteException e) {
@@ -886,6 +892,27 @@ public final class Pm {
         }
     }
 
+    public void runListProfiles() {
+        // Need to be run as root
+        if (Process.myUid() != ROOT_UID) {
+            System.err.println("Error: list-profiles must be run as root");
+            return;
+        }
+        try {
+            List<UserInfo> users = mPm.getUsers();
+            if (users == null) {
+                System.err.println("Error: couldn't get users");
+            } else {
+                System.out.println("Users:");
+                for (int i = 0; i < users.size(); i++) {
+                    System.out.println("\t" + users.get(i).toString());
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
         boolean finished;
         boolean result;
@@ -966,7 +993,8 @@ public final class Pm {
 
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs)) {
+            if (!ActivityManagerNative.getDefault().clearApplicationUserData(pkg, obs,
+                    Binder.getOrigCallingUser())) {
                 System.err.println("Failed");
             }
 
@@ -1132,8 +1160,8 @@ public final class Pm {
         System.err.println("       pm disable-user PACKAGE_OR_COMPONENT");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
-        System.err.println("       pm createUser USER_NAME");
-        System.err.println("       pm removeUser USER_ID");
+        System.err.println("       pm create-profile USER_NAME");
+        System.err.println("       pm remove-profile USER_ID");
         System.err.println("");
         System.err.println("pm list packages: prints all packages, optionally only");
         System.err.println("  those whose package name contains the text in FILTER.  Options:");
