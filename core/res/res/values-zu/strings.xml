@@ -785,7 +785,7 @@
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"iminithi elingu-1 edlule"</item>
-    <item quantity="other" msgid="2176942008915455116">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule.."</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> amaminithi adlule.."</item>
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"ihora elingu-1 elidlule"</item>
@@ -822,7 +822,7 @@
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"iminithi elingu-1 edlule"</item>
-    <item quantity="other" msgid="851164968597150710">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> amaminithi adlule"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
     <item quantity="one" msgid="4796212039724722116">"ihora elingu-1 elidlule"</item>
@@ -1111,7 +1111,7 @@
     <string name="no_matches" msgid="8129421908915840737">"Akukho okufanayo"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Thola ekhasini"</string>
   <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"okufanayo okungu-1"</item>
+    <item quantity="one" msgid="8167147081136579439">"1 okufanayo"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ku-<xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Kwenziwe"</string>
