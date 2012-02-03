@@ -204,18 +204,24 @@ public class MediaRecorder
         /** MPEG4 media file format*/
         public static final int MPEG_4 = 2;
 
-        /** The following formats are audio only .aac or .amr formats **/
-        /** @deprecated  Deprecated in favor of AMR_NB */
-        /** Deprecated in favor of MediaRecorder.OutputFormat.AMR_NB */
-        /** AMR NB file format */
+        /** The following formats are audio only .aac or .amr formats */
+
+        /**
+         * AMR NB file format
+         * @deprecated  Deprecated in favor of MediaRecorder.OutputFormat.AMR_NB
+         */
         public static final int RAW_AMR = 3;
+
         /** AMR NB file format */
         public static final int AMR_NB = 3;
+
         /** AMR WB file format */
         public static final int AMR_WB = 4;
+
         /** @hide AAC ADIF file format */
         public static final int AAC_ADIF = 5;
-        /** @hide AAC ADTS file format */
+
+        /** AAC ADTS file format */
         public static final int AAC_ADTS = 6;
 
         /** @hide Stream over a socket, limited to a single stream */
