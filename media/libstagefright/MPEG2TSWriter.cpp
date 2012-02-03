@@ -513,7 +513,7 @@ void MPEG2TSWriter::init() {
 
 MPEG2TSWriter::~MPEG2TSWriter() {
     if (mStarted) {
-        stop();
+        reset();
     }
 
     mLooper->unregisterHandler(mReflector->id());
@@ -564,7 +564,7 @@ status_t MPEG2TSWriter::start(MetaData *param) {
     return OK;
 }
 
-status_t MPEG2TSWriter::stop() {
+status_t MPEG2TSWriter::reset() {
     CHECK(mStarted);
 
     for (size_t i = 0; i < mSources.size(); ++i) {

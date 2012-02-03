@@ -60,7 +60,7 @@ AACWriter::AACWriter(int fd)
 
 AACWriter::~AACWriter() {
     if (mStarted) {
-        stop();
+        reset();
     }
 
     if (mFd != -1) {
@@ -152,7 +152,7 @@ status_t AACWriter::pause() {
     return OK;
 }
 
-status_t AACWriter::stop() {
+status_t AACWriter::reset() {
     if (!mStarted) {
         return OK;
     }

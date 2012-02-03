@@ -34,7 +34,7 @@ struct AACWriter : public MediaWriter {
     virtual status_t addSource(const sp<MediaSource> &source);
     virtual bool reachedEOS();
     virtual status_t start(MetaData *params = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual status_t pause();
 
 protected:
@@ -66,6 +66,7 @@ private:
     bool exceedsFileSizeLimit();
     bool exceedsFileDurationLimit();
     status_t writeAdtsHeader(uint32_t frameLength);
+    status_t reset();
 
     DISALLOW_EVIL_CONSTRUCTORS(AACWriter);
 };
