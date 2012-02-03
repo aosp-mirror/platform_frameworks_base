@@ -364,4 +364,6 @@ interface IPackageManager {
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();
+
+    List<UserInfo> getUsers();
 }

@@ -1177,13 +1177,14 @@ final class ApplicationPackageManager extends PackageManager {
      */
     @Override
     public List<UserInfo> getUsers() {
-        // TODO:
-        // Dummy code, always returns just the primary user
-        ArrayList<UserInfo> users = new ArrayList<UserInfo>();
-        UserInfo primary = new UserInfo(0, "Root!",
-                UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
-        users.add(primary);
-        return users;
+        try {
+            return mPM.getUsers();
+        } catch (RemoteException re) {
+            ArrayList<UserInfo> users = new ArrayList<UserInfo>();
+            UserInfo primary = new UserInfo(0, "Root!", UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+            users.add(primary);
+            return users;
+        }
     }
 
     /**

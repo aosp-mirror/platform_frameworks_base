@@ -19,7 +19,9 @@ package com.android.server.am;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.UserId;
 
 import java.io.PrintWriter;
 
@@ -37,6 +39,7 @@ class TaskRecord extends ThumbnailHolder {
     boolean askedCompatMode;// Have asked the user about compat mode for this task.
 
     String stringName;      // caching of toString() result.
+    int userId; // user for which this task was created
     
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
@@ -84,12 +87,16 @@ class TaskRecord extends ThumbnailHolder {
                 origActivity = new ComponentName(info.packageName, info.name);
             }
         }
-        
+
         if (intent != null &&
                 (intent.getFlags()&Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
             // Once we are set to an Intent with this flag, we count this
             // task as having a true root activity.
             rootWasReset = true;
+        }
+
+        if (info.applicationInfo != null) {
+            userId = UserId.getUserId(info.applicationInfo.uid);
         }
     }
     
@@ -154,6 +161,8 @@ class TaskRecord extends ThumbnailHolder {
         } else {
             sb.append(" ??");
         }
+        sb.append(" U ");
+        sb.append(userId);
         sb.append('}');
         return stringName = sb.toString();
     }

@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
@@ -975,7 +976,7 @@ public class ActivityManager {
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
             return ActivityManagerNative.getDefault().clearApplicationUserData(packageName, 
-                    observer);
+                    observer, Binder.getOrigCallingUser());
         } catch (RemoteException e) {
             return false;
         }

@@ -25,11 +25,13 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -60,6 +62,7 @@ class ServiceRecord extends Binder {
                             // all information about the service.
     final ApplicationInfo appInfo;
                             // information about service's app.
+    final int userId;       // user that this service is running as
     final String packageName; // the package implementing intent's component
     final String processName; // process where this component wants to run
     final String permission;// permission needed to access service
@@ -289,6 +292,7 @@ class ServiceRecord extends Binder {
         this.restarter = restarter;
         createTime = SystemClock.elapsedRealtime();
         lastActivity = SystemClock.uptimeMillis();
+        userId = UserId.getUserId(appInfo.uid);
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,

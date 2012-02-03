@@ -91,7 +91,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, false, true);
+                null /*permission*/, false, true, Binder.getOrigCallingUser());
         } catch (RemoteException ex) {
         }
     }
@@ -306,9 +306,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String perm = data.readString();
             boolean serialized = data.readInt() != 0;
             boolean sticky = data.readInt() != 0;
+            int userId = data.readInt();
             int res = broadcastIntent(app, intent, resolvedType, resultTo,
                     resultCode, resultData, resultExtras, perm,
-                    serialized, sticky);
+                    serialized, sticky, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -320,7 +321,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder b = data.readStrongBinder();
             IApplicationThread app = b != null ? ApplicationThreadNative.asInterface(b) : null;
             Intent intent = Intent.CREATOR.createFromParcel(data);
-            unbroadcastIntent(app, intent);
+            int userId = data.readInt();
+            unbroadcastIntent(app, intent, userId);
             reply.writeNoException();
             return true;
         }
@@ -900,7 +902,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String packageName = data.readString();
             IPackageDataObserver observer = IPackageDataObserver.Stub.asInterface(
                     data.readStrongBinder());
-            boolean res = clearApplicationUserData(packageName, observer);
+            int userId = data.readInt();
+            boolean res = clearApplicationUserData(packageName, observer, userId);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -1819,7 +1822,7 @@ class ActivityManagerProxy implements IActivityManager
             Intent intent, String resolvedType,  IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle map,
             String requiredPermission, boolean serialized,
-            boolean sticky) throws RemoteException
+            boolean sticky, int userId) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -1834,6 +1837,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(requiredPermission);
         data.writeInt(serialized ? 1 : 0);
         data.writeInt(sticky ? 1 : 0);
+        data.writeInt(userId);
         mRemote.transact(BROADCAST_INTENT_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
@@ -1841,13 +1845,15 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-    public void unbroadcastIntent(IApplicationThread caller, Intent intent) throws RemoteException
+    public void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId)
+            throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(caller != null ? caller.asBinder() : null);
         intent.writeToParcel(data, 0);
+        data.writeInt(userId);
         mRemote.transact(UNBROADCAST_INTENT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
@@ -2651,12 +2657,13 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
     public boolean clearApplicationUserData(final String packageName,
-            final IPackageDataObserver observer) throws RemoteException {        
+            final IPackageDataObserver observer, final int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
         data.writeStrongBinder(observer.asBinder());
+        data.writeInt(userId);
         mRemote.transact(CLEAR_APP_DATA_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
