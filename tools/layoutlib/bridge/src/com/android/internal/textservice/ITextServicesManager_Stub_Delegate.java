@@ -43,28 +43,33 @@ public class ITextServicesManager_Stub_Delegate {
 
     private static class FakeTextServicesManager implements ITextServicesManager {
 
+        @Override
         public void finishSpellCheckerService(ISpellCheckerSessionListener arg0)
                 throws RemoteException {
             // TODO Auto-generated method stub
 
         }
 
+        @Override
         public SpellCheckerInfo getCurrentSpellChecker(String arg0) throws RemoteException {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public SpellCheckerSubtype getCurrentSpellCheckerSubtype(String arg0, boolean arg1)
                 throws RemoteException {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public SpellCheckerInfo[] getEnabledSpellCheckers() throws RemoteException {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public void getSpellCheckerService(String arg0, String arg1,
                 ITextServicesSessionListener arg2, ISpellCheckerSessionListener arg3, Bundle arg4)
                 throws RemoteException {
@@ -72,26 +77,31 @@ public class ITextServicesManager_Stub_Delegate {
 
         }
 
+        @Override
         public boolean isSpellCheckerEnabled() throws RemoteException {
             // TODO Auto-generated method stub
             return false;
         }
 
+        @Override
         public void setCurrentSpellChecker(String arg0, String arg1) throws RemoteException {
             // TODO Auto-generated method stub
 
         }
 
+        @Override
         public void setCurrentSpellCheckerSubtype(String arg0, int arg1) throws RemoteException {
             // TODO Auto-generated method stub
 
         }
 
+        @Override
         public void setSpellCheckerEnabled(boolean arg0) throws RemoteException {
             // TODO Auto-generated method stub
 
         }
 
+        @Override
         public IBinder asBinder() {
             // TODO Auto-generated method stub
             return null;

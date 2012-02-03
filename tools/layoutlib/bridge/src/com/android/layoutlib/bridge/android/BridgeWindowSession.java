@@ -26,7 +26,6 @@ import android.os.RemoteException;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InputChannel;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.WindowManager.LayoutParams;
@@ -37,6 +36,7 @@ import android.view.WindowManager.LayoutParams;
  */
 public final class BridgeWindowSession implements IWindowSession {
 
+    @Override
     public int add(IWindow arg0, int seq, LayoutParams arg1, int arg2, Rect arg3,
             InputChannel outInputchannel)
             throws RemoteException {
@@ -44,40 +44,30 @@ public final class BridgeWindowSession implements IWindowSession {
         return 0;
     }
 
+    @Override
     public int addWithoutInputChannel(IWindow arg0, int seq, LayoutParams arg1, int arg2, Rect arg3)
             throws RemoteException {
         // pass for now.
         return 0;
     }
 
+    @Override
     public void finishDrawing(IWindow arg0) throws RemoteException {
         // pass for now.
     }
 
-    public void finishKey(IWindow arg0) throws RemoteException {
-        // pass for now.
-    }
-
+    @Override
     public boolean getInTouchMode() throws RemoteException {
         // pass for now.
         return false;
     }
 
+    @Override
     public boolean performHapticFeedback(IWindow window, int effectId, boolean always) {
         // pass for now.
         return false;
     }
-
-    public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
-        // pass for now.
-        return null;
-    }
-
-    public MotionEvent getPendingTrackballMove(IWindow arg0) throws RemoteException {
-        // pass for now.
-        return null;
-    }
-
+    @Override
     public int relayout(IWindow arg0, int seq, LayoutParams arg1, int arg2, int arg3, int arg4,
             int arg4_5, Rect arg5, Rect arg6, Rect arg7, Configuration arg7b, Surface arg8)
             throws RemoteException {
@@ -85,35 +75,43 @@ public final class BridgeWindowSession implements IWindowSession {
         return 0;
     }
 
+    @Override
     public void performDeferredDestroy(IWindow window) {
         // pass for now.
     }
 
+    @Override
     public boolean outOfMemory(IWindow window) throws RemoteException {
         return false;
     }
 
+    @Override
     public void getDisplayFrame(IWindow window, Rect outDisplayFrame) {
         // pass for now.
     }
 
+    @Override
     public void remove(IWindow arg0) throws RemoteException {
         // pass for now.
     }
 
+    @Override
     public void setInTouchMode(boolean arg0) throws RemoteException {
         // pass for now.
     }
 
+    @Override
     public void setTransparentRegion(IWindow arg0, Region arg1) throws RemoteException {
         // pass for now.
     }
 
+    @Override
     public void setInsets(IWindow window, int touchable, Rect contentInsets,
             Rect visibleInsets, Region touchableRegion) {
         // pass for now.
     }
 
+    @Override
     public IBinder prepareDrag(IWindow window, int flags,
             int thumbnailWidth, int thumbnailHeight, Surface outSurface)
             throws RemoteException {
@@ -121,6 +119,7 @@ public final class BridgeWindowSession implements IWindowSession {
         return null;
     }
 
+    @Override
     public boolean performDrag(IWindow window, IBinder dragToken,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data)
@@ -129,49 +128,47 @@ public final class BridgeWindowSession implements IWindowSession {
         return false;
     }
 
+    @Override
     public void reportDropResult(IWindow window, boolean consumed) throws RemoteException {
         // pass for now
     }
 
+    @Override
     public void dragRecipientEntered(IWindow window) throws RemoteException {
         // pass for now
     }
 
+    @Override
     public void dragRecipientExited(IWindow window) throws RemoteException {
         // pass for now
     }
 
+    @Override
     public void setWallpaperPosition(IBinder window, float x, float y,
         float xStep, float yStep) {
         // pass for now.
     }
 
+    @Override
     public void wallpaperOffsetsComplete(IBinder window) {
         // pass for now.
     }
 
+    @Override
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         // pass for now.
         return null;
     }
 
+    @Override
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
         // pass for now.
     }
 
-    public void closeSystemDialogs(String reason) {
-        // pass for now.
-    }
-
+    @Override
     public IBinder asBinder() {
         // pass for now.
-        return null;
-    }
-
-    public IBinder prepareDrag(IWindow arg0, boolean arg1, int arg2, int arg3, Surface arg4)
-            throws RemoteException {
-        // TODO Auto-generated method stub
         return null;
     }
 }

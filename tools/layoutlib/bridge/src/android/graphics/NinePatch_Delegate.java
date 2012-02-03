@@ -215,6 +215,7 @@ public final class NinePatch_Delegate {
         Paint_Delegate paint_delegate = Paint_Delegate.getDelegate(paint_instance_or_null);
 
         canvas_delegate.getSnapshot().draw(new GcSnapshot.Drawable() {
+                @Override
                 public void draw(Graphics2D graphics, Paint_Delegate paint) {
                     chunkObject.draw(bitmap_delegate.getImage(), graphics,
                             left, top, right - left, bottom - top, destDensity, srcDensity);

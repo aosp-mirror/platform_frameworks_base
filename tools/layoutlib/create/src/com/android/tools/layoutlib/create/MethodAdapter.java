@@ -28,13 +28,14 @@ public class MethodAdapter implements MethodListener {
      * A stub method is being invoked.
      * <p/>
      * Known limitation: caller arguments are not available.
-     *  
+     *
      * @param signature The signature of the method being invoked, composed of the
      *                  binary class name followed by the method descriptor (aka argument
      *                  types). Example: "com/foo/MyClass/InnerClass/printInt(I)V".
      * @param isNative True if the method was a native method.
      * @param caller The calling object. Null for static methods, "this" for instance methods.
      */
+    @Override
     public void onInvokeV(String signature, boolean isNative, Object caller) {
     }
 
@@ -43,6 +44,7 @@ public class MethodAdapter implements MethodListener {
      * @see #onInvokeV(String, boolean, Object)
      * @return an integer, or a boolean, or a short or a byte.
      */
+    @Override
     public int onInvokeI(String signature, boolean isNative, Object caller) {
         onInvokeV(signature, isNative, caller);
         return 0;
@@ -53,6 +55,7 @@ public class MethodAdapter implements MethodListener {
      * @see #onInvokeV(String, boolean, Object)
      * @return a long.
      */
+    @Override
     public long onInvokeL(String signature, boolean isNative, Object caller) {
         onInvokeV(signature, isNative, caller);
         return 0;
@@ -63,6 +66,7 @@ public class MethodAdapter implements MethodListener {
      * @see #onInvokeV(String, boolean, Object)
      * @return a float.
      */
+    @Override
     public float onInvokeF(String signature, boolean isNative, Object caller) {
         onInvokeV(signature, isNative, caller);
         return 0;
@@ -73,6 +77,7 @@ public class MethodAdapter implements MethodListener {
      * @see #onInvokeV(String, boolean, Object)
      * @return a double.
      */
+    @Override
     public double onInvokeD(String signature, boolean isNative, Object caller) {
         onInvokeV(signature, isNative, caller);
         return 0;
@@ -83,6 +88,7 @@ public class MethodAdapter implements MethodListener {
      * @see #onInvokeV(String, boolean, Object)
      * @return an object.
      */
+    @Override
     public Object onInvokeA(String signature, boolean isNative, Object caller) {
         onInvokeV(signature, isNative, caller);
         return null;

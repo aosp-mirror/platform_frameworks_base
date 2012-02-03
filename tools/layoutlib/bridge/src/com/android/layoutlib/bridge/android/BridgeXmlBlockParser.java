@@ -95,6 +95,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
 
     // ------- XmlResourceParser implementation
 
+    @Override
     public void setFeature(String name, boolean state)
             throws XmlPullParserException {
         if (FEATURE_PROCESS_NAMESPACES.equals(name) && state) {
@@ -106,6 +107,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         throw new XmlPullParserException("Unsupported feature: " + name);
     }
 
+    @Override
     public boolean getFeature(String name) {
         if (FEATURE_PROCESS_NAMESPACES.equals(name)) {
             return true;
@@ -116,82 +118,101 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         return false;
     }
 
+    @Override
     public void setProperty(String name, Object value) throws XmlPullParserException {
         throw new XmlPullParserException("setProperty() not supported");
     }
 
+    @Override
     public Object getProperty(String name) {
         return null;
     }
 
+    @Override
     public void setInput(Reader in) throws XmlPullParserException {
         mParser.setInput(in);
     }
 
+    @Override
     public void setInput(InputStream inputStream, String inputEncoding)
             throws XmlPullParserException {
         mParser.setInput(inputStream, inputEncoding);
     }
 
+    @Override
     public void defineEntityReplacementText(String entityName,
             String replacementText) throws XmlPullParserException {
         throw new XmlPullParserException(
                 "defineEntityReplacementText() not supported");
     }
 
+    @Override
     public String getNamespacePrefix(int pos) throws XmlPullParserException {
         throw new XmlPullParserException("getNamespacePrefix() not supported");
     }
 
+    @Override
     public String getInputEncoding() {
         return null;
     }
 
+    @Override
     public String getNamespace(String prefix) {
         throw new RuntimeException("getNamespace() not supported");
     }
 
+    @Override
     public int getNamespaceCount(int depth) throws XmlPullParserException {
         throw new XmlPullParserException("getNamespaceCount() not supported");
     }
 
+    @Override
     public String getPositionDescription() {
         return "Binary XML file line #" + getLineNumber();
     }
 
+    @Override
     public String getNamespaceUri(int pos) throws XmlPullParserException {
         throw new XmlPullParserException("getNamespaceUri() not supported");
     }
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
 
+    @Override
     public int getDepth() {
         return mParser.getDepth();
     }
 
+    @Override
     public String getText() {
         return mParser.getText();
     }
 
+    @Override
     public int getLineNumber() {
         return mParser.getLineNumber();
     }
 
+    @Override
     public int getEventType() {
         return mEventType;
     }
 
+    @Override
     public boolean isWhitespace() throws XmlPullParserException {
         // Original comment: whitespace was stripped by aapt.
         return mParser.isWhitespace();
     }
 
+    @Override
     public String getPrefix() {
         throw new RuntimeException("getPrefix not supported");
     }
 
+    @Override
     public char[] getTextCharacters(int[] holderForStartAndLength) {
         String txt = getText();
         char[] chars = null;
@@ -204,55 +225,68 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         return chars;
     }
 
+    @Override
     public String getNamespace() {
         return mParser.getNamespace();
     }
 
+    @Override
     public String getName() {
         return mParser.getName();
     }
 
+    @Override
     public String getAttributeNamespace(int index) {
         return mParser.getAttributeNamespace(index);
     }
 
+    @Override
     public String getAttributeName(int index) {
         return mParser.getAttributeName(index);
     }
 
+    @Override
     public String getAttributePrefix(int index) {
         throw new RuntimeException("getAttributePrefix not supported");
     }
 
+    @Override
     public boolean isEmptyElementTag() {
         // XXX Need to detect this.
         return false;
     }
 
+    @Override
     public int getAttributeCount() {
         return mParser.getAttributeCount();
     }
 
+    @Override
     public String getAttributeValue(int index) {
         return mParser.getAttributeValue(index);
     }
 
+    @Override
     public String getAttributeType(int index) {
         return "CDATA";
     }
 
+    @Override
     public boolean isAttributeDefault(int index) {
         return false;
     }
 
+    @Override
     public int nextToken() throws XmlPullParserException, IOException {
         return next();
     }
 
+    @Override
     public String getAttributeValue(String namespace, String name) {
         return mParser.getAttributeValue(namespace, name);
     }
 
+    @Override
     public int next() throws XmlPullParserException, IOException {
         if (!mStarted) {
             mStarted = true;
@@ -313,6 +347,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         return "????";
     }
 
+    @Override
     public void require(int type, String namespace, String name)
             throws XmlPullParserException {
         if (type != getEventType()
@@ -322,6 +357,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
                     + getPositionDescription());
     }
 
+    @Override
     public String nextText() throws XmlPullParserException, IOException {
         if (getEventType() != START_TAG) {
             throw new XmlPullParserException(getPositionDescription()
@@ -348,6 +384,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         }
     }
 
+    @Override
     public int nextTag() throws XmlPullParserException, IOException {
         int eventType = next();
         if (eventType == TEXT && isWhitespace()) { // skip whitespace
@@ -363,76 +400,94 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
     // AttributeSet implementation
 
 
+    @Override
     public void close() {
         // pass
     }
 
+    @Override
     public boolean getAttributeBooleanValue(int index, boolean defaultValue) {
         return mAttrib.getAttributeBooleanValue(index, defaultValue);
     }
 
+    @Override
     public boolean getAttributeBooleanValue(String namespace, String attribute,
             boolean defaultValue) {
         return mAttrib.getAttributeBooleanValue(namespace, attribute, defaultValue);
     }
 
+    @Override
     public float getAttributeFloatValue(int index, float defaultValue) {
         return mAttrib.getAttributeFloatValue(index, defaultValue);
     }
 
+    @Override
     public float getAttributeFloatValue(String namespace, String attribute, float defaultValue) {
         return mAttrib.getAttributeFloatValue(namespace, attribute, defaultValue);
     }
 
+    @Override
     public int getAttributeIntValue(int index, int defaultValue) {
         return mAttrib.getAttributeIntValue(index, defaultValue);
     }
 
+    @Override
     public int getAttributeIntValue(String namespace, String attribute, int defaultValue) {
         return mAttrib.getAttributeIntValue(namespace, attribute, defaultValue);
     }
 
+    @Override
     public int getAttributeListValue(int index, String[] options, int defaultValue) {
         return mAttrib.getAttributeListValue(index, options, defaultValue);
     }
 
+    @Override
     public int getAttributeListValue(String namespace, String attribute,
             String[] options, int defaultValue) {
         return mAttrib.getAttributeListValue(namespace, attribute, options, defaultValue);
     }
 
+    @Override
     public int getAttributeNameResource(int index) {
         return mAttrib.getAttributeNameResource(index);
     }
 
+    @Override
     public int getAttributeResourceValue(int index, int defaultValue) {
         return mAttrib.getAttributeResourceValue(index, defaultValue);
     }
 
+    @Override
     public int getAttributeResourceValue(String namespace, String attribute, int defaultValue) {
         return mAttrib.getAttributeResourceValue(namespace, attribute, defaultValue);
     }
 
+    @Override
     public int getAttributeUnsignedIntValue(int index, int defaultValue) {
         return mAttrib.getAttributeUnsignedIntValue(index, defaultValue);
     }
 
+    @Override
     public int getAttributeUnsignedIntValue(String namespace, String attribute, int defaultValue) {
         return mAttrib.getAttributeUnsignedIntValue(namespace, attribute, defaultValue);
     }
 
+    @Override
     public String getClassAttribute() {
         return mAttrib.getClassAttribute();
     }
 
+    @Override
     public String getIdAttribute() {
         return mAttrib.getIdAttribute();
     }
 
+    @Override
     public int getIdAttributeResourceValue(int defaultValue) {
         return mAttrib.getIdAttributeResourceValue(defaultValue);
     }
 
+    @Override
     public int getStyleAttribute() {
         return mAttrib.getStyleAttribute();
     }
