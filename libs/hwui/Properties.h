@@ -38,8 +38,8 @@
 #define LAYER_SIZE 64
 
 // Defines the size in bits of the stencil buffer
-// Note: We only want 1 bit, but in practice we'll get 8 bits on all GPUs
-//       for the foreseeable future
+// Note: Only 1 bit is required for clipping but more bits are required
+// to properly implement the winding fill rule when rasterizing paths
 #define STENCIL_BUFFER_SIZE 0
 
 /**
