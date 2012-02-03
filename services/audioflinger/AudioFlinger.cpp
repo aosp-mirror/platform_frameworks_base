@@ -5885,13 +5885,13 @@ void AudioFlinger::ThreadBase::setMode(audio_mode_t mode)
 
 void AudioFlinger::ThreadBase::disconnectEffect(const sp<EffectModule>& effect,
                                                     const wp<EffectHandle>& handle,
-                                                    bool unpiniflast) {
+                                                    bool unpinIfLast) {
 
     Mutex::Autolock _l(mLock);
     ALOGV("disconnectEffect() %p effect %p", this, effect.get());
     // delete the effect module if removing last handle on it
     if (effect->removeHandle(handle) == 0) {
-        if (!effect->isPinned() || unpiniflast) {
+        if (!effect->isPinned() || unpinIfLast) {
             removeEffect_l(effect);
             AudioSystem::unregisterEffect(effect->id());
         }
@@ -6207,7 +6207,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::EffectModule::controlHandle()
     return mHandles.size() != 0 ? mHandles[0].promote() : 0;
 }
 
-void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool unpiniflast)
+void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool unpinIfLast)
 {
     ALOGV("disconnect() %p handle %p ", this, handle.unsafe_get());
     // keep a strong reference on this EffectModule to avoid calling the
@@ -6216,7 +6216,7 @@ void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool
     {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            thread->disconnectEffect(keep, handle, unpiniflast);
+            thread->disconnectEffect(keep, handle, unpinIfLast);
         }
     }
 }
@@ -6888,13 +6888,13 @@ void AudioFlinger::EffectHandle::disconnect()
     disconnect(true);
 }
 
-void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
+void AudioFlinger::EffectHandle::disconnect(bool unpinIfLast)
 {
-    ALOGV("disconnect(%s)", unpiniflast ? "true" : "false");
+    ALOGV("disconnect(%s)", unpinIfLast ? "true" : "false");
     if (mEffect == 0) {
         return;
     }
-    mEffect->disconnect(this, unpiniflast);
+    mEffect->disconnect(this, unpinIfLast);
 
     if (mHasControl && mEnabled) {
         sp<ThreadBase> thread = mEffect->thread().promote();
