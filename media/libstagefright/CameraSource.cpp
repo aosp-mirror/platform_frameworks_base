@@ -548,7 +548,7 @@ status_t CameraSource::initWithCameraAccess(
 
 CameraSource::~CameraSource() {
     if (mStarted) {
-        stop();
+        reset();
     } else if (mInitCheck == OK) {
         // Camera is initialized but because start() is never called,
         // the lock on Camera is never released(). This makes sure
@@ -632,8 +632,8 @@ void CameraSource::releaseCamera() {
     mCameraFlags = 0;
 }
 
-status_t CameraSource::stop() {
-    ALOGD("stop: E");
+status_t CameraSource::reset() {
+    ALOGD("reset: E");
     Mutex::Autolock autoLock(mLock);
     mStarted = false;
     mFrameAvailableCondition.signal();
@@ -670,7 +670,7 @@ status_t CameraSource::stop() {
     }
 
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
-    ALOGD("stop: X");
+    ALOGD("reset: X");
     return OK;
 }
 
