@@ -261,4 +261,14 @@ public interface ViewParent {
      * @return True if the event was sent.
      */
     public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event);
+
+    /**
+     * Called when a child view now has or no longer is tracking transient state.
+     *
+     * @param child Child view whose state has changed
+     * @param hasTransientState true if this child has transient state
+     *
+     * @hide
+     */
+    public void childHasTransientStateChanged(View child, boolean hasTransientState);
 }

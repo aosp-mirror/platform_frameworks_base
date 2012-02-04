@@ -1205,6 +1205,7 @@ public class GridView extends AbsListView {
             // Clear out old views
             //removeAllViewsInLayout();
             detachAllViewsFromParent();
+            recycleBin.removeSkippedScrap();
 
             switch (mLayoutMode) {
             case LAYOUT_SET_SELECTION:

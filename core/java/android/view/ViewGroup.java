@@ -77,6 +77,7 @@ import java.util.HashSet;
  * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
+    private static final String TAG = "ViewGroup";
 
     private static final boolean DBG = false;
 
@@ -375,6 +376,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "drawing")
     boolean mDrawLayers = true;
 
+    // Indicates how many of this container's child subtrees contain transient state
+    @ViewDebug.ExportedProperty(category = "layout")
+    private int mChildCountWithTransientState = 0;
+
     public ViewGroup(Context context) {
         super(context);
         initViewGroup();
@@ -650,6 +655,38 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         return true;
+    }
+
+    /**
+     * Called when a child view has changed whether or not it is tracking transient state.
+     *
+     * @hide
+     */
+    public void childHasTransientStateChanged(View child, boolean childHasTransientState) {
+        final boolean oldHasTransientState = hasTransientState();
+        if (childHasTransientState) {
+            mChildCountWithTransientState++;
+        } else {
+            mChildCountWithTransientState--;
+        }
+
+        final boolean newHasTransientState = hasTransientState();
+        if (mParent != null && oldHasTransientState != newHasTransientState) {
+            try {
+                mParent.childHasTransientStateChanged(this, newHasTransientState);
+            } catch (AbstractMethodError e) {
+                Log.e(TAG, mParent.getClass().getSimpleName() +
+                        " does not fully implement ViewParent", e);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean hasTransientState() {
+        return mChildCountWithTransientState > 0 || super.hasTransientState();
     }
 
     /**
@@ -3099,6 +3136,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if ((child.mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE) {
             mGroupFlags |= FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE;
         }
+
+        if (child.hasTransientState()) {
+            childHasTransientStateChanged(child, true);
+        }
     }
 
     private void addInArray(View child, int index) {
@@ -3295,6 +3336,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
            view.dispatchDetachedFromWindow();
         }
 
+        if (view.hasTransientState()) {
+            childHasTransientStateChanged(view, false);
+        }
+
         onViewRemoved(view);
 
         needGlobalAttributesUpdate(false);
@@ -3366,6 +3411,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                view.dispatchDetachedFromWindow();
             }
 
+            if (view.hasTransientState()) {
+                childHasTransientStateChanged(view, false);
+            }
+
             needGlobalAttributesUpdate(false);
 
             onViewRemoved(view);
@@ -3431,6 +3480,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                view.dispatchDetachedFromWindow();
             }
 
+            if (view.hasTransientState()) {
+                childHasTransientStateChanged(view, false);
+            }
+
             onViewRemoved(view);
 
             view.mParent = null;
@@ -3469,6 +3522,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             addDisappearingView(child);
         } else if (child.mAttachInfo != null) {
             child.dispatchDetachedFromWindow();
+        }
+
+        if (child.hasTransientState()) {
+            childHasTransientStateChanged(child, false);
         }
 
         onViewRemoved(child);

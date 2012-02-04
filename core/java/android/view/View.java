@@ -1759,6 +1759,16 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     static final int LAYOUT_DIRECTION_RESOLVED = 0x00000008;
 
 
+    /**
+     * Indicates that the view is tracking some sort of transient state
+     * that the app should not need to be aware of, but that the framework
+     * should take special care to preserve.
+     *
+     * @hide
+     */
+    static final int HAS_TRANSIENT_STATE = 0x00000010;
+
+
     /* End of masks for mPrivateFlags2 */
 
     static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
@@ -4886,6 +4896,43 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
         return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
+    }
+
+    /**
+     * Indicates whether the view is currently tracking transient state that the
+     * app should not need to concern itself with saving and restoring, but that
+     * the framework should take special note to preserve when possible.
+     *
+     * @return true if the view has transient state
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "layout")
+    public boolean hasTransientState() {
+        return (mPrivateFlags2 & HAS_TRANSIENT_STATE) == HAS_TRANSIENT_STATE;
+    }
+
+    /**
+     * Set whether this view is currently tracking transient state that the
+     * framework should attempt to preserve when possible.
+     *
+     * @param hasTransientState true if this view has transient state
+     *
+     * @hide
+     */
+    public void setHasTransientState(boolean hasTransientState) {
+        if (hasTransientState() == hasTransientState) return;
+
+        mPrivateFlags2 = (mPrivateFlags2 & ~HAS_TRANSIENT_STATE) |
+                (hasTransientState ? HAS_TRANSIENT_STATE : 0);
+        if (mParent != null) {
+            try {
+                mParent.childHasTransientStateChanged(this, hasTransientState);
+            } catch (AbstractMethodError e) {
+                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                        " does not fully implement ViewParent", e);
+            }
+        }
     }
 
     /**
