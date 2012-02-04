@@ -20,8 +20,7 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 #include <time.h>
-#include <sys/mman.h>
-#include <cutils/ashmem.h>
+#include <errno.h>
 
 #include "../../utils/tests/TestHelpers.h"
 
@@ -36,35 +35,24 @@ protected:
 
 TEST_F(InputChannelTest, ConstructorAndDestructor_TakesOwnershipOfFileDescriptors) {
     // Our purpose here is to verify that the input channel destructor closes the
-    // file descriptors provided to it.  One easy way is to provide it with one end
+    // file descriptor provided to it.  One easy way is to provide it with one end
     // of a pipe and to check for EPIPE on the other end after the channel is destroyed.
-    Pipe fakeAshmem, sendPipe, receivePipe;
+    Pipe pipe;
 
-    sp<InputChannel> inputChannel = new InputChannel(String8("channel name"),
-            fakeAshmem.sendFd, receivePipe.receiveFd, sendPipe.sendFd);
+    sp<InputChannel> inputChannel = new InputChannel(String8("channel name"), pipe.sendFd);
 
     EXPECT_STREQ("channel name", inputChannel->getName().string())
             << "channel should have provided name";
-    EXPECT_EQ(fakeAshmem.sendFd, inputChannel->getAshmemFd())
-            << "channel should have provided ashmem fd";
-    EXPECT_EQ(receivePipe.receiveFd, inputChannel->getReceivePipeFd())
-            << "channel should have provided receive pipe fd";
-    EXPECT_EQ(sendPipe.sendFd, inputChannel->getSendPipeFd())
-            << "channel should have provided send pipe fd";
+    EXPECT_EQ(pipe.sendFd, inputChannel->getFd())
+            << "channel should have provided fd";
 
     inputChannel.clear(); // destroys input channel
 
-    EXPECT_EQ(-EPIPE, fakeAshmem.readSignal())
-            << "channel should have closed ashmem fd when destroyed";
-    EXPECT_EQ(-EPIPE, receivePipe.writeSignal())
-            << "channel should have closed receive pipe fd when destroyed";
-    EXPECT_EQ(-EPIPE, sendPipe.readSignal())
-            << "channel should have closed send pipe fd when destroyed";
+    EXPECT_EQ(-EPIPE, pipe.readSignal())
+            << "channel should have closed fd when destroyed";
 
     // clean up fds of Pipe endpoints that were closed so we don't try to close them again
-    fakeAshmem.sendFd = -1;
-    receivePipe.receiveFd = -1;
-    sendPipe.sendFd = -1;
+    pipe.sendFd = -1;
 }
 
 TEST_F(InputChannelTest, OpenInputChannelPair_ReturnsAPairOfConnectedChannels) {
@@ -82,43 +70,37 @@ TEST_F(InputChannelTest, OpenInputChannelPair_ReturnsAPairOfConnectedChannels) {
     EXPECT_STREQ("channel name (client)", clientChannel->getName().string())
             << "client channel should have suffixed name";
 
-    // Ashmem uniqueness
-    EXPECT_NE(serverChannel->getAshmemFd(), clientChannel->getAshmemFd())
-            << "server and client channel should have different ashmem fds because it was dup'd";
-
-    // Ashmem usability
-    ssize_t serverAshmemSize = ashmem_get_size_region(serverChannel->getAshmemFd());
-    ssize_t clientAshmemSize = ashmem_get_size_region(clientChannel->getAshmemFd());
-    uint32_t* serverAshmem = static_cast<uint32_t*>(mmap(NULL, serverAshmemSize,
-            PROT_READ | PROT_WRITE, MAP_SHARED, serverChannel->getAshmemFd(), 0));
-    uint32_t* clientAshmem = static_cast<uint32_t*>(mmap(NULL, clientAshmemSize,
-            PROT_READ | PROT_WRITE, MAP_SHARED, clientChannel->getAshmemFd(), 0));
-    ASSERT_TRUE(serverAshmem != NULL)
-            << "server channel ashmem should be mappable";
-    ASSERT_TRUE(clientAshmem != NULL)
-            << "client channel ashmem should be mappable";
-    *serverAshmem = 0xf00dd00d;
-    EXPECT_EQ(0xf00dd00d, *clientAshmem)
-            << "ashmem buffer should be shared by client and server";
-    munmap(serverAshmem, serverAshmemSize);
-    munmap(clientAshmem, clientAshmemSize);
-
     // Server->Client communication
-    EXPECT_EQ(OK, serverChannel->sendSignal('S'))
-            << "server channel should be able to send signal to client channel";
-    char signal;
-    EXPECT_EQ(OK, clientChannel->receiveSignal(& signal))
-            << "client channel should be able to receive signal from server channel";
-    EXPECT_EQ('S', signal)
-            << "client channel should receive the correct signal from server channel";
+    InputMessage serverMsg;
+    memset(&serverMsg, 0, sizeof(InputMessage));
+    serverMsg.header.type = InputMessage::TYPE_KEY;
+    serverMsg.body.key.action = AKEY_EVENT_ACTION_DOWN;
+    EXPECT_EQ(OK, serverChannel->sendMessage(&serverMsg))
+            << "server channel should be able to send message to client channel";
+
+    InputMessage clientMsg;
+    EXPECT_EQ(OK, clientChannel->receiveMessage(&clientMsg))
+            << "client channel should be able to receive message from server channel";
+    EXPECT_EQ(serverMsg.header.type, clientMsg.header.type)
+            << "client channel should receive the correct message from server channel";
+    EXPECT_EQ(serverMsg.body.key.action, clientMsg.body.key.action)
+            << "client channel should receive the correct message from server channel";
 
     // Client->Server communication
-    EXPECT_EQ(OK, clientChannel->sendSignal('c'))
-            << "client channel should be able to send signal to server channel";
-    EXPECT_EQ(OK, serverChannel->receiveSignal(& signal))
-            << "server channel should be able to receive signal from client channel";
-    EXPECT_EQ('c', signal)
-            << "server channel should receive the correct signal from client channel";
+    InputMessage clientReply;
+    memset(&clientReply, 0, sizeof(InputMessage));
+    clientReply.header.type = InputMessage::TYPE_FINISHED;
+    clientReply.body.finished.handled = true;
+    EXPECT_EQ(OK, clientChannel->sendMessage(&clientReply))
+            << "client channel should be able to send message to server channel";
+
+    InputMessage serverReply;
+    EXPECT_EQ(OK, serverChannel->receiveMessage(&serverReply))
+            << "server channel should be able to receive message from client channel";
+    EXPECT_EQ(clientReply.header.type, serverReply.header.type)
+            << "server channel should receive the correct message from client channel";
+    EXPECT_EQ(clientReply.body.finished.handled, serverReply.body.finished.handled)
+            << "server channel should receive the correct message from client channel";
 }
 
 TEST_F(InputChannelTest, ReceiveSignal_WhenNoSignalPresent_ReturnsAnError) {
@@ -130,9 +112,9 @@ TEST_F(InputChannelTest, ReceiveSignal_WhenNoSignalPresent_ReturnsAnError) {
     ASSERT_EQ(OK, result)
             << "should have successfully opened a channel pair";
 
-    char signal;
-    EXPECT_EQ(WOULD_BLOCK, clientChannel->receiveSignal(& signal))
-            << "receiveSignal should have returned WOULD_BLOCK";
+    InputMessage msg;
+    EXPECT_EQ(WOULD_BLOCK, clientChannel->receiveMessage(&msg))
+            << "receiveMessage should have returned WOULD_BLOCK";
 }
 
 TEST_F(InputChannelTest, ReceiveSignal_WhenPeerClosed_ReturnsAnError) {
@@ -146,9 +128,9 @@ TEST_F(InputChannelTest, ReceiveSignal_WhenPeerClosed_ReturnsAnError) {
 
     serverChannel.clear(); // close server channel
 
-    char signal;
-    EXPECT_EQ(DEAD_OBJECT, clientChannel->receiveSignal(& signal))
-            << "receiveSignal should have returned DEAD_OBJECT";
+    InputMessage msg;
+    EXPECT_EQ(DEAD_OBJECT, clientChannel->receiveMessage(&msg))
+            << "receiveMessage should have returned DEAD_OBJECT";
 }
 
 TEST_F(InputChannelTest, SendSignal_WhenPeerClosed_ReturnsAnError) {
@@ -162,8 +144,10 @@ TEST_F(InputChannelTest, SendSignal_WhenPeerClosed_ReturnsAnError) {
 
     serverChannel.clear(); // close server channel
 
-    EXPECT_EQ(DEAD_OBJECT, clientChannel->sendSignal('S'))
-            << "sendSignal should have returned DEAD_OBJECT";
+    InputMessage msg;
+    msg.header.type = InputMessage::TYPE_KEY;
+    EXPECT_EQ(DEAD_OBJECT, clientChannel->sendMessage(&msg))
+            << "sendMessage should have returned DEAD_OBJECT";
 }
 
 

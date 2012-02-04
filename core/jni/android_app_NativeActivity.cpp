@@ -130,21 +130,21 @@ AInputQueue::~AInputQueue() {
 void AInputQueue::attachLooper(ALooper* looper, int ident,
         ALooper_callbackFunc callback, void* data) {
     mLooper = static_cast<android::Looper*>(looper);
-    mLooper->addFd(mConsumer.getChannel()->getReceivePipeFd(),
+    mLooper->addFd(mConsumer.getChannel()->getFd(),
             ident, ALOOPER_EVENT_INPUT, callback, data);
     mLooper->addFd(mDispatchKeyRead,
             ident, ALOOPER_EVENT_INPUT, callback, data);
 }
 
 void AInputQueue::detachLooper() {
-    mLooper->removeFd(mConsumer.getChannel()->getReceivePipeFd());
+    mLooper->removeFd(mConsumer.getChannel()->getFd());
     mLooper->removeFd(mDispatchKeyRead);
 }
 
 int32_t AInputQueue::hasEvents() {
     struct pollfd pfd[2];
 
-    pfd[0].fd = mConsumer.getChannel()->getReceivePipeFd();
+    pfd[0].fd = mConsumer.getChannel()->getFd();
     pfd[0].events = POLLIN;
     pfd[0].revents = 0;
     pfd[1].fd = mDispatchKeyRead;
@@ -200,16 +200,9 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
             return 0;
         }
     }
-    
-    int32_t res = mConsumer.receiveDispatchSignal();
-    if (res != android::OK) {
-        ALOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
-                mConsumer.getChannel()->getName().string(), res);
-        return -1;
-    }
 
     InputEvent* myEvent = NULL;
-    res = mConsumer.consume(this, &myEvent);
+    status_t res = mConsumer.consume(this, &myEvent);
     if (res != android::OK) {
         ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                 mConsumer.getChannel()->getName().string(), res);
@@ -481,11 +474,6 @@ struct NativeCode : public ANativeActivity {
                     android_view_InputChannel_getInputChannel(env, _channel);
             if (ic != NULL) {
                 nativeInputQueue = new AInputQueue(ic, mainWorkWrite);
-                if (nativeInputQueue->getConsumer().initialize() != android::OK) {
-                    delete nativeInputQueue;
-                    nativeInputQueue = NULL;
-                    return UNKNOWN_ERROR;
-                }
             } else {
                 return UNKNOWN_ERROR;
             }

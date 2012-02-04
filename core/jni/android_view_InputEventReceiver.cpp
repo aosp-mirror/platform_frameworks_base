@@ -83,7 +83,7 @@ NativeInputEventReceiver::~NativeInputEventReceiver() {
     ALOGD("channel '%s' ~ Disposing input event receiver.", getInputChannelName());
 #endif
 
-    mLooper->removeFd(mInputConsumer.getChannel()->getReceivePipeFd());
+    mLooper->removeFd(mInputConsumer.getChannel()->getFd());
     if (mEventInProgress) {
         mInputConsumer.sendFinishedSignal(false); // ignoring result
     }
@@ -93,14 +93,7 @@ NativeInputEventReceiver::~NativeInputEventReceiver() {
 }
 
 status_t NativeInputEventReceiver::initialize() {
-    status_t result = mInputConsumer.initialize();
-    if (result) {
-        ALOGW("Failed to initialize input consumer for input channel '%s', status=%d",
-                getInputChannelName(), result);
-        return result;
-    }
-
-    int32_t receiveFd = mInputConsumer.getChannel()->getReceivePipeFd();
+    int32_t receiveFd = mInputConsumer.getChannel()->getFd();
     mLooper->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
     return OK;
 }
@@ -139,13 +132,6 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
         return 1;
     }
 
-    status_t status = r->mInputConsumer.receiveDispatchSignal();
-    if (status) {
-        ALOGE("channel '%s' ~ Failed to receive dispatch signal.  status=%d",
-                r->getInputChannelName(), status);
-        return 0; // remove the callback
-    }
-
     if (r->mEventInProgress) {
         ALOGW("channel '%s' ~ Publisher sent spurious dispatch signal.",
                 r->getInputChannelName());
@@ -153,7 +139,7 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
     }
 
     InputEvent* inputEvent;
-    status = r->mInputConsumer.consume(&r->mInputEventFactory, &inputEvent);
+    status_t status = r->mInputConsumer.consume(&r->mInputEventFactory, &inputEvent);
     if (status) {
         ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
                 r->getInputChannelName(), status);

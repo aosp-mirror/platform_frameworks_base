@@ -807,8 +807,6 @@ private:
         inline double getDispatchLatencyMillis(nsecs_t currentTime) const {
             return (currentTime - lastDispatchTime) / 1000000.0;
         }
-
-        status_t initialize();
     };
 
     enum DropReason {
@@ -862,8 +860,8 @@ private:
 
     sp<InputWindowHandle> findTouchedWindowAtLocked(int32_t x, int32_t y);
 
-    // All registered connections mapped by receive pipe file descriptor.
-    KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
+    // All registered connections mapped by channel file descriptor.
+    KeyedVector<int, sp<Connection> > mConnectionsByFd;
 
     ssize_t getConnectionIndexLocked(const sp<InputChannel>& inputChannel);
 
@@ -1027,7 +1025,7 @@ private:
     void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool notify);
     void drainOutboundQueueLocked(Connection* connection);
-    static int handleReceiveCallback(int receiveFd, int events, void* data);
+    static int handleReceiveCallback(int fd, int events, void* data);
 
     void synthesizeCancelationEventsForAllConnectionsLocked(
             const CancelationOptions& options);

@@ -20,17 +20,13 @@
 /**
  * Native input transport.
  *
- * Uses anonymous shared memory as a whiteboard for sending input events from an
- * InputPublisher to an InputConsumer and ensuring appropriate synchronization.
- * One interesting feature is that published events can be updated in place as long as they
- * have not yet been consumed.
+ * The InputChannel provides a mechanism for exchanging InputMessage structures across processes.
  *
- * The InputPublisher and InputConsumer only take care of transferring event data
- * over an InputChannel and sending synchronization signals.  The InputDispatcher and InputQueue
- * build on these abstractions to add multiplexing and queueing.
+ * The InputPublisher and InputConsumer each handle one end-point of an input channel.
+ * The InputPublisher is used by the input dispatcher to send events to the application.
+ * The InputConsumer is used by the application to receive events from the input dispatcher.
  */
 
-#include <semaphore.h>
 #include <ui/Input.h>
 #include <utils/Errors.h>
 #include <utils/Timers.h>
@@ -40,88 +36,25 @@
 namespace android {
 
 /*
- * An input channel consists of a shared memory buffer and a pair of pipes
- * used to send input messages from an InputPublisher to an InputConsumer
- * across processes.  Each channel has a descriptive name for debugging purposes.
- *
- * Each endpoint has its own InputChannel object that specifies its own file descriptors.
- *
- * The input channel is closed when all references to it are released.
- */
-class InputChannel : public RefBase {
-protected:
-    virtual ~InputChannel();
-
-public:
-    InputChannel(const String8& name, int32_t ashmemFd, int32_t receivePipeFd,
-            int32_t sendPipeFd);
-
-    /* Creates a pair of input channels and their underlying shared memory buffers
-     * and pipes.
-     *
-     * Returns OK on success.
-     */
-    static status_t openInputChannelPair(const String8& name,
-            sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel);
-
-    inline String8 getName() const { return mName; }
-    inline int32_t getAshmemFd() const { return mAshmemFd; }
-    inline int32_t getReceivePipeFd() const { return mReceivePipeFd; }
-    inline int32_t getSendPipeFd() const { return mSendPipeFd; }
-
-    /* Sends a signal to the other endpoint.
-     *
-     * Returns OK on success.
-     * Returns DEAD_OBJECT if the channel's peer has been closed.
-     * Other errors probably indicate that the channel is broken.
-     */
-    status_t sendSignal(char signal);
-
-    /* Receives a signal send by the other endpoint.
-     * (Should only call this after poll() indicates that the receivePipeFd has available input.)
-     *
-     * Returns OK on success.
-     * Returns WOULD_BLOCK if there is no signal present.
-     * Returns DEAD_OBJECT if the channel's peer has been closed.
-     * Other errors probably indicate that the channel is broken.
-     */
-    status_t receiveSignal(char* outSignal);
-
-private:
-    String8 mName;
-    int32_t mAshmemFd;
-    int32_t mReceivePipeFd;
-    int32_t mSendPipeFd;
-};
-
-/*
- * Private intermediate representation of input events as messages written into an
- * ashmem buffer.
+ * Intermediate representation used to send input events and related signals.
  */
 struct InputMessage {
-    /* Semaphore count is set to 1 when the message is published.
-     * It becomes 0 transiently while the publisher updates the message.
-     * It becomes 0 permanently when the consumer consumes the message.
-     */
-    sem_t semaphore;
-
-    /* Initialized to false by the publisher.
-     * Set to true by the consumer when it consumes the message.
-     */
-    bool consumed;
-
-    int32_t type;
-
-    struct SampleData {
-        nsecs_t eventTime;
-        PointerCoords coords[0]; // variable length
+    enum {
+        TYPE_KEY = 1,
+        TYPE_MOTION = 2,
+        TYPE_FINISHED = 3,
     };
 
-    int32_t deviceId;
-    int32_t source;
+    struct Header {
+        uint32_t type;
+        uint32_t padding; // 8 byte alignment for the body that follows
+    } header;
 
-    union {
-        struct {
+    union Body {
+        struct Key {
+            nsecs_t eventTime;
+            int32_t deviceId;
+            int32_t source;
             int32_t action;
             int32_t flags;
             int32_t keyCode;
@@ -129,10 +62,16 @@ struct InputMessage {
             int32_t metaState;
             int32_t repeatCount;
             nsecs_t downTime;
-            nsecs_t eventTime;
+
+            inline size_t size() const {
+                return sizeof(Key);
+            }
         } key;
 
-        struct {
+        struct Motion {
+            nsecs_t eventTime;
+            int32_t deviceId;
+            int32_t source;
             int32_t action;
             int32_t flags;
             int32_t metaState;
@@ -144,28 +83,87 @@ struct InputMessage {
             float xPrecision;
             float yPrecision;
             size_t pointerCount;
-            PointerProperties pointerProperties[MAX_POINTERS];
-            size_t sampleCount;
-            SampleData sampleData[0]; // variable length
+            struct Pointer {
+                PointerProperties properties;
+                PointerCoords coords;
+            } pointers[MAX_POINTERS];
+
+            inline size_t size() const {
+                return sizeof(Motion) - sizeof(Pointer) * MAX_POINTERS
+                        + sizeof(Pointer) * pointerCount;
+            }
         } motion;
-    };
 
-    /* Gets the number of bytes to add to step to the next SampleData object in a motion
-     * event message for a given number of pointers.
-     */
-    static inline size_t sampleDataStride(size_t pointerCount) {
-        return sizeof(InputMessage::SampleData) + pointerCount * sizeof(PointerCoords);
-    }
+        struct Finished {
+            bool handled;
 
-    /* Adds the SampleData stride to the given pointer. */
-    static inline SampleData* sampleDataPtrIncrement(SampleData* ptr, size_t stride) {
-        return reinterpret_cast<InputMessage::SampleData*>(reinterpret_cast<char*>(ptr) + stride);
-    }
+            inline size_t size() const {
+                return sizeof(Finished);
+            }
+        } finished;
+    } body;
+
+    bool isValid(size_t actualSize) const;
+    size_t size() const;
 };
 
 /*
- * Publishes input events to an anonymous shared memory buffer.
- * Uses atomic operations to coordinate shared access with a single concurrent consumer.
+ * An input channel consists of a local unix domain socket used to send and receive
+ * input messages across processes.  Each channel has a descriptive name for debugging purposes.
+ *
+ * Each endpoint has its own InputChannel object that specifies its file descriptor.
+ *
+ * The input channel is closed when all references to it are released.
+ */
+class InputChannel : public RefBase {
+protected:
+    virtual ~InputChannel();
+
+public:
+    InputChannel(const String8& name, int32_t fd);
+
+    /* Creates a pair of input channels.
+     *
+     * Returns OK on success.
+     */
+    static status_t openInputChannelPair(const String8& name,
+            sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel);
+
+    inline String8 getName() const { return mName; }
+    inline int32_t getFd() const { return mFd; }
+
+    /* Sends a message to the other endpoint.
+     *
+     * If the channel is full then the message is guaranteed not to have been sent at all.
+     * Try again after the consumer has sent a finished signal indicating that it has
+     * consumed some of the pending messages from the channel.
+     *
+     * Returns OK on success.
+     * Returns WOULD_BLOCK if the channel is full.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
+     * Other errors probably indicate that the channel is broken.
+     */
+    status_t sendMessage(const InputMessage* msg);
+
+    /* Receives a message sent by the other endpoint.
+     *
+     * If there is no message present, try again after poll() indicates that the fd
+     * is readable.
+     *
+     * Returns OK on success.
+     * Returns WOULD_BLOCK if there is no message present.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
+     * Other errors probably indicate that the channel is broken.
+     */
+    status_t receiveMessage(InputMessage* msg);
+
+private:
+    String8 mName;
+    int32_t mFd;
+};
+
+/*
+ * Publishes input events to an input channel.
  */
 class InputPublisher {
 public:
@@ -178,24 +176,12 @@ public:
     /* Gets the underlying input channel. */
     inline sp<InputChannel> getChannel() { return mChannel; }
 
-    /* Prepares the publisher for use.  Must be called before it is used.
-     * Returns OK on success.
-     *
-     * This method implicitly calls reset(). */
-    status_t initialize();
-
-    /* Resets the publisher to its initial state and unpins its ashmem buffer.
-     * Returns OK on success.
-     *
-     * Should be called after an event has been consumed to release resources used by the
-     * publisher until the next event is ready to be published.
-     */
-    status_t reset();
-
-    /* Publishes a key event to the ashmem buffer.
+    /* Publishes a key event to the input channel.
      *
      * Returns OK on success.
-     * Returns INVALID_OPERATION if the publisher has not been reset.
+     * Returns WOULD_BLOCK if the channel is full.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
+     * Other errors probably indicate that the channel is broken.
      */
     status_t publishKeyEvent(
             int32_t deviceId,
@@ -209,11 +195,13 @@ public:
             nsecs_t downTime,
             nsecs_t eventTime);
 
-    /* Publishes a motion event to the ashmem buffer.
+    /* Publishes a motion event to the input channel.
      *
      * Returns OK on success.
-     * Returns INVALID_OPERATION if the publisher has not been reset.
+     * Returns WOULD_BLOCK if the channel is full.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Returns BAD_VALUE if pointerCount is less than 1 or greater than MAX_POINTERS.
+     * Other errors probably indicate that the channel is broken.
      */
     status_t publishMotionEvent(
             int32_t deviceId,
@@ -233,55 +221,22 @@ public:
             const PointerProperties* pointerProperties,
             const PointerCoords* pointerCoords);
 
-    /* Appends a motion sample to a motion event unless already consumed.
-     *
-     * Returns OK on success.
-     * Returns INVALID_OPERATION if the current event is not a AMOTION_EVENT_ACTION_MOVE event.
-     * Returns FAILED_TRANSACTION if the current event has already been consumed.
-     * Returns NO_MEMORY if the buffer is full and no additional samples can be added.
-     */
-    status_t appendMotionSample(
-            nsecs_t eventTime,
-            const PointerCoords* pointerCoords);
-
-    /* Sends a dispatch signal to the consumer to inform it that a new message is available.
-     *
-     * Returns OK on success.
-     * Errors probably indicate that the channel is broken.
-     */
-    status_t sendDispatchSignal();
-
     /* Receives the finished signal from the consumer in reply to the original dispatch signal.
      * Returns whether the consumer handled the message.
      *
      * Returns OK on success.
      * Returns WOULD_BLOCK if there is no signal present.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Other errors probably indicate that the channel is broken.
      */
     status_t receiveFinishedSignal(bool* outHandled);
 
 private:
     sp<InputChannel> mChannel;
-
-    size_t mAshmemSize;
-    InputMessage* mSharedMessage;
-    bool mPinned;
-    bool mSemaphoreInitialized;
-    bool mWasDispatched;
-
-    size_t mMotionEventPointerCount;
-    InputMessage::SampleData* mMotionEventSampleDataTail;
-    size_t mMotionEventSampleDataStride;
-
-    status_t publishInputEvent(
-            int32_t type,
-            int32_t deviceId,
-            int32_t source);
 };
 
 /*
- * Consumes input events from an anonymous shared memory buffer.
- * Uses atomic operations to coordinate shared access with a single concurrent publisher.
+ * Consumes input events from an input channel.
  */
 class InputConsumer {
 public:
@@ -294,16 +249,14 @@ public:
     /* Gets the underlying input channel. */
     inline sp<InputChannel> getChannel() { return mChannel; }
 
-    /* Prepares the consumer for use.  Must be called before it is used. */
-    status_t initialize();
-
-    /* Consumes the input event in the buffer and copies its contents into
+    /* Consumes an input event from the input channel and copies its contents into
      * an InputEvent object created using the specified factory.
-     * This operation will block if the publisher is updating the event.
      *
      * Returns OK on success.
-     * Returns INVALID_OPERATION if there is no currently published event.
+     * Returns WOULD_BLOCK if there is no event present.
+     * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Returns NO_MEMORY if the event could not be created.
+     * Other errors probably indicate that the channel is broken.
      */
     status_t consume(InputEventFactoryInterface* factory, InputEvent** outEvent);
 
@@ -311,26 +264,12 @@ public:
      * finished processing and specifies whether the message was handled by the consumer.
      *
      * Returns OK on success.
-     * Errors probably indicate that the channel is broken.
+     * Other errors probably indicate that the channel is broken.
      */
     status_t sendFinishedSignal(bool handled);
 
-    /* Receives the dispatched signal from the publisher.
-     *
-     * Returns OK on success.
-     * Returns WOULD_BLOCK if there is no signal present.
-     * Other errors probably indicate that the channel is broken.
-     */
-    status_t receiveDispatchSignal();
-
 private:
     sp<InputChannel> mChannel;
-
-    size_t mAshmemSize;
-    InputMessage* mSharedMessage;
-
-    void populateKeyEvent(KeyEvent* keyEvent) const;
-    void populateMotionEvent(MotionEvent* motionEvent) const;
 };
 
 } // namespace android
