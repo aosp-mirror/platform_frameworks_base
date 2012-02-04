@@ -20,24 +20,35 @@ import android.app.IActivityManager.ContentProviderHolder;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
+import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.Process;
+import android.os.RemoteException;
+import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.HashSet;
 
 class ContentProviderRecord extends ContentProviderHolder {
     // All attached clients
     final HashSet<ProcessRecord> clients = new HashSet<ProcessRecord>();
+    // Handles for non-framework processes supported by this provider
+    HashMap<IBinder, ExternalProcessHandle> externalProcessTokenToHandle;
+    // Count for external process for which we have no handles.
+    int externalProcessNoHandleCount;
+    final ActivityManagerService service;
     final int uid;
     final ApplicationInfo appInfo;
     final ComponentName name;
-    int externals;     // number of non-framework processes supported by this provider
     ProcessRecord proc; // if non-null, hosting process.
     ProcessRecord launchingApp; // if non-null, waiting for this app to be launched.
     String stringName;
-    
-    public ContentProviderRecord(ProviderInfo _info, ApplicationInfo ai, ComponentName _name) {
+
+    public ContentProviderRecord(ActivityManagerService _service, ProviderInfo _info,
+            ApplicationInfo ai, ComponentName _name) {
         super(_info);
+        service = _service;
         uid = ai.uid;
         appInfo = ai;
         name = _name;
@@ -50,11 +61,63 @@ class ContentProviderRecord extends ContentProviderHolder {
         appInfo = cpr.appInfo;
         name = cpr.name;
         noReleaseNeeded = cpr.noReleaseNeeded;
+        service = cpr.service;
     }
 
     public boolean canRunHere(ProcessRecord app) {
         return (info.multiprocess || info.processName.equals(app.processName))
                 && (uid == Process.SYSTEM_UID || uid == app.info.uid);
+    }
+
+    public void addExternalProcessHandleLocked(IBinder token) {
+        if (token == null) {
+            externalProcessNoHandleCount++;
+        } else {
+            if (externalProcessTokenToHandle == null) {
+                externalProcessTokenToHandle = new HashMap<IBinder, ExternalProcessHandle>();
+            }
+            ExternalProcessHandle handle = externalProcessTokenToHandle.get(token);
+            if (handle == null) {
+                handle = new ExternalProcessHandle(token);
+                externalProcessTokenToHandle.put(token, handle);
+            }
+            handle.mAcquisitionCount++;
+        }
+    }
+
+    public boolean removeExternalProcessHandleLocked(IBinder token) {
+        if (hasExternalProcessHandles()) {
+            boolean hasHandle = false;
+            if (externalProcessTokenToHandle != null) {
+                ExternalProcessHandle handle = externalProcessTokenToHandle.get(token);
+                if (handle != null) {
+                    hasHandle = true;
+                    handle.mAcquisitionCount--;
+                    if (handle.mAcquisitionCount == 0) {
+                        removeExternalProcessHandleInternalLocked(token);
+                        return true;
+                    }
+                }
+            }
+            if (!hasHandle) {
+                externalProcessNoHandleCount--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void removeExternalProcessHandleInternalLocked(IBinder token) {
+        ExternalProcessHandle handle = externalProcessTokenToHandle.get(token);
+        handle.unlinkFromOwnDeathLocked();
+        externalProcessTokenToHandle.remove(token);
+        if (externalProcessTokenToHandle.size() == 0) {
+            externalProcessTokenToHandle = null;
+        }
+    }
+
+    public boolean hasExternalProcessHandles() {
+        return (externalProcessTokenToHandle != null || externalProcessNoHandleCount > 0);
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -73,8 +136,9 @@ class ContentProviderRecord extends ContentProviderHolder {
                     pw.print("multiprocess="); pw.print(info.multiprocess);
                     pw.print(" initOrder="); pw.println(info.initOrder);
         }
-        if (externals != 0) {
-            pw.print(prefix); pw.print("externals="); pw.println(externals);
+        if (hasExternalProcessHandles()) {
+            pw.print(prefix); pw.print("externals=");
+            pw.println(externalProcessTokenToHandle.size());
         }
         if (clients.size() > 0) {
             pw.print(prefix); pw.println("Clients:");
@@ -84,6 +148,7 @@ class ContentProviderRecord extends ContentProviderHolder {
         }
     }
 
+    @Override
     public String toString() {
         if (stringName != null) {
             return stringName;
@@ -95,5 +160,36 @@ class ContentProviderRecord extends ContentProviderHolder {
         sb.append(info.name);
         sb.append('}');
         return stringName = sb.toString();
+    }
+
+    // This class represents a handle from an external process to a provider.
+    private class ExternalProcessHandle implements DeathRecipient {
+        private static final String LOG_TAG = "ExternalProcessHanldle";
+
+        private final IBinder mToken;
+        private int mAcquisitionCount;
+
+        public ExternalProcessHandle(IBinder token) {
+            mToken = token;
+            try {
+                token.linkToDeath(this, 0);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Couldn't register for death for token: " + mToken, re);
+            }
+        }
+
+        public void unlinkFromOwnDeathLocked() {
+            mToken.unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (service) {
+                if (hasExternalProcessHandles() &&
+                        externalProcessTokenToHandle.get(mToken) != null) {
+                    removeExternalProcessHandleInternalLocked(mToken);
+                }                        
+            }
+        }
     }
 }

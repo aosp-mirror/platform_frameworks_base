@@ -150,8 +150,11 @@ public interface IActivityManager extends IInterface {
             Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
             String name) throws RemoteException;
+    public ContentProviderHolder getContentProviderExternal(String name, IBinder token)
+            throws RemoteException;
     public void removeContentProvider(IApplicationThread caller,
             String name) throws RemoteException;
+    public void removeContentProviderExternal(String name, IBinder token) throws RemoteException;
     public void publishContentProviders(IApplicationThread caller,
             List<ContentProviderHolder> providers) throws RemoteException;
     public PendingIntent getRunningServiceControlPanel(ComponentName service)
@@ -415,7 +418,7 @@ public interface IActivityManager extends IInterface {
                 source.readStrongBinder());
             noReleaseNeeded = source.readInt() != 0;
         }
-    };
+    }
 
     /** Information returned after waiting for an activity start. */
     public static class WaitResult implements Parcelable {
@@ -601,4 +604,6 @@ public interface IActivityManager extends IInterface {
     int SHOW_BOOT_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+137;
     int DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+138;
     int KILL_ALL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+139;
+    int GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+140;
+    int REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+141;
 }

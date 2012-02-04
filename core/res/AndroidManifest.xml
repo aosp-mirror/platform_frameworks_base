@@ -1521,6 +1521,17 @@
         android:description="@string/permdesc_serialPort"
         android:protectionLevel="normal" />
 
+    <!-- Allows the holder to access content providers from outside an ApplicationThread.
+         This permission is enforced by the ActivityManagerService on the corresponding APIs,
+         in particular ActivityManagerService#getContentProviderExternal(String) and
+         ActivityManagerService#removeContentProviderExternal(String).
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY"
+        android:label="@string/permlab_accessContentProvidersExternally"
+        android:description="@string/permdesc_accessContentProvidersExternally"
+        android:protectionLevel="signature" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
