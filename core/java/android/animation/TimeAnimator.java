@@ -1,13 +1,11 @@
 package android.animation;
 
 /**
- * This class provides a simple callback mechanism to listeners that is synchronized with other
- * animators in the system. There is no duration, interpolation, or object value-setting
- * with this Animator. Instead, it is simply started and proceeds to send out events on every
- * animation frame to its TimeListener (if set), with information about this animator,
- * the total elapsed time, and the time since the last animation frame.
- *
- * @hide
+ * This class provides a simple callback mechanism to listeners that is synchronized with all
+ * other animators in the system. There is no duration, interpolation, or object value-setting
+ * with this Animator. Instead, it is simply started, after which it proceeds to send out events
+ * on every animation frame to its TimeListener (if set), with information about this animator,
+ * the total elapsed time, and the elapsed time since the previous animation frame.
  */
 public class TimeAnimator extends ValueAnimator {
 
@@ -59,10 +57,10 @@ public class TimeAnimator extends ValueAnimator {
      * Implementors of this interface can set themselves as update listeners
      * to a <code>TimeAnimator</code> instance to receive callbacks on every animation
      * frame to receive the total time since the animator started and the delta time
-     * since the last frame. The first time the listener is called, totalTime and
-     * deltaTime should both be zero.
-     *
-     * @hide
+     * since the last frame. The first time the listener is called,
+     * deltaTime will be zero. The same is true for totalTime, unless the animator was
+     * set to a specific {@link ValueAnimator#setCurrentPlayTime(long) currentPlayTime}
+     * prior to starting.
      */
     public static interface TimeListener {
         /**
@@ -70,7 +68,8 @@ public class TimeAnimator extends ValueAnimator {
          * along with information about the elapsed time.</p>
          *
          * @param animation The animator sending out the notification.
-         * @param totalTime The
+         * @param totalTime The total time elapsed since the animator started, in milliseconds.
+         * @param deltaTime The time elapsed since the previous frame, in milliseconds.
          */
         void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime);
 

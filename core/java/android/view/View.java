@@ -2166,15 +2166,13 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
         float mScaleY = 1f;
 
         /**
-         * The amount of scale in the x direction around the pivot point. A
-         * value of 1 means no scaling is applied.
+         * The x location of the point around which the view is rotated and scaled.
          */
         @ViewDebug.ExportedProperty
         float mPivotX = 0f;
 
         /**
-         * The amount of scale in the y direction around the pivot point. A
-         * value of 1 means no scaling is applied.
+         * The y location of the point around which the view is rotated and scaled.
          */
         @ViewDebug.ExportedProperty
         float mPivotY = 0f;

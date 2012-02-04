@@ -2349,6 +2349,15 @@ package android.animation {
     method public void setPropertyName(java.lang.String);
   }
 
+  public class TimeAnimator extends android.animation.ValueAnimator {
+    ctor public TimeAnimator();
+    method public void setTimeListener(android.animation.TimeAnimator.TimeListener);
+  }
+
+  public static abstract interface TimeAnimator.TimeListener {
+    method public abstract void onTimeUpdate(android.animation.TimeAnimator, long, long);
+  }
+
   public abstract interface TimeInterpolator {
     method public abstract float getInterpolation(float);
   }
