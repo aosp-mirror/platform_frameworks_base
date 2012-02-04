@@ -419,9 +419,7 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
             // post surfaces (if needed)
             handlePageFlip();
 
-            if (!mDirtyRegion.isEmpty()) {
-                signalRefresh();
-            }
+            signalRefresh();
         } break;
 
         case MessageQueue::REFRESH: {
@@ -430,33 +428,32 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
             const DisplayHardware& hw(graphicPlane(0).displayHardware());
             handleRefresh();
 
-            if (!mDirtyRegion.isEmpty()) {
-                if (CC_UNLIKELY(mHwWorkListDirty)) {
-                    // build the h/w work list
-                    handleWorkList();
-                }
-                if (CC_LIKELY(hw.canDraw())) {
-                    // repaint the framebuffer (if needed)
-                    handleRepaint();
-                    // inform the h/w that we're done compositing
-                    hw.compositionComplete();
-                    postFramebuffer();
-                } else {
-                    // pretend we did the post
-                    hw.compositionComplete();
-                }
+            if (CC_UNLIKELY(mHwWorkListDirty)) {
+                // build the h/w work list
+                handleWorkList();
+            }
+            if (CC_LIKELY(hw.canDraw())) {
+                // repaint the framebuffer (if needed)
+                handleRepaint();
+                // inform the h/w that we're done compositing
+                hw.compositionComplete();
+                postFramebuffer();
             } else {
+                // pretend we did the post
                 hw.compositionComplete();
             }
+
         } break;
     }
 }
 
 void SurfaceFlinger::postFramebuffer()
 {
-    // this should never happen. we do the flip anyways so we don't
-    // risk to cause a deadlock with hwc
-    ALOGW_IF(mSwapRegion.isEmpty(), "mSwapRegion is empty");
+    // mSwapRegion can be empty here is some cases, for instance if a hidden
+    // or fully transparent window is updating.
+    // in that case, we need to flip anyways to not risk a deadlock with
+    // h/w composer.
+
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const nsecs_t now = systemTime();
     mDebugInSwapBuffers = now;
