@@ -425,12 +425,12 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
         } break;
 
         case MessageQueue::REFRESH: {
-            if (!mDirtyRegion.isEmpty()) {
-                // NOTE: it is mandatory to call hw.compositionComplete()
-                // after handleRefresh()
-                handleRefresh();
+            // NOTE: it is mandatory to call hw.compositionComplete()
+            // after handleRefresh()
+            const DisplayHardware& hw(graphicPlane(0).displayHardware());
+            handleRefresh();
 
-                const DisplayHardware& hw(graphicPlane(0).displayHardware());
+            if (!mDirtyRegion.isEmpty()) {
                 if (CC_UNLIKELY(mHwWorkListDirty)) {
                     // build the h/w work list
                     handleWorkList();
@@ -445,6 +445,8 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
                     // pretend we did the post
                     hw.compositionComplete();
                 }
+            } else {
+                hw.compositionComplete();
             }
         } break;
     }
