@@ -394,7 +394,7 @@ public class WifiStateMachine extends StateMachine {
      * Starting and shutting down driver too quick causes problems leading to driver
      * being in a bad state. Delay driver stop.
      */
-    private static final int DELAYED_DRIVER_STOP_MS = 2 * 60 * 1000; /* 2 minutes */
+    private final int mDriverStopDelayMs;
     private int mDelayedStopCounter;
     private boolean mInDelayedStop = false;
 
@@ -562,6 +562,9 @@ public class WifiStateMachine extends StateMachine {
 
         mDefaultSupplicantScanIntervalMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_wifi_supplicant_scan_interval);
+
+        mDriverStopDelayMs = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_wifi_driver_stop_delay);
 
         mContext.registerReceiver(
             new BroadcastReceiver() {
@@ -2589,7 +2592,7 @@ public class WifiStateMachine extends StateMachine {
                     } else {
                         /* send regular delayed shut down */
                         sendMessageDelayed(obtainMessage(CMD_DELAYED_STOP_DRIVER,
-                                mDelayedStopCounter, 0), DELAYED_DRIVER_STOP_MS);
+                                mDelayedStopCounter, 0), mDriverStopDelayMs);
                     }
                     break;
                 case CMD_START_DRIVER:
