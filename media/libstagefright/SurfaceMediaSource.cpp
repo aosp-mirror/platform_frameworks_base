@@ -60,7 +60,7 @@ SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
 SurfaceMediaSource::~SurfaceMediaSource() {
     ALOGV("SurfaceMediaSource::~SurfaceMediaSource");
     if (!mStopped) {
-        stop();
+        reset();
     }
 }
 
@@ -716,9 +716,9 @@ status_t SurfaceMediaSource::start(MetaData *params)
 }
 
 
-status_t SurfaceMediaSource::stop()
+status_t SurfaceMediaSource::reset()
 {
-    ALOGV("Stop");
+    ALOGV("Reset");
 
     Mutex::Autolock lock(mMutex);
     // TODO: Add waiting on mFrameCompletedCondition here?
