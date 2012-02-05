@@ -43,14 +43,6 @@ DisplayHardwareBase::DisplayEventThread::DisplayEventThread(
 DisplayHardwareBase::DisplayEventThread::~DisplayEventThread() {
 }
 
-void DisplayHardwareBase::DisplayEventThread::onFirstRef() {
-    if (initCheck() == NO_ERROR) {
-        run("DisplayEventThread", PRIORITY_URGENT_DISPLAY);
-    } else {
-        ALOGW("/sys/power/wait_for_fb_{wake|sleep} don't exist");
-    }
-}
-
 status_t DisplayHardwareBase::DisplayEventThread::initCheck() const {
     return ((access(kSleepFileName, R_OK) == 0 &&
             access(kWakeFileName, R_OK) == 0)) ? NO_ERROR : NO_INIT;
@@ -118,6 +110,14 @@ DisplayHardwareBase::DisplayHardwareBase(const sp<SurfaceFlinger>& flinger,
     : mScreenAcquired(true)
 {
     mDisplayEventThread = new DisplayEventThread(flinger);
+}
+
+void DisplayHardwareBase::startSleepManagement() const {
+    if (mDisplayEventThread->initCheck() == NO_ERROR) {
+        mDisplayEventThread->run("DisplayEventThread", PRIORITY_URGENT_DISPLAY);
+    } else {
+        ALOGW("/sys/power/wait_for_fb_{wake|sleep} don't exist");
+    }
 }
 
 DisplayHardwareBase::~DisplayHardwareBase() {

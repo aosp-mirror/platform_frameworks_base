@@ -300,6 +300,7 @@ status_t SurfaceFlinger::readyToRun()
     // start the EventThread
     mEventThread = new EventThread(this);
     mEventQueue.setEventThread(mEventThread);
+    hw.startSleepManagement();
 
     /*
      *  We're now ready to accept clients...
