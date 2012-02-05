@@ -458,16 +458,21 @@ void LayerBase::drawWithOpenGL(const Region& clip) const
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 {
     const Layer::State& s(drawingState());
+
+    snprintf(buffer, SIZE,
+            "+ %s %p (%s)\n",
+            getTypeId(), this, getName().string());
+    result.append(buffer);
+
     s.transparentRegion.dump(result, "transparentRegion");
     transparentRegionScreen.dump(result, "transparentRegionScreen");
     visibleRegionScreen.dump(result, "visibleRegionScreen");
+
     snprintf(buffer, SIZE,
-            "+ %s %p (%s)\n"
             "      "
             "z=%9d, pos=(%g,%g), size=(%4d,%4d), "
             "isOpaque=%1d, needsDithering=%1d, invalidate=%1d, "
             "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
-            getTypeId(), this, getName().string(),
             s.z, s.transform.tx(), s.transform.ty(), s.w, s.h,
             isOpaque(), needsDithering(), contentDirty,
             s.alpha, s.flags,
