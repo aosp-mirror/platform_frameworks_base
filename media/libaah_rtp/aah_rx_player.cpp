@@ -17,7 +17,6 @@
 #define LOG_TAG "LibAAH_RTP"
 //#define LOG_NDEBUG 0
 
-#include <common_time/cc_helper.h>
 #include <binder/IServiceManager.h>
 #include <media/MediaPlayerInterface.h>
 #include <utils/Log.h>
@@ -70,12 +69,12 @@ status_t AAH_RXPlayer::initCheck() {
         return NO_MEMORY;
     }
 
-    // Check for the presense of the A@H common time service by attempting to
-    // query for CommonTime's frequency.  If we get an error back, we cannot
-    // talk to the service at all and should abort now.
+    // Check for the presense of the common time service by attempting to query
+    // for CommonTime's frequency.  If we get an error back, we cannot talk to
+    // the service at all and should abort now.
     status_t res;
     uint64_t freq;
-    res = CCHelper::getCommonFreq(&freq);
+    res = cc_helper_.getCommonFreq(&freq);
     if (OK != res) {
         LOGE("Failed to connect to common time service!");
         return res;

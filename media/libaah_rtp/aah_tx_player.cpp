@@ -120,14 +120,14 @@ void AAH_TXPlayer::cancelPlayerEvents(bool keepBufferingGoing) {
 }
 
 status_t AAH_TXPlayer::initCheck() {
-    // Check for the presense of the A@H common time service by attempting to
-    // query for CommonTime's frequency.  If we get an error back, we cannot
-    // talk to the service at all and should abort now.
+    // Check for the presense of the common time service by attempting to query
+    // for CommonTime's frequency.  If we get an error back, we cannot talk to
+    // the service at all and should abort now.
     status_t res;
     uint64_t freq;
-    res = CCHelper::getCommonFreq(&freq);
+    res = mCCHelper.getCommonFreq(&freq);
     if (OK != res) {
-        LOGE("Failed to connect to common time service!");
+        LOGE("Failed to connect to common time service! (res %d)", res);
         return res;
     }
 
@@ -505,7 +505,7 @@ void AAH_TXPlayer::updateClockTransform_l(bool pause) {
 
     // sample the current common time
     int64_t commonTimeNow;
-    if (OK != CCHelper::getCommonTime(&commonTimeNow)) {
+    if (OK != mCCHelper.getCommonTime(&commonTimeNow)) {
         LOGE("updateClockTransform_l get common time failed");
         mCurrentClockTransformValid = false;
         return;
@@ -584,7 +584,7 @@ status_t AAH_TXPlayer::getCurrentPosition(int *msec) {
     } else if (mCurrentClockTransformValid) {
         // sample the current common time
         int64_t commonTimeNow;
-        if (OK != CCHelper::getCommonTime(&commonTimeNow)) {
+        if (OK != mCCHelper.getCommonTime(&commonTimeNow)) {
             LOGE("getCurrentPosition get common time failed");
             return INVALID_OPERATION;
         }
@@ -990,7 +990,7 @@ void AAH_TXPlayer::onPumpAudio() {
         // of good options here.  For now, signal an error up to the app level
         // and shut down the transmission pump.
         int64_t commonTimeNow;
-        if (OK != CCHelper::getCommonTime(&commonTimeNow)) {
+        if (OK != mCCHelper.getCommonTime(&commonTimeNow)) {
             // Failed to get common time; either the service is down or common
             // time is not synced.  Raise an error and shutdown the player.
             LOGE("*** Cannot pump audio, unable to fetch common time."
@@ -1051,7 +1051,7 @@ void AAH_TXPlayer::onPumpAudio() {
         LOGV("*** timeUs=%lld", mediaTimeUs);
 
         if (!mCurrentClockTransformValid) {
-            if (OK == CCHelper::getCommonTime(&commonTimeNow)) {
+            if (OK == mCCHelper.getCommonTime(&commonTimeNow)) {
                 mCurrentClockTransform.a_zero = mediaTimeUs;
                 mCurrentClockTransform.b_zero = commonTimeNow +
                                                 kAAHStartupLeadTimeUs;

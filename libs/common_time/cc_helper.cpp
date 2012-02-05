@@ -24,17 +24,66 @@ namespace android {
 
 Mutex CCHelper::lock_;
 sp<ICommonClock> CCHelper::common_clock_;
+sp<ICommonClockListener> CCHelper::common_clock_listener_;
+uint32_t CCHelper::ref_count_ = 0;
 
 bool CCHelper::verifyClock_l() {
+    bool ret = false;
+
     if (common_clock_ == NULL) {
         common_clock_ = ICommonClock::getInstance();
         if (common_clock_ == NULL)
-            return false;
+            goto bailout;
     }
 
-    return true;
+    if (ref_count_ > 0) {
+        if (common_clock_listener_ == NULL) {
+            common_clock_listener_ = new CommonClockListener();
+            if (common_clock_listener_ == NULL)
+                goto bailout;
+
+            if (OK != common_clock_->registerListener(common_clock_listener_))
+                goto bailout;
+        }
+    }
+
+    ret = true;
+
+bailout:
+    if (!ret) {
+        common_clock_listener_ = NULL;
+        common_clock_ = NULL;
+    }
+    return ret;
 }
 
+CCHelper::CCHelper() {
+    Mutex::Autolock lock(&lock_);
+    ref_count_++;
+    verifyClock_l();
+}
+
+CCHelper::~CCHelper() {
+    Mutex::Autolock lock(&lock_);
+
+    assert(ref_count_ > 0);
+    ref_count_--;
+
+    // If we were the last CCHelper instance in the system, and we had
+    // previously register a listener, unregister it now so that the common time
+    // service has the chance to go into auto-disabled mode.
+    if (!ref_count_ &&
+       (common_clock_ != NULL) &&
+       (common_clock_listener_ != NULL)) {
+        common_clock_->unregisterListener(common_clock_listener_);
+        common_clock_listener_ = NULL;
+    }
+}
+
+void CCHelper::CommonClockListener::onTimelineChanged(uint64_t timelineID) {
+    // do nothing; listener is only really used as a token so the server can
+    // find out when clients die.
+}
 
 // Helper methods which attempts to make calls to the common time binder
 // service.  If the first attempt fails with DEAD_OBJECT, the helpers will
@@ -43,20 +92,18 @@ bool CCHelper::verifyClock_l() {
 // If the second attempt fails, or no connection can be made, the we let the
 // error propagate up the stack and let the caller deal with the situation as
 // best they can.
-
 #define CCHELPER_METHOD(decl, call)                 \
     status_t CCHelper::decl {                       \
         Mutex::Autolock lock(&lock_);               \
                                                     \
         if (!verifyClock_l())                       \
-        return DEAD_OBJECT;                         \
+            return DEAD_OBJECT;                     \
                                                     \
         status_t status = common_clock_->call;      \
         if (DEAD_OBJECT == status) {                \
-            common_clock_ = NULL;                   \
             if (!verifyClock_l())                   \
-            return DEAD_OBJECT;                     \
-            status_t status = common_clock_->call;  \
+                return DEAD_OBJECT;                 \
+            status = common_clock_->call;           \
         }                                           \
                                                     \
         return status;                              \

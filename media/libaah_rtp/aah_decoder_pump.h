@@ -19,6 +19,7 @@
 
 #include <pthread.h>
 
+#include <common_time/cc_helper.h>
 #include <media/stagefright/MediaSource.h>
 #include <utils/LinearTransform.h>
 #include <utils/List.h>
@@ -93,6 +94,7 @@ class AAH_DecoderPump : public MediaSource {
     bool                last_ts_transform_valid_;
     LinearTransform     last_ts_transform_;
     uint8_t             last_volume_;
+    CCHelper            cc_helper_;
 
     // protected by the thread_lock_
     typedef List<MediaBuffer*> MBQueue;

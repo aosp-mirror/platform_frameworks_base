@@ -17,6 +17,7 @@
 #ifndef __AAH_TX_PLAYER_H__
 #define __AAH_TX_PLAYER_H__
 
+#include <common_time/cc_helper.h>
 #include <libstagefright/include/HTTPBase.h>
 #include <libstagefright/include/NuCachedSource2.h>
 #include <libstagefright/include/TimedEventQueue.h>
@@ -161,13 +162,13 @@ class AAH_TXPlayer : public MediaPlayerHWInterface {
     int64_t          mLastQueuedMediaTimePTS;
     bool             mLastQueuedMediaTimePTSValid;
     bool             mPlayRateIsPaused;
+    CCHelper         mCCHelper;
 
     Mutex mEndpointLock;
     AAH_TXSender::Endpoint mEndpoint;
     bool mEndpointValid;
     bool mEndpointRegistered;
     uint16_t mProgramID;
-
     uint8_t mTRTPVolume;
 
     DISALLOW_EVIL_CONSTRUCTORS(AAH_TXPlayer);

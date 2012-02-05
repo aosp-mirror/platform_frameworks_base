@@ -17,6 +17,7 @@
 #ifndef __AAH_RX_PLAYER_H__
 #define __AAH_RX_PLAYER_H__
 
+#include <common_time/cc_helper.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBuffer.h>
@@ -267,6 +268,7 @@ class AAH_RXPlayer : public MediaPlayerInterface {
     RXRingBuffer        ring_buffer_;
     SubstreamVec        substreams_;
     OMXClient           omx_;
+    CCHelper            cc_helper_;
 
     // Connection to audio flinger used to hack a path to setMasterVolume.
     sp<IAudioFlinger>   audio_flinger_;
