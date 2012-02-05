@@ -403,7 +403,8 @@ bool SurfaceFlinger::threadLoop()
 void SurfaceFlinger::onMessageReceived(int32_t what)
 {
     switch (what) {
-        case MessageQueue::INVALIDATE: {
+        case MessageQueue::REFRESH: {
+//        case MessageQueue::INVALIDATE: {
             // check for transactions
             if (CC_UNLIKELY(mConsoleSignals)) {
                 handleConsoleEvents();
@@ -419,19 +420,25 @@ void SurfaceFlinger::onMessageReceived(int32_t what)
             // post surfaces (if needed)
             handlePageFlip();
 
-            signalRefresh();
-        } break;
+//            signalRefresh();
+//
+//        } break;
+//
+//        case MessageQueue::REFRESH: {
 
-        case MessageQueue::REFRESH: {
-            // NOTE: it is mandatory to call hw.compositionComplete()
-            // after handleRefresh()
-            const DisplayHardware& hw(graphicPlane(0).displayHardware());
             handleRefresh();
+
+            const DisplayHardware& hw(graphicPlane(0).displayHardware());
+
+//            if (mDirtyRegion.isEmpty()) {
+//                return;
+//            }
 
             if (CC_UNLIKELY(mHwWorkListDirty)) {
                 // build the h/w work list
                 handleWorkList();
             }
+
             if (CC_LIKELY(hw.canDraw())) {
                 // repaint the framebuffer (if needed)
                 handleRepaint();
