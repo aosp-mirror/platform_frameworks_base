@@ -35,6 +35,8 @@ public:
 
     ~DisplayHardwareBase();
 
+    void startSleepManagement() const;
+
     // console management
     void releaseScreen() const;
     void acquireScreen() const;
@@ -52,7 +54,6 @@ private:
     public:
         DisplayEventThread(const sp<SurfaceFlinger>& flinger);
         virtual ~DisplayEventThread();
-        virtual void onFirstRef();
         virtual bool threadLoop();
         status_t releaseScreen() const;
         status_t initCheck() const;
