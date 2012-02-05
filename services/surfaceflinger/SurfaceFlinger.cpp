@@ -1650,11 +1650,13 @@ void SurfaceFlinger::dumpAllLocked(
     snprintf(buffer, SIZE,
             "  last eglSwapBuffers() time: %f us\n"
             "  last transaction time     : %f us\n"
+            "  transaction-flags         : %08x\n"
             "  refresh-rate              : %f fps\n"
             "  x-dpi                     : %f\n"
             "  y-dpi                     : %f\n",
             mLastSwapBufferTime/1000.0,
             mLastTransactionTime/1000.0,
+            mTransactionFlags,
             hw.getRefreshRate(),
             hw.getDpiX(),
             hw.getDpiY());
