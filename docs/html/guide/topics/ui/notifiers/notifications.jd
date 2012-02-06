@@ -173,7 +173,7 @@ in these two typical notification flows, first handling a Calendar notification:
   </li>
   <li>
     The user has seen enough to know they have a meeting coming up,
-    so they press the BACK button.  They are now returned to Email, which
+    so they press the <em>Back</em> button.  They are now returned to Email, which
     is where they were when they took the notification.
   </li>
 </ol>
@@ -198,8 +198,8 @@ in these two typical notification flows, first handling a Calendar notification:
     (writing an e-mail), but that message is still saved in their drafts.
   </li>
   <li>
-    The user presses BACK once to go to the message list (the typical flow in the
-    Email app), and press BACK again to return to Calendar as they left it.
+    The user presses <em>Back</em> once to go to the message list (the typical flow in the
+    Email app), and press <em>Back</em> again to return to Calendar as they left it.
   </li>
 </ol>
 
@@ -216,7 +216,7 @@ new notification state.</p>
 most interest is the <code>makeMessageIntentStack()</code> method, which constructs
 an array of intents representing the app's new activity stack for this state.
 (If you are using fragments, you may need to initialize your fragment and
-app state so that pressing BACK will switch the UI back to its parent state.)
+app state so that pressing <em>Back</em> will switch the UI back to its parent state.)
 The core of this is the {@link android.content.Intent#makeRestartActivityTask
 Intent.makeRestartActivityTask()} method, which constructs the root activity
 of the stack with the appropriate flags, such as
