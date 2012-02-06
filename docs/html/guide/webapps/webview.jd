@@ -298,18 +298,18 @@ history of visited web
 pages. You can navigate backward and forward through the history with {@link
 android.webkit.WebView#goBack()} and {@link android.webkit.WebView#goForward()}.</p>
 
-<p>For example, here's how your {@link android.app.Activity} can use the device BACK key to navigate
-backward:</p>
+<p>For example, here's how your {@link android.app.Activity} can use the device <em>Back</em> button
+to navigate backward:</p>
 
 <pre>
 &#64;Override
 public boolean {@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown}(int keyCode, KeyEvent event) {
-    // Check if the key event was the BACK key and if there's history
+    // Check if the key event was the Back button and if there's history
     if ((keyCode == KeyEvent.KEYCODE_BACK) &amp;&amp; myWebView.{@link android.webkit.WebView#canGoBack() canGoBack}() {
         myWebView.{@link android.webkit.WebView#goBack() goBack}();
         return true;
     }
-    // If it wasn't the BACK key or there's no web page history, bubble up to the default
+    // If it wasn't the Back key or there's no web page history, bubble up to the default
     // system behavior (probably exit the activity)
     return super.onKeyDown(keyCode, event);
 }
