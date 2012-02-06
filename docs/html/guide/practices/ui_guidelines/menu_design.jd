@@ -71,7 +71,7 @@ parent.link=index.html
   <ul>
     <li>The <em>Options menu</em> contains primary functionality that applies
         globally to the current activity or starts a related activity. 
-        It is typically invoked by a user pressing a hard button, often labeled MENU.</li>
+        It is typically invoked by a user pressing a hard button, often labeled <em>Menu</em>.</li>
     <li>The <em>Context menu</em> contains secondary functionality for the currently
         selected item.  It is typically invoked by a user's touch &amp; hold
         on an item.  Like on the Options menu, the operation can run either
@@ -109,10 +109,10 @@ or device to another.
 </p>
 
 <p>
-  On most devices, a user presses the MENU button to access the Options menu, 
+  On most devices, a user presses the <em>Menu</em> button to access the Options menu, 
   as shown in the screenshot below.  To close the menu, the user presses 
-  MENU again, or presses the BACK button. 
-  In fact, to cancel out of any menu, press the BACK button.  (Pressing the MENU
+  <em>Menu</em> again, or presses the <em>Back</em> button. 
+  In fact, to cancel out of any menu, press the <em>Back</em> button.  (Pressing the <em>Menu</em>
   button or touching outside the menu also works.)  Note that how to invoke this
   menu may be different on different devices.
 </p>
@@ -140,7 +140,7 @@ or device to another.
 
 <ul>
   <li>
-    <b>Options icon menu</b> - The first press of the MENU button displays a
+    <b>Options icon menu</b> - The first press of the <em>Menu</em> button displays a
     non-scrollable grid of icons at the bottom of the screen.  (On the G1
     phone, up to 6 buttons typically appear.)
   </li>
@@ -156,7 +156,7 @@ or device to another.
 
 <p>
   On some versions of Android, the user can display keyboard shortcuts in the
-  icon menu by long pressing the MENU button &mdash; the text in the icon menu
+  icon menu by long pressing the <em>Menu</em> button &mdash; the text in the icon menu
   alternates between the command names and their keyboard shortcuts (if any).
 </p>
 
@@ -299,7 +299,7 @@ or device to another.
   <a href="#location">location</a>) on the screen, put the command in the
   Context menu for that content.  If the command acts on no specific content
   or location, put it in the Options menu.  This separation of commands
-  is enforced by the system in the following way.  When you press the MENU
+  is enforced by the system in the following way.  When you press the <em>Menu</em>
   button to display the Options menu, the selected content becomes unselected,
   and so cannot be operated on.  For an explanation
   of why the content becomes unselected, see the article on
@@ -340,7 +340,7 @@ or device to another.
 
 <p>
   Before opening a Context menu, it has no visual representation that identifies
-  its presence (whereas the Options menu has the MENU button), and so is not
+  its presence (whereas the Options menu has the <em>Menu</em> button), and so is not
   particularly discoverable. 
   Therefore, in general, a Context menu should <em>duplicate</em> commands 
   found in the corresponding activity screen.  For example, while it's useful to
@@ -459,7 +459,8 @@ or device to another.
 <h3 id="a_dialog_should_not_have_an_options_menu">A dialog should not have an Options menu</h3>
 
 <p>
-  When a dialog is displayed, pressing the MENU button should do nothing.  This also holds true
+  When a dialog is displayed, pressing the <em>Menu</em> button should do nothing.  This also holds
+true
   for activities that look like dialogs.  A dialog box is recognizable by being
   smaller than full-screen, having zero to three buttons, is non-scrollable, and 
   possibly a list of selectable items that can include checkboxes or radio buttons.
@@ -475,7 +476,7 @@ or device to another.
 <h3 id="do_not_substitute_message">If an activity has no Options menu, do not display a message</h3>
 
 <p>
-  When the user presses the MENU button, if there is no Options menu, the system
+  When the user presses the <em>Menu</em> button, if there is no Options menu, the system
   currently does nothing.  We recommend you do not perform any action (such as
   displaying a message).  It's a better user experience for this behavior to be
   consistent across applications.

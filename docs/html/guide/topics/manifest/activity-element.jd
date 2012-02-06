@@ -133,21 +133,21 @@ is meaningful only for activities that start a new task (the root activity);
 it's ignored for all other activities in the task.
 
 <p>
-When the value is "{@code true}", every time users start the task again, they 
-are brought to its root activity, regardless of what they were last doing in 
-the task and regardless of whether they used BACK or HOME to last leave it.  
-When the value is "{@code false}", the task may be cleared of activities in 
+When the value is "{@code true}", every time users start the task again, they
+are brought to its root activity regardless of what they were last doing in
+the task and regardless of whether they used the <em>Back</em> or <em>Home</em> button to
+leave it. When the value is "{@code false}", the task may be cleared of activities in
 some situations (see the 
 <code><a href="#always">alwaysRetainTaskState</a></code> attribute), but not always.  
 </p>
 
 <p>
 Suppose, for example, that someone launches activity P from the home screen, 
-and from there goes to activity Q.  The user next presses HOME, and then returns 
+and from there goes to activity Q.  The user next presses <em>Home</em>, and then returns 
 to activity P.  Normally, the user would see activity Q, since that is what they 
 were last doing in P's task.  However, if P set this flag to "{@code true}", all 
 of the activities on top of it (Q in this case) were removed when the user pressed 
-HOME and the task went to the background.  So the user sees only P when returning 
+<em>Home</em> and the task went to the background.  So the user sees only P when returning 
 to the task.
 </p>
 
@@ -501,7 +501,7 @@ users and is very different from most other applications.
 
 <p>Regardless of the launch mode that you choose, make sure to test the usability
 of the activity during launch and when navigating back to it from
-other activities and tasks using the BACK key. </p>
+other activities and tasks using the <em>Back</em> button. </p>
 
 <p>For more information on launch modes and their interaction with Intent
 flags, see the 
