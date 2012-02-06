@@ -315,16 +315,16 @@ class AaptSymbolEntry
 {
 public:
     AaptSymbolEntry()
-        : isPublic(false), typeCode(TYPE_UNKNOWN)
+        : isPublic(false), isJavaSymbol(false), typeCode(TYPE_UNKNOWN)
     {
     }
     AaptSymbolEntry(const String8& _name)
-        : name(_name), isPublic(false), typeCode(TYPE_UNKNOWN)
+        : name(_name), isPublic(false), isJavaSymbol(false), typeCode(TYPE_UNKNOWN)
     {
     }
     AaptSymbolEntry(const AaptSymbolEntry& o)
         : name(o.name), sourcePos(o.sourcePos), isPublic(o.isPublic)
-        , comment(o.comment), typeComment(o.typeComment)
+        , isJavaSymbol(o.isJavaSymbol), comment(o.comment), typeComment(o.typeComment)
         , typeCode(o.typeCode), int32Val(o.int32Val), stringVal(o.stringVal)
     {
     }
@@ -332,6 +332,7 @@ public:
     {
         sourcePos = o.sourcePos;
         isPublic = o.isPublic;
+        isJavaSymbol = o.isJavaSymbol;
         comment = o.comment;
         typeComment = o.typeComment;
         typeCode = o.typeCode;
@@ -344,6 +345,7 @@ public:
     
     SourcePos sourcePos;
     bool isPublic;
+    bool isJavaSymbol;
     
     String16 comment;
     String16 typeComment;
@@ -401,6 +403,15 @@ public:
         return NO_ERROR;
     }
 
+    status_t makeSymbolJavaSymbol(const String8& name, const SourcePos& pos) {
+        if (!check_valid_symbol_name(name, pos, "symbol")) {
+            return BAD_VALUE;
+        }
+        AaptSymbolEntry& sym = edit_symbol(name, &pos);
+        sym.isJavaSymbol = true;
+        return NO_ERROR;
+    }
+
     void appendComment(const String8& name, const String16& comment, const SourcePos& pos) {
         if (comment.size() <= 0) {
             return;
@@ -440,6 +451,8 @@ public:
 
         return sym;
     }
+
+    status_t applyJavaSymbols(const sp<AaptSymbols>& javaSymbols);
 
     const KeyedVector<String8, AaptSymbolEntry>& getSymbols() const
         { return mSymbols; }
@@ -509,7 +522,11 @@ public:
     virtual ~AaptAssets() { delete mRes; }
 
     const String8& getPackage() const { return mPackage; }
-    void setPackage(const String8& package) { mPackage = package; mSymbolsPrivatePackage = package; }
+    void setPackage(const String8& package) {
+        mPackage = package;
+        mSymbolsPrivatePackage = package;
+        mHavePrivateSymbols = false;
+    }
 
     const SortedVector<AaptGroupEntry>& getGroupEntries() const;
 
@@ -532,11 +549,22 @@ public:
 
     sp<AaptSymbols> getSymbolsFor(const String8& name);
 
+    sp<AaptSymbols> getJavaSymbolsFor(const String8& name);
+
+    status_t applyJavaSymbols();
+
     const DefaultKeyedVector<String8, sp<AaptSymbols> >& getSymbols() const { return mSymbols; }
 
     String8 getSymbolsPrivatePackage() const { return mSymbolsPrivatePackage; }
-    void setSymbolsPrivatePackage(const String8& pkg) { mSymbolsPrivatePackage = pkg; }
-    
+    void setSymbolsPrivatePackage(const String8& pkg) {
+        mSymbolsPrivatePackage = pkg;
+        mHavePrivateSymbols = mSymbolsPrivatePackage != mPackage;
+    }
+
+    bool havePrivateSymbols() const { return mHavePrivateSymbols; }
+
+    bool isJavaSymbol(const AaptSymbolEntry& sym, bool includePrivate) const;
+
     status_t buildIncludedResources(Bundle* bundle);
     status_t addIncludedResources(const sp<AaptFile>& file);
     const ResTable& getIncludedResources() const;
@@ -576,7 +604,9 @@ private:
     String8 mPackage;
     SortedVector<AaptGroupEntry> mGroupEntries;
     DefaultKeyedVector<String8, sp<AaptSymbols> > mSymbols;
+    DefaultKeyedVector<String8, sp<AaptSymbols> > mJavaSymbols;
     String8 mSymbolsPrivatePackage;
+    bool mHavePrivateSymbols;
 
     Vector<sp<AaptDir> > mResDirs;
 

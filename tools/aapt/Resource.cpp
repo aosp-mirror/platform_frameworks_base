@@ -1808,7 +1808,7 @@ static status_t writeSymbolClass(
         if (sym.typeCode != AaptSymbolEntry::TYPE_INT32) {
             continue;
         }
-        if (!includePrivate && !sym.isPublic) {
+        if (!assets->isJavaSymbol(sym, includePrivate)) {
             continue;
         }
         String16 name(sym.name);
@@ -1864,7 +1864,7 @@ static status_t writeSymbolClass(
         if (sym.typeCode != AaptSymbolEntry::TYPE_STRING) {
             continue;
         }
-        if (!includePrivate && !sym.isPublic) {
+        if (!assets->isJavaSymbol(sym, includePrivate)) {
             continue;
         }
         String16 name(sym.name);
@@ -1976,7 +1976,8 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         "\n"
         "package %s;\n\n", package.string());
 
-        status_t err = writeSymbolClass(fp, assets, includePrivate, symbols, className, 0, bundle->getNonConstantId());
+        status_t err = writeSymbolClass(fp, assets, includePrivate, symbols,
+                className, 0, bundle->getNonConstantId());
         if (err != NO_ERROR) {
             return err;
         }

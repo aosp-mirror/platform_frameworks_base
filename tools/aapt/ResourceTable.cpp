@@ -753,6 +753,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 public16("public");
     const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
+    const String16 java_symbol16("java-symbol");
     const String16 add_resource16("add-resource");
     const String16 skip16("skip");
     const String16 eat_comment16("eat-comment");
@@ -1057,6 +1058,49 @@ status_t compileResourceFile(Bundle* bundle,
                     }
                 }
                 continue;
+
+            } else if (strcmp16(block.getElementName(&len), java_symbol16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+            
+                String16 type;
+                ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <public>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                type = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <public>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                sp<AaptSymbols> symbols = assets->getJavaSymbolsFor(String8("R"));
+                if (symbols != NULL) {
+                    symbols = symbols->addNestedSymbol(String8(type), srcPos);
+                }
+                if (symbols != NULL) {
+                    symbols->makeSymbolJavaSymbol(String8(name), srcPos);
+                    String16 comment(
+                        block.getComment(&len) ? block.getComment(&len) : nulStr);
+                    symbols->appendComment(String8(name), comment, srcPos);
+                } else {
+                    srcPos.error("Unable to create symbols!\n");
+                    hasErrors = localHasErrors = true;
+                }
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), java_symbol16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+
 
             } else if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
