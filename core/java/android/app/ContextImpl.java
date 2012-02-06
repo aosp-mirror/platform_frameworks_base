@@ -1125,6 +1125,12 @@ class ContextImpl extends Context {
     @Override
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
+        return bindService(service, conn, flags, UserId.getUserId(Process.myUid()));
+    }
+
+    /** @hide */
+    @Override
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
         IServiceConnection sd;
         if (mPackageInfo != null) {
             sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(),
@@ -1143,7 +1149,7 @@ class ContextImpl extends Context {
             int res = ActivityManagerNative.getDefault().bindService(
                 mMainThread.getApplicationThread(), getActivityToken(),
                 service, service.resolveTypeIfNeeded(getContentResolver()),
-                sd, flags);
+                sd, flags, userId);
             if (res < 0) {
                 throw new SecurityException(
                         "Not allowed to bind to service " + service);

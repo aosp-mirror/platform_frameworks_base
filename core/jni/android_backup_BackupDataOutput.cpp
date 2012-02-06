@@ -52,7 +52,6 @@ writeEntityHeader_native(JNIEnv* env, jobject clazz, int w, jstring key, int dat
     if (keyUTF == NULL) {
         return -1;
     }
-
     err = writer->WriteEntityHeader(String8(keyUTF), dataSize);
 
     env->ReleaseStringUTFChars(key, keyUTF);

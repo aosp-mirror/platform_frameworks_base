@@ -333,6 +333,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public void unbindService(ServiceConnection conn) {
         throw new UnsupportedOperationException();

@@ -670,8 +670,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resolvedType = data.readString();
             b = data.readStrongBinder();
             int fl = data.readInt();
+            int userId = data.readInt();
             IServiceConnection conn = IServiceConnection.Stub.asInterface(b);
-            int res = bindService(app, token, service, resolvedType, conn, fl);
+            int res = bindService(app, token, service, resolvedType, conn, fl, userId);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -2288,7 +2289,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType, IServiceConnection connection,
-            int flags) throws RemoteException {
+            int flags, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2298,6 +2299,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resolvedType);
         data.writeStrongBinder(connection.asBinder());
         data.writeInt(flags);
+        data.writeInt(userId);
         mRemote.transact(BIND_SERVICE_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
