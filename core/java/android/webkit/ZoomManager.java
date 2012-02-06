@@ -717,7 +717,7 @@ class ZoomManager {
     private void zoomToReadingLevel() {
         final float readingScale = getReadingLevelScale();
 
-        int left = mWebView.nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
+        int left = mWebView.getBlockLeftEdge(mAnchorX, mAnchorY, readingScale);
         if (left != WebView.NO_LEFTEDGE) {
             // add a 5pt padding to the left edge.
             int viewLeft = mWebView.contentToViewX(left < 5 ? 0 : (left - 5))
