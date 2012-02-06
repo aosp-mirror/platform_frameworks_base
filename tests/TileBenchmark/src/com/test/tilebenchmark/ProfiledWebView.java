@@ -40,8 +40,11 @@ public class ProfiledWebView extends WebView {
     private long mContentInvalMillis;
     private static final int LOAD_STALL_MILLIS = 2000; // nr of millis after load,
                                                        // before test is forced
-    private double mLoadTime;
-    private double mAnimationTime;
+
+    // ignore anim end events until this many millis after load
+    private static final long ANIM_SAFETY_THRESHOLD = 200;
+    private long mLoadTime;
+    private long mAnimationTime;
 
     public ProfiledWebView(Context context) {
         super(context);
@@ -131,7 +134,6 @@ public class ProfiledWebView extends WebView {
                     // invalidate all content, and kick off redraw
                     Log.d("ProfiledWebView",
                             "kicking off test with callback registration, and tile discard...");
-                    registerPageSwapCallback();
                     discardAllTextures();
                     invalidate();
                     mIsScrolling = true;
@@ -150,10 +152,11 @@ public class ProfiledWebView extends WebView {
      */
     @Override
     protected void pageSwapCallback(boolean startAnim) {
+        super.pageSwapCallback(startAnim);
+
         if (!mIsTesting && mIsScrolling) {
             // kick off testing
             mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
-            super.pageSwapCallback(startAnim);
             Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis + "millis");
             mIsTesting = true;
             invalidate(); // ensure a redraw so that auto-scrolling can occur
@@ -166,14 +169,14 @@ public class ProfiledWebView extends WebView {
         String updatesString = settings.getProperty("tree_updates");
         int updates = (updatesString == null) ? -1 : Integer.parseInt(updatesString);
 
-        double animationTime;
-        if (mAnimationTime == 0) {
+        long animationTime;
+        if (mAnimationTime == 0 || mAnimationTime - mLoadTime < ANIM_SAFETY_THRESHOLD) {
             animationTime = System.currentTimeMillis() - mLoadTime;
         } else {
             animationTime = mAnimationTime - mLoadTime;
         }
 
-        return updates * 1000 / animationTime;
+        return updates * 1000.0 / animationTime;
     }
 
     public void setDoubleBuffering(boolean useDoubleBuffering) {
