@@ -544,7 +544,8 @@ public boolean onSearchRequested() {
 }
 </pre>
 
-<p>If the user cancels search by pressing the BACK button, the search dialog closes and the activity
+<p>If the user cancels search by pressing the <em>Back</em> button, the search dialog closes and the
+activity
 regains input focus. You can register to be notified when the search dialog is
 closed with {@link android.app.SearchManager#setOnDismissListener(SearchManager.OnDismissListener)
 setOnDismissListener()}
@@ -569,7 +570,8 @@ things happens:</p>
 android.content.Intent#ACTION_SEARCH} intent with a call to {@link
 android.app.Activity#onCreate(Bundle) onCreate()} and a new instance of the
 activity is brought to the top of the activity stack. There are now two instances of your
-searchable activity in the activity stack (so pressing the BACK button goes back to the previous
+searchable activity in the activity stack (so pressing the <em>Back</em> button goes back to the
+previous
 instance of the searchable activity, rather than exiting the searchable activity).</li>
   <li>If you set {@code android:launchMode} to <code>"singleTop"</code>, then the
 searchable activity receives the {@link android.content.Intent#ACTION_SEARCH} intent with a call

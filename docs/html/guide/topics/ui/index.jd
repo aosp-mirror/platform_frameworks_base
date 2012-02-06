@@ -174,7 +174,8 @@ href="ui-events.html">Input Events</a> document.</p>
 
 <p>Application menus are another important part of an application's UI. Menus offers a reliable interface that reveals
 application functions and settings. The most common application menu is revealed by pressing
-the MENU key on the device. However, you can also add Context Menus, which may be revealed when the user presses
+the <em>Menu</em> button on the device. However, you can also add Context Menus, which may be
+revealed when the user presses
 and holds down on an item.</p>
 
 <p>Menus are also structured using a View hierarchy, but you don't define this structure yourself. Instead,

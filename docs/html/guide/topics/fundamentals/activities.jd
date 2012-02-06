@@ -63,7 +63,7 @@ activity can then start another activity in order to perform different actions. 
 activity starts, the previous activity is stopped, but the system preserves the activity
 in a stack (the "back stack"). When a new activity starts, it is pushed onto the back stack and
 takes user focus. The back stack abides to the basic "last in, first out" queue mechanism,
-so, when the user is done with the current activity and presses the BACK key, it
+so, when the user is done with the current activity and presses the <em>Back</em> button, it
 is popped from the stack (and destroyed) and the previous activity resumes. (The back stack is
 discussed more in the <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks
 and Back Stack</a> document.)</p>
@@ -649,7 +649,8 @@ remains intact.</p>
 <p class="note"><strong>Note:</strong> There's no guarantee that {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()} will be called before your
 activity is destroyed, because there are cases in which it won't be necessary to save the state
-(such as when the user leaves your activity using the BACK key, because the user is explicitly
+(such as when the user leaves your activity using the <em>Back</em> button, because the user is
+explicitly
 closing the activity). If the system calls {@link android.app.Activity#onSaveInstanceState
 onSaveInstanceState()}, it does so before {@link
 android.app.Activity#onStop onStop()} and possibly before {@link android.app.Activity#onPause

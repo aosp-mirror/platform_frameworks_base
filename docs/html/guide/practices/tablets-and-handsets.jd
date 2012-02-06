@@ -99,7 +99,8 @@ side.</p>
 
 <p>You can enable items from the options menu to appear directly in the action bar as "action
 items". You can also add navigation features to the action bar, such as tabs or a drop-down list,
-and use the application icon to supplement the system's BACK behavior with the option to navigate to
+and use the application icon to supplement the system's <em>Back</em> button behavior with the option to
+navigate to
 your application's "home" activity or "up" the application's structural hierarchy.</p>
 
 <p>This guide provides some tips for using the action bar in ways that support both tablets and
@@ -458,7 +459,8 @@ attribute.</p>
 developer guide, you can use the application icon in the action bar to facilitate user navigation
 when appropriate&mdash;either as a method to get back to the "home" activity (similar to clicking
 the logo on a web site) or as a way to navigate up the application's structural hierarchy. Although
-it might seem similar to the standard BACK navigation in some cases, the up navigation option
+it might seem similar to the standard <em>Back</em> navigation in some cases, the up navigation
+option
 provides a more predictable navigation method for situations in which the user may have entered
 from an external location, such as a notification, app widget, or a different application.</p>
 
