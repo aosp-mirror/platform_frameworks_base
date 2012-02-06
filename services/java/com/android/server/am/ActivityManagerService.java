@@ -15253,6 +15253,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
+        if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);
         newInfo.uid = applyUserId(info.uid, userId);
         if (newInfo.uid >= Process.FIRST_APPLICATION_UID) {
@@ -15263,7 +15264,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
-        if (aInfo.applicationInfo.uid < Process.FIRST_APPLICATION_UID
+        if (aInfo == null || aInfo.applicationInfo.uid < Process.FIRST_APPLICATION_UID
                 || userId < 1) {
             return aInfo;
         }
