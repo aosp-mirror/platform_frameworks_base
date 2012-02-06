@@ -41,6 +41,13 @@ import java.util.List;
  * event types. For detailed information please refer to {@link AccessibilityEvent}.
  * </p>
  *
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating and processing AccessibilityRecords, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
+ *
  * @see AccessibilityEvent
  * @see AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService

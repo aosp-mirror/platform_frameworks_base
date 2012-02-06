@@ -160,6 +160,20 @@
           <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">
                 <span class="en">Custom Components</span>
               </a></li>
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>guide/topics/ui/accessibility/index.html">
+                <span class="en">Accessibility</span>
+                <span class="new">new!</span>
+            </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/topics/ui/accessibility/apps.html">
+                <span class="en">Making Applications Accessible</span>
+              </a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/ui/accessibility/services.html">
+                <span class="en">Building Accessibility Services</span>
+              </a></li>
+            </ul>
+          </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">
                 <span class="en">Binding to Data with AdapterView</span>
               </a></li>
@@ -835,9 +849,6 @@ applications</span>
       </li>
       </ul>
       <ul>
-      <li><a href="<?cs var:toroot ?>guide/practices/design/accessibility.html">
-            <span class="en">Designing for Accessibility</span>
-          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>

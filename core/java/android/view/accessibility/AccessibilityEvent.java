@@ -59,6 +59,12 @@ import java.util.List;
  * by this class. For each event type there is a corresponding constant defined
  * in this class. Follows a specification of the event types and their associated properties:
  * </p>
+ * <div class="special reference">
+ * <h3>Developer Guides</h3>
+ * <p>For more information about creating and processing AccessibilityEvents, read the
+ * <a href="{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+ * developer guide.</p>
+ * </div>
  * <p>
  * <b>VIEW TYPES</b></br>
  * </p>
