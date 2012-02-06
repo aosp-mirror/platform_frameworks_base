@@ -178,7 +178,6 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mPendingEvent(NULL), mAppSwitchSawKeyDown(false), mAppSwitchDueTime(LONG_LONG_MAX),
     mNextUnblockedEvent(NULL),
     mDispatchEnabled(true), mDispatchFrozen(false), mInputFilterEnabled(false),
-    mCurrentInputTargetsValid(false),
     mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE) {
     mLooper = new Looper(false);
 
@@ -269,22 +268,21 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
             }
 
             // Nothing to do if there is no pending event.
-            if (! mPendingEvent) {
-                if (mActiveConnections.isEmpty()) {
-                    dispatchIdleLocked();
-                }
+            if (!mPendingEvent) {
                 return;
             }
         } else {
             // Inbound queue has at least one entry.
-            EventEntry* entry = mInboundQueue.dequeueAtHead();
-            mPendingEvent = entry;
+            mPendingEvent = mInboundQueue.dequeueAtHead();
         }
 
         // Poke user activity for this event.
         if (mPendingEvent->policyFlags & POLICY_FLAG_PASS_TO_USER) {
             pokeUserActivityLocked(mPendingEvent);
         }
+
+        // Get ready to dispatch the event.
+        resetANRTimeoutsLocked();
     }
 
     // Now we have an event to dispatch.
@@ -370,16 +368,6 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
         releasePendingEventLocked();
         *nextWakeupTime = LONG_LONG_MIN;  // force next poll to wake up immediately
     }
-}
-
-void InputDispatcher::dispatchIdleLocked() {
-#if DEBUG_FOCUS
-    ALOGD("Dispatcher idle.  There are no pending events or active connections.");
-#endif
-
-    // Reset targets when idle, to release input channels and other resources
-    // they are holding onto.
-    resetTargetsLocked();
 }
 
 bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
@@ -582,6 +570,7 @@ void InputDispatcher::drainInboundQueueLocked() {
 
 void InputDispatcher::releasePendingEventLocked() {
     if (mPendingEvent) {
+        resetANRTimeoutsLocked();
         releaseInboundEventLocked(mPendingEvent);
         mPendingEvent = NULL;
     }
@@ -704,7 +693,6 @@ bool InputDispatcher::dispatchKeyLocked(nsecs_t currentTime, KeyEntry* entry,
         }
 
         entry->dispatchInProgress = true;
-        resetTargetsLocked();
 
         logOutboundKeyDetailsLocked("dispatchKey - ", entry);
     }
@@ -743,31 +731,28 @@ bool InputDispatcher::dispatchKeyLocked(nsecs_t currentTime, KeyEntry* entry,
 
     // Clean up if dropping the event.
     if (*dropReason != DROP_REASON_NOT_DROPPED) {
-        resetTargetsLocked();
         setInjectionResultLocked(entry, *dropReason == DROP_REASON_POLICY
                 ? INPUT_EVENT_INJECTION_SUCCEEDED : INPUT_EVENT_INJECTION_FAILED);
         return true;
     }
 
     // Identify targets.
-    if (! mCurrentInputTargetsValid) {
-        int32_t injectionResult = findFocusedWindowTargetsLocked(currentTime,
-                entry, nextWakeupTime);
-        if (injectionResult == INPUT_EVENT_INJECTION_PENDING) {
-            return false;
-        }
-
-        setInjectionResultLocked(entry, injectionResult);
-        if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
-            return true;
-        }
-
-        addMonitoringTargetsLocked();
-        commitTargetsLocked();
+    Vector<InputTarget> inputTargets;
+    int32_t injectionResult = findFocusedWindowTargetsLocked(currentTime,
+            entry, inputTargets, nextWakeupTime);
+    if (injectionResult == INPUT_EVENT_INJECTION_PENDING) {
+        return false;
     }
 
+    setInjectionResultLocked(entry, injectionResult);
+    if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+        return true;
+    }
+
+    addMonitoringTargetsLocked(inputTargets);
+
     // Dispatch the key.
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry);
+    dispatchEventLocked(currentTime, entry, inputTargets);
     return true;
 }
 
@@ -788,14 +773,12 @@ bool InputDispatcher::dispatchMotionLocked(
     // Preprocessing.
     if (! entry->dispatchInProgress) {
         entry->dispatchInProgress = true;
-        resetTargetsLocked();
 
         logOutboundMotionDetailsLocked("dispatchMotion - ", entry);
     }
 
     // Clean up if dropping the event.
     if (*dropReason != DROP_REASON_NOT_DROPPED) {
-        resetTargetsLocked();
         setInjectionResultLocked(entry, *dropReason == DROP_REASON_POLICY
                 ? INPUT_EVENT_INJECTION_SUCCEEDED : INPUT_EVENT_INJECTION_FAILED);
         return true;
@@ -804,30 +787,29 @@ bool InputDispatcher::dispatchMotionLocked(
     bool isPointerEvent = entry->source & AINPUT_SOURCE_CLASS_POINTER;
 
     // Identify targets.
+    Vector<InputTarget> inputTargets;
+
     bool conflictingPointerActions = false;
-    if (! mCurrentInputTargetsValid) {
-        int32_t injectionResult;
-        if (isPointerEvent) {
-            // Pointer event.  (eg. touchscreen)
-            injectionResult = findTouchedWindowTargetsLocked(currentTime,
-                    entry, nextWakeupTime, &conflictingPointerActions);
-        } else {
-            // Non touch event.  (eg. trackball)
-            injectionResult = findFocusedWindowTargetsLocked(currentTime,
-                    entry, nextWakeupTime);
-        }
-        if (injectionResult == INPUT_EVENT_INJECTION_PENDING) {
-            return false;
-        }
-
-        setInjectionResultLocked(entry, injectionResult);
-        if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
-            return true;
-        }
-
-        addMonitoringTargetsLocked();
-        commitTargetsLocked();
+    int32_t injectionResult;
+    if (isPointerEvent) {
+        // Pointer event.  (eg. touchscreen)
+        injectionResult = findTouchedWindowTargetsLocked(currentTime,
+                entry, inputTargets, nextWakeupTime, &conflictingPointerActions);
+    } else {
+        // Non touch event.  (eg. trackball)
+        injectionResult = findFocusedWindowTargetsLocked(currentTime,
+                entry, inputTargets, nextWakeupTime);
     }
+    if (injectionResult == INPUT_EVENT_INJECTION_PENDING) {
+        return false;
+    }
+
+    setInjectionResultLocked(entry, injectionResult);
+    if (injectionResult != INPUT_EVENT_INJECTION_SUCCEEDED) {
+        return true;
+    }
+
+    addMonitoringTargetsLocked(inputTargets);
 
     // Dispatch the motion.
     if (conflictingPointerActions) {
@@ -835,7 +817,7 @@ bool InputDispatcher::dispatchMotionLocked(
                 "conflicting pointer actions");
         synthesizeCancelationEventsForAllConnectionsLocked(options);
     }
-    dispatchEventToCurrentInputTargetsLocked(currentTime, entry);
+    dispatchEventLocked(currentTime, entry, inputTargets);
     return true;
 }
 
@@ -873,8 +855,8 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
 #endif
 }
 
-void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime,
-        EventEntry* eventEntry) {
+void InputDispatcher::dispatchEventLocked(nsecs_t currentTime,
+        EventEntry* eventEntry, const Vector<InputTarget>& inputTargets) {
 #if DEBUG_DISPATCH_CYCLE
     ALOGD("dispatchEventToCurrentInputTargets");
 #endif
@@ -883,8 +865,8 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
 
     pokeUserActivityLocked(eventEntry);
 
-    for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
-        const InputTarget& inputTarget = mCurrentInputTargets.itemAt(i);
+    for (size_t i = 0; i < inputTargets.size(); i++) {
+        const InputTarget& inputTarget = inputTargets.itemAt(i);
 
         ssize_t connectionIndex = getConnectionIndexLocked(inputTarget.inputChannel);
         if (connectionIndex >= 0) {
@@ -898,16 +880,6 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
 #endif
         }
     }
-}
-
-void InputDispatcher::resetTargetsLocked() {
-    mCurrentInputTargetsValid = false;
-    mCurrentInputTargets.clear();
-    resetANRTimeoutsLocked();
-}
-
-void InputDispatcher::commitTargetsLocked() {
-    mCurrentInputTargetsValid = true;
 }
 
 int32_t InputDispatcher::handleTargetsNotReadyLocked(nsecs_t currentTime,
@@ -1024,9 +996,7 @@ void InputDispatcher::resetANRTimeoutsLocked() {
 }
 
 int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
-        const EventEntry* entry, nsecs_t* nextWakeupTime) {
-    mCurrentInputTargets.clear();
-
+        const EventEntry* entry, Vector<InputTarget>& inputTargets, nsecs_t* nextWakeupTime) {
     int32_t injectionResult;
 
     // If there is no currently focused window and no focused application
@@ -1077,7 +1047,8 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
     // Success!  Output targets.
     injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
     addWindowTargetLocked(mFocusedWindowHandle,
-            InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_DISPATCH_AS_IS, BitSet32(0));
+            InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_DISPATCH_AS_IS, BitSet32(0),
+            inputTargets);
 
     // Done.
 Failed:
@@ -1094,14 +1065,13 @@ Unresponsive:
 }
 
 int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
-        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions) {
+        const MotionEntry* entry, Vector<InputTarget>& inputTargets, nsecs_t* nextWakeupTime,
+        bool* outConflictingPointerActions) {
     enum InjectionPermission {
         INJECTION_PERMISSION_UNKNOWN,
         INJECTION_PERMISSION_GRANTED,
         INJECTION_PERMISSION_DENIED
     };
-
-    mCurrentInputTargets.clear();
 
     nsecs_t startTime = now();
 
@@ -1468,7 +1438,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     for (size_t i = 0; i < mTempTouchState.windows.size(); i++) {
         const TouchedWindow& touchedWindow = mTempTouchState.windows.itemAt(i);
         addWindowTargetLocked(touchedWindow.windowHandle, touchedWindow.targetFlags,
-                touchedWindow.pointerIds);
+                touchedWindow.pointerIds, inputTargets);
     }
 
     // Drop the outside or hover touch windows since we will not care about them
@@ -1573,11 +1543,11 @@ Unresponsive:
 }
 
 void InputDispatcher::addWindowTargetLocked(const sp<InputWindowHandle>& windowHandle,
-        int32_t targetFlags, BitSet32 pointerIds) {
-    mCurrentInputTargets.push();
+        int32_t targetFlags, BitSet32 pointerIds, Vector<InputTarget>& inputTargets) {
+    inputTargets.push();
 
     const InputWindowInfo* windowInfo = windowHandle->getInfo();
-    InputTarget& target = mCurrentInputTargets.editTop();
+    InputTarget& target = inputTargets.editTop();
     target.inputChannel = windowInfo->inputChannel;
     target.flags = targetFlags;
     target.xOffset = - windowInfo->frameLeft;
@@ -1586,11 +1556,11 @@ void InputDispatcher::addWindowTargetLocked(const sp<InputWindowHandle>& windowH
     target.pointerIds = pointerIds;
 }
 
-void InputDispatcher::addMonitoringTargetsLocked() {
+void InputDispatcher::addMonitoringTargetsLocked(Vector<InputTarget>& inputTargets) {
     for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
-        mCurrentInputTargets.push();
+        inputTargets.push();
 
-        InputTarget& target = mCurrentInputTargets.editTop();
+        InputTarget& target = inputTargets.editTop();
         target.inputChannel = mMonitoringChannels[i];
         target.flags = InputTarget::FLAG_DISPATCH_AS_IS;
         target.xOffset = 0;
@@ -2819,13 +2789,13 @@ void InputDispatcher::setFocusedApplication(
         if (inputApplicationHandle != NULL && inputApplicationHandle->updateInfo()) {
             if (mFocusedApplicationHandle != inputApplicationHandle) {
                 if (mFocusedApplicationHandle != NULL) {
-                    resetTargetsLocked();
+                    resetANRTimeoutsLocked();
                     mFocusedApplicationHandle->releaseInfo();
                 }
                 mFocusedApplicationHandle = inputApplicationHandle;
             }
         } else if (mFocusedApplicationHandle != NULL) {
-            resetTargetsLocked();
+            resetANRTimeoutsLocked();
             mFocusedApplicationHandle->releaseInfo();
             mFocusedApplicationHandle.clear();
         }
@@ -2978,7 +2948,7 @@ void InputDispatcher::resetAndDropEverythingLocked(const char* reason) {
     resetKeyRepeatLocked();
     releasePendingEventLocked();
     drainInboundQueueLocked();
-    resetTargetsLocked();
+    resetANRTimeoutsLocked();
 
     mTouchState.reset();
     mLastHoverWindowHandle.clear();

@@ -834,7 +834,6 @@ private:
     Vector<EventEntry*> mTempCancelationEvents;
 
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
-    void dispatchIdleLocked();
 
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
     bool enqueueInboundEventLocked(EventEntry* entry);
@@ -955,15 +954,13 @@ private:
     bool dispatchMotionLocked(
             nsecs_t currentTime, MotionEntry* entry,
             DropReason* dropReason, nsecs_t* nextWakeupTime);
-    void dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTime, EventEntry* entry);
+    void dispatchEventLocked(nsecs_t currentTime, EventEntry* entry,
+            const Vector<InputTarget>& inputTargets);
 
     void logOutboundKeyDetailsLocked(const char* prefix, const KeyEntry* entry);
     void logOutboundMotionDetailsLocked(const char* prefix, const MotionEntry* entry);
 
-    // The input targets that were most recently identified for dispatch.
-    bool mCurrentInputTargetsValid; // false while targets are being recomputed
-    Vector<InputTarget> mCurrentInputTargets;
-
+    // Keeping track of ANR timeouts.
     enum InputTargetWaitCause {
         INPUT_TARGET_WAIT_CAUSE_NONE,
         INPUT_TARGET_WAIT_CAUSE_SYSTEM_NOT_READY,
@@ -980,8 +977,6 @@ private:
     sp<InputWindowHandle> mLastHoverWindowHandle;
 
     // Finding targets for input events.
-    void resetTargetsLocked();
-    void commitTargetsLocked();
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
             const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle,
@@ -992,13 +987,15 @@ private:
     void resetANRTimeoutsLocked();
 
     int32_t findFocusedWindowTargetsLocked(nsecs_t currentTime, const EventEntry* entry,
-            nsecs_t* nextWakeupTime);
+            Vector<InputTarget>& inputTargets, nsecs_t* nextWakeupTime);
     int32_t findTouchedWindowTargetsLocked(nsecs_t currentTime, const MotionEntry* entry,
-            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions);
+            Vector<InputTarget>& inputTargets, nsecs_t* nextWakeupTime,
+            bool* outConflictingPointerActions);
 
     void addWindowTargetLocked(const sp<InputWindowHandle>& windowHandle,
-            int32_t targetFlags, BitSet32 pointerIds);
-    void addMonitoringTargetsLocked();
+            int32_t targetFlags, BitSet32 pointerIds, Vector<InputTarget>& inputTargets);
+    void addMonitoringTargetsLocked(Vector<InputTarget>& inputTargets);
+
     void pokeUserActivityLocked(const EventEntry* eventEntry);
     bool checkInjectionPermission(const sp<InputWindowHandle>& windowHandle,
             const InjectionState* injectionState);
