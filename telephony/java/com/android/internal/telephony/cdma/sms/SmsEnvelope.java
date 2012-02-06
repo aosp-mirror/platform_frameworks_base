@@ -37,6 +37,7 @@ public final class SmsEnvelope {
     static public final int TELESERVICE_VMN               = 0x1003;
     static public final int TELESERVICE_WAP               = 0x1004;
     static public final int TELESERVICE_WEMT              = 0x1005;
+    static public final int TELESERVICE_SCPT              = 0x1006;
 
     /**
      * The following are defined as extensions to the standard teleservices
@@ -46,14 +47,17 @@ public final class SmsEnvelope {
     // number of messages waiting, it's used by some CDMA carriers for a voice mail count.
     static public final int TELESERVICE_MWI               = 0x40000;
 
-    // ServiceCategories for Cell Broadcast, see 3GPP2 C.R1001 table 9.3.1-1
-    //static public final int SERVICECATEGORY_EMERGENCY      = 0x0010;
+    // Service Categories for Cell Broadcast, see 3GPP2 C.R1001 table 9.3.1-1
+    // static final int SERVICE_CATEGORY_EMERGENCY      = 0x0001;
     //...
 
-    /**
-     *  maximum lengths for fields as defined in ril_cdma_sms.h
-     */
-    static public final int SMS_BEARER_DATA_MAX = 255;
+    // CMAS alert service category assignments, see 3GPP2 C.R1001 table 9.3.3-1
+    public static final int SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT  = 0x1000;
+    public static final int SERVICE_CATEGORY_CMAS_EXTREME_THREAT            = 0x1001;
+    public static final int SERVICE_CATEGORY_CMAS_SEVERE_THREAT             = 0x1002;
+    public static final int SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 0x1003;
+    public static final int SERVICE_CATEGORY_CMAS_TEST_MESSAGE              = 0x1004;
+    public static final int SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE       = 0x10ff;
 
     /**
      * Provides the type of a SMS message like point to point, broadcast or acknowledge

@@ -16,28 +16,29 @@
 
 package com.android.internal.telephony.cdma.sms;
 
-import static android.telephony.SmsMessage.ENCODING_16BIT;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
-
+import android.content.res.Resources;
+import android.telephony.SmsCbCmasInfo;
+import android.telephony.SmsCbMessage;
+import android.telephony.SmsMessage;
+import android.telephony.cdma.CdmaSmsCbProgramData;
+import android.text.format.Time;
 import android.util.Log;
 
-import android.telephony.SmsMessage;
-
-import android.text.format.Time;
-
-import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
-
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
-import android.content.res.Resources;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.TimeZone;
 
+import static android.telephony.SmsMessage.ENCODING_16BIT;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 
 /**
  * An object to encode and decode CDMA SMS bearer data.
@@ -68,8 +69,8 @@ public final class BearerData {
     private final static byte SUBPARAM_MESSAGE_DISPLAY_MODE             = 0x0F;
     //private final static byte SUBPARAM_MULTIPLE_ENCODING_USER_DATA      = 0x10;
     private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
-    //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA    = 0x12;
-    //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS = 0x13;
+    private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA    = 0x12;
+    private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS = 0x13;
     private final static byte SUBPARAM_MESSAGE_STATUS                   = 0x14;
     //private final static byte SUBPARAM_TP_FAILURE_CAUSE                 = 0x15;
     //private final static byte SUBPARAM_ENHANCED_VMN                     = 0x16;
@@ -339,9 +340,65 @@ public final class BearerData {
      */
     public CdmaSmsAddress callbackNumber;
 
+    /**
+     * CMAS warning notification information.
+     * @see #decodeCmasUserData(BearerData, int)
+     */
+    public SmsCbCmasInfo cmasWarningInfo;
+
+    /**
+     * The Service Category Program Data subparameter is used to enable and disable
+     * SMS broadcast service categories to display. If this subparameter is present,
+     * this field will contain a list of one or more
+     * {@link android.telephony.cdma.CdmaSmsCbProgramData} objects containing the
+     * operation(s) to perform.
+     */
+    public List<CdmaSmsCbProgramData> serviceCategoryProgramData;
+
     private static class CodingException extends Exception {
         public CodingException(String s) {
             super(s);
+        }
+    }
+
+    /**
+     * Returns the language indicator as a two-character ISO 639 string.
+     * @return a two character ISO 639 language code
+     */
+    public String getLanguage() {
+        return getLanguageCodeForValue(language);
+    }
+
+    /**
+     * Converts a CDMA language indicator value to an ISO 639 two character language code.
+     * @param languageValue the CDMA language value to convert
+     * @return the two character ISO 639 language code for the specified value, or null if unknown
+     */
+    private static String getLanguageCodeForValue(int languageValue) {
+        switch (languageValue) {
+            case LANGUAGE_ENGLISH:
+                return "en";
+
+            case LANGUAGE_FRENCH:
+                return "fr";
+
+            case LANGUAGE_SPANISH:
+                return "es";
+
+            case LANGUAGE_JAPANESE:
+                return "ja";
+
+            case LANGUAGE_KOREAN:
+                return "ko";
+
+            case LANGUAGE_CHINESE:
+                return "zh";
+
+            case LANGUAGE_HEBREW:
+                return "he";
+
+            default:
+                return null;
         }
     }
 
@@ -916,6 +973,9 @@ public final class BearerData {
     private static String decodeUtf8(byte[] data, int offset, int numFields)
         throws CodingException
     {
+        if (numFields < 0 || (numFields + offset) > data.length) {
+            throw new CodingException("UTF-8 decode failed: offset or length out of range");
+        }
         try {
             return new String(data, offset, numFields, "UTF-8");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -926,11 +986,12 @@ public final class BearerData {
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        // Start reading from the next 16-bit aligned boundary after offset.
-        int padding = offset % 2;
-        numFields -= (offset + padding) / 2;
+        int byteCount = numFields * 2;
+        if (byteCount < 0 || (byteCount + offset) > data.length) {
+            throw new CodingException("UTF-16 decode failed: offset or length out of range");
+        }
         try {
-            return new String(data, offset, numFields * 2, "utf-16be");
+            return new String(data, offset, byteCount, "utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
             throw new CodingException("UTF-16 decode failed: " + ex);
         }
@@ -988,8 +1049,11 @@ public final class BearerData {
     private static String decodeLatin(byte[] data, int offset, int numFields)
         throws CodingException
     {
+        if (numFields < 0 || (numFields + offset) > data.length) {
+            throw new CodingException("ISO-8859-1 decode failed: offset or length out of range");
+        }
         try {
-            return new String(data, offset, numFields - offset, "ISO-8859-1");
+            return new String(data, offset, numFields, "ISO-8859-1");
         } catch (java.io.UnsupportedEncodingException ex) {
             throw new CodingException("ISO-8859-1 decode failed: " + ex);
         }
@@ -1032,6 +1096,7 @@ public final class BearerData {
                 userData.payloadStr = decodeUtf8(userData.payload, offset, userData.numFields);
             }
             break;
+
         case UserData.ENCODING_IA5:
         case UserData.ENCODING_7BIT_ASCII:
             userData.payloadStr = decode7bitAscii(userData.payload, offset, userData.numFields);
@@ -1114,8 +1179,9 @@ public final class BearerData {
         BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
         int dataLen = inStream.available() / 6;  // 6-bit packed character encoding.
         int numFields = bData.userData.numFields;
-        if ((dataLen > 14) || (dataLen < numFields)) {
-            throw new CodingException("IS-91 voicemail status decoding failed");
+        // dataLen may be > 14 characters due to octet padding
+        if ((numFields > 14) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 short message decoding failed");
         }
         StringBuffer strbuf = new StringBuffer(dataLen);
         for (int i = 0; i < numFields; i++) {
@@ -1539,7 +1605,7 @@ public final class BearerData {
             bData.userResponseCode = inStream.read(8);
         }
         if ((! decodeSuccess) || (paramBits > 0)) {
-            Log.d(LOG_TAG, "USER_REPONSE_CODE decode " +
+            Log.d(LOG_TAG, "USER_RESPONSE_CODE decode " +
                       (decodeSuccess ? "succeeded" : "failed") +
                       " (extra bits = " + paramBits + ")");
         }
@@ -1548,27 +1614,240 @@ public final class BearerData {
         return decodeSuccess;
     }
 
+    private static boolean decodeServiceCategoryProgramData(BearerData bData,
+            BitwiseInputStream inStream) throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.available() < 13) {
+            throw new CodingException("SERVICE_CATEGORY_PROGRAM_DATA decode failed: only "
+                    + inStream.available() + " bits available");
+        }
+
+        int paramBits = inStream.read(8) * 8;
+        int msgEncoding = inStream.read(5);
+        paramBits -= 5;
+
+        if (inStream.available() < paramBits) {
+            throw new CodingException("SERVICE_CATEGORY_PROGRAM_DATA decode failed: only "
+                    + inStream.available() + " bits available (" + paramBits + " bits expected)");
+        }
+
+        ArrayList<CdmaSmsCbProgramData> programDataList = new ArrayList<CdmaSmsCbProgramData>();
+
+        final int CATEGORY_FIELD_MIN_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        while (paramBits >= CATEGORY_FIELD_MIN_SIZE) {
+            int operation = inStream.read(4);
+            int category = (inStream.read(8) << 8) | inStream.read(8);
+            String language = getLanguageCodeForValue(inStream.read(8));
+            int maxMessages = inStream.read(8);
+            int alertOption = inStream.read(4);
+            int numFields = inStream.read(8);
+            paramBits -= CATEGORY_FIELD_MIN_SIZE;
+
+            int textBits = getBitsForNumFields(msgEncoding, numFields);
+            if (paramBits < textBits) {
+                throw new CodingException("category name is " + textBits + " bits in length,"
+                        + " but there are only " + paramBits + " bits available");
+            }
+
+            UserData userData = new UserData();
+            userData.msgEncoding = msgEncoding;
+            userData.msgEncodingSet = true;
+            userData.numFields = numFields;
+            userData.payload = inStream.readByteArray(textBits);
+            paramBits -= textBits;
+
+            decodeUserDataPayload(userData, false);
+            String categoryName = userData.payloadStr;
+            CdmaSmsCbProgramData programData = new CdmaSmsCbProgramData(operation, category,
+                    language, maxMessages, alertOption, categoryName);
+            programDataList.add(programData);
+
+            decodeSuccess = true;
+        }
+
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "SERVICE_CATEGORY_PROGRAM_DATA decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ')');
+        }
+
+        inStream.skip(paramBits);
+        bData.serviceCategoryProgramData = programDataList;
+        return decodeSuccess;
+    }
+
+    private static int serviceCategoryToCmasMessageClass(int serviceCategory) {
+        switch (serviceCategory) {
+            case SmsEnvelope.SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT:
+                return SmsCbCmasInfo.CMAS_CLASS_PRESIDENTIAL_LEVEL_ALERT;
+
+            case SmsEnvelope.SERVICE_CATEGORY_CMAS_EXTREME_THREAT:
+                return SmsCbCmasInfo.CMAS_CLASS_EXTREME_THREAT;
+
+            case SmsEnvelope.SERVICE_CATEGORY_CMAS_SEVERE_THREAT:
+                return SmsCbCmasInfo.CMAS_CLASS_SEVERE_THREAT;
+
+            case SmsEnvelope.SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY:
+                return SmsCbCmasInfo.CMAS_CLASS_CHILD_ABDUCTION_EMERGENCY;
+
+            case SmsEnvelope.SERVICE_CATEGORY_CMAS_TEST_MESSAGE:
+                return SmsCbCmasInfo.CMAS_CLASS_REQUIRED_MONTHLY_TEST;
+
+            default:
+                return SmsCbCmasInfo.CMAS_CLASS_UNKNOWN;
+        }
+    }
+
+    /**
+     * Calculates the number of bits to read for the specified number of encoded characters.
+     * @param msgEncoding the message encoding to use
+     * @param numFields the number of characters to read. For Shift-JIS and Korean encodings,
+     *  this is the number of bytes to read.
+     * @return the number of bits to read from the stream
+     * @throws CodingException if the specified encoding is not supported
+     */
+    private static int getBitsForNumFields(int msgEncoding, int numFields)
+            throws CodingException {
+        switch (msgEncoding) {
+            case UserData.ENCODING_OCTET:
+            case UserData.ENCODING_SHIFT_JIS:
+            case UserData.ENCODING_KOREAN:
+            case UserData.ENCODING_LATIN:
+            case UserData.ENCODING_LATIN_HEBREW:
+                return numFields * 8;
+
+            case UserData.ENCODING_IA5:
+            case UserData.ENCODING_7BIT_ASCII:
+            case UserData.ENCODING_GSM_7BIT_ALPHABET:
+                return numFields * 7;
+
+            case UserData.ENCODING_UNICODE_16:
+                return numFields * 16;
+
+            default:
+                throw new CodingException("unsupported message encoding (" + msgEncoding + ')');
+        }
+    }
+
+    /**
+     * CMAS message decoding.
+     * (See TIA-1149-0-1, CMAS over CDMA)
+     *
+     * @param serviceCategory is the service category from the SMS envelope
+     */
+    private static void decodeCmasUserData(BearerData bData, int serviceCategory)
+            throws BitwiseInputStream.AccessException, CodingException {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        if (inStream.available() < 8) {
+            throw new CodingException("emergency CB with no CMAE_protocol_version");
+        }
+        int protocolVersion = inStream.read(8);
+        if (protocolVersion != 0) {
+            throw new CodingException("unsupported CMAE_protocol_version " + protocolVersion);
+        }
+
+        int messageClass = serviceCategoryToCmasMessageClass(serviceCategory);
+        int category = SmsCbCmasInfo.CMAS_CATEGORY_UNKNOWN;
+        int responseType = SmsCbCmasInfo.CMAS_RESPONSE_TYPE_UNKNOWN;
+        int severity = SmsCbCmasInfo.CMAS_SEVERITY_UNKNOWN;
+        int urgency = SmsCbCmasInfo.CMAS_URGENCY_UNKNOWN;
+        int certainty = SmsCbCmasInfo.CMAS_CERTAINTY_UNKNOWN;
+
+        while (inStream.available() >= 16) {
+            int recordType = inStream.read(8);
+            int recordLen = inStream.read(8);
+            switch (recordType) {
+                case 0:     // Type 0 elements (Alert text)
+                    UserData alertUserData = new UserData();
+                    alertUserData.msgEncoding = inStream.read(5);
+                    alertUserData.msgEncodingSet = true;
+                    alertUserData.msgType = 0;
+
+                    int numFields;                          // number of chars to decode
+                    switch (alertUserData.msgEncoding) {
+                        case UserData.ENCODING_OCTET:
+                        case UserData.ENCODING_LATIN:
+                            numFields = recordLen - 1;      // subtract 1 byte for encoding
+                            break;
+
+                        case UserData.ENCODING_IA5:
+                        case UserData.ENCODING_7BIT_ASCII:
+                        case UserData.ENCODING_GSM_7BIT_ALPHABET:
+                            numFields = ((recordLen * 8) - 5) / 7;  // subtract 5 bits for encoding
+                            break;
+
+                        case UserData.ENCODING_UNICODE_16:
+                            numFields = (recordLen - 1) / 2;
+                            break;
+
+                        default:
+                            numFields = 0;      // unsupported encoding
+                    }
+
+                    alertUserData.numFields = numFields;
+                    alertUserData.payload = inStream.readByteArray(recordLen * 8 - 5);
+                    decodeUserDataPayload(alertUserData, false);
+                    bData.userData = alertUserData;
+                    break;
+
+                case 1:     // Type 1 elements
+                    category = inStream.read(8);
+                    responseType = inStream.read(8);
+                    severity = inStream.read(4);
+                    urgency = inStream.read(4);
+                    certainty = inStream.read(4);
+                    inStream.skip(recordLen * 8 - 28);
+                    break;
+
+                default:
+                    Log.w(LOG_TAG, "skipping unsupported CMAS record type " + recordType);
+                    inStream.skip(recordLen * 8);
+                    break;
+            }
+        }
+
+        bData.cmasWarningInfo = new SmsCbCmasInfo(messageClass, category, responseType, severity,
+                urgency, certainty);
+    }
+
     /**
      * Create BearerData object from serialized representation.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
      *
      * @param smsData byte array of raw encoded SMS bearer data.
-     *
      * @return an instance of BearerData.
      */
     public static BearerData decode(byte[] smsData) {
+        return decode(smsData, 0);
+    }
+
+    private static boolean isCmasAlertCategory(int category) {
+        return category >= SmsEnvelope.SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT
+                && category <= SmsEnvelope.SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE;
+    }
+
+    /**
+     * Create BearerData object from serialized representation.
+     * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
+     *
+     * @param smsData byte array of raw encoded SMS bearer data.
+     * @param serviceCategory the envelope service category (for CMAS alert handling)
+     * @return an instance of BearerData.
+     */
+    public static BearerData decode(byte[] smsData, int serviceCategory) {
         try {
             BitwiseInputStream inStream = new BitwiseInputStream(smsData);
             BearerData bData = new BearerData();
             int foundSubparamMask = 0;
             while (inStream.available() > 0) {
-                boolean decodeSuccess = false;
                 int subparamId = inStream.read(8);
                 int subparamIdBit = 1 << subparamId;
                 if ((foundSubparamMask & subparamIdBit) != 0) {
                     throw new CodingException("illegal duplicate subparameter (" +
                                               subparamId + ")");
                 }
+                boolean decodeSuccess;
                 switch (subparamId) {
                 case SUBPARAM_MESSAGE_IDENTIFIER:
                     decodeSuccess = decodeMessageId(bData, inStream);
@@ -1624,6 +1903,9 @@ public final class BearerData {
                 case SUBPARAM_MESSAGE_DEPOSIT_INDEX:
                     decodeSuccess = decodeDepositIndex(bData, inStream);
                     break;
+                case SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA:
+                    decodeSuccess = decodeServiceCategoryProgramData(bData, inStream);
+                    break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
                                               + subparamId + ")");
@@ -1634,7 +1916,10 @@ public final class BearerData {
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");
             }
             if (bData.userData != null) {
-                if (bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) {
+                if (isCmasAlertCategory(serviceCategory) && bData.priorityIndicatorSet
+                        && bData.priority == SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY) {
+                    decodeCmasUserData(bData, serviceCategory);
+                } else if (bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) {
                     if ((foundSubparamMask ^
                              (1 << SUBPARAM_MESSAGE_IDENTIFIER) ^
                              (1 << SUBPARAM_USER_DATA))
