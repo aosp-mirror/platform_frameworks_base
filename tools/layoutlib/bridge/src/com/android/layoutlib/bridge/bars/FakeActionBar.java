@@ -34,7 +34,7 @@ public class FakeActionBar extends CustomBar {
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
-        loadIcon(0, icon);
+        loadIconById(android.R.id.home, icon);
         mTextView = setText(1, label);
 
         setStyle("actionBarStyle");
