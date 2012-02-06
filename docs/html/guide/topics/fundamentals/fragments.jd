@@ -78,7 +78,7 @@ manipulate each fragment independently, such as add or remove them. When you per
 fragment transaction, you can also add it to a back stack that's managed by the
 activity&mdash;each back stack entry in the activity is a record of the fragment transaction that
 occurred. The back stack allows the user to reverse a fragment transaction (navigate backwards),
-by pressing the BACK button.</p>
+by pressing the <em>Back</em> button.</p>
 
 <p>When you add a fragment as a part of your activity layout, it lives in a {@link
 android.view.ViewGroup} inside the activity's view hierarchy and the fragment defines its own view
@@ -398,7 +398,7 @@ android.app.FragmentManager#findFragmentById findFragmentById()} (for fragments 
 the activity layout) or {@link android.app.FragmentManager#findFragmentByTag
 findFragmentByTag()} (for fragments that do or don't provide a UI).</li> 
   <li>Pop fragments off the back stack, with {@link
-android.app.FragmentManager#popBackStack()} (simulating a BACK command by the user).</li>
+android.app.FragmentManager#popBackStack()} (simulating a <em>Back</em> command by the user).</li>
   <li>Register a listener for changes to the back stack, with {@link
 android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()}.</li>
 </ul>
@@ -439,7 +439,7 @@ to the activity, you must call {@link android.app.FragmentTransaction#commit()}.
 android.app.FragmentTransaction#commit()}, however, you might want to call {@link
 android.app.FragmentTransaction#addToBackStack addToBackStack()}, in order to add the transaction
 to a back stack of fragment transactions. This back stack is managed by the activity and allows
-the user to return to the previous fragment state, by pressing the BACK key.</p>
+the user to return to the previous fragment state, by pressing the <em>Back</em> button.</p>
 
 <p>For example, here's how you can replace one fragment with another, and preserve the previous
 state in the back stack:</p>
@@ -462,14 +462,14 @@ transaction.commit();
 layout container identified by the {@code R.id.fragment_container} ID. By calling {@link
 android.app.FragmentTransaction#addToBackStack addToBackStack()}, the replace transaction is
 saved to the back stack so the user can reverse the transaction and bring back the
-previous fragment by pressing the BACK key.</p>
+previous fragment by pressing the <em>Back</em> button.</p>
 
 <p>If you add multiple changes to the transaction (such as another {@link
 android.app.FragmentTransaction#add add()} or {@link android.app.FragmentTransaction#remove
 remove()}) and call {@link
 android.app.FragmentTransaction#addToBackStack addToBackStack()}, then all changes applied
 before you call {@link android.app.FragmentTransaction#commit commit()} are added to the
-back stack as a single transaction and the BACK key will reverse them all together.</p>
+back stack as a single transaction and the <em>Back</em> button will reverse them all together.</p>
 
 <p>The order in which you add changes to a {@link android.app.FragmentTransaction} doesn't matter,
 except:</p>
@@ -696,7 +696,7 @@ document.</p>
 <p>The most significant difference in lifecycle between an activity and a fragment is how one is
 stored in its respective back stack. An activity is placed into a back stack of activities
 that's managed by the system when it's stopped, by default (so that the user can navigate back
-to it with the BACK key, as discussed in <a
+to it with the <em>Back</em> button, as discussed in <a
 href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>).
 However, a fragment is placed into a back stack managed by the host activity only when you
 explicitly request that the instance be saved by calling {@link
