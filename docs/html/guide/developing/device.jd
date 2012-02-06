@@ -254,6 +254,10 @@ above.</p>
     <td><code>04DD</code></td>
   </tr>
   <tr>
+    <td>Sony</td>
+    <td><code>054C</code></td>
+  </tr>
+  <tr>
     <td>Sony Ericsson</td>
     <td><code>0FCE</code></td>
   </tr>
