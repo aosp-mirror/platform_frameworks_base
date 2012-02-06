@@ -1298,7 +1298,7 @@ int PreProcessingFx_Command(effect_handle_t  self,
                 return -EINVAL;
             }
 
-            Session_GetConfig(effect->session, (effect_config_t *)pCmdData);
+            Session_GetConfig(effect->session, (effect_config_t *)pReplyData);
             break;
 
         case EFFECT_CMD_SET_CONFIG_REVERSE:
