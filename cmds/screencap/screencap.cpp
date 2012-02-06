@@ -28,6 +28,7 @@
 
 #include <SkImageEncoder.h>
 #include <SkBitmap.h>
+#include <SkData.h>
 #include <SkStream.h>
 
 using namespace android;
@@ -168,7 +169,9 @@ int main(int argc, char** argv)
             SkDynamicMemoryWStream stream;
             SkImageEncoder::EncodeStream(&stream, b,
                     SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality);
-            write(fd, stream.getStream(), stream.getOffset());
+            SkData* streamData = stream.copyToData();
+            write(fd, streamData->data(), streamData->size());
+            streamData->unref();
         } else {
             write(fd, &w, 4);
             write(fd, &h, 4);
