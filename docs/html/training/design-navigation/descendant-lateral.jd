@@ -117,7 +117,16 @@ next.link=ancestral-temporal.html
 <p class="img-caption"><strong>Figure 5.</strong> Example phone and tablet tab-based navigation interfaces with relevant screen map excerpt.</p>
 
 
-<p>Several best practices apply when using tabs. Tabs should be persistent across immediate related screens. Only the designated content region should change when selecting a tab, and tab indicators should remain available at all times. Additionally, tab switches should not be treated as history. For example, if a user switches from a tab <em>A</em> to another tab <em>B</em>, pressing the BACK button (more on that in the <a href="ancestral-temporal.html">next lesson</a>) should not re-select tab <em>A</em>. Tabs are usually laid out horizontally, although other presentations of tab navigation such as using a drop-down list in the Action Bar (<a href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design) are sometimes appropriate. Lastly, and most importantly, <em>tabs should always run along the top of the screen</em>, and should not be aligned to the bottom of the screen.</p>
+<p>Several best practices apply when using tabs. Tabs should be persistent across immediate related
+screens. Only the designated content region should change when selecting a tab, and tab indicators
+should remain available at all times. Additionally, tab switches should not be treated as history.
+For example, if a user switches from a tab <em>A</em> to another tab <em>B</em>, pressing the
+<em>Back</em> button (more on that in the <a href="ancestral-temporal.html">next lesson</a>) should
+not re-select tab <em>A</em>. Tabs are usually laid out horizontally, although other presentations
+of tab navigation such as using a drop-down list in the Action Bar (<a
+href="{@docRoot}design/patterns/actionbar.html">pattern docs</a> at Android Design) are sometimes
+appropriate. Lastly, and most importantly, <em>tabs should always run along the top of the
+screen</em>, and should not be aligned to the bottom of the screen.</p>
 
 <p>There are some obvious immediate benefits of tabs over simpler list- and button-based navigation:</p>
 

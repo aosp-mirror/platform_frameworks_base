@@ -41,7 +41,9 @@ Relationships</a></strong></dt>
     <dd>Learn about techniques for allowing users to navigate deep into, as well as across, your content hierarchy. Also learn about pros and cons of, and best practices for, specific navigational UI elements for various situations.</dd>
 
   <dt><strong><a href="ancestral-temporal.html">Providing Ancestral and Temporal Navigation</a></strong></dt>
-    <dd>Learn how to allow users to navigate upwards in the content hierarchy. Also learn about best practices for the BACK button and temporal navigation, or navigation to previous screens that may not be hierarchically related.</dd>
+    <dd>Learn how to allow users to navigate upwards in the content hierarchy. Also learn about best
+practices for the <em>Back</em> button and temporal navigation, or navigation to previous screens
+that may not be hierarchically related.</dd>
 
   <dt><strong><a href="wireframing.html">Putting it All Together: Wireframing the Example App</a></strong></dt>
     <dd>Learn how to create screen wireframes (low-fidelity graphic mockups) representing the screens in a news application based on the desired information model. These wireframes utilize navigational elements discussed in previous lessons to demonstrate intuitive and efficient navigation.</dd>
