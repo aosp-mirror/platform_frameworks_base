@@ -30,8 +30,10 @@ import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
+import android.telephony.SmsCbMessage;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage.MessageClass;
+import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
@@ -50,6 +52,7 @@ import com.android.internal.util.HexDump;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import android.content.res.Resources;
 
@@ -97,6 +100,24 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         }
     }
 
+    /**
+     * Dispatch service category program data to the CellBroadcastReceiver app, which filters
+     * the broadcast alerts to display.
+     * @param sms the SMS message containing one or more
+     * {@link android.telephony.cdma.CdmaSmsCbProgramData} objects.
+     */
+    private void handleServiceCategoryProgramData(SmsMessage sms) {
+        List<CdmaSmsCbProgramData> programDataList = sms.getSmsCbProgramData();
+        if (programDataList == null) {
+            Log.e(TAG, "handleServiceCategoryProgramData: program data list is null!");
+            return;
+        }
+
+        Intent intent = new Intent(Intents.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION);
+        intent.putExtra("program_data_list", (CdmaSmsCbProgramData[]) programDataList.toArray());
+        dispatch(intent, RECEIVE_SMS_PERMISSION);
+    }
+
     /** {@inheritDoc} */
     @Override
     public int dispatchMessage(SmsMessageBase smsb) {
@@ -119,8 +140,19 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
-        // See if we have a network duplicate SMS.
         SmsMessage sms = (SmsMessage) smsb;
+
+        // Handle CMAS emergency broadcast messages.
+        if (SmsEnvelope.MESSAGE_TYPE_BROADCAST == sms.getMessageType()) {
+            Log.d(TAG, "Broadcast type message");
+            SmsCbMessage message = sms.parseBroadcastSms();
+            if (message != null) {
+                dispatchBroadcastMessage(message);
+            }
+            return Intents.RESULT_SMS_HANDLED;
+        }
+
+        // See if we have a network duplicate SMS.
         mLastDispatchedSmsFingerprint = sms.getIncomingSmsFingerprint();
         if (mLastAcknowledgedSmsFingerprint != null &&
                 Arrays.equals(mLastDispatchedSmsFingerprint, mLastAcknowledgedSmsFingerprint)) {
@@ -148,6 +180,9 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                 (SmsEnvelope.TELESERVICE_WEMT == teleService)) &&
                 sms.isStatusReportMessage()) {
             handleCdmaStatusReport(sms);
+            handled = true;
+        } else if (SmsEnvelope.TELESERVICE_SCPT == teleService) {
+            handleServiceCategoryProgramData(sms);
             handled = true;
         } else if ((sms.getUserData() == null)) {
             if (false) {

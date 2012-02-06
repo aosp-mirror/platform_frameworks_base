@@ -77,6 +77,7 @@ public class BitwiseOutputStream {
         byte[] newBuf = new byte[(mPos + bits) >>> 2];
         System.arraycopy(mBuf, 0, newBuf, 0, mEnd >>> 3);
         mBuf = newBuf;
+        mEnd = newBuf.length << 3;
     }
 
     /**

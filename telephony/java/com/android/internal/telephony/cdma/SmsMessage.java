@@ -19,7 +19,11 @@ package com.android.internal.telephony.cdma;
 import android.os.Parcel;
 import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SmsCbLocation;
+import android.telephony.SmsCbMessage;
+import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.util.Log;
+
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -38,6 +42,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.List;
+
+import static android.telephony.SmsMessage.MessageClass;
 
 /**
  * TODO(cleanup): these constants are disturbing... are they not just
@@ -46,12 +53,6 @@ import java.io.IOException;
  * imported like this.  The class in this file could just as well be
  * named CdmaSmsMessage, could it not?
  */
-
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER;
-import static android.telephony.SmsMessage.MessageClass;
 
 /**
  * TODO(cleanup): internally returning null in many places makes
@@ -192,15 +193,16 @@ public class SmsMessage extends SmsMessageBase {
 
         // bearer data
         countInt = p.readInt(); //p_cur->uBearerDataLen
-        if (countInt >0) {
-            data = new byte[countInt];
-             //p_cur->aBearerData[digitCount] :
-            for (int index=0; index < countInt; index++) {
-                data[index] = p.readByte();
-            }
-            env.bearerData = data;
-            // BD gets further decoded when accessed in SMSDispatcher
+        if (countInt < 0) {
+            countInt = 0;
         }
+
+        data = new byte[countInt];
+        for (int index=0; index < countInt; index++) {
+            data[index] = p.readByte();
+        }
+        // BD gets further decoded when accessed in SMSDispatcher
+        env.bearerData = data;
 
         // link the the filled objects to the SMS
         env.origAddress = addr;
@@ -732,6 +734,29 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * Parses a broadcast SMS, possibly containing a CMAS alert.
+     */
+    SmsCbMessage parseBroadcastSms() {
+        BearerData bData = BearerData.decode(mEnvelope.bearerData, mEnvelope.serviceCategory);
+        if (bData == null) {
+            Log.w(LOG_TAG, "BearerData.decode() returned null");
+            return null;
+        }
+
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
+            Log.d(LOG_TAG, "MT raw BearerData = " + HexDump.toHexString(mEnvelope.bearerData));
+        }
+
+        String plmn = SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
+        SmsCbLocation location = new SmsCbLocation(plmn);
+
+        return new SmsCbMessage(SmsCbMessage.MESSAGE_FORMAT_3GPP2,
+                SmsCbMessage.GEOGRAPHICAL_SCOPE_PLMN_WIDE, bData.messageId, location,
+                mEnvelope.serviceCategory, bData.getLanguage(), bData.userData.payloadStr,
+                bData.priority, null, bData.cmasWarningInfo);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public MessageClass getMessageClass() {
@@ -960,5 +985,13 @@ public class SmsMessage extends SmsMessageBase {
                 mEnvelope.origSubaddress.origBytes.length);
 
         return output.toByteArray();
+    }
+
+    /**
+     * Returns the list of service category program data, if present.
+     * @return a list of CdmaSmsCbProgramData objects, or null if not present
+     */
+    List<CdmaSmsCbProgramData> getSmsCbProgramData() {
+        return mBearerData.serviceCategoryProgramData;
     }
 }

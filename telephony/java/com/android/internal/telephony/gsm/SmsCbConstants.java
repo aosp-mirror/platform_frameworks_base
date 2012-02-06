@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package android.telephony;
+package com.android.internal.telephony.gsm;
 
 /**
- * Constants used in SMS Cell Broadcast messages.
+ * Constants used in SMS Cell Broadcast messages (see 3GPP TS 23.041). This class is used by the
+ * boot-time broadcast channel enable and database upgrade code in CellBroadcastReceiver, so it
+ * is public, but should be avoided in favor of the radio technology independent constants in
+ * {@link android.telephony.SmsCbMessage}, {@link android.telephony.SmsCbEtwsInfo}, and
+ * {@link android.telephony.SmsCbCmasInfo} classes.
  *
  * {@hide}
  */
-public interface SmsCbConstants {
+public class SmsCbConstants {
+
+    /** Private constructor for utility class. */
+    private SmsCbConstants() { }
+
     /** Start of PWS Message Identifier range (includes ETWS and CMAS). */
     public static final int MESSAGE_ID_PWS_FIRST_IDENTIFIER = 0x1100;
 
@@ -94,11 +102,11 @@ public interface SmsCbConstants {
     /** End of PWS Message Identifier range (includes ETWS, CMAS, and future extensions). */
     public static final int MESSAGE_ID_PWS_LAST_IDENTIFIER                  = 0x18FF;
 
-    /** ETWS message code flag to activate the popup display. */
-    public static final int MESSAGE_CODE_ETWS_ACTIVATE_POPUP                = 0x100;
+    /** ETWS serial number flag to activate the popup display. */
+    public static final int SERIAL_NUMBER_ETWS_ACTIVATE_POPUP                = 0x1000;
 
-    /** ETWS message code flag to activate the emergency user alert. */
-    public static final int MESSAGE_CODE_ETWS_EMERGENCY_USER_ALERT          = 0x200;
+    /** ETWS serial number flag to activate the emergency user alert. */
+    public static final int SERIAL_NUMBER_ETWS_EMERGENCY_USER_ALERT          = 0x2000;
 
     /** ETWS warning type value for earthquake. */
     public static final int ETWS_WARNING_TYPE_EARTHQUAKE                    = 0x00;
