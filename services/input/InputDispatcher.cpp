@@ -3965,17 +3965,6 @@ const char* InputDispatcher::Connection::getStatusLabel() const {
     }
 }
 
-InputDispatcher::DispatchEntry* InputDispatcher::Connection::findQueuedDispatchEntryForEvent(
-        const EventEntry* eventEntry) const {
-    for (DispatchEntry* dispatchEntry = outboundQueue.tail; dispatchEntry;
-            dispatchEntry = dispatchEntry->prev) {
-        if (dispatchEntry->eventEntry == eventEntry) {
-            return dispatchEntry;
-        }
-    }
-    return NULL;
-}
-
 
 // --- InputDispatcher::CommandEntry ---
 
