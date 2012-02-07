@@ -22,6 +22,8 @@
 #include <sys/types.h>
 #include <limits.h>
 
+#include <common_time/cc_helper.h>
+
 #include <media/IAudioFlinger.h>
 #include <media/IAudioFlingerClient.h>
 #include <media/IAudioTrack.h>
@@ -741,6 +743,7 @@ private:
             uint32_t            mTimedSilenceBufferSize;
             mutable Mutex       mTimedBufferQueueLock;
             bool                mTimedAudioOutputOnTime;
+            CCHelper            mCCHelper;
 
             Mutex               mMediaTimeTransformLock;
             LinearTransform     mMediaTimeTransform;

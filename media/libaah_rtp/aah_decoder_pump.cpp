@@ -262,7 +262,7 @@ bool AAH_DecoderPump::isAboutToUnderflow(int64_t threshold) {
     // Since we cannot really tell if we are about to underflow or not, its
     // probably best to assume that we are not and proceed accordingly.
     int64_t tt_now;
-    if (OK != CCHelper::getCommonTime(&tt_now)) {
+    if (OK != cc_helper_.getCommonTime(&tt_now)) {
         return false;
     }
 

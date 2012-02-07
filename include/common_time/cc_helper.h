@@ -18,30 +18,53 @@
 #define __CC_HELPER_H__
 
 #include <stdint.h>
+#include <common_time/ICommonClock.h>
 #include <utils/threads.h>
 
 namespace android {
 
-class ICommonClock;
-
 // CCHelper is a simple wrapper class to help with centralizing access to the
-// Common Clock service as well as to implement a simple policy of making a
-// basic attempt to reconnect to the common clock service when things go wrong.
+// Common Clock service and implementing lifetime managment, as well as to
+// implement a simple policy of making a basic attempt to reconnect to the
+// common clock service when things go wrong.
+// 
+// On platforms which run the native common_time service in auto-diable mode,
+// the service will go into networkless mode whenever it has no active clients.
+// It tracks active clients using registered CommonClockListeners (the callback
+// interface for onTimelineChanged) since this provides a convienent death
+// handler notification for when the service's clients die unexpectedly.  This
+// means that users of the common time service should really always have a
+// CommonClockListener, unless they know that the time service is not running in
+// auto disabled mode, or that there is at least one other registered listener
+// active in the system.  The CCHelper makes this a little easier by sharing a
+// ref counted ICommonClock interface across all clients and automatically
+// registering and unregistering a listener whenever there are CCHelper
+// instances active in the process.
 class CCHelper {
   public:
-    static status_t isCommonTimeValid(bool* valid, uint32_t* timelineID);
-    static status_t commonTimeToLocalTime(int64_t commonTime, int64_t* localTime);
-    static status_t localTimeToCommonTime(int64_t localTime, int64_t* commonTime);
-    static status_t getCommonTime(int64_t* commonTime);
-    static status_t getCommonFreq(uint64_t* freq);
-    static status_t getLocalTime(int64_t* localTime);
-    static status_t getLocalFreq(uint64_t* freq);
+    CCHelper();
+    ~CCHelper();
+
+    status_t isCommonTimeValid(bool* valid, uint32_t* timelineID);
+    status_t commonTimeToLocalTime(int64_t commonTime, int64_t* localTime);
+    status_t localTimeToCommonTime(int64_t localTime, int64_t* commonTime);
+    status_t getCommonTime(int64_t* commonTime);
+    status_t getCommonFreq(uint64_t* freq);
+    status_t getLocalTime(int64_t* localTime);
+    status_t getLocalFreq(uint64_t* freq);
 
   private:
+    class CommonClockListener : public BnCommonClockListener {
+      public:
+        void onTimelineChanged(uint64_t timelineID);
+    };
+
     static bool verifyClock_l();
 
     static Mutex lock_;
     static sp<ICommonClock> common_clock_;
+    static sp<ICommonClockListener> common_clock_listener_;
+    static uint32_t ref_count_;
 };
 
 

@@ -3899,8 +3899,8 @@ void AudioFlinger::PlaybackThread::TimedTrack::trimTimedBufferQueue_l() {
 
         int64_t targetTimeNow;
         status_t res = (mMediaTimeTransformTarget == TimedAudioTrack::COMMON_TIME)
-            ? CCHelper::getCommonTime(&targetTimeNow)
-            : CCHelper::getLocalTime(&targetTimeNow);
+            ? mCCHelper.getCommonTime(&targetTimeNow)
+            : mCCHelper.getLocalTime(&targetTimeNow);
 
         if (OK != res)
             return;
@@ -4019,7 +4019,7 @@ status_t AudioFlinger::PlaybackThread::TimedTrack::getNextBuffer(
             }
 
             if (mMediaTimeTransformTarget == TimedAudioTrack::COMMON_TIME) {
-                if (OK != CCHelper::commonTimeToLocalTime(transformedPTS,
+                if (OK != mCCHelper.commonTimeToLocalTime(transformedPTS,
                                                           &headLocalPTS)) {
                     buffer->raw = 0;
                     buffer->frameCount = 0;
