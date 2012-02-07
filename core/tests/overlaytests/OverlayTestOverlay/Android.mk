@@ -9,6 +9,4 @@ LOCAL_SDK_VERSION := current
 
 LOCAL_PACKAGE_NAME := com.android.overlaytest.overlay
 
-LOCAL_AAPT_FLAGS := -o
-
 include $(BUILD_PACKAGE)
