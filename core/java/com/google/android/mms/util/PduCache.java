@@ -73,10 +73,12 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
 
     private final HashMap<Integer, HashSet<Uri>> mMessageBoxes;
     private final HashMap<Long, HashSet<Uri>> mThreads;
+    private final HashSet<Uri> mUpdating;
 
     private PduCache() {
         mMessageBoxes = new HashMap<Integer, HashSet<Uri>>();
         mThreads = new HashMap<Long, HashSet<Uri>>();
+        mUpdating = new HashSet<Uri>();
     }
 
     synchronized public static final PduCache getInstance() {
@@ -111,7 +113,20 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
             msgBox.add(finalKey);
             thread.add(finalKey);
         }
+        setUpdating(uri, false);
         return result;
+    }
+
+    synchronized public void setUpdating(Uri uri, boolean updating) {
+        if (updating) {
+            mUpdating.add(uri);
+        } else {
+            mUpdating.remove(uri);
+        }
+    }
+
+    synchronized public boolean isUpdating(Uri uri) {
+        return mUpdating.contains(uri);
     }
 
     @Override
