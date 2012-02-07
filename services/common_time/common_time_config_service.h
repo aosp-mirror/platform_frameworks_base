@@ -21,10 +21,13 @@
 namespace android {
 
 class String16;
+class CommonTimeServer;
 
 class CommonTimeConfigService : public BnCommonTimeConfig {
   public:
-    static sp<CommonTimeConfigService> instantiate();
+    static sp<CommonTimeConfigService> instantiate(CommonTimeServer& timeServer);
+
+    virtual status_t dump(int fd, const Vector<String16>& args);
 
     virtual status_t getMasterElectionPriority(uint8_t *priority);
     virtual status_t setMasterElectionPriority(uint8_t priority);
@@ -45,7 +48,10 @@ class CommonTimeConfigService : public BnCommonTimeConfig {
     virtual status_t forceNetworklessMasterMode();
 
   private:
-    CommonTimeConfigService() {}
+    CommonTimeConfigService(CommonTimeServer& timeServer)
+        : mTimeServer(timeServer) { }
+    CommonTimeServer& mTimeServer;
+
 };
 
 };  // namespace android

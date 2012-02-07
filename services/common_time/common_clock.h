@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ class CommonClock {
 
     status_t  localToCommon(int64_t local, int64_t *common_out) const;
     status_t  commonToLocal(int64_t common, int64_t *local_out) const;
+    int64_t   localDurationToCommonDuration(int64_t localDur) const;
     uint64_t  getCommonFreq() const { return kCommonFreq; }
     bool      isValid() const { return cur_trans_valid_; }
     status_t  setSlew(int64_t change_time, int32_t ppm);
@@ -45,6 +46,7 @@ class CommonClock {
     uint32_t local_to_common_freq_numer_;
     uint32_t local_to_common_freq_denom_;
 
+    LinearTransform duration_trans_;
     LinearTransform cur_trans_;
     bool cur_trans_valid_;
 

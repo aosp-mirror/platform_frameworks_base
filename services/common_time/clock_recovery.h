@@ -18,6 +18,7 @@
 #define __CLOCK_RECOVERY_H__
 
 #include <stdint.h>
+#include <common_time/ICommonClock.h>
 #include <utils/LinearTransform.h>
 #include <utils/threads.h>
 
@@ -39,6 +40,7 @@ class ClockRecoveryLoop {
     bool pushDisciplineEvent(int64_t local_time,
                              int64_t nominal_common_time,
                              int64_t data_point_rtt);
+    int32_t getLastErrorEstimate();
 
   private:
     typedef struct {

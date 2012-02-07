@@ -265,6 +265,15 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     return true;
 }
 
+int32_t ClockRecoveryLoop::getLastErrorEstimate() {
+    Mutex::Autolock lock(&lock_);
+
+    if (last_delta_valid_)
+        return last_delta_;
+    else
+        return ICommonClock::kErrorEstimateUnknown;
+}
+
 void ClockRecoveryLoop::computePIDParams() {
     // TODO(johngro) : add the ability to fetch parameters from the driver/board
     // level in case they have a HW clock discipline solution with parameters
