@@ -1837,6 +1837,49 @@ String8 AaptDir::getPrintableSource() const
 // =========================================================================
 // =========================================================================
 
+status_t AaptSymbols::applyJavaSymbols(const sp<AaptSymbols>& javaSymbols)
+{
+    status_t err = NO_ERROR;
+    size_t N = javaSymbols->mSymbols.size();
+    for (size_t i=0; i<N; i++) {
+        const String8& name = javaSymbols->mSymbols.keyAt(i);
+        const AaptSymbolEntry& entry = javaSymbols->mSymbols.valueAt(i);
+        ssize_t pos = mSymbols.indexOfKey(name);
+        if (pos < 0) {
+            entry.sourcePos.error("Symbol '%s' declared with <java-symbol> not defined\n", name.string());
+            err = UNKNOWN_ERROR;
+            continue;
+        }
+        //printf("**** setting symbol #%d/%d %s to isJavaSymbol=%d\n",
+        //        i, N, name.string(), entry.isJavaSymbol ? 1 : 0);
+        mSymbols.editValueAt(pos).isJavaSymbol = entry.isJavaSymbol;
+    }
+
+    N = javaSymbols->mNestedSymbols.size();
+    for (size_t i=0; i<N; i++) {
+        const String8& name = javaSymbols->mNestedSymbols.keyAt(i);
+        const sp<AaptSymbols>& symbols = javaSymbols->mNestedSymbols.valueAt(i);
+        ssize_t pos = mNestedSymbols.indexOfKey(name);
+        if (pos < 0) {
+            SourcePos pos;
+            pos.error("Java symbol dir %s not defined\n", name.string());
+            err = UNKNOWN_ERROR;
+            continue;
+        }
+        //printf("**** applying java symbols in dir %s\n", name.string());
+        status_t myerr = mNestedSymbols.valueAt(pos)->applyJavaSymbols(symbols);
+        if (myerr != NO_ERROR) {
+            err = myerr;
+        }
+    }
+
+    return err;
+}
+
+// =========================================================================
+// =========================================================================
+// =========================================================================
+
 AaptAssets::AaptAssets()
     : AaptDir(String8(), String8()),
       mChanged(false), mHaveIncludedAssets(false), mRes(NULL)
@@ -2402,6 +2445,48 @@ sp<AaptSymbols> AaptAssets::getSymbolsFor(const String8& name)
         mSymbols.add(name, sym);
     }
     return sym;
+}
+
+sp<AaptSymbols> AaptAssets::getJavaSymbolsFor(const String8& name)
+{
+    sp<AaptSymbols> sym = mJavaSymbols.valueFor(name);
+    if (sym == NULL) {
+        sym = new AaptSymbols();
+        mJavaSymbols.add(name, sym);
+    }
+    return sym;
+}
+
+status_t AaptAssets::applyJavaSymbols()
+{
+    size_t N = mJavaSymbols.size();
+    for (size_t i=0; i<N; i++) {
+        const String8& name = mJavaSymbols.keyAt(i);
+        const sp<AaptSymbols>& symbols = mJavaSymbols.valueAt(i);
+        ssize_t pos = mSymbols.indexOfKey(name);
+        if (pos < 0) {
+            SourcePos pos;
+            pos.error("Java symbol dir %s not defined\n", name.string());
+            return UNKNOWN_ERROR;
+        }
+        //printf("**** applying java symbols in dir %s\n", name.string());
+        status_t err = mSymbols.valueAt(pos)->applyJavaSymbols(symbols);
+        if (err != NO_ERROR) {
+            return err;
+        }
+    }
+
+    return NO_ERROR;
+}
+
+bool AaptAssets::isJavaSymbol(const AaptSymbolEntry& sym, bool includePrivate) const {
+    //printf("isJavaSymbol %s: public=%d, includePrivate=%d, isJavaSymbol=%d\n",
+    //        sym.name.string(), sym.isPublic ? 1 : 0, includePrivate ? 1 : 0,
+    //        sym.isJavaSymbol ? 1 : 0);
+    if (!mHavePrivateSymbols) return true;
+    if (sym.isPublic) return true;
+    if (includePrivate && sym.isJavaSymbol) return true;
+    return false;
 }
 
 status_t AaptAssets::buildIncludedResources(Bundle* bundle)

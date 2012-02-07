@@ -1617,6 +1617,12 @@ int doPackage(Bundle* bundle)
         goto bail;
     }
 
+    // Update symbols with information about which ones are needed as Java symbols.
+    assets->applyJavaSymbols();
+    if (SourcePos::hasErrors()) {
+        goto bail;
+    }
+
     // If we've been asked to generate a dependency file, do that here
     if (bundle->getGenDependencies()) {
         // If this is the packaging step, generate the dependency file next to
@@ -1638,7 +1644,7 @@ int doPackage(Bundle* bundle)
     }
 
     // Write out R.java constants
-    if (assets->getPackage() == assets->getSymbolsPrivatePackage()) {
+    if (!assets->havePrivateSymbols()) {
         if (bundle->getCustomPackage() == NULL) {
             // Write the R.java file into the appropriate class directory
             // e.g. gen/com/foo/app/R.java
