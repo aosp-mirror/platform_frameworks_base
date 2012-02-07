@@ -42,6 +42,7 @@
 #include <utils/Timers.h>
 
 #include "common_clock_service.h"
+#include "common_time_config_service.h"
 #include "clock_recovery.h"
 #include "common_clock.h"
 
@@ -235,6 +236,9 @@ class CommonTimeServer : public Thread {
 
     // implementation of ICommonClock
     sp<CommonClockService> mICommonClock;
+
+    // implementation of ICommonTimeConfig
+    sp<CommonTimeConfigService> mICommonTimeConfig;
 
     // UDP socket for the time sync protocol
     int mSocket;
@@ -479,6 +483,11 @@ bool CommonTimeServer::setup() {
     // start the ICommonClock service
     mICommonClock = CommonClockService::instantiate(&mCommonClock, &mLocalClock);
     if (mICommonClock == NULL)
+        return false;
+
+    // start the ICommonTimeConfig service
+    mICommonTimeConfig = CommonTimeConfigService::instantiate();
+    if (mICommonTimeConfig == NULL)
         return false;
 
     return true;
