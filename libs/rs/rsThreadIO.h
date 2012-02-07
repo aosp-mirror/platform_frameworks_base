@@ -18,7 +18,6 @@
 #define ANDROID_RS_THREAD_IO_H
 
 #include "rsUtils.h"
-#include "rsLocklessFifo.h"
 #include "rsFifoSocket.h"
 
 // ---------------------------------------------------------------------------
@@ -32,23 +31,17 @@ public:
     ThreadIO();
     ~ThreadIO();
 
-    void init(bool useSocket = false);
+    void init();
     void shutdown();
 
     // Plays back commands from the client.
     // Returns true if any commands were processed.
-    bool playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait);
+    bool playCoreCommands(Context *con, bool waitForCommand, int waitFd);
 
-    void setTimoutCallback(void (*)(void *), void *, uint64_t timeout);
-    //LocklessCommandFifo mToCore;
+    void setTimeoutCallback(void (*)(void *), void *, uint64_t timeout);
 
-
-
-    void coreFlush();
     void * coreHeader(uint32_t, size_t dataLen);
-    void coreData(const void *data, size_t dataLen);
     void coreCommit();
-    void coreCommitSync();
     void coreSetReturn(const void *data, size_t dataLen);
     void coreGetReturn(void *data, size_t dataLen);
 
@@ -71,19 +64,15 @@ protected:
     } ClientCmdHeader;
     ClientCmdHeader mLastClientHeader;
 
-    size_t mCoreCommandSize;
-    uint32_t mCoreCommandID;
-    uint8_t * mCoreDataPtr;
-    uint8_t * mCoreDataBasePtr;
+    bool mRunning;
 
-    bool mUsingSocket;
-    LocklessCommandFifo mToClient;
-    LocklessCommandFifo mToCore;
-
-    FifoSocket mToClientSocket;
-    FifoSocket mToCoreSocket;
+    FifoSocket mToClient;
+    FifoSocket mToCore;
 
     intptr_t mToCoreRet;
+
+    size_t mSendLen;
+    uint8_t mSendBuffer[2 * 1024];
 
 };
 

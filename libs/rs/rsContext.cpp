@@ -18,6 +18,7 @@
 #include "rsContext.h"
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
+#include <gui/DisplayEventReceiver.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>
@@ -245,42 +246,55 @@ void * Context::threadProc(void *vrsc) {
     }
 
     rsc->mRunning = true;
-    bool mDraw = true;
-    bool doWait = true;
-
-    uint64_t targetTime = rsc->getTime();
-    while (!rsc->mExit) {
-        uint64_t waitTime = 0;
-        uint64_t now = rsc->getTime();
-        if (!doWait) {
-            if (now < targetTime) {
-                waitTime = targetTime - now;
-                doWait = true;
-            }
+    if (!rsc->mIsGraphicsContext) {
+        while (!rsc->mExit) {
+            rsc->mIO.playCoreCommands(rsc, true, -1);
         }
+    } else {
+#ifndef ANDROID_RS_SERIALIZE
+        DisplayEventReceiver displayEvent;
+        DisplayEventReceiver::Event eventBuffer[1];
+#endif
+        int vsyncRate = 0;
+        int targetRate = 0;
 
-        mDraw |= rsc->mIO.playCoreCommands(rsc, doWait, waitTime);
-        mDraw &= (rsc->mRootScript.get() != NULL);
-        mDraw &= rsc->mHasSurface;
+        bool drawOnce = false;
+        while (!rsc->mExit) {
+            rsc->timerSet(RS_TIMER_IDLE);
 
-        if (mDraw && rsc->mIsGraphicsContext) {
-            uint64_t delay = rsc->runRootScript() * 1000000;
-            targetTime = rsc->getTime() + delay;
-            doWait = (delay == 0);
-
-            if (rsc->props.mLogVisual) {
-                rsc->displayDebugStats();
+#ifndef ANDROID_RS_SERIALIZE
+            if (vsyncRate != targetRate) {
+                displayEvent.setVsyncRate(targetRate);
+                vsyncRate = targetRate;
+            }
+            if (targetRate) {
+                drawOnce |= rsc->mIO.playCoreCommands(rsc, true, displayEvent.getFd());
+                while (displayEvent.getEvents(eventBuffer, 1) != 0) {
+                    //ALOGE("vs2 time past %lld", (rsc->getTime() - eventBuffer[0].header.timestamp) / 1000000);
+                }
+            } else
+#endif
+            {
+                drawOnce |= rsc->mIO.playCoreCommands(rsc, true, -1);
             }
 
-            mDraw = !rsc->mPaused;
-            rsc->timerSet(RS_TIMER_CLEAR_SWAP);
-            rsc->mHal.funcs.swap(rsc);
-            rsc->timerFrame();
-            rsc->timerSet(RS_TIMER_INTERNAL);
-            rsc->timerPrint();
-            rsc->timerReset();
-        } else {
-            doWait = true;
+            if ((rsc->mRootScript.get() != NULL) && rsc->mHasSurface &&
+                (targetRate || drawOnce) && !rsc->mPaused) {
+
+                drawOnce = false;
+                targetRate = ((rsc->runRootScript() + 15) / 16);
+
+                if (rsc->props.mLogVisual) {
+                    rsc->displayDebugStats();
+                }
+
+                rsc->timerSet(RS_TIMER_CLEAR_SWAP);
+                rsc->mHal.funcs.swap(rsc);
+                rsc->timerFrame();
+                rsc->timerSet(RS_TIMER_INTERNAL);
+                rsc->timerPrint();
+                rsc->timerReset();
+            }
         }
     }
 
@@ -315,8 +329,8 @@ void Context::destroyWorkerThreadResources() {
          mFBOCache.deinit(this);
     }
     ObjectBase::freeAllChildren(this);
-    //ALOGV("destroyWorkerThreadResources 2");
     mExit = true;
+    //ALOGV("destroyWorkerThreadResources 2");
 }
 
 void Context::printWatchdogInfo(void *ctx) {
@@ -382,7 +396,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     pthread_mutex_lock(&gInitMutex);
 
     mIO.init();
-    mIO.setTimoutCallback(printWatchdogInfo, this, 2e9);
+    mIO.setTimeoutCallback(printWatchdogInfo, this, 2e9);
 
     dev->addContext(this);
     mDev = dev;
@@ -434,14 +448,12 @@ Context::~Context() {
     ALOGV("%p Context::~Context", this);
 
     if (!mIsContextLite) {
-        mIO.coreFlush();
-        rsAssert(mExit);
-        mExit = true;
         mPaused = false;
         void *res;
 
         mIO.shutdown();
         int status = pthread_join(mThreadId, &res);
+        rsAssert(mExit);
 
         if (mHal.funcs.shutdownDriver) {
             mHal.funcs.shutdownDriver(this);
