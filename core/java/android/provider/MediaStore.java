@@ -70,6 +70,18 @@ public final class MediaStore {
     public static final String UNHIDE_CALL = "unhide";
 
     /**
+     * This is for internal use by the media scanner only.
+     * Name of the (optional) Uri parameter that determines whether to skip deleting
+     * the file pointed to by the _data column, when deleting the database entry.
+     * The only appropriate value for this parameter is "false", in which case the
+     * delete will be skipped. Note especially that setting this to true, or omitting
+     * the parameter altogether, will perform the default action, which is different
+     * for different types of media.
+     * @hide
+     */
+    public static final String PARAM_DELETE_DATA = "deletedata";
+
+    /**
      * Activity Action: Launch a music player.
      * The activity should be able to play, browse, or manipulate music files stored on the device.
      *
