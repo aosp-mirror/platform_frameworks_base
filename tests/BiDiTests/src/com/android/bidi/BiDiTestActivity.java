@@ -108,6 +108,10 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Linear RTL", BiDiTestLinearLayoutRtl.class, R.id.linear_layout_rtl);
         addItem(result, "Linear LOC", BiDiTestLinearLayoutLocale.class, R.id.linear_layout_locale);
 
+        addItem(result, "Grid LTR", BiDiTestGridLayoutLtr.class, R.id.grid_layout_ltr);
+        addItem(result, "Grid RTL", BiDiTestGridLayoutRtl.class, R.id.grid_layout_rtl);
+        addItem(result, "Grid LOC", BiDiTestGridLayoutLocale.class, R.id.grid_layout_locale);
+
         addItem(result, "Frame LTR", BiDiTestFrameLayoutLtr.class, R.id.frame_layout_ltr);
         addItem(result, "Frame RTL", BiDiTestFrameLayoutRtl.class, R.id.frame_layout_rtl);
         addItem(result, "Frame LOC", BiDiTestFrameLayoutLocale.class, R.id.frame_layout_locale);
