@@ -2043,18 +2043,30 @@ int InputDispatcher::handleReceiveCallback(int fd, int events, void* data) {
                 return 1;
             }
 
-            bool handled = false;
-            status_t status = connection->inputPublisher.receiveFinishedSignal(&handled);
-            if (!status) {
-                nsecs_t currentTime = now();
+            nsecs_t currentTime = now();
+            bool gotOne = false;
+            status_t status;
+            for (;;) {
+                bool handled = false;
+                status = connection->inputPublisher.receiveFinishedSignal(&handled);
+                if (status) {
+                    break;
+                }
                 d->finishDispatchCycleLocked(currentTime, connection, handled);
+                gotOne = true;
+            }
+            if (gotOne) {
                 d->runCommandsLockedInterruptible();
-                return 1;
+                if (status == WOULD_BLOCK) {
+                    return 1;
+                }
             }
 
-            ALOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
-                    connection->getInputChannelName(), status);
-            notify = true;
+            notify = status != DEAD_OBJECT || !connection->monitor;
+            if (notify) {
+                ALOGE("channel '%s' ~ Failed to receive finished signal.  status=%d",
+                        connection->getInputChannelName(), status);
+            }
         } else {
             // Monitor channels are never explicitly unregistered.
             // We do it automatically when the remote endpoint is closed so don't warn
