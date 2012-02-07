@@ -28,14 +28,20 @@ public class NativeDaemonEvent {
     // TODO: keep class ranges in sync with ResponseCode.h
     // TODO: swap client and server error ranges to roughly mirror HTTP spec
 
+    private final int mCmdNumber;
     private final int mCode;
     private final String mMessage;
     private final String mRawEvent;
 
-    private NativeDaemonEvent(int code, String message, String rawEvent) {
+    private NativeDaemonEvent(int cmdNumber, int code, String message, String rawEvent) {
+        mCmdNumber = cmdNumber;
         mCode = code;
         mMessage = message;
         mRawEvent = rawEvent;
+    }
+
+    public int getCmdNumber() {
+        return mCmdNumber;
     }
 
     public int getCode() {
@@ -89,7 +95,11 @@ public class NativeDaemonEvent {
      * Test if event represents an unsolicited event from native daemon.
      */
     public boolean isClassUnsolicited() {
-        return mCode >= 600 && mCode < 700;
+        return isClassUnsolicited(mCode);
+    }
+
+    private static boolean isClassUnsolicited(int code) {
+        return code >= 600 && code < 700;
     }
 
     /**
@@ -110,20 +120,37 @@ public class NativeDaemonEvent {
      *             from native side.
      */
     public static NativeDaemonEvent parseRawEvent(String rawEvent) {
-        final int splitIndex = rawEvent.indexOf(' ');
-        if (splitIndex == -1) {
-            throw new IllegalArgumentException("unable to find ' ' separator");
+        final String[] parsed = rawEvent.split(" ");
+        if (parsed.length < 2) {
+            throw new IllegalArgumentException("Insufficient arguments");
         }
+
+        int skiplength = 0;
 
         final int code;
         try {
-            code = Integer.parseInt(rawEvent.substring(0, splitIndex));
+            code = Integer.parseInt(parsed[0]);
+            skiplength = parsed[0].length() + 1;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("problem parsing code", e);
         }
 
-        final String message = rawEvent.substring(splitIndex + 1);
-        return new NativeDaemonEvent(code, message, rawEvent);
+        int cmdNumber = -1;
+        if (isClassUnsolicited(code) == false) {
+            if (parsed.length < 3) {
+                throw new IllegalArgumentException("Insufficient arguemnts");
+            }
+            try {
+                cmdNumber = Integer.parseInt(parsed[1]);
+                skiplength += parsed[1].length() + 1;
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("problem parsing cmdNumber", e);
+            }
+        }
+
+        final String message = rawEvent.substring(skiplength);
+
+        return new NativeDaemonEvent(cmdNumber, code, message, rawEvent);
     }
 
     /**
