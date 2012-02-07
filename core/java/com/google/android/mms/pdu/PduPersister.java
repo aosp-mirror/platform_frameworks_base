@@ -510,13 +510,26 @@ public class PduPersister {
      * @throws MmsException Failed to load some fields of a PDU.
      */
     public GenericPdu load(Uri uri) throws MmsException {
-        PduCacheEntry cacheEntry = PDU_CACHE_INSTANCE.get(uri);
-        if (cacheEntry != null) {
-            return cacheEntry.getPdu();
+        PduCacheEntry cacheEntry;
+        synchronized(PDU_CACHE_INSTANCE) {
+            if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                try {
+                    PDU_CACHE_INSTANCE.wait();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "load: ", e);
+                }
+                cacheEntry = PDU_CACHE_INSTANCE.get(uri);
+                if (cacheEntry != null) {
+                    return cacheEntry.getPdu();
+                }
+            }
+            // Tell the cache to indicate to other callers that this item
+            // is currently being updated.
+            PDU_CACHE_INSTANCE.setUpdating(uri, true);
         }
 
         Cursor c = SqliteWrapper.query(mContext, mContentResolver, uri,
-                        PDU_PROJECTION, null, null, null);
+                                                PDU_PROJECTION, null, null, null);
         PduHeaders headers = new PduHeaders();
         Set<Entry<Integer, Integer>> set;
         long msgId = ContentUris.parseId(uri);
@@ -634,9 +647,14 @@ public class PduPersister {
                         "Unrecognized PDU type: " + Integer.toHexString(msgType));
         }
 
-        cacheEntry = new PduCacheEntry(pdu, msgBox, threadId);
-        PDU_CACHE_INSTANCE.put(uri, cacheEntry);
-        return pdu;
+        synchronized(PDU_CACHE_INSTANCE ) {
+            assert(PDU_CACHE_INSTANCE.get(uri) == null);
+            // Update the cache entry with the real info
+            cacheEntry = new PduCacheEntry(pdu, msgBox, threadId);
+            PDU_CACHE_INSTANCE.put(uri, cacheEntry);
+            PDU_CACHE_INSTANCE.notifyAll();     // tell anybody waiting on this entry to go ahead
+            return pdu;
+        }
     }
 
     private void persistAddress(
@@ -818,6 +836,17 @@ public class PduPersister {
      * @throws MmsException Bad URI or updating failed.
      */
     public void updateHeaders(Uri uri, SendReq sendReq) {
+        synchronized(PDU_CACHE_INSTANCE) {
+            // If the cache item is getting updated, wait until it's done updating before
+            // purging it.
+            if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                try {
+                    PDU_CACHE_INSTANCE.wait();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "updateHeaders: ", e);
+                }
+            }
+        }
         PDU_CACHE_INSTANCE.purge(uri);
 
         ContentValues values = new ContentValues(10);
@@ -969,52 +998,72 @@ public class PduPersister {
      */
     public void updateParts(Uri uri, PduBody body)
             throws MmsException {
-        PduCacheEntry cacheEntry = PDU_CACHE_INSTANCE.get(uri);
-        if (cacheEntry != null) {
-            ((MultimediaMessagePdu) cacheEntry.getPdu()).setBody(body);
-        }
-
-        ArrayList<PduPart> toBeCreated = new ArrayList<PduPart>();
-        HashMap<Uri, PduPart> toBeUpdated = new HashMap<Uri, PduPart>();
-
-        int partsNum = body.getPartsNum();
-        StringBuilder filter = new StringBuilder().append('(');
-        for (int i = 0; i < partsNum; i++) {
-            PduPart part = body.getPart(i);
-            Uri partUri = part.getDataUri();
-            if ((partUri == null) || !partUri.getAuthority().startsWith("mms")) {
-                toBeCreated.add(part);
-            } else {
-                toBeUpdated.put(partUri, part);
-
-                // Don't use 'i > 0' to determine whether we should append
-                // 'AND' since 'i = 0' may be skipped in another branch.
-                if (filter.length() > 1) {
-                    filter.append(" AND ");
+        try {
+            PduCacheEntry cacheEntry;
+            synchronized(PDU_CACHE_INSTANCE) {
+                if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                    try {
+                        PDU_CACHE_INSTANCE.wait();
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "updateParts: ", e);
+                    }
+                    cacheEntry = PDU_CACHE_INSTANCE.get(uri);
+                    if (cacheEntry != null) {
+                        ((MultimediaMessagePdu) cacheEntry.getPdu()).setBody(body);
+                    }
                 }
-
-                filter.append(Part._ID);
-                filter.append("!=");
-                DatabaseUtils.appendEscapedSQLString(filter, partUri.getLastPathSegment());
+                // Tell the cache to indicate to other callers that this item
+                // is currently being updated.
+                PDU_CACHE_INSTANCE.setUpdating(uri, true);
             }
-        }
-        filter.append(')');
 
-        long msgId = ContentUris.parseId(uri);
+            ArrayList<PduPart> toBeCreated = new ArrayList<PduPart>();
+            HashMap<Uri, PduPart> toBeUpdated = new HashMap<Uri, PduPart>();
 
-        // Remove the parts which doesn't exist anymore.
-        SqliteWrapper.delete(mContext, mContentResolver,
-                Uri.parse(Mms.CONTENT_URI + "/" + msgId + "/part"),
-                filter.length() > 2 ? filter.toString() : null, null);
+            int partsNum = body.getPartsNum();
+            StringBuilder filter = new StringBuilder().append('(');
+            for (int i = 0; i < partsNum; i++) {
+                PduPart part = body.getPart(i);
+                Uri partUri = part.getDataUri();
+                if ((partUri == null) || !partUri.getAuthority().startsWith("mms")) {
+                    toBeCreated.add(part);
+                } else {
+                    toBeUpdated.put(partUri, part);
 
-        // Create new parts which didn't exist before.
-        for (PduPart part : toBeCreated) {
-            persistPart(part, msgId);
-        }
+                    // Don't use 'i > 0' to determine whether we should append
+                    // 'AND' since 'i = 0' may be skipped in another branch.
+                    if (filter.length() > 1) {
+                        filter.append(" AND ");
+                    }
 
-        // Update the modified parts.
-        for (Map.Entry<Uri, PduPart> e : toBeUpdated.entrySet()) {
-            updatePart(e.getKey(), e.getValue());
+                    filter.append(Part._ID);
+                    filter.append("!=");
+                    DatabaseUtils.appendEscapedSQLString(filter, partUri.getLastPathSegment());
+                }
+            }
+            filter.append(')');
+
+            long msgId = ContentUris.parseId(uri);
+
+            // Remove the parts which doesn't exist anymore.
+            SqliteWrapper.delete(mContext, mContentResolver,
+                    Uri.parse(Mms.CONTENT_URI + "/" + msgId + "/part"),
+                    filter.length() > 2 ? filter.toString() : null, null);
+
+            // Create new parts which didn't exist before.
+            for (PduPart part : toBeCreated) {
+                persistPart(part, msgId);
+            }
+
+            // Update the modified parts.
+            for (Map.Entry<Uri, PduPart> e : toBeUpdated.entrySet()) {
+                updatePart(e.getKey(), e.getValue());
+            }
+        } finally {
+            synchronized(PDU_CACHE_INSTANCE) {
+                PDU_CACHE_INSTANCE.setUpdating(uri, false);
+                PDU_CACHE_INSTANCE.notifyAll();
+            }
         }
     }
 
@@ -1029,14 +1078,31 @@ public class PduPersister {
         if (uri == null) {
             throw new MmsException("Uri may not be null.");
         }
+        long msgId = -1;
+        try {
+            msgId = ContentUris.parseId(uri);
+        } catch (NumberFormatException e) {
+            // the uri ends with "inbox" or something else like that
+        }
+        boolean existingUri = msgId != -1;
 
-        Integer msgBox = MESSAGE_BOX_MAP.get(uri);
-        if (msgBox == null) {
+        if (!existingUri && MESSAGE_BOX_MAP.get(uri) == null) {
             throw new MmsException(
                     "Bad destination, must be one of "
                     + "content://mms/inbox, content://mms/sent, "
                     + "content://mms/drafts, content://mms/outbox, "
                     + "content://mms/temp.");
+        }
+        synchronized(PDU_CACHE_INSTANCE) {
+            // If the cache item is getting updated, wait until it's done updating before
+            // purging it.
+            if (PDU_CACHE_INSTANCE.isUpdating(uri)) {
+                try {
+                    PDU_CACHE_INSTANCE.wait();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "persist1: ", e);
+                }
+            }
         }
         PDU_CACHE_INSTANCE.purge(uri);
 
@@ -1145,14 +1211,20 @@ public class PduPersister {
             }
         }
 
-        Uri res = SqliteWrapper.insert(mContext, mContentResolver, uri, values);
-        if (res == null) {
-            throw new MmsException("persist() failed: return null.");
+        Uri res = null;
+        if (existingUri) {
+            res = uri;
+            SqliteWrapper.update(mContext, mContentResolver, res, values, null, null);
+        } else {
+            res = SqliteWrapper.insert(mContext, mContentResolver, uri, values);
+            if (res == null) {
+                throw new MmsException("persist() failed: return null.");
+            }
+            // Get the real ID of the PDU and update all parts which were
+            // saved with the dummy ID.
+            msgId = ContentUris.parseId(res);
         }
 
-        // Get the real ID of the PDU and update all parts which were
-        // saved with the dummy ID.
-        long msgId = ContentUris.parseId(res);
         values = new ContentValues(1);
         values.put(Part.MSG_ID, msgId);
         SqliteWrapper.update(mContext, mContentResolver,
@@ -1163,7 +1235,9 @@ public class PduPersister {
         // persisted PDU is '8', we should return "content://mms/inbox/8"
         // instead of "content://mms/8".
         // FIXME: Should the MmsProvider be responsible for this???
-        res = Uri.parse(uri + "/" + msgId);
+        if (!existingUri) {
+            res = Uri.parse(uri + "/" + msgId);
+        }
 
         // Save address information.
         for (int addrType : ADDRESS_FIELDS) {
