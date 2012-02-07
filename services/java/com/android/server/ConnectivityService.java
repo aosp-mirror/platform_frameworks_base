@@ -1394,9 +1394,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
     private INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
-            // only someone like NPMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
+            // caller is NPMS, since we only register with them
             if (LOGD_RULES) {
                 log("onUidRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
             }
@@ -1415,9 +1413,7 @@ private NetworkStateTracker makeWimaxStateTracker() {
 
         @Override
         public void onMeteredIfacesChanged(String[] meteredIfaces) {
-            // only someone like NPMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
+            // caller is NPMS, since we only register with them
             if (LOGD_RULES) {
                 log("onMeteredIfacesChanged(ifaces=" + Arrays.toString(meteredIfaces) + ")");
             }
@@ -1426,6 +1422,27 @@ private NetworkStateTracker makeWimaxStateTracker() {
                 mMeteredIfaces.clear();
                 for (String iface : meteredIfaces) {
                     mMeteredIfaces.add(iface);
+                }
+            }
+        }
+
+        @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            // caller is NPMS, since we only register with them
+            if (LOGD_RULES) {
+                log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
+            }
+
+            // kick off connectivity change broadcast for active network, since
+            // global background policy change is radical.
+            final int networkType = mActiveDefaultNetwork;
+            if (isNetworkTypeValid(networkType)) {
+                final NetworkStateTracker tracker = mNetTrackers[networkType];
+                if (tracker != null) {
+                    final NetworkInfo info = tracker.getNetworkInfo();
+                    if (info != null && info.isConnected()) {
+                        sendConnectedBroadcast(info);
+                    }
                 }
             }
         }
