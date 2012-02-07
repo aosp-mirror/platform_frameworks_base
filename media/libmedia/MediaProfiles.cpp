@@ -25,7 +25,7 @@
 #include <cutils/properties.h>
 #include <expat.h>
 #include <media/MediaProfiles.h>
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/openmax/OMX_Video.h>
 
 namespace android {

@@ -18,7 +18,7 @@
 
 #include <stdlib.h>
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 
 namespace android {
 
@@ -33,7 +33,7 @@ OMXComponentBase::OMXComponentBase(
 OMXComponentBase::~OMXComponentBase() {}
 
 void OMXComponentBase::setComponentHandle(OMX_COMPONENTTYPE *handle) {
-    CHECK_EQ(mComponentHandle, NULL);
+    CHECK(mComponentHandle == NULL);
     mComponentHandle = handle;
 }
 

@@ -23,7 +23,7 @@
 
 #include <binder/ProcessState.h>
 #include <media/stagefright/FileSource.h>
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 
 #define MAXPATHLEN 256
 
@@ -70,7 +70,7 @@ static void hexdump(const void *_data, size_t size) {
 
 void scanFile(const char *path) {
     sp<FileSource> file = new FileSource(path);
-    CHECK_EQ(file->initCheck(), OK);
+    CHECK_EQ(file->initCheck(), (status_t)OK);
 
     ID3 tag(file);
     if (!tag.isValid()) {

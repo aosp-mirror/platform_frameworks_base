@@ -20,8 +20,8 @@
 
 #include "../include/ID3.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 #include <utils/String8.h>
 #include <byteswap.h>

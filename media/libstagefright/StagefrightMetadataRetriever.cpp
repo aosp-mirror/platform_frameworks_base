@@ -20,10 +20,10 @@
 
 #include "include/StagefrightMetadataRetriever.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/ColorConverter.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
@@ -37,7 +37,7 @@ StagefrightMetadataRetriever::StagefrightMetadataRetriever()
     ALOGV("StagefrightMetadataRetriever()");
 
     DataSource::RegisterDefaultSniffers();
-    CHECK_EQ(mClient.connect(), OK);
+    CHECK_EQ(mClient.connect(), (status_t)OK);
 }
 
 StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
@@ -169,7 +169,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
              || (buffer != NULL && buffer->range_length() == 0));
 
     if (err != OK) {
-        CHECK_EQ(buffer, NULL);
+        CHECK(buffer == NULL);
 
         ALOGV("decoding frame failed.");
         decoder->stop();

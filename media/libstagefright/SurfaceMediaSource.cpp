@@ -16,14 +16,14 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "SurfaceMediaSource"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/SurfaceMediaSource.h>
-#include <ui/GraphicBuffer.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaDefs.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/openmax/OMX_IVCommon.h>
 #include <media/stagefright/MetadataBufferType.h>
 
+#include <ui/GraphicBuffer.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <surfaceflinger/IGraphicBufferAlloc.h>
@@ -855,7 +855,7 @@ void SurfaceMediaSource::signalBufferReturned(MediaBuffer *buffer) {
     }
 
     if (!foundBuffer) {
-        CHECK_EQ(0, "signalBufferReturned: bogus buffer");
+        CHECK(!"signalBufferReturned: bogus buffer");
     }
 }
 

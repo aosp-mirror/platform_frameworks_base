@@ -22,8 +22,8 @@
 #include "voAAC.h"
 #include "cmnMemory.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -114,8 +114,8 @@ status_t AACEncoder::setAudioSpecificConfigData() {
     ALOGV("setAudioSpecificConfigData: %d hz, %d bps, and %d channels",
          mSampleRate, mBitRate, mChannels);
 
-    int32_t index;
-    CHECK_EQ(OK, getSampleRateTableIndex(mSampleRate, index));
+    int32_t index = 0;
+    CHECK_EQ((status_t)OK, getSampleRateTableIndex(mSampleRate, index));
     if (mChannels > 2 || mChannels <= 0) {
         ALOGE("Unsupported number of channels(%d)", mChannels);
         return UNKNOWN_ERROR;
@@ -142,7 +142,7 @@ status_t AACEncoder::start(MetaData *params) {
     mBufferGroup = new MediaBufferGroup;
     mBufferGroup->add_buffer(new MediaBuffer(2048));
 
-    CHECK_EQ(OK, initCheck());
+    CHECK_EQ((status_t)OK, initCheck());
 
     mNumInputSamples = 0;
     mAnchorTimeUs = 0;
@@ -183,7 +183,7 @@ status_t AACEncoder::stop() {
 
     mSource->stop();
     if (mEncoderHandle) {
-        CHECK_EQ(VO_ERR_NONE, mApiHandle->Uninit(mEncoderHandle));
+        CHECK_EQ((VO_U32)VO_ERR_NONE, mApiHandle->Uninit(mEncoderHandle));
         mEncoderHandle = NULL;
     }
     delete mApiHandle;
@@ -223,7 +223,7 @@ status_t AACEncoder::read(
     CHECK(options == NULL || !options->getSeekTo(&seekTimeUs, &mode));
 
     MediaBuffer *buffer;
-    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), OK);
+    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), (status_t)OK);
     uint8_t *outPtr = (uint8_t *)buffer->data();
     bool readFromSource = false;
     int64_t wallClockTimeUs = -1;
@@ -255,7 +255,7 @@ status_t AACEncoder::read(
             }
 
             size_t align = mInputBuffer->range_length() % sizeof(int16_t);
-            CHECK_EQ(align, 0);
+            CHECK_EQ(align, (size_t)0);
 
             int64_t timeUs;
             if (mInputBuffer->meta_data()->findInt64(kKeyDriftTime, &timeUs)) {

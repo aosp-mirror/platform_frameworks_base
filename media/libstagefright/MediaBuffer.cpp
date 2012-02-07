@@ -22,8 +22,8 @@
 #include <stdlib.h>
 
 #include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 
 #include <ui/GraphicBuffer.h>
@@ -157,7 +157,7 @@ void MediaBuffer::reset() {
 }
 
 MediaBuffer::~MediaBuffer() {
-    CHECK_EQ(mObserver, NULL);
+    CHECK(mObserver == NULL);
 
     if (mOwnsData && mData != NULL) {
         free(mData);
@@ -188,7 +188,7 @@ int MediaBuffer::refcount() const {
 }
 
 MediaBuffer *MediaBuffer::clone() {
-    CHECK_EQ(mGraphicBuffer, NULL);
+    CHECK(mGraphicBuffer == NULL);
 
     MediaBuffer *buffer = new MediaBuffer(mData, mSize);
     buffer->set_range(mRangeOffset, mRangeLength);

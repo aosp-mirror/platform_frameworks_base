@@ -26,6 +26,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libskia \
     libstagefright \
+    libstagefright_foundation \
     libbinder \
     libutils \
     libjpeg

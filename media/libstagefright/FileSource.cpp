@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/FileSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/types.h>

@@ -2,10 +2,10 @@
 
 #include <binder/ProcessState.h>
 #include <media/mediarecorder.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/AudioSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
@@ -24,7 +24,7 @@ int main() {
     android::ProcessState::self()->startThreadPool();
 
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
 #if 0
     sp<MediaSource> source = new SineSource(kSampleRate, kNumChannels);
@@ -82,7 +82,7 @@ int main() {
     delete player;
     player = NULL;
 #elif 0
-    CHECK_EQ(decoder->start(), OK);
+    CHECK_EQ(decoder->start(), (status_t)OK);
 
     MediaBuffer *buffer;
     while (decoder->read(&buffer) == OK) {
@@ -95,7 +95,7 @@ int main() {
         buffer = NULL;
     }
 
-    CHECK_EQ(decoder->stop(), OK);
+    CHECK_EQ(decoder->stop(), (status_t)OK);
 #endif
 #endif
 
