@@ -528,9 +528,6 @@ private:
         float yOffset;
         float scaleFactor;
 
-        // True if dispatch has started.
-        bool inProgress;
-
         // Set to the resolved action and flags when the event is enqueued.
         int32_t resolvedAction;
         int32_t resolvedFlags;
@@ -782,7 +779,17 @@ private:
         bool monitor;
         InputPublisher inputPublisher;
         InputState inputState;
+
+        // True if the socket is full and no further events can be published until
+        // the application consumes some of the input.
+        bool inputPublisherBlocked;
+
+        // Queue of events that need to be published to the connection.
         Queue<DispatchEntry> outboundQueue;
+
+        // Queue of events that have been published to the connection but that have not
+        // yet received a "finished" response from the application.
+        Queue<DispatchEntry> waitQueue;
 
         explicit Connection(const sp<InputChannel>& inputChannel,
                 const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
@@ -976,7 +983,8 @@ private:
             const InjectionState* injectionState);
     bool isWindowObscuredAtPointLocked(const sp<InputWindowHandle>& windowHandle,
             int32_t x, int32_t y) const;
-    bool isWindowFinishedWithPreviousInputLocked(const sp<InputWindowHandle>& windowHandle);
+    bool isWindowReadyForMoreInputLocked(nsecs_t currentTime,
+            const sp<InputWindowHandle>& windowHandle, bool focusedEvent);
     String8 getApplicationWindowLabelLocked(const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle);
 
@@ -993,10 +1001,10 @@ private:
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool handled);
-    void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool notify);
-    void drainOutboundQueueLocked(Connection* connection);
+    void drainDispatchQueueLocked(Queue<DispatchEntry>* queue);
+    void releaseDispatchEntryLocked(DispatchEntry* dispatchEntry);
     static int handleReceiveCallback(int fd, int events, void* data);
 
     void synthesizeCancelationEventsForAllConnectionsLocked(
@@ -1025,8 +1033,6 @@ private:
     void deactivateConnectionLocked(Connection* connection);
 
     // Interesting events that we might like to log or tell the framework about.
-    void onDispatchCycleStartedLocked(
-            nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleFinishedLocked(
             nsecs_t currentTime, const sp<Connection>& connection, bool handled);
     void onDispatchCycleBrokenLocked(
