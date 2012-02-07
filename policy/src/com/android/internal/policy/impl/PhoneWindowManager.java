@@ -2389,8 +2389,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public int finishLayoutLw() {
-        return 0;
+    @Override
+    public void finishLayoutLw() {
+        return;
     }
 
     /** {@inheritDoc} */

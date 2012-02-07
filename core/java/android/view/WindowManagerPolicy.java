@@ -536,7 +536,7 @@ public interface WindowManagerPolicy {
     /**
      * Return the available screen width that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayWidth(int, int)}; it may be smaller than
+     * {@link #getNonDecorDisplayWidth(int, int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation);
@@ -544,7 +544,7 @@ public interface WindowManagerPolicy {
     /**
      * Return the available screen height that we should report for the
      * configuration.  This must be no larger than
-     * {@link #getNonDecorDisplayHeight(int, int)}; it may be smaller than
+     * {@link #getNonDecorDisplayHeight(int, int, int)}; it may be smaller than
      * that to account for more transient decoration like a status bar.
      */
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation);
@@ -754,12 +754,8 @@ public interface WindowManagerPolicy {
      * Called when layout of the windows is finished.  After this function has
      * returned, all windows given to layoutWindow() <em>must</em> have had a
      * frame assigned.
-     *  
-     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT},
-     * {@link #FINISH_LAYOUT_REDO_CONFIG}, {@link #FINISH_LAYOUT_REDO_WALLPAPER},
-     * or {@link #FINISH_LAYOUT_REDO_ANIM}.
      */
-    public int finishLayoutLw();
+    public void finishLayoutLw();
 
     /** Layout state may have changed (so another layout will be performed) */
     static final int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
@@ -822,7 +818,7 @@ public interface WindowManagerPolicy {
 
     public interface ScreenOnListener {
         void onScreenOn();
-    };
+    }
 
     /**
      * Called when the power manager would like to turn the screen on.
