@@ -623,7 +623,7 @@ nAllocationData2D_alloc(JNIEnv *_env, jobject _this, RsContext con,
                         jint srcAlloc, jint srcXoff, jint srcYoff,
                         jint srcMip, jint srcFace)
 {
-    LOG_API("nAllocation2DData_s, con(%p), dstAlloc(%p), dstXoff, dstYoff,"
+    LOG_API("nAllocation2DData_s, con(%p), dstAlloc(%p), dstXoff(%i), dstYoff(%i),"
             " dstMip(%i), dstFace(%i), width(%i), height(%i),"
             " srcAlloc(%p), srcXoff(%i), srcYoff(%i), srcMip(%i), srcFace(%i)",
             con, (RsAllocation)dstAlloc, dstXoff, dstYoff, dstMip, dstFace,

@@ -39,7 +39,6 @@
 #include "rsFBOCache.h"
 
 #include "rsgApiStructs.h"
-#include "rsLocklessFifo.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
