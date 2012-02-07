@@ -15,6 +15,7 @@ LOCAL_C_INCLUDES := \
     system/media/audio_effects/include
 
 LOCAL_SHARED_LIBRARIES := \
+    libcommon_time_client \
     libcutils \
     libutils \
     libbinder \
@@ -23,8 +24,7 @@ LOCAL_SHARED_LIBRARIES := \
     libhardware_legacy \
     libeffects \
     libdl \
-    libpowermanager \
-    libaah_timesrv_client
+    libpowermanager
 
 LOCAL_STATIC_LIBRARIES := \
     libcpustats \

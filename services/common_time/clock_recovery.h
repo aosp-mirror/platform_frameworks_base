@@ -21,7 +21,7 @@
 #include <utils/LinearTransform.h>
 #include <utils/threads.h>
 
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
 #include "diag_thread.h"
 #endif
 
@@ -111,7 +111,7 @@ class ClockRecoveryLoop {
     DisciplineDataPoint startup_filter_data_[kStartupFilterSize];
     uint32_t startup_filter_wr_;
 
-#ifdef AAH_TSDEBUG
+#ifdef TIME_SERVICE_DEBUG
     sp<DiagThread> diag_thread_;
 #endif
 };

@@ -16,7 +16,7 @@
 
 #define __STDC_LIMIT_MACROS
 
-#define LOG_TAG "aah_timesrv"
+#define LOG_TAG "common_time"
 #include <utils/Log.h>
 
 #include <stdint.h>

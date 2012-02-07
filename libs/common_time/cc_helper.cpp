@@ -16,8 +16,8 @@
 
 #include <stdint.h>
 
-#include <aah_timesrv/cc_helper.h>
-#include <aah_timesrv/ICommonClock.h>
+#include <common_time/cc_helper.h>
+#include <common_time/ICommonClock.h>
 #include <utils/threads.h>
 
 namespace android {

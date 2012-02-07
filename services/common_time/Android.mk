@@ -1,28 +1,28 @@
 LOCAL_PATH:= $(call my-dir)
 
 #
-# aah_timesrv
+# common_time_service
 #
 
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-    aah_common_clock_service.cpp \
-    aah_timesrv.cpp \
+    common_clock_service.cpp \
+    common_time_server.cpp \
     clock_recovery.cpp \
     common_clock.cpp
 
-ifeq ($(AAH_TSDEBUG), true)
+ifeq ($(TIME_SERVICE_DEBUG), true)
 LOCAL_SRC_FILES += diag_thread.cpp
-LOCAL_CFLAGS += -DAAH_TSDEBUG
+LOCAL_CFLAGS += -DTIME_SERVICE_DEBUG
 endif
 
 LOCAL_SHARED_LIBRARIES := \
-    libaah_timesrv_client \
     libbinder \
+    libcommon_time_client \
     libutils
 
 LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := aah_timesrv
+LOCAL_MODULE := common_time
 
 include $(BUILD_EXECUTABLE)
