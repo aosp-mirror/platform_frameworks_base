@@ -518,12 +518,6 @@ JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env)
 bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     JNIEnv* env = vm2env(fVM);
 
-    // If allocating in the Java heap, only allow a single object to be
-    // allocated for the lifetime of this object.
-    if (fStorageObj != NULL) {
-        SkDebugf("WARNING: One-shot allocator has already allocated (alloc count = %d)\n", fAllocCount);
-//        sk_throw();
-    }
     fStorageObj = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
     fAllocCount += 1;
     return fStorageObj != NULL;
