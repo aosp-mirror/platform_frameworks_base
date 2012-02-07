@@ -11,7 +11,8 @@ LOCAL_MODULE := libcommon_time_client
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := cc_helper.cpp \
                    local_clock.cpp \
-                   ICommonClock.cpp
+                   ICommonClock.cpp \
+                   utils.cpp
 LOCAL_SHARED_LIBRARIES := libbinder \
                           libhardware \
                           libutils

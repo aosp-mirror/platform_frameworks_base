@@ -1114,15 +1114,16 @@ bool CommonTimeServer::becomeInitial() {
 
 void CommonTimeServer::notifyClockSync() {
     if (!mClockSynced) {
-        mICommonClock->notifyOnClockSync(mTimelineID);
         mClockSynced = true;
+        mICommonClock->notifyOnTimelineChanged(mTimelineID);
     }
 }
 
 void CommonTimeServer::notifyClockSyncLoss() {
     if (mClockSynced) {
-        mICommonClock->notifyOnClockSyncLoss();
         mClockSynced = false;
+        mICommonClock->notifyOnTimelineChanged(
+                ICommonClock::kInvalidTimelineID);
     }
 }
 
