@@ -93,23 +93,40 @@ public class FragmentShader extends Shader {
         return mProgram;
     }
 
-    public void updateTextures() {
+    ScriptField_ShaderParam_s getTextureParams() {
         RenderScriptGL rs = SceneManager.getRS();
         Resources res = SceneManager.getRes();
         if (rs == null || res == null) {
-            return;
+            return null;
         }
+
+        ArrayList<ScriptField_ShaderParam_s.Item> paramList;
+        paramList = new ArrayList<ScriptField_ShaderParam_s.Item>();
+
         int shaderTextureStart = mTextureTypes.size();
         for (int i = 0; i < mShaderTextureNames.size(); i ++) {
             ShaderParam sp = mSourceParams.get(mShaderTextureNames.get(i));
             if (sp != null && sp instanceof TextureParam) {
                 TextureParam p = (TextureParam)sp;
-                TextureBase tex = p.getTexture();
-                if (tex != null) {
-                    mProgram.bindTexture(tex.getRsData(), shaderTextureStart + i);
-                }
+                ScriptField_ShaderParam_s.Item paramRS = new ScriptField_ShaderParam_s.Item();
+                paramRS.bufferOffset = shaderTextureStart + i;
+                paramRS.transformTimestamp = 0;
+                paramRS.dataTimestamp = 0;
+                paramRS.data = p.getRSData().getAllocation();
+                paramList.add(paramRS);
             }
         }
+
+        ScriptField_ShaderParam_s rsParams = null;
+        int paramCount = paramList.size();
+        if (paramCount != 0) {
+            rsParams = new ScriptField_ShaderParam_s(rs, paramCount);
+            for (int i = 0; i < paramCount; i++) {
+                rsParams.set(paramList.get(i), i, false);
+            }
+            rsParams.copyAll();
+        }
+        return rsParams;
     }
 
     ScriptField_FragmentShader_s getRSData() {
@@ -125,6 +142,11 @@ public class FragmentShader extends Shader {
 
         ScriptField_FragmentShader_s.Item item = new ScriptField_FragmentShader_s.Item();
         item.program = mProgram;
+
+        ScriptField_ShaderParam_s texParams = getTextureParams();
+        if (texParams != null) {
+            item.shaderTextureParams = texParams.getAllocation();
+        }
 
         linkConstants(rs);
         if (mPerShaderConstants != null) {

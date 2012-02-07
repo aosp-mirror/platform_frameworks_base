@@ -54,6 +54,10 @@ public class TextureParam extends ShaderParam {
     }
 
     void initLocalData() {
+        mData.type = ScriptC_export.const_ShaderParam_TEXTURE;
+        if (mTexture != null) {
+            mData.texture = mTexture.getRsData(false).getAllocation();
+        }
     }
 }
 

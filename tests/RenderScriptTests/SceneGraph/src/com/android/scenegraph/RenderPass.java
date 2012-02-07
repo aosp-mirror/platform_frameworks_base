@@ -29,11 +29,11 @@ import android.content.res.Resources;
  */
 public class RenderPass extends SceneGraphBase {
 
-    Allocation mColorTarget;
+    TextureRenderTarget mColorTarget;
     Float4 mClearColor;
     boolean mShouldClearColor;
 
-    Allocation mDepthTarget;
+    TextureRenderTarget mDepthTarget;
     float mClearDepth;
     boolean mShouldClearDepth;
 
@@ -59,7 +59,7 @@ public class RenderPass extends SceneGraphBase {
         mCamera = c;
     }
 
-    public void setColorTarget(Allocation colorTarget) {
+    public void setColorTarget(TextureRenderTarget colorTarget) {
         mColorTarget = colorTarget;
     }
     public void setClearColor(Float4 clearColor) {
@@ -69,7 +69,7 @@ public class RenderPass extends SceneGraphBase {
         mShouldClearColor = shouldClearColor;
     }
 
-    public void setDepthTarget(Allocation depthTarget) {
+    public void setDepthTarget(TextureRenderTarget depthTarget) {
         mDepthTarget = depthTarget;
     }
     public void setClearDepth(float clearDepth) {
@@ -89,8 +89,12 @@ public class RenderPass extends SceneGraphBase {
         }
 
         mRsField = new ScriptField_RenderPass_s.Item();
-        mRsField.color_target = mColorTarget;
-        mRsField.depth_target = mDepthTarget;
+        if (mColorTarget != null) {
+            mRsField.color_target = mColorTarget.getRsData(true).get_texture(0);
+        }
+        if (mColorTarget != null) {
+            mRsField.depth_target = mDepthTarget.getRsData(true).get_texture(0);
+        }
         mRsField.camera = mCamera != null ? mCamera.getRSData().getAllocation() : null;
 
         if (mObjectsToDraw.size() != 0) {

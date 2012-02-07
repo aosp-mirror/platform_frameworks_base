@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import com.android.scenegraph.SceneManager;
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,7 +54,11 @@ public class TestAppLoadingScreen {
     }
 
     public void showLoadingScreen(boolean show) {
-        mScript.set_gInitialized(!show);
+        if (show) {
+            mRS.bindRootScript(mScript);
+        } else {
+            mRS.bindRootScript(SceneManager.getInstance().getRenderLoop());
+        }
     }
 
     // The loading screen has some elements that shouldn't be loaded on the UI thread
@@ -103,11 +109,5 @@ public class TestAppLoadingScreen {
     void renderLoading() {
         mScript = new ScriptC_test_app(mRS, mRes, R.raw.test_app);
         mRS.bindRootScript(mScript);
-    }
-
-    public void setRenderLoop(ScriptC renderLoop) {
-        mScript.set_gRenderLoop(renderLoop);
-        Allocation dummyAlloc = Allocation.createSized(mRS, Element.I32(mRS), 1);
-        mScript.set_gDummyAlloc(dummyAlloc);
     }
 }

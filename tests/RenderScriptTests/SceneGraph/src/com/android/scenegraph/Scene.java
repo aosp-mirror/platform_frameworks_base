@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.android.scenegraph.SceneManager;
+import com.android.scenegraph.TextureBase;
 
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -36,38 +37,6 @@ import android.util.Log;
  */
 public class Scene extends SceneGraphBase {
     private static String TIMER_TAG = "TIMER";
-
-    private class ImageLoaderTask extends AsyncTask<ArrayList<RenderableBase>, Void, Boolean> {
-        protected Boolean doInBackground(ArrayList<RenderableBase>... objects) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < objects[0].size(); i ++) {
-                Renderable dI = (Renderable)objects[0].get(i);
-                dI.updateTextures(mRS, mRes);
-            }
-            long end = System.currentTimeMillis();
-            Log.v(TIMER_TAG, "Texture init time: " + (end - start));
-            return new Boolean(true);
-        }
-
-        protected void onPostExecute(Boolean result) {
-        }
-    }
-
-    private class ShaderImageLoader extends AsyncTask<ArrayList<FragmentShader>, Void, Boolean> {
-        protected Boolean doInBackground(ArrayList<FragmentShader>... objects) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < objects[0].size(); i ++) {
-                FragmentShader sI = objects[0].get(i);
-                sI.updateTextures();
-            }
-            long end = System.currentTimeMillis();
-            Log.v(TIMER_TAG, "Shader texture init time: " + (end - start));
-            return new Boolean(true);
-        }
-
-        protected void onPostExecute(Boolean result) {
-        }
-    }
 
     CompoundTransform mRootTransforms;
     HashMap<String, Transform> mTransformMap;
@@ -228,17 +197,13 @@ public class Scene extends SceneGraphBase {
     }
 
     public void initRenderPassRS(RenderScriptGL rs, SceneManager sceneManager) {
-        new ShaderImageLoader().execute(mFragmentShaders);
         if (mRenderPasses.size() != 0) {
             mRenderPassAlloc = new ScriptField_RenderPass_s(mRS, mRenderPasses.size());
             for (int i = 0; i < mRenderPasses.size(); i ++) {
                 mRenderPassAlloc.set(mRenderPasses.get(i).getRsField(mRS, mRes), i, false);
-                new ImageLoaderTask().execute(mRenderPasses.get(i).getRenderables());
             }
             mRenderPassAlloc.copyAll();
             sceneManager.mRenderLoop.set_gRenderPasses(mRenderPassAlloc.getAllocation());
-        } else {
-            new ImageLoaderTask().execute(mRenderables);
         }
     }
 
@@ -279,9 +244,10 @@ public class Scene extends SceneGraphBase {
         sceneManager.mRenderLoop.set_gFragmentShaders(shaderData);
     }
 
-    public void initRS(RenderScriptGL rs, Resources res, SceneManager sceneManager) {
-        mRS = rs;
-        mRes = res;
+    public void initRS() {
+        SceneManager sceneManager = SceneManager.getInstance();
+        mRS = SceneManager.getRS();
+        mRes = SceneManager.getRes();
         long start = System.currentTimeMillis();
         mTransformRSData = mRootTransforms.getRSData();
         long end = System.currentTimeMillis();
@@ -294,30 +260,38 @@ public class Scene extends SceneGraphBase {
         Log.v(TIMER_TAG, "Script init time: " + (end - start));
 
         start = System.currentTimeMillis();
-        addDrawables(rs, res, sceneManager);
+        addDrawables(mRS, mRes, sceneManager);
         end = System.currentTimeMillis();
         Log.v(TIMER_TAG, "Renderable init time: " + (end - start));
 
-        addShaders(rs, res, sceneManager);
+        addShaders(mRS, mRes, sceneManager);
 
-        Allocation opaqueBuffer = Allocation.createSized(rs, Element.U32(rs), mRenderables.size());
-        Allocation transparentBuffer = Allocation.createSized(rs,
-                                                              Element.U32(rs), mRenderables.size());
+        Allocation opaqueBuffer = null;
+        if (mRenderables.size() > 0) {
+            opaqueBuffer = Allocation.createSized(mRS, Element.U32(mRS), mRenderables.size());
+        }
+        Allocation transparentBuffer = null;
+        if (mRenderables.size() > 0) {
+            transparentBuffer = Allocation.createSized(mRS, Element.U32(mRS), mRenderables.size());
+        }
 
         sceneManager.mRenderLoop.bind_gFrontToBack(opaqueBuffer);
         sceneManager.mRenderLoop.bind_gBackToFront(transparentBuffer);
 
-        Allocation cameraData = Allocation.createSized(rs, Element.ALLOCATION(rs), mCameras.size());
-        Allocation[] cameraAllocs = new Allocation[mCameras.size()];
-        for (int i = 0; i < mCameras.size(); i ++) {
-            cameraAllocs[i] = mCameras.get(i).getRSData().getAllocation();
+        if (mCameras.size() > 0) {
+            Allocation cameraData;
+            cameraData = Allocation.createSized(mRS, Element.ALLOCATION(mRS), mCameras.size());
+            Allocation[] cameraAllocs = new Allocation[mCameras.size()];
+            for (int i = 0; i < mCameras.size(); i ++) {
+                cameraAllocs[i] = mCameras.get(i).getRSData().getAllocation();
+            }
+            cameraData.copyFrom(cameraAllocs);
+            sceneManager.mRenderLoop.set_gCameras(cameraData);
         }
-        cameraData.copyFrom(cameraAllocs);
-        sceneManager.mRenderLoop.set_gCameras(cameraData);
 
-        if (mLights.size() != 0) {
-            Allocation lightData = Allocation.createSized(rs,
-                                                          Element.ALLOCATION(rs),
+        if (mLights.size() > 0) {
+            Allocation lightData = Allocation.createSized(mRS,
+                                                          Element.ALLOCATION(mRS),
                                                           mLights.size());
             Allocation[] lightAllocs = new Allocation[mLights.size()];
             for (int i = 0; i < mLights.size(); i ++) {

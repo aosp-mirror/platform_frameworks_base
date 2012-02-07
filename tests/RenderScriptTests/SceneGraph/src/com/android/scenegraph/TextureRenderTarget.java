@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.android.scenegraph;
 import java.lang.Math;
 
 import com.android.scenegraph.SceneManager;
-import com.android.scenegraph.TextureBase;
 
 import android.content.res.Resources;
 import android.renderscript.*;
@@ -28,35 +27,14 @@ import android.util.Log;
 /**
  * @hide
  */
-public class TextureCube extends TextureBase {
-    String mFileName;
-    String mFileDir;
-
-    public TextureCube() {
-        super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
+public class TextureRenderTarget extends TextureBase {
+    public TextureRenderTarget() {
+        super(ScriptC_export.const_TextureType_TEXTURE_RENDER_TARGET);
     }
 
-    public TextureCube(Allocation tex) {
-        super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
+    public TextureRenderTarget(Allocation tex) {
+        super(ScriptC_export.const_TextureType_TEXTURE_RENDER_TARGET);
         setTexture(tex);
-    }
-
-    public TextureCube(String dir, String file) {
-        super(ScriptC_export.const_TextureType_TEXTURE_CUBE);
-        setFileDir(dir);
-        setFileName(file);
-    }
-
-    public void setFileDir(String dir) {
-        mFileDir = dir;
-    }
-
-    public void setFileName(String file) {
-        mFileName = file;
-    }
-
-    public String getFileName() {
-        return mFileName;
     }
 
     public void setTexture(Allocation tex) {
@@ -67,10 +45,6 @@ public class TextureCube extends TextureBase {
     }
 
     void load() {
-        RenderScriptGL rs = SceneManager.getRS();
-        Resources res = SceneManager.getRes();
-        String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        setTexture(SceneManager.loadCubemap(mFileDir + shortName, rs, res));
     }
 
     ScriptField_Texture_s getRsData(boolean loadNow) {
@@ -79,20 +53,11 @@ public class TextureCube extends TextureBase {
         }
 
         RenderScriptGL rs = SceneManager.getRS();
-        Resources res = SceneManager.getRes();
-        if (rs == null || res == null) {
+        if (rs == null) {
             return null;
         }
 
         mField = new ScriptField_Texture_s(rs, 1);
-
-        if (loadNow) {
-            load();
-        } else {
-            mData.texture = SceneManager.getDefaultTexCube();
-            new SingleImageLoaderTask().execute(this);
-        }
-
         mField.set(mData, 0, true);
         return mField;
     }

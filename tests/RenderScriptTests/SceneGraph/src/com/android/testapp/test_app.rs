@@ -35,11 +35,6 @@ rs_mesh gRobotMesh;
 
 rs_program_store gPFSBackground;
 
-rs_allocation gDummyAlloc;
-rs_script gRenderLoop;
-
-bool gInitialized = false;
-
 float gRotate;
 
 void init() {
@@ -84,15 +79,8 @@ static void displayLoading() {
 }
 
 int root(void) {
-    rs_allocation nullAlloc;
-    if (!gInitialized) {
-        rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        rsgClearDepth(1.0f);
-        displayLoading();
-        return 30;
-    }
-
-    rsForEach(gRenderLoop, gDummyAlloc, nullAlloc);
-
-    return 10;
+    rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgClearDepth(1.0f);
+    displayLoading();
+    return 30;
 }

@@ -19,7 +19,7 @@ package com.android.scenegraph;
 import java.lang.Math;
 
 import com.android.scenegraph.SceneManager;
-
+import android.os.AsyncTask;
 import android.content.res.Resources;
 import android.renderscript.*;
 import android.util.Log;
@@ -28,8 +28,27 @@ import android.util.Log;
  * @hide
  */
 public abstract class TextureBase extends SceneGraphBase {
+
+    class SingleImageLoaderTask extends AsyncTask<TextureBase, Void, Boolean> {
+        protected Boolean doInBackground(TextureBase... objects) {
+            TextureBase tex = objects[0];
+            tex.load();
+            return new Boolean(true);
+        }
+        protected void onPostExecute(Boolean result) {
+        }
+    }
+
+    ScriptField_Texture_s.Item mData;
+    ScriptField_Texture_s mField;
+    TextureBase(int type) {
+        mData = new ScriptField_Texture_s.Item();
+        mData.type = type;
+    }
+
     protected Allocation mRsTexture;
-    abstract Allocation getRsData();
+    abstract ScriptField_Texture_s getRsData(boolean loadNow);
+    abstract void load();
 }
 
 

@@ -26,4 +26,5 @@ void root(rs_allocation *v_out, const void *usrData) {
     SgFragmentShader *shader = (SgFragmentShader *)rsGetElementAt(*v_out, 0);
     const SgCamera *camera = (const SgCamera*)usrData;
     processAllParams(shader->shaderConst, shader->shaderConstParams, camera);
+    processTextureParams(shader);
 }

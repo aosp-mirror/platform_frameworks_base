@@ -108,7 +108,6 @@ public class TestAppRS {
         // Initi renderscript stuff specific to the app. This will need to be abstracted out later.
         FullscreenBlur.createRenderTargets(mRS, mWidth, mHeight);
         initPaintShaders();
-        mLoadingScreen.setRenderLoop(mSceneManager.getRenderLoop());
 
         // Load a scene to render
         mSceneManager.loadModel(mFilePath + modelName, mLoadedCallback);
@@ -257,7 +256,7 @@ public class TestAppRS {
         }
 
         long start = System.currentTimeMillis();
-        mActiveScene.initRS(mRS, mRes, mSceneManager);
+        mActiveScene.initRS();
         long end = System.currentTimeMillis();
         Log.v("TIMER", "Scene init time: " + (end - start));
 

@@ -43,6 +43,10 @@ const int Transform_TRANSLATE = TRANSFORM_TRANSLATE;
 const int Transform_ROTATE = TRANSFORM_ROTATE;
 const int Transform_SCALE = TRANSFORM_SCALE;
 
+const int TextureType_TEXTURE_2D = TEXTURE_2D;
+const int TextureType_TEXTURE_CUBE = TEXTURE_CUBE;
+const int TextureType_TEXTURE_RENDER_TARGET = TEXTURE_RENDER_TARGET;
+
 SgTransform *exportPtr;
 SgTransformComponent *componentPtr;
 SgRenderState *sExport;
@@ -54,3 +58,4 @@ SgShaderParam *spExport;
 SgShaderParamData *spDataExport;
 SgVertexShader *pvExport;
 SgFragmentShader *pfExport;
+SgTexture *texExport;
