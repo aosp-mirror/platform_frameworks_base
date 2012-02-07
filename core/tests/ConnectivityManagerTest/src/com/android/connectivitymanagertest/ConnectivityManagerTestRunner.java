@@ -46,8 +46,7 @@ public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
             // create a new test suite
             suite.setName("ConnectivityManagerWifiOnlyFunctionalTests");
             String[] methodNames = {"testConnectToWifi", "testConnectToWifWithKnownAP",
-                    "testDisconnectWifi", "testDataConnectionOverAMWithWifi",
-                    "testDataConnectionWithWifiToAMToWifi", "testWifiStateChange"};
+                    "testDisconnectWifi", "testWifiStateChange"};
             Class<ConnectivityManagerMobileTest> testClass = ConnectivityManagerMobileTest.class;
             for (String method: methodNames) {
                 suite.addTest(TestSuite.createTest(testClass, method));
