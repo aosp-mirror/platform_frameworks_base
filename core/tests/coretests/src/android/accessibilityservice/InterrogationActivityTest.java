@@ -430,4 +430,35 @@ public class InterrogationActivityTest
             }
         }
     }
+
+    @LargeTest
+    public void testGetRootAccessibilityNodeInfoInActiveWindow() throws Exception {
+        final long startTimeMillis = SystemClock.uptimeMillis();
+        try {
+            // get the root via the designated API
+            AccessibilityNodeInfo fetched = mUiTestAutomationBridge
+                    .getRootAccessibilityNodeInfoInActiveWindow();
+            assertNotNull(fetched);
+
+            // get the root via traversal
+            AccessibilityNodeInfo expected = mUiTestAutomationBridge
+                    .findAccessibilityNodeInfoByViewIdInActiveWindow(R.id.root);
+            while (true) {
+                AccessibilityNodeInfo parent = expected.getParent();
+                if (parent == null) {
+                    break;
+                }
+                expected = parent;
+            }
+            assertNotNull(expected);
+
+            assertEquals("The node with id \"root\" should be the root.", expected, fetched);
+        } finally {
+            if (DEBUG) {
+                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                Log.i(LOG_TAG, "testGetRootAccessibilityNodeInfoInActiveWindow: "
+                        + elapsedTimeMillis + "ms");
+            }
+        }
+    }
 }
