@@ -63,6 +63,8 @@ public class UiTestAutomationBridge {
 
     private AccessibilityEvent mLastEvent;
 
+    private AccessibilityEvent mLastWindowStateChangeEvent;
+
     private volatile boolean mWaitingForEventDelivery;
 
     private volatile boolean mUnprocessedEventAvailable;
@@ -138,12 +140,22 @@ public class UiTestAutomationBridge {
             public void onAccessibilityEvent(AccessibilityEvent event) {
                 synchronized (mLock) {
                     while (true) {
+                        mLastEvent = AccessibilityEvent.obtain(event);
+
+                        final int eventType = event.getEventType();
+                        if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                                || eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+                            if (mLastWindowStateChangeEvent != null) {
+                                mLastWindowStateChangeEvent.recycle();
+                            }
+                            mLastWindowStateChangeEvent = mLastEvent;
+                        }
+
                         if (!mWaitingForEventDelivery) {
                             break;
                         }
                         if (!mUnprocessedEventAvailable) {
                             mUnprocessedEventAvailable = true;
-                            mLastEvent = AccessibilityEvent.obtain(event);
                             mLock.notifyAll();
                             break;
                         }
@@ -407,6 +419,20 @@ public class UiTestAutomationBridge {
         ensureValidConnection(connectionId);
         return AccessibilityInteractionClient.getInstance().performAccessibilityAction(connectionId,
                 accessibilityWindowId, accessibilityNodeId, action);
+    }
+
+    /**
+     * Gets the root {@link AccessibilityNodeInfo} in the active window.
+     *
+     * @return The root info.
+     */
+    public AccessibilityNodeInfo getRootAccessibilityNodeInfoInActiveWindow() {
+        synchronized (mLock) {
+            if (mLastWindowStateChangeEvent != null) {
+                return mLastWindowStateChangeEvent.getSource();
+            }
+        }
+        return null;
     }
 
     private void ensureValidConnection(int connectionId) {
