@@ -132,6 +132,7 @@ class ServerThread extends Thread {
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
+        CommonTimeManagementService commonTimeMgmtService = null;
 
         // Critical services...
         try {
@@ -575,6 +576,14 @@ class ServerThread extends Thread {
             } catch (Throwable e) {
                 reportWtf("starting NetworkTimeUpdate service", e);
             }
+
+            try {
+                Slog.i(TAG, "CommonTimeManagementService");
+                commonTimeMgmtService = new CommonTimeManagementService(context);
+                ServiceManager.addService("commontime_management", commonTimeMgmtService);
+            } catch (Throwable e) {
+                reportWtf("starting CommonTimeManagementService service", e);
+            }
         }
 
         // Before things start rolling, be sure we have decided whether
@@ -653,6 +662,7 @@ class ServerThread extends Thread {
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
+        final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
         final TextServicesManagerService textServiceManagerServiceF = tsms;
         final StatusBarManagerService statusBarF = statusBar;
 
@@ -750,6 +760,11 @@ class ServerThread extends Thread {
                     if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Network Time Service ready", e);
+                }
+                try {
+                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Common time management service ready", e);
                 }
                 try {
                     if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
