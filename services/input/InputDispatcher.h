@@ -814,8 +814,6 @@ private:
     Queue<EventEntry> mInboundQueue;
     Queue<CommandEntry> mCommandQueue;
 
-    Vector<EventEntry*> mTempCancelationEvents;
-
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
 
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
