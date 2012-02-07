@@ -2187,7 +2187,7 @@ error:
     }
 }
 
-int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
+int64_t OMXCodec::getDecodingTimeUs() {
     CHECK(mIsEncoder && mIsVideo);
 
     if (mDecodingTimeList.empty()) {
@@ -2199,12 +2199,7 @@ int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
 
     List<int64_t>::iterator it = mDecodingTimeList.begin();
     int64_t timeUs = *it;
-
-    // If the output buffer is codec specific configuration,
-    // do not remove the decoding time from the list.
-    if (!isCodecSpecific) {
-        mDecodingTimeList.erase(it);
-    }
+    mDecodingTimeList.erase(it);
     return timeUs;
 }
 
@@ -2384,7 +2379,7 @@ void OMXCodec::on_message(const omx_message &msg) {
                 }
 
                 if (mIsEncoder && mIsVideo) {
-                    int64_t decodingTimeUs = retrieveDecodingTimeUs(isCodecSpecific);
+                    int64_t decodingTimeUs = isCodecSpecific? 0: getDecodingTimeUs();
                     buffer->meta_data()->setInt64(kKeyDecodingTime, decodingTimeUs);
                 }
 
