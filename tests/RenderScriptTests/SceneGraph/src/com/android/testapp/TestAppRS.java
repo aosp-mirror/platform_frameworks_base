@@ -189,7 +189,7 @@ public class TestAppRS {
         int numDraw = allDraw.size();
 
         if (mUseBlur) {
-            FullscreenBlur.addBlurPasses(mActiveScene, mRS);
+            FullscreenBlur.addBlurPasses(mActiveScene, mRS, mTouchHandler.getCamera());
         }
 
         RenderPass mainPass = new RenderPass();
@@ -197,14 +197,14 @@ public class TestAppRS {
         mainPass.setShouldClearColor(true);
         mainPass.setClearDepth(1.0f);
         mainPass.setShouldClearDepth(true);
-        mainPass.setCamera(mActiveScene.getCameras().get(1));
+        mainPass.setCamera(mTouchHandler.getCamera());
         for (int i = 0; i < numDraw; i ++) {
             mainPass.appendRenderable((Renderable)allDraw.get(i));
         }
         mActiveScene.appendRenderPass(mainPass);
 
         if (mUseBlur) {
-            FullscreenBlur.addCompositePass(mActiveScene, mRS);
+            FullscreenBlur.addCompositePass(mActiveScene, mRS, mTouchHandler.getCamera());
         }
     }
 
@@ -221,6 +221,7 @@ public class TestAppRS {
     public void prepareToRender(Scene s) {
         mSceneManager.setActiveScene(s);
         mActiveScene = s;
+        mTouchHandler.init(mActiveScene);
         addShadersToScene();
         RenderState plastic = new RenderState(mGenericV, mPlasticF, null, null);
         RenderState diffuse = new RenderState(mGenericV, mDiffuseF, null, null);
@@ -254,8 +255,6 @@ public class TestAppRS {
             plane.setRenderState(texState);
             plane.setVisible(!mUseBlur);
         }
-
-        mTouchHandler.init(mActiveScene);
 
         long start = System.currentTimeMillis();
         mActiveScene.initRS(mRS, mRes, mSceneManager);

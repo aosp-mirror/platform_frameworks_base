@@ -28,25 +28,45 @@ public class TouchHandler {
     float mLastX;
     float mLastY;
 
-    RotateComponent mRotateX;
     float mRotateXValue;
-    RotateComponent mRotateY;
     float mRotateYValue;
-    TranslateComponent mDist;
     Float3 mDistValue;
+    Float3 mPosValue;
+
+    CompoundTransform mCameraRig;
+    RotateComponent mRotateX;
+    RotateComponent mRotateY;
+    TranslateComponent mDist;
+    TranslateComponent mPosition;
+    Camera mCamera;
 
     public void init(Scene scene) {
-        CompoundTransform cameraRotate = (CompoundTransform)scene.getTransformByName("CameraAim");
-        CompoundTransform cameraDist = (CompoundTransform)scene.getTransformByName("CameraDist");
+        // Some initial values for camera position
+        mRotateXValue = -20;
+        mRotateYValue = 45;
+        mDistValue = new Float3(0, 0, 45);
+        mPosValue = new Float3(0, 4, 0);
 
-        if (cameraRotate != null && cameraDist != null) {
-            mRotateX = (RotateComponent)cameraRotate.mTransformComponents.get(2);
-            mRotateXValue = mRotateX.getAngle();
-            mRotateY = (RotateComponent)cameraRotate.mTransformComponents.get(1);
-            mRotateYValue = mRotateY.getAngle();
-            mDist = (TranslateComponent)cameraDist.mTransformComponents.get(0);
-            mDistValue = mDist.getValue();
-        }
+        mRotateX = new RotateComponent("RotateX", new Float3(1, 0, 0), mRotateXValue);
+        mRotateY = new RotateComponent("RotateY", new Float3(0, 1, 0), mRotateYValue);
+        mDist = new TranslateComponent("Distance", mDistValue);
+        mPosition = new TranslateComponent("Distance", mPosValue);
+
+        // Make a camera transform we can manipulate
+        mCameraRig = new CompoundTransform();
+        mCameraRig.setName("CameraRig");
+        mCameraRig.addComponent(mPosition);
+        mCameraRig.addComponent(mRotateY);
+        mCameraRig.addComponent(mRotateX);
+        mCameraRig.addComponent(mDist);
+        scene.appendTransform(mCameraRig);
+        mCamera = new Camera();
+        mCamera.setTransform(mCameraRig);
+        scene.appendCamera(mCamera);
+    }
+
+    public Camera getCamera() {
+        return mCamera;
     }
 
     public void onActionDown(float x, float y) {
@@ -59,7 +79,7 @@ public class TouchHandler {
             return;
         }
         mDistValue.z *= 1.0f / scale;
-        mDistValue.z = Math.max(20.0f, Math.min(mDistValue.z, 100.0f));
+        mDistValue.z = Math.max(10.0f, Math.min(mDistValue.z, 150.0f));
         mDist.setValue(mDistValue);
     }
 

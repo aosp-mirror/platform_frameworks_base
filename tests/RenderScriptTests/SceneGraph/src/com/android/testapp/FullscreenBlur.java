@@ -75,18 +75,18 @@ class FullscreenBlur {
         quad.appendSourceParams(new Float4Param("blurOffset3", advance * 3.5f));
     }
 
-    static RenderPass addPass(Scene scene, Allocation color, Allocation depth) {
+    static RenderPass addPass(Scene scene, Camera cam, Allocation color, Allocation depth) {
         RenderPass pass = new RenderPass();
         pass.setColorTarget(color);
         pass.setDepthTarget(depth);
         pass.setShouldClearColor(false);
         pass.setShouldClearDepth(false);
-        pass.setCamera(scene.getCameras().get(1));
+        pass.setCamera(cam);
         scene.appendRenderPass(pass);
         return pass;
     }
 
-    static void addBlurPasses(Scene scene, RenderScriptGL rs) {
+    static void addBlurPasses(Scene scene, RenderScriptGL rs, Camera cam) {
         SceneManager sceneManager = SceneManager.getInstance();
         ArrayList<RenderableBase> allDraw = scene.getRenderables();
         int numDraw = allDraw.size();
@@ -101,7 +101,7 @@ class FullscreenBlur {
         RenderState vBlur = new RenderState(mPV_Blur, mPF_BlurV, blendNone, cullNone);
 
         // Renders the scene off screen
-        RenderPass blurSourcePass = addPass(scene,
+        RenderPass blurSourcePass = addPass(scene, cam,
                                             sRenderTargetBlur0Color,
                                             sRenderTargetBlur0Depth);
         blurSourcePass.setClearColor(new Float4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -113,42 +113,42 @@ class FullscreenBlur {
         }
 
         // Pass for selecting bright colors
-        RenderPass selectColorPass = addPass(scene,
+        RenderPass selectColorPass = addPass(scene, cam,
                                              sRenderTargetBlur2Color,
                                              sRenderTargetBlur2Depth);
         Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadS", selectCol);
-        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur0Color)));
+        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur0Color)));
         selectColorPass.appendRenderable(quad);
 
         // Horizontal blur
-        RenderPass horizontalBlurPass = addPass(scene,
+        RenderPass horizontalBlurPass = addPass(scene, cam,
                                                 sRenderTargetBlur1Color,
                                                 sRenderTargetBlur1Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadH", hBlur);
-        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur2Color)));
+        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur2Color)));
         addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getX());
         horizontalBlurPass.appendRenderable(quad);
 
         // Vertical Blur
-        RenderPass verticalBlurPass = addPass(scene,
+        RenderPass verticalBlurPass = addPass(scene, cam,
                                               sRenderTargetBlur2Color,
                                               sRenderTargetBlur2Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadV", vBlur);
-        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur1Color)));
+        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur1Color)));
         addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getY());
         verticalBlurPass.appendRenderable(quad);
     }
 
     // Additively renders the blurred colors on top of the scene
-    static void addCompositePass(Scene scene, RenderScriptGL rs) {
+    static void addCompositePass(Scene scene, RenderScriptGL rs, Camera cam) {
         SceneManager sceneManager = SceneManager.getInstance();
         RenderState drawTex = new RenderState(mPV_Blur, mPF_Texture,
                                               SceneManager.BLEND_ADD_DEPTH_NONE(rs),
                                               ProgramRaster.CULL_NONE(rs));
 
-        RenderPass compositePass = addPass(scene, null, null);
-        Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuad", drawTex);
-        quad.appendSourceParams(new TextureParam("tex0", new Texture2D(sRenderTargetBlur2Color)));
+        RenderPass compositePass = addPass(scene, cam, null, null);
+        Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadComposite", drawTex);
+        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur2Color)));
         compositePass.appendRenderable(quad);
     }
 

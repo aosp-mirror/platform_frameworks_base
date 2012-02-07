@@ -39,7 +39,7 @@ public class Camera extends SceneGraphBase {
     public Camera() {
         mData = new ScriptField_Camera_s.Item();
         mData.near = 0.1f;
-        mData.far = 100.0f;
+        mData.far = 1000.0f;
         mData.horizontalFOV = 60.0f;
         mData.aspect = 0;
     }
