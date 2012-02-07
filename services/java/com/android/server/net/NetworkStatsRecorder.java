@@ -51,6 +51,7 @@ import java.util.Map;
 public class NetworkStatsRecorder {
     private static final String TAG = "NetworkStatsRecorder";
     private static final boolean LOGD = true;
+    private static final boolean LOGV = false;
 
     private final FileRotator mRotator;
     private final NonMonotonicObserver<String> mObserver;
@@ -170,7 +171,7 @@ public class NetworkStatsRecorder {
 
         mLastSnapshot = snapshot;
 
-        if (LOGD && unknownIfaces.size() > 0) {
+        if (LOGV && unknownIfaces.size() > 0) {
             Slog.w(TAG, "unknown interfaces " + unknownIfaces + ", ignoring those stats");
         }
     }

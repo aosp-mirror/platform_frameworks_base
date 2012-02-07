@@ -195,6 +195,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_FOREGROUND_ACTIVITIES_CHANGED = 3;
     private static final int MSG_PROCESS_DIED = 4;
     private static final int MSG_LIMIT_REACHED = 5;
+    private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1225,6 +1226,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateNotificationsLocked();
             writePolicyLocked();
         }
+
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, restrictBackground ? 1 : 0, 0)
+                .sendToTarget();
     }
 
     @Override
@@ -1572,6 +1576,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                     }
                     return true;
+                }
+                case MSG_RESTRICT_BACKGROUND_CHANGED: {
+                    final boolean restrictBackground = msg.arg1 != 0;
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        if (listener != null) {
+                            try {
+                                listener.onRestrictBackgroundChanged(restrictBackground);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                    mListeners.finishBroadcast();
                 }
                 default: {
                     return false;
