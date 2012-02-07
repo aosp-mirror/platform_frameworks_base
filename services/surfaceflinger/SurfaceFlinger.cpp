@@ -1793,6 +1793,7 @@ status_t SurfaceFlinger::onTransact(
                 reply->writeInt32(0);
                 reply->writeInt32(mDebugRegion);
                 reply->writeInt32(mDebugBackground);
+                reply->writeInt32(mDebugDisableHWC);
                 return NO_ERROR;
             case 1013: {
                 Mutex::Autolock _l(mStateLock);
