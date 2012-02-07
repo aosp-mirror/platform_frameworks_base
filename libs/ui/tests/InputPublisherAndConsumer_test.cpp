@@ -69,6 +69,7 @@ TEST_F(InputPublisherAndConsumerTest, GetChannel_ReturnsTheChannel) {
 void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
     status_t status;
 
+    const uint32_t seq = 15;
     const int32_t deviceId = 1;
     const int32_t source = AINPUT_SOURCE_KEYBOARD;
     const int32_t action = AKEY_EVENT_ACTION_DOWN;
@@ -80,13 +81,14 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
     const nsecs_t downTime = 3;
     const nsecs_t eventTime = 4;
 
-    status = mPublisher->publishKeyEvent(deviceId, source, action, flags,
+    status = mPublisher->publishKeyEvent(seq, deviceId, source, action, flags,
             keyCode, scanCode, metaState, repeatCount, downTime, eventTime);
     ASSERT_EQ(OK, status)
             << "publisher publishKeyEvent should return OK";
 
+    uint32_t consumeSeq;
     InputEvent* event;
-    status = mConsumer->consume(& mEventFactory, & event);
+    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, &consumeSeq, &event);
     ASSERT_EQ(OK, status)
             << "consumer consume should return OK";
 
@@ -96,6 +98,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
             << "consumer should have returned a key event";
 
     KeyEvent* keyEvent = static_cast<KeyEvent*>(event);
+    EXPECT_EQ(seq, consumeSeq);
     EXPECT_EQ(deviceId, keyEvent->getDeviceId());
     EXPECT_EQ(source, keyEvent->getSource());
     EXPECT_EQ(action, keyEvent->getAction());
@@ -107,14 +110,17 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
     EXPECT_EQ(downTime, keyEvent->getDownTime());
     EXPECT_EQ(eventTime, keyEvent->getEventTime());
 
-    status = mConsumer->sendFinishedSignal(true);
+    status = mConsumer->sendFinishedSignal(seq, true);
     ASSERT_EQ(OK, status)
             << "consumer sendFinishedSignal should return OK";
 
+    uint32_t finishedSeq = 0;
     bool handled = false;
-    status = mPublisher->receiveFinishedSignal(&handled);
+    status = mPublisher->receiveFinishedSignal(&finishedSeq, &handled);
     ASSERT_EQ(OK, status)
             << "publisher receiveFinishedSignal should return OK";
+    ASSERT_EQ(seq, finishedSeq)
+            << "publisher receiveFinishedSignal should have returned the original sequence number";
     ASSERT_TRUE(handled)
             << "publisher receiveFinishedSignal should have set handled to consumer's reply";
 }
@@ -122,6 +128,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeKeyEvent() {
 void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent() {
     status_t status;
 
+    const uint32_t seq = 15;
     const int32_t deviceId = 1;
     const int32_t source = AINPUT_SOURCE_TOUCHSCREEN;
     const int32_t action = AMOTION_EVENT_ACTION_MOVE;
@@ -155,15 +162,16 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent() {
         pointerCoords[i].setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, 3.5 * i);
     }
 
-    status = mPublisher->publishMotionEvent(deviceId, source, action, flags, edgeFlags,
+    status = mPublisher->publishMotionEvent(seq, deviceId, source, action, flags, edgeFlags,
             metaState, buttonState, xOffset, yOffset, xPrecision, yPrecision,
             downTime, eventTime, pointerCount,
             pointerProperties, pointerCoords);
     ASSERT_EQ(OK, status)
             << "publisher publishMotionEvent should return OK";
 
+    uint32_t consumeSeq;
     InputEvent* event;
-    status = mConsumer->consume(& mEventFactory, & event);
+    status = mConsumer->consume(&mEventFactory, true /*consumeBatches*/, &consumeSeq, &event);
     ASSERT_EQ(OK, status)
             << "consumer consume should return OK";
 
@@ -173,6 +181,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent() {
             << "consumer should have returned a motion event";
 
     MotionEvent* motionEvent = static_cast<MotionEvent*>(event);
+    EXPECT_EQ(seq, consumeSeq);
     EXPECT_EQ(deviceId, motionEvent->getDeviceId());
     EXPECT_EQ(source, motionEvent->getSource());
     EXPECT_EQ(action, motionEvent->getAction());
@@ -216,14 +225,17 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent() {
                 motionEvent->getOrientation(i));
     }
 
-    status = mConsumer->sendFinishedSignal(false);
+    status = mConsumer->sendFinishedSignal(seq, false);
     ASSERT_EQ(OK, status)
             << "consumer sendFinishedSignal should return OK";
 
+    uint32_t finishedSeq = 0;
     bool handled = true;
-    status = mPublisher->receiveFinishedSignal(&handled);
+    status = mPublisher->receiveFinishedSignal(&finishedSeq, &handled);
     ASSERT_EQ(OK, status)
             << "publisher receiveFinishedSignal should return OK";
+    ASSERT_EQ(seq, finishedSeq)
+            << "publisher receiveFinishedSignal should have returned the original sequence number";
     ASSERT_FALSE(handled)
             << "publisher receiveFinishedSignal should have set handled to consumer's reply";
 }
@@ -242,7 +254,7 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenPointerCountLessTha
     PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(BAD_VALUE, status)
             << "publisher publishMotionEvent should return BAD_VALUE";
@@ -258,7 +270,7 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenPointerCountGreater
         pointerCoords[i].clear();
     }
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(BAD_VALUE, status)
             << "publisher publishMotionEvent should return BAD_VALUE";

@@ -172,7 +172,7 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
             in_flight_event inflight;
             inflight.event = kevent;
             inflight.seq = -1;
-            inflight.doFinish = false;
+            inflight.finishSeq = 0;
             mInFlightEvents.push(inflight);
         }
         if (mFinishPreDispatches.size() > 0) {
@@ -201,19 +201,21 @@ int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
         }
     }
 
+    uint32_t consumerSeq;
     InputEvent* myEvent = NULL;
-    status_t res = mConsumer.consume(this, &myEvent);
+    status_t res = mConsumer.consume(this, true /*consumeBatches*/, &consumerSeq, &myEvent);
     if (res != android::OK) {
-        ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
-                mConsumer.getChannel()->getName().string(), res);
-        mConsumer.sendFinishedSignal(false);
+        if (res != android::WOULD_BLOCK) {
+            ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
+                    mConsumer.getChannel()->getName().string(), res);
+        }
         return -1;
     }
 
     in_flight_event inflight;
     inflight.event = myEvent;
     inflight.seq = -1;
-    inflight.doFinish = true;
+    inflight.finishSeq = consumerSeq;
     mInFlightEvents.push(inflight);
 
     *outEvent = myEvent;
@@ -255,8 +257,8 @@ void AInputQueue::finishEvent(AInputEvent* event, bool handled, bool didDefaultH
     for (size_t i=0; i<N; i++) {
         const in_flight_event& inflight(mInFlightEvents[i]);
         if (inflight.event == event) {
-            if (inflight.doFinish) {
-                int32_t res = mConsumer.sendFinishedSignal(handled);
+            if (inflight.finishSeq) {
+                status_t res = mConsumer.sendFinishedSignal(inflight.finishSeq, handled);
                 if (res != android::OK) {
                     ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
                             mConsumer.getChannel()->getName().string(), res);

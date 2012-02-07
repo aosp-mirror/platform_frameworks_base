@@ -90,6 +90,7 @@ TEST_F(InputChannelTest, OpenInputChannelPair_ReturnsAPairOfConnectedChannels) {
     InputMessage clientReply;
     memset(&clientReply, 0, sizeof(InputMessage));
     clientReply.header.type = InputMessage::TYPE_FINISHED;
+    clientReply.body.finished.seq = 0x11223344;
     clientReply.body.finished.handled = true;
     EXPECT_EQ(OK, clientChannel->sendMessage(&clientReply))
             << "client channel should be able to send message to server channel";
@@ -98,6 +99,8 @@ TEST_F(InputChannelTest, OpenInputChannelPair_ReturnsAPairOfConnectedChannels) {
     EXPECT_EQ(OK, serverChannel->receiveMessage(&serverReply))
             << "server channel should be able to receive message from client channel";
     EXPECT_EQ(clientReply.header.type, serverReply.header.type)
+            << "server channel should receive the correct message from client channel";
+    EXPECT_EQ(clientReply.body.finished.seq, serverReply.body.finished.seq)
             << "server channel should receive the correct message from client channel";
     EXPECT_EQ(clientReply.body.finished.handled, serverReply.body.finished.handled)
             << "server channel should receive the correct message from client channel";

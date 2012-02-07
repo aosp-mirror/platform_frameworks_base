@@ -114,8 +114,8 @@ private:
 
     struct in_flight_event {
         android::InputEvent* event;
-        int seq;
-        bool doFinish;
+        int seq; // internal sequence number for synthetic pre-dispatch events
+        uint32_t finishSeq; // sequence number for sendFinishedSignal, or 0 if finish not required
     };
 
     struct finish_pre_dispatch {

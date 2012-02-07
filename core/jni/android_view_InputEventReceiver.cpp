@@ -40,6 +40,7 @@ static struct {
     jclass clazz;
 
     jmethodID dispatchInputEvent;
+    jmethodID dispatchBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
 
@@ -50,7 +51,8 @@ public:
             const sp<Looper>& looper);
 
     status_t initialize();
-    status_t finishInputEvent(bool handled);
+    status_t finishInputEvent(uint32_t seq, bool handled);
+    status_t consumeEvents(bool consumeBatches);
     static int handleReceiveCallback(int receiveFd, int events, void* data);
 
 protected:
@@ -60,8 +62,8 @@ private:
     jobject mReceiverObjGlobal;
     InputConsumer mInputConsumer;
     sp<Looper> mLooper;
-    bool mEventInProgress;
     PreallocatedInputEventFactory mInputEventFactory;
+    bool mBatchedInputEventPending;
 
     const char* getInputChannelName() {
         return mInputConsumer.getChannel()->getName().string();
@@ -72,7 +74,8 @@ private:
 NativeInputEventReceiver::NativeInputEventReceiver(JNIEnv* env,
         jobject receiverObj, const sp<InputChannel>& inputChannel, const sp<Looper>& looper) :
         mReceiverObjGlobal(env->NewGlobalRef(receiverObj)),
-        mInputConsumer(inputChannel), mLooper(looper), mEventInProgress(false) {
+        mInputConsumer(inputChannel), mLooper(looper),
+        mBatchedInputEventPending(false) {
 #if DEBUG_DISPATCH_CYCLE
     ALOGD("channel '%s' ~ Initializing input event receiver.", getInputChannelName());
 #endif
@@ -84,9 +87,6 @@ NativeInputEventReceiver::~NativeInputEventReceiver() {
 #endif
 
     mLooper->removeFd(mInputConsumer.getChannel()->getFd());
-    if (mEventInProgress) {
-        mInputConsumer.sendFinishedSignal(false); // ignoring result
-    }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(mReceiverObjGlobal);
@@ -98,23 +98,17 @@ status_t NativeInputEventReceiver::initialize() {
     return OK;
 }
 
-status_t NativeInputEventReceiver::finishInputEvent(bool handled) {
-    if (mEventInProgress) {
+status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) {
 #if DEBUG_DISPATCH_CYCLE
-        ALOGD("channel '%s' ~ Finished input event.", getInputChannelName());
+    ALOGD("channel '%s' ~ Finished input event.", getInputChannelName());
 #endif
-        mEventInProgress = false;
 
-        status_t status = mInputConsumer.sendFinishedSignal(handled);
-        if (status) {
-            ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
-                    getInputChannelName(), status);
-        }
-        return status;
-    } else {
-        ALOGW("Ignoring attempt to finish input event while no event is in progress.");
-        return OK;
+    status_t status = mInputConsumer.sendFinishedSignal(seq, handled);
+    if (status) {
+        ALOGW("Failed to send finished signal on channel '%s'.  status=%d",
+                getInputChannelName(), status);
     }
+    return status;
 }
 
 int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, void* data) {
@@ -132,79 +126,101 @@ int NativeInputEventReceiver::handleReceiveCallback(int receiveFd, int events, v
         return 1;
     }
 
-    if (r->mEventInProgress) {
-        ALOGW("channel '%s' ~ Publisher sent spurious dispatch signal.",
-                r->getInputChannelName());
-        return 1;
-    }
+    status_t status = r->consumeEvents(false /*consumeBatches*/);
+    return status == OK || status == NO_MEMORY ? 1 : 0;
+}
 
-    InputEvent* inputEvent;
-    status_t status = r->mInputConsumer.consume(&r->mInputEventFactory, &inputEvent);
-    if (status) {
-        ALOGW("channel '%s' ~ Failed to consume input event.  status=%d",
-                r->getInputChannelName(), status);
-        r->mInputConsumer.sendFinishedSignal(false);
-        return 1;
+status_t NativeInputEventReceiver::consumeEvents(bool consumeBatches) {
+#if DEBUG_DISPATCH_CYCLE
+    ALOGD("channel '%s' ~ Consuming input events, consumeBatches=%s.", getInputChannelName(),
+            consumeBatches ? "true" : "false");
+#endif
+
+    if (consumeBatches) {
+        mBatchedInputEventPending = false;
     }
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jobject inputEventObj;
-    switch (inputEvent->getType()) {
-    case AINPUT_EVENT_TYPE_KEY:
+    for (;;) {
+        uint32_t seq;
+        InputEvent* inputEvent;
+        status_t status = mInputConsumer.consume(&mInputEventFactory,
+                consumeBatches, &seq, &inputEvent);
+        if (status) {
+            if (status == WOULD_BLOCK) {
+                if (mInputConsumer.hasPendingBatch() && !mBatchedInputEventPending) {
+                    // There is a pending batch.  Come back later.
+                    mBatchedInputEventPending = true;
 #if DEBUG_DISPATCH_CYCLE
-        ALOGD("channel '%s' ~ Received key event.",
-                r->getInputChannelName());
+                    ALOGD("channel '%s' ~ Dispatching batched input event pending notification.",
+                            getInputChannelName());
 #endif
-        inputEventObj = android_view_KeyEvent_fromNative(env,
-                static_cast<KeyEvent*>(inputEvent));
-        break;
+                    env->CallVoidMethod(mReceiverObjGlobal,
+                            gInputEventReceiverClassInfo.dispatchBatchedInputEventPending);
 
-    case AINPUT_EVENT_TYPE_MOTION:
+                    if (env->ExceptionCheck()) {
+                        ALOGE("channel '%s' ~ An exception occurred while dispatching that "
+                                "batched input events are pending.", getInputChannelName());
+                        LOGE_EX(env);
+                        env->ExceptionClear();
+                        mBatchedInputEventPending = false; // try again later
+                    }
+                }
+                return OK;
+            }
+            ALOGE("channel '%s' ~ Failed to consume input event.  status=%d",
+                    getInputChannelName(), status);
+            return status;
+        }
+        assert(inputEvent);
+
+        jobject inputEventObj;
+        switch (inputEvent->getType()) {
+        case AINPUT_EVENT_TYPE_KEY:
 #if DEBUG_DISPATCH_CYCLE
-        ALOGD("channel '%s' ~ Received motion event.",
-                r->getInputChannelName());
+            ALOGD("channel '%s' ~ Received key event.", getInputChannelName());
 #endif
-        inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
-                static_cast<MotionEvent*>(inputEvent));
-        break;
+            inputEventObj = android_view_KeyEvent_fromNative(env,
+                    static_cast<KeyEvent*>(inputEvent));
+            break;
 
-    default:
-        assert(false); // InputConsumer should prevent this from ever happening
-        inputEventObj = NULL;
-    }
+        case AINPUT_EVENT_TYPE_MOTION:
+#if DEBUG_DISPATCH_CYCLE
+            ALOGD("channel '%s' ~ Received motion event.", getInputChannelName());
+#endif
+            inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
+                    static_cast<MotionEvent*>(inputEvent));
+            break;
 
-    if (!inputEventObj) {
-        ALOGW("channel '%s' ~ Failed to obtain event object.",
-                r->getInputChannelName());
-        r->mInputConsumer.sendFinishedSignal(false);
-        return 1;
-    }
+        default:
+            assert(false); // InputConsumer should prevent this from ever happening
+            inputEventObj = NULL;
+        }
 
-    r->mEventInProgress = true;
+        if (!inputEventObj) {
+            ALOGW("channel '%s' ~ Failed to obtain event object.", getInputChannelName());
+            mInputConsumer.sendFinishedSignal(seq, false);
+            return NO_MEMORY;
+        }
 
 #if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Invoking input handler.", r->getInputChannelName());
+        ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName());
 #endif
-    env->CallVoidMethod(r->mReceiverObjGlobal,
-            gInputEventReceiverClassInfo.dispatchInputEvent, inputEventObj);
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Returned from input handler.", r->getInputChannelName());
-#endif
+        env->CallVoidMethod(mReceiverObjGlobal,
+                gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
 
-    if (env->ExceptionCheck()) {
-        ALOGE("channel '%s' ~ An exception occurred while dispatching an event.",
-                r->getInputChannelName());
-        LOGE_EX(env);
-        env->ExceptionClear();
+        env->DeleteLocalRef(inputEventObj);
 
-        if (r->mEventInProgress) {
-            r->mInputConsumer.sendFinishedSignal(false);
-            r->mEventInProgress = false;
+        if (env->ExceptionCheck()) {
+            ALOGE("channel '%s' ~ An exception occurred while dispatching an event.",
+                    getInputChannelName());
+            LOGE_EX(env);
+            env->ExceptionClear();
+
+            mInputConsumer.sendFinishedSignal(seq, false);
+            return OK;
         }
     }
-
-    env->DeleteLocalRef(inputEventObj);
-    return 1;
 }
 
 
@@ -243,13 +259,25 @@ static void nativeDispose(JNIEnv* env, jclass clazz, jint receiverPtr) {
     receiver->decStrong(gInputEventReceiverClassInfo.clazz); // drop reference held by the object
 }
 
-static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr, jboolean handled) {
+static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jint receiverPtr,
+        jint seq, jboolean handled) {
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
-    status_t status = receiver->finishInputEvent(handled);
+    status_t status = receiver->finishInputEvent(seq, handled);
     if (status) {
         String8 message;
         message.appendFormat("Failed to finish input event.  status=%d", status);
+        jniThrowRuntimeException(env, message.string());
+    }
+}
+
+static void nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jint receiverPtr) {
+    sp<NativeInputEventReceiver> receiver =
+            reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    status_t status = receiver->consumeEvents(true /*consumeBatches*/);
+    if (status) {
+        String8 message;
+        message.appendFormat("Failed to consume batched input event.  status=%d", status);
         jniThrowRuntimeException(env, message.string());
     }
 }
@@ -260,11 +288,12 @@ static JNINativeMethod gMethods[] = {
     { "nativeInit",
             "(Landroid/view/InputEventReceiver;Landroid/view/InputChannel;Landroid/os/MessageQueue;)I",
             (void*)nativeInit },
-    { "nativeDispose",
-            "(I)V",
+    { "nativeDispose", "(I)V",
             (void*)nativeDispose },
-    { "nativeFinishInputEvent", "(IZ)V",
-            (void*)nativeFinishInputEvent }
+    { "nativeFinishInputEvent", "(IIZ)V",
+            (void*)nativeFinishInputEvent },
+    { "nativeConsumeBatchedInputEvents", "(I)V",
+            (void*)nativeConsumeBatchedInputEvents },
 };
 
 #define FIND_CLASS(var, className) \
@@ -285,7 +314,10 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
 
     GET_METHOD_ID(gInputEventReceiverClassInfo.dispatchInputEvent,
             gInputEventReceiverClassInfo.clazz,
-            "dispatchInputEvent", "(Landroid/view/InputEvent;)V");
+            "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
+    GET_METHOD_ID(gInputEventReceiverClassInfo.dispatchBatchedInputEventPending,
+            gInputEventReceiverClassInfo.clazz,
+            "dispatchBatchedInputEventPending", "()V");
     return 0;
 }
 

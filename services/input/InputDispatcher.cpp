@@ -1872,7 +1872,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             KeyEntry* keyEntry = static_cast<KeyEntry*>(eventEntry);
 
             // Publish the key event.
-            status = connection->inputPublisher.publishKeyEvent(
+            status = connection->inputPublisher.publishKeyEvent(dispatchEntry->seq,
                     keyEntry->deviceId, keyEntry->source,
                     dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags,
                     keyEntry->keyCode, keyEntry->scanCode,
@@ -1916,7 +1916,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             }
 
             // Publish the motion event.
-            status = connection->inputPublisher.publishMotionEvent(
+            status = connection->inputPublisher.publishMotionEvent(dispatchEntry->seq,
                     motionEntry->deviceId, motionEntry->source,
                     dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags,
                     motionEntry->edgeFlags, motionEntry->metaState, motionEntry->buttonState,
@@ -1967,10 +1967,10 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 }
 
 void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
-        const sp<Connection>& connection, bool handled) {
+        const sp<Connection>& connection, uint32_t seq, bool handled) {
 #if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ finishDispatchCycle - handled=%s",
-            connection->getInputChannelName(), toString(handled));
+    ALOGD("channel '%s' ~ finishDispatchCycle - seq=%u, handled=%s",
+            connection->getInputChannelName(), seq, toString(handled));
 #endif
 
     connection->inputPublisherBlocked = false;
@@ -1981,7 +1981,7 @@ void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
     }
 
     // Notify other system components and prepare to start the next dispatch cycle.
-    onDispatchCycleFinishedLocked(currentTime, connection, handled);
+    onDispatchCycleFinishedLocked(currentTime, connection, seq, handled);
 }
 
 void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
@@ -2047,12 +2047,13 @@ int InputDispatcher::handleReceiveCallback(int fd, int events, void* data) {
             bool gotOne = false;
             status_t status;
             for (;;) {
-                bool handled = false;
-                status = connection->inputPublisher.receiveFinishedSignal(&handled);
+                uint32_t seq;
+                bool handled;
+                status = connection->inputPublisher.receiveFinishedSignal(&seq, &handled);
                 if (status) {
                     break;
                 }
-                d->finishDispatchCycleLocked(currentTime, connection, handled);
+                d->finishDispatchCycleLocked(currentTime, connection, seq, handled);
                 gotOne = true;
             }
             if (gotOne) {
@@ -3171,10 +3172,11 @@ ssize_t InputDispatcher::getConnectionIndexLocked(const sp<InputChannel>& inputC
 }
 
 void InputDispatcher::onDispatchCycleFinishedLocked(
-        nsecs_t currentTime, const sp<Connection>& connection, bool handled) {
+        nsecs_t currentTime, const sp<Connection>& connection, uint32_t seq, bool handled) {
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doDispatchCycleFinishedLockedInterruptible);
     commandEntry->connection = connection;
+    commandEntry->seq = seq;
     commandEntry->handled = handled;
 }
 
@@ -3268,12 +3270,13 @@ void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
 void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         CommandEntry* commandEntry) {
     sp<Connection> connection = commandEntry->connection;
+    uint32_t seq = commandEntry->seq;
     bool handled = commandEntry->handled;
 
-    if (!connection->waitQueue.isEmpty()) {
-        // Handle post-event policy actions.
+    // Handle post-event policy actions.
+    DispatchEntry* dispatchEntry = connection->findWaitQueueEntry(seq);
+    if (dispatchEntry) {
         bool restartEvent;
-        DispatchEntry* dispatchEntry = connection->waitQueue.head;
         if (dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
             restartEvent = afterKeyEventLockedInterruptible(connection,
@@ -3290,8 +3293,8 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         // Note that because the lock might have been released, it is possible that the
         // contents of the wait queue to have been drained, so we need to double-check
         // a few things.
-        if (connection->waitQueue.head == dispatchEntry) {
-            connection->waitQueue.dequeueAtHead();
+        if (dispatchEntry == connection->findWaitQueueEntry(seq)) {
+            connection->waitQueue.dequeue(dispatchEntry);
             if (restartEvent && connection->status == Connection::STATUS_NORMAL) {
                 connection->outboundQueue.enqueueAtHead(dispatchEntry);
             } else {
@@ -3635,8 +3638,11 @@ InputDispatcher::MotionEntry::~MotionEntry() {
 
 // --- InputDispatcher::DispatchEntry ---
 
+volatile int32_t InputDispatcher::DispatchEntry::sNextSeqAtomic;
+
 InputDispatcher::DispatchEntry::DispatchEntry(EventEntry* eventEntry,
         int32_t targetFlags, float xOffset, float yOffset, float scaleFactor) :
+        seq(nextSeq()),
         eventEntry(eventEntry), targetFlags(targetFlags),
         xOffset(xOffset), yOffset(yOffset), scaleFactor(scaleFactor),
         resolvedAction(0), resolvedFlags(0) {
@@ -3645,6 +3651,15 @@ InputDispatcher::DispatchEntry::DispatchEntry(EventEntry* eventEntry,
 
 InputDispatcher::DispatchEntry::~DispatchEntry() {
     eventEntry->release();
+}
+
+uint32_t InputDispatcher::DispatchEntry::nextSeq() {
+    // Sequence number 0 is reserved and will never be returned.
+    uint32_t seq;
+    do {
+        seq = android_atomic_inc(&sNextSeqAtomic);
+    } while (!seq);
+    return seq;
 }
 
 
@@ -3999,11 +4014,21 @@ const char* InputDispatcher::Connection::getStatusLabel() const {
     }
 }
 
+InputDispatcher::DispatchEntry* InputDispatcher::Connection::findWaitQueueEntry(uint32_t seq) {
+    for (DispatchEntry* entry = waitQueue.head; entry != NULL; entry = entry->next) {
+        if (entry->seq == seq) {
+            return entry;
+        }
+    }
+    return NULL;
+}
+
 
 // --- InputDispatcher::CommandEntry ---
 
 InputDispatcher::CommandEntry::CommandEntry(Command command) :
-    command(command), eventTime(0), keyEntry(NULL), userActivityEventType(0), handled(false) {
+    command(command), eventTime(0), keyEntry(NULL), userActivityEventType(0),
+    seq(0), handled(false) {
 }
 
 InputDispatcher::CommandEntry::~CommandEntry() {
