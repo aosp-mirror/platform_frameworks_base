@@ -225,7 +225,8 @@ public abstract class DataConnectionTracker extends Handler {
     //       having to have different values for GSM and
     //       CDMA. If so we can then remove the need for
     //       getActionIntentReconnectAlarm.
-    protected static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
+    protected static final String INTENT_RECONNECT_ALARM_EXTRA_REASON =
+        "reconnect_alarm_extra_reason";
 
     // Used for debugging. Send the INTENT with an optional counter value with the number
     // of times the setup is to fail before succeeding. If the counter isn't passed the
