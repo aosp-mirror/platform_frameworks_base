@@ -117,8 +117,7 @@ import java.util.HashSet;
  */
 public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String TAG = "NetworkStats";
-    private static final boolean LOGD = true;
-    private static final boolean LOGV = true;
+    private static final boolean LOGV = false;
 
     private static final int MSG_PERFORM_POLL = 1;
     private static final int MSG_UPDATE_IFACES = 2;
@@ -858,8 +857,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             argSet.add(arg);
         }
 
-        // usage: dumpsys netstats --full --uid --tag
+        // usage: dumpsys netstats --full --uid --tag --poll --checkin
         final boolean poll = argSet.contains("--poll") || argSet.contains("poll");
+        final boolean checkin = argSet.contains("--checkin");
         final boolean fullHistory = argSet.contains("--full") || argSet.contains("full");
         final boolean includeUid = argSet.contains("--uid") || argSet.contains("detail");
         final boolean includeTag = argSet.contains("--tag") || argSet.contains("detail");
@@ -870,6 +870,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (poll) {
                 performPollLocked(FLAG_PERSIST_ALL | FLAG_PERSIST_FORCE);
                 pw.println("Forced poll");
+                return;
+            }
+
+            if (checkin) {
+                // list current stats files to verify rotation
+                pw.println("Current files:");
+                pw.increaseIndent();
+                for (String file : mBaseDir.list()) {
+                    pw.println(file);
+                }
+                pw.decreaseIndent();
                 return;
             }
 
