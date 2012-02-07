@@ -98,7 +98,7 @@ static int usb_device_added(const char *devname, void* client_data) {
     vendorId = usb_device_get_vendor_id(device);
     productId = usb_device_get_product_id(device);
 
-    if (vendorId == 0x18D1 || vendorId == 0x22B8) {
+    if (vendorId == 0x18D1 || vendorId == 0x22B8 || vendorId == 0x04e8) {
         if (!sDevice && (productId == 0x2D00 || productId == 0x2D01)) {
             struct usb_descriptor_header* desc;
             struct usb_descriptor_iter iter;
