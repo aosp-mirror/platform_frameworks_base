@@ -17,8 +17,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include <utils/Errors.h>
 
@@ -38,6 +39,8 @@ BitTube::BitTube()
         mSendFd = fds[1];
         fcntl(mReceiveFd, F_SETFL, O_NONBLOCK);
         fcntl(mSendFd, F_SETFL, O_NONBLOCK);
+        // ignore SIGPIPE, we handle write errors through EPIPE instead
+        signal(SIGPIPE, SIG_IGN);
     } else {
         mReceiveFd = -errno;
         ALOGE("BitTube: pipe creation failed (%s)", strerror(-mReceiveFd));
