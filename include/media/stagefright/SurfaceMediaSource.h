@@ -58,7 +58,7 @@ public:
 
     // For the MediaSource interface for use by StageFrightRecorder:
     virtual status_t start(MetaData *params = NULL);
-    virtual status_t stop();
+    virtual status_t stop() { return reset(); }
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
     virtual sp<MetaData> getFormat();
@@ -358,6 +358,8 @@ private:
     // is a frame available for dequeuing
     Condition mFrameAvailableCondition;
     Condition mFrameCompleteCondition;
+
+    status_t reset();
 
     // Avoid copying and equating and default constructor
     DISALLOW_IMPLICIT_CONSTRUCTORS(SurfaceMediaSource);
