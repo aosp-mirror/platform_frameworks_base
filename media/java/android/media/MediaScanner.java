@@ -1176,15 +1176,14 @@ public class MediaScanner
             }
 
             if (fileMissing) {
-                // Clear the file path to prevent the _DELETE_FILE database hook
-                // in the media provider from deleting the file.
+                // Tell the provider to not delete the file.
                 // If the file is truly gone the delete is unnecessary, and we want to avoid
-                // accidentally deleting files that are really there.
-                ContentValues values = new ContentValues();
-                values.put(Files.FileColumns.DATA, "");
-                values.put(Files.FileColumns.DATE_MODIFIED, 0);
-                mMediaProvider.update(ContentUris.withAppendedId(mFilesUri, entry.mRowId),
-                        values, null, null);
+                // accidentally deleting files that are really there (this may happen if the
+                // filesystem is mounted and unmounted while the scanner is running).
+                Uri.Builder builder = mFilesUri.buildUpon();
+                builder.appendEncodedPath(String.valueOf(entry.mRowId));
+                builder.appendQueryParameter(MediaStore.PARAM_DELETE_DATA, "false");
+                Uri missingUri = builder.build();
 
                 // do not delete missing playlists, since they may have been modified by the user.
                 // the user can delete them in the media player instead.
@@ -1193,8 +1192,7 @@ public class MediaScanner
                 int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
 
                 if (!MediaFile.isPlayListFileType(fileType)) {
-                    mMediaProvider.delete(ContentUris.withAppendedId(mFilesUri, entry.mRowId),
-                            null, null);
+                    mMediaProvider.delete(missingUri, null, null);
                     iterator.remove();
                     if (entry.mPath.toLowerCase(Locale.US).endsWith("/.nomedia")) {
                         File f = new File(path);
