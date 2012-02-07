@@ -41,6 +41,7 @@ import android.renderscript.*;
 import android.renderscript.Allocation.MipmapControl;
 import android.renderscript.Mesh;
 import android.renderscript.RenderScriptGL;
+import android.renderscript.Type.Builder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -69,6 +70,52 @@ public class SceneManager extends SceneGraphBase {
 
     Scene mActiveScene;
     private static SceneManager sSceneManager;
+
+    private Allocation sDefault2D;
+    private Allocation sDefaultCube;
+
+    private static Allocation getDefault(boolean isCube) {
+        final int dimension = 4;
+        final int bytesPerPixel = 4;
+        int arraySize = dimension * dimension * bytesPerPixel;
+
+        RenderScriptGL rs = sSceneManager.mRS;
+        Type.Builder b = new Type.Builder(rs, Element.RGBA_8888(rs));
+        b.setX(dimension).setY(dimension);
+        if (isCube) {
+            b.setFaces(true);
+            arraySize *= 6;
+        }
+        Type bitmapType = b.create();
+
+        Allocation.MipmapControl mip = Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE;
+        int usage =  Allocation.USAGE_GRAPHICS_TEXTURE;
+        Allocation defaultImage = Allocation.createTyped(rs, bitmapType, mip, usage);
+
+        byte imageData[] = new byte[arraySize];
+        defaultImage.copyFrom(imageData);
+        return defaultImage;
+    }
+
+    static Allocation getDefaultTex2D() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.sDefault2D == null) {
+            sSceneManager.sDefault2D = getDefault(false);
+        }
+        return sSceneManager.sDefault2D;
+    }
+
+    static Allocation getDefaultTexCube() {
+        if (sSceneManager == null) {
+            return null;
+        }
+        if (sSceneManager.sDefaultCube != null) {
+            sSceneManager.sDefault2D = getDefault(true);
+        }
+        return sSceneManager.sDefaultCube;
+    }
 
     public static boolean isSDCardPath(String path) {
         int sdCardIndex = path.indexOf("sdcard/");

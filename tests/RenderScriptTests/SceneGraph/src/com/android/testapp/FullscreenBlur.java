@@ -35,12 +35,12 @@ import android.util.Log;
 
 class FullscreenBlur {
 
-    static Allocation sRenderTargetBlur0Color;
-    static Allocation sRenderTargetBlur0Depth;
-    static Allocation sRenderTargetBlur1Color;
-    static Allocation sRenderTargetBlur1Depth;
-    static Allocation sRenderTargetBlur2Color;
-    static Allocation sRenderTargetBlur2Depth;
+    static TextureRenderTarget sRenderTargetBlur0Color;
+    static TextureRenderTarget sRenderTargetBlur0Depth;
+    static TextureRenderTarget sRenderTargetBlur1Color;
+    static TextureRenderTarget sRenderTargetBlur1Depth;
+    static TextureRenderTarget sRenderTargetBlur2Color;
+    static TextureRenderTarget sRenderTargetBlur2Depth;
 
     static FragmentShader mPF_BlurH;
     static FragmentShader mPF_BlurV;
@@ -49,23 +49,28 @@ class FullscreenBlur {
     static VertexShader mPV_Paint;
     static VertexShader mPV_Blur;
 
+    static int targetWidth;
+    static int targetHeight;
+
     // This is only used when full screen blur is enabled
     // Basically, it's the offscreen render targets
     static void createRenderTargets(RenderScriptGL rs, int w, int h) {
+        targetWidth = w/8;
+        targetHeight = h/8;
         Type.Builder b = new Type.Builder(rs, Element.RGBA_8888(rs));
-        Type renderType = b.setX(w/8).setY(h/8).create();
+        Type renderType = b.setX(targetWidth).setY(targetHeight).create();
         int usage = Allocation.USAGE_GRAPHICS_TEXTURE | Allocation.USAGE_GRAPHICS_RENDER_TARGET;
-        sRenderTargetBlur0Color = Allocation.createTyped(rs, renderType, usage);
-        sRenderTargetBlur1Color = Allocation.createTyped(rs, renderType, usage);
-        sRenderTargetBlur2Color = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur0Color = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
+        sRenderTargetBlur1Color = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
+        sRenderTargetBlur2Color = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
 
         b = new Type.Builder(rs, Element.createPixel(rs, Element.DataType.UNSIGNED_16,
                                                      Element.DataKind.PIXEL_DEPTH));
-        renderType = b.setX(w/8).setY(h/8).create();
+        renderType = b.setX(targetWidth).setY(targetHeight).create();
         usage = Allocation.USAGE_GRAPHICS_RENDER_TARGET;
-        sRenderTargetBlur0Depth = Allocation.createTyped(rs, renderType, usage);
-        sRenderTargetBlur1Depth = Allocation.createTyped(rs, renderType, usage);
-        sRenderTargetBlur2Depth = Allocation.createTyped(rs, renderType, usage);
+        sRenderTargetBlur0Depth = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
+        sRenderTargetBlur1Depth = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
+        sRenderTargetBlur2Depth = new TextureRenderTarget(Allocation.createTyped(rs, renderType, usage));
     }
 
     static void addOffsets(Renderable quad, float advance) {
@@ -75,7 +80,7 @@ class FullscreenBlur {
         quad.appendSourceParams(new Float4Param("blurOffset3", advance * 3.5f));
     }
 
-    static RenderPass addPass(Scene scene, Camera cam, Allocation color, Allocation depth) {
+    static RenderPass addPass(Scene scene, Camera cam, TextureRenderTarget color, TextureRenderTarget depth) {
         RenderPass pass = new RenderPass();
         pass.setColorTarget(color);
         pass.setDepthTarget(depth);
@@ -117,7 +122,7 @@ class FullscreenBlur {
                                              sRenderTargetBlur2Color,
                                              sRenderTargetBlur2Depth);
         Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadS", selectCol);
-        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur0Color)));
+        quad.appendSourceParams(new TextureParam("color", sRenderTargetBlur0Color));
         selectColorPass.appendRenderable(quad);
 
         // Horizontal blur
@@ -125,8 +130,8 @@ class FullscreenBlur {
                                                 sRenderTargetBlur1Color,
                                                 sRenderTargetBlur1Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadH", hBlur);
-        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur2Color)));
-        addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getX());
+        quad.appendSourceParams(new TextureParam("color", sRenderTargetBlur2Color));
+        addOffsets(quad, 1.0f / (float)targetWidth);
         horizontalBlurPass.appendRenderable(quad);
 
         // Vertical Blur
@@ -134,8 +139,8 @@ class FullscreenBlur {
                                               sRenderTargetBlur2Color,
                                               sRenderTargetBlur2Depth);
         quad = sceneManager.getRenderableQuad("ScreenAlignedQuadV", vBlur);
-        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur1Color)));
-        addOffsets(quad, 1.0f / (float)sRenderTargetBlur0Color.getType().getY());
+        quad.appendSourceParams(new TextureParam("color", sRenderTargetBlur1Color));
+        addOffsets(quad, 1.0f / (float)targetHeight);
         verticalBlurPass.appendRenderable(quad);
     }
 
@@ -148,7 +153,7 @@ class FullscreenBlur {
 
         RenderPass compositePass = addPass(scene, cam, null, null);
         Renderable quad = sceneManager.getRenderableQuad("ScreenAlignedQuadComposite", drawTex);
-        quad.appendSourceParams(new TextureParam("color", new Texture2D(sRenderTargetBlur2Color)));
+        quad.appendSourceParams(new TextureParam("color", sRenderTargetBlur2Color));
         compositePass.appendRenderable(quad);
     }
 

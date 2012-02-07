@@ -33,10 +33,10 @@
 #define LIGHT_DIRECTIONAL 1
 
 // Shader params that involve only data
-#define SHADER_PARAM_DATA_ONLY       10000
-#define SHADER_PARAM_FLOAT4_DATA     10001
-#define SHADER_PARAM_TRANSFORM_DATA  10002
-#define SHADER_PARAM_TRANSFORM_MODEL 10003
+#define SHADER_PARAM_DATA_ONLY                 10000
+#define SHADER_PARAM_FLOAT4_DATA               10001
+#define SHADER_PARAM_TRANSFORM_DATA            10002
+#define SHADER_PARAM_TRANSFORM_MODEL           10003
 
 // Shader params that involve camera
 #define SHADER_PARAM_CAMERA                    1000
@@ -54,11 +54,12 @@
 #define SHADER_PARAM_FLOAT4_LIGHT_POS          104
 #define SHADER_PARAM_FLOAT4_LIGHT_DIR          105
 
-#define SHADER_PARAM_TEXTURE 10
+#define SHADER_PARAM_TEXTURE                   10
 
-#define TEXTURE_NONE 0
-#define TEXTURE_2D 1
-#define TEXTURE_CUBE 2
+#define TEXTURE_NONE          0
+#define TEXTURE_2D            1
+#define TEXTURE_CUBE          2
+#define TEXTURE_RENDER_TARGET 3
 
 typedef struct TransformComponent_s {
     float4 value;
@@ -96,6 +97,8 @@ typedef struct FragmentShader_s {
     rs_allocation shaderConst;
     // ShaderParam's that populate data
     rs_allocation shaderConstParams;
+    // ShaderParam's that set textures
+    rs_allocation shaderTextureParams;
     // location of the per object constants on the buffer
     int objectConstIndex;
 } SgFragmentShader;

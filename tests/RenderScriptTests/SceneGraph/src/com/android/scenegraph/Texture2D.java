@@ -32,9 +32,11 @@ public class Texture2D extends TextureBase {
     String mFileDir;
 
     public Texture2D() {
+        super(ScriptC_export.const_TextureType_TEXTURE_2D);
     }
 
     public Texture2D(Allocation tex) {
+        super(ScriptC_export.const_TextureType_TEXTURE_2D);
         setTexture(tex);
     }
 
@@ -51,12 +53,22 @@ public class Texture2D extends TextureBase {
     }
 
     public void setTexture(Allocation tex) {
-        mRsTexture = tex;
+        mData.texture = tex;
+        if (mField != null) {
+            mField.set_texture(0, mData.texture, true);
+        }
     }
 
-    Allocation getRsData() {
-        if (mRsTexture != null) {
-            return mRsTexture;
+    void load() {
+        RenderScriptGL rs = SceneManager.getRS();
+        Resources res = SceneManager.getRes();
+        String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
+        setTexture(SceneManager.loadTexture2D(mFileDir + shortName, rs, res));
+    }
+
+    ScriptField_Texture_s getRsData(boolean loadNow) {
+        if (mField != null) {
+            return mField;
         }
 
         RenderScriptGL rs = SceneManager.getRS();
@@ -65,10 +77,17 @@ public class Texture2D extends TextureBase {
             return null;
         }
 
-        String shortName = mFileName.substring(mFileName.lastIndexOf('/') + 1);
-        mRsTexture = SceneManager.loadTexture2D(mFileDir + shortName, rs, res);
+        mField = new ScriptField_Texture_s(rs, 1);
 
-        return mRsTexture;
+        if (loadNow) {
+            load();
+        } else {
+            mData.texture = SceneManager.getDefaultTex2D();
+            new SingleImageLoaderTask().execute(this);
+        }
+
+        mField.set(mData, 0, true);
+        return mField;
     }
 }
 

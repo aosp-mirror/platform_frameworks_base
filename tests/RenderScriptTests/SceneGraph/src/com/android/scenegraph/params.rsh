@@ -19,8 +19,7 @@
 #include "scenegraph_objects.rsh"
 
 //#define DEBUG_PARAMS
-static void debugParam(SgShaderParam *p, SgShaderParamData *pData,
-                       uint8_t *constantBuffer, const SgCamera *currentCam) {
+static void debugParam(SgShaderParam *p, SgShaderParamData *pData) {
     rsDebug("____________ Param ____________", p);
     printName(pData->paramName);
     rsDebug("bufferOffset", p->bufferOffset);
@@ -28,7 +27,6 @@ static void debugParam(SgShaderParam *p, SgShaderParamData *pData,
     rsDebug("data timestamp ", pData->timestamp);
     rsDebug("param timestamp", p->dataTimestamp);
 
-    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
     const SgTransform *pTransform = NULL;
     if (rsIsObject(pData->transform)) {
         pTransform = (const SgTransform *)rsGetElementAt(pData->transform, 0);
@@ -70,7 +68,9 @@ static void writeFloatData(float *ptr, const float4 *input, uint32_t vecSize) {
 }
 
 static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
-                         uint8_t *constantBuffer, const SgCamera *currentCam) {
+                         uint8_t *constantBuffer,
+                         const SgCamera *currentCam,
+                         SgFragmentShader *shader) {
     bool isDataOnly = (pData->type > SHADER_PARAM_DATA_ONLY);
     const SgTransform *pTransform = NULL;
     if (rsIsObject(pData->transform)) {
@@ -97,9 +97,18 @@ static bool processParam(SgShaderParam *p, SgShaderParamData *pData,
         pLight = (const SgLight *)rsGetElementAt(pData->light, 0);
     }
 
-    uint8_t *dataPtr = constantBuffer + p->bufferOffset;
+    uint8_t *dataPtr = NULL;
+    const SgTexture *tex = NULL;
+    if (pData->type == SHADER_PARAM_TEXTURE) {
+        tex = rsGetElementAt(pData->texture, 0);
+    } else {
+        dataPtr = constantBuffer + p->bufferOffset;
+    }
 
-    switch(pData->type) {
+    switch (pData->type) {
+    case SHADER_PARAM_TEXTURE:
+        rsgBindTexture(shader->program, p->bufferOffset, tex->texture);
+        break;
     case SHADER_PARAM_FLOAT4_DATA:
         writeFloatData((float*)dataPtr, &pData->float_value, p->float_vecSize);
         break;
@@ -161,9 +170,24 @@ static void processAllParams(rs_allocation shaderConst,
             SgShaderParam *current = (SgShaderParam*)rsGetElementAt(allParams, i);
             SgShaderParamData *currentData = (SgShaderParamData*)rsGetElementAt(current->data, 0);
 #ifdef DEBUG_PARAMS
-            debugParam(current, currentData, constantBuffer, camera);
+            debugParam(current, currentData);
 #endif // DEBUG_PARAMS
-            updated = processParam(current, currentData, constantBuffer, camera) || updated;
+            updated = processParam(current, currentData, constantBuffer, camera, NULL) || updated;
         }
+    }
+}
+
+static void processTextureParams(SgFragmentShader *shader) {
+    int numParams = 0;
+    if (rsIsObject(shader->shaderTextureParams)) {
+        numParams = rsAllocationGetDimX(shader->shaderTextureParams);
+    }
+    for (int i = 0; i < numParams; i ++) {
+        SgShaderParam *current = (SgShaderParam*)rsGetElementAt(shader->shaderTextureParams, i);
+        SgShaderParamData *currentData = (SgShaderParamData*)rsGetElementAt(current->data, 0);
+#ifdef DEBUG_PARAMS
+        debugParam(current, currentData);
+#endif // DEBUG_PARAMS
+        processParam(current, currentData, NULL, NULL, shader);
     }
 }

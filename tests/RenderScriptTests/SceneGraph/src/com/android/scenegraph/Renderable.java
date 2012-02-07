@@ -128,7 +128,7 @@ public class Renderable extends RenderableBase {
         }
     }
 
-    void updateTextures(RenderScriptGL rs, Resources res) {
+    void updateTextures(RenderScriptGL rs) {
         Iterator<ShaderParam> allParamsIter = mSourceParams.values().iterator();
         int paramIndex = 0;
         while (allParamsIter.hasNext()) {
@@ -137,7 +137,7 @@ public class Renderable extends RenderableBase {
                 TextureParam p = (TextureParam)sp;
                 TextureBase tex = p.getTexture();
                 if (tex != null) {
-                    mData.pf_textures[paramIndex++] = tex.getRsData();
+                    mData.pf_textures[paramIndex++] = tex.getRsData(false).getAllocation();
                 }
             }
         }
@@ -161,6 +161,7 @@ public class Renderable extends RenderableBase {
             return mField;
         }
         updateFieldItem(rs);
+        updateTextures(rs);
 
         mField = new ScriptField_Renderable_s(rs, 1);
         mField.set(mData, 0, true);

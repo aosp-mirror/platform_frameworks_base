@@ -49,7 +49,7 @@ static SgCamera *gActiveCamera = NULL;
 
 static rs_allocation nullAlloc;
 
-//#define DEBUG_RENDERABLES
+// #define DEBUG_RENDERABLES
 static void draw(SgRenderable *obj) {
 #ifdef DEBUG_RENDERABLES
     const SgTransform *objTransform = (const SgTransform *)rsGetElementAt(obj->transformMatrix, 0);
@@ -87,11 +87,8 @@ static void draw(SgRenderable *obj) {
     rsgBindProgramFragment(pf->program);
 
     for (uint32_t i = 0; i < obj->pf_num_textures; i ++) {
-        if (rsIsObject(obj->pf_textures[i])) {
-            rsgBindTexture(pf->program, i, obj->pf_textures[i]);
-        } else {
-            rsgBindTexture(pf->program, i, gTGrid);
-        }
+        const SgTexture *tex = rsGetElementAt(obj->pf_textures[i], 0);
+        rsgBindTexture(pf->program, i, tex->texture);
     }
 
     rsgDrawMesh(obj->mesh, obj->meshIndex);
@@ -117,8 +114,10 @@ static void updateActiveCamera(rs_allocation cam) {
 
 static void prepareCameras() {
     // now compute all the camera matrices
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
-    rsForEach(gCameraScript, gCameras, nullAlloc, &aspect, sizeof(aspect));
+    if (rsIsObject(gCameras)) {
+        float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+        rsForEach(gCameraScript, gCameras, nullAlloc, &aspect, sizeof(aspect));
+    }
 }
 
 static void prepareLights() {
@@ -164,20 +163,21 @@ static void drawAllObjects(rs_allocation allObj) {
     drawSorted();
 }
 
-void root(const void *v_in, void *v_out) {
+int root(void) {
 #ifdef DEBUG_RENDERABLES
     rsDebug("=============================================================================", 0);
 #endif // DEBUG_RENDERABLES
+
     // first step is to update the transform hierachy
-    rsForEach(gTransformScript, gRootNode->children, nullAlloc, 0, 0);
+    if (gRootNode && rsIsObject(gRootNode->children)) {
+        rsForEach(gTransformScript, gRootNode->children, nullAlloc, 0, 0);
+    }
 
     prepareCameras();
     prepareLights();
 
-    rsgClearDepth(1.0f);
-
-    int numRenderables = rsAllocationGetDimX(gRenderableObjects);
     if (rsIsObject(gRenderPasses)) {
+        rsgClearDepth(1.0f);
         int numPasses = rsAllocationGetDimX(gRenderPasses);
         for (uint i = 0; i < numPasses; i ++) {
             gFrontToBackCount = 0;
@@ -208,10 +208,14 @@ void root(const void *v_in, void *v_out) {
         gBackToFrontCount = 0;
         rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         rsgClearDepth(1.0f);
-        rs_allocation *camAlloc = (rs_allocation*)rsGetElementAt(gCameras, 1);
-        updateActiveCamera(*camAlloc);
+
+        if (rsIsObject(gCameras)) {
+            rs_allocation *camAlloc = (rs_allocation*)rsGetElementAt(gCameras, 0);
+            updateActiveCamera(*camAlloc);
+        }
         drawAllObjects(gRenderableObjects);
     }
+    return 10;
 }
 
 // Search through sorted and culled objects
