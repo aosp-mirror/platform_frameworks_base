@@ -335,7 +335,7 @@ private:
     status_t applyRotation();
     status_t waitForBufferFilled_l();
 
-    int64_t retrieveDecodingTimeUs(bool isCodecSpecific);
+    int64_t getDecodingTimeUs();
 
     status_t parseAVCCodecSpecificData(
             const void *data, size_t size,
