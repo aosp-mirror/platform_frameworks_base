@@ -446,7 +446,6 @@ private:
         virtual status_t    readyToRun();
         virtual void        onFirstRef();
         AudioTrack& mReceiver;
-        Mutex       mLock;
     };
 
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
