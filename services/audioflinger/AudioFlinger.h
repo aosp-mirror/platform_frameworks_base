@@ -323,7 +323,7 @@ private:
                                         uint32_t flags,
                                         const sp<IMemory>& sharedBuffer,
                                         int sessionId);
-                                ~TrackBase();
+            virtual             ~TrackBase();
 
             virtual status_t    start() = 0;
             virtual void        stop() = 0;
@@ -581,7 +581,7 @@ private:
                                         int frameCount,
                                         const sp<IMemory>& sharedBuffer,
                                         int sessionId);
-                                ~Track();
+            virtual             ~Track();
 
                     void        dump(char* buffer, size_t size);
             virtual status_t    start();
@@ -664,7 +664,7 @@ private:
                                         audio_format_t format,
                                         uint32_t channelMask,
                                         int frameCount);
-                                ~OutputTrack();
+            virtual             ~OutputTrack();
 
             virtual status_t    start();
             virtual void        stop();
@@ -845,7 +845,7 @@ private:
     public:
 
         DirectOutputThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device);
-        ~DirectOutputThread();
+        virtual                 ~DirectOutputThread();
 
         // Thread virtuals
         virtual     bool        threadLoop();
@@ -871,7 +871,7 @@ private:
     class DuplicatingThread : public MixerThread {
     public:
         DuplicatingThread (const sp<AudioFlinger>& audioFlinger, MixerThread* mainThread, int id);
-        ~DuplicatingThread();
+        virtual                 ~DuplicatingThread();
 
         // Thread virtuals
         virtual     bool        threadLoop();
@@ -946,7 +946,7 @@ private:
                                         int frameCount,
                                         uint32_t flags,
                                         int sessionId);
-                                ~RecordTrack();
+            virtual             ~RecordTrack();
 
             virtual status_t    start();
             virtual void        stop();
@@ -975,7 +975,7 @@ private:
                         uint32_t channels,
                         int id,
                         uint32_t device);
-                ~RecordThread();
+                virtual     ~RecordThread();
 
         virtual bool        threadLoop();
         virtual status_t    readyToRun();
@@ -1064,7 +1064,7 @@ private:
                         effect_descriptor_t *desc,
                         int id,
                         int sessionId);
-        ~EffectModule();
+        virtual ~EffectModule();
 
         enum effect_state {
             IDLE,
@@ -1241,7 +1241,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
     class EffectChain: public RefBase {
     public:
         EffectChain(const wp<ThreadBase>& wThread, int sessionId);
-        ~EffectChain();
+        virtual ~EffectChain();
 
         // special key used for an entry in mSuspendedEffects keyed vector
         // corresponding to a suspend all request.

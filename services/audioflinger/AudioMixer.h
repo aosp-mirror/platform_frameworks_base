@@ -33,7 +33,7 @@ class AudioMixer
 public:
                             AudioMixer(size_t frameCount, uint32_t sampleRate);
 
-                            ~AudioMixer();
+    /*virtual*/             ~AudioMixer();  // non-virtual saves a v-table, restore if sub-classed
 
     static const uint32_t MAX_NUM_TRACKS = 32;
     static const uint32_t MAX_NUM_CHANNELS = 2;
