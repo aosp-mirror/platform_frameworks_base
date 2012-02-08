@@ -370,6 +370,18 @@ status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
     return NO_ERROR;
 }
 
+sp<AudioFlinger::Client> AudioFlinger::registerPid_l(pid_t pid)
+{
+    // If pid is already in the mClients wp<> map, then use that entry
+    // (for which promote() is always != 0), otherwise create a new entry and Client.
+    sp<Client> client = mClients.valueFor(pid).promote();
+    if (client == 0) {
+        client = new Client(this, pid);
+        mClients.add(pid, client);
+    }
+
+    return client;
+}
 
 // IAudioFlinger interface
 
@@ -390,7 +402,6 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     sp<PlaybackThread::Track> track;
     sp<TrackHandle> trackHandle;
     sp<Client> client;
-    wp<Client> wclient;
     status_t lStatus;
     int lSessionId;
 
@@ -412,14 +423,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
             goto Exit;
         }
 
-        wclient = mClients.valueFor(pid);
-
-        if (wclient != NULL) {
-            client = wclient.promote();
-        } else {
-            client = new Client(this, pid);
-            mClients.add(pid, client);
-        }
+        client = registerPid_l(pid);
 
         ALOGV("createTrack() sessionId: %d", (sessionId == NULL) ? -2 : *sessionId);
         if (sessionId != NULL && *sessionId != AUDIO_SESSION_OUTPUT_MIX) {
@@ -4131,7 +4135,6 @@ sp<IAudioRecord> AudioFlinger::openRecord(
     sp<RecordThread::RecordTrack> recordTrack;
     sp<RecordHandle> recordHandle;
     sp<Client> client;
-    wp<Client> wclient;
     status_t lStatus;
     RecordThread *thread;
     size_t inFrameCount;
@@ -4152,13 +4155,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
             goto Exit;
         }
 
-        wclient = mClients.valueFor(pid);
-        if (wclient != NULL) {
-            client = wclient.promote();
-        } else {
-            client = new Client(this, pid);
-            mClients.add(pid, client);
-        }
+        client = registerPid_l(pid);
 
         // If no audio session id is provided, create one here
         if (sessionId != NULL && *sessionId != AUDIO_SESSION_OUTPUT_MIX) {
@@ -5405,10 +5402,8 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
     status_t lStatus = NO_ERROR;
     sp<EffectHandle> handle;
     effect_descriptor_t desc;
-    sp<Client> client;
-    wp<Client> wclient;
 
-    ALOGV("createEffect pid %d, client %p, priority %d, sessionId %d, io %d",
+    ALOGV("createEffect pid %d, effectClient %p, priority %d, sessionId %d, io %d",
             pid, effectClient.get(), priority, sessionId, io);
 
     if (pDesc == NULL) {
@@ -5559,14 +5554,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             }
         }
 
-        wclient = mClients.valueFor(pid);
-
-        if (wclient != NULL) {
-            client = wclient.promote();
-        } else {
-            client = new Client(this, pid);
-            mClients.add(pid, client);
-        }
+        sp<Client> client = registerPid_l(pid);
 
         // create effect on selected output thread
         handle = thread->createEffect_l(client, effectClient, priority, sessionId,
@@ -6923,6 +6911,7 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
             mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
         }
         mCblkMemory.clear();    // free the shared memory before releasing the heap it belongs to
+        // Client destructor must run with AudioFlinger mutex locked
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
         mClient.clear();
     }
