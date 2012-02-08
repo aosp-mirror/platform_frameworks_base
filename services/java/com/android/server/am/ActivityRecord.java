@@ -602,6 +602,7 @@ final class ActivityRecord {
     
     public void windowsDrawn() {
         synchronized(service) {
+            stack.reportActivityDrawnLocked(this);
             if (launchTime != 0) {
                 final long curTime = SystemClock.uptimeMillis();
                 final long thisTime = curTime - launchTime;
@@ -690,7 +691,9 @@ final class ActivityRecord {
             // Hmmm, who might we be waiting for?
             r = stack.mResumedActivity;
             if (r == null) {
-                r = stack.mPausingActivity;
+                if (stack.mPausingActivities.size() > 0) {
+                    r = stack.mPausingActivities.get(stack.mPausingActivities.size()-1);
+                }
             }
             // Both of those null?  Fall back to 'this' again
             if (r == null) {

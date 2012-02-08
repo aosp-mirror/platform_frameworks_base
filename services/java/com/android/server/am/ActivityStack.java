@@ -227,7 +227,13 @@ final class ActivityStack {
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      */
-    ActivityRecord mPausingActivity = null;
+    final ArrayList<ActivityRecord> mPausingActivities = new ArrayList<ActivityRecord>();
+
+    /**
+     * These activities currently have their input paused, as they want for
+     * the next top activity to have its windows visible.
+     */
+    final ArrayList<ActivityRecord> mInputPausedActivities = new ArrayList<ActivityRecord>();
 
     /**
      * This is the last activity that we put into the paused state.  This is
@@ -807,9 +813,9 @@ final class ActivityStack {
                 startPausingLocked(false, true);
                 return;
             }
-            if (mPausingActivity != null) {
+            if (mPausingActivities.size() > 0) {
                 // Still waiting for something to pause; can't sleep yet.
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still waiting to pause " + mPausingActivity);
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still waiting to pause " + mPausingActivities);
                 return;
             }
 
@@ -872,11 +878,6 @@ final class ActivityStack {
     }
 
     private final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
-        if (mPausingActivity != null) {
-            RuntimeException e = new RuntimeException();
-            Slog.e(TAG, "Trying to pause when pause is already pending for "
-                  + mPausingActivity, e);
-        }
         ActivityRecord prev = mResumedActivity;
         if (prev == null) {
             RuntimeException e = new RuntimeException();
@@ -884,19 +885,25 @@ final class ActivityStack {
             resumeTopActivityLocked(null);
             return;
         }
+        if (mPausingActivities.contains(prev)) {
+            RuntimeException e = new RuntimeException();
+            Slog.e(TAG, "Trying to pause when pause when already pausing " + prev, e);
+        }
         if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSING: " + prev);
         else if (DEBUG_PAUSE) Slog.v(TAG, "Start pausing: " + prev);
         mResumedActivity = null;
-        mPausingActivity = prev;
+        mPausingActivities.add(prev);
         mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
         prev.updateThumbnail(screenshotActivities(prev), null);
 
         mService.updateCpuStats();
+        ActivityRecord pausing;
         
         if (prev.app != null && prev.app.thread != null) {
             if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending pause: " + prev);
+            pausing = prev;
             try {
                 EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
                         System.identityHashCode(prev),
@@ -909,12 +916,14 @@ final class ActivityStack {
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
-                mPausingActivity = null;
+                mPausingActivities.remove(prev);
                 mLastPausedActivity = null;
+                pausing = null;
             }
         } else {
-            mPausingActivity = null;
+            mPausingActivities.remove(prev);
             mLastPausedActivity = null;
+            pausing = null;
         }
 
         // If we are not going to sleep, we want to ensure the device is
@@ -928,16 +937,26 @@ final class ActivityStack {
             }
         }
 
-
-        if (mPausingActivity != null) {
+        if (pausing != null) {
             // Have the window manager pause its key dispatching until the new
             // activity has started.  If we're pausing the activity just because
             // the screen is being turned off and the UI is sleeping, don't interrupt
             // key dispatch; the same activity will pick it up again on wakeup.
             if (!uiSleeping) {
-                prev.pauseKeyDispatchingLocked();
+                pausing.pauseKeyDispatchingLocked();
+                mInputPausedActivities.add(prev);
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Key dispatch not paused for screen off");
+            }
+
+            if (pausing.configDestroy) {
+                // The previous is being paused because the configuration
+                // is changing, which means it is actually stopping...
+                // To juggle the fact that we are also starting a new
+                // instance right now, we need to first completely stop
+                // the current instance before starting the new one.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Destroying at pause: " + prev);
+                destroyActivityLocked(pausing, true, false, "pause-config");
             }
 
             // Schedule a pause timeout in case the app doesn't respond.
@@ -951,7 +970,10 @@ final class ActivityStack {
             // This activity failed to schedule the
             // pause, so just treat it as being paused now.
             if (DEBUG_PAUSE) Slog.v(TAG, "Activity not running, resuming next.");
-            resumeTopActivityLocked(null);
+        }
+
+        if (!mService.isSleeping()) {
+            resumeTopActivityLocked(pausing);
         }
     }
     
@@ -966,16 +988,17 @@ final class ActivityStack {
             if (index >= 0) {
                 r = mHistory.get(index);
                 mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
-                if (mPausingActivity == r) {
+                if (mPausingActivities.contains(r)) {
                     if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
                             + (timeout ? " (due to timeout)" : " (pause complete)"));
                     r.state = ActivityState.PAUSED;
-                    completePauseLocked();
+                    completePauseLocked(r);
                 } else {
+                    ActivityRecord old = mPausingActivities.size() > 0
+                            ? mPausingActivities.get(0) : null;
                     EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
                             System.identityHashCode(r), r.shortComponentName, 
-                            mPausingActivity != null
-                                ? mPausingActivity.shortComponentName : "(none)");
+                            old != null ? old.shortComponentName : "(none)");
                 }
             }
         }
@@ -1001,8 +1024,14 @@ final class ActivityStack {
                 ProcessRecord fgApp = null;
                 if (mResumedActivity != null) {
                     fgApp = mResumedActivity.app;
-                } else if (mPausingActivity != null) {
-                    fgApp = mPausingActivity.app;
+                } else {
+                    for (int i=mPausingActivities.size()-1; i>=0; i--) {
+                        ActivityRecord pausing = mPausingActivities.get(i);
+                        if (pausing.app == r.app) {
+                            fgApp = pausing.app;
+                            break;
+                        }
+                    }
                 }
                 if (r.app != null && fgApp != null && r.app != fgApp
                         && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
@@ -1014,57 +1043,48 @@ final class ActivityStack {
         }
     }
 
-    private final void completePauseLocked() {
-        ActivityRecord prev = mPausingActivity;
+    private final void completePauseLocked(ActivityRecord prev) {
         if (DEBUG_PAUSE) Slog.v(TAG, "Complete pause: " + prev);
         
-        if (prev != null) {
-            if (prev.finishing) {
-                if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
-                prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE);
-            } else if (prev.app != null) {
-                if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending stop: " + prev);
-                if (prev.waitingVisible) {
-                    prev.waitingVisible = false;
-                    mWaitingVisibleActivities.remove(prev);
-                    if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(
-                            TAG, "Complete pause, no longer waiting: " + prev);
-                }
-                if (prev.configDestroy) {
-                    // The previous is being paused because the configuration
-                    // is changing, which means it is actually stopping...
-                    // To juggle the fact that we are also starting a new
-                    // instance right now, we need to first completely stop
-                    // the current instance before starting the new one.
-                    if (DEBUG_PAUSE) Slog.v(TAG, "Destroying after pause: " + prev);
-                    destroyActivityLocked(prev, true, false, "pause-config");
-                } else {
-                    mStoppingActivities.add(prev);
-                    if (mStoppingActivities.size() > 3) {
-                        // If we already have a few activities waiting to stop,
-                        // then give up on things going idle and start clearing
-                        // them out.
-                        if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
-                        scheduleIdleLocked();
-                    } else {
-                        checkReadyForSleepLocked();
-                    }
-                }
-            } else {
-                if (DEBUG_PAUSE) Slog.v(TAG, "App died during pause, not stopping: " + prev);
-                prev = null;
+        if (prev.finishing) {
+            if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
+            prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE);
+        } else if (prev.app != null) {
+            if (DEBUG_PAUSE) Slog.v(TAG, "Enqueueing pending stop: " + prev);
+            if (prev.waitingVisible) {
+                prev.waitingVisible = false;
+                mWaitingVisibleActivities.remove(prev);
+                if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(
+                        TAG, "Complete pause, no longer waiting: " + prev);
             }
-            mPausingActivity = null;
-        }
-
-        if (!mService.isSleeping()) {
-            resumeTopActivityLocked(prev);
+            if (prev.configDestroy) {
+                // The previous is being paused because the configuration
+                // is changing, which means it is actually stopping...
+                // To juggle the fact that we are also starting a new
+                // instance right now, we need to first completely stop
+                // the current instance before starting the new one.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Destroying after pause: " + prev);
+                destroyActivityLocked(prev, true, false, "pause-config");
+            } else {
+                mStoppingActivities.add(prev);
+                if (mStoppingActivities.size() > 3) {
+                    // If we already have a few activities waiting to stop,
+                    // then give up on things going idle and start clearing
+                    // them out.
+                    if (DEBUG_PAUSE) Slog.v(TAG, "To many pending stops, forcing idle");
+                    scheduleIdleLocked();
+                } else {
+                    checkReadyForSleepLocked();
+                }
+            }
         } else {
-            checkReadyForSleepLocked();
+            if (DEBUG_PAUSE) Slog.v(TAG, "App died during pause, not stopping: " + prev);
+            prev = null;
         }
-        
-        if (prev != null) {
-            prev.resumeKeyDispatchingLocked();
+        mPausingActivities.remove(prev);
+
+        if (mService.isSleeping()) {
+            checkReadyForSleepLocked();
         }
 
         if (prev.app != null && prev.cpuTimeAtResume > 0
@@ -1122,7 +1142,9 @@ final class ActivityStack {
         if (mMainStack) {
             mService.setFocusedActivityLocked(next);
         }
-        next.resumeKeyDispatchingLocked();
+        if (mInputPausedActivities.remove(next)) {
+            next.resumeKeyDispatchingLocked();
+        }
         ensureActivitiesVisibleLocked(null, 0);
         mService.mWindowManager.executeAppTransition();
         mNoAnimActivities.clear();
@@ -1351,13 +1373,6 @@ final class ActivityStack {
         mWaitingVisibleActivities.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
-
-        // If we are currently pausing an activity, then don't do anything
-        // until that is done.
-        if (mPausingActivity != null) {
-            if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: pausing=" + mPausingActivity);
-            return false;
-        }
 
         // Okay we are now going to start a switch, to 'next'.  We may first
         // have to pause the current activity, but this is an important point
@@ -2440,7 +2455,7 @@ final class ActivityStack {
         
         err = startActivityUncheckedLocked(r, sourceRecord,
                 grantedUriPermissions, grantedMode, onlyIfNeeded, true);
-        if (mDismissKeyguardOnNextActivity && mPausingActivity == null) {
+        if (mDismissKeyguardOnNextActivity && mPausingActivities.size() == 0) {
             // Someone asked to have the keyguard dismissed on the next
             // activity start, but we are not actually doing an activity
             // switch...  just dismiss the keyguard now, because we
@@ -3111,7 +3126,18 @@ final class ActivityStack {
         }
         mService.notifyAll();
     }
-    
+
+    void reportActivityDrawnLocked(ActivityRecord r) {
+        if (mResumedActivity == r) {
+            // Once the resumed activity has been drawn, we can stop
+            // pausing input on all other activities.
+            for (int i=mInputPausedActivities.size()-1; i>=0; i--) {
+                mInputPausedActivities.get(i).resumeKeyDispatchingLocked();
+            }
+            mInputPausedActivities.clear();
+        }
+    }
+
     void reportActivityVisibleLocked(ActivityRecord r) {
         for (int i=mWaitingActivityVisible.size()-1; i>=0; i--) {
             WaitResult w = mWaitingActivityVisible.get(i);
@@ -3170,7 +3196,9 @@ final class ActivityStack {
                     mService.setFocusedActivityLocked(topRunningActivityLocked(null));
                 }
             }
-            r.resumeKeyDispatchingLocked();
+            if (mInputPausedActivities.remove(r)) {
+                r.resumeKeyDispatchingLocked();
+            }
             try {
                 r.stopped = false;
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPING: " + r
@@ -3496,7 +3524,7 @@ final class ActivityStack {
             // Tell window manager to prepare for this one to be removed.
             mService.mWindowManager.setAppVisibility(r.appToken, false);
                 
-            if (mPausingActivity == null) {
+            if (!mPausingActivities.contains(r)) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Finish needs to pause: " + r);
                 if (DEBUG_USER_LEAVING) Slog.v(TAG, "finish() => pause with userLeaving=false");
                 startPausingLocked(false, false);
@@ -3578,6 +3606,20 @@ final class ActivityStack {
             resumeTopActivityLocked(null);
         }
         return r;
+    }
+
+    final void appDiedLocked(ProcessRecord app) {
+        for (int i=mPausingActivities.size()-1; i>=0; i--) {
+            ActivityRecord r = mPausingActivities.get(i);
+            if (r.app == app) {
+                if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " + r);
+                mPausingActivities.remove(i);
+                mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
+            }
+        }
+        if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
+            mLastPausedActivity = null;
+        }
     }
 
     /**
