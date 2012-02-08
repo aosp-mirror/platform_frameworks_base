@@ -103,13 +103,13 @@ public:
     virtual     bool        getMicMute() const = 0;
 
     virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs) = 0;
-    virtual     String8     getParameters(int ioHandle, const String8& keys) = 0;
+    virtual     String8     getParameters(int ioHandle, const String8& keys) const = 0;
 
     // register a current process for audio output change notifications
     virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
 
     // retrieve the audio recording buffer size
-    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) = 0;
+    virtual size_t getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const = 0;
 
     virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
@@ -133,20 +133,21 @@ public:
 
     virtual status_t setVoiceVolume(float volume) = 0;
 
-    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) = 0;
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) const = 0;
 
-    virtual unsigned int  getInputFramesLost(int ioHandle) = 0;
+    virtual unsigned int getInputFramesLost(int ioHandle) const = 0;
 
     virtual int newAudioSessionId() = 0;
 
     virtual void acquireAudioSessionId(int audioSession) = 0;
     virtual void releaseAudioSessionId(int audioSession) = 0;
 
-    virtual status_t queryNumberEffects(uint32_t *numEffects) = 0;
+    virtual status_t queryNumberEffects(uint32_t *numEffects) const = 0;
 
-    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor) = 0;
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor) const = 0;
 
-    virtual status_t getEffectDescriptor(effect_uuid_t *pEffectUUID, effect_descriptor_t *pDescriptor) = 0;
+    virtual status_t getEffectDescriptor(effect_uuid_t *pEffectUUID,
+                                        effect_descriptor_t *pDescriptor) const = 0;
 
     virtual sp<IEffect> createEffect(pid_t pid,
                                     effect_descriptor_t *pDesc,

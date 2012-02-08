@@ -412,7 +412,8 @@ status_t AudioEffect::queryEffect(uint32_t index, effect_descriptor_t *descripto
     return af->queryEffect(index, descriptor);
 }
 
-status_t AudioEffect::getEffectDescriptor(effect_uuid_t *uuid, effect_descriptor_t *descriptor)
+status_t AudioEffect::getEffectDescriptor(effect_uuid_t *uuid,
+        effect_descriptor_t *descriptor) /*const*/
 {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
