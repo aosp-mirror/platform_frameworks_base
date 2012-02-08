@@ -4834,10 +4834,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int extendedPaddingTop = getExtendedPaddingTop();
         int extendedPaddingBottom = getExtendedPaddingBottom();
 
+        final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
+        final int maxScrollY = mLayout.getHeight() - vspace;
+
         float clipLeft = compoundPaddingLeft + scrollX;
-        float clipTop = extendedPaddingTop + scrollY;
+        float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
         float clipRight = right - left - compoundPaddingRight + scrollX;
-        float clipBottom = bottom - top - extendedPaddingBottom + scrollY;
+        float clipBottom = bottom - top + scrollY -
+                ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
 
         if (mShadowRadius != 0) {
             clipLeft += Math.min(0, mShadowDx - mShadowRadius);
