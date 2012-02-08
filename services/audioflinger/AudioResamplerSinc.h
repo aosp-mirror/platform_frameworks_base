@@ -31,7 +31,7 @@ class AudioResamplerSinc : public AudioResampler {
 public:
     AudioResamplerSinc(int bitDepth, int inChannelCount, int32_t sampleRate);
 
-    ~AudioResamplerSinc();
+    virtual ~AudioResamplerSinc();
 
     virtual void resample(int32_t* out, size_t outFrameCount,
             AudioBufferProvider* provider);
