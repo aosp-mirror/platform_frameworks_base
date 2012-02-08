@@ -205,7 +205,7 @@ public:
 
                audio_mode_t getMode() const { return mMode; }
 
-                bool        btNrecIsOff() { return mBtNrecIsOff; }
+                bool        btNrecIsOff() const { return mBtNrecIsOff; }
 
 private:
 
@@ -229,7 +229,7 @@ private:
         virtual             ~Client();
         sp<MemoryDealer>    heap() const;
         pid_t               pid() const { return mPid; }
-        sp<AudioFlinger>    audioFlinger() { return mAudioFlinger; }
+        sp<AudioFlinger>    audioFlinger() const { return mAudioFlinger; }
 
     private:
                             Client(const Client&);
@@ -327,9 +327,9 @@ private:
 
             virtual status_t    start() = 0;
             virtual void        stop() = 0;
-                    sp<IMemory> getCblk() const;
+                    sp<IMemory> getCblk() const { return mCblkMemory; }
                     audio_track_cblk_t* cblk() const { return mCblk; }
-                    int         sessionId() { return mSessionId; }
+                    int         sessionId() const { return mSessionId; }
 
         protected:
             friend class ThreadBase;
@@ -349,11 +349,11 @@ private:
                 return mFormat;
             }
 
-            int channelCount() const ;
+            int channelCount() const { return mChannelCount; }
 
-            uint32_t channelMask() const;
+            uint32_t channelMask() const { return mChannelMask; }
 
-            int sampleRate() const;
+            int sampleRate() const; // FIXME inline after cblk sr moved
 
             void* getBuffer(uint32_t offset, uint32_t frames) const;
 
@@ -409,10 +409,10 @@ private:
 
         virtual     status_t    initCheck() const = 0;
                     type_t      type() const { return mType; }
-                    uint32_t    sampleRate() const;
-                    int         channelCount() const;
-                    audio_format_t format() const;
-                    size_t      frameCount() const;
+                    uint32_t    sampleRate() const { return mSampleRate; }
+                    int         channelCount() const { return mChannelCount; }
+                    audio_format_t format() const { return mFormat; }
+                    size_t      frameCount() const { return mFrameCount; }
                     void        wakeUp()    { mWaitWorkCV.broadcast(); }
                     void        exit();
         virtual     bool        checkForNewParameters_l() = 0;
@@ -600,10 +600,10 @@ private:
                     }
                     status_t    attachAuxEffect(int EffectId);
                     void        setAuxBuffer(int EffectId, int32_t *buffer);
-                    int32_t     *auxBuffer() { return mAuxBuffer; }
+                    int32_t     *auxBuffer() const { return mAuxBuffer; }
                     void        setMainBuffer(int16_t *buffer) { mMainBuffer = buffer; }
-                    int16_t     *mainBuffer() { return mMainBuffer; }
-                    int         auxEffectId() { return mAuxEffectId; }
+                    int16_t     *mainBuffer() const { return mMainBuffer; }
+                    int         auxEffectId() const { return mAuxEffectId; }
 
 
         protected:
@@ -617,7 +617,7 @@ private:
                                 Track& operator = (const Track&);
 
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer);
-            bool isMuted() { return mMute; }
+            bool isMuted() const { return mMute; }
             bool isPausing() const {
                 return mState == PAUSING;
             }
@@ -669,9 +669,9 @@ private:
             virtual status_t    start();
             virtual void        stop();
                     bool        write(int16_t* data, uint32_t frames);
-                    bool        bufferQueueEmpty() { return (mBufferQueue.size() == 0) ? true : false; }
-                    bool        isActive() { return mActive; }
-            const wp<ThreadBase>& thread() { return mThread; }
+                    bool        bufferQueueEmpty() const { return (mBufferQueue.size() == 0) ? true : false; }
+                    bool        isActive() const { return mActive; }
+            const wp<ThreadBase>& thread() const { return mThread; }
 
         private:
 
@@ -708,8 +708,8 @@ private:
         virtual     status_t    setMasterVolume(float value);
         virtual     status_t    setMasterMute(bool muted);
 
-        virtual     float       masterVolume() const;
-        virtual     bool        masterMute() const;
+        virtual     float       masterVolume() const { return mMasterVolume; }
+        virtual     bool        masterMute() const { return mMasterMute; }
 
         virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value);
         virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted);
@@ -738,7 +738,7 @@ private:
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged_l(int event, int param = 0);
         virtual     status_t    getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames);
-                    int16_t     *mixBuffer() { return mMixBuffer; };
+                    int16_t     *mixBuffer() const { return mMixBuffer; };
 
         virtual     void detachAuxEffect_l(int effectId);
                     status_t attachAuxEffect(const sp<AudioFlinger::PlaybackThread::Track> track,
@@ -1076,7 +1076,7 @@ private:
             DESTROYED
         };
 
-        int         id() { return mId; }
+        int         id() const { return mId; }
         void process();
         void updateState();
         status_t command(uint32_t cmdCode,
@@ -1094,12 +1094,12 @@ private:
         uint32_t status() {
             return mStatus;
         }
-        int sessionId() {
+        int sessionId() const {
             return mSessionId;
         }
         status_t    setEnabled(bool enabled);
-        bool isEnabled();
-        bool isProcessEnabled();
+        bool isEnabled() const;
+        bool isProcessEnabled() const;
 
         void        setInBuffer(int16_t *buffer) { mConfig.inputCfg.buffer.s16 = buffer; }
         int16_t     *inBuffer() { return mConfig.inputCfg.buffer.s16; }
@@ -1126,7 +1126,7 @@ private:
 
         sp<EffectHandle> controlHandle();
 
-        bool             isPinned() { return mPinned; }
+        bool             isPinned() const { return mPinned; }
         void             unPin() { mPinned = false; }
 
         status_t         dump(int fd, const Vector<String16>& args);
@@ -1187,7 +1187,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                                  void *pReplyData);
         virtual void disconnect();
         virtual void disconnect(bool unpiniflast);
-        virtual sp<IMemory> getCblk() const;
+        virtual sp<IMemory> getCblk() const { return mCblkMemory; }
         virtual status_t onTransact(uint32_t code, const Parcel& data,
                 Parcel* reply, uint32_t flags);
 
@@ -1203,13 +1203,13 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                              uint32_t replySize,
                              void *pReplyData);
         void setEnabled(bool enabled);
-        bool enabled() { return mEnabled; }
+        bool enabled() const { return mEnabled; }
 
         // Getters
-        int id() { return mEffect->id(); }
-        int priority() { return mPriority; }
-        bool hasControl() { return mHasControl; }
-        sp<EffectModule> effect() { return mEffect; }
+        int id() const { return mEffect->id(); }
+        int priority() const { return mPriority; }
+        bool hasControl() const { return mHasControl; }
+        sp<EffectModule> effect() const { return mEffect; }
 
         void dump(char* buffer, size_t size);
 
@@ -1263,7 +1263,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         status_t addEffect_l(const sp<EffectModule>& handle);
         size_t removeEffect_l(const sp<EffectModule>& handle);
 
-        int sessionId() { return mSessionId; }
+        int sessionId() const { return mSessionId; }
         void setSessionId(int sessionId) { mSessionId = sessionId; }
 
         sp<EffectModule> getEffectFromDesc_l(effect_descriptor_t *descriptor);
@@ -1277,26 +1277,26 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
             mInBuffer = buffer;
             mOwnInBuffer = ownsBuffer;
         }
-        int16_t *inBuffer() {
+        int16_t *inBuffer() const {
             return mInBuffer;
         }
         void setOutBuffer(int16_t *buffer) {
             mOutBuffer = buffer;
         }
-        int16_t *outBuffer() {
+        int16_t *outBuffer() const {
             return mOutBuffer;
         }
 
         void incTrackCnt() { android_atomic_inc(&mTrackCnt); }
         void decTrackCnt() { android_atomic_dec(&mTrackCnt); }
-        int32_t trackCnt() { return mTrackCnt;}
+        int32_t trackCnt() const { return mTrackCnt;}
 
         void incActiveTrackCnt() { android_atomic_inc(&mActiveTrackCnt);
                                    mTailBufferCount = mMaxTailBuffers; }
         void decActiveTrackCnt() { android_atomic_dec(&mActiveTrackCnt); }
-        int32_t activeTrackCnt() { return mActiveTrackCnt;}
+        int32_t activeTrackCnt() const { return mActiveTrackCnt;}
 
-        uint32_t strategy() { return mStrategy; }
+        uint32_t strategy() const { return mStrategy; }
         void setStrategy(uint32_t strategy)
                  { mStrategy = strategy; }
 
