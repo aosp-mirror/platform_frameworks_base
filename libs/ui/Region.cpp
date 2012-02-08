@@ -126,6 +126,9 @@ void Region::addRectUnchecked(int l, int t, int r, int b)
 Region& Region::orSelf(const Rect& r) {
     return operationSelf(r, op_or);
 }
+Region& Region::xorSelf(const Rect& r) {
+    return operationSelf(r, op_xor);
+}
 Region& Region::andSelf(const Rect& r) {
     return operationSelf(r, op_and);
 }
@@ -142,6 +145,9 @@ Region& Region::operationSelf(const Rect& r, int op) {
 
 Region& Region::orSelf(const Region& rhs) {
     return operationSelf(rhs, op_or);
+}
+Region& Region::xorSelf(const Region& rhs) {
+    return operationSelf(rhs, op_xor);
 }
 Region& Region::andSelf(const Region& rhs) {
     return operationSelf(rhs, op_and);
@@ -165,6 +171,9 @@ Region& Region::translateSelf(int x, int y) {
 const Region Region::merge(const Rect& rhs) const {
     return operation(rhs, op_or);
 }
+const Region Region::mergeExclusive(const Rect& rhs) const {
+    return operation(rhs, op_xor);
+}
 const Region Region::intersect(const Rect& rhs) const {
     return operation(rhs, op_and);
 }
@@ -181,6 +190,9 @@ const Region Region::operation(const Rect& rhs, int op) const {
 
 const Region Region::merge(const Region& rhs) const {
     return operation(rhs, op_or);
+}
+const Region Region::mergeExclusive(const Region& rhs) const {
+    return operation(rhs, op_xor);
 }
 const Region Region::intersect(const Region& rhs) const {
     return operation(rhs, op_and);
@@ -205,6 +217,9 @@ const Region Region::translate(int x, int y) const {
 Region& Region::orSelf(const Region& rhs, int dx, int dy) {
     return operationSelf(rhs, dx, dy, op_or);
 }
+Region& Region::xorSelf(const Region& rhs, int dx, int dy) {
+    return operationSelf(rhs, dx, dy, op_xor);
+}
 Region& Region::andSelf(const Region& rhs, int dx, int dy) {
     return operationSelf(rhs, dx, dy, op_and);
 }
@@ -221,6 +236,9 @@ Region& Region::operationSelf(const Region& rhs, int dx, int dy, int op) {
 
 const Region Region::merge(const Region& rhs, int dx, int dy) const {
     return operation(rhs, dx, dy, op_or);
+}
+const Region Region::mergeExclusive(const Region& rhs, int dx, int dy) const {
+    return operation(rhs, dx, dy, op_xor);
 }
 const Region Region::intersect(const Region& rhs, int dx, int dy) const {
     return operation(rhs, dx, dy, op_and);
@@ -421,6 +439,7 @@ void Region::boolean_operation(int op, Region& dst,
     SkRegion::Op sk_op;
     switch (op) {
         case op_or: sk_op = SkRegion::kUnion_Op; name="OR"; break;
+        case op_xor: sk_op = SkRegion::kUnion_XOR; name="XOR"; break;
         case op_and: sk_op = SkRegion::kIntersect_Op; name="AND"; break;
         case op_nand: sk_op = SkRegion::kDifference_Op; name="NAND"; break;
     }

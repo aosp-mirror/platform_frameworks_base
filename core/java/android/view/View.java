@@ -12734,9 +12734,9 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * </p>
      *
      * <p>
-     * The actual mesurement work of a view is performed in
+     * The actual measurement work of a view is performed in
      * {@link #onMeasure(int, int)}, called by this method. Therefore, only
-     * {@link #onMeasure(int, int)} can and must be overriden by subclasses.
+     * {@link #onMeasure(int, int)} can and must be overridden by subclasses.
      * </p>
      *
      *
