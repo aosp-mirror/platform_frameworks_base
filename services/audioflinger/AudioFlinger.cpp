@@ -909,7 +909,7 @@ void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
 
     Mutex::Autolock _l(mLock);
 
-    int pid = IPCThreadState::self()->getCallingPid();
+    pid_t pid = IPCThreadState::self()->getCallingPid();
     if (mNotificationClients.indexOfKey(pid) < 0) {
         sp<NotificationClient> notificationClient = new NotificationClient(this,
                                                                             client,
@@ -5203,7 +5203,7 @@ int AudioFlinger::newAudioSessionId()
 void AudioFlinger::acquireAudioSessionId(int audioSession)
 {
     Mutex::Autolock _l(mLock);
-    int caller = IPCThreadState::self()->getCallingPid();
+    pid_t caller = IPCThreadState::self()->getCallingPid();
     ALOGV("acquiring %d from %d", audioSession, caller);
     int num = mAudioSessionRefs.size();
     for (int i = 0; i< num; i++) {
@@ -5221,7 +5221,7 @@ void AudioFlinger::acquireAudioSessionId(int audioSession)
 void AudioFlinger::releaseAudioSessionId(int audioSession)
 {
     Mutex::Autolock _l(mLock);
-    int caller = IPCThreadState::self()->getCallingPid();
+    pid_t caller = IPCThreadState::self()->getCallingPid();
     ALOGV("releasing %d from %d", audioSession, caller);
     int num = mAudioSessionRefs.size();
     for (int i = 0; i< num; i++) {
