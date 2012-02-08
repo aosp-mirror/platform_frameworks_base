@@ -3259,7 +3259,6 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
         // mBufferEnd
         mFrameCount(0),
         mState(IDLE),
-        mClientTid(-1),
         mFormat(format),
         mFlags(flags & ~SYSTEM_FLAGS_MASK),
         mSessionId(sessionId)
@@ -4631,7 +4630,6 @@ status_t AudioFlinger::RecordThread::dump(int fd, const Vector<String16>& args)
     const size_t SIZE = 256;
     char buffer[SIZE];
     String8 result;
-    pid_t pid = 0;
 
     snprintf(buffer, SIZE, "\nInput thread %p internals\n", this);
     result.append(buffer);

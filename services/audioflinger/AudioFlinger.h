@@ -376,7 +376,6 @@ private:
             uint32_t            mFrameCount;
             // we don't really need a lock for these
             track_state         mState;
-            int                 mClientTid;
             const audio_format_t mFormat;
             uint32_t            mFlags;
             const int           mSessionId;
