@@ -809,9 +809,8 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
             }
         }
     }
-    if (thread != NULL) {
-        result = thread->setParameters(keyValuePairs);
-        return result;
+    if (thread != 0) {
+        return thread->setParameters(keyValuePairs);
     }
     return BAD_VALUE;
 }
@@ -3206,7 +3205,7 @@ void AudioFlinger::DuplicatingThread::updateWaitTime()
     mWaitTimeMs = UINT_MAX;
     for (size_t i = 0; i < mOutputTracks.size(); i++) {
         sp<ThreadBase> strong = mOutputTracks[i]->thread().promote();
-        if (strong != NULL) {
+        if (strong != 0) {
             uint32_t waitTimeMs = (strong->frameCount() * 2 * 1000) / strong->sampleRate();
             if (waitTimeMs < mWaitTimeMs) {
                 mWaitTimeMs = waitTimeMs;
@@ -3329,9 +3328,12 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
         }
     }
     mCblkMemory.clear();            // and free the shared memory
-    if (mClient != NULL) {
+    if (mClient != 0) {
         // Client destructor must run with AudioFlinger mutex locked
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
+        // If the client's reference count drops to zero, the associated destructor
+        // must run with AudioFlinger lock held. Thus the explicit clear() rather than
+        // relying on the automatic clear() at end of scope.
         mClient.clear();
     }
 }
@@ -3485,7 +3487,7 @@ void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
     uint32_t vlr = mCblk->getVolumeLR();
     snprintf(buffer, size, "   %05d %05d %03u %03u 0x%08x %05u   %04u %1d %1d %1d %05u %05u %05u  0x%08x 0x%08x 0x%08x 0x%08x\n",
             mName - AudioMixer::TRACK0,
-            (mClient == NULL) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid() : mClient->pid(),
             mStreamType,
             mFormat,
             mChannelMask,
@@ -3812,7 +3814,7 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
 void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
 {
     snprintf(buffer, size, "   %05d %03u 0x%08x %05d   %04u %01d %05u  %08x %08x\n",
-            (mClient == NULL) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid() : mClient->pid(),
             mFormat,
             mChannelMask,
             mSessionId,
@@ -4527,7 +4529,7 @@ sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createR
         track = new RecordTrack(this, client, sampleRate,
                       format, channelMask, frameCount, flags, sessionId);
 
-        if (track->getCblk() == NULL) {
+        if (track->getCblk() == 0) {
             lStatus = NO_MEMORY;
             goto Exit;
         }
@@ -7101,7 +7103,7 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
     bool locked = mCblk != NULL && tryLock(mCblk->lock);
 
     snprintf(buffer, size, "\t\t\t%05d %05d    %01u    %01u      %05u  %05u\n",
-            (mClient == NULL) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid() : mClient->pid(),
             mPriority,
             mHasControl,
             !locked,
