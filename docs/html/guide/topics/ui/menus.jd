@@ -17,7 +17,7 @@ parent.link=index.html
   <li><a href="#context-menu">Creating Contextual Menus</a>
     <ol>
       <li><a href="#FloatingContextMenu">Creating a floating context menu</a></li>
-      <li><a href="#CAB">Using the contextual action bar</a></li>
+      <li><a href="#CAB">Using the contextual action mode</a></li>
     </ol>
   </li>
   <li><a href="#PopupMenu">Creating a Popup Menu</a>
