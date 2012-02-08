@@ -591,26 +591,6 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
     return NO_ERROR;
 }
 
-status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount) const
-{
-    AutoMutex lock(mLock);
-    if (loopStart != NULL) {
-        *loopStart = mCblk->loopStart;
-    }
-    if (loopEnd != NULL) {
-        *loopEnd = mCblk->loopEnd;
-    }
-    if (loopCount != NULL) {
-        if (mCblk->loopCount < 0) {
-            *loopCount = -1;
-        } else {
-            *loopCount = mCblk->loopCount;
-        }
-    }
-
-    return NO_ERROR;
-}
-
 status_t AudioTrack::setMarkerPosition(uint32_t marker)
 {
     if (mCbf == NULL) return INVALID_OPERATION;
