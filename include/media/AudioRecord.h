@@ -344,7 +344,6 @@ private:
         virtual status_t    readyToRun() { return NO_ERROR; }
         virtual void        onFirstRef() {}
         AudioRecord& mReceiver;
-        Mutex       mLock;
     };
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
