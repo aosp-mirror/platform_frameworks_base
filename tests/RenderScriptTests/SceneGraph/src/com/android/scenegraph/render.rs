@@ -37,7 +37,6 @@ rs_allocation gRenderableObjects;
 rs_allocation gRenderPasses;
 
 // Temporary shaders
-rs_allocation gTGrid;
 rs_program_store gPFSBackground;
 
 uint32_t *gFrontToBack;

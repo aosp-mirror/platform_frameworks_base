@@ -53,7 +53,7 @@ public class Texture2D extends TextureBase {
     }
 
     public void setTexture(Allocation tex) {
-        mData.texture = tex;
+        mData.texture = tex != null ? tex : SceneManager.getDefaultTex2D();
         if (mField != null) {
             mField.set_texture(0, mData.texture, true);
         }

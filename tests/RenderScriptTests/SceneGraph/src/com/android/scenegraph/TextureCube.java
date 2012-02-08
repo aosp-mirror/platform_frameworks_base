@@ -60,7 +60,7 @@ public class TextureCube extends TextureBase {
     }
 
     public void setTexture(Allocation tex) {
-        mData.texture = tex;
+        mData.texture = tex != null ? tex : SceneManager.getDefaultTexCube();
         if (mField != null) {
             mField.set_texture(0, mData.texture, true);
         }

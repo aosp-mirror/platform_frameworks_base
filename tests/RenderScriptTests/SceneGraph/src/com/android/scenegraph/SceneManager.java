@@ -111,8 +111,8 @@ public class SceneManager extends SceneGraphBase {
         if (sSceneManager == null) {
             return null;
         }
-        if (sSceneManager.sDefaultCube != null) {
-            sSceneManager.sDefault2D = getDefault(true);
+        if (sSceneManager.sDefaultCube == null) {
+            sSceneManager.sDefaultCube = getDefault(true);
         }
         return sSceneManager.sDefaultCube;
     }
@@ -156,6 +156,9 @@ public class SceneManager extends SceneGraphBase {
 
     public static Allocation loadCubemap(String name, RenderScriptGL rs, Resources res) {
         Bitmap b = loadBitmap(name, res);
+        if (b == null) {
+            return null;
+        }
         return Allocation.createCubemapFromBitmap(rs, b,
                                                   MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
                                                   Allocation.USAGE_GRAPHICS_TEXTURE);
@@ -163,6 +166,9 @@ public class SceneManager extends SceneGraphBase {
 
     public static Allocation loadTexture2D(String name, RenderScriptGL rs, Resources res) {
         Bitmap b = loadBitmap(name, res);
+        if (b == null) {
+            return null;
+        }
         return Allocation.createFromBitmap(rs, b,
                                            Allocation.MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
                                            Allocation.USAGE_GRAPHICS_TEXTURE);
@@ -336,10 +342,6 @@ public class SceneManager extends SceneGraphBase {
         mRenderLoop.set_gVertexParamsScript(mVertexParamsScript);
         mRenderLoop.set_gCullScript(mCullScript);
 
-        Allocation checker = Allocation.createFromBitmapResource(mRS, mRes, R.drawable.checker,
-                                                         MipmapControl.MIPMAP_ON_SYNC_TO_TEXTURE,
-                                                         Allocation.USAGE_GRAPHICS_TEXTURE);
-        mRenderLoop.set_gTGrid(checker);
         mRenderLoop.set_gPFSBackground(ProgramStore.BLEND_NONE_DEPTH_TEST(mRS));
     }
 
