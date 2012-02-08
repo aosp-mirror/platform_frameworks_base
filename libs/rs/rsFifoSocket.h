@@ -29,23 +29,23 @@ public:
     FifoSocket();
     virtual ~FifoSocket();
 
-    bool init();
+    bool init(bool supportNonBlocking = true,
+              bool supportReturnValues = true,
+              size_t maxDataSize = 0);
     void shutdown();
 
+    bool writeAsync(const void *data, size_t bytes, bool waitForSpace = true);
+    void writeWaitReturn(void *ret, size_t retSize);
+    size_t read(void *data, size_t bytes);
+    void readReturn(const void *data, size_t bytes);
+    bool isEmpty();
 
-
-    void virtual writeAsync(const void *data, size_t bytes);
-    void virtual writeWaitReturn(void *ret, size_t retSize);
-    size_t virtual read(void *data, size_t bytes);
-    void virtual readReturn(const void *data, size_t bytes);
-
-    void virtual flush();
+    int getWriteFd() {return sv[0];}
+    int getReadFd() {return sv[1];}
 
 protected:
     int sv[2];
-    uint32_t sequence;
-
-
+    bool mShutdown;
 };
 
 }

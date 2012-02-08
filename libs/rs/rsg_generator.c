@@ -256,7 +256,7 @@ void printApiCpp(FILE *f) {
                     fprintf(f, "        memcpy(payload, %s, %s_length);\n", vt->name, vt->name);
                     fprintf(f, "        cmd->%s = (", vt->name);
                     printVarType(f, vt);
-                    fprintf(f, ")payload;\n");
+                    fprintf(f, ")(payload - ((uint8_t *)&cmd[1]));\n");
                     fprintf(f, "        payload += %s_length;\n", vt->name);
                     fprintf(f, "    } else {\n");
                     fprintf(f, "        cmd->%s = %s;\n", vt->name, vt->name);
@@ -270,26 +270,19 @@ void printApiCpp(FILE *f) {
                 needFlush = 1;
             }
 
+            fprintf(f, "    io->coreCommit();\n");
             if (hasInlineDataPointers(api)) {
-                fprintf(f, "    if (dataSize < 1024) {\n");
-                fprintf(f, "        io->coreCommit();\n");
-                fprintf(f, "    } else {\n");
-                fprintf(f, "        io->coreCommitSync();\n");
+                fprintf(f, "    if (dataSize >= 1024) {\n");
+                fprintf(f, "        io->coreGetReturn(NULL, 0);\n");
                 fprintf(f, "    }\n");
-            } else {
-                fprintf(f, "    io->coreCommit");
-                if (needFlush) {
-                    fprintf(f, "Sync");
-                }
-                fprintf(f, "();\n");
-            }
-
-            if (api->ret.typeName[0]) {
+            } else if (api->ret.typeName[0]) {
                 fprintf(f, "\n    ");
                 printVarType(f, &api->ret);
                 fprintf(f, " ret;\n");
                 fprintf(f, "    io->coreGetReturn(&ret, sizeof(ret));\n");
                 fprintf(f, "    return ret;\n");
+            } else if (needFlush) {
+                fprintf(f, "    io->coreGetReturn(NULL, 0);\n");
             }
         }
         fprintf(f, "};\n\n");
@@ -434,6 +427,7 @@ void printPlaybackCpp(FILE *f) {
 
     for (ct=0; ct < apiCount; ct++) {
         const ApiEntry * api = &apis[ct];
+        int needFlush = 0;
 
         if (api->direct) {
             continue;
@@ -444,6 +438,13 @@ void printPlaybackCpp(FILE *f) {
         //fprintf(f, "    ALOGE(\"play command %s\\n\");\n", api->name);
         fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
 
+        if (hasInlineDataPointers(api)) {
+            fprintf(f, "    const uint8_t *baseData = 0;\n");
+            fprintf(f, "    if (cmdSizeBytes != sizeof(RS_CMD_%s)) {\n", api->name);
+            fprintf(f, "        baseData = &((const uint8_t *)vp)[sizeof(*cmd)];\n");
+            fprintf(f, "    }\n");
+        }
+
         fprintf(f, "    ");
         if (api->ret.typeName[0]) {
             fprintf(f, "\n    ");
@@ -453,12 +454,24 @@ void printPlaybackCpp(FILE *f) {
         fprintf(f, "rsi_%s(con", api->name);
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
-            fprintf(f, ",\n           cmd->%s", vt->name);
+            needFlush += vt->ptrLevel;
+
+            if (hasInlineDataPointers(api) && vt->ptrLevel) {
+                fprintf(f, ",\n           (const %s *)&baseData[(intptr_t)cmd->%s]", vt->typeName, vt->name);
+            } else {
+                fprintf(f, ",\n           cmd->%s", vt->name);
+            }
         }
         fprintf(f, ");\n");
 
-        if (api->ret.typeName[0]) {
+        if (hasInlineDataPointers(api)) {
+            fprintf(f, "    if (cmdSizeBytes == sizeof(RS_CMD_%s)) {\n", api->name);
+            fprintf(f, "        con->mIO.coreSetReturn(NULL, 0);\n");
+            fprintf(f, "    }\n");
+        } else if (api->ret.typeName[0]) {
             fprintf(f, "    con->mIO.coreSetReturn(&ret, sizeof(ret));\n");
+        } else if (api->sync || needFlush) {
+            fprintf(f, "    con->mIO.coreSetReturn(NULL, 0);\n");
         }
 
         fprintf(f, "};\n\n");
@@ -466,6 +479,7 @@ void printPlaybackCpp(FILE *f) {
 
     for (ct=0; ct < apiCount; ct++) {
         const ApiEntry * api = &apis[ct];
+        int needFlush = 0;
 
         fprintf(f, "void rspr_%s(Context *con, Fifo *f, uint8_t *scratch, size_t scratchSize) {\n", api->name);
 
@@ -475,6 +489,7 @@ void printPlaybackCpp(FILE *f) {
 
         for (ct2=0; ct2 < api->paramCount; ct2++) {
             const VarType *vt = &api->params[ct2];
+            needFlush += vt->ptrLevel;
             if (vt->ptrLevel == 1) {
                 fprintf(f, "    cmd.%s = (", vt->name);
                 printVarType(f, vt);
@@ -515,6 +530,8 @@ void printPlaybackCpp(FILE *f) {
 
         if (api->ret.typeName[0]) {
             fprintf(f, "    f->readReturn(&ret, sizeof(ret));\n");
+        } else if (needFlush) {
+            fprintf(f, "    f->readReturn(NULL, 0);\n");
         }
 
         fprintf(f, "};\n\n");

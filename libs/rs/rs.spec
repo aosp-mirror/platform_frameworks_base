@@ -119,6 +119,7 @@ ContextSetPriority {
 	}
 
 ContextDestroyWorker {
+        sync
 }
 
 AssignName {

@@ -215,6 +215,8 @@ bool rsdGLInit(const Context *rsc) {
     ret = eglChooseConfig(dc->gl.egl.display, configAttribs, 0, 0, &numConfigs);
     checkEglError("eglGetConfigs", ret);
 
+    eglSwapInterval(dc->gl.egl.display, 0);
+
     if (numConfigs) {
         EGLConfig* const configs = new EGLConfig[numConfigs];
 
