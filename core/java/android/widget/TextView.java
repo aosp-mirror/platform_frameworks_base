@@ -1205,6 +1205,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         }
 
+        mTextDisplayListIsValid = false;
         prepareCursorControllers();
 
         // start or stop the cursor blinking as appropriate
@@ -2310,6 +2311,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setHighlightColor(int color) {
         if (mHighlightColor != color) {
             mHighlightColor = color;
+            mTextDisplayListIsValid = false;
             invalidate();
         }
     }
@@ -2330,6 +2332,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mShadowDx = dx;
         mShadowDy = dy;
 
+        mTextDisplayListIsValid = false;
         invalidate();
     }
 
@@ -2821,6 +2824,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         if (inval) {
+            mTextDisplayListIsValid = false;
             invalidate();
         }
     }
