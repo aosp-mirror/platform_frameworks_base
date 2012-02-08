@@ -3291,9 +3291,10 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
 AudioFlinger::ThreadBase::TrackBase::~TrackBase()
 {
     if (mCblk != NULL) {
-        mCblk->~audio_track_cblk_t();   // destroy our shared-structure.
-        if (mClient == NULL) {
+        if (mClient == 0) {
             delete mCblk;
+        } else {
+            mCblk->~audio_track_cblk_t();   // destroy our shared-structure.
         }
     }
     mCblkMemory.clear();            // and free the shared memory
@@ -6915,6 +6916,7 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
     mEffect.clear();
     if (mClient != 0) {
         if (mCblk != NULL) {
+            // unlike ~TrackBase(), mCblk is never a local new, so don't delete
             mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
         }
         mCblkMemory.clear();            // and free the shared memory
