@@ -1150,8 +1150,43 @@ public class MediaScanner
         }
     }
 
+    static class MediaBulkDeleter {
+        StringBuilder idList = new StringBuilder();
+        IContentProvider mProvider;
+        Uri mBaseUri;
+
+        public MediaBulkDeleter(IContentProvider provider, Uri baseUri) {
+            mProvider = provider;
+            mBaseUri = baseUri;
+        }
+
+        public void delete(long id) throws RemoteException {
+            if (idList.length() != 0) {
+                idList.append(",");
+            }
+            idList.append(id);
+            if (idList.length() > 1024) {
+                flush();
+            }
+        }
+        public void flush() throws RemoteException {
+            int numrows = mProvider.delete(mBaseUri, MediaStore.MediaColumns._ID + " IN (" +
+                    idList.toString() + ")", null);
+            //Log.i("@@@@@@@@@", "rows deleted: " + numrows);
+            idList.setLength(0);
+        }
+    }
+
     private void postscan(String[] directories) throws RemoteException {
         Iterator<FileCacheEntry> iterator = mFileCache.values().iterator();
+
+        // Tell the provider to not delete the file.
+        // If the file is truly gone the delete is unnecessary, and we want to avoid
+        // accidentally deleting files that are really there (this may happen if the
+        // filesystem is mounted and unmounted while the scanner is running).
+        Uri.Builder builder = mFilesUri.buildUpon();
+        builder.appendQueryParameter(MediaStore.PARAM_DELETE_DATA, "false");
+        MediaBulkDeleter deleter = new MediaBulkDeleter(mMediaProvider, builder.build());
 
         while (iterator.hasNext()) {
             FileCacheEntry entry = iterator.next();
@@ -1176,15 +1211,6 @@ public class MediaScanner
             }
 
             if (fileMissing) {
-                // Tell the provider to not delete the file.
-                // If the file is truly gone the delete is unnecessary, and we want to avoid
-                // accidentally deleting files that are really there (this may happen if the
-                // filesystem is mounted and unmounted while the scanner is running).
-                Uri.Builder builder = mFilesUri.buildUpon();
-                builder.appendEncodedPath(String.valueOf(entry.mRowId));
-                builder.appendQueryParameter(MediaStore.PARAM_DELETE_DATA, "false");
-                Uri missingUri = builder.build();
-
                 // do not delete missing playlists, since they may have been modified by the user.
                 // the user can delete them in the media player instead.
                 // instead, clear the path and lastModified fields in the row
@@ -1192,15 +1218,17 @@ public class MediaScanner
                 int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
 
                 if (!MediaFile.isPlayListFileType(fileType)) {
-                    mMediaProvider.delete(missingUri, null, null);
+                    deleter.delete(entry.mRowId);
                     iterator.remove();
                     if (entry.mPath.toLowerCase(Locale.US).endsWith("/.nomedia")) {
+                        deleter.flush();
                         File f = new File(path);
                         mMediaProvider.call(MediaStore.UNHIDE_CALL, f.getParent(), null);
                     }
                 }
             }
         }
+        deleter.flush();
 
         // handle playlists last, after we know what media files are on the storage.
         if (mProcessPlaylists) {
