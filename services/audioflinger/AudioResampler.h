@@ -66,7 +66,6 @@ protected:
     // multiplier to calculate fixed point phase increment
     static const double kPhaseMultiplier = 1L << kNumPhaseBits;
 
-    enum format {MONO_16_BIT, STEREO_16_BIT};
     AudioResampler(int bitDepth, int inChannelCount, int32_t sampleRate);
 
     // prevent copying
@@ -83,7 +82,6 @@ protected:
         uint32_t mVolumeRL;
     };
     int16_t mTargetVolume[2];
-    format mFormat;
     size_t mInputIndex;
     int32_t mPhaseIncrement;
     uint32_t mPhaseFraction;
