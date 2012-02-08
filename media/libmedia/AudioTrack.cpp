@@ -506,7 +506,7 @@ status_t AudioTrack::setVolume(float left, float right)
     return NO_ERROR;
 }
 
-void AudioTrack::getVolume(float* left, float* right)
+void AudioTrack::getVolume(float* left, float* right) const
 {
     if (left != NULL) {
         *left  = mVolume[LEFT];
@@ -531,7 +531,7 @@ status_t AudioTrack::setAuxEffectSendLevel(float level)
     return NO_ERROR;
 }
 
-void AudioTrack::getAuxEffectSendLevel(float* level)
+void AudioTrack::getAuxEffectSendLevel(float* level) const
 {
     if (level != NULL) {
         *level  = mSendLevel;
@@ -553,7 +553,7 @@ status_t AudioTrack::setSampleRate(int rate)
     return NO_ERROR;
 }
 
-uint32_t AudioTrack::getSampleRate()
+uint32_t AudioTrack::getSampleRate() const
 {
     AutoMutex lock(mLock);
     return mCblk->sampleRate;
@@ -601,7 +601,7 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
     return NO_ERROR;
 }
 
-status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount)
+status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount) const
 {
     AutoMutex lock(mLock);
     if (loopStart != NULL) {
@@ -631,7 +631,7 @@ status_t AudioTrack::setMarkerPosition(uint32_t marker)
     return NO_ERROR;
 }
 
-status_t AudioTrack::getMarkerPosition(uint32_t *marker)
+status_t AudioTrack::getMarkerPosition(uint32_t *marker) const
 {
     if (marker == NULL) return BAD_VALUE;
 
@@ -652,7 +652,7 @@ status_t AudioTrack::setPositionUpdatePeriod(uint32_t updatePeriod)
     return NO_ERROR;
 }
 
-status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod)
+status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod) const
 {
     if (updatePeriod == NULL) return BAD_VALUE;
 
@@ -712,7 +712,7 @@ audio_io_handle_t AudioTrack::getOutput_l()
             mCblk->sampleRate, mFormat, mChannelMask, (audio_policy_output_flags_t)mFlags);
 }
 
-int AudioTrack::getSessionId()
+int AudioTrack::getSessionId() const
 {
     return mSessionId;
 }
