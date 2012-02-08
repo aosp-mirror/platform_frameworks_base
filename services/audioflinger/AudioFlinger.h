@@ -105,12 +105,12 @@ public:
     virtual     bool        getMicMute() const;
 
     virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs);
-    virtual     String8     getParameters(int ioHandle, const String8& keys);
+    virtual     String8     getParameters(int ioHandle, const String8& keys) const;
 
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
-    virtual     size_t      getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount);
-    virtual     unsigned int  getInputFramesLost(int ioHandle);
+    virtual     size_t      getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const;
+    virtual     unsigned int  getInputFramesLost(int ioHandle) const;
 
     virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
@@ -139,7 +139,7 @@ public:
 
     virtual status_t setVoiceVolume(float volume);
 
-    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output);
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) const;
 
     virtual int newAudioSessionId();
 
@@ -147,11 +147,12 @@ public:
 
     virtual void releaseAudioSessionId(int audioSession);
 
-    virtual status_t queryNumberEffects(uint32_t *numEffects);
+    virtual status_t queryNumberEffects(uint32_t *numEffects) const;
 
-    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor);
+    virtual status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor) const;
 
-    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid, effect_descriptor_t *descriptor);
+    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid,
+                                         effect_descriptor_t *descriptor) const;
 
     virtual sp<IEffect> createEffect(pid_t pid,
                         effect_descriptor_t *pDesc,
