@@ -89,7 +89,6 @@ LOCAL_SRC_FILES:= \
 	rsFifoSocket.cpp \
 	rsFileA3D.cpp \
 	rsFont.cpp \
-	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix2x2.cpp \
 	rsMatrix3x3.cpp \
@@ -130,7 +129,7 @@ LOCAL_SRC_FILES:= \
 	driver/rsdShaderCache.cpp \
 	driver/rsdVertexArray.cpp
 
-LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo
+LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo libgui
 
 LOCAL_STATIC_LIBRARIES := libdex libft2
 
@@ -198,7 +197,6 @@ LOCAL_SRC_FILES:= \
 	rsFifoSocket.cpp \
 	rsFileA3D.cpp \
 	rsFont.cpp \
-	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix2x2.cpp \
 	rsMatrix3x3.cpp \

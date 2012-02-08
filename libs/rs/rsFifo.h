@@ -35,9 +35,9 @@ protected:
     virtual ~Fifo();
 
 public:
-    void virtual writeAsync(const void *data, size_t bytes) = 0;
+    bool virtual writeAsync(const void *data, size_t bytes, bool waitForSpace = true) = 0;
     void virtual writeWaitReturn(void *ret, size_t retSize) = 0;
-    size_t virtual read(void *data, size_t bytes) = 0;
+    size_t virtual read(void *data, size_t bytes, bool doWait = true, uint64_t timeToWait = 0) = 0;
     void virtual readReturn(const void *data, size_t bytes) = 0;
 
     void virtual flush() = 0;
