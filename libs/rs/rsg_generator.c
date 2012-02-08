@@ -465,7 +465,14 @@ void printPlaybackCpp(FILE *f) {
         fprintf(f, ");\n");
 
         if (hasInlineDataPointers(api)) {
-            fprintf(f, "    if (cmdSizeBytes == sizeof(RS_CMD_%s)) {\n", api->name);
+            fprintf(f, "    size_t totalSize = 0;\n");
+            for (ct2=0; ct2 < api->paramCount; ct2++) {
+                if (api->params[ct2].ptrLevel) {
+                    fprintf(f, "    totalSize += cmd->%s_length;\n", api->params[ct2].name);
+                }
+            }
+
+            fprintf(f, "    if ((totalSize != 0) && (cmdSizeBytes == sizeof(RS_CMD_%s))) {\n", api->name);
             fprintf(f, "        con->mIO.coreSetReturn(NULL, 0);\n");
             fprintf(f, "    }\n");
         } else if (api->ret.typeName[0]) {
