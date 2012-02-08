@@ -68,7 +68,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         // t->prevAuxLevel
         // t->frameCount
         t->channelCount = 2;
-        t->enabled = 0;
+        t->enabled = false;
         t->format = 16;
         t->channelMask = AUDIO_CHANNEL_OUT_STEREO;
         t->bufferProvider = NULL;
@@ -121,8 +121,8 @@ void AudioMixer::deleteTrackName(int name)
     assert(uint32_t(name) < MAX_NUM_TRACKS);
     ALOGV("deleteTrackName(%d)", name);
     track_t& track(mState.tracks[ name ]);
-    if (track.enabled != 0) {
-        track.enabled = 0;
+    if (track.enabled) {
+        track.enabled = false;
         invalidateState(1<<name);
     }
     if (track.resampler != NULL) {
@@ -143,8 +143,8 @@ void AudioMixer::enable(int name)
     assert(uint32_t(name) < MAX_NUM_TRACKS);
     track_t& track = mState.tracks[name];
 
-    if (track.enabled != 1) {
-        track.enabled = 1;
+    if (!track.enabled) {
+        track.enabled = true;
         ALOGV("enable(%d)", name);
         invalidateState(1 << name);
     }
@@ -156,8 +156,8 @@ void AudioMixer::disable(int name)
     assert(uint32_t(name) < MAX_NUM_TRACKS);
     track_t& track = mState.tracks[name];
 
-    if (track.enabled != 0) {
-        track.enabled = 0;
+    if (track.enabled) {
+        track.enabled = false;
         ALOGV("disable(%d)", name);
         invalidateState(1 << name);
     }
@@ -383,9 +383,9 @@ void AudioMixer::process__validate(state_t* state)
 
     // compute everything we need...
     int countActiveTracks = 0;
-    int all16BitsStereoNoResample = 1;
-    int resampling = 0;
-    int volumeRamp = 0;
+    bool all16BitsStereoNoResample = true;
+    bool resampling = false;
+    bool volumeRamp = false;
     uint32_t en = state->enabledTracks;
     while (en) {
         const int i = 31 - __builtin_clz(en);
@@ -402,7 +402,7 @@ void AudioMixer::process__validate(state_t* state)
         }
 
         if (t.volumeInc[0]|t.volumeInc[1]) {
-            volumeRamp = 1;
+            volumeRamp = true;
         } else if (!t.doesResample() && t.volumeRL == 0) {
             n |= NEEDS_MUTE_ENABLED;
         }
@@ -412,16 +412,16 @@ void AudioMixer::process__validate(state_t* state)
             t.hook = track__nop;
         } else {
             if ((n & NEEDS_AUX__MASK) == NEEDS_AUX_ENABLED) {
-                all16BitsStereoNoResample = 0;
+                all16BitsStereoNoResample = false;
             }
             if ((n & NEEDS_RESAMPLE__MASK) == NEEDS_RESAMPLE_ENABLED) {
-                all16BitsStereoNoResample = 0;
-                resampling = 1;
+                all16BitsStereoNoResample = false;
+                resampling = true;
                 t.hook = track__genericResample;
             } else {
                 if ((n & NEEDS_CHANNEL_COUNT__MASK) == NEEDS_CHANNEL_1){
                     t.hook = track__16BitsMono;
-                    all16BitsStereoNoResample = 0;
+                    all16BitsStereoNoResample = false;
                 }
                 if ((n & NEEDS_CHANNEL_COUNT__MASK) == NEEDS_CHANNEL_2){
                     t.hook = track__16BitsStereo;
@@ -469,7 +469,7 @@ void AudioMixer::process__validate(state_t* state)
     // Now that the volume ramp has been done, set optimal state and
     // track hooks for subsequent mixer process
     if (countActiveTracks) {
-        int allMuted = 1;
+        bool allMuted = true;
         uint32_t en = state->enabledTracks;
         while (en) {
             const int i = 31 - __builtin_clz(en);
@@ -480,7 +480,7 @@ void AudioMixer::process__validate(state_t* state)
                 t.needs |= NEEDS_MUTE_ENABLED;
                 t.hook = track__nop;
             } else {
-                allMuted = 0;
+                allMuted = false;
             }
         }
         if (allMuted) {
