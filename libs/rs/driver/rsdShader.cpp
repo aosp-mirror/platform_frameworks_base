@@ -190,12 +190,11 @@ bool RsdShader::loadShader(const Context *rsc) {
                 char* buf = (char*) malloc(infoLen);
                 if (buf) {
                     RSD_CALL_GL(glGetShaderInfoLog, mShaderID, infoLen, NULL, buf);
-                    ALOGE("Could not compile shader \n%s\n", buf);
+                    rsc->setError(RS_ERROR_FATAL_PROGRAM_LINK, buf);
                     free(buf);
                 }
                 RSD_CALL_GL(glDeleteShader, mShaderID);
                 mShaderID = 0;
-                rsc->setError(RS_ERROR_BAD_SHADER, "Error returned from GL driver loading shader text,");
                 return false;
             }
         }
