@@ -77,15 +77,15 @@ public:
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
-                                int output,
+                                audio_io_handle_t output,
                                 int *sessionId,
                                 status_t *status);
 
-    virtual     uint32_t    sampleRate(int output) const;
-    virtual     int         channelCount(int output) const;
-    virtual     audio_format_t format(int output) const;
-    virtual     size_t      frameCount(int output) const;
-    virtual     uint32_t    latency(int output) const;
+    virtual     uint32_t    sampleRate(audio_io_handle_t output) const;
+    virtual     int         channelCount(audio_io_handle_t output) const;
+    virtual     audio_format_t format(audio_io_handle_t output) const;
+    virtual     size_t      frameCount(audio_io_handle_t output) const;
+    virtual     uint32_t    latency(audio_io_handle_t output) const;
 
     virtual     status_t    setMasterVolume(float value);
     virtual     status_t    setMasterMute(bool muted);
@@ -93,10 +93,12 @@ public:
     virtual     float       masterVolume() const;
     virtual     bool        masterMute() const;
 
-    virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value, int output);
+    virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value,
+                                            audio_io_handle_t output);
     virtual     status_t    setStreamMute(audio_stream_type_t stream, bool muted);
 
-    virtual     float       streamVolume(audio_stream_type_t stream, int output) const;
+    virtual     float       streamVolume(audio_stream_type_t stream,
+                                         audio_io_handle_t output) const;
     virtual     bool        streamMute(audio_stream_type_t stream) const;
 
     virtual     status_t    setMode(audio_mode_t mode);
@@ -104,42 +106,44 @@ public:
     virtual     status_t    setMicMute(bool state);
     virtual     bool        getMicMute() const;
 
-    virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs);
-    virtual     String8     getParameters(int ioHandle, const String8& keys) const;
+    virtual     status_t    setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs);
+    virtual     String8     getParameters(audio_io_handle_t ioHandle, const String8& keys) const;
 
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
     virtual     size_t      getInputBufferSize(uint32_t sampleRate, audio_format_t format, int channelCount) const;
-    virtual     unsigned int  getInputFramesLost(int ioHandle) const;
+    virtual     unsigned int  getInputFramesLost(audio_io_handle_t ioHandle) const;
 
-    virtual int openOutput(uint32_t *pDevices,
+    virtual audio_io_handle_t openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
                                     audio_format_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     uint32_t flags);
 
-    virtual int openDuplicateOutput(int output1, int output2);
+    virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1,
+                                                  audio_io_handle_t output2);
 
-    virtual status_t closeOutput(int output);
+    virtual status_t closeOutput(audio_io_handle_t output);
 
-    virtual status_t suspendOutput(int output);
+    virtual status_t suspendOutput(audio_io_handle_t output);
 
-    virtual status_t restoreOutput(int output);
+    virtual status_t restoreOutput(audio_io_handle_t output);
 
-    virtual int openInput(uint32_t *pDevices,
+    virtual audio_io_handle_t openInput(uint32_t *pDevices,
                             uint32_t *pSamplingRate,
                             audio_format_t *pFormat,
                             uint32_t *pChannels,
                             audio_in_acoustics_t acoustics);
 
-    virtual status_t closeInput(int input);
+    virtual status_t closeInput(audio_io_handle_t input);
 
-    virtual status_t setStreamOutput(audio_stream_type_t stream, int output);
+    virtual status_t setStreamOutput(audio_stream_type_t stream, audio_io_handle_t output);
 
     virtual status_t setVoiceVolume(float volume);
 
-    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int output) const;
+    virtual status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames,
+                                       audio_io_handle_t output) const;
 
     virtual int newAudioSessionId();
 
@@ -158,13 +162,14 @@ public:
                         effect_descriptor_t *pDesc,
                         const sp<IEffectClient>& effectClient,
                         int32_t priority,
-                        int io,
+                        audio_io_handle_t io,
                         int sessionId,
                         status_t *status,
                         int *id,
                         int *enabled);
 
-    virtual status_t moveEffects(int sessionId, int srcOutput, int dstOutput);
+    virtual status_t moveEffects(int sessionId, audio_io_handle_t srcOutput,
+                        audio_io_handle_t dstOutput);
 
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
@@ -188,7 +193,7 @@ public:
     // record interface
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int input,
+                                audio_io_handle_t input,
                                 uint32_t sampleRate,
                                 audio_format_t format,
                                 uint32_t channelMask,
@@ -286,7 +291,7 @@ private:
             RECORD              // Thread class is RecordThread
         };
 
-        ThreadBase (const sp<AudioFlinger>& audioFlinger, int id, uint32_t device, type_t type);
+        ThreadBase (const sp<AudioFlinger>& audioFlinger, audio_io_handle_t id, uint32_t device, type_t type);
         virtual             ~ThreadBase();
 
         status_t dumpBase(int fd, const Vector<String16>& args);
@@ -422,7 +427,7 @@ private:
                     void        sendConfigEvent(int event, int param = 0);
                     void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
-                    int         id() const { return mId;}
+                    audio_io_handle_t id() const { return mId;}
                     bool        standby() { return mStandby; }
                     uint32_t    device() { return mDevice; }
         virtual     audio_stream_t* stream() = 0;
@@ -544,7 +549,7 @@ private:
                     status_t                mParamStatus;
                     Vector<ConfigEvent>     mConfigEvents;
                     bool                    mStandby;
-                    int                     mId;
+                    const audio_io_handle_t mId;
                     bool                    mExiting;
                     Vector< sp<EffectChain> > mEffectChains;
                     uint32_t                mDevice;    // output device for PlaybackThread
@@ -691,8 +696,8 @@ private:
             DuplicatingThread* const mSourceThread; // for waitTimeMs() in write()
         };  // end of OutputTrack
 
-        PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id,
-                        uint32_t device, type_t type);
+        PlaybackThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output,
+                        audio_io_handle_t id, uint32_t device, type_t type);
         virtual             ~PlaybackThread();
 
         virtual     status_t    dump(int fd, const Vector<String16>& args);
@@ -817,7 +822,7 @@ private:
     public:
         MixerThread (const sp<AudioFlinger>& audioFlinger,
                      AudioStreamOut* output,
-                     int id,
+                     audio_io_handle_t id,
                      uint32_t device,
                      type_t type = MIXER);
         virtual             ~MixerThread();
@@ -844,7 +849,8 @@ private:
     class DirectOutputThread : public PlaybackThread {
     public:
 
-        DirectOutputThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device);
+        DirectOutputThread (const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output,
+                            audio_io_handle_t id, uint32_t device);
         virtual                 ~DirectOutputThread();
 
         // Thread virtuals
@@ -870,7 +876,8 @@ private:
 
     class DuplicatingThread : public MixerThread {
     public:
-        DuplicatingThread (const sp<AudioFlinger>& audioFlinger, MixerThread* mainThread, int id);
+        DuplicatingThread (const sp<AudioFlinger>& audioFlinger, MixerThread* mainThread,
+                           audio_io_handle_t id);
         virtual                 ~DuplicatingThread();
 
         // Thread virtuals
@@ -889,13 +896,16 @@ private:
                     uint32_t    mWaitTimeMs;
     };
 
-              PlaybackThread *checkPlaybackThread_l(int output) const;
-              MixerThread *checkMixerThread_l(int output) const;
-              RecordThread *checkRecordThread_l(int input) const;
-              float streamVolumeInternal(audio_stream_type_t stream) const { return mStreamTypes[stream].volume; }
-              void audioConfigChanged_l(int event, int ioHandle, void *param2);
+              PlaybackThread *checkPlaybackThread_l(audio_io_handle_t output) const;
+              MixerThread *checkMixerThread_l(audio_io_handle_t output) const;
+              RecordThread *checkRecordThread_l(audio_io_handle_t input) const;
+              float streamVolumeInternal(audio_stream_type_t stream) const
+                                { return mStreamTypes[stream].volume; }
+              void audioConfigChanged_l(int event, audio_io_handle_t ioHandle, void *param2);
 
+              // allocate an audio_io_handle_t, session ID, or effect ID
               uint32_t nextUniqueId();
+
               status_t moveEffectChain_l(int sessionId,
                                      AudioFlinger::PlaybackThread *srcThread,
                                      AudioFlinger::PlaybackThread *dstThread,
@@ -973,7 +983,7 @@ private:
                         AudioStreamIn *input,
                         uint32_t sampleRate,
                         uint32_t channels,
-                        int id,
+                        audio_io_handle_t id,
                         uint32_t device);
                 virtual     ~RecordThread();
 
@@ -1401,14 +1411,14 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
     mutable     hardware_call_state                 mHardwareStatus;    // for dump only
 
 
-                DefaultKeyedVector< int, sp<PlaybackThread> >  mPlaybackThreads;
+                DefaultKeyedVector< audio_io_handle_t, sp<PlaybackThread> >  mPlaybackThreads;
                 PlaybackThread::stream_type_t       mStreamTypes[AUDIO_STREAM_CNT];
 
                 // both are protected by mLock
                 float                               mMasterVolume;
                 bool                                mMasterMute;
 
-                DefaultKeyedVector< int, sp<RecordThread> >    mRecordThreads;
+                DefaultKeyedVector< audio_io_handle_t, sp<RecordThread> >    mRecordThreads;
 
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 volatile int32_t                    mNextUniqueId;
