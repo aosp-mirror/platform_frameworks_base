@@ -28,20 +28,14 @@ public class NativeDaemonEvent {
     // TODO: keep class ranges in sync with ResponseCode.h
     // TODO: swap client and server error ranges to roughly mirror HTTP spec
 
-    private final int mCmdNumber;
     private final int mCode;
     private final String mMessage;
     private final String mRawEvent;
 
-    private NativeDaemonEvent(int cmdNumber, int code, String message, String rawEvent) {
-        mCmdNumber = cmdNumber;
+    private NativeDaemonEvent(int code, String message, String rawEvent) {
         mCode = code;
         mMessage = message;
         mRawEvent = rawEvent;
-    }
-
-    public int getCmdNumber() {
-        return mCmdNumber;
     }
 
     public int getCode() {
@@ -116,28 +110,20 @@ public class NativeDaemonEvent {
      *             from native side.
      */
     public static NativeDaemonEvent parseRawEvent(String rawEvent) {
-        final String[] parsed = rawEvent.split(" ");
-        if (parsed.length < 3) {
+        final int splitIndex = rawEvent.indexOf(' ');
+        if (splitIndex == -1) {
             throw new IllegalArgumentException("unable to find ' ' separator");
-        }
-
-        final int cmdNumber;
-        try {
-            cmdNumber = Integer.parseInt(parsed[0]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("problem parsing cmdNumber", e);
         }
 
         final int code;
         try {
-            code = Integer.parseInt(parsed[1]);
+            code = Integer.parseInt(rawEvent.substring(0, splitIndex));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("problem parsing code", e);
         }
 
-        final String message = rawEvent.substring(parsed[0].length() + parsed[1].length() + 2);
-
-        return new NativeDaemonEvent(cmdNumber, code, message, rawEvent);
+        final String message = rawEvent.substring(splitIndex + 1);
+        return new NativeDaemonEvent(code, message, rawEvent);
     }
 
     /**
