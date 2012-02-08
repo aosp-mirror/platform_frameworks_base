@@ -43,6 +43,8 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
         invisible(s->invisible), empty(false),
         viewport(s->viewport), height(s->height) {
 
+    clipRegion = NULL;
+
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
         transform = &mTransformRoot;
@@ -57,11 +59,7 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
         if (s->clipRegion) {
             mClipRegionRoot.merge(*s->clipRegion);
             clipRegion = &mClipRegionRoot;
-        } else {
-            clipRegion = NULL;
         }
-#else
-        clipRegion = NULL;
 #endif
     } else {
         clipRect = s->clipRect;
@@ -213,10 +211,12 @@ bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {
     clipRect->set(left, top, right, bottom);
+#if STENCIL_BUFFER_SIZE
     if (clipRegion) {
         clipRegion->clear();
         clipRegion = NULL;
     }
+#endif
     flags |= Snapshot::kFlagClipSet;
 }
 
