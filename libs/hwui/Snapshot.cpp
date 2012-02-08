@@ -31,6 +31,7 @@ Snapshot::Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0),
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
     region = NULL;
+    clipRegion = NULL;
 }
 
 /**
@@ -52,8 +53,21 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
     if (saveFlags & SkCanvas::kClip_SaveFlag) {
         mClipRectRoot.set(*s->clipRect);
         clipRect = &mClipRectRoot;
+#if STENCIL_BUFFER_SIZE
+        if (s->clipRegion) {
+            mClipRegionRoot.merge(*s->clipRegion);
+            clipRegion = &mClipRegionRoot;
+        } else {
+            clipRegion = NULL;
+        }
+#else
+        clipRegion = NULL;
+#endif
     } else {
         clipRect = s->clipRect;
+#if STENCIL_BUFFER_SIZE
+        clipRegion = s->clipRegion;
+#endif
     }
 
     if (s->flags & Snapshot::kFlagFboTarget) {
@@ -68,6 +82,77 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags):
 // Clipping
 ///////////////////////////////////////////////////////////////////////////////
 
+void Snapshot::ensureClipRegion() {
+#if STENCIL_BUFFER_SIZE
+    if (!clipRegion) {
+        clipRegion = &mClipRegionRoot;
+        android::Rect tmp(clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
+        clipRegion->set(tmp);
+    }
+#endif
+}
+
+void Snapshot::copyClipRectFromRegion() {
+#if STENCIL_BUFFER_SIZE
+    if (!clipRegion->isEmpty()) {
+        android::Rect bounds(clipRegion->bounds());
+        clipRect->set(bounds.left, bounds.top, bounds.right, bounds.bottom);
+
+        if (clipRegion->isRect()) {
+            clipRegion->clear();
+            clipRegion = NULL;
+        }
+    } else {
+        clipRect->setEmpty();
+        clipRegion = NULL;
+    }
+#endif
+}
+
+bool Snapshot::clipRegionOr(float left, float top, float right, float bottom) {
+#if STENCIL_BUFFER_SIZE
+    android::Rect tmp(left, top, right, bottom);
+    clipRegion->orSelf(tmp);
+    copyClipRectFromRegion();
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool Snapshot::clipRegionXor(float left, float top, float right, float bottom) {
+#if STENCIL_BUFFER_SIZE
+    android::Rect tmp(left, top, right, bottom);
+    clipRegion->xorSelf(tmp);
+    copyClipRectFromRegion();
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool Snapshot::clipRegionAnd(float left, float top, float right, float bottom) {
+#if STENCIL_BUFFER_SIZE
+    android::Rect tmp(left, top, right, bottom);
+    clipRegion->andSelf(tmp);
+    copyClipRectFromRegion();
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool Snapshot::clipRegionNand(float left, float top, float right, float bottom) {
+#if STENCIL_BUFFER_SIZE
+    android::Rect tmp(left, top, right, bottom);
+    clipRegion->subtractSelf(tmp);
+    copyClipRectFromRegion();
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool Snapshot::clip(float left, float top, float right, float bottom, SkRegion::Op op) {
     Rect r(left, top, right, bottom);
     transform->mapRect(r);
@@ -77,32 +162,46 @@ bool Snapshot::clip(float left, float top, float right, float bottom, SkRegion::
 bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
     bool clipped = false;
 
-    // NOTE: The unimplemented operations require support for regions
-    // Supporting regions would require using a stencil buffer instead
-    // of the scissor. The stencil buffer itself is not too expensive
-    // (memory cost excluded) but on fillrate limited devices, managing
-    // the stencil might have a negative impact on the framerate.
     switch (op) {
-        case SkRegion::kDifference_Op:
+        case SkRegion::kDifference_Op: {
+            ensureClipRegion();
+            clipped = clipRegionNand(r.left, r.top, r.right, r.bottom);
             break;
-        case SkRegion::kIntersect_Op:
-            clipped = clipRect->intersect(r);
-            if (!clipped) {
-                clipRect->setEmpty();
-                clipped = true;
+        }
+        case SkRegion::kIntersect_Op: {
+            if (CC_UNLIKELY(clipRegion)) {
+                clipped = clipRegionOr(r.left, r.top, r.right, r.bottom);
+            } else {
+                clipped = clipRect->intersect(r);
+                if (!clipped) {
+                    clipRect->setEmpty();
+                    clipped = true;
+                }
             }
             break;
-        case SkRegion::kUnion_Op:
-            clipped = clipRect->unionWith(r);
+        }
+        case SkRegion::kUnion_Op: {
+            if (CC_UNLIKELY(clipRegion)) {
+                clipped = clipRegionAnd(r.left, r.top, r.right, r.bottom);
+            } else {
+                clipped = clipRect->unionWith(r);
+            }
             break;
-        case SkRegion::kXOR_Op:
+        }
+        case SkRegion::kXOR_Op: {
+            ensureClipRegion();
+            clipped = clipRegionXor(r.left, r.top, r.right, r.bottom);
             break;
-        case SkRegion::kReverseDifference_Op:
+        }
+        case SkRegion::kReverseDifference_Op: {
+            // TODO!!!!!!!
             break;
-        case SkRegion::kReplace_Op:
-            clipRect->set(r);
+        }
+        case SkRegion::kReplace_Op: {
+            setClip(r.left, r.top, r.right, r.bottom);
             clipped = true;
             break;
+        }
     }
 
     if (clipped) {
@@ -114,6 +213,10 @@ bool Snapshot::clipTransformed(const Rect& r, SkRegion::Op op) {
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {
     clipRect->set(left, top, right, bottom);
+    if (clipRegion) {
+        clipRegion->clear();
+        clipRegion = NULL;
+    }
     flags |= Snapshot::kFlagClipSet;
 }
 
@@ -129,8 +232,7 @@ const Rect& Snapshot::getLocalClip() {
 
 void Snapshot::resetClip(float left, float top, float right, float bottom) {
     clipRect = &mClipRectRoot;
-    clipRect->set(left, top, right, bottom);
-    flags |= Snapshot::kFlagClipSet;
+    setClip(left, top, right, bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

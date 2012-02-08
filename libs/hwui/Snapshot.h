@@ -181,13 +181,24 @@ public:
     mat4* transform;
 
     /**
-     * Current clip region. The clip is stored in canvas-space coordinates,
+     * Current clip rect. The clip is stored in canvas-space coordinates,
      * (screen-space coordinates in the regular case.)
      *
      * This is a reference to a rect owned by this snapshot or another
      * snapshot. This pointer must not be freed. See ::mClipRectRoot.
      */
     Rect* clipRect;
+
+    /**
+     * Current clip region. The clip is stored in canvas-space coordinates,
+     * (screen-space coordinates in the regular case.)
+     *
+     * This is a reference to a region owned by this snapshot or another
+     * snapshot. This pointer must not be freed. See ::mClipRegionRoot.
+     *
+     * This field is used only if STENCIL_BUFFER_SIZE is > 0.
+     */
+    Region* clipRegion;
 
     /**
      * The ancestor layer's dirty region.
@@ -198,9 +209,21 @@ public:
     Region* region;
 
 private:
+    void ensureClipRegion();
+    void copyClipRectFromRegion();
+
+    bool clipRegionOr(float left, float top, float right, float bottom);
+    bool clipRegionXor(float left, float top, float right, float bottom);
+    bool clipRegionAnd(float left, float top, float right, float bottom);
+    bool clipRegionNand(float left, float top, float right, float bottom);
+
     mat4 mTransformRoot;
     Rect mClipRectRoot;
     Rect mLocalClip;
+
+#if STENCIL_BUFFER_SIZE
+    Region mClipRegionRoot;
+#endif
 
 }; // class Snapshot
 
