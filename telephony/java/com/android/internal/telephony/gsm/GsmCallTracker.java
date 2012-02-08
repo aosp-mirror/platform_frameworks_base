@@ -198,7 +198,8 @@ public final class GsmCallTracker extends CallTracker {
             throw new CallStateException("cannot dial in current state");
         }
 
-        pendingMO = new GsmConnection(phone.getContext(), dialString, this, foregroundCall);
+        pendingMO = new GsmConnection(phone.getContext(), checkForTestEmergencyNumber(dialString),
+                this, foregroundCall);
         hangupPendingMO = false;
 
         if (pendingMO.address == null || pendingMO.address.length() == 0

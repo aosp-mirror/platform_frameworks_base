@@ -1571,4 +1571,9 @@ public interface CommandsInterface {
      * @param response a callback message with the String response in the obj field
      */
     public void requestIsimAuthentication(String nonce, Message response);
+
+    /**
+     * Notifiy that we are testing an emergency call
+     */
+    public void testingEmergencyCall();
 }
