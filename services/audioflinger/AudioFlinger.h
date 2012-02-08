@@ -151,7 +151,7 @@ public:
 
     virtual status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor) const;
 
-    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid,
+    virtual status_t getEffectDescriptor(const effect_uuid_t *pUuid,
                                          effect_descriptor_t *descriptor) const;
 
     virtual sp<IEffect> createEffect(pid_t pid,

@@ -582,7 +582,7 @@ public:
         return NO_ERROR;
     }
 
-    virtual status_t getEffectDescriptor(effect_uuid_t *pUuid,
+    virtual status_t getEffectDescriptor(const effect_uuid_t *pUuid,
             effect_descriptor_t *pDescriptor) const
     {
         if (pUuid == NULL || pDescriptor == NULL) {

@@ -108,7 +108,7 @@ public:
      * Returned value
      *   *descriptor updated with effect descriptor
      */
-    static status_t getEffectDescriptor(effect_uuid_t *uuid,
+    static status_t getEffectDescriptor(const effect_uuid_t *uuid,
                                         effect_descriptor_t *descriptor) /*const*/;
 
 

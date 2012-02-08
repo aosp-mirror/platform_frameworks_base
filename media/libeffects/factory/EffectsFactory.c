@@ -53,8 +53,8 @@ static int loadEffect(cnode *node);
 static lib_entry_t *getLibrary(const char *path);
 static void resetEffectEnumeration();
 static uint32_t updateNumEffects();
-static int findEffect(effect_uuid_t *type,
-               effect_uuid_t *uuid,
+static int findEffect(const effect_uuid_t *type,
+               const effect_uuid_t *uuid,
                lib_entry_t **lib,
                effect_descriptor_t **desc);
 static void dumpEffectDescriptor(effect_descriptor_t *desc, char *str, size_t len);
@@ -236,7 +236,7 @@ int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor)
     return ret;
 }
 
-int EffectGetDescriptor(effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
+int EffectGetDescriptor(const effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
 {
     lib_entry_t *l = NULL;
     effect_descriptor_t *d = NULL;
@@ -257,7 +257,7 @@ int EffectGetDescriptor(effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
     return ret;
 }
 
-int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_handle_t *pHandle)
+int EffectCreate(const effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_handle_t *pHandle)
 {
     list_elem_t *e = gLibraryList;
     lib_entry_t *l = NULL;
@@ -372,7 +372,7 @@ exit:
     return ret;
 }
 
-int EffectIsNullUuid(effect_uuid_t *uuid)
+int EffectIsNullUuid(const effect_uuid_t *uuid)
 {
     if (memcmp(uuid, EFFECT_UUID_NULL, sizeof(effect_uuid_t))) {
         return 0;
@@ -628,8 +628,8 @@ uint32_t updateNumEffects() {
     return cnt;
 }
 
-int findEffect(effect_uuid_t *type,
-               effect_uuid_t *uuid,
+int findEffect(const effect_uuid_t *type,
+               const effect_uuid_t *uuid,
                lib_entry_t **lib,
                effect_descriptor_t **desc)
 {
