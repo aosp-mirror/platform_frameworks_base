@@ -303,12 +303,12 @@ typedef struct reverb_module_s {
 int EffectQueryNumberEffects(uint32_t *pNumEffects);
 int EffectQueryEffect(uint32_t index,
                       effect_descriptor_t *pDescriptor);
-int EffectCreate(effect_uuid_t *effectUID,
+int EffectCreate(const effect_uuid_t *effectUID,
                  int32_t sessionId,
                  int32_t ioId,
                  effect_handle_t *pHandle);
 int EffectRelease(effect_handle_t handle);
-int EffectGetDescriptor(effect_uuid_t       *uuid,
+int EffectGetDescriptor(const effect_uuid_t *uuid,
                         effect_descriptor_t *pDescriptor);
 
 static int Reverb_Process(effect_handle_t self,

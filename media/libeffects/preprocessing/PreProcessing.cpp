@@ -1072,7 +1072,7 @@ int PreProc_Init() {
     return sInitStatus;
 }
 
-const effect_descriptor_t *PreProc_GetDescriptor(effect_uuid_t *uuid)
+const effect_descriptor_t *PreProc_GetDescriptor(const effect_uuid_t *uuid)
 {
     size_t i;
     for (i = 0; i < PREPROC_NUM_EFFECTS; i++) {
@@ -1568,7 +1568,7 @@ int PreProcessingLib_QueryEffect(uint32_t index, effect_descriptor_t *pDescripto
     return 0;
 }
 
-int PreProcessingLib_Create(effect_uuid_t       *uuid,
+int PreProcessingLib_Create(const effect_uuid_t *uuid,
                             int32_t             sessionId,
                             int32_t             ioId,
                             effect_handle_t  *pInterface)
@@ -1620,7 +1620,7 @@ int PreProcessingLib_Release(effect_handle_t interface)
     return Session_ReleaseEffect(fx->session, fx);
 }
 
-int PreProcessingLib_GetDescriptor(effect_uuid_t       *uuid,
+int PreProcessingLib_GetDescriptor(const effect_uuid_t *uuid,
                                    effect_descriptor_t *pDescriptor) {
 
     if (pDescriptor == NULL || uuid == NULL){

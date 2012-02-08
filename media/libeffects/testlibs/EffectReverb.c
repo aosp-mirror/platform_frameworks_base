@@ -111,7 +111,7 @@ int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor) {
     return 0;
 }
 
-int EffectCreate(effect_uuid_t *uuid,
+int EffectCreate(const effect_uuid_t *uuid,
         int32_t sessionId,
         int32_t ioId,
         effect_handle_t *pHandle) {
@@ -182,7 +182,7 @@ int EffectRelease(effect_handle_t handle) {
     return 0;
 }
 
-int EffectGetDescriptor(effect_uuid_t       *uuid,
+int EffectGetDescriptor(const effect_uuid_t *uuid,
                         effect_descriptor_t *pDescriptor) {
     int i;
     int length = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
