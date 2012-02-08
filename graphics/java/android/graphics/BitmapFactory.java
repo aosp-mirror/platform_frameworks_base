@@ -518,15 +518,16 @@ public class BitmapFactory {
         byte[] np = bm.getNinePatchChunk();
         final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
         if (opts.inScaled || isNinePatch) {
-            float scale = targetDensity / (float)density;
-            // TODO: This is very inefficient and should be done in native by Skia
-            final Bitmap oldBitmap = bm;
-            bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
-                    (int) (bm.getHeight() * scale + 0.5f), true);
-            oldBitmap.recycle();
+            float scale = targetDensity / (float) density;
+            if (scale != 1.0f) {
+                final Bitmap oldBitmap = bm;
+                bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
+                        (int) (bm.getHeight() * scale + 0.5f), true);
+                if (bm != oldBitmap) oldBitmap.recycle();
+            }
 
             if (isNinePatch) {
-                np = nativeScaleNinePatch(np, scale, outPadding);
+                if (scale != 1.0f) np = nativeScaleNinePatch(np, scale, outPadding);
                 bm.setNinePatchChunk(np);
             }
             bm.setDensity(targetDensity);
