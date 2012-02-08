@@ -819,7 +819,7 @@ void AudioPolicyService::AudioCommandThread::stopToneCommand()
 
 status_t AudioPolicyService::AudioCommandThread::volumeCommand(audio_stream_type_t stream,
                                                                float volume,
-                                                               int output,
+                                                               audio_io_handle_t output,
                                                                int delayMs)
 {
     status_t status = NO_ERROR;
@@ -849,7 +849,7 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(audio_stream_type
     return status;
 }
 
-status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
+status_t AudioPolicyService::AudioCommandThread::parametersCommand(audio_io_handle_t ioHandle,
                                                                    const char *keyValuePairs,
                                                                    int delayMs)
 {
@@ -1019,7 +1019,7 @@ void AudioPolicyService::setParameters(audio_io_handle_t ioHandle,
                                        const char *keyValuePairs,
                                        int delayMs)
 {
-    mAudioCommandThread->parametersCommand((int)ioHandle, keyValuePairs,
+    mAudioCommandThread->parametersCommand(ioHandle, keyValuePairs,
                                            delayMs);
 }
 
@@ -1029,7 +1029,7 @@ int AudioPolicyService::setStreamVolume(audio_stream_type_t stream,
                                         int delayMs)
 {
     return (int)mAudioCommandThread->volumeCommand(stream, volume,
-                                                   (int)output, delayMs);
+                                                   output, delayMs);
 }
 
 int AudioPolicyService::startTone(audio_policy_tone_t tone,
@@ -1458,7 +1458,7 @@ static int aps_move_effects(void *service, int session,
     if (af == 0)
         return PERMISSION_DENIED;
 
-    return af->moveEffects(session, (int)src_output, (int)dst_output);
+    return af->moveEffects(session, src_output, dst_output);
 }
 
 static char * aps_get_parameters(void *service, audio_io_handle_t io_handle,
