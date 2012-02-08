@@ -138,6 +138,7 @@ import java.io.StringWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -3520,13 +3521,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Just in case...
-        if (mMainStack.mPausingActivity != null && mMainStack.mPausingActivity.app == app) {
-            if (DEBUG_PAUSE) Slog.v(TAG, "App died while pausing: " +mMainStack.mPausingActivity);
-            mMainStack.mPausingActivity = null;
-        }
-        if (mMainStack.mLastPausedActivity != null && mMainStack.mLastPausedActivity.app == app) {
-            mMainStack.mLastPausedActivity = null;
-        }
+        mMainStack.appDiedLocked(app);
 
         // Remove this application's activities from active lists.
         mMainStack.removeHistoryRecordsForAppLocked(app);
@@ -7231,7 +7226,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mMainStack.stopIfSleepingLocked();
                 final long endTime = System.currentTimeMillis() + timeout;
                 while (mMainStack.mResumedActivity != null
-                        || mMainStack.mPausingActivity != null) {
+                        || mMainStack.mPausingActivities.size() > 0) {
                     long delay = endTime - System.currentTimeMillis();
                     if (delay <= 0) {
                         Slog.w(TAG, "Activity manager shutdown timed out");
@@ -9025,8 +9020,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         pw.println(" ");
-        if (mMainStack.mPausingActivity != null) {
-            pw.println("  mPausingActivity: " + mMainStack.mPausingActivity);
+        if (mMainStack.mPausingActivities.size() > 0) {
+            pw.println("  mPausingActivities: " + Arrays.toString(
+                    mMainStack.mPausingActivities.toArray()));
+        }
+        if (mMainStack.mInputPausedActivities.size() > 0) {
+            pw.println("  mInputPausedActivities: " + Arrays.toString(
+                    mMainStack.mInputPausedActivities.toArray()));
         }
         pw.println("  mResumedActivity: " + mMainStack.mResumedActivity);
         pw.println("  mFocusedActivity: " + mFocusedActivity);
@@ -14759,7 +14759,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final ActivityRecord resumedAppLocked() {
         ActivityRecord resumedActivity = mMainStack.mResumedActivity;
         if (resumedActivity == null || resumedActivity.app == null) {
-            resumedActivity = mMainStack.mPausingActivity;
+            for (int i=mMainStack.mPausingActivities.size()-1; i>=0; i--) {
+                ActivityRecord r = mMainStack.mPausingActivities.get(i);
+                if (r.app != null) {
+                    resumedActivity = r;
+                    break;
+                }
+            }
             if (resumedActivity == null || resumedActivity.app == null) {
                 resumedActivity = mMainStack.topRunningActivityLocked(null);
             }
