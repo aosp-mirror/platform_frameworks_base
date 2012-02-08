@@ -600,7 +600,7 @@ private:
                         return mName;
                     }
 
-                    audio_stream_type_t type() const {
+                    audio_stream_type_t streamType() const {
                         return mStreamType;
                     }
                     status_t    attachAuxEffect(int EffectId);

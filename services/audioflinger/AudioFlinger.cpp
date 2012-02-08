@@ -1524,12 +1524,11 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         // all tracks in same audio session must share the same routing strategy otherwise
         // conflicts will happen when tracks are moved from one output to another by audio policy
         // manager
-        uint32_t strategy =
-                AudioSystem::getStrategyForStream((audio_stream_type_t)streamType);
+        uint32_t strategy = AudioSystem::getStrategyForStream(streamType);
         for (size_t i = 0; i < mTracks.size(); ++i) {
             sp<Track> t = mTracks[i];
             if (t != 0) {
-                uint32_t actual = AudioSystem::getStrategyForStream((audio_stream_type_t)t->type());
+                uint32_t actual = AudioSystem::getStrategyForStream(t->streamType());
                 if (sessionId == t->sessionId() && strategy != actual) {
                     ALOGE("createTrack_l() mismatched strategy; expected %u but found %u",
                             strategy, actual);
@@ -1551,7 +1550,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         if (chain != 0) {
             ALOGV("createTrack_l() setting main buffer %p", chain->inBuffer());
             track->setMainBuffer(chain->inBuffer());
-            chain->setStrategy(AudioSystem::getStrategyForStream((audio_stream_type_t)track->type()));
+            chain->setStrategy(AudioSystem::getStrategyForStream(track->streamType()));
             chain->incTrackCnt();
         }
 
@@ -1781,7 +1780,7 @@ uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
         sp<Track> track = mTracks[i];
         if (sessionId == track->sessionId() &&
                 !(track->mCblk->flags & CBLK_INVALID_MSK)) {
-            return AudioSystem::getStrategyForStream((audio_stream_type_t) track->type());
+            return AudioSystem::getStrategyForStream(track->streamType());
         }
     }
     return AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
@@ -2162,7 +2161,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
             // compute volume for this track
             uint32_t vl, vr, va;
             if (track->isMuted() || track->isPausing() ||
-                mStreamTypes[track->type()].mute) {
+                mStreamTypes[track->streamType()].mute) {
                 vl = vr = va = 0;
                 if (track->isPausing()) {
                     track->setPaused();
@@ -2170,7 +2169,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::MixerThread::prepareTrac
             } else {
 
                 // read original volumes with volume control
-                float typeVolume = mStreamTypes[track->type()].volume;
+                float typeVolume = mStreamTypes[track->streamType()].volume;
                 float v = masterVolume * typeVolume;
                 uint32_t vlr = cblk->getVolumeLR();
                 vl = vlr & 0xFFFF;
@@ -2331,7 +2330,7 @@ void AudioFlinger::MixerThread::invalidateTracks(audio_stream_type_t streamType)
     size_t size = mTracks.size();
     for (size_t i = 0; i < size; i++) {
         sp<Track> t = mTracks[i];
-        if (t->type() == streamType) {
+        if (t->streamType() == streamType) {
             android_atomic_or(CBLK_INVALID_ON, &t->mCblk->flags);
             t->mCblk->cv.signal();
         }
@@ -2704,13 +2703,13 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     // compute volume for this track
                     float left, right;
                     if (track->isMuted() || mMasterMute || track->isPausing() ||
-                        mStreamTypes[track->type()].mute) {
+                        mStreamTypes[track->streamType()].mute) {
                         left = right = 0;
                         if (track->isPausing()) {
                             track->setPaused();
                         }
                     } else {
-                        float typeVolume = mStreamTypes[track->type()].volume;
+                        float typeVolume = mStreamTypes[track->streamType()].volume;
                         float v = mMasterVolume * typeVolume;
                         uint32_t vlr = cblk->getVolumeLR();
                         float v_clamped = v * (vlr & 0xFFFF);
@@ -3428,9 +3427,7 @@ void AudioFlinger::PlaybackThread::Track::destroy()
         if (thread != 0) {
             if (!isOutputTrack()) {
                 if (mState == ACTIVE || mState == RESUMING) {
-                    AudioSystem::stopOutput(thread->id(),
-                                            (audio_stream_type_t)mStreamType,
-                                            mSessionId);
+                    AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
 
                     // to track the speaker usage
                     addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
@@ -3541,9 +3538,7 @@ status_t AudioFlinger::PlaybackThread::Track::start()
 
         if (!isOutputTrack() && state != ACTIVE && state != RESUMING) {
             thread->mLock.unlock();
-            status = AudioSystem::startOutput(thread->id(),
-                                              (audio_stream_type_t)mStreamType,
-                                              mSessionId);
+            status = AudioSystem::startOutput(thread->id(), mStreamType, mSessionId);
             thread->mLock.lock();
 
             // to track the speaker usage
@@ -3581,9 +3576,7 @@ void AudioFlinger::PlaybackThread::Track::stop()
         }
         if (!isOutputTrack() && (state == ACTIVE || state == RESUMING)) {
             thread->mLock.unlock();
-            AudioSystem::stopOutput(thread->id(),
-                                    (audio_stream_type_t)mStreamType,
-                                    mSessionId);
+            AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
             thread->mLock.lock();
 
             // to track the speaker usage
@@ -3603,9 +3596,7 @@ void AudioFlinger::PlaybackThread::Track::pause()
             ALOGV("ACTIVE/RESUMING => PAUSING (%d) on thread %p", mName, thread.get());
             if (!isOutputTrack()) {
                 thread->mLock.unlock();
-                AudioSystem::stopOutput(thread->id(),
-                                        (audio_stream_type_t)mStreamType,
-                                        mSessionId);
+                AudioSystem::stopOutput(thread->id(), mStreamType, mSessionId);
                 thread->mLock.lock();
 
                 // to track the speaker usage
