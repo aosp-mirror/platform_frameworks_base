@@ -22,11 +22,14 @@
 #include <sys/types.h>
 #include <limits.h>
 
+#include <common_time/cc_helper.h>
+
 #include <media/IAudioFlinger.h>
 #include <media/IAudioFlingerClient.h>
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/AudioSystem.h>
+#include <media/AudioTrack.h>
 
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
@@ -55,7 +58,7 @@ class AudioResampler;
 
 // ----------------------------------------------------------------------------
 
-static const nsecs_t kStandbyTimeInNsecs = seconds(3);
+static const nsecs_t kDefaultStandbyTimeInNsecs = seconds(3);
 
 class AudioFlinger :
     public BinderService<AudioFlinger>,
@@ -78,6 +81,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 audio_io_handle_t output,
+                                bool isTimed,
                                 int *sessionId,
                                 status_t *status);
 
@@ -102,6 +106,7 @@ public:
     virtual     status_t    setMasterMute(bool muted);
 
     virtual     float       masterVolume() const;
+    virtual     float       masterVolumeSW() const;
     virtual     bool        masterMute() const;
 
     virtual     status_t    setStreamVolume(audio_stream_type_t stream, float value,
@@ -206,6 +211,8 @@ private:
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
     void                    purgeStaleEffects_l();
 
+    static nsecs_t          mStandbyTimeInNsecs;
+
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
     status_t dumpClients(int fd, const Vector<String16>& args);
@@ -220,12 +227,18 @@ private:
         pid_t               pid() const { return mPid; }
         sp<AudioFlinger>    audioFlinger() const { return mAudioFlinger; }
 
+        bool reserveTimedTrack();
+        void releaseTimedTrack();
+
     private:
                             Client(const Client&);
                             Client& operator = (const Client&);
         const sp<AudioFlinger> mAudioFlinger;
         const sp<MemoryDealer> mMemoryDealer;
         const pid_t         mPid;
+
+        Mutex               mTimedTrackLock;
+        int                 mTimedTrackCount;
     };
 
     // --- Notification Client ---
@@ -333,7 +346,9 @@ private:
                                 TrackBase(const TrackBase&);
                                 TrackBase& operator = (const TrackBase&);
 
-            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer) = 0;
+            virtual status_t getNextBuffer(
+                AudioBufferProvider::Buffer* buffer,
+                int64_t pts) = 0;
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
 
             audio_format_t format() const {
@@ -609,7 +624,6 @@ private:
                     int16_t     *mainBuffer() const { return mMainBuffer; }
                     int         auxEffectId() const { return mAuxEffectId; }
 
-
         protected:
             friend class ThreadBase;
             friend class TrackHandle;
@@ -620,7 +634,11 @@ private:
                                 Track(const Track&);
                                 Track& operator = (const Track&);
 
-            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer);
+            virtual status_t getNextBuffer(
+                AudioBufferProvider::Buffer* buffer,
+                int64_t pts);
+            virtual uint32_t framesReady() const;
+
             bool isMuted() const { return mMute; }
             bool isPausing() const {
                 return mState == PAUSING;
@@ -635,6 +653,8 @@ private:
             bool isOutputTrack() const {
                 return (mStreamType == AUDIO_STREAM_CNT);
             }
+
+            virtual bool isTimedTrack() const { return false; }
 
             // we don't really need a lock for these
             volatile bool       mMute;
@@ -651,6 +671,79 @@ private:
             int                 mAuxEffectId;
             bool                mHasVolumeController;
         };  // end of Track
+
+        class TimedTrack : public Track {
+          public:
+            static sp<TimedTrack> create(const wp<ThreadBase>& thread,
+                                         const sp<Client>& client,
+                                         audio_stream_type_t streamType,
+                                         uint32_t sampleRate,
+                                         audio_format_t format,
+                                         uint32_t channelMask,
+                                         int frameCount,
+                                         const sp<IMemory>& sharedBuffer,
+                                         int sessionId);
+            ~TimedTrack();
+
+            class TimedBuffer {
+              public:
+                TimedBuffer();
+                TimedBuffer(const sp<IMemory>& buffer, int64_t pts);
+                const sp<IMemory>& buffer() const { return mBuffer; }
+                int64_t pts() const { return mPTS; }
+                int position() const { return mPosition; }
+                void setPosition(int pos) { mPosition = pos; }
+              private:
+                sp<IMemory> mBuffer;
+                int64_t mPTS;
+                int mPosition;
+            };
+
+            virtual bool isTimedTrack() const { return true; }
+
+            virtual uint32_t framesReady() const;
+
+            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer,
+                                           int64_t pts);
+            virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
+            void timedYieldSamples(AudioBufferProvider::Buffer* buffer);
+            void timedYieldSilence(uint32_t numFrames,
+                                   AudioBufferProvider::Buffer* buffer);
+
+            status_t    allocateTimedBuffer(size_t size,
+                                            sp<IMemory>* buffer);
+            status_t    queueTimedBuffer(const sp<IMemory>& buffer,
+                                         int64_t pts);
+            status_t    setMediaTimeTransform(const LinearTransform& xform,
+                                              TimedAudioTrack::TargetTimeline target);
+            void        trimTimedBufferQueue_l();
+
+          private:
+            TimedTrack(const wp<ThreadBase>& thread,
+                       const sp<Client>& client,
+                       audio_stream_type_t streamType,
+                       uint32_t sampleRate,
+                       audio_format_t format,
+                       uint32_t channelMask,
+                       int frameCount,
+                       const sp<IMemory>& sharedBuffer,
+                       int sessionId);
+
+            uint64_t            mLocalTimeFreq;
+            LinearTransform     mLocalTimeToSampleTransform;
+            sp<MemoryDealer>    mTimedMemoryDealer;
+            Vector<TimedBuffer> mTimedBufferQueue;
+            uint8_t*            mTimedSilenceBuffer;
+            uint32_t            mTimedSilenceBufferSize;
+            mutable Mutex       mTimedBufferQueueLock;
+            bool                mTimedAudioOutputOnTime;
+            CCHelper            mCCHelper;
+
+            Mutex               mMediaTimeTransformLock;
+            LinearTransform     mMediaTimeTransform;
+            bool                mMediaTimeTransformValid;
+            TimedAudioTrack::TargetTimeline mMediaTimeTransformTarget;
+        };
 
 
         // playback track
@@ -726,6 +819,7 @@ private:
                                     int frameCount,
                                     const sp<IMemory>& sharedBuffer,
                                     int sessionId,
+                                    bool isTimed,
                                     status_t *status);
 
                     AudioStreamOut* getOutput() const;
@@ -920,6 +1014,12 @@ private:
         virtual void        mute(bool);
         virtual void        pause();
         virtual status_t    attachAuxEffect(int effectId);
+        virtual status_t    allocateTimedBuffer(size_t size,
+                                                sp<IMemory>* buffer);
+        virtual status_t    queueTimedBuffer(const sp<IMemory>& buffer,
+                                             int64_t pts);
+        virtual status_t    setMediaTimeTransform(const LinearTransform& xform,
+                                                  int target);
         virtual status_t onTransact(
             uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     private:
@@ -967,7 +1067,9 @@ private:
                                 RecordTrack(const RecordTrack&);
                                 RecordTrack& operator = (const RecordTrack&);
 
-            virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer);
+            virtual status_t getNextBuffer(
+                AudioBufferProvider::Buffer* buffer,
+                int64_t pts);
 
             bool                mOverflow;
         };
@@ -1004,7 +1106,8 @@ private:
                 AudioStreamIn* clearInput();
                 virtual audio_stream_t* stream();
 
-        virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer);
+        virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer,
+                                          int64_t pts);
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
         virtual bool        checkForNewParameters_l();
         virtual String8     getParameters(const String8& keys);
@@ -1401,6 +1504,28 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
     friend class RecordThread;
     friend class PlaybackThread;
 
+    enum master_volume_support {
+        // MVS_NONE:
+        // Audio HAL has no support for master volume, either setting or
+        // getting.  All master volume control must be implemented in SW by the
+        // AudioFlinger mixing core.
+        MVS_NONE,
+
+        // MVS_SETONLY:
+        // Audio HAL has support for setting master volume, but not for getting
+        // master volume (original HAL design did not include a getter).
+        // AudioFlinger needs to keep track of the last set master volume in
+        // addition to needing to set an initial, default, master volume at HAL
+        // load time.
+        MVS_SETONLY,
+
+        // MVS_FULL:
+        // Audio HAL has support both for setting and getting master volume.
+        // AudioFlinger should send all set and get master volume requests
+        // directly to the HAL.
+        MVS_FULL,
+    };
+
     mutable     Mutex                               mLock;
 
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;   // see ~Client()
@@ -1429,6 +1554,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         AUDIO_SET_VOICE_VOLUME,
         AUDIO_SET_PARAMETER,
         AUDIO_HW_GET_INPUT_BUFFER_SIZE,
+        AUDIO_HW_GET_MASTER_VOLUME,
     };
 
     mutable     hardware_call_state                 mHardwareStatus;    // for dump only
@@ -1439,6 +1565,8 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
                 // both are protected by mLock
                 float                               mMasterVolume;
+                float                               mMasterVolumeSW;
+                master_volume_support               mMasterVolumeSupportLvl;
                 bool                                mMasterMute;
 
                 DefaultKeyedVector< audio_io_handle_t, sp<RecordThread> >    mRecordThreads;
@@ -1451,7 +1579,8 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 // protected by mLock
                 Vector<AudioSessionRef*> mAudioSessionRefs;
 
-                float       masterVolume_l() const  { return mMasterVolume; }
+                float       masterVolume_l() const;
+                float       masterVolumeSW_l() const  { return mMasterVolumeSW; }
                 bool        masterMute_l() const    { return mMasterMute; }
 
 private:

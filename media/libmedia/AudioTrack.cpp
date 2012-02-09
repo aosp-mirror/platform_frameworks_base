@@ -80,7 +80,9 @@ status_t AudioTrack::getMinFrameCount(
 
 AudioTrack::AudioTrack()
     : mStatus(NO_INIT),
-      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
+      mIsTimed(false),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL),
+      mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
 }
 
@@ -96,7 +98,9 @@ AudioTrack::AudioTrack(
         int notificationFrames,
         int sessionId)
     : mStatus(NO_INIT),
-      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
+      mIsTimed(false),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL),
+      mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames,
@@ -134,7 +138,9 @@ AudioTrack::AudioTrack(
         int notificationFrames,
         int sessionId)
     : mStatus(NO_INIT),
-      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
+      mIsTimed(false),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL),
+      mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             0, flags, cbf, user, notificationFrames,
@@ -540,6 +546,10 @@ status_t AudioTrack::setSampleRate(int rate)
 {
     int afSamplingRate;
 
+    if (mIsTimed) {
+        return INVALID_OPERATION;
+    }
+
     if (AudioSystem::getOutputSamplingRate(&afSamplingRate, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
@@ -553,6 +563,10 @@ status_t AudioTrack::setSampleRate(int rate)
 
 uint32_t AudioTrack::getSampleRate() const
 {
+    if (mIsTimed) {
+        return INVALID_OPERATION;
+    }
+
     AutoMutex lock(mLock);
     return mCblk->sampleRate;
 }
@@ -576,6 +590,10 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
         cblk->loopCount = 0;
         mLoopCount = 0;
         return NO_ERROR;
+    }
+
+    if (mIsTimed) {
+        return INVALID_OPERATION;
     }
 
     if (loopStart >= loopEnd ||
@@ -641,6 +659,8 @@ status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod) const
 
 status_t AudioTrack::setPosition(uint32_t position)
 {
+    if (mIsTimed) return INVALID_OPERATION;
+
     AutoMutex lock(mLock);
 
     if (!stopped_l()) return INVALID_OPERATION;
@@ -791,6 +811,7 @@ status_t AudioTrack::createTrack_l(
                                                       ((uint16_t)flags) << 16,
                                                       sharedBuffer,
                                                       output,
+                                                      mIsTimed,
                                                       &mSessionId,
                                                       &status);
 
@@ -957,6 +978,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
 {
 
     if (mSharedBuffer != 0) return INVALID_OPERATION;
+    if (mIsTimed) return INVALID_OPERATION;
 
     if (ssize_t(userSize) < 0) {
         // Sanity-check: user is most-likely passing an error code, and it would
@@ -1009,6 +1031,59 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     } while (userSize >= frameSz);
 
     return written;
+}
+
+// -------------------------------------------------------------------------
+
+TimedAudioTrack::TimedAudioTrack() {
+    mIsTimed = true;
+}
+
+status_t TimedAudioTrack::allocateTimedBuffer(size_t size, sp<IMemory>* buffer)
+{
+    status_t result = UNKNOWN_ERROR;
+
+    // If the track is not invalid already, try to allocate a buffer.  alloc
+    // fails indicating that the server is dead, flag the track as invalid so
+    // we can attempt to restore in in just a bit.
+    if (!(mCblk->flags & CBLK_INVALID_MSK)) {
+        result = mAudioTrack->allocateTimedBuffer(size, buffer);
+        if (result == DEAD_OBJECT) {
+            android_atomic_or(CBLK_INVALID_ON, &mCblk->flags);
+        }
+    }
+
+    // If the track is invalid at this point, attempt to restore it. and try the
+    // allocation one more time.
+    if (mCblk->flags & CBLK_INVALID_MSK) {
+        mCblk->lock.lock();
+        result = restoreTrack_l(mCblk, false);
+        mCblk->lock.unlock();
+
+        if (result == OK)
+            result = mAudioTrack->allocateTimedBuffer(size, buffer);
+    }
+
+    return result;
+}
+
+status_t TimedAudioTrack::queueTimedBuffer(const sp<IMemory>& buffer,
+                                           int64_t pts)
+{
+    // restart track if it was disabled by audioflinger due to previous underrun
+    if (mActive && (mCblk->flags & CBLK_DISABLED_MSK)) {
+        android_atomic_and(~CBLK_DISABLED_ON, &mCblk->flags);
+        ALOGW("queueTimedBuffer() track %p disabled, restarting", this);
+        mAudioTrack->start(0);
+    }
+
+    return mAudioTrack->queueTimedBuffer(buffer, pts);
+}
+
+status_t TimedAudioTrack::setMediaTimeTransform(const LinearTransform& xform,
+                                                TargetTimeline target)
+{
+    return mAudioTrack->setMediaTimeTransform(xform, target);
 }
 
 // -------------------------------------------------------------------------

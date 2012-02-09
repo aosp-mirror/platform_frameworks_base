@@ -55,6 +55,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 audio_io_handle_t output,
+                                bool isTimed,
                                 int *sessionId,
                                 status_t *status) = 0;
 

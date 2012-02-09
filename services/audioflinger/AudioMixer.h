@@ -79,7 +79,7 @@ public:
     void        setParameter(int name, int target, int param, void *value);
 
     void        setBufferProvider(int name, AudioBufferProvider* bufferProvider);
-    void        process();
+    void        process(int64_t pts);
 
     uint32_t    trackNames() const { return mTrackNames; }
 
@@ -114,7 +114,7 @@ private:
     struct state_t;
     struct track_t;
 
-    typedef void (*mix_t)(state_t* state);
+    typedef void (*mix_t)(state_t* state, int64_t pts);
     typedef void (*hook_t)(track_t* t, int32_t* output, size_t numOutFrames, int32_t* temp, int32_t* aux);
     static const int BLOCKSIZE = 16; // 4 cache lines
 
@@ -152,6 +152,8 @@ private:
         int32_t*           mainBuffer;
         int32_t*           auxBuffer;
 
+        uint64_t    localTimeFreq;
+
         bool        setResampler(uint32_t sampleRate, uint32_t devSampleRate);
         bool        doesResample() const { return resampler != NULL; }
         void        resetResampler() { if (resampler != NULL) resampler->reset(); }
@@ -187,14 +189,19 @@ private:
     static void volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux);
     static void volumeStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp, int32_t* aux);
 
-    static void process__validate(state_t* state);
-    static void process__nop(state_t* state);
-    static void process__genericNoResampling(state_t* state);
-    static void process__genericResampling(state_t* state);
-    static void process__OneTrack16BitsStereoNoResampling(state_t* state);
+    static void process__validate(state_t* state, int64_t pts);
+    static void process__nop(state_t* state, int64_t pts);
+    static void process__genericNoResampling(state_t* state, int64_t pts);
+    static void process__genericResampling(state_t* state, int64_t pts);
+    static void process__OneTrack16BitsStereoNoResampling(state_t* state,
+                                                          int64_t pts);
 #if 0
-    static void process__TwoTracks16BitsStereoNoResampling(state_t* state);
+    static void process__TwoTracks16BitsStereoNoResampling(state_t* state,
+                                                           int64_t pts);
 #endif
+
+    static int64_t calculateOutputPTS(const track_t& t, int64_t basePTS,
+                                      int outputFrameIndex);
 };
 
 // ----------------------------------------------------------------------------

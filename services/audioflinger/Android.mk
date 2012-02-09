@@ -7,6 +7,7 @@ LOCAL_SRC_FILES:=               \
     AudioMixer.cpp.arm          \
     AudioResampler.cpp.arm      \
     AudioPolicyService.cpp      \
+    AudioBufferProvider.cpp     \
     ServiceUtilities.cpp
 #   AudioResamplerSinc.cpp.arm
 #   AudioResamplerCubic.cpp.arm
@@ -17,6 +18,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SHARED_LIBRARIES := \
     libaudioutils \
+    libcommon_time_client \
     libcutils \
     libutils \
     libbinder \
