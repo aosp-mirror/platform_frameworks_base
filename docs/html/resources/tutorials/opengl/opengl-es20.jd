@@ -57,7 +57,7 @@ carefully consider which version of the OpenGL ES API (1.0/1.1 or 2.0) is most a
 needs. For more information, see
 <a href="{@docRoot}guide/topics/graphics/opengl.html#choosing-version">Choosing an OpenGL API
 Version</a>. If you would prefer to use OpenGL ES 1.0, see the <a
-href="{@docRoot}resources/tutorials/opengl/opengl-es10.jd">OpenGL ES 1.0 tutorial</a>.</p>
+href="{@docRoot}resources/tutorials/opengl/opengl-es10.html">OpenGL ES 1.0 tutorial</a>.</p>
 
 <p>Before you start, you should understand how to create a basic Android application. If you do not
 know how to create an app, follow the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello
