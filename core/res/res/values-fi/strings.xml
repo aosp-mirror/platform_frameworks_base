@@ -776,7 +776,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Hakulauseke"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Tyhjennä kysely"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Lähetä kysely"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Äänihaku"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Puhehaku"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"kuukausi sitten"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Yli kuukausi sitten"</string>
   <plurals name="num_seconds_ago">
