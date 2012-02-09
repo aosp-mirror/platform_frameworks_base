@@ -36,7 +36,7 @@ public:
 
     // Plays back commands from the client.
     // Returns true if any commands were processed.
-    bool playCoreCommands(Context *con, bool waitForCommand, int waitFd);
+    bool playCoreCommands(Context *con, int waitFd);
 
     void setTimeoutCallback(void (*)(void *), void *, uint64_t timeout);
 
