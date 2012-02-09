@@ -491,7 +491,7 @@ href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/Load
 LoaderCursor</a> &#8212; A complete version of the
 snippet shown above.</li>
   <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> &#8212; An example of how to use throttling to
-reduce the number of queries a content provider does then its data changes.</li>
+reduce the number of queries a content provider does when its data changes.</li>
 </ul>
 
 <p>For information on downloading and installing the SDK samples, see <a

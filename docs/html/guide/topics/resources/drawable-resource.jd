@@ -1248,7 +1248,6 @@ the right edge, a right gravity clips the left edge, and neither clips both edge
     android:drawable="@drawable/android"
     android:clipOrientation="horizontal"
     android:gravity="left" /&gt;
-&lt;/clip>
 </pre>
     <p>The following layout XML applies the clip drawable to a View:</p>
 <pre>
