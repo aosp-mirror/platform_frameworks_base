@@ -36,7 +36,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Izaziso"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Xhuma ishaja."</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Ibhetri iya ngokuphela."</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"okusele okungu-<xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> okusele"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ukushaja i-USB akusekelwe."\n"Sebenzisa kuphela ishaja enikeziwe."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Ukusebenzisa ibhetri"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Izilungiselelo"</string>
