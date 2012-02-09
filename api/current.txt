@@ -26386,10 +26386,12 @@ package android.widget {
     field public static final android.widget.GridLayout.Alignment BASELINE;
     field public static final android.widget.GridLayout.Alignment BOTTOM;
     field public static final android.widget.GridLayout.Alignment CENTER;
+    field public static final android.widget.GridLayout.Alignment END;
     field public static final android.widget.GridLayout.Alignment FILL;
     field public static final int HORIZONTAL = 0; // 0x0
     field public static final android.widget.GridLayout.Alignment LEFT;
     field public static final android.widget.GridLayout.Alignment RIGHT;
+    field public static final android.widget.GridLayout.Alignment START;
     field public static final android.widget.GridLayout.Alignment TOP;
     field public static final int UNDEFINED = -2147483648; // 0x80000000
     field public static final int VERTICAL = 1; // 0x1
