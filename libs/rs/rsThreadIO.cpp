@@ -89,7 +89,7 @@ void ThreadIO::setTimeoutCallback(void (*cb)(void *), void *dat, uint64_t timeou
     //mToCore.setTimeoutCallback(cb, dat, timeout);
 }
 
-bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand, int waitFd) {
+bool ThreadIO::playCoreCommands(Context *con, int waitFd) {
     bool ret = false;
 
     uint8_t buf[2 * 1024];
@@ -132,7 +132,6 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand, int waitFd) {
             if (con->props.mLogTimes) {
                 con->timerSet(Context::RS_TIMER_INTERNAL);
             }
-            waitForCommand = false;
             //ALOGV("playCoreCommands 3 %i %i", cmd->cmdID, cmd->bytes);
 
             if (cmd->cmdID >= (sizeof(gPlaybackFuncs) / sizeof(void *))) {
