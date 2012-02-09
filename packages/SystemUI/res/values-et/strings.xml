@@ -65,7 +65,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Kuvatõmmise salvestamine ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Kuvatõmmise salvestamine ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Kuvatõmmist salvestatakse."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Kuvatõmmis on jäädvustatud."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekraanipilt on jäädvustatud."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Puudutage kuvatõmmise vaatamiseks."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Kuvatõmmist ei saanud jäädvustada."</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"Kuvatõmmist ei saa salvestada. Mäluseade võib olla kasutuses."</string>
