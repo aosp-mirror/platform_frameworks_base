@@ -294,7 +294,7 @@ public class SensorEvent {
      * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
      * the ground at the device's current location and roughly points East).</li>
      * <li>Y is tangential to the ground at the device's current location and
-     * points towards the magnetic North Pole.</li>
+     * points towards magnetic north.</li>
      * <li>Z points towards the sky and is perpendicular to the ground.</li>
      * </ul>
      *

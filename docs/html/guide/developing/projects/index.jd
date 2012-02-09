@@ -179,8 +179,9 @@ page.title=Managing Projects
 
     <dd>Customizable computer-specific properties for the build system. If you use Ant to build
     the project, this contains the path to the SDK installation. Because the content of the file
-    is specific to the local installation of the SDK, maintained it in a source
-    revision control system. If you use Eclipse, this file is not used.</dd>
+    is specific to the local installation of the SDK, the <code>local.properties</code> should not
+be maintained in a source revision control system. If you use Eclipse, this file is not
+used.</dd>
 
     <dt><code>ant.properties</code></dt>
 

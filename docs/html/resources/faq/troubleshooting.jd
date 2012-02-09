@@ -222,8 +222,8 @@ the adb tool. Here's how to do that:</p>
 
 <ol>
   <li>In a terminal, change to the tools directory of the SDK.</li>
-  <li>If no emulator instance is running, start an emulator using using the command <code>emulator &</code>.</li>
-  <li>Uninstall the preinstalled app using the command <code>adb uninstall com.android.samples</code>.</li>
+  <li>If no emulator instance is running, start an emulator using using the command <code>emulator</code>.</li>
+  <li>Uninstall the preinstalled app using the command <code>adb uninstall com.example.android.apis</code>.</li>
   <li>Reinstall the app using the command <code>adb install &lt;path to the ApiDemos.apk&gt;</code>. If you are 
   working in Eclipse/ADT, you can just compile and run the app in the normal way. </li>
 </ol>
