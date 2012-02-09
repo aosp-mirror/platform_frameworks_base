@@ -1156,8 +1156,13 @@ public class WebSettings {
     }
 
     /**
-     * Tell the WebView to load image resources automatically.
-     * @param flag True if the WebView should load images automatically.
+     * Sets whether the WebView should load image resources. Note that this method
+     * controls loading of all images, including those embedded using the data
+     * URI scheme. Use {@link #setBlockNetworkImage} to control loading only
+     * of images specified using network URI schemes. Note that if the value of this
+     * setting is changed from false to true, all images resources referenced
+     * by content currently displayed by the WebView are loaded automatically.
+     * @param flag Whether the WebView should load image resources.
      */
     public synchronized void setLoadsImagesAutomatically(boolean flag) {
         if (mLoadsImagesAutomatically != flag) {
@@ -1167,20 +1172,26 @@ public class WebSettings {
     }
 
     /**
-     * Return true if the WebView will load image resources automatically.
-     * The default is true.
-     * @return True if the WebView loads images automatically.
+     * Returns true if the WebView loads image resources. This includes
+     * images embedded using the data URI scheme. The default is true.
+     * @return True if the WebView loads image resources.
      */
     public synchronized boolean getLoadsImagesAutomatically() {
         return mLoadsImagesAutomatically;
     }
 
     /**
-     * Tell the WebView to block network images. This is only checked when
-     * {@link #getLoadsImagesAutomatically} is true. If you set the value to
-     * false, images will automatically be loaded. Use this api to reduce
-     * bandwidth only. Use {@link #setBlockNetworkLoads} if possible.
-     * @param flag True if the WebView should block network images.
+     * Sets whether the WebView should not load image resources from the
+     * network (resources accessed via http and https URI schemes).  Note
+     * that this method has no effect unless
+     * {@link #getLoadsImagesAutomatically} returns true. Also note that
+     * disabling all network loads using {@link #setBlockNetworkLoads}
+     * will also prevent network images from loading, even if this flag is set
+     * to false. When the value of this setting is changed from true to false,
+     * network images resources referenced by content currently displayed by
+     * the WebView are fetched automatically.
+     * @param flag Whether the WebView should not load image resources from
+     * the network.
      * @see #setBlockNetworkLoads
      */
     public synchronized void setBlockNetworkImage(boolean flag) {
@@ -1191,20 +1202,27 @@ public class WebSettings {
     }
 
     /**
-     * Return true if the WebView will block network images. The default is
-     * false.
-     * @return True if the WebView blocks network images.
+     * Returns true if the WebView does not load image resources from the network.
+     * The default is false.
+     * @return True if the WebView does not load image resources from the network.
      */
     public synchronized boolean getBlockNetworkImage() {
         return mBlockNetworkImage;
     }
 
     /**
-     * Tell the WebView to block all network load requests. If you set the
-     * value to false, you must call {@link android.webkit.WebView#reload} to
-     * fetch remote resources. This flag supercedes the value passed to
-     * {@link #setBlockNetworkImage}.
-     * @param flag True if the WebView should block all network loads.
+     * Sets whether the WebView should not load resources from the network.
+     * Use {@link #setBlockNetworkImage} to only avoid loading
+     * image resources. Note that if the value of this setting is
+     * changed from true to false, network resources referenced by content
+     * currently displayed by the WebView are not fetched until
+     * {@link android.webkit.WebView#reload} is called.
+     * If the application does not have the
+     * {@link android.Manifest.permission#INTERNET} permission, attempts to set
+     * a value of false will cause a {@link java.lang.SecurityException}
+     * to be thrown.
+     * @param flag Whether the WebView should not load any resources
+     * from the network.
      * @see android.webkit.WebView#reload
      */
     public synchronized void setBlockNetworkLoads(boolean flag) {
@@ -1216,9 +1234,11 @@ public class WebSettings {
     }
 
     /**
-     * Return true if the WebView will block all network loads. The default is
-     * false.
-     * @return True if the WebView blocks all network loads.
+     * Returns true if the WebView does not load any resources from the network.
+     * The default value is false if the application has the
+     * {@link android.Manifest.permission#INTERNET} permission, otherwise it is
+     * true.
+     * @return True if the WebView does not load any resources from the network.
      */
     public synchronized boolean getBlockNetworkLoads() {
         return mBlockNetworkLoads;
