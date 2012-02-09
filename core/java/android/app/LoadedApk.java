@@ -119,7 +119,7 @@ public final class LoadedApk {
         final int myUid = Process.myUid();
         mResDir = aInfo.uid == myUid ? aInfo.sourceDir
                 : aInfo.publicSourceDir;
-        if (!UserId.isSameUser(aInfo.uid, myUid)) {
+        if (!UserId.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
             aInfo.dataDir = PackageManager.getDataDirForUser(UserId.getUserId(myUid),
                     mPackageName);
         }

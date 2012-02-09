@@ -3482,4 +3482,10 @@
   <public type="color" name="holo_orange_dark" id="0x01060019" />
   <public type="color" name="holo_purple" id="0x0106001a" />
   <public type="color" name="holo_blue_bright" id="0x0106001b" />
+
+<!-- ===============================================================
+     Resources added in version 16 of the platform (Jelly Bean)
+     =============================================================== -->
+  <public type="attr" name="isolatedProcess" id="0x010103a7" />
+
 </resources>

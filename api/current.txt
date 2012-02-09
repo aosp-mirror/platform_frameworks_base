@@ -562,6 +562,7 @@ package android {
     field public static final int isRepeatable = 16843336; // 0x1010248
     field public static final int isScrollContainer = 16843342; // 0x101024e
     field public static final int isSticky = 16843335; // 0x1010247
+    field public static final int isolatedProcess = 16843687; // 0x10103a7
     field public static final int itemBackground = 16843056; // 0x1010130
     field public static final int itemIconDisabledAlpha = 16843057; // 0x1010131
     field public static final int itemPadding = 16843565; // 0x101032d
@@ -6469,6 +6470,7 @@ package android.content.pm {
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public int flags;
     field public java.lang.String permission;
@@ -15178,7 +15180,7 @@ package android.os {
     method public static final deprecated boolean supportsProcesses();
     field public static final int BLUETOOTH_GID = 2000; // 0x7d0
     field public static final int FIRST_APPLICATION_UID = 10000; // 0x2710
-    field public static final int LAST_APPLICATION_UID = 99999; // 0x1869f
+    field public static final int LAST_APPLICATION_UID = 89999; // 0x15f8f
     field public static final int PHONE_UID = 1001; // 0x3e9
     field public static final int SIGNAL_KILL = 9; // 0x9
     field public static final int SIGNAL_QUIT = 3; // 0x3

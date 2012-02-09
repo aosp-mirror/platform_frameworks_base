@@ -134,7 +134,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_CONFIGURATION = false;
-    private static final boolean DEBUG_SERVICE = true;
+    private static final boolean DEBUG_SERVICE = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -3764,13 +3764,17 @@ public final class ActivityThread {
     }
 
     private void setupGraphicsSupport(LoadedApk info) {
+        if (Process.isIsolated()) {
+            // Isolated processes aren't going to do UI.
+            return;
+        }
         try {
             int uid = Process.myUid();
             String[] packages = getPackageManager().getPackagesForUid(uid);
 
             // If there are several packages in this application we won't
             // initialize the graphics disk caches 
-            if (packages.length == 1) {
+            if (packages != null && packages.length == 1) {
                 ContextImpl appContext = new ContextImpl();
                 appContext.init(info, null, this);
 
