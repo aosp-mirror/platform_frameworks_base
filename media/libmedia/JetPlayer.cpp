@@ -246,14 +246,12 @@ int JetPlayer::render() {
     }//while (1)
 
 threadExit:
-    if (mAudioTrack) {
+    if (mAudioTrack != NULL) {
         mAudioTrack->stop();
         mAudioTrack->flush();
     }
-    if (mAudioBuffer) {
-        delete [] mAudioBuffer;
-        mAudioBuffer = NULL;
-    }
+    delete [] mAudioBuffer;
+    mAudioBuffer = NULL;
     mMutex.lock();
     mTid = -1;
     mCondition.signal();

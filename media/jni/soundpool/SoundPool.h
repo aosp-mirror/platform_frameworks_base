@@ -116,7 +116,7 @@ protected:
 class SoundChannel : public SoundEvent {
 public:
     enum state { IDLE, RESUMING, STOPPING, PAUSED, PLAYING };
-    SoundChannel() : mAudioTrack(0), mState(IDLE), mNumChannels(1),
+    SoundChannel() : mAudioTrack(NULL), mState(IDLE), mNumChannels(1),
             mPos(0), mToggle(0), mAutoPaused(false) {}
     ~SoundChannel();
     void init(SoundPool* soundPool);

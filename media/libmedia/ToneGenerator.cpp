@@ -1045,7 +1045,7 @@ bool ToneGenerator::initAudioTrack() {
 initAudioTrack_exit:
 
     // Cleanup
-    if (mpAudioTrack) {
+    if (mpAudioTrack != NULL) {
         ALOGV("Delete Track I: %p", mpAudioTrack);
         delete mpAudioTrack;
         mpAudioTrack = NULL;

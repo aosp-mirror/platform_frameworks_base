@@ -559,7 +559,7 @@ public:
         if (status != NO_ERROR) {
             return status;
         }
-        if (numEffects) {
+        if (numEffects != NULL) {
             *numEffects = (uint32_t)reply.readInt32();
         }
         return NO_ERROR;

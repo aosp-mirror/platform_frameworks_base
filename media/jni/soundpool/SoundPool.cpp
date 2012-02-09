@@ -840,7 +840,7 @@ void SoundChannel::autoResume()
 void SoundChannel::setRate(float rate)
 {
     Mutex::Autolock lock(&mLock);
-    if (mAudioTrack != 0 && mSample.get() != 0) {
+    if (mAudioTrack != NULL && mSample != 0) {
         uint32_t sampleRate = uint32_t(float(mSample->sampleRate()) * rate + 0.5);
         mAudioTrack->setSampleRate(sampleRate);
         mRate = rate;
@@ -852,7 +852,8 @@ void SoundChannel::setVolume_l(float leftVolume, float rightVolume)
 {
     mLeftVolume = leftVolume;
     mRightVolume = rightVolume;
-    if (mAudioTrack != 0) mAudioTrack->setVolume(leftVolume, rightVolume);
+    if (mAudioTrack != NULL)
+        mAudioTrack->setVolume(leftVolume, rightVolume);
 }
 
 void SoundChannel::setVolume(float leftVolume, float rightVolume)
@@ -864,7 +865,7 @@ void SoundChannel::setVolume(float leftVolume, float rightVolume)
 void SoundChannel::setLoop(int loop)
 {
     Mutex::Autolock lock(&mLock);
-    if (mAudioTrack != 0 && mSample.get() != 0) {
+    if (mAudioTrack != NULL && mSample != 0) {
         uint32_t loopEnd = mSample->size()/mNumChannels/
             ((mSample->format() == AUDIO_FORMAT_PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
         mAudioTrack->setLoop(0, loopEnd, loop);
