@@ -80,6 +80,7 @@ class ServiceRecord extends Binder {
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
+    ProcessRecord isolatedProc; // keep track of isolated process, if requested
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
@@ -210,6 +211,9 @@ class ServiceRecord extends Binder {
         }
         pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
+        if (isolatedProc != null) {
+            pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
+        }
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
                     pw.print(" foregroundId="); pw.print(foregroundId);

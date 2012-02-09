@@ -761,7 +761,7 @@ final class ActivityStack {
         }
 
         mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
-                "activity", r.intent.getComponent(), false);
+                "activity", r.intent.getComponent(), false, false);
     }
     
     void stopIfSleepingLocked() {

@@ -119,7 +119,19 @@ public class Process {
      * Last of application-specific UIDs starting at
      * {@link #FIRST_APPLICATION_UID}.
      */
-    public static final int LAST_APPLICATION_UID = 99999;
+    public static final int LAST_APPLICATION_UID = 89999;
+
+    /**
+     * First uid used for fully isolated sandboxed processes (with no permissions of their own)
+     * @hide
+     */
+    public static final int FIRST_ISOLATED_UID = 99000;
+
+    /**
+     * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
+     * @hide
+     */
+    public static final int LAST_ISOLATED_UID = 99999;
 
     /**
      * Defines a secondary group id for access to the bluetooth hardware.
@@ -574,6 +586,15 @@ public class Process {
      * Returns the identifier of this process's user.
      */
     public static final native int myUid();
+
+    /**
+     * Returns whether the current process is in an isolated sandbox.
+     * @hide
+     */
+    public static final boolean isIsolated() {
+        int uid = UserId.getAppId(myUid());
+        return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
+    }
 
     /**
      * Returns the UID assigned to a particular user name, or -1 if there is

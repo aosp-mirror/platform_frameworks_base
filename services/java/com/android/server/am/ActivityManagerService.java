@@ -835,7 +835,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         info.activityInfo.applicationInfo, true,
                         r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                         "broadcast", r.curComponent,
-                        (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0))
+                        (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false))
                                 == null) {
                     // Ah, this recipient is unavailable.  Finish it if necessary,
                     // and mark the broadcast record as ready for the next.
@@ -1134,6 +1134,17 @@ public final class ActivityManagerService extends ActivityManagerNative
      * objects.
      */
     final ProcessMap<ProcessRecord> mProcessNames = new ProcessMap<ProcessRecord>();
+
+    /**
+     * The currently running isolated processes.
+     */
+    final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<ProcessRecord>();
+
+    /**
+     * Counter for assigning isolated process uids, to avoid frequently reusing the
+     * same ones.
+     */
+    int mNextIsolatedProcessUid = 0;
 
     /**
      * The currently running heavy-weight process, if any.
@@ -2099,11 +2110,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (mSelf) {
                 ProcessRecord app = mSelf.newProcessRecordLocked(
                         mSystemThread.getApplicationThread(), info,
-                        info.processName);
+                        info.processName, false);
                 app.persistent = true;
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
-                mSelf.mProcessNames.put(app.processName, app.info.uid, app);
+                mSelf.mProcessNames.put(app.processName, app.uid, app);
                 synchronized (mSelf.mPidsSelfLocked) {
                     mSelf.mPidsSelfLocked.put(app.pid, app);
                 }
@@ -2621,8 +2632,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            String hostingType, ComponentName hostingName, boolean allowWhileBooting) {
-        ProcessRecord app = getProcessRecordLocked(processName, info.uid);
+            String hostingType, ComponentName hostingName, boolean allowWhileBooting,
+            boolean isolated) {
+        ProcessRecord app;
+        if (!isolated) {
+            app = getProcessRecordLocked(processName, info.uid);
+        } else {
+            // If this is an isolated process, it can't re-use an existing process.
+            app = null;
+        }
         // We don't have to do anything more if:
         // (1) There is an existing application record; and
         // (2) The caller doesn't think it is dead, OR there is no thread
@@ -2651,36 +2669,46 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         String hostingNameStr = hostingName != null
                 ? hostingName.flattenToShortString() : null;
-        
-        if ((intentFlags&Intent.FLAG_FROM_BACKGROUND) != 0) {
-            // If we are in the background, then check to see if this process
-            // is bad.  If so, we will just silently fail.
-            if (mBadProcesses.get(info.processName, info.uid) != null) {
-                if (DEBUG_PROCESSES) Slog.v(TAG, "Bad process: " + info.uid
+
+        if (!isolated) {
+            if ((intentFlags&Intent.FLAG_FROM_BACKGROUND) != 0) {
+                // If we are in the background, then check to see if this process
+                // is bad.  If so, we will just silently fail.
+                if (mBadProcesses.get(info.processName, info.uid) != null) {
+                    if (DEBUG_PROCESSES) Slog.v(TAG, "Bad process: " + info.uid
+                            + "/" + info.processName);
+                    return null;
+                }
+            } else {
+                // When the user is explicitly starting a process, then clear its
+                // crash count so that we won't make it bad until they see at
+                // least one crash dialog again, and make the process good again
+                // if it had been bad.
+                if (DEBUG_PROCESSES) Slog.v(TAG, "Clearing bad process: " + info.uid
                         + "/" + info.processName);
-                return null;
-            }
-        } else {
-            // When the user is explicitly starting a process, then clear its
-            // crash count so that we won't make it bad until they see at
-            // least one crash dialog again, and make the process good again
-            // if it had been bad.
-            if (DEBUG_PROCESSES) Slog.v(TAG, "Clearing bad process: " + info.uid
-                    + "/" + info.processName);
-            mProcessCrashTimes.remove(info.processName, info.uid);
-            if (mBadProcesses.get(info.processName, info.uid) != null) {
-                EventLog.writeEvent(EventLogTags.AM_PROC_GOOD, info.uid,
-                        info.processName);
-                mBadProcesses.remove(info.processName, info.uid);
-                if (app != null) {
-                    app.bad = false;
+                mProcessCrashTimes.remove(info.processName, info.uid);
+                if (mBadProcesses.get(info.processName, info.uid) != null) {
+                    EventLog.writeEvent(EventLogTags.AM_PROC_GOOD, info.uid,
+                            info.processName);
+                    mBadProcesses.remove(info.processName, info.uid);
+                    if (app != null) {
+                        app.bad = false;
+                    }
                 }
             }
         }
-        
+
         if (app == null) {
-            app = newProcessRecordLocked(null, info, processName);
-            mProcessNames.put(processName, info.uid, app);
+            app = newProcessRecordLocked(null, info, processName, isolated);
+            if (app == null) {
+                Slog.w(TAG, "Failed making new process record for "
+                        + processName + "/" + info.uid + " isolated=" + isolated);
+                return null;
+            }
+            mProcessNames.put(processName, app.uid, app);
+            if (isolated) {
+                mIsolatedProcesses.put(app.uid, app);
+            }
         } else {
             // If this is a new package in the process, add the package to the list
             app.addPackage(info.packageName);
@@ -2726,14 +2754,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProcDeaths[0] = 0;
         
         try {
-            int uid = app.info.uid;
+            int uid = app.uid;
 
             int[] gids = null;
-            try {
-                gids = mContext.getPackageManager().getPackageGids(
-                        app.info.packageName);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.w(TAG, "Unable to retrieve gids", e);
+            if (!app.isolated) {
+                try {
+                    gids = mContext.getPackageManager().getPackageGids(
+                            app.info.packageName);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.w(TAG, "Unable to retrieve gids", e);
+                }
             }
             if (mFactoryTest != SystemServer.FACTORY_TEST_OFF) {
                 if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
@@ -3405,7 +3435,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (mPidsSelfLocked) {
                 for (int i=0; i<mPidsSelfLocked.size(); i++) {
                     ProcessRecord p = mPidsSelfLocked.valueAt(i);
-                    if (p.info.uid != uid) {
+                    if (p.uid != uid) {
                         continue;
                     }
                     if (p.pid == initialPid) {
@@ -4389,6 +4419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     service.app.removed = true;
                 }
                 service.app = null;
+                service.isolatedProc = null;
                 services.add(service);
             }
         }
@@ -4434,12 +4465,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {
         final String name = app.processName;
-        final int uid = app.info.uid;
+        final int uid = app.uid;
         if (DEBUG_PROCESSES) Slog.d(
             TAG, "Force removing proc " + app.toShortString() + " (" + name
             + "/" + uid + ")");
 
         mProcessNames.remove(name, uid);
+        mIsolatedProcesses.remove(app.uid);
         if (mHeavyWeightProcess == app) {
             mHeavyWeightProcess = null;
             mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
@@ -4456,9 +4488,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mLruProcesses.remove(app);
             Process.killProcessQuiet(pid);
             
-            if (app.persistent) {
+            if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
-                    addAppLocked(app.info);
+                    addAppLocked(app.info, false);
                 } else {
                     needRestart = true;
                 }
@@ -4483,9 +4515,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         if (gone) {
             Slog.w(TAG, "Process " + app + " failed to attach");
-            EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, pid, app.info.uid,
+            EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, pid, app.uid,
                     app.processName);
-            mProcessNames.remove(app.processName, app.info.uid);
+            mProcessNames.remove(app.processName, app.uid);
+            mIsolatedProcesses.remove(app.uid);
             if (mHeavyWeightProcess == app) {
                 mHeavyWeightProcess = null;
                 mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
@@ -4495,9 +4528,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Take care of any services that are waiting for the process.
             for (int i=0; i<mPendingServices.size(); i++) {
                 ServiceRecord sr = mPendingServices.get(i);
-                if (app.info.uid == sr.appInfo.uid
-                        && app.processName.equals(sr.processName)) {
+                if ((app.uid == sr.appInfo.uid
+                        && app.processName.equals(sr.processName))
+                        || sr.isolatedProc == app) {
                     Slog.w(TAG, "Forcing bringing down service: " + sr);
+                    sr.isolatedProc = null;
                     mPendingServices.remove(i);
                     i--;
                     bringDownServiceLocked(sr, true);
@@ -4678,7 +4713,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // See if the top visible activity is waiting to run in this process...
         ActivityRecord hr = mMainStack.topRunningActivityLocked(null);
         if (hr != null && normalMode) {
-            if (hr.app == null && app.info.uid == hr.info.applicationInfo.uid
+            if (hr.app == null && app.uid == hr.info.applicationInfo.uid
                     && processName.equals(hr.processName)) {
                 try {
                     if (mMainStack.realStartActivityLocked(hr, app, true, true)) {
@@ -4700,8 +4735,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 for (int i=0; i<mPendingServices.size(); i++) {
                     sr = mPendingServices.get(i);
-                    if (app.info.uid != sr.appInfo.uid
-                            || !processName.equals(sr.processName)) {
+                    if (app != sr.isolatedProc && (app.uid != sr.appInfo.uid
+                            || !processName.equals(sr.processName))) {
                         continue;
                     }
 
@@ -4728,7 +4763,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Check whether the next backup agent is in this process...
-        if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.info.uid) {
+        if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.uid) {
             if (DEBUG_BACKUP) Slog.v(TAG, "New app is backup target, launching agent for " + app);
             ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
             try {
@@ -5183,7 +5218,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             synchronized (mPidsSelfLocked) {
                 ProcessRecord pr = mPidsSelfLocked.get(pid);
-                if (pr == null) {
+                if (pr == null && isForeground) {
                     Slog.w(TAG, "setProcessForeground called on unknown pid: " + pid);
                     return;
                 }
@@ -5191,7 +5226,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (oldToken != null) {
                     oldToken.token.unlinkToDeath(oldToken, 0);
                     mForegroundProcesses.remove(pid);
-                    pr.forcingToForeground = null;
+                    if (pr != null) {
+                        pr.forcingToForeground = null;
+                    }
                     changed = true;
                 }
                 if (isForeground && token != null) {
@@ -5680,7 +5717,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException("null uri");
             }
 
-            grantUriPermissionLocked(r.info.uid, targetPkg, uri, modeFlags,
+            grantUriPermissionLocked(r.uid, targetPkg, uri, modeFlags,
                     null);
         }
     }
@@ -5811,8 +5848,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final String authority = uri.getAuthority();
             ProviderInfo pi = null;
-            ContentProviderRecord cpr = mProviderMap.getProviderByName(authority,
-                    UserId.getUserId(r.info.uid));
+            ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, r.userId);
             if (cpr != null) {
                 pi = cpr.info;
             } else {
@@ -5828,7 +5864,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            revokeUriPermissionLocked(r.info.uid, uri, modeFlags);
+            revokeUriPermissionLocked(r.uid, uri, modeFlags);
         }
     }
 
@@ -6532,13 +6568,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         List<ProviderInfo> providers = null;
         try {
             providers = AppGlobals.getPackageManager().
-                queryContentProviders(app.processName, app.info.uid,
+                queryContentProviders(app.processName, app.uid,
                         STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
         } catch (RemoteException ex) {
         }
         if (DEBUG_MU)
-            Slog.v(TAG_MU, "generateApplicationProvidersLocked, app.info.uid = " + app.info.uid);
-        int userId = UserId.getUserId(app.info.uid);
+            Slog.v(TAG_MU, "generateApplicationProvidersLocked, app.info.uid = " + app.uid);
+        int userId = app.userId;
         if (providers != null) {
             final int N = providers.size();
             for (int i=0; i<N; i++) {
@@ -6564,7 +6600,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final String checkContentProviderPermissionLocked(
             ProviderInfo cpi, ProcessRecord r) {
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
-        final int callingUid = (r != null) ? r.info.uid : Binder.getCallingUid();
+        final int callingUid = (r != null) ? r.uid : Binder.getCallingUid();
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
                 cpi.applicationInfo.uid, cpi.exported)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -6680,7 +6716,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // First check if this content provider has been published...
-            int userId = UserId.getUserId(r != null ? r.info.uid : Binder.getCallingUid());
+            int userId = UserId.getUserId(r != null ? r.uid : Binder.getCallingUid());
             cpr = mProviderMap.getProviderByName(name, userId);
             boolean providerRunning = cpr != null;
             if (providerRunning) {
@@ -6815,7 +6851,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (DEBUG_PROVIDER) {
                     RuntimeException e = new RuntimeException("here");
-                    Slog.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + r.info.uid
+                    Slog.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + r.uid
                           + " pruid " + cpr.appInfo.uid + "): " + cpr.info.name, e);
                 }
 
@@ -6849,7 +6885,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ProcessRecord proc = startProcessLocked(cpi.processName,
                                 cpr.appInfo, false, 0, "content provider",
                                 new ComponentName(cpi.applicationInfo.packageName,
-                                        cpi.name), false);
+                                        cpi.name), false, false);
                         if (proc == null) {
                             Slog.w(TAG, "Unable to launch app "
                                     + cpi.applicationInfo.packageName + "/"
@@ -6987,7 +7023,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (DEBUG_MU)
-                Slog.v(TAG_MU, "ProcessRecord uid = " + r.info.uid);
+                Slog.v(TAG_MU, "ProcessRecord uid = " + r.uid);
             if (r == null) {
                 throw new SecurityException(
                         "Unable to find app for caller " + caller
@@ -7098,22 +7134,52 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     final ProcessRecord newProcessRecordLocked(IApplicationThread thread,
-            ApplicationInfo info, String customProcess) {
+            ApplicationInfo info, String customProcess, boolean isolated) {
         String proc = customProcess != null ? customProcess : info.processName;
         BatteryStatsImpl.Uid.Proc ps = null;
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        int uid = info.uid;
+        if (isolated) {
+            int userId = UserId.getUserId(uid);
+            int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
+            uid = 0;
+            while (true) {
+                if (mNextIsolatedProcessUid < Process.FIRST_ISOLATED_UID
+                        || mNextIsolatedProcessUid > Process.LAST_ISOLATED_UID) {
+                    mNextIsolatedProcessUid = Process.FIRST_ISOLATED_UID;
+                }
+                uid = UserId.getUid(userId, mNextIsolatedProcessUid);
+                mNextIsolatedProcessUid++;
+                if (mIsolatedProcesses.indexOfKey(uid) < 0) {
+                    // No process for this uid, use it.
+                    break;
+                }
+                stepsLeft--;
+                if (stepsLeft <= 0) {
+                    return null;
+                }
+            }
+        }
         synchronized (stats) {
             ps = stats.getProcessStatsLocked(info.uid, proc);
         }
-        return new ProcessRecord(ps, thread, info, proc);
+        return new ProcessRecord(ps, thread, info, proc, uid);
     }
 
-    final ProcessRecord addAppLocked(ApplicationInfo info) {
-        ProcessRecord app = getProcessRecordLocked(info.processName, info.uid);
+    final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
+        ProcessRecord app;
+        if (!isolated) {
+            app = getProcessRecordLocked(info.processName, info.uid);
+        } else {
+            app = null;
+        }
 
         if (app == null) {
-            app = newProcessRecordLocked(null, info, null);
-            mProcessNames.put(info.processName, info.uid, app);
+            app = newProcessRecordLocked(null, info, null, isolated);
+            mProcessNames.put(info.processName, app.uid, app);
+            if (isolated) {
+                mIsolatedProcesses.put(app.uid, app);
+            }
             updateLruProcessLocked(app, true, true);
         }
 
@@ -7862,7 +7928,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 = (ApplicationInfo)apps.get(i);
                             if (info != null &&
                                     !info.packageName.equals("android")) {
-                                addAppLocked(info);
+                                addAppLocked(info, false);
                             }
                         }
                     }
@@ -7961,14 +8027,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean handleAppCrashLocked(ProcessRecord app) {
         long now = SystemClock.uptimeMillis();
 
-        Long crashTime = mProcessCrashTimes.get(app.info.processName,
-                app.info.uid);
+        Long crashTime;
+        if (!app.isolated) {
+            crashTime = mProcessCrashTimes.get(app.info.processName, app.uid);
+        } else {
+            crashTime = null;
+        }
         if (crashTime != null && now < crashTime+ProcessList.MIN_CRASH_INTERVAL) {
             // This process loses!
             Slog.w(TAG, "Process " + app.info.processName
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
-                    app.info.processName, app.info.uid);
+                    app.info.processName, app.uid);
             for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
                 if (r.app == app) {
@@ -7982,11 +8052,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // explicitly does so...  but for persistent process, we really
                 // need to keep it running.  If a persistent process is actually
                 // repeatedly crashing, then badness for everyone.
-                EventLog.writeEvent(EventLogTags.AM_PROC_BAD, app.info.uid,
+                EventLog.writeEvent(EventLogTags.AM_PROC_BAD, app.uid,
                         app.info.processName);
-                mBadProcesses.put(app.info.processName, app.info.uid, now);
+                if (!app.isolated) {
+                    // XXX We don't have a way to mark isolated processes
+                    // as bad, since they don't have a peristent identity.
+                    mBadProcesses.put(app.info.processName, app.uid, now);
+                    mProcessCrashTimes.remove(app.info.processName, app.uid);
+                }
                 app.bad = true;
-                mProcessCrashTimes.remove(app.info.processName, app.info.uid);
                 app.removed = true;
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
@@ -8058,7 +8132,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        mProcessCrashTimes.put(app.info.processName, app.info.uid, now);
+        if (!app.isolated) {
+            // XXX Can't keep track of crash times for isolated processes,
+            // because they don't have a perisistent identity.
+            mProcessCrashTimes.put(app.info.processName, app.uid, now);
+        }
+
         return true;
     }
 
@@ -8556,8 +8635,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         Intent appErrorIntent = null;
         synchronized (this) {
-            if (r != null) {
-                mProcessCrashTimes.put(r.info.processName, r.info.uid,
+            if (r != null && !r.isolated) {
+                // XXX Can't keep track of crash time for isolated processes,
+                // since they don't have a persistent identity.
+                mProcessCrashTimes.put(r.info.processName, r.uid,
                         SystemClock.uptimeMillis());
             }
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
@@ -9095,7 +9176,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        
+
+        if (mIsolatedProcesses.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Isolated process list (sorted by uid):");
+            for (int i=0; i<mIsolatedProcesses.size(); i++) {
+                ProcessRecord r = mIsolatedProcesses.valueAt(i);
+                if (dumpPackage != null && !dumpPackage.equals(r.info.packageName)) {
+                    continue;
+                }
+                pw.println(String.format("%sIsolated #%2d: %s",
+                        "    ", i, r.toString()));
+            }
+        }
+
         if (mLruProcesses.size() > 0) {
             if (needSep) pw.println(" ");
             needSep = true;
@@ -10880,6 +10975,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sr.stats.stopLaunchedLocked();
                 }
                 sr.app = null;
+                sr.isolatedProc = null;
                 sr.executeNesting = 0;
                 if (mStoppingServices.remove(sr)) {
                     if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
@@ -11115,10 +11211,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
-        if (!app.persistent) {
+        if (!app.persistent || app.isolated) {
             if (DEBUG_PROCESSES) Slog.v(TAG,
                     "Removing non-persistent process during cleanup: " + app);
-            mProcessNames.remove(app.processName, app.info.uid);
+            mProcessNames.remove(app.processName, app.uid);
+            mIsolatedProcesses.remove(app.uid);
             if (mHeavyWeightProcess == app) {
                 mHeavyWeightProcess = null;
                 mHandler.sendEmptyMessage(CANCEL_HEAVY_NOTIFICATION_MSG);
@@ -11143,10 +11240,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             mPreviousProcess = null;
         }
 
-        if (restart) {
+        if (restart && !app.isolated) {
             // We have components that still need to be running in the
             // process, so re-launch it.
-            mProcessNames.put(app.processName, app.info.uid, app);
+            mProcessNames.put(app.processName, app.uid, app);
             startProcessLocked(app, "restart", app.processName);
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
@@ -11548,7 +11645,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (DEBUG_MU)
             Slog.v(TAG_MU, "realStartServiceLocked, ServiceRecord.uid = " + r.appInfo.uid
-                    + ", ProcessRecord.uid = " + app.info.uid);
+                    + ", ProcessRecord.uid = " + app.uid);
         r.app = app;
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
@@ -11743,35 +11840,53 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + r.packageName + ": " + e);
         }
 
+        final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String appName = r.processName;
-        ProcessRecord app = getProcessRecordLocked(appName, r.appInfo.uid);
-        if (DEBUG_MU)
-            Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
-        if (app != null && app.thread != null) {
-            try {
-                app.addPackage(r.appInfo.packageName);
-                realStartServiceLocked(r, app);
-                return true;
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception when starting service " + r.shortName, e);
-            }
+        ProcessRecord app;
 
-            // If a dead object exception was thrown -- fall through to
-            // restart the application.
+        if (!isolated) {
+            app = getProcessRecordLocked(appName, r.appInfo.uid);
+            if (DEBUG_MU)
+                Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
+            if (app != null && app.thread != null) {
+                try {
+                    app.addPackage(r.appInfo.packageName);
+                    realStartServiceLocked(r, app);
+                    return true;
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Exception when starting service " + r.shortName, e);
+                }
+
+                // If a dead object exception was thrown -- fall through to
+                // restart the application.
+            }
+        } else {
+            // If this service runs in an isolated process, then each time
+            // we call startProcessLocked() we will get a new isolated
+            // process, starting another process if we are currently waiting
+            // for a previous process to come up.  To deal with this, we store
+            // in the service any current isolated process it is running in or
+            // waiting to have come up.
+            app = r.isolatedProc;
         }
 
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
-        if (startProcessLocked(appName, r.appInfo, true, intentFlags,
-                "service", r.name, false) == null) {
-            Slog.w(TAG, "Unable to launch app "
-                    + r.appInfo.packageName + "/"
-                    + r.appInfo.uid + " for service "
-                    + r.intent.getIntent() + ": process is bad");
-            bringDownServiceLocked(r, true);
-            return false;
+        if (app == null) {
+            if ((app=startProcessLocked(appName, r.appInfo, true, intentFlags,
+                    "service", r.name, false, isolated)) == null) {
+                Slog.w(TAG, "Unable to launch app "
+                        + r.appInfo.packageName + "/"
+                        + r.appInfo.uid + " for service "
+                        + r.intent.getIntent() + ": process is bad");
+                bringDownServiceLocked(r, true);
+                return false;
+            }
+            if (isolated) {
+                r.isolatedProc = app;
+            }
         }
-        
+
         if (!mPendingServices.contains(r)) {
             mPendingServices.add(r);
         }
@@ -12687,7 +12802,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     : new ComponentName("android", "FullBackupAgent");
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
-                    false, 0, "backup", hostingName, false);
+                    false, 0, "backup", hostingName, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -13632,7 +13747,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true);
-            ProcessRecord app = addAppLocked(ai);
+            ProcessRecord app = addAppLocked(ai, false);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
             app.instrumentationProfileFile = profileFile;
@@ -14845,6 +14960,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         Process.killProcessQuiet(app.pid);
                     }
                 }
+                if (!app.killedBackground && app.isolated && app.services.size() <= 0) {
+                    // If this is an isolated process, and there are no
+                    // services running in it, then the process is no longer
+                    // needed.  We agressively kill these because we can by
+                    // definition not re-use the same process again, and it is
+                    // good to avoid having whatever code was running in them
+                    // left sitting around after no longer needed.
+                    Slog.i(TAG, "Isolated process " + app.processName
+                            + " (pid " + app.pid + ") no longer needed");
+                    EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                            app.processName, app.setAdj, "isolated not needed");
+                    app.killedBackground = true;
+                    Process.killProcessQuiet(app.pid);
+                }
             }
         }
 
@@ -14983,7 +15112,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     
                     if (app.persistent) {
                         if (app.persistent) {
-                            addAppLocked(app.info);
+                            addAppLocked(app.info, false);
                         }
                     }
                 }
