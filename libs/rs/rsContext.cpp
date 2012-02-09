@@ -248,7 +248,7 @@ void * Context::threadProc(void *vrsc) {
     rsc->mRunning = true;
     if (!rsc->mIsGraphicsContext) {
         while (!rsc->mExit) {
-            rsc->mIO.playCoreCommands(rsc, true, -1);
+            rsc->mIO.playCoreCommands(rsc, -1);
         }
     } else {
 #ifndef ANDROID_RS_SERIALIZE
@@ -268,14 +268,14 @@ void * Context::threadProc(void *vrsc) {
                 vsyncRate = targetRate;
             }
             if (targetRate) {
-                drawOnce |= rsc->mIO.playCoreCommands(rsc, true, displayEvent.getFd());
+                drawOnce |= rsc->mIO.playCoreCommands(rsc, displayEvent.getFd());
                 while (displayEvent.getEvents(eventBuffer, 1) != 0) {
                     //ALOGE("vs2 time past %lld", (rsc->getTime() - eventBuffer[0].header.timestamp) / 1000000);
                 }
             } else
 #endif
             {
-                drawOnce |= rsc->mIO.playCoreCommands(rsc, true, -1);
+                drawOnce |= rsc->mIO.playCoreCommands(rsc, -1);
             }
 
             if ((rsc->mRootScript.get() != NULL) && rsc->mHasSurface &&
