@@ -132,10 +132,6 @@ public class AudioService extends IAudioService.Stub {
     // Timeout for connection to bluetooth headset service
     private static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
 
-    // Amount to raise/lower master volume
-    // FIXME - this should probably be in a resource
-    private static final float MASTER_VOLUME_INCREMENT = 0.05f;
-
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
     /** @see AudioHandler */
@@ -279,6 +275,8 @@ public class AudioService extends IAudioService.Stub {
     // True if we have master volume support
     private final boolean mUseMasterVolume;
 
+    private final int[] mMasterVolumeRamp;
+
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
     private ArrayList <SetModeDeathHandler> mSetModeDeathHandlers = new ArrayList <SetModeDeathHandler>();
@@ -408,6 +406,9 @@ public class AudioService extends IAudioService.Stub {
         mUseMasterVolume = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_useMasterVolume);
         restoreMasterVolume();
+
+        mMasterVolumeRamp = context.getResources().getIntArray(
+                com.android.internal.R.array.config_masterVolumeRamp);
     }
 
     private void createAudioSystemThread() {
@@ -593,19 +594,27 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#adjustMasterVolume(int) */
     public void adjustMasterVolume(int direction, int flags) {
         ensureValidDirection(direction);
-
-        float volume = AudioSystem.getMasterVolume();
-        if (volume >= 0.0) {
-            // get current master volume adjusted to 0 to 100
+        int volume = Math.round(AudioSystem.getMasterVolume() * MAX_MASTER_VOLUME);
+        int delta = 0;
+        for (int i = 0; i < mMasterVolumeRamp.length; i += 2) {
+            int testVolume = mMasterVolumeRamp[i];
+            int testDelta =  mMasterVolumeRamp[i + 1];
             if (direction == AudioManager.ADJUST_RAISE) {
-                volume += MASTER_VOLUME_INCREMENT;
-                if (volume > 1.0f) volume = 1.0f;
+                if (volume >= testVolume) {
+                    delta = testDelta;
+                } else {
+                    break;
+                }
             } else if (direction == AudioManager.ADJUST_LOWER) {
-                volume -= MASTER_VOLUME_INCREMENT;
-                if (volume < 0.0f) volume = 0.0f;
+                if (volume - testDelta >= testVolume) {
+                    delta = -testDelta;
+                } else {
+                    break;
+                }
             }
-            doSetMasterVolume(volume, flags);
         }
+//        Log.d(TAG, "adjustMasterVolume volume: " + volume + " delta: " + delta + " direction: " + direction);
+        setMasterVolume(volume + delta, flags);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
@@ -756,6 +765,11 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void setMasterVolume(int volume, int flags) {
+        if (volume < 0) {
+            volume = 0;
+        } else if (volume > MAX_MASTER_VOLUME) {
+            volume = MAX_MASTER_VOLUME;
+        }
         doSetMasterVolume((float)volume / MAX_MASTER_VOLUME, flags);
     }
 
