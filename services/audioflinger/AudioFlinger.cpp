@@ -2505,21 +2505,6 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 {
 }
 
-static inline
-int32_t mul(int16_t in, int16_t v)
-{
-#if defined(__arm__) && !defined(__thumb__)
-    int32_t out;
-    asm( "smulbb %[out], %[in], %[v] \n"
-         : [out]"=r"(out)
-         : [in]"%r"(in), [v]"r"(v)
-         : );
-    return out;
-#else
-    return in * int32_t(v);
-#endif
-}
-
 void AudioFlinger::DirectOutputThread::applyVolume(uint16_t leftVol, uint16_t rightVol, bool ramp)
 {
     // Do not apply volume on compressed audio
