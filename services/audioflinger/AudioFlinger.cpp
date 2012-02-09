@@ -923,7 +923,7 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
         for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
             audio_hw_device_t *dev = mAudioHwDevs[i];
             char *s = dev->get_parameters(dev, keys.string());
-            out_s8 += String8(s);
+            out_s8 += String8(s ? s : "");
             free(s);
         }
         return out_s8;
