@@ -243,7 +243,7 @@ performing transactions with the provider doesn't need to and instead calls meth
 android.content.ContentResolver} object. This leaves a layer of abstraction between the content
 provider and the component requesting information (for security).</p>
 
-<p>There are separate methods for activiting each type of component:</p>
+<p>There are separate methods for activating each type of component:</p>
 <ul>
   <li>You can start an activity (or give it something new to do) by
 passing an {@link android.content.Intent} to {@link android.content.Context#startActivity
@@ -400,7 +400,7 @@ href="{@docRoot}guide/appendix/api-levels.html">API Level</a> 7), you should dec
 requirements in your manifest file. That way, devices that do <em>not</em> have a camera and have an
 Android version <em>lower</em> than 2.1 cannot install your application from Android Market.</p>
 
-<p>However, you can also declare that your applicaiton uses the camera, but does not
+<p>However, you can also declare that your application uses the camera, but does not
 <em>require</em> it. In that case, your application must perform a check at runtime to determine
 if the device has a camera and disable any features that use the camera if one is not available.</p>
 
