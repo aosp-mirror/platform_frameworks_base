@@ -272,10 +272,11 @@ is "{@code false}", it cannot be instantiated.
 </p></dd>
 
 <dt><a name="exclude"></a>{@code android:excludeFromRecents}</dt>
-<dd>Whether or not the activity should be excluded from the list of recently 
-launched activities that can be displayed to users &mdash; "{@code true}" if 
-it should be excluded, and "{@code false}" if it should be included.  
-The default value is "{@code false}".
+<dd>Whether or not the task initiated by this activity should be excluded from the list of recently
+used applications ("recent apps"). That is, when this activity is the root activity of a new task,
+this attribute determines whether the task should not appear in the list of recent apps. "{@code
+true}" if the task should be <em>excluded</em> from the list; "{@code false}" if it should be
+<em>included</em>. The default value is "{@code false}".
 </p></dd>
 
 <dt><a name="exported"></a>{@code android:exported}</dt>
