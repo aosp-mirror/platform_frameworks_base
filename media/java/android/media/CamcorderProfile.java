@@ -20,12 +20,12 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 
 /**
- * The CamcorderProfile class is used to retrieve the
+ * Retrieves the
  * predefined camcorder profile settings for camcorder applications.
  * These settings are read-only.
  *
- * The compressed output from a recording session with a given
- * CamcorderProfile contains two tracks: one for auido and one for video.
+ * <p>The compressed output from a recording session with a given
+ * CamcorderProfile contains two tracks: one for audio and one for video.
  *
  * <p>Each profile specifies the following set of parameters:
  * <ul>
