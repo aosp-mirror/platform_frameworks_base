@@ -1386,7 +1386,7 @@ public final class Settings {
         public static final int SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
 
         /**
-         * SCREEN_BRIGHTNESS_MODE value for manual mode.
+         * SCREEN_BRIGHTNESS_MODE value for automatic mode.
          */
         public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
 

@@ -58,7 +58,7 @@ though.</p>
 
 <p>When your application displays a lot of data, or data that is expensive to fetch,
 the automatic destruction/creation of the activities can be lead to a
-painful user experience. Take the example of <a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/">Photostream</a>,
+painful user experience. Take the example of <a href="http://code.google.com/p/apps-for-android/source/browse/#git%2FPhotostream%2Fsrc%2Fcom%2Fgoogle%2Fandroid%2Fphotostream">Photostream</a>,
 a simple Flickr browsing application. After you launch the application and choose a Flickr account, the
 application downloads a set of 6 photos (on a T-Mobile G1) from the
 Flickr servers and displays them on screen. To improve the user
@@ -80,9 +80,9 @@ offers a great API exactly for that purpose.</p>
 
 <p>The Activity class has a special method called 
 {@link android.app.Activity#onRetainNonConfigurationInstance()}. This method 
-can be used to pass an arbitrary object <em>your future self</em> and Android 
+can be used to pass an arbitrary object to <em>your future self</em> and Android 
 is smart enough to call this method only when needed. In the case of Photostream, 
-the application <a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/src/com/google/android/photostream/PhotostreamActivity.java#226">used this method</a>
+the application used this method
 to pass the downloaded images to the future activity on orientation change. 
 The implementation can be summarized like so:</p>
 
@@ -96,7 +96,7 @@ public Object onRetainNonConfigurationInstance() {
 
 <p>In the new activity, in <code>onCreate()</code>, all you have to do to 
 get your object back is to call {@link android.app.Activity#getLastNonConfigurationInstance()}. 
-In Photostream, <a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/src/com/google/android/photostream/PhotostreamActivity.java#251">this method is invoked</a> 
+In Photostream, this method is invoked 
 and if the returned value is not null, the grid is loaded with the list of 
 photos from the previous activity:</p>
 
@@ -128,3 +128,6 @@ only, not the drawables. Finally, remember that
 <code>onRetainNonConfigurationChange()</code> should be used only to retain 
 data that is expensive to load. Otherwise, keep it simple and let Android 
 do everything.</p>
+
+<p>Also read the guide to <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
+Changes</a>.</p>
