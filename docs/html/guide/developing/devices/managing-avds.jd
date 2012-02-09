@@ -233,13 +233,5 @@ to emulate:</p>
 
       <td>hw.lcd.density</td>
     </tr>
-
-    <tr>
-      <td>Trackball support</td>
-
-      <td>Whether there is a trackball present.</td>
-
-      <td>hw.trackBall</td>
-    </tr>
   </table>
 

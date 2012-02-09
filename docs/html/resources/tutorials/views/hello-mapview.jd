@@ -255,7 +255,7 @@ to define its coordinates on the map.</p>
 <pre>
 List&lt;Overlay> mapOverlays = mapView.getOverlays();
 Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
-HelloItemizedOverlay itemizedoverlay = new HelloItemizedOverlay(drawable);</pre>
+HelloItemizedOverlay itemizedoverlay = new HelloItemizedOverlay(drawable, this);</pre>
 
     <p>All overlay elements on a map are held by the {@code MapView}, so when you want to add some,
     you have to get a list from the <code>getOverlays()</code> method. Then instantiate the {@link
