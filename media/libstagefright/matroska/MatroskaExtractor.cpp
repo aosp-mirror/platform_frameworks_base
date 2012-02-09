@@ -93,7 +93,10 @@ struct BlockIterator {
 
     void advance();
     void reset();
-    void seek(int64_t seekTimeUs, bool seekToKeyFrame);
+
+    void seek(
+            int64_t seekTimeUs, bool seekToKeyFrame,
+            int64_t *actualFrameTimeUs);
 
     const mkvparser::Block *block() const;
     int64_t blockTimeUs() const;
@@ -303,22 +306,52 @@ void BlockIterator::reset() {
     } while (!eos() && block()->GetTrackNumber() != mTrackNum);
 }
 
-void BlockIterator::seek(int64_t seekTimeUs, bool seekToKeyFrame) {
+void BlockIterator::seek(
+        int64_t seekTimeUs, bool seekToKeyFrame,
+        int64_t *actualFrameTimeUs) {
     Mutex::Autolock autoLock(mExtractor->mLock);
 
-    mCluster = mExtractor->mSegment->FindCluster(seekTimeUs * 1000ll);
+    *actualFrameTimeUs = -1ll;
+
+    int64_t seekTimeNs = seekTimeUs * 1000ll;
+
+    mCluster = mExtractor->mSegment->FindCluster(seekTimeNs);
     mBlockEntry = NULL;
     mBlockEntryIndex = 0;
 
-    do {
-        advance_l();
-    }
-    while (!eos() && block()->GetTrackNumber() != mTrackNum);
+    long prevKeyFrameBlockEntryIndex = -1;
 
-    if (seekToKeyFrame) {
-        while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
-            advance_l();
+    for (;;) {
+        advance_l();
+
+        if (eos()) {
+            break;
         }
+
+        if (block()->GetTrackNumber() != mTrackNum) {
+            continue;
+        }
+
+        if (block()->IsKey()) {
+            prevKeyFrameBlockEntryIndex = mBlockEntryIndex - 1;
+        }
+
+        int64_t timeNs = block()->GetTime(mCluster);
+
+        if (timeNs >= seekTimeNs) {
+            *actualFrameTimeUs = (timeNs + 500ll) / 1000ll;
+            break;
+        }
+    }
+
+    if (eos()) {
+        return;
+    }
+
+    if (seekToKeyFrame && !block()->IsKey()) {
+        CHECK_GE(prevKeyFrameBlockEntryIndex, 0);
+        mBlockEntryIndex = prevKeyFrameBlockEntryIndex;
+        advance_l();
     }
 }
 
@@ -397,6 +430,8 @@ status_t MatroskaSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
 
+    int64_t targetSampleTimeUs = -1ll;
+
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)
@@ -406,10 +441,14 @@ status_t MatroskaSource::read(
         // Apparently keyframe indication in audio tracks is unreliable,
         // fortunately in all our currently supported audio encodings every
         // frame is effectively a keyframe.
-        mBlockIter.seek(seekTimeUs, !mIsAudio);
+        int64_t actualFrameTimeUs;
+        mBlockIter.seek(seekTimeUs, !mIsAudio, &actualFrameTimeUs);
+
+        if (mode == ReadOptions::SEEK_CLOSEST) {
+            targetSampleTimeUs = actualFrameTimeUs;
+        }
     }
 
-again:
     while (mPendingFrames.empty()) {
         status_t err = readBlock();
 
@@ -424,6 +463,11 @@ again:
     mPendingFrames.erase(mPendingFrames.begin());
 
     if (mType != AVC) {
+        if (targetSampleTimeUs >= 0ll) {
+            frame->meta_data()->setInt64(
+                    kKeyTargetTime, targetSampleTimeUs);
+        }
+
         *out = frame;
 
         return OK;
@@ -505,6 +549,11 @@ again:
 
     frame->release();
     frame = NULL;
+
+    if (targetSampleTimeUs >= 0ll) {
+        buffer->meta_data()->setInt64(
+                kKeyTargetTime, targetSampleTimeUs);
+    }
 
     *out = buffer;
 

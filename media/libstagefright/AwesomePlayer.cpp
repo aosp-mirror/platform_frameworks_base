@@ -1609,7 +1609,7 @@ void AwesomePlayer::onVideoEvent() {
                     mSeekTimeUs,
                     mSeeking == SEEK_VIDEO_ONLY
                         ? MediaSource::ReadOptions::SEEK_NEXT_SYNC
-                        : MediaSource::ReadOptions::SEEK_CLOSEST_SYNC);
+                        : MediaSource::ReadOptions::SEEK_CLOSEST);
         }
         for (;;) {
             status_t err = mVideoSource->read(&mVideoBuffer, &options);
