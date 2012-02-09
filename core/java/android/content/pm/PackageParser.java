@@ -2581,6 +2581,11 @@ public class PackageParser {
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_STOP_WITH_TASK;
         }
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_isolatedProcess,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_ISOLATED_PROCESS;
+        }
 
         sa.recycle();
 

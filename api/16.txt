@@ -15052,7 +15052,7 @@ package android.os {
     method public static final deprecated boolean supportsProcesses();
     field public static final int BLUETOOTH_GID = 2000; // 0x7d0
     field public static final int FIRST_APPLICATION_UID = 10000; // 0x2710
-    field public static final int LAST_APPLICATION_UID = 99999; // 0x1869f
+    field public static final int LAST_APPLICATION_UID = 89999; // 0x1869f
     field public static final int PHONE_UID = 1001; // 0x3e9
     field public static final int SIGNAL_KILL = 9; // 0x9
     field public static final int SIGNAL_QUIT = 3; // 0x3

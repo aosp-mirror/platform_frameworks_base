@@ -1235,6 +1235,10 @@
              when the user remove a task rooted in an activity owned by
              the application.  The default is false. -->
         <attr name="stopWithTask" format="boolean" />
+        <!-- If set to true, this service will run under a special process
+             that is isolated from the rest of the system.  The only communication
+             with it is through the Service API (binding and starting). -->
+        <attr name="isolatedProcess" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>receiver</code> tag declares an

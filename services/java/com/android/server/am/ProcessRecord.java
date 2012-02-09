@@ -28,7 +28,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
@@ -44,6 +46,9 @@ import java.util.HashSet;
 class ProcessRecord {
     final BatteryStatsImpl.Uid.Proc batteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
+    final boolean isolated;     // true if this is a special isolated process
+    final int uid;              // uid of process; may be different from 'info' if isolated
+    final int userId;           // user of process.
     final String processName;   // name of the process
     // List of packages running in the process
     final HashSet<String> pkgList = new HashSet<String>();
@@ -147,6 +152,12 @@ class ProcessRecord {
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
 
+        pw.print(prefix); pw.print("user #"); pw.print(userId);
+                pw.print(" uid="); pw.print(info.uid);
+        if (uid != info.uid) {
+            pw.print(" ISOLATED uid="); pw.print(uid);
+        }
+        pw.println();
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -267,9 +278,12 @@ class ProcessRecord {
     }
     
     ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
-            ApplicationInfo _info, String _processName) {
+            ApplicationInfo _info, String _processName, int _uid) {
         batteryStats = _batteryStats;
         info = _info;
+        isolated = _info.uid != _uid;
+        uid = _uid;
+        userId = UserId.getUserId(_uid);
         processName = _processName;
         pkgList.add(_info.packageName);
         thread = _thread;
@@ -343,7 +357,18 @@ class ProcessRecord {
         sb.append(':');
         sb.append(processName);
         sb.append('/');
-        sb.append(info.uid);
+        if (info.uid < Process.FIRST_APPLICATION_UID) {
+            sb.append(uid);
+        } else {
+            sb.append('u');
+            sb.append(userId);
+            sb.append('a');
+            sb.append(info.uid%Process.FIRST_APPLICATION_UID);
+            if (uid != info.uid) {
+                sb.append('i');
+                sb.append(UserId.getAppId(uid) - Process.FIRST_ISOLATED_UID);
+            }
+        }
     }
     
     public String toString() {
