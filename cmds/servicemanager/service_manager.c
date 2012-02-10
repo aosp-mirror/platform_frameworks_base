@@ -90,6 +90,7 @@ struct svcinfo
     struct svcinfo *next;
     void *ptr;
     struct binder_death death;
+    int allow_isolated;
     unsigned len;
     uint16_t name[0];
 };
@@ -125,13 +126,21 @@ uint16_t svcmgr_id[] = {
 };
   
 
-void *do_find_service(struct binder_state *bs, uint16_t *s, unsigned len)
+void *do_find_service(struct binder_state *bs, uint16_t *s, unsigned len, unsigned uid)
 {
     struct svcinfo *si;
     si = find_svc(s, len);
 
 //    ALOGI("check_service('%s') ptr = %p\n", str8(s), si ? si->ptr : 0);
     if (si && si->ptr) {
+        if (!si->allow_isolated) {
+            // If this service doesn't allow access from isolated processes,
+            // then check the uid to see if it is isolated.
+            unsigned appid = uid % AID_USER;
+            if (appid >= AID_ISOLATED_START && appid <= AID_ISOLATED_END) {
+                return 0;
+            }
+        }
         return si->ptr;
     } else {
         return 0;
@@ -140,10 +149,11 @@ void *do_find_service(struct binder_state *bs, uint16_t *s, unsigned len)
 
 int do_add_service(struct binder_state *bs,
                    uint16_t *s, unsigned len,
-                   void *ptr, unsigned uid)
+                   void *ptr, unsigned uid, int allow_isolated)
 {
     struct svcinfo *si;
-//    ALOGI("add_service('%s',%p) uid=%d\n", str8(s), ptr, uid);
+    //ALOGI("add_service('%s',%p,%s) uid=%d\n", str8(s), ptr,
+    //        allow_isolated ? "allow_isolated" : "!allow_isolated", uid);
 
     if (!ptr || (len == 0) || (len > 127))
         return -1;
@@ -175,6 +185,7 @@ int do_add_service(struct binder_state *bs,
         si->name[len] = '\0';
         si->death.func = svcinfo_death;
         si->death.ptr = si;
+        si->allow_isolated = allow_isolated;
         si->next = svclist;
         svclist = si;
     }
@@ -194,6 +205,7 @@ int svcmgr_handler(struct binder_state *bs,
     unsigned len;
     void *ptr;
     uint32_t strict_policy;
+    int allow_isolated;
 
 //    ALOGI("target=%p code=%d pid=%d uid=%d\n",
 //         txn->target, txn->code, txn->sender_pid, txn->sender_euid);
@@ -217,7 +229,7 @@ int svcmgr_handler(struct binder_state *bs,
     case SVC_MGR_GET_SERVICE:
     case SVC_MGR_CHECK_SERVICE:
         s = bio_get_string16(msg, &len);
-        ptr = do_find_service(bs, s, len);
+        ptr = do_find_service(bs, s, len, txn->sender_euid);
         if (!ptr)
             break;
         bio_put_ref(reply, ptr);
@@ -226,7 +238,8 @@ int svcmgr_handler(struct binder_state *bs,
     case SVC_MGR_ADD_SERVICE:
         s = bio_get_string16(msg, &len);
         ptr = bio_get_ref(msg);
-        if (do_add_service(bs, s, len, ptr, txn->sender_euid))
+        allow_isolated = bio_get_uint32(msg) ? 1 : 0;
+        if (do_add_service(bs, s, len, ptr, txn->sender_euid, allow_isolated))
             return -1;
         break;
 

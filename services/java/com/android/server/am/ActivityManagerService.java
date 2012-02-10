@@ -2093,7 +2093,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             ActivityManagerService m = mSelf;
             
-            ServiceManager.addService("activity", m);
+            ServiceManager.addService("activity", m, true);
             ServiceManager.addService("meminfo", new MemBinder(m));
             ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
             ServiceManager.addService("dbinfo", new DbBinder(m));
@@ -2964,37 +2964,52 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
     }
 
+    void enforceNotIsolatedCaller(String caller) {
+        if (UserId.isIsolated(Binder.getCallingUid())) {
+            throw new SecurityException("Isolated process not allowed to call " + caller);
+        }
+    }
+
     public int getFrontActivityScreenCompatMode() {
+        enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (this) {
             return mCompatModePackages.getFrontActivityScreenCompatModeLocked();
         }
     }
 
     public void setFrontActivityScreenCompatMode(int mode) {
+        enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
+                "setFrontActivityScreenCompatMode");
         synchronized (this) {
             mCompatModePackages.setFrontActivityScreenCompatModeLocked(mode);
         }
     }
 
     public int getPackageScreenCompatMode(String packageName) {
+        enforceNotIsolatedCaller("getPackageScreenCompatMode");
         synchronized (this) {
             return mCompatModePackages.getPackageScreenCompatModeLocked(packageName);
         }
     }
 
     public void setPackageScreenCompatMode(String packageName, int mode) {
+        enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
+                "setPackageScreenCompatMode");
         synchronized (this) {
             mCompatModePackages.setPackageScreenCompatModeLocked(packageName, mode);
         }
     }
 
     public boolean getPackageAskScreenCompat(String packageName) {
+        enforceNotIsolatedCaller("getPackageAskScreenCompat");
         synchronized (this) {
             return mCompatModePackages.getPackageAskCompatModeLocked(packageName);
         }
     }
 
     public void setPackageAskScreenCompat(String packageName, boolean ask) {
+        enforceCallingPermission(android.Manifest.permission.SET_SCREEN_COMPATIBILITY,
+                "setPackageAskScreenCompat");
         synchronized (this) {
             mCompatModePackages.setPackageAskCompatModeLocked(packageName, ask);
         }
@@ -3069,6 +3084,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
             String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+        enforceNotIsolatedCaller("startActivity");
         int userId = 0;
         if (intent.getCategories() != null && intent.getCategories().contains(Intent.CATEGORY_HOME)) {
             // Requesting home, set the identity to the current user
@@ -3093,6 +3109,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
             String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+        enforceNotIsolatedCaller("startActivityAndWait");
         WaitResult res = new WaitResult();
         int userId = Binder.getOrigCallingUser();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
@@ -3107,6 +3124,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
             boolean debug, Configuration config) {
+        enforceNotIsolatedCaller("startActivityWithConfig");
         int ret = mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
                 requestCode, onlyIfNeeded,
@@ -3118,6 +3136,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) {
+        enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
         if (fillInIntent != null && fillInIntent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -3259,6 +3278,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public final int startActivities(IApplicationThread caller,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo) {
+        enforceNotIsolatedCaller("startActivities");
         int ret = mMainStack.startActivities(caller, -1, intents, resolvedTypes, resultTo,
                 Binder.getOrigCallingUser());
         return ret;
@@ -4020,6 +4040,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, final int userId) {
+        enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         long callingId = Binder.clearCallingIdentity();
@@ -4208,6 +4229,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void closeSystemDialogs(String reason) {
+        enforceNotIsolatedCaller("closeSystemDialogs");
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         if (reason != null) {
@@ -4248,6 +4270,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException {
+        enforceNotIsolatedCaller("getProcessMemoryInfo");
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
             infos[i] = new Debug.MemoryInfo();
@@ -4257,6 +4280,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public long[] getProcessPss(int[] pids) throws RemoteException {
+        enforceNotIsolatedCaller("getProcessPss");
         long[] pss = new long[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
             pss[i] = Debug.getPss(pids[i]);
@@ -4825,10 +4849,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
+        enforceNotIsolatedCaller("showBootMessage");
         mWindowManager.showBootMessage(msg, always);
     }
 
     public void dismissKeyguardOnNextActivity() {
+        enforceNotIsolatedCaller("dismissKeyguardOnNextActivity");
         synchronized (this) {
             mMainStack.dismissKeyguardOnNextActivityLocked();
         }
@@ -4991,6 +5017,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public IIntentSender getIntentSender(int type,
             String packageName, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags) {
+        enforceNotIsolatedCaller("getIntentSender");
         // Refuse possible leaked file descriptors
         if (intents != null) {
             if (intents.length < 1) {
@@ -5293,6 +5320,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (uid == 0 || uid == Process.SYSTEM_UID || pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
+        // Isolated processes don't get any permissions.
+        if (UserId.isIsolated(uid)) {
+            return PackageManager.PERMISSION_DENIED;
+        }
         // If there is a uid that owns whatever is being accessed, it has
         // blanket access to it regardless of the permissions it requires.
         if (owningUid >= 0 && UserId.isSameApp(uid, owningUid)) {
@@ -5445,6 +5476,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
+        enforceNotIsolatedCaller("checkUriPermission");
+
         // Another redirected-binder-call permissions check as in
         // {@link checkComponentPermission}.
         Identity tlsIdentity = sCallerIdentity.get();
@@ -5595,6 +5628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public int checkGrantUriPermission(int callingUid, String targetPkg,
             Uri uri, int modeFlags) {
+        enforceNotIsolatedCaller("checkGrantUriPermission");
         synchronized(this) {
             return checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags);
         }
@@ -5703,6 +5737,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void grantUriPermission(IApplicationThread caller, String targetPkg,
             Uri uri, int modeFlags) {
+        enforceNotIsolatedCaller("grantUriPermission");
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (r == null) {
@@ -5826,6 +5861,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void revokeUriPermission(IApplicationThread caller, Uri uri,
             int modeFlags) {
+        enforceNotIsolatedCaller("revokeUriPermission");
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (r == null) {
@@ -5870,6 +5906,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public IBinder newUriPermissionOwner(String name) {
+        enforceNotIsolatedCaller("newUriPermissionOwner");
         synchronized(this) {
             UriPermissionOwner owner = new UriPermissionOwner(this, name);
             return owner.getExternalTokenLocked();
@@ -6406,6 +6443,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @return Returns true if the move completed, false if not.
      */
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) {
+        enforceNotIsolatedCaller("moveActivityTaskToBack");
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
             int taskId = getTaskForActivityLocked(token, !nonRoot);
@@ -6460,6 +6498,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void finishOtherInstances(IBinder token, ComponentName className) {
+        enforceNotIsolatedCaller("finishOtherInstances");
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
 
@@ -6938,6 +6977,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public final ContentProviderHolder getContentProvider(
             IApplicationThread caller, String name) {
+        enforceNotIsolatedCaller("getContentProvider");
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider "
                     + name;
@@ -6958,6 +6998,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param cpr
      */
     public void removeContentProvider(IApplicationThread caller, String name) {
+        enforceNotIsolatedCaller("removeContentProvider");
         synchronized (this) {
             int userId = UserId.getUserId(Binder.getCallingUid());
             ContentProviderRecord cpr = mProviderMap.getProviderByName(name, userId);
@@ -7020,6 +7061,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
+        enforceNotIsolatedCaller("publishContentProviders");
         synchronized(this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
             if (DEBUG_MU)
@@ -7107,6 +7149,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      *     src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
      */
     public String getProviderMimeType(Uri uri) {
+        enforceNotIsolatedCaller("getProviderMimeType");
         final String name = uri.getAuthority();
         final long ident = Binder.clearCallingIdentity();
         ContentProviderHolder holder = null;
@@ -7224,6 +7267,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException {
+        enforceNotIsolatedCaller("openContentUri");
         String name = uri.getAuthority();
         ContentProviderHolder cph = getContentProviderExternal(name);
         ParcelFileDescriptor pfd = null;
@@ -7477,6 +7521,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     public void registerActivityWatcher(IActivityWatcher watcher) {
+        enforceNotIsolatedCaller("registerActivityWatcher");
         synchronized (this) {
             mWatchers.register(watcher);
         }
@@ -7489,6 +7534,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void registerProcessObserver(IProcessObserver observer) {
+        enforceNotIsolatedCaller("registerProcessObserver");
         mProcessObservers.register(observer);
     }
 
@@ -7517,6 +7563,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public boolean isTopActivityImmersive() {
+        enforceNotIsolatedCaller("startActivity");
         synchronized (this) {
             ActivityRecord r = mMainStack.topRunningActivityLocked(null);
             return (r != null) ? r.immersive : false;
@@ -8701,6 +8748,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState() {
+        enforceNotIsolatedCaller("getProcessesInErrorState");
         // assume our apps are happy - lazy create the list
         List<ActivityManager.ProcessErrorStateInfo> errList = null;
 
@@ -8763,6 +8811,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses() {
+        enforceNotIsolatedCaller("getRunningAppProcesses");
         // Lazy instantiation of list
         List<ActivityManager.RunningAppProcessInfo> runList = null;
         synchronized (this) {
@@ -8808,6 +8857,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public List<ApplicationInfo> getRunningExternalApplications() {
+        enforceNotIsolatedCaller("getRunningExternalApplications");
         List<ActivityManager.RunningAppProcessInfo> runningApps = getRunningAppProcesses();
         List<ApplicationInfo> retList = new ArrayList<ApplicationInfo>();
         if (runningApps != null && runningApps.size() > 0) {
@@ -11323,6 +11373,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     public List<ActivityManager.RunningServiceInfo> getServices(int maxNum,
             int flags) {
+        enforceNotIsolatedCaller("getServices");
         synchronized (this) {
             ArrayList<ActivityManager.RunningServiceInfo> res
                     = new ArrayList<ActivityManager.RunningServiceInfo>();
@@ -11349,6 +11400,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public PendingIntent getRunningServiceControlPanel(ComponentName name) {
+        enforceNotIsolatedCaller("getRunningServiceControlPanel");
         synchronized (this) {
             int userId = UserId.getUserId(Binder.getCallingUid());
             ServiceRecord r = mServiceMap.getServiceByName(name, userId);
@@ -12076,6 +12128,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public ComponentName startService(IApplicationThread caller, Intent service,
             String resolvedType) {
+        enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -12118,6 +12171,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public int stopService(IApplicationThread caller, Intent service,
             String resolvedType) {
+        enforceNotIsolatedCaller("stopService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -12155,6 +12209,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public IBinder peekService(Intent service, String resolvedType) {
+        enforceNotIsolatedCaller("peekService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -12293,6 +12348,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType,
             IServiceConnection connection, int flags) {
+        enforceNotIsolatedCaller("bindService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -12949,6 +13005,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission) {
+        enforceNotIsolatedCaller("registerReceiver");
         synchronized(this) {
             ProcessRecord callerApp = null;
             if (caller != null) {
@@ -13458,6 +13515,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle map,
             String requiredPermission, boolean serialized, boolean sticky, int userId) {
+        enforceNotIsolatedCaller("broadcastIntent");
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
             
@@ -13704,6 +13762,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
             IInstrumentationWatcher watcher) {
+        enforceNotIsolatedCaller("startInstrumentation");
         // Refuse possible leaked file descriptors
         if (arguments != null && arguments.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Bundle");
@@ -13901,7 +13960,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * configuration.
      * @param persistent TODO
      */
-    public boolean updateConfigurationLocked(Configuration values,
+    boolean updateConfigurationLocked(Configuration values,
             ActivityRecord starting, boolean persistent, boolean initLocale) {
         int changes = 0;
         
@@ -15321,7 +15380,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) { }
     }
 
-    public void onCoreSettingsChange(Bundle settings) {
+    void onCoreSettingsChange(Bundle settings) {
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord processRecord = mLruProcesses.get(i);
             try {
