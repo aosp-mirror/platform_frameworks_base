@@ -184,7 +184,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
     size_t outputSampleCount = outFrameCount * 2;
     size_t inFrameCount = (outFrameCount*mInSampleRate)/mSampleRate;
 
-    // ALOGE("starting resample %d frames, inputIndex=%d, phaseFraction=%d, phaseIncrement=%d\n",
+    // ALOGE("starting resample %d frames, inputIndex=%d, phaseFraction=%d, phaseIncrement=%d",
     //      outFrameCount, inputIndex, phaseFraction, phaseIncrement);
 
     while (outputIndex < outputSampleCount) {
@@ -197,7 +197,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
                 goto resampleStereo16_exit;
             }
 
-            // ALOGE("New buffer fetched: %d frames\n", mBuffer.frameCount);
+            // ALOGE("New buffer fetched: %d frames", mBuffer.frameCount);
             if (mBuffer.frameCount > inputIndex) break;
 
             inputIndex -= mBuffer.frameCount;
@@ -211,7 +211,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
 
         // handle boundary case
         while (inputIndex == 0) {
-            // ALOGE("boundary case\n");
+            // ALOGE("boundary case");
             out[outputIndex++] += vl * Interp(mX0L, in[0], phaseFraction);
             out[outputIndex++] += vr * Interp(mX0R, in[1], phaseFraction);
             Advance(&inputIndex, &phaseFraction, phaseIncrement);
@@ -220,7 +220,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
         }
 
         // process input samples
-        // ALOGE("general case\n");
+        // ALOGE("general case");
 
 #ifdef ASM_ARM_RESAMP1  // asm optimisation for ResamplerOrder1
         if (inputIndex + 2 < mBuffer.frameCount) {
@@ -242,7 +242,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
             Advance(&inputIndex, &phaseFraction, phaseIncrement);
         }
 
-        // ALOGE("loop done - outputIndex=%d, inputIndex=%d\n", outputIndex, inputIndex);
+        // ALOGE("loop done - outputIndex=%d, inputIndex=%d", outputIndex, inputIndex);
 
         // if done with buffer, save samples
         if (inputIndex >= mBuffer.frameCount) {
@@ -259,7 +259,7 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
         }
     }
 
-    // ALOGE("output buffer full - outputIndex=%d, inputIndex=%d\n", outputIndex, inputIndex);
+    // ALOGE("output buffer full - outputIndex=%d, inputIndex=%d", outputIndex, inputIndex);
 
 resampleStereo16_exit:
     // save state
@@ -280,7 +280,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
     size_t outputSampleCount = outFrameCount * 2;
     size_t inFrameCount = (outFrameCount*mInSampleRate)/mSampleRate;
 
-    // ALOGE("starting resample %d frames, inputIndex=%d, phaseFraction=%d, phaseIncrement=%d\n",
+    // ALOGE("starting resample %d frames, inputIndex=%d, phaseFraction=%d, phaseIncrement=%d",
     //      outFrameCount, inputIndex, phaseFraction, phaseIncrement);
     while (outputIndex < outputSampleCount) {
         // buffer is empty, fetch a new one
@@ -292,7 +292,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
                 mPhaseFraction = phaseFraction;
                 goto resampleMono16_exit;
             }
-            // ALOGE("New buffer fetched: %d frames\n", mBuffer.frameCount);
+            // ALOGE("New buffer fetched: %d frames", mBuffer.frameCount);
             if (mBuffer.frameCount >  inputIndex) break;
 
             inputIndex -= mBuffer.frameCount;
@@ -304,7 +304,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
 
         // handle boundary case
         while (inputIndex == 0) {
-            // ALOGE("boundary case\n");
+            // ALOGE("boundary case");
             int32_t sample = Interp(mX0L, in[0], phaseFraction);
             out[outputIndex++] += vl * sample;
             out[outputIndex++] += vr * sample;
@@ -314,7 +314,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
         }
 
         // process input samples
-        // ALOGE("general case\n");
+        // ALOGE("general case");
 
 #ifdef ASM_ARM_RESAMP1  // asm optimisation for ResamplerOrder1
         if (inputIndex + 2 < mBuffer.frameCount) {
@@ -337,7 +337,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
         }
 
 
-        // ALOGE("loop done - outputIndex=%d, inputIndex=%d\n", outputIndex, inputIndex);
+        // ALOGE("loop done - outputIndex=%d, inputIndex=%d", outputIndex, inputIndex);
 
         // if done with buffer, save samples
         if (inputIndex >= mBuffer.frameCount) {
@@ -353,7 +353,7 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
         }
     }
 
-    // ALOGE("output buffer full - outputIndex=%d, inputIndex=%d\n", outputIndex, inputIndex);
+    // ALOGE("output buffer full - outputIndex=%d, inputIndex=%d", outputIndex, inputIndex);
 
 resampleMono16_exit:
     // save state

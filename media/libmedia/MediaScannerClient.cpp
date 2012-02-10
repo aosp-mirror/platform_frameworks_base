@@ -142,12 +142,12 @@ void MediaScannerClient::convertValues(uint32_t encoding)
 
         UConverter *conv = ucnv_open(enc, &status);
         if (U_FAILURE(status)) {
-            ALOGE("could not create UConverter for %s\n", enc);
+            ALOGE("could not create UConverter for %s", enc);
             return;
         }
         UConverter *utf8Conv = ucnv_open("UTF-8", &status);
         if (U_FAILURE(status)) {
-            ALOGE("could not create UConverter for UTF-8\n");
+            ALOGE("could not create UConverter for UTF-8");
             ucnv_close(conv);
             return;
         }
@@ -181,7 +181,7 @@ void MediaScannerClient::convertValues(uint32_t encoding)
             ucnv_convertEx(utf8Conv, conv, &target, target + targetLength,
                     &source, (const char *)dest, NULL, NULL, NULL, NULL, TRUE, TRUE, &status);
             if (U_FAILURE(status)) {
-                ALOGE("ucnv_convertEx failed: %d\n", status);
+                ALOGE("ucnv_convertEx failed: %d", status);
                 mValues->setEntry(i, "???");
             } else {
                 // zero terminate

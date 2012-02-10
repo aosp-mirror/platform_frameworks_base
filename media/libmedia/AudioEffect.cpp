@@ -159,7 +159,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     mCblk->buffer = (uint8_t *)mCblk + bufOffset;
 
     iEffect->asBinder()->linkToDeath(mIEffectClient);
-    ALOGV("set() %p OK effect: %s id: %d status %d enabled %d, ", this, mDescriptor.name, mId, mStatus, mEnabled);
+    ALOGV("set() %p OK effect: %s id: %d status %d enabled %d", this, mDescriptor.name, mId, mStatus, mEnabled);
 
     return mStatus;
 }

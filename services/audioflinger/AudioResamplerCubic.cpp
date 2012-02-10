@@ -99,7 +99,7 @@ void AudioResamplerCubic::resampleStereo16(int32_t* out, size_t outFrameCount,
                 if (mBuffer.raw == NULL)
                     goto save_state;  // ugly, but efficient
                 in = mBuffer.i16;
-                // ALOGW("New buffer: offset=%p, frames=%d\n", mBuffer.raw, mBuffer.frameCount);
+                // ALOGW("New buffer: offset=%p, frames=%d", mBuffer.raw, mBuffer.frameCount);
             }
 
             // advance sample state
@@ -133,7 +133,7 @@ void AudioResamplerCubic::resampleMono16(int32_t* out, size_t outFrameCount,
         provider->getNextBuffer(&mBuffer);
         if (mBuffer.raw == NULL)
             return;
-        // ALOGW("New buffer: offset=%p, frames=%d\n", mBuffer.raw, mBuffer.frameCount);
+        // ALOGW("New buffer: offset=%p, frames=%d", mBuffer.raw, mBuffer.frameCount);
     }
     int16_t *in = mBuffer.i16;
 

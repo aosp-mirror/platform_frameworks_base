@@ -349,7 +349,7 @@ void MediaProfiles::addImageEncodingQualityLevel(int cameraId, const char** atts
 {
     CHECK(!strcmp("quality", atts[0]));
     int quality = atoi(atts[1]);
-    ALOGV("%s: cameraId=%d, quality=%d\n", __func__, cameraId, quality);
+    ALOGV("%s: cameraId=%d, quality=%d", __func__, cameraId, quality);
     ImageEncodingQualityLevels *levels = findImageEncodingQualityLevels(cameraId);
 
     if (levels == NULL) {
