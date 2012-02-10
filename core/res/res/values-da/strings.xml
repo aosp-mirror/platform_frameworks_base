@@ -137,13 +137,10 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Slå trådløs fra"</string>
     <string name="screen_lock" msgid="799094655496098153">"Skærmlås"</string>
     <string name="power_off" msgid="4266614107412865048">"Sluk"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
-    <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned ..."</string>
+    <string name="silent_mode_silent" msgid="319298163018473078">"Ringeren er deaktiveret"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ringervibrering"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Ringeren er aktiveret"</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Din tabletcomputer slukkes nu."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Din telefon slukkes nu."</string>
     <string name="shutdown_confirm_question" msgid="6656441286856415014">"Vil du slukke?"</string>
@@ -883,7 +880,7 @@
     <string name="replace" msgid="5781686059063148930">"Erstat..."</string>
     <string name="delete" msgid="6098684844021697789">"Slet"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopier webadresse"</string>
-    <string name="selectTextMode" msgid="6738556348861347240">"Marker tekst..."</string>
+    <string name="selectTextMode" msgid="6738556348861347240">"Markér tekst..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="9090375111134433012">"føj til ordbog"</string>
     <string name="deleteText" msgid="7070985395199629156">"slet"</string>

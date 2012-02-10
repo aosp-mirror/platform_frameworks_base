@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Изключване на радиото"</string>
     <string name="screen_lock" msgid="799094655496098153">"Заключване на екрана"</string>
     <string name="power_off" msgid="4266614107412865048">"Изключване"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Звъненето е изключено"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибрира при звънене"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефонът ви ще се изключи."</string>
@@ -169,7 +166,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Вашите лични данни"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Пряк достъп до контактите и календара ви, съхранени в таблета."</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Пряк достъп до контактите и календара ви, съхранени в телефона."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Вашето местоположение"</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Местоположение"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Наблюдение на физическото ви местоположение"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Мрежова комуникация"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Разрешаване на достъпа на приложенията до различни мрежови функции."</string>

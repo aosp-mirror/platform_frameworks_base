@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Vala okungenantambo"</string>
     <string name="screen_lock" msgid="799094655496098153">"Ukuvala isikrini"</string>
     <string name="power_off" msgid="4266614107412865048">"Vala amandla"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Iringa icimile"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Ukudlidliza kweringa"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Iringa iyasebenza"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Ivala shaqa..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ithebhulethi yakho izocima."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Ifoni yakho izocima."</string>
@@ -787,7 +784,7 @@
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"iminithi elingu-1 edlule"</item>
-    <item quantity="other" msgid="2176942008915455116">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule.."</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> amaminithi adlule.."</item>
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"ihora elingu-1 elidlule"</item>
@@ -824,7 +821,7 @@
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"iminithi elingu-1 edlule"</item>
-    <item quantity="other" msgid="851164968597150710">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> amaminithi adlule"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
     <item quantity="one" msgid="4796212039724722116">"ihora elingu-1 elidlule"</item>
@@ -1107,7 +1104,7 @@
     <string name="no_matches" msgid="8129421908915840737">"Akukho okufanayo"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Thola ekhasini"</string>
   <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"okufanayo okungu-1"</item>
+    <item quantity="one" msgid="8167147081136579439">"1 okufanayo"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ku-<xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Kwenziwe"</string>
