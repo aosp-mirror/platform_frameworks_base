@@ -564,6 +564,18 @@ private:
                     KeyedVector< int, KeyedVector< int, sp<SuspendedSessionDesc> > >  mSuspendedSessions;
     };
 
+    struct  stream_type_t {
+        stream_type_t()
+            :   volume(1.0f),
+                mute(false),
+                valid(true)
+        {
+        }
+        float       volume;
+        bool        mute;
+        bool        valid;
+    };
+
     // --- PlaybackThread ---
     class PlaybackThread : public ThreadBase {
     public:
@@ -757,18 +769,6 @@ private:
                     virtual uint32_t getStrategyForSession_l(int sessionId);
 
                             void setStreamValid(audio_stream_type_t streamType, bool valid);
-
-        struct  stream_type_t {
-            stream_type_t()
-                :   volume(1.0f),
-                    mute(false),
-                    valid(true)
-            {
-            }
-            float       volume;
-            bool        mute;
-            bool        valid;
-        };
 
     protected:
         int16_t*                        mMixBuffer;
@@ -1412,7 +1412,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
 
 
                 DefaultKeyedVector< audio_io_handle_t, sp<PlaybackThread> >  mPlaybackThreads;
-                PlaybackThread::stream_type_t       mStreamTypes[AUDIO_STREAM_CNT];
+                stream_type_t                       mStreamTypes[AUDIO_STREAM_CNT];
 
                 // both are protected by mLock
                 float                               mMasterVolume;
