@@ -20,8 +20,8 @@
 
 #include <OMX_Component.h>
 #include <binder/IPCThreadState.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/CameraSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -114,7 +114,7 @@ static int32_t getColorFormat(const char* colorFormat) {
     ALOGE("Uknown color format (%s), please add it to "
          "CameraSource::getColorFormat", colorFormat);
 
-    CHECK_EQ(0, "Unknown color format");
+    CHECK(!"Unknown color format");
 }
 
 CameraSource *CameraSource::Create() {
@@ -517,7 +517,7 @@ status_t CameraSource::initWithCameraAccess(
 
     // This CHECK is good, since we just passed the lock/unlock
     // check earlier by calling mCamera->setParameters().
-    CHECK_EQ(OK, mCamera->setPreviewDisplay(mSurface));
+    CHECK_EQ((status_t)OK, mCamera->setPreviewDisplay(mSurface));
 
     // By default, do not store metadata in video buffers
     mIsMetaDataStoredInVideoBuffers = false;
@@ -566,7 +566,8 @@ void CameraSource::startCameraRecording() {
     if (mCameraFlags & FLAGS_HOT_CAMERA) {
         mCamera->unlock();
         mCamera.clear();
-        CHECK_EQ(OK, mCameraRecordingProxy->startRecording(new ProxyListener(this)));
+        CHECK_EQ((status_t)OK,
+            mCameraRecordingProxy->startRecording(new ProxyListener(this)));
     } else {
         mCamera->setListener(new CameraSourceListener(this));
         mCamera->startRecording();
@@ -718,7 +719,7 @@ void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
             return;
         }
     }
-    CHECK_EQ(0, "signalBufferReturned: bogus buffer");
+    CHECK(!"signalBufferReturned: bogus buffer");
 }
 
 status_t CameraSource::read(

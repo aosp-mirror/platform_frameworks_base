@@ -18,8 +18,8 @@
 #define LOG_TAG "ColorConverter"
 #include <utils/Log.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/ColorConverter.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
 namespace android {

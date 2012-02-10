@@ -5,7 +5,7 @@ LOCAL_SRC_FILES =       \
 	OMXHarness.cpp  \
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright libbinder libmedia libutils
+	libstagefright libbinder libmedia libutils libstagefright_foundation
 
 LOCAL_C_INCLUDES := \
 	$(JNI_H_INCLUDE) \

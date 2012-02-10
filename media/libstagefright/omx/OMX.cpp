@@ -25,7 +25,7 @@
 #include "../include/OMXNodeInstance.h"
 
 #include <binder/IMemory.h>
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <utils/threads.h>
 
 #include "OMXMaster.h"
@@ -102,7 +102,7 @@ OMX::CallbackDispatcher::~CallbackDispatcher() {
     if (status != WOULD_BLOCK) {
         // Other than join to self, the only other error return codes are
         // whatever readyToRun() returns, and we don't override that
-        CHECK_EQ(status, NO_ERROR);
+        CHECK_EQ(status, (status_t)NO_ERROR);
     }
 }
 

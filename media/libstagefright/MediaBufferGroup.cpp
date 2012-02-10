@@ -17,9 +17,9 @@
 #define LOG_TAG "MediaBufferGroup"
 #include <utils/Log.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 

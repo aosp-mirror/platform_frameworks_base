@@ -17,9 +17,9 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "YUVImage"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/YUVImage.h>
 #include <ui/Rect.h>
-#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 

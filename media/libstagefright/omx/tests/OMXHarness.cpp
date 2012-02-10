@@ -26,9 +26,9 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryDealer.h>
 #include <media/IMediaPlayerService.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -155,7 +155,7 @@ status_t Harness::dequeueMessageForNodeIgnoringBuffers(
         if (err == TIMED_OUT) {
             return err;
         }
-        CHECK_EQ(err, OK);
+        CHECK_EQ(err, (status_t)OK);
     }
 }
 
@@ -317,7 +317,7 @@ status_t Harness::testStateTransitions(
     EXPECT_SUCCESS(err, "allocatePortBuffers(input)");
 
     err = dequeueMessageForNode(node, &msg, DEFAULT_TIMEOUT);
-    CHECK_EQ(err, TIMED_OUT);
+    CHECK_EQ(err, (status_t)TIMED_OUT);
 
     Vector<Buffer> outputBuffers;
     err = allocatePortBuffers(dealer, node, 1, &outputBuffers);
@@ -412,7 +412,7 @@ status_t Harness::testStateTransitions(
     // Make sure node doesn't just transition to loaded before we are done
     // freeing all input and output buffers.
     err = dequeueMessageForNode(node, &msg, DEFAULT_TIMEOUT);
-    CHECK_EQ(err, TIMED_OUT);
+    CHECK_EQ(err, (status_t)TIMED_OUT);
 
     for (size_t i = 0; i < inputBuffers.size(); ++i) {
         err = mOMX->freeBuffer(node, 0, inputBuffers[i].mID);
@@ -420,7 +420,7 @@ status_t Harness::testStateTransitions(
     }
 
     err = dequeueMessageForNode(node, &msg, DEFAULT_TIMEOUT);
-    CHECK_EQ(err, TIMED_OUT);
+    CHECK_EQ(err, (status_t)TIMED_OUT);
 
     for (size_t i = 0; i < outputBuffers.size(); ++i) {
         err = mOMX->freeBuffer(node, 1, outputBuffers[i].mID);
@@ -584,7 +584,7 @@ status_t Harness::testSeek(
         return UNKNOWN_ERROR;
     }
 
-    CHECK_EQ(seekSource->start(), OK);
+    CHECK_EQ(seekSource->start(), (status_t)OK);
 
     sp<MediaSource> codec = OMXCodec::Create(
             mOMX, source->getFormat(), false /* createEncoder */,
@@ -592,7 +592,7 @@ status_t Harness::testSeek(
 
     CHECK(codec != NULL);
 
-    CHECK_EQ(codec->start(), OK);
+    CHECK_EQ(codec->start(), (status_t)OK);
 
     int64_t durationUs;
     CHECK(source->getFormat()->findInt64(kKeyDuration, &durationUs));
@@ -638,7 +638,7 @@ status_t Harness::testSeek(
                     requestedSeekTimeUs, MediaSource::ReadOptions::SEEK_NEXT_SYNC);
 
             if (seekSource->read(&buffer, &options) != OK) {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
                 actualSeekTimeUs = -1;
             } else {
                 CHECK(buffer != NULL);
@@ -659,7 +659,7 @@ status_t Harness::testSeek(
             err = codec->read(&buffer, &options);
             options.clearSeekTo();
             if (err == INFO_FORMAT_CHANGED) {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
                 continue;
             }
             if (err == OK) {
@@ -670,7 +670,7 @@ status_t Harness::testSeek(
                     continue;
                 }
             } else {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
             }
 
             break;
@@ -679,7 +679,7 @@ status_t Harness::testSeek(
         if (requestedSeekTimeUs < 0) {
             // Linear read.
             if (err != OK) {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
             } else {
                 CHECK(buffer != NULL);
                 buffer->release();
@@ -694,8 +694,8 @@ status_t Harness::testSeek(
                    "We attempted to seek beyond EOS and expected "
                    "ERROR_END_OF_STREAM to be returned, but instead "
                    "we found some other error.");
-            CHECK_EQ(err, ERROR_END_OF_STREAM);
-            CHECK_EQ(buffer, NULL);
+            CHECK_EQ(err, (status_t)ERROR_END_OF_STREAM);
+            CHECK(buffer == NULL);
         } else {
             EXPECT(err == OK,
                    "Expected a valid buffer to be returned from "
@@ -715,7 +715,7 @@ status_t Harness::testSeek(
                 buffer->release();
                 buffer = NULL;
 
-                CHECK_EQ(codec->stop(), OK);
+                CHECK_EQ(codec->stop(), (status_t)OK);
 
                 return UNKNOWN_ERROR;
             }
@@ -725,7 +725,7 @@ status_t Harness::testSeek(
         }
     }
 
-    CHECK_EQ(codec->stop(), OK);
+    CHECK_EQ(codec->stop(), (status_t)OK);
 
     return OK;
 }
@@ -841,7 +841,7 @@ int main(int argc, char **argv) {
     srand(seed);
 
     sp<Harness> h = new Harness;
-    CHECK_EQ(h->initCheck(), OK);
+    CHECK_EQ(h->initCheck(), (status_t)OK);
 
     if (argc == 0) {
         h->testAll();

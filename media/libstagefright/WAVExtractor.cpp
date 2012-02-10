@@ -20,9 +20,9 @@
 
 #include "include/WAVExtractor.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
@@ -217,7 +217,7 @@ status_t WAVExtractor::init() {
                                 kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_G711_ALAW);
                         break;
                     default:
-                        CHECK_EQ(mWaveFormat, WAVE_FORMAT_MULAW);
+                        CHECK_EQ(mWaveFormat, (uint16_t)WAVE_FORMAT_MULAW);
                         mTrackMeta->setCString(
                                 kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_G711_MLAW);
                         break;
@@ -362,7 +362,7 @@ status_t WAVSource::read(
             // Convert 8-bit unsigned samples to 16-bit signed.
 
             MediaBuffer *tmp;
-            CHECK_EQ(mGroup->acquire_buffer(&tmp), OK);
+            CHECK_EQ(mGroup->acquire_buffer(&tmp), (status_t)OK);
 
             // The new buffer holds the sample number of samples, but each
             // one is 2 bytes wide.

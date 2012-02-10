@@ -17,11 +17,11 @@
 #include "SineSource.h"
 
 #include <binder/ProcessState.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
     status_t err = OK;
 
@@ -231,14 +231,14 @@ int main(int argc, char **argv) {
     sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");
     writer->addSource(encoder);
     writer->setMaxFileDuration(kDurationUs);
-    CHECK_EQ(OK, writer->start());
+    CHECK_EQ((status_t)OK, writer->start());
     while (!writer->reachedEOS()) {
         fprintf(stderr, ".");
         usleep(100000);
     }
     err = writer->stop();
 #else
-    CHECK_EQ(OK, encoder->start());
+    CHECK_EQ((status_t)OK, encoder->start());
 
     MediaBuffer *buffer;
     while (encoder->read(&buffer) == OK) {
@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < 100; ++i) {
         MediaBuffer *buffer;
         status_t err = source->read(&buffer);
-        CHECK_EQ(err, OK);
+        CHECK_EQ(err, (status_t)OK);
 
         printf("got a frame, data=%p, size=%d\n",
                buffer->data(), buffer->range_length());
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
 
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
     const int32_t kSampleRate = 22050;
     const int32_t kNumChannels = 2;

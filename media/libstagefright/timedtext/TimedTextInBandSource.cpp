@@ -19,8 +19,8 @@
 #include <utils/Log.h>
 
 #include <binder/Parcel.h>
+#include <media/stagefright/foundation/ADebug.h>  // CHECK_XX macro
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>  // CHECK_XX macro
 #include <media/stagefright/MediaDefs.h>  // for MEDIA_MIMETYPE_xxx
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>

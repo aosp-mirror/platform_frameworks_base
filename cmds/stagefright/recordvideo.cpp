@@ -17,9 +17,9 @@
 #include "SineSource.h"
 
 #include <binder/ProcessState.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MPEG4Writer.h>
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
     }
 
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
     status_t err = OK;
     sp<MediaSource> source =
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
     sp<MPEG4Writer> writer = new MPEG4Writer(fileName);
     writer->addSource(encoder);
     int64_t start = systemTime();
-    CHECK_EQ(OK, writer->start());
+    CHECK_EQ((status_t)OK, writer->start());
     while (!writer->reachedEOS()) {
     }
     err = writer->stop();

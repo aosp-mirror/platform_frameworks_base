@@ -22,8 +22,8 @@
 
 #include <arpa/inet.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/Utils.h>
 
 #include "include/SampleTable.h"

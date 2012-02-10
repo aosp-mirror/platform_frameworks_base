@@ -18,10 +18,10 @@
 #define LOG_TAG "JPEGSource"
 #include <utils/Log.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/JPEGSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -59,7 +59,7 @@ JPEGSource::JPEGSource(const sp<DataSource> &source)
       mWidth(0),
       mHeight(0),
       mOffset(0) {
-    CHECK_EQ(parseJPEG(), OK);
+    CHECK_EQ(parseJPEG(), (status_t)OK);
     CHECK(mSource->getSize(&mSize) == OK);
 }
 

@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MetaData.h>
 
 namespace android {
