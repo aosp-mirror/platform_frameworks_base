@@ -38,7 +38,6 @@ import android.app.AppGlobals;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
-import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
@@ -1560,9 +1559,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mProfileType = 0;
     boolean mAutoStopProfiler = false;
 
-    final RemoteCallbackList<IActivityWatcher> mWatchers
-            = new RemoteCallbackList<IActivityWatcher>();
-
     final RemoteCallbackList<IProcessObserver> mProcessObservers
             = new RemoteCallbackList<IProcessObserver>();
 
@@ -3020,19 +3016,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         final int identHash = System.identityHashCode(r);
         updateUsageStats(r, true);
-        
-        int i = mWatchers.beginBroadcast();
-        while (i > 0) {
-            i--;
-            IActivityWatcher w = mWatchers.getBroadcastItem(i);
-            if (w != null) {
-                try {
-                    w.activityResuming(identHash);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-        mWatchers.finishBroadcast();
     }
 
     private void dispatchForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
@@ -4239,22 +4222,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         synchronized (this) {
-            int i = mWatchers.beginBroadcast();
-            while (i > 0) {
-                i--;
-                IActivityWatcher w = mWatchers.getBroadcastItem(i);
-                if (w != null) {
-                    try {
-                        w.closingSystemDialogs(reason);
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
-            mWatchers.finishBroadcast();
-            
             mWindowManager.closeSystemDialogs(reason);
             
-            for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
+            for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                 ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
                     r.stack.finishActivityLocked(r, i,
@@ -6497,30 +6467,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         return -1;
     }
 
-    public void finishOtherInstances(IBinder token, ComponentName className) {
-        enforceNotIsolatedCaller("finishOtherInstances");
-        synchronized(this) {
-            final long origId = Binder.clearCallingIdentity();
-
-            int N = mMainStack.mHistory.size();
-            TaskRecord lastTask = null;
-            for (int i=0; i<N; i++) {
-                ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-                if (r.realActivity.equals(className)
-                        && r.appToken != token && lastTask != r.task) {
-                    if (r.stack.finishActivityLocked(r, i, Activity.RESULT_CANCELED,
-                            null, "others")) {
-                        i--;
-                        N--;
-                    }
-                }
-                lastTask = r.task;
-            }
-
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     // =========================================================
     // THUMBNAILS
     // =========================================================
@@ -7520,26 +7466,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    public void registerActivityWatcher(IActivityWatcher watcher) {
-        enforceNotIsolatedCaller("registerActivityWatcher");
-        synchronized (this) {
-            mWatchers.register(watcher);
-        }
-    }
-
-    public void unregisterActivityWatcher(IActivityWatcher watcher) {
-        synchronized (this) {
-            mWatchers.unregister(watcher);
-        }
-    }
-
     public void registerProcessObserver(IProcessObserver observer) {
-        enforceNotIsolatedCaller("registerProcessObserver");
-        mProcessObservers.register(observer);
+        enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
+                "registerProcessObserver()");
+        synchronized (this) {
+            mProcessObservers.register(observer);
+        }
     }
 
     public void unregisterProcessObserver(IProcessObserver observer) {
-        mProcessObservers.unregister(observer);
+        synchronized (this) {
+            mProcessObservers.unregister(observer);
+        }
     }
 
     public void setImmersive(IBinder token, boolean immersive) {

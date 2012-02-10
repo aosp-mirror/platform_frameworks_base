@@ -200,11 +200,7 @@ final class Settings {
                 return null;
             }
             s = new SharedUserSetting(name, pkgFlags);
-            if (PackageManagerService.MULTIPLE_APPLICATION_UIDS) {
-                s.userId = newUserIdLPw(s);
-            } else {
-                s.userId = PackageManagerService.FIRST_APPLICATION_UID;
-            }
+            s.userId = newUserIdLPw(s);
             Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.userId);
             // < 0 means we couldn't assign a userid; fall out and return
             // s, which is currently null
@@ -407,7 +403,7 @@ final class Settings {
                 }
                 if (sharedUser != null) {
                     p.userId = sharedUser.userId;
-                } else if (PackageManagerService.MULTIPLE_APPLICATION_UIDS) {
+                } else {
                     // Clone the setting here for disabled system packages
                     PackageSetting dis = mDisabledSysPackages.get(name);
                     if (dis != null) {
@@ -430,8 +426,6 @@ final class Settings {
                         // Assign new user id
                         p.userId = newUserIdLPw(p);
                     }
-                } else {
-                    p.userId = PackageManagerService.FIRST_APPLICATION_UID;
                 }
             }
             if (p.userId < 0) {
@@ -598,13 +592,13 @@ final class Settings {
     }
 
     private boolean addUserIdLPw(int uid, Object obj, Object name) {
-        if (uid >= PackageManagerService.FIRST_APPLICATION_UID + PackageManagerService.MAX_APPLICATION_UIDS) {
+        if (uid > Process.LAST_APPLICATION_UID) {
             return false;
         }
 
-        if (uid >= PackageManagerService.FIRST_APPLICATION_UID) {
+        if (uid >= Process.FIRST_APPLICATION_UID) {
             int N = mUserIds.size();
-            final int index = uid - PackageManagerService.FIRST_APPLICATION_UID;
+            final int index = uid - Process.FIRST_APPLICATION_UID;
             while (index >= N) {
                 mUserIds.add(null);
                 N++;
@@ -629,9 +623,9 @@ final class Settings {
     }
 
     public Object getUserIdLPr(int uid) {
-        if (uid >= PackageManagerService.FIRST_APPLICATION_UID) {
+        if (uid >= Process.FIRST_APPLICATION_UID) {
             final int N = mUserIds.size();
-            final int index = uid - PackageManagerService.FIRST_APPLICATION_UID;
+            final int index = uid - Process.FIRST_APPLICATION_UID;
             return index < N ? mUserIds.get(index) : null;
         } else {
             return mOtherUserIds.get(uid);
@@ -639,9 +633,9 @@ final class Settings {
     }
 
     private void removeUserIdLPw(int uid) {
-        if (uid >= PackageManagerService.FIRST_APPLICATION_UID) {
+        if (uid >= Process.FIRST_APPLICATION_UID) {
             final int N = mUserIds.size();
-            final int index = uid - PackageManagerService.FIRST_APPLICATION_UID;
+            final int index = uid - Process.FIRST_APPLICATION_UID;
             if (index < N) mUserIds.set(index, null);
         } else {
             mOtherUserIds.remove(uid);
@@ -649,9 +643,9 @@ final class Settings {
     }
 
     private void replaceUserIdLPw(int uid, Object obj) {
-        if (uid >= PackageManagerService.FIRST_APPLICATION_UID) {
+        if (uid >= Process.FIRST_APPLICATION_UID) {
             final int N = mUserIds.size();
-            final int index = uid - PackageManagerService.FIRST_APPLICATION_UID;
+            final int index = uid - Process.FIRST_APPLICATION_UID;
             if (index < N) mUserIds.set(index, obj);
         } else {
             mOtherUserIds.put(uid, obj);
@@ -1898,17 +1892,17 @@ final class Settings {
         for (int i = 0; i < N; i++) {
             if (mUserIds.get(i) == null) {
                 mUserIds.set(i, obj);
-                return PackageManagerService.FIRST_APPLICATION_UID + i;
+                return Process.FIRST_APPLICATION_UID + i;
             }
         }
 
         // None left?
-        if (N >= PackageManagerService.MAX_APPLICATION_UIDS) {
+        if (N > (Process.LAST_APPLICATION_UID-Process.FIRST_APPLICATION_UID)) {
             return -1;
         }
 
         mUserIds.add(obj);
-        return PackageManagerService.FIRST_APPLICATION_UID + N;
+        return Process.FIRST_APPLICATION_UID + N;
     }
 
     public VerifierDeviceIdentity getVerifierDeviceIdentityLPw() {
