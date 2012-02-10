@@ -475,6 +475,15 @@ check_method(const char* filename, int kind, method_type* m)
             err = 1;
         }
 
+        if (returnType == EVENT_FAKE_TYPE
+                && convert_direction(arg->direction.data) != IN_PARAMETER) {
+            fprintf(stderr, "%s:%d parameter %d: '%s %s' All paremeters on events must be 'in'.\n",
+                    filename, m->type.type.lineno, index,
+                    arg->type.type.data, arg->name.data);
+            err = 1;
+            goto next;
+        }
+
         if (arg->direction.data == NULL
                 && (arg->type.dimension != 0 || t->CanBeOutParameter())) {
             fprintf(stderr, "%s:%d parameter %d: '%s %s' can be an out"

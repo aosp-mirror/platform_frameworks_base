@@ -55,7 +55,7 @@ public class NetworkTimeUpdateService {
 
     private static final int EVENT_AUTO_TIME_CHANGED = 1;
     private static final int EVENT_POLL_NETWORK_TIME = 2;
-    private static final int EVENT_WIFI_CONNECTED = 3;
+    private static final int EVENT_NETWORK_CONNECTED = 3;
 
     /** Normal polling frequency */
     private static final long POLLING_INTERVAL_MS = 24L * 60 * 60 * 1000; // 24 hrs
@@ -240,8 +240,9 @@ public class NetworkTimeUpdateService {
                 if (netInfo != null) {
                     // Verify that it's a WIFI connection
                     if (netInfo.getState() == NetworkInfo.State.CONNECTED &&
-                            netInfo.getType() == ConnectivityManager.TYPE_WIFI ) {
-                        mHandler.obtainMessage(EVENT_WIFI_CONNECTED).sendToTarget();
+                            (netInfo.getType() == ConnectivityManager.TYPE_WIFI ||
+                                netInfo.getType() == ConnectivityManager.TYPE_ETHERNET) ) {
+                        mHandler.obtainMessage(EVENT_NETWORK_CONNECTED).sendToTarget();
                     }
                 }
             }
@@ -260,7 +261,7 @@ public class NetworkTimeUpdateService {
             switch (msg.what) {
                 case EVENT_AUTO_TIME_CHANGED:
                 case EVENT_POLL_NETWORK_TIME:
-                case EVENT_WIFI_CONNECTED:
+                case EVENT_NETWORK_CONNECTED:
                     onPollNetworkTime(msg.what);
                     break;
             }

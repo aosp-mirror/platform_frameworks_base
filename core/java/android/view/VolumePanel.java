@@ -91,9 +91,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private static final int MSG_VIBRATE = 4;
     private static final int MSG_TIMEOUT = 5;
     private static final int MSG_RINGER_MODE_CHANGED = 6;
+    private static final int MSG_MUTE_CHANGED = 7;
 
     // Pseudo stream type for master volume
-    private static final int STREAM_MASTER = -1;
+    private static final int STREAM_MASTER = -100;
 
     protected Context mContext;
     private AudioManager mAudioManager;
@@ -295,45 +296,39 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     private boolean isMuted(int streamType) {
         if (streamType == STREAM_MASTER) {
-            // master volume mute not yet supported
-            return false;
+            return mAudioService.isMasterMute();
         } else {
             return mAudioService.isStreamMute(streamType);
         }
     }
 
     private int getStreamMaxVolume(int streamType) {
-        // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            return 100;
+            return mAudioService.getMasterMaxVolume();
         } else {
             return mAudioService.getStreamMaxVolume(streamType);
         }
     }
 
     private int getStreamVolume(int streamType) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            return Math.round(mAudioService.getMasterVolume() * 100);
+            return mAudioService.getMasterVolume();
         } else {
             return mAudioService.getStreamVolume(streamType);
         }
     }
 
     private void setStreamVolume(int streamType, int index, int flags) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            mAudioService.setMasterVolume((float)index / 100.0f);
+            mAudioService.setMasterVolume(index, flags);
         } else {
             mAudioService.setStreamVolume(streamType, index, flags);
         }
     }
 
     private int getLastAudibleStreamVolume(int streamType) {
-         // master volume is 0.0f - 1.0f, but we will use 0 - 100 internally
         if (streamType == STREAM_MASTER) {
-            // master volume mute not yet supported
-            return getStreamVolume(STREAM_MASTER);
+            return mAudioService.getLastAudibleMasterVolume();
         } else {
             return mAudioService.getLastAudibleStreamVolume(streamType);
         }
@@ -456,6 +451,19 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         postVolumeChanged(STREAM_MASTER, flags);
     }
 
+    public void postMuteChanged(int streamType, int flags) {
+        if (hasMessages(MSG_VOLUME_CHANGED)) return;
+        if (mStreamControls == null) {
+            createSliders();
+        }
+        removeMessages(MSG_FREE_RESOURCES);
+        obtainMessage(MSG_MUTE_CHANGED, streamType, flags).sendToTarget();
+    }
+
+    public void postMasterMuteChanged(int flags) {
+        postMuteChanged(STREAM_MASTER, flags);
+    }
+
     /**
      * Override this if you have other work to do when the volume changes (for
      * example, vibrating, playing a sound, etc.). Make sure to call through to
@@ -487,6 +495,18 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         sendMessageDelayed(obtainMessage(MSG_FREE_RESOURCES), FREE_DELAY);
 
         resetTimeout();
+    }
+
+    protected void onMuteChanged(int streamType, int flags) {
+
+        if (LOGD) Log.d(TAG, "onMuteChanged(streamType: " + streamType + ", flags: " + flags + ")");
+
+        StreamControl sc = mStreamControls.get(streamType);
+        if (sc != null) {
+            sc.icon.setImageResource(isMuted(sc.streamType) ? sc.iconMuteRes : sc.iconRes);
+        }
+
+        onVolumeChanged(streamType, flags);
     }
 
     protected void onShowVolumeChanged(int streamType, int flags) {
@@ -684,6 +704,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
             case MSG_VOLUME_CHANGED: {
                 onVolumeChanged(msg.arg1, msg.arg2);
+                break;
+            }
+
+            case MSG_MUTE_CHANGED: {
+                onMuteChanged(msg.arg1, msg.arg2);
                 break;
             }
 

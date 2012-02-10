@@ -49,6 +49,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private LinkCapabilities mLinkCapabilities;
     private NetworkInfo mNetworkInfo;
     private InterfaceObserver mInterfaceObserver;
+    private String mHwAddr;
 
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
@@ -74,6 +75,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
             if (mIface.equals(iface) && mLinkUp != up) {
                 Log.d(TAG, "Interface " + iface + " link " + (up ? "up" : "down"));
                 mLinkUp = up;
+                mTracker.mNetworkInfo.setIsAvailable(up);
 
                 // use DHCP
                 if (up) {
@@ -101,10 +103,6 @@ public class EthernetDataTracker implements NetworkStateTracker {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_ETHERNET, 0, NETWORKTYPE, "");
         mLinkProperties = new LinkProperties();
         mLinkCapabilities = new LinkCapabilities();
-        mLinkUp = false;
-
-        mNetworkInfo.setIsAvailable(false);
-        setTeardownRequested(false);
     }
 
     private void interfaceAdded(String iface) {
@@ -113,7 +111,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
         Log.d(TAG, "Adding " + iface);
 
-        synchronized(mIface) {
+        synchronized(this) {
             if(!mIface.isEmpty())
                 return;
             mIface = iface;
@@ -122,8 +120,6 @@ public class EthernetDataTracker implements NetworkStateTracker {
         mNetworkInfo.setIsAvailable(true);
         Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
         msg.sendToTarget();
-
-        runDhcp();
     }
 
     public void disconnect() {
@@ -132,7 +128,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
 
         mLinkProperties.clear();
         mNetworkInfo.setIsAvailable(false);
-        mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
+        mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED, null, mHwAddr);
 
         Message msg = mCsHandler.obtainMessage(EVENT_CONFIGURATION_CHANGED, mNetworkInfo);
         msg.sendToTarget();
@@ -154,7 +150,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
             return;
 
         Log.d(TAG, "Removing " + iface);
-	disconnect();
+        disconnect();
         mIface = "";
     }
 
@@ -169,7 +165,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
                 mLinkProperties = dhcpInfoInternal.makeLinkProperties();
                 mLinkProperties.setInterfaceName(mIface);
 
-                mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+                mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, mHwAddr);
                 Message msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
                 msg.sendToTarget();
             }
@@ -216,8 +212,15 @@ public class EthernetDataTracker implements NetworkStateTracker {
             for (String iface : ifaces) {
                 if (iface.matches(sIfaceMatch)) {
                     mIface = iface;
+                    service.setInterfaceUp(iface);
                     InterfaceConfiguration config = service.getInterfaceConfig(iface);
                     mLinkUp = config.isActive();
+                    if (config != null && mHwAddr == null) {
+                        mHwAddr = config.getHardwareAddress();
+                        if (mHwAddr != null) {
+                            mNetworkInfo.setExtraInfo(mHwAddr);
+                        }
+                    }
                     reconnect();
                     break;
                 }
@@ -247,9 +250,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
      * Re-enable connectivity to a network after a {@link #teardown()}.
      */
     public boolean reconnect() {
-        mTeardownRequested.set(false);
-        runDhcp();
-        return true;
+        if (mLinkUp) {
+            mTeardownRequested.set(false);
+            runDhcp();
+        }
+        return mLinkUp;
     }
 
     /**
