@@ -67,6 +67,8 @@ void rsdAllocationSyncAll(const android::renderscript::Context *rsc,
                           RsAllocationUsageType src);
 void rsdAllocationMarkDirty(const android::renderscript::Context *rsc,
                             const android::renderscript::Allocation *alloc);
+int32_t rsdAllocationInitSurfaceTexture(const android::renderscript::Context *rsc,
+                                        const android::renderscript::Allocation *alloc);
 
 void rsdAllocationData1D(const android::renderscript::Context *rsc,
                          const android::renderscript::Allocation *alloc,
