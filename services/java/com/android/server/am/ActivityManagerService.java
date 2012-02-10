@@ -49,6 +49,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.WallpaperManager;
 import android.app.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -1367,24 +1368,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * still report back to a pending thumbnail receiver.
      */
     final ArrayList mCancelledThumbnails = new ArrayList();
-
-    /**
-     * All of the currently running global content providers.  Keys are a
-     * string containing the provider name and values are a
-     * ContentProviderRecord object containing the data about it.  Note
-     * that a single provider may be published under multiple names, so
-     * there may be multiple entries here for a single one in mProvidersByClass.
-     */
-    final HashMap<String, ContentProviderRecord> mProvidersByName
-            = new HashMap<String, ContentProviderRecord>();
-
-    /**
-     * All of the currently running global content providers.  Keys are a
-     * string containing the provider's implementation class and values are a
-     * ContentProviderRecord object containing the data about it.
-     */
-    final HashMap<ComponentName, ContentProviderRecord> mProvidersByClass
-            = new HashMap<ComponentName, ContentProviderRecord>();
 
     final ProviderMap mProviderMap = new ProviderMap();
 
@@ -4445,7 +4428,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
-        for (ContentProviderRecord provider : mProvidersByClass.values()) {
+        for (ContentProviderRecord provider : mProviderMap.getProvidersByClass(-1).values()) {
             if (provider.info.packageName.equals(name)
                     && (provider.proc == null || evenPersistent || !provider.proc.persistent)) {
                 if (!doit) {
@@ -11372,18 +11355,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String resolvedType, int callingPid, int callingUid) {
+            String resolvedType, int callingPid, int callingUid, int userId) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE)
             Slog.v(TAG, "retrieveServiceLocked: " + service + " type=" + resolvedType
-                    + " origCallingUid=" + callingUid);
+                    + " callingUid=" + callingUid);
 
         if (service.getComponent() != null) {
-            r = mServiceMap.getServiceByName(service.getComponent(), Binder.getOrigCallingUser());
+            r = mServiceMap.getServiceByName(service.getComponent(), userId);
         }
         if (r == null) {
             Intent.FilterComparison filter = new Intent.FilterComparison(service);
-            r = mServiceMap.getServiceByIntent(filter, Binder.getOrigCallingUser());
+            r = mServiceMap.getServiceByIntent(filter, userId);
         }
         if (r == null) {
             try {
@@ -11397,13 +11380,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                           ": not found");
                     return null;
                 }
-                if (Binder.getOrigCallingUser() > 0) {
-                    sInfo.applicationInfo = getAppInfoForUser(sInfo.applicationInfo,
-                            Binder.getOrigCallingUser());
+                if (userId > 0) {
+                    sInfo.applicationInfo = getAppInfoForUser(sInfo.applicationInfo, userId);
                 }
                 ComponentName name = new ComponentName(
                         sInfo.applicationInfo.packageName, sInfo.name);
-                r = mServiceMap.getServiceByName(name, Binder.getOrigCallingUser());
+                r = mServiceMap.getServiceByName(name, userId);
                 if (r == null) {
                     Intent.FilterComparison filter = new Intent.FilterComparison(
                             service.cloneFilter());
@@ -11967,7 +11949,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             ServiceLookupResult res =
                 retrieveServiceLocked(service, resolvedType,
-                        callingPid, callingUid);
+                        callingPid, callingUid, UserId.getUserId(callingUid));
             if (res == null) {
                 return null;
             }
@@ -12217,12 +12199,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType,
-            IServiceConnection connection, int flags) {
+            IServiceConnection connection, int flags, int userId) {
         enforceNotIsolatedCaller("bindService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+
+        checkValidCaller(Binder.getCallingUid(), userId);
 
         synchronized(this) {
             if (DEBUG_SERVICE) Slog.v(TAG, "bindService: " + service
@@ -12273,7 +12257,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             ServiceLookupResult res =
                 retrieveServiceLocked(service, resolvedType,
-                        Binder.getCallingPid(), Binder.getOrigCallingUid());
+                        Binder.getCallingPid(), Binder.getCallingUid(), userId);
             if (res == null) {
                 return 0;
             }
@@ -15287,6 +15271,25 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private int mCurrentUserId;
     private SparseIntArray mLoggedInUsers = new SparseIntArray(5);
+    private ArrayList<UserListener> mUserListeners = new ArrayList<UserListener>(3);
+
+    public interface UserListener {
+        public void onUserChanged(int userId);
+
+        public void onUserAdded(int userId);
+
+        public void onUserRemoved(int userId);
+
+        public void onUserLoggedOut(int userId);
+    }
+
+    public void addUserListener(UserListener listener) {
+        synchronized (this) {
+            if (!mUserListeners.contains(listener)) {
+                mUserListeners.add(listener);
+            }
+        }
+    }
 
     public boolean switchUser(int userId) {
         final int callingUid = Binder.getCallingUid();
@@ -15296,6 +15299,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (mCurrentUserId == userId)
             return true;
+
+        ArrayList<UserListener> listeners;
 
         synchronized (this) {
             // Check if user is already logged in, otherwise check if user exists first before
@@ -15312,6 +15317,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!haveActivities) {
                 startHomeActivityLocked(userId);
             }
+
+            listeners = (ArrayList<UserListener>) mUserListeners.clone();
+        }
+        // Inform the listeners
+        for (UserListener listener : listeners) {
+            listener.onUserChanged(userId);
         }
         return true;
     }
@@ -15331,6 +15342,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    private void checkValidCaller(int uid, int userId) {
+        if (UserId.getUserId(uid) == userId || uid == Process.SYSTEM_UID || uid == 0) return;
+
+        throw new SecurityException("Caller uid=" + uid
+                + " is not privileged to communicate with user=" + userId);
+    }
 
     private int applyUserId(int uid, int userId) {
         return UserId.getUid(userId, uid);

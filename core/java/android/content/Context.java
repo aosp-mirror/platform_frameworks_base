@@ -1307,6 +1307,15 @@ public abstract class Context {
             int flags);
 
     /**
+     * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userId
+     * argument for use by system server and other multi-user aware code.
+     * @hide
+     */
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Disconnect from an application service.  You will no longer receive
      * calls as the service is restarted, and the service is now allowed to
      * stop at any time.

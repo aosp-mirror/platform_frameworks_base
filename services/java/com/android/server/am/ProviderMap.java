@@ -158,7 +158,7 @@ public class ProviderMap {
         }
     }
 
-    private HashMap<ComponentName, ContentProviderRecord> getProvidersByClass(int optionalUserId) {
+    HashMap<ComponentName, ContentProviderRecord> getProvidersByClass(int optionalUserId) {
         final int userId = optionalUserId >= 0
                 ? optionalUserId : Binder.getOrigCallingUser();
         final HashMap<ComponentName, ContentProviderRecord> map = mProvidersByClassPerUser.get(userId);

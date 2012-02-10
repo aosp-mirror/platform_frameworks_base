@@ -573,12 +573,13 @@ class AppWidgetServiceImpl {
                 mBoundRemoteViewsServices.remove(key);
             }
 
+            int userId = UserId.getUserId(id.provider.uid);
             // Bind to the RemoteViewsService (which will trigger a callback to the
             // RemoteViewsAdapter.onServiceConnected())
             final long token = Binder.clearCallingIdentity();
             try {
                 conn = new ServiceConnectionProxy(key, connection);
-                mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+                mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
                 mBoundRemoteViewsServices.put(key, conn);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -638,11 +639,11 @@ class AppWidgetServiceImpl {
 
         // Check if we need to destroy any services (if no other app widgets are
         // referencing the same service)
-        decrementAppWidgetServiceRefCount(appWidgetId);
+        decrementAppWidgetServiceRefCount(id);
     }
 
     // Destroys the cached factory on the RemoteViewsService's side related to the specified intent
-    private void destroyRemoteViewsService(final Intent intent) {
+    private void destroyRemoteViewsService(final Intent intent, AppWidgetId id) {
         final ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -663,11 +664,12 @@ class AppWidgetServiceImpl {
             }
         };
 
+        int userId = UserId.getUserId(id.provider.uid);
         // Bind to the service and remove the static intent->factory mapping in the
         // RemoteViewsService.
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -687,16 +689,16 @@ class AppWidgetServiceImpl {
 
     // Subtracts from the ref-count for a given RemoteViewsService intent, prompting a delete if
     // the ref-count reaches zero.
-    private void decrementAppWidgetServiceRefCount(int appWidgetId) {
+    private void decrementAppWidgetServiceRefCount(AppWidgetId id) {
         Iterator<FilterComparison> it = mRemoteViewsServicesAppWidgets.keySet().iterator();
         while (it.hasNext()) {
             final FilterComparison key = it.next();
             final HashSet<Integer> ids = mRemoteViewsServicesAppWidgets.get(key);
-            if (ids.remove(appWidgetId)) {
+            if (ids.remove(id.appWidgetId)) {
                 // If we have removed the last app widget referencing this service, then we
                 // should destroy it and remove it from this set
                 if (ids.isEmpty()) {
-                    destroyRemoteViewsService(key.getIntent());
+                    destroyRemoteViewsService(key.getIntent(), id);
                     it.remove();
                 }
             }
@@ -888,10 +890,11 @@ class AppWidgetServiceImpl {
                             }
                         };
 
+                        int userId = UserId.getUserId(id.provider.uid);
                         // Bind to the service and call onDataSetChanged()
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+                            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE, userId);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
@@ -1343,7 +1346,6 @@ class AppWidgetServiceImpl {
 
     void readStateFromFileLocked(FileInputStream stream) {
         boolean success = false;
-
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(stream, null);
@@ -1475,7 +1477,7 @@ class AppWidgetServiceImpl {
     }
 
     AtomicFile savedStateFile() {
-        int userId = Binder.getOrigCallingUser();
+        int userId = UserId.getCallingUserId();
         File dir = new File("/data/system/users/" + userId);
         File settingsFile = new File(dir, SETTINGS_FILENAME);
         if (!dir.exists()) {
