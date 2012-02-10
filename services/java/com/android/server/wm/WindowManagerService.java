@@ -7636,6 +7636,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mInnerFields.mAnimating = true;
                 } else {
                     updateRotation = true;
+                    mScreenRotationAnimation.kill();
+                    mScreenRotationAnimation = null;
                 }
             }
         }
@@ -8708,7 +8710,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInnerFields.mAnimating = false;
 
                 // SECOND LOOP: Execute animations and update visibility of windows.
-                updateRotation =
+                updateRotation |=
                         updateAppsAndRotationAnimationsLocked(currentTime, innerDw, innerDh);
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: seq="
@@ -9010,11 +9012,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
                     LocalPowerManager.BUTTON_EVENT, true);
             mTurnOnScreen = false;
-        }
-
-        if (updateRotation && mScreenRotationAnimation != null) {
-            mScreenRotationAnimation.kill();
-            mScreenRotationAnimation = null;
         }
 
         if (updateRotation) {
@@ -9387,7 +9384,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (CUSTOM_SCREEN_ROTATION) {
-            if (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating()) {
+            if (mScreenRotationAnimation != null) {
                 mScreenRotationAnimation.kill();
                 mScreenRotationAnimation = null;
             }
@@ -9918,11 +9915,15 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
                     pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
-            pw.print("  mTraversalScheduled="); pw.print(mTraversalScheduled);
-                    pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
-                    pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
+            if (mScreenRotationAnimation != null) {
+                pw.println("  mScreenRotationAnimation:");
+                mScreenRotationAnimation.printTo("    ", pw);
+            }
+            pw.print("  mWindowAnimationScale="); pw.print(mWindowAnimationScale);
+                    pw.print(" mTransitionWindowAnimationScale="); pw.print(mTransitionAnimationScale);
                     pw.print(" mAnimatorDurationScale="); pw.println(mAnimatorDurationScale);
-            pw.print("  mNextAppTransition=0x");
+            pw.print("  mTraversalScheduled="); pw.print(mTraversalScheduled);
+                    pw.print("  mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
             pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
