@@ -55,9 +55,8 @@ public:
             bool hasMipmaps;
             bool hasFaces;
             bool hasReferences;
-            int32_t surfaceTextureID;
-
             void * usrPtr;
+            int32_t surfaceTextureID;
         };
         State state;
 
