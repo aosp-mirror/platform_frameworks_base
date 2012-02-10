@@ -542,7 +542,7 @@ status_t AudioPolicyService::queryDefaultPreProcessing(int audioSession,
 }
 
 void AudioPolicyService::binderDied(const wp<IBinder>& who) {
-    ALOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
+    ALOGW("binderDied() %p, tid %d, calling pid %d", who.unsafe_get(), gettid(),
             IPCThreadState::self()->getCallingPid());
 }
 
