@@ -55,6 +55,8 @@ public:
             bool hasMipmaps;
             bool hasFaces;
             bool hasReferences;
+            void * usrPtr;
+            int32_t surfaceTextureID;
         };
         State state;
 
@@ -123,6 +125,7 @@ public:
         return mHal.state.mipmapControl != RS_ALLOCATION_MIPMAP_NONE;
     }
 
+    int32_t getSurfaceTextureID(const Context *rsc);
 
 protected:
     Vector<const Program *> mToDirtyList;

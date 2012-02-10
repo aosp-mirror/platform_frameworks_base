@@ -413,6 +413,12 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
     ALOGE("not implemented");
 }
 
+int32_t Allocation::getSurfaceTextureID(const Context *rsc) {
+    int32_t id = rsc->mHal.funcs.allocation.initSurfaceTexture(rsc, this);
+    mHal.state.surfaceTextureID = id;
+    return id;
+}
+
 /////////////////
 //
 
@@ -656,6 +662,11 @@ void rsi_AllocationCopy2DRange(Context *rsc,
                                            width, height,
                                            src, srcXoff, srcYoff,srcMip,
                                            (RsAllocationCubemapFace)srcFace);
+}
+
+int32_t rsi_AllocationGetSurfaceTextureID(Context *rsc, RsAllocation valloc) {
+    Allocation *alloc = static_cast<Allocation *>(valloc);
+    return alloc->getSurfaceTextureID(rsc);
 }
 
 }

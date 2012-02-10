@@ -72,6 +72,7 @@ static RsdHalFunctions FunctionTable = {
         rsdAllocationResize,
         rsdAllocationSyncAll,
         rsdAllocationMarkDirty,
+        rsdAllocationInitSurfaceTexture,
         rsdAllocationData1D,
         rsdAllocationData2D,
         rsdAllocationData3D,
