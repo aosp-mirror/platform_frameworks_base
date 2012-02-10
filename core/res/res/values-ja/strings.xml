@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリに許可します。この許可を悪意のあるアプリに利用されると、悪意のあるアプリが強制的に優先される恐れがあります。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"実行中のアプリの停止"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"タスクの削除とアプリの終了をアプリに許可します。この許可を悪意のあるアプリケーションに利用されると、他のアプリの動作が妨害される恐れがあります。"</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"アプリのデバッグの有効化"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"別のアプリをデバッグモードにすることをアプリに許可します。この許可を悪意のあるアプリに利用されると、他のアプリが強制終了される恐れがあります。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI設定の変更"</string>

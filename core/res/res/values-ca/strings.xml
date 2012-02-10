@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet que l\'aplicació desplaci tasques en primer o segon pla. Les aplicacions malicioses poden aparèixer en primer pla sense el teu consentiment."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"atura les aplicacions que s\'estan executant"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet que l\'aplicació elimini tasques i finalitzi les seves aplicacions. Les aplicacions malicioses poden alterar el comportament d\'altres aplicacions."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activa la depuració d\'aplicacions"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet que una aplicació activi la depuració per a una altra aplicació. Les aplicacions malicioses poden utilitzar aquesta funció per finalitzar altres aplicacions."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"canviar la configuració de la IU"</string>

@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lehetővé teszi az alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. A rosszindulatú alkalmazások az előtérbe helyezhetik magukat az Ön engedélye nélkül."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"futó alkalmazások leállítása"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Lehetővé teszi, hogy az alkalmazás feladatokat távolítson el és leállítsa azok alkalmazásait. Rosszindulatú alkalmazások megzavarhatják más alkalmazások viselkedését."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"alkalmazások hibakeresésének bekapcsolása"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Lehetővé teszi az alkalmazás számára, hogy hibakeresést végezzen egy másik alkalmazáson. A rosszindulatú alkalmazások ezzel leállíthatnak más alkalmazásokat."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"a felhasználói felület beállításainak módosítása"</string>

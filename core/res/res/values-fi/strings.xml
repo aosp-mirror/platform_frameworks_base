@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Antaa sovelluksen siirtää tehtäviä etualalle ja taustalle. Haitalliset sovellukset voivat pakottaa itsensä etualalle ilman käyttäjän hallintaa."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käynnissä olevien sovellusten pysäyttäminen"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Antaa sovelluksen poistaa tehtäviä ja lopettaa niiden sovelluksia. Haitalliset sovellukset voivat häiritä muiden sovellusten toimintaa."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"sovellusten vianetsinnän käyttöönotto"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Antaa sovelluksen ottaa vianetsinnän käyttöön toisessa sovelluksessa. Haitalliset ohjelmat voivat lopettaa tällä muita sovelluksia."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"muuta käyttöliittymäsi asetuksia"</string>

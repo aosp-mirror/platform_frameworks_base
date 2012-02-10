@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet à l\'application de faire passer les tâches de premier plan en arrière-plan. Des applications malveillantes peuvent exploiter cette fonctionnalité pour passer au premier plan sans votre consentement."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"arrêter les applications en cours d\'exécution"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet à l\'application de supprimer des tâches et de fermer les applications qui les exécutent. Des applications malveillantes peuvent exploiter cette fonctionnalité pour perturber le comportement des autres applications."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activer le débogage des applications"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet à l\'application d\'activer le débogage d\'une autre application. Des applications malveillantes peuvent exploiter cette fonctionnalité pour en fermer d\'autres."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Modification des paramètres de l\'IU"</string>
