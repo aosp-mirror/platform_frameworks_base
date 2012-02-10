@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Consente all\'applicazione di spostare attività in primo piano e in background. Le applicazioni dannose potrebbero forzare la loro impostazione in primo piano senza il tuo controllo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"interruzione applicazioni in esecuzione"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Consente all\'applicazione di rimuovere le attività e terminare le loro applicazioni. Le applicazioni dannose potrebbero interferire con il comportamento di altre applicazioni."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"attivazione debug delle applicazioni"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Consente all\'applicazione di attivare il debug per un\'altra applicazione. Le applicazioni dannose potrebbero farne uso per terminare altre applicazioni."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifica impostazioni UI"</string>

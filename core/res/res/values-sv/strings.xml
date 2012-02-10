@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillåter att appen flyttar uppgifter till förgrunden eller bakgrunden. Skadliga appar kan tvinga sig till förgrunden utan att du kan styra det."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"avsluta appar som körs"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillåter att appen tar bort uppgifter och avslutar appar. Skadliga appar kan störa funktionen i andra appar."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivera felsökning av appar"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Tillåter att appen aktiverar felsökning för en annan app. Skadliga appar kan använda detta för att avsluta andra appar."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ändra dina gränssnittsinställningar"</string>

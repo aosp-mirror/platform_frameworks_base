@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Allows the app to move tasks to the foreground and background. Malicious apps may force themselves to the front without your control."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop running apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Allows the app to remove tasks and kill their apps. Malicious apps may disrupt the behaviour of other apps."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"enable app debugging"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Allows the app to turn on debugging for another app. Malicious apps may use this to kill other apps."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"change your UI settings"</string>

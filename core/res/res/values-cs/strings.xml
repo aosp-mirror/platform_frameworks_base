@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Škodlivé aplikace mohou vynutit zobrazení na popředí bez vašeho svolení."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zastavení činnosti aplikací"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umožňuje aplikaci odstranit úlohy a ukončit jejich aplikace. Škodlivé aplikace mohou narušit chování ostatních aplikací."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"povolení ladění aplikací"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Umožňuje aplikaci zapnout ladění jiné aplikace. Škodlivé aplikace mohou toto oprávnění použít k ukončení ostatních aplikací."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"změna vašeho nastavení uživatelského rozhraní"</string>

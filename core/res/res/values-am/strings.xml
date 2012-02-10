@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"ወደ ግንባር ዎይ እና ዳራ ስራዎችን ለማንቀሳቀስ ለመተግበሪያው ይፈቅዳሉ፡፡ ያለአንተ ቁጥጥር  ተንኮል አዘል መተግበሪያዎች ራሳቸውን ወደፊት መምጣት ሊያስገድዱ ይችላሉ፡፡"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"የአሂድ ትግበራዎች አቁም"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"ተግባሮችን ለማስወገድ እና መተግበሪያዎቻቸውን ለመግደል ለመተግበሪያ ይፈቅዳል። ጎጂ የሆኑ መተግበሪያዎች የሌሎችን መተግበሪያዎችን ባህሪ ሊያውኩ ይችላሉ።"</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"የትግበራ ማረሚያ አንቃ"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"ለሌላ መተግበሪያ አርምን አብራ ለመተግበሪያው ይፈቅዳሉ። ሌሎች መተግበሪያዎች ለመግደል ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙት ይችላሉ።"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"የUI ቅንብሮችን ለውጥ"</string>

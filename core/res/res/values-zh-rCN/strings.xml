@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允许应用程序将任务移动到前台和后台。恶意应用程序可能会不受您的控制，强行让自己处于前台。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用程序"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允许该应用程序删除任务并终止这些任务的应用程序。恶意应用程序可以籍此影响其他应用程序的行为。"</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"启用应用程序调试"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"允许该应用程序对其他应用程序启用调试。恶意应用程序可以籍此终止其他的应用程序。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"更改用户界面设置"</string>
