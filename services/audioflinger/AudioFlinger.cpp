@@ -188,29 +188,32 @@ void AudioFlinger::onFirstRef()
              mod->name, mod->id);
         mAudioHwDevs.push(dev);
 
-        if (!mPrimaryHardwareDev) {
+        if (mPrimaryHardwareDev == NULL) {
             mPrimaryHardwareDev = dev;
             ALOGI("Using '%s' (%s.%s) as the primary audio interface",
                  mod->name, mod->id, audio_interfaces[i]);
         }
     }
 
-    mHardwareStatus = AUDIO_HW_INIT;
-
-    if (!mPrimaryHardwareDev || mAudioHwDevs.size() == 0) {
+    if (mPrimaryHardwareDev == NULL) {
         ALOGE("Primary audio interface not found");
-        return;
+        // proceed, all later accesses to mPrimaryHardwareDev verify it's safe with initCheck()
     }
+
+    // Currently (mPrimaryHardwareDev == NULL) == (mAudioHwDevs.size() == 0), but the way the
+    // primary HW dev is selected can change so these conditions might not always be equivalent.
+    // When that happens, re-visit all the code that assumes this.
+
+    AutoMutex lock(mHardwareLock);
 
     for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
         audio_hw_device_t *dev = mAudioHwDevs[i];
 
         mHardwareStatus = AUDIO_HW_INIT;
         rc = dev->init_check(dev);
+        mHardwareStatus = AUDIO_HW_IDLE;
         if (rc == 0) {
-            AutoMutex lock(mHardwareLock);
-
-            mMode = AUDIO_MODE_NORMAL;
+            mMode = AUDIO_MODE_NORMAL;  // assigned multiple times with same value
             mHardwareStatus = AUDIO_HW_SET_MODE;
             dev->set_mode(dev, mMode);
             mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
@@ -220,17 +223,8 @@ void AudioFlinger::onFirstRef()
     }
 }
 
-status_t AudioFlinger::initCheck() const
-{
-    Mutex::Autolock _l(mLock);
-    if (mPrimaryHardwareDev == NULL || mAudioHwDevs.size() == 0)
-        return NO_INIT;
-    return NO_ERROR;
-}
-
 AudioFlinger::~AudioFlinger()
 {
-    int num_devs = mAudioHwDevs.size();
 
     while (!mRecordThreads.isEmpty()) {
         // closeInput() will remove first entry from mRecordThreads
@@ -241,9 +235,9 @@ AudioFlinger::~AudioFlinger()
         closeOutput(mPlaybackThreads.keyAt(0));
     }
 
-    for (int i = 0; i < num_devs; i++) {
-        audio_hw_device_t *dev = mAudioHwDevs[i];
-        audio_hw_device_close(dev);
+    for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
+        // no mHardwareLock needed, as there are no other references to this
+        audio_hw_device_close(mAudioHwDevs[i]);
     }
 }
 
@@ -625,6 +619,7 @@ bool AudioFlinger::getMicMute() const
     }
 
     bool state = AUDIO_MODE_INVALID;
+    AutoMutex lock(mHardwareLock);
     mHardwareStatus = AUDIO_HW_GET_MIC_MUTE;
     mPrimaryHardwareDev->get_mic_mute(mPrimaryHardwareDev, &state);
     mHardwareStatus = AUDIO_HW_IDLE;
@@ -856,7 +851,11 @@ size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, audio_format_t form
         return 0;
     }
 
-    return mPrimaryHardwareDev->get_input_buffer_size(mPrimaryHardwareDev, sampleRate, format, channelCount);
+    AutoMutex lock(mHardwareLock);
+    mHardwareStatus = AUDIO_HW_GET_INPUT_BUFFER_SIZE;
+    size_t size = mPrimaryHardwareDev->get_input_buffer_size(mPrimaryHardwareDev, sampleRate, format, channelCount);
+    mHardwareStatus = AUDIO_HW_IDLE;
+    return size;
 }
 
 unsigned int AudioFlinger::getInputFramesLost(audio_io_handle_t ioHandle) const

@@ -199,7 +199,9 @@ private:
                             AudioFlinger();
     virtual                 ~AudioFlinger();
 
-    status_t                initCheck() const;
+    // call in any IAudioFlinger method that accesses mPrimaryHardwareDev
+    status_t                initCheck() const { return mPrimaryHardwareDev == NULL ? NO_INIT : NO_ERROR; }
+
     virtual     void        onFirstRef();
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
     void                    purgeStaleEffects_l();
@@ -1391,7 +1393,9 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;   // see ~Client()
 
                 mutable     Mutex                   mHardwareLock;
-                audio_hw_device_t*                  mPrimaryHardwareDev;
+
+                // These two fields are immutable after onFirstRef(), so no lock needed to access
+                audio_hw_device_t*                  mPrimaryHardwareDev; // mAudioHwDevs[0] or NULL
                 Vector<audio_hw_device_t*>          mAudioHwDevs;
 
     enum hardware_call_state {
@@ -1411,6 +1415,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         AUDIO_HW_SET_MIC_MUTE,
         AUDIO_SET_VOICE_VOLUME,
         AUDIO_SET_PARAMETER,
+        AUDIO_HW_GET_INPUT_BUFFER_SIZE,
     };
 
     mutable     hardware_call_state                 mHardwareStatus;    // for dump only
