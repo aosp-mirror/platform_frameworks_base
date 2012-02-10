@@ -111,6 +111,8 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Grid LTR", BiDiTestGridLayoutLtr.class, R.id.grid_layout_ltr);
         addItem(result, "Grid RTL", BiDiTestGridLayoutRtl.class, R.id.grid_layout_rtl);
         addItem(result, "Grid LOC", BiDiTestGridLayoutLocale.class, R.id.grid_layout_locale);
+        addItem(result, "Grid C-LTR", BiDiTestGridLayoutCodeLtr.class, R.id.grid_layout_code);
+        addItem(result, "Grid C-RTL", BiDiTestGridLayoutCodeRtl.class, R.id.grid_layout_code);
 
         addItem(result, "Frame LTR", BiDiTestFrameLayoutLtr.class, R.id.frame_layout_ltr);
         addItem(result, "Frame RTL", BiDiTestFrameLayoutRtl.class, R.id.frame_layout_rtl);
