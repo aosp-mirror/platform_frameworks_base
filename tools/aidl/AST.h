@@ -54,6 +54,16 @@ struct LiteralExpression : public Expression
     virtual void Write(FILE* to);
 };
 
+// TODO: also escape the contents.  not needed for now
+struct StringLiteralExpression : public Expression
+{
+    string value;
+
+    StringLiteralExpression(const string& value);
+    virtual ~StringLiteralExpression();
+    virtual void Write(FILE* to);
+};
+
 struct Variable : public Expression
 {
     Type* type;
@@ -104,7 +114,7 @@ struct Statement
     virtual void Write(FILE* to) = 0;
 };
 
-struct StatementBlock
+struct StatementBlock : public Statement
 {
     vector<Statement*> statements;
 
@@ -146,6 +156,7 @@ struct MethodCall : public Expression
     vector<string> exceptions;
 
     MethodCall(const string& name);
+    MethodCall(const string& name, int argc, ...);
     MethodCall(Expression* obj, const string& name);
     MethodCall(Type* clazz, const string& name);
     MethodCall(Expression* obj, const string& name, int argc, ...);
@@ -174,8 +185,12 @@ struct NewExpression : public Expression
     vector<Expression*> arguments;
 
     NewExpression(Type* type);
+    NewExpression(Type* type, int argc, ...);
     virtual ~NewExpression();
     virtual void Write(FILE* to);
+
+private:
+    void init(int n, va_list args);
 };
 
 struct NewArrayExpression : public Expression
@@ -289,6 +304,13 @@ struct SwitchStatement : public Statement
 
     SwitchStatement(Expression* expression);
     virtual ~SwitchStatement();
+    virtual void Write(FILE* to);
+};
+
+struct Break : public Statement
+{
+    Break();
+    virtual ~Break();
     virtual void Write(FILE* to);
 };
 

@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 75;
+    private static final int DATABASE_VERSION = 76;
 
     private Context mContext;
 
@@ -1006,6 +1006,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 75;
         }
+        if (upgradeVersion == 75) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            Cursor c = null;
+            try {
+                c = db.query("secure", new String[] {"_id", "value"},
+                        "name='lockscreen.disabled'",
+                        null, null, null, null);
+                // only set default if it has not yet been set
+                if (c == null || c.getCount() == 0) {
+                    stmt = db.compileStatement("INSERT INTO system(name,value)"
+                            + " VALUES(?,?);");
+                    loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
+                            R.bool.def_lockscreen_disabled);
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (c != null) c.close();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 76;
+        }
 
         // *** Remember to update DATABASE_VERSION above!
 
@@ -1352,7 +1375,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadBooleanSetting(stmt, Settings.System.DIM_SCREEN,
                     R.bool.def_dim_screen);
             loadSetting(stmt, Settings.System.STAY_ON_WHILE_PLUGGED_IN,
-                    "1".equals(SystemProperties.get("ro.kernel.qemu")) ? 1 : 0);
+                    ("1".equals(SystemProperties.get("ro.kernel.qemu")) ||
+                        mContext.getResources().getBoolean(R.bool.def_stay_on_while_plugged_in))
+                     ? 1 : 0);
             loadIntegerSetting(stmt, Settings.System.SCREEN_OFF_TIMEOUT,
                     R.integer.def_screen_off_timeout);
     
@@ -1568,6 +1593,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_SCREEN_READER_URL,
                     R.string.def_accessibility_screen_reader_url);
+
+            loadBooleanSetting(stmt, Settings.System.LOCKSCREEN_DISABLED,
+                    R.bool.def_lockscreen_disabled);
+
+            loadBooleanSetting(stmt, Settings.Secure.DEVICE_PROVISIONED,
+                    R.bool.def_device_provisioned);
         } finally {
             if (stmt != null) stmt.close();
         }

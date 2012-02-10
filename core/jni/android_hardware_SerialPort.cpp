@@ -146,6 +146,8 @@ android_hardware_SerialPort_open(JNIEnv *env, jobject thiz, jobject fileDescript
         memset(&tio, 0, sizeof(tio));
 
     tio.c_cflag =  speed | CS8 | CLOCAL | CREAD;
+    // Disable output processing, including messing with end-of-line characters.
+    tio.c_oflag &= ~OPOST;
     tio.c_iflag = IGNPAR;
     tio.c_lflag = 0; /* turn of CANON, ECHO*, etc */
     /* no timeout but request at least one character per read */
@@ -234,6 +236,13 @@ android_hardware_SerialPort_write_direct(JNIEnv *env, jobject thiz, jobject buff
         jniThrowException(env, "java/io/IOException", NULL);
 }
 
+static void
+android_hardware_SerialPort_send_break(JNIEnv *env, jobject thiz)
+{
+    int fd = env->GetIntField(thiz, field_context);
+    tcsendbreak(fd, 0);
+}
+
 static JNINativeMethod method_table[] = {
     {"native_open",             "(Ljava/io/FileDescriptor;I)V",
                                         (void *)android_hardware_SerialPort_open},
@@ -246,6 +255,7 @@ static JNINativeMethod method_table[] = {
                                         (void *)android_hardware_SerialPort_write_array},
     {"native_write_direct",     "(Ljava/nio/ByteBuffer;I)V",
                                         (void *)android_hardware_SerialPort_write_direct},
+    {"native_send_break",       "()V",  (void *)android_hardware_SerialPort_send_break},
 };
 
 int register_android_hardware_SerialPort(JNIEnv *env)
