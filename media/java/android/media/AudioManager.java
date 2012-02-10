@@ -91,7 +91,8 @@ public class AudioManager {
      * @see #EXTRA_VIBRATE_SETTING
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String VIBRATE_SETTING_CHANGED_ACTION = "android.media.VIBRATE_SETTING_CHANGED";
+    public static final String VIBRATE_SETTING_CHANGED_ACTION =
+        "android.media.VIBRATE_SETTING_CHANGED";
 
     /**
      * @hide Broadcast intent when the volume for a particular stream type changes.
@@ -103,6 +104,27 @@ public class AudioManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
+
+    /**
+     * @hide Broadcast intent when the master volume changes.
+     * Includes the new volume
+     *
+     * @see #EXTRA_MASTER_VOLUME_VALUE
+     * @see #EXTRA_PREV_MASTER_VOLUME_VALUE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String MASTER_VOLUME_CHANGED_ACTION =
+        "android.media.MASTER_VOLUME_CHANGED_ACTION";
+
+    /**
+     * @hide Broadcast intent when the master mute state changes.
+     * Includes the the new volume
+     *
+     * @see #EXTRA_MASTER_VOLUME_MUTED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String MASTER_MUTE_CHANGED_ACTION =
+        "android.media.MASTER_MUTE_CHANGED_ACTION";
 
     /**
      * The new vibrate setting for a particular type.
@@ -140,6 +162,27 @@ public class AudioManager {
      */
     public static final String EXTRA_PREV_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE";
+
+    /**
+     * @hide The new master volume value for the master volume changed intent.
+     * Value is integer between 0 and 100 inclusive.
+     */
+    public static final String EXTRA_MASTER_VOLUME_VALUE =
+        "android.media.EXTRA_MASTER_VOLUME_VALUE";
+
+    /**
+     * @hide The previous master volume value for the master volume changed intent.
+     * Value is integer between 0 and 100 inclusive.
+     */
+    public static final String EXTRA_PREV_MASTER_VOLUME_VALUE =
+        "android.media.EXTRA_PREV_MASTER_VOLUME_VALUE";
+
+    /**
+     * @hide The new master volume mute state for the master mute changed intent.
+     * Value is boolean
+     */
+    public static final String EXTRA_MASTER_VOLUME_MUTED =
+        "android.media.EXTRA_MASTER_VOLUME_MUTED";
 
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
@@ -372,11 +415,12 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void preDispatchKeyEvent(int keyCode, int stream) {
+    public void preDispatchKeyEvent(KeyEvent event, int stream) {
         /*
          * If the user hits another key within the play sound delay, then
          * cancel the sound
          */
+        int keyCode = event.getKeyCode();
         if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
                 && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
                 && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
@@ -397,7 +441,8 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void handleKeyDown(int keyCode, int stream) {
+    public void handleKeyDown(KeyEvent event, int stream) {
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
@@ -426,7 +471,13 @@ public class AudioManager {
                 }
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
-                // TODO: Actually handle MUTE.
+                if (event.getRepeatCount() == 0) {
+                    if (mUseMasterVolume) {
+                        setMasterMute(!isMasterMute());
+                    } else {
+                        // TODO: Actually handle MUTE.
+                    }
+                }
                 break;
         }
     }
@@ -434,7 +485,8 @@ public class AudioManager {
     /**
      * @hide
      */
-    public void handleKeyUp(int keyCode, int stream) {
+    public void handleKeyUp(KeyEvent event, int stream) {
+        int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
@@ -460,9 +512,6 @@ public class AudioManager {
 
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                // TODO: Actually handle MUTE.
-                break;
         }
     }
 
@@ -485,7 +534,11 @@ public class AudioManager {
     public void adjustStreamVolume(int streamType, int direction, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustStreamVolume(streamType, direction, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustStreamVolume(streamType, direction, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustStreamVolume", e);
         }
@@ -511,7 +564,11 @@ public class AudioManager {
     public void adjustVolume(int direction, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustVolume(direction, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustVolume(direction, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustVolume", e);
         }
@@ -537,7 +594,11 @@ public class AudioManager {
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            if (mUseMasterVolume) {
+                service.adjustMasterVolume(direction, flags);
+            } else {
+                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);
         }
@@ -551,8 +612,9 @@ public class AudioManager {
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
      *            {@link #ADJUST_SAME}.
      * @param flags One or more flags.
+     * @hide
      */
-    private void adjustMasterVolume(int direction, int flags) {
+    public void adjustMasterVolume(int direction, int flags) {
         IAudioService service = getService();
         try {
             service.adjustMasterVolume(direction, flags);
@@ -603,7 +665,11 @@ public class AudioManager {
     public int getStreamMaxVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getStreamMaxVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getMasterMaxVolume();
+            } else {
+                return service.getStreamMaxVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getStreamMaxVolume", e);
             return 0;
@@ -621,7 +687,11 @@ public class AudioManager {
     public int getStreamVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getStreamVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getMasterVolume();
+            } else {
+                return service.getStreamVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getStreamVolume", e);
             return 0;
@@ -636,7 +706,11 @@ public class AudioManager {
     public int getLastAudibleStreamVolume(int streamType) {
         IAudioService service = getService();
         try {
-            return service.getLastAudibleStreamVolume(streamType);
+            if (mUseMasterVolume) {
+                return service.getLastAudibleMasterVolume();
+            } else {
+                return service.getLastAudibleStreamVolume(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getLastAudibleStreamVolume", e);
             return 0;
@@ -679,9 +753,78 @@ public class AudioManager {
     public void setStreamVolume(int streamType, int index, int flags) {
         IAudioService service = getService();
         try {
-            service.setStreamVolume(streamType, index, flags);
+            if (mUseMasterVolume) {
+                service.setMasterVolume(index, flags);
+            } else {
+                service.setStreamVolume(streamType, index, flags);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamVolume", e);
+        }
+    }
+
+    /**
+     * Returns the maximum volume index for master volume.
+     *
+     * @hide
+     */
+    public int getMasterMaxVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getMasterMaxVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getMasterMaxVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the current volume index for master volume.
+     *
+     * @return The current volume index for master volume.
+     * @hide
+     */
+    public int getMasterVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getMasterVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getMasterVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Get last audible volume before master volume was muted.
+     *
+     * @hide
+     */
+    public int getLastAudibleMasterVolume() {
+        IAudioService service = getService();
+        try {
+            return service.getLastAudibleMasterVolume();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getLastAudibleMasterVolume", e);
+            return 0;
+        }
+    }
+
+    /**
+     * Sets the volume index for master volume.
+     *
+     * @param index The volume index to set. See
+     *            {@link #getMasterMaxVolume(int)} for the largest valid value.
+     * @param flags One or more flags.
+     * @see #getMasterMaxVolume(int)
+     * @see #getMasterVolume(int)
+     * @hide
+     */
+    public void setMasterVolume(int index, int flags) {
+        IAudioService service = getService();
+        try {
+            service.setMasterVolume(index, flags);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMasterVolume", e);
         }
     }
 
@@ -751,6 +894,35 @@ public class AudioManager {
             return service.isStreamMute(streamType);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in isStreamMute", e);
+            return false;
+        }
+    }
+
+    /**
+     * set master mute state.
+     *
+     * @hide
+     */
+    public void setMasterMute(boolean state) {
+        IAudioService service = getService();
+        try {
+            service.setMasterMute(state, mICallBack);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMasterMute", e);
+        }
+    }
+
+    /**
+     * get master mute state.
+     *
+     * @hide
+     */
+    public boolean isMasterMute() {
+        IAudioService service = getService();
+        try {
+            return service.isMasterMute();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isMasterMute", e);
             return false;
         }
     }

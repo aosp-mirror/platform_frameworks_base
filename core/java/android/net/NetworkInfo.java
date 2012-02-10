@@ -351,6 +351,18 @@ public class NetworkInfo implements Parcelable {
     }
 
     /**
+     * Set the extraInfo field.
+     * @param extraInfo an optional {@code String} providing addditional network state
+     * information passed up from the lower networking layers.
+     * @hide
+     */
+    public void setExtraInfo(String extraInfo) {
+        synchronized (this) {
+            this.mExtraInfo = extraInfo;
+        }
+    }
+
+    /**
      * Report the reason an attempt to establish connectivity failed,
      * if one is available.
      * @return the reason for failure, or null if not available

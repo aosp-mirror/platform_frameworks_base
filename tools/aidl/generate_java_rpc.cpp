@@ -15,6 +15,8 @@ Type* RPC_BROKER_TYPE = new Type("com.android.athome.connector", "Broker",
         Type::BUILT_IN, false, false, false);
 Type* RPC_CONTAINER_TYPE = new Type("com.android.athome.connector", "ConnectorContainer",
         Type::BUILT_IN, false, false, false);
+Type* PLACE_INFO_TYPE = new Type("android.support.place.connector", "PlaceInfo",
+        Type::BUILT_IN, false, false, false);
 // TODO: Just use Endpoint, so this works for all endpoints.
 Type* RPC_CONNECTOR_TYPE = new Type("com.android.athome.connector", "Connector",
         Type::BUILT_IN, false, false, false);
@@ -293,6 +295,7 @@ public:
 
 private:
     void generate_ctor();
+    void generate_get_endpoint_info();
 };
 
 RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfaceType)
@@ -312,6 +315,7 @@ RpcProxyClass::RpcProxyClass(const interface_type* iface, InterfaceType* interfa
 
     // methods
     generate_ctor();
+    generate_get_endpoint_info();
 }
 
 RpcProxyClass::~RpcProxyClass()
@@ -333,6 +337,19 @@ RpcProxyClass::generate_ctor()
 
     ctor->statements->Add(new Assignment(this->broker, broker));
     ctor->statements->Add(new Assignment(this->endpoint, endpoint));
+}
+
+void
+RpcProxyClass::generate_get_endpoint_info()
+{
+    Method* get = new Method;
+    get->modifiers = PUBLIC;
+    get->returnType = RPC_ENDPOINT_INFO_TYPE;
+    get->name = "getEndpointInfo";
+    get->statements = new StatementBlock;
+    this->elements.push_back(get);
+
+    get->statements->Add(new ReturnStatement(this->endpoint));
 }
 
 // =================================================
@@ -460,15 +477,17 @@ EndpointBaseClass::generate_ctor()
 {
     Variable* container = new Variable(RPC_CONTAINER_TYPE, "container");
     Variable* broker = new Variable(RPC_BROKER_TYPE, "broker");
+	Variable* place = new Variable(PLACE_INFO_TYPE, "placeInfo");
     Method* ctor = new Method;
         ctor->modifiers = PUBLIC;
         ctor->name = class_name_leaf(this->type->Name());
         ctor->statements = new StatementBlock;
         ctor->parameters.push_back(container);
         ctor->parameters.push_back(broker);
+        ctor->parameters.push_back(place);
     this->elements.push_back(ctor);
 
-    ctor->statements->Add(new MethodCall("super", 2, container, broker));
+    ctor->statements->Add(new MethodCall("super", 3, container, broker, place));
 }
 
 // =================================================
@@ -739,11 +758,13 @@ generate_result_dispatcher_method(const method_type* method,
     // The return value
     {
         Type* t = NAMES.Search(method->type.type.data);
-        Variable* rv = new Variable(t, "rv");
-        dispatchMethod->statements->Add(new VariableDeclaration(rv));
-        generate_create_from_data(t, dispatchMethod->statements, "_result", rv,
-                resultData, &classLoader);
-        realCall->arguments.push_back(rv);
+        if (t != VOID_TYPE) {
+            Variable* rv = new Variable(t, "rv");
+            dispatchMethod->statements->Add(new VariableDeclaration(rv));
+            generate_create_from_data(t, dispatchMethod->statements, "_result", rv,
+                    resultData, &classLoader);
+            realCall->arguments.push_back(rv);
+        }
     }
 
     VariableFactory stubArgs("arg");

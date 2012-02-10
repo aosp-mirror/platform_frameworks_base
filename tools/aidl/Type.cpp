@@ -212,6 +212,12 @@ Type::CreatorName() const
 }
 
 string
+Type::RpcCreatorName() const
+{
+    return "";
+}
+
+string
 Type::InstantiableName() const
 {
     return QualifiedName();
@@ -910,6 +916,12 @@ UserDataType::CreatorName() const
     return QualifiedName() + ".CREATOR";
 }
 
+string
+UserDataType::RpcCreatorName() const
+{
+    return QualifiedName() + ".RPC_CREATOR";
+}
+
 void
 UserDataType::WriteToParcel(StatementBlock* addTo, Variable* v, Variable* parcel, int flags)
 {
@@ -1004,48 +1016,17 @@ void
 UserDataType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, int flags)
 {
-    // if (v != null) {
-    //     RpcData _obj = new RpcData();
-    //     v.writeToRpcData(_obj);
-    //     data.putRpcData(k, obj);
-    // }
-    IfStatement* ifpart = new IfStatement;
-    ifpart->expression = new Comparison(v, "!=", NULL_VALUE);
-    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
-    ifpart->statements->Add(new VariableDeclaration(_obj, new NewExpression(RPC_DATA_TYPE)));
-    ifpart->statements->Add(new MethodCall(v, "writeToRpcData", 1, _obj));
-    ifpart->statements->Add(new MethodCall(data, "putRpcData", 2, k, _obj));
-
-    addTo->Add(ifpart);
+    // data.putFlattenable(k, v);
+    addTo->Add(new MethodCall(data, "putFlattenable", 2, k, v));
 }
 
 void
 UserDataType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
                                     Variable* data, Variable** cl)
 {
-    // RpcData _obj_XX = data.getRpcData(k);
-    // if (_data_XX != null)
-    //     v = CLASS.RPC_CREATOR.createFromParcel(parcel)
-    // } else {
-    //     v = null;
-    // }
-
-    StatementBlock* block = new StatementBlock;
-    addTo->Add(block);
-
-    Variable* _obj = new Variable(RPC_DATA_TYPE, "_obj");
-    block->Add(new VariableDeclaration(_obj, new MethodCall(data, "getRpcData", 1, k)));
-
-    IfStatement* ifpart = new IfStatement();
-    ifpart->expression = new Comparison(_obj, "!=", NULL_VALUE);
-    ifpart->statements->Add(new Assignment(v,
-                new MethodCall(v->type, "RPC_CREATOR.createFromRpcData", 1, data)));
-
-    IfStatement* elsepart = new IfStatement();
-    ifpart->elseif = elsepart;
-    elsepart->statements->Add(new Assignment(v, NULL_VALUE));
-
-    block->Add(ifpart);
+    // data.getFlattenable(k, CLASS.RPC_CREATOR);
+    addTo->Add(new Assignment(v, new MethodCall(data, "getFlattenable", 2, k,
+                new FieldVariable(v->type, "RPC_CREATOR"))));
 }
 
 // ================================================================
@@ -1221,17 +1202,32 @@ void
 GenericListType::WriteToRpcData(StatementBlock* addTo, Expression* k, Variable* v,
         Variable* data, int flags)
 {
-    addTo->Add(new MethodCall(data, "putList", 2, k, v));
+    Type* generic = GenericArgumentTypes()[0];
+    if (generic == RPC_DATA_TYPE) {
+        addTo->Add(new MethodCall(data, "putRpcDataList", 2, k, v));
+    } else if (generic->RpcCreatorName() != "") {
+        addTo->Add(new MethodCall(data, "putFlattenableList", 2, k, v));
+    } else {
+        addTo->Add(new MethodCall(data, "putList", 2, k, v));
+    }
 }
 
 void
 GenericListType::CreateFromRpcData(StatementBlock* addTo, Expression* k, Variable* v,
         Variable* data, Variable** cl)
 {
-    string classArg = GenericArgumentTypes()[0]->QualifiedName();
-    classArg += ".class";
-    addTo->Add(new Assignment(v, new MethodCall(data, "getList", 2, k,
-                    new LiteralExpression(classArg))));
+    Type* generic = GenericArgumentTypes()[0];
+    if (generic == RPC_DATA_TYPE) {
+        addTo->Add(new Assignment(v, new MethodCall(data, "getRpcDataList", 2, k)));
+    } else if (generic->RpcCreatorName() != "") {
+        addTo->Add(new Assignment(v, new MethodCall(data, "getFlattenableList", 2, k, 
+                        new LiteralExpression(generic->RpcCreatorName()))));
+    } else {
+        string classArg = GenericArgumentTypes()[0]->QualifiedName();
+        classArg += ".class";
+        addTo->Add(new Assignment(v, new MethodCall(data, "getList", 2, k,
+                        new LiteralExpression(classArg))));
+    }
 }
 
 
