@@ -167,12 +167,11 @@ bool RsdShaderCache::link(const Context *rsc) {
                 char* buf = (char*) malloc(bufLength);
                 if (buf) {
                     glGetProgramInfoLog(pgm, bufLength, NULL, buf);
-                    ALOGE("Could not link program:\n%s\n", buf);
+                    rsc->setError(RS_ERROR_FATAL_PROGRAM_LINK, buf);
                     free(buf);
                 }
             }
             glDeleteProgram(pgm);
-            rsc->setError(RS_ERROR_FATAL_PROGRAM_LINK, "Error linking GL Programs");
             return false;
         }
 
