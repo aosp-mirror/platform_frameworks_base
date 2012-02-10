@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Отключить беспроводное соединение"</string>
     <string name="screen_lock" msgid="799094655496098153">"Блокировка экрана"</string>
     <string name="power_off" msgid="4266614107412865048">"Выключение"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Звонок отключен"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Вибросигнал"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Звонок включен"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшетный ПК будет отключен."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон будет выключен."</string>
@@ -688,11 +685,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карта заблокирована"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Разблокировка SIM-карты…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. "\n\n"Повтор через <xliff:g id="NUMBER_1">%d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Количество неудачных попыток ввода пароля: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Количество неудачных попыток ввода PIN-кода: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После нескольких неудачных попыток (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будет предложено разблокировать планшетный ПК с помощью учетных данных Google."\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.  "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки планшетного ПК потребуется войти в аккаунт Google. "\n\n" Повтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Вы <xliff:g id="NUMBER_0">%d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google. "\n\n" Повтор через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Не удалось разблокировать телефон (число попыток: <xliff:g id="NUMBER_0">%d</xliff:g>). Осталось попыток: <xliff:g id="NUMBER_1">%d</xliff:g>. После этого будут установлены настройки по умолчанию, что приведет к удалению всех пользовательских данных."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Не удалось разблокировать планшетный ПК (число попыток: <xliff:g id="NUMBER">%d</xliff:g>). Будут установлены настройки по умолчанию."</string>
@@ -701,8 +698,8 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Снятие блокировки аккаунта"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Слишком много попыток ввода графического ключа!"</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Для разблокировки войдите с помощью своего аккаунта Google"</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Имя пользователя (электронная почта)"</string>
+    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Чтобы разблокировать устройство, войдите в свой аккаунт Google."</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Имя пользователя (эл. почта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Вход"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неверное имя пользователя или пароль."</string>
