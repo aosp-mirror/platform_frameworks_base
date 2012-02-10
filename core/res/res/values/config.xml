@@ -545,6 +545,9 @@
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>
 
+    <!-- True if WallpaperService is enabled -->
+    <bool name="config_enableWallpaperService">true</bool>
+
     <!-- Component name of the service providing network location support. -->
     <string name="config_networkLocationProvider" translatable="false">@null</string>
 
