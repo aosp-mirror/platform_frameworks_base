@@ -72,9 +72,7 @@ static void android_media_ToneGenerator_release(JNIEnv *env, jobject thiz) {
 
     env->SetIntField(thiz, fields.context, 0);
 
-    if (lpToneGen) {
-        delete lpToneGen;
-    }
+    delete lpToneGen;
 }
 
 static void android_media_ToneGenerator_native_setup(JNIEnv *env, jobject thiz,

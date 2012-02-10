@@ -588,10 +588,10 @@ status_t AudioPolicyService::dump(int fd, const Vector<String16>& args)
         }
 
         dumpInternals(fd);
-        if (mAudioCommandThread != NULL) {
+        if (mAudioCommandThread != 0) {
             mAudioCommandThread->dump(fd);
         }
-        if (mTonePlaybackThread != NULL) {
+        if (mTonePlaybackThread != 0) {
             mTonePlaybackThread->dump(fd);
         }
 
