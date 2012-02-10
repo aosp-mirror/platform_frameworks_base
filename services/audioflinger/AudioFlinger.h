@@ -442,7 +442,7 @@ private:
                                         status_t *status);
                     void disconnectEffect(const sp< EffectModule>& effect,
                                           const wp<EffectHandle>& handle,
-                                          bool unpiniflast);
+                                          bool unpinIfLast);
 
                     // return values for hasAudioSession (bit field)
                     enum effect_state {
@@ -1120,7 +1120,7 @@ private:
         const wp<ThreadBase>& thread() { return mThread; }
 
         status_t addHandle(const sp<EffectHandle>& handle);
-        void disconnect(const wp<EffectHandle>& handle, bool unpiniflast);
+        void disconnect(const wp<EffectHandle>& handle, bool unpinIfLast);
         size_t removeHandle (const wp<EffectHandle>& handle);
 
         effect_descriptor_t& desc() { return mDescriptor; }
@@ -1196,7 +1196,9 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                                  uint32_t *replySize,
                                  void *pReplyData);
         virtual void disconnect();
-        virtual void disconnect(bool unpiniflast);
+    private:
+                void disconnect(bool unpinIfLast);
+    public:
         virtual sp<IMemory> getCblk() const { return mCblkMemory; }
         virtual status_t onTransact(uint32_t code, const Parcel& data,
                 Parcel* reply, uint32_t flags);
