@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дазваляе прыкладанням перамяшчаць заданні на ​​пярэдні план і фон. Шкоднасныя прыкладанні могуць прымусова рабіць сябе асноўнымі без вашага ведама."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спыніць запушчаныя прыкладанні"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дазваляе прыкладанням выдаляць заданні і спыняць прыкладанні, якія іх выкарыстоўваюць. Шкоднасныя прыкладаннi могуць перашкодзiць працы іншых прыкладанняў."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"уключыць адладку прыкладання"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дазваляе прыкладанням уключаць адладку для іншага прыкладання. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта, каб спыняць іншыя прыкладанні."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змяняць налады карыстальніцкага інтэрфейса"</string>

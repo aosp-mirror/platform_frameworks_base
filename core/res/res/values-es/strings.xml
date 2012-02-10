@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas a segundo o a primer plano. Algunas aplicaciones malintencionadas pueden aparecer en primer plano sin el control del usuario."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener aplicaciones en ejecución"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que la aplicación termine tareas y cierre sus aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para interferir en el comportamiento de otras aplicaciones."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"habilitar depuración de aplicación"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que la aplicación active la depuración de otra aplicación. Las aplicaciones malintencionadas pueden usar este permiso para interrumpir la ejecución de otras aplicaciones."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"cambiar la configuración de la interfaz de usuario"</string>

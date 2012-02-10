@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Laat die program toe om take na die voorgrond en agtergrond te skuif. Kwaadwillige programme kan hulself sonder jou beheer na vore dwing."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stop lopende programme"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Laat die program toe om take te verwyder en hul programme te dood. Kwaadwillige programme kan die gedrag van ander programme ontwrig."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktiveer programontfouting"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Laat die program toe om ontfouting vir \'n ander program af te skakel. Kwaadwillige programme kan dit dalk gebruik om ander programme te dood."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Verander jou UI-instellings"</string>

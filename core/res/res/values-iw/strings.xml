@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"מאפשר ליישום להעביר משימות לחזית ולרקע. יישומים זדוניים עלולים לאלץ את עצמם לעבור לחזית ללא שליטה מצדך."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"עצירת יישומים פעילים"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"הרשאה זו מאפשרת ליישום להסיר משימות ולסגור את היישומים שבהם הן פועלות. יישומים זדוניים עלולים לשבש את פעולתם של יישומים אחרים."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"הפעלה של ניקוי באגים ביישומים"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"הרשאה זו מאפשרת ליישום להפעיל ניקוי באגים עבור יישום אחר. יישומים זדוניים עלולים להשתמש באפשרות זו כדי לסגור יישומים אחרים."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"שנה את הגדרות ממשק המשתמש שלך"</string>

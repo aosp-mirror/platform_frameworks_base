@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite à aplicação mover tarefas para primeiro e segundo plano. As aplicações maliciosas podem impor-se em primeiro plano sem o controlo do utilizador."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"parar aplicações em execução"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que a aplicação remova tarefas e elimine as respetivas aplicações. As aplicações maliciosas podem perturbar o comportamento de outras aplicações."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"ativar depuração da aplicação"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que a aplicação ative a depuração para outra aplicação. As aplicações maliciosas podem utilizar isto para eliminar outras aplicações."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"alterar definições da IU"</string>

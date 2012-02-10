@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Uygulamaya, görevleri ön plana ve arka plana taşıma izni verir. Kötü amaçlı uygulamalar kendilerini sizin denetiminiz dışında ön plana taşıyabilir."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"çalışan uygulamaları durdur"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Uygulamaya, görevleri kaldırma ve bunlara ait uygulamaları kapatma izni verir. Kötü amaçlı uygulamalar diğer uygulamaların çalışmasını bozabilir."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"uygulama hata ayıklamayı etkinleştir"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Uygulamaya, başka bir uygulama için hata ayıklamayı açma izni verir. Kötü amaçlı uygulamalar diğer uygulamaları kaldırmak için bunu kullanabilir."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"kullanıcı arayüzü ayarlarınızı değiştirin"</string>
