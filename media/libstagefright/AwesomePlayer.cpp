@@ -1360,7 +1360,7 @@ void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     mAudioTrack = source;
 }
 
-void AwesomePlayer::addTextSource(sp<MediaSource> source) {
+void AwesomePlayer::addTextSource(const sp<MediaSource>& source) {
     Mutex::Autolock autoLock(mTimedTextLock);
     CHECK(source != NULL);
 
