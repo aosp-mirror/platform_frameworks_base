@@ -234,6 +234,7 @@
   <java-symbol type="bool" name="preferences_prefer_dual_pane" />
   <java-symbol type="bool" name="skip_restoring_network_selection" />
   <java-symbol type="bool" name="split_action_bar_is_narrow" />
+  <java-symbol type="bool" name="config_useMasterVolume" />
 
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />

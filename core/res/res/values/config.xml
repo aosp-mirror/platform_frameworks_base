@@ -61,6 +61,10 @@
          As of Honeycomb, blurring is not supported anymore. -->
     <bool name="config_sf_slowBlur">true</bool>
 
+    <!-- Flag indicating that the media framework should allow changing
+         master volume stream and nothing else . -->
+    <bool name="config_useMasterVolume">false</bool>
+
     <!-- The duration (in milliseconds) of a short animation. -->
     <integer name="config_shortAnimTime">200</integer>
 
