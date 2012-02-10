@@ -52,7 +52,7 @@ onclick="submit()" />
   <script language="javascript">
     var loc = window.location.href;
     if (loc.indexOf('?v=') != -1) {
-      var filename = loc.substring(loc.indexOf('=')+1,loc.length);
+      var filename = loc.substring(loc.indexOf('=')+1,loc.length).replace(/</g,"&lt;").replace(/>/g,"&gt;");
       document.write("File: " + filename);
     }
   </script>
