@@ -554,15 +554,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case FINISH_OTHER_INSTANCES_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            ComponentName className = ComponentName.readFromParcel(data);
-            finishOtherInstances(token, className);
-            reply.writeNoException();
-            return true;
-        }
-
         case REPORT_THUMBNAIL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -1189,22 +1180,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             ApplicationInfo info = ApplicationInfo.CREATOR.createFromParcel(data);
             unbindBackupAgent(info);
             reply.writeNoException();
-            return true;
-        }
-        
-        case REGISTER_ACTIVITY_WATCHER_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IActivityWatcher watcher = IActivityWatcher.Stub.asInterface(
-                    data.readStrongBinder());
-            registerActivityWatcher(watcher);
-            return true;
-        }
-        
-        case UNREGISTER_ACTIVITY_WATCHER_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IActivityWatcher watcher = IActivityWatcher.Stub.asInterface(
-                    data.readStrongBinder());
-            unregisterActivityWatcher(watcher);
             return true;
         }
         
@@ -2164,18 +2139,6 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
-    public void finishOtherInstances(IBinder token, ComponentName className) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        ComponentName.writeToParcel(className, data);
-        mRemote.transact(FINISH_OTHER_INSTANCES_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
     public void reportThumbnail(IBinder token,
                                 Bitmap thumbnail, CharSequence description) throws RemoteException
     {
@@ -3022,30 +2985,6 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         reply.recycle();
         data.recycle();
-    }
-    
-    public void registerActivityWatcher(IActivityWatcher watcher)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
-        mRemote.transact(REGISTER_ACTIVITY_WATCHER_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    
-    public void unregisterActivityWatcher(IActivityWatcher watcher)
-            throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
-        mRemote.transact(UNREGISTER_ACTIVITY_WATCHER_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
     }
     
     public int startActivityInPackage(int uid,

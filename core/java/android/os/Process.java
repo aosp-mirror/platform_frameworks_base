@@ -119,7 +119,7 @@ public class Process {
      * Last of application-specific UIDs starting at
      * {@link #FIRST_APPLICATION_UID}.
      */
-    public static final int LAST_APPLICATION_UID = 89999;
+    public static final int LAST_APPLICATION_UID = 19999;
 
     /**
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)

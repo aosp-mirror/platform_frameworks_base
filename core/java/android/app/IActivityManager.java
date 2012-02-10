@@ -145,7 +145,6 @@ public interface IActivityManager extends IInterface {
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
-    public void finishOtherInstances(IBinder token, ComponentName className) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
@@ -295,11 +294,6 @@ public interface IActivityManager extends IInterface {
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
     
-    public void registerActivityWatcher(IActivityWatcher watcher)
-            throws RemoteException;
-    public void unregisterActivityWatcher(IActivityWatcher watcher)
-            throws RemoteException;
-
     public int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded)
@@ -505,7 +499,7 @@ public interface IActivityManager extends IInterface {
     int BIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
     int UNBIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int PUBLISH_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
-    int FINISH_OTHER_INSTANCES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
+
     int GOING_TO_SLEEP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+39;
     int WAKING_UP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+40;
     int SET_DEBUG_APP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+41;
@@ -559,8 +553,8 @@ public interface IActivityManager extends IInterface {
     int START_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+89;
     int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
-    int REGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
-    int UNREGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
+
+
     int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
