@@ -137,18 +137,15 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Funk ausschalten"</string>
     <string name="screen_lock" msgid="799094655496098153">"Display-Sperre"</string>
     <string name="power_off" msgid="4266614107412865048">"Ausschalten"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Klingelton aus"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Klingeltonmodus \"Vibration\""</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Klingelton ein"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wird heruntergefahren..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Ihr Tablet wird heruntergefahren."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon wird heruntergefahren."</string>
     <string name="shutdown_confirm_question" msgid="6656441286856415014">"Möchten Sie das Gerät herunterfahren?"</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Zuletzt verwendet"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Keine zuletzt verwendeten Apps"</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Kürzlich geöffnet"</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Keine kürzlich geöffneten Apps"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-Optionen"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoptionen"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
@@ -208,7 +205,7 @@
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ermöglicht einer App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre vertraulichen Nachrichten."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Ermöglicht einer App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre  vertraulichen Nachrichten."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS oder MMS bearbeiten"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ermöglicht einer App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ermöglicht einer App, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Apps löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Ermöglicht einer App, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP-Nachrichten empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ermöglicht der App, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Apps können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
@@ -219,7 +216,7 @@
     <string name="permlab_removeTasks" msgid="4802740047161700683">"Aktive Apps beenden"</string>
     <string name="permdesc_removeTasks" msgid="2000332928514575461">"Ermöglicht einer App das Entfernen von Aufgaben und Beenden der entsprechenden Apps. Schädliche Apps können das Verhalten anderer Apps stören."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"Fehlerbeseitigung für App aktivieren"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ermöglicht einer App, die Fehlerbeseitigung für eine andere Anwendung zu aktivieren. Schädliche Anwendungen können so andere Anwendungen löschen."</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ermöglicht einer App, die Fehlerbeseitigung für eine andere App zu aktivieren. Schädliche Apps können so andere Apps löschen."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI-Einstellungen ändern"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Ermöglicht einer App, die aktuelle Konfiguration zu ändern, etwa das Gebietsschema oder die Schriftgröße"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Automodus aktivieren"</string>
@@ -253,7 +250,7 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"Akku-Daten ändern"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Ermöglicht die Änderung von gesammelten Akku-Daten. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Systemsicherung und -wiederherstellung kontrollieren"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"Der Anwendung wird die Steuerung des Sicherungs- und Wiederherstellungsmechanismus des Systems ermöglicht. Nicht für normale Apps vorgesehen."</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Der App wird die Steuerung des Sicherungs- und Wiederherstellungsmechanismus des Systems ermöglicht. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Vollständige Sicherung oder Wiederherstellung bestätigen"</string>
     <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Ermöglicht der App den Start der Benutzeroberfläche zur Bestätigung der vollständigen Sicherung. Kann nicht von jeder App verwendet werden."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"nicht autorisierte Fenster anzeigen"</string>
@@ -319,7 +316,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"allgemeine Systemeinstellungen ändern"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Ermöglicht einer App, die Einstellungsdaten des Systems zu ändern. Schädliche Anwendungen können so die Systemkonfiguration beschädigen."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"Sicherheitseinstellungen für das System ändern"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Der Anwendung wird das Ändern der Sicherheitseinstellungsdaten des Systems ermöglicht. Nicht für normale Apps vorgesehen."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Der App wird das Ändern der Sicherheitseinstellungsdaten des Systems ermöglicht. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google Services Map ändern"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Ermöglicht einer App, Änderungen an der Google Services Map vorzunehmen. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"Automatisch nach dem Booten starten"</string>
@@ -353,7 +350,7 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Zugriff auf zusätzliche Dienstanbieterbefehle für Standort. Schädliche Anwendungen könnten so die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Berechtigung zur Installation eines Standortanbieters"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Erstellt simulierte Standortquellen für Testzwecke. Schädliche Anwendungen können so den von den echten Standortquellen wie GPS oder Netzwerkanbieter zurückgegebenen Standort und/oder Status überschreiben oder Ihren Standort überwachen und an eine externe Quelle weitergeben."</string>
-    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Genauer (GPS-) Standort"</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"genauer (GPS-) Standort"</string>
     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Zugriff auf genaue Standortquellen wie GPS auf dem Tablet (falls verfügbar). Schädliche Anwendungen können damit bestimmen, wo Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Zugriff auf genaue Standortquellen wie GPS auf dem Telefon (falls verfügbar). Schädliche Anwendungen können damit bestimmen, so Sie sich befinden und so Ihren Akku zusätzlich belasten."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"ungefährer (netzwerkbasierter) Standort"</string>
@@ -413,7 +410,7 @@
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"Auf Check-In-Eigenschaften zugreifen"</string>
     <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Ermöglicht den Schreib-/Lesezugriff auf vom Check-In-Service hochgeladene Elemente. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"Widgets auswählen"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ermöglicht der App, dem System zu melden, welche Widgets von welcher Anwendung verwendet werden können. Mit dieser Berechtigung können Anwendungen anderen Anwendungen Zugriff auf persönliche Daten gewähren. Nicht für normale Apps vorgesehen."</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ermöglicht der App, dem System zu melden, welche Widgets von welcher App verwendet werden können. Mit dieser Berechtigung können Apps anderen Apps Zugriff auf persönliche Daten gewähren. Nicht für normale Apps vorgesehen."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"Telefonstatus ändern"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Ermöglicht einer App, die Telefonfunktionen des Geräts zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder die Mobilfunkverbindung des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"Telefonstatus lesen und identifizieren"</string>
@@ -454,7 +451,7 @@
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Ermöglicht einer App, Authentifizierungs-Token anzufordern"</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"Netzwerkstatus anzeigen"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Ermöglicht einer App, den Status aller Netzwerke anzuzeigen"</string>
-    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"Uneingeschränkter Internetzugriff"</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"uneingeschränkter Internetzugriff"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Ermöglicht einer App, Netzwerk-Sockets einzurichten"</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"Netzwerkeinstellungen und -verkehr ändern/abfangen"</string>
     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Ermöglicht einer App, Netzwerkeinstellungen zu ändern und Netzwerkverkehr abzufangen und zu überprüfen, um beispielsweise den Proxy und den Port eines beliebigen Zugriffspunkts zu ändern. Schädliche Apps können so Netzwerkpakete ohne Ihr Wissen überwachen, weiterleiten oder ändern."</string>
@@ -686,7 +683,7 @@
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Netzwerk gesperrt"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"PUK-Sperre auf SIM"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Weitere Informationen finden Sie in der Bedienungsanleitung oder wenden Sie sich an den Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Bitte PIN eingeben"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"PIN eingeben"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g> Mal falsch eingegeben. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>

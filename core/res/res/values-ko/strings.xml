@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"무선 끄기"</string>
     <string name="screen_lock" msgid="799094655496098153">"화면 잠금"</string>
     <string name="power_off" msgid="4266614107412865048">"종료"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"벨소리가 무음입니다."</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"벨소리가 진동입니다."</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"벨소리가 켜져 있습니다."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"종료 중..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"태블릿이 종료됩니다."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"휴대전화가 종료됩니다."</string>
@@ -157,8 +154,8 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"소리 켜짐"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"비행기 모드"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용 안함"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용중"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용중이 아님"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>

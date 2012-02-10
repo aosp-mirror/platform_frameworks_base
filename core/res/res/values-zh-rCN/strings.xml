@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"关闭收音机"</string>
     <string name="screen_lock" msgid="799094655496098153">"屏幕锁定"</string>
     <string name="power_off" msgid="4266614107412865048">"关机"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"振铃器关闭"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"振铃器振动"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"振铃器开启"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"您的手机会关机。"</string>
@@ -527,7 +524,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据"</string>
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"恢复出厂设置时，将擦除手机上的数据而不发送警告"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"设置设备全局代理"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"请设置在启用政策的情况下要使用的设备全局代理。只有第一设备管理员才可设置有效的全局代理。"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"请设置在启用规范的情况下要使用的设备全局代理。只有第一设备管理员才可设置有效的全局代理。"</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"设置锁定屏幕密码的有效期"</string>
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"控制锁定屏幕密码的更改频率"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"设置存储设备加密"</string>
