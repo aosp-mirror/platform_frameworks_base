@@ -56,6 +56,11 @@ public final class UserId {
         return getAppId(uid1) == getAppId(uid2);
     }
 
+    public static final boolean isIsolated(int uid) {
+        uid = getAppId(uid);
+        return uid >= Process.FIRST_ISOLATED_UID && uid <= Process.LAST_ISOLATED_UID;
+    }
+
     /**
      * Returns the user id for a given uid.
      * @hide

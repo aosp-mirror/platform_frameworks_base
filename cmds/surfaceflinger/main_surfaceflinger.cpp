@@ -20,6 +20,6 @@
 using namespace android;
 
 int main(int argc, char** argv) {
-    SurfaceFlinger::publishAndJoinThreadPool();
+    SurfaceFlinger::publishAndJoinThreadPool(true);
     return 0;
 }
