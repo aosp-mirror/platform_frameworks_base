@@ -143,6 +143,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final SecurityPolicy mSecurityPolicy;
 
+    private Service mUiAutomationService;
+
     /**
      * Handler for delayed event dispatch.
      */
@@ -494,19 +496,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
         // Hook the automation service up.
-        Service service = new Service(componentName, accessibilityServiceInfo, true);
-        service.onServiceConnected(componentName, listener.asBinder());
+        mUiAutomationService = new Service(componentName, accessibilityServiceInfo, true);
+        mUiAutomationService.onServiceConnected(componentName, listener.asBinder());
     }
 
     public void unregisterUiTestAutomationService(IEventListener listener) {
         synchronized (mLock) {
-            final int serviceCount = mServices.size();
-            for (int i = 0; i < serviceCount; i++) {
-                Service service = mServices.get(i);
-                if (service.mServiceInterface == listener && service.mIsAutomation) {
-                    // Automation service is not bound, so pretend it died to perform clean up.
-                    service.binderDied();
-                }
+            // Automation service is not bound, so pretend it died to perform clean up.
+            if (mUiAutomationService != null) {
+                mUiAutomationService.binderDied();
             }
         }
     }
@@ -741,7 +739,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Manages services by starting enabled ones and stopping disabled ones.
      */
     private void manageServicesLocked() {
-        unbindAutomationService();
+        // While the UI automation service is running it takes over.
+        if (mUiAutomationService != null) {
+            return;
+        }
         populateEnabledServicesLocked(mEnabledServices);
         final int enabledInstalledServicesCount = updateServicesStateLocked(mInstalledServices,
                 mEnabledServices);
@@ -764,21 +765,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (service.unbind()) {
                 i--;
                 count--;
-            }
-        }
-    }
-
-    /**
-     * Unbinds the automation service if such is running.
-     */
-    private void unbindAutomationService() {
-        List<Service> runningServices = mServices;
-        int runningServiceCount = mServices.size();
-        for (int i = 0; i < runningServiceCount; i++) {
-            Service service = runningServices.get(i);
-            if (service.mIsAutomation) {
-                 service.unbind();
-                 return;
             }
         }
     }
@@ -1248,6 +1234,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // We no longer have an automation service, so restore
                 // the state based on values in the settings database.
                 if (mIsAutomation) {
+                    mUiAutomationService = null;
                     handleAccessibilityEnabledSettingChangedLocked();
                 }
             }
