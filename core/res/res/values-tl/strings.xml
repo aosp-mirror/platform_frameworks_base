@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pinapayagan ang app na ilipat ang mga gawain sa foreground at background. Maaaring puwersahin ng nakakahamak na apps ang mga sarili nito sa harapan nang wala ang iyong pagkontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Pinapayagan ang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pagkilos ng iba pang apps."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"paganahin ang pag-debug ng app"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Pinapayagan ang app na i-on ang pag-debug para sa isa pang app. Maaari itong gamitin ng nakakahamak na apps upang i-off ang iba pang apps."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"baguhin ang iyong mga setting ng UI"</string>

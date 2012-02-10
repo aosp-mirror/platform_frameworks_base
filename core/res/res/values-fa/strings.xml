@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"به برنامه اجازه می‎دهد تا کارها را به پیش زمینه و پس زمینه منتقل کند. برنامه‎های مخرب می‎توانند بدون کنترل به اجبار خود را به جلو منتقل کنند."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"متوقف کردن برنامه‎های در حال اجرا"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"به برنامه اجازه می‎دهد تا کارها را حذف کند و برنامه‎های آنها را متوقف کند. برنامه‎های مخرب می‌توانند در اجرای برنامه‎های دیگر اختلال ایجاد ‎کنند."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"فعال کردن عیب‌یابی برنامه"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"به برنامه اجازه می‎دهد تا عیب‌یابی را برای برنامه‌ای دیگر فعال کند. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اجرای برنامه‎های دیگر را متوقف کنند."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"تغییر تنظیمات UI"</string>

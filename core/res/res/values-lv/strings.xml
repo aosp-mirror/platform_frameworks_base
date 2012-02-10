@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ļauj lietotnei pārvietot uzdevumus priekšplānā un fonā. Ļaunprātīgas lietotnes var tikt izvirzītas priekšplānā bez jūsu vadības."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"apturēt izmantoto lietotņu darbību"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Ļauj lietotnei noņemt uzdevumus un pārtraukt to lietotņu darbību. Ļaunprātīgas lietotnes var traucēt citu lietotņu darbību."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"iespējot lietotnes atkļūdošanu"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Ļauj lietotnei ieslēgt citas lietotnes atkļūdošanu. Ļaunprātīgas lietotnes to var izmantot, lai pārtrauktu citu lietotņu darbību."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"mainīt lietotāja saskarnes iestatījumus"</string>

@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дозволяє програмі переміщувати завдання в активні чи фонові вікна. Шкідливі програми можуть примусово ставати активними без вашого відома."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"зупиняти запущені програми"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозволяє програмі видаляти завдання та примусово припиняти роботу відповідних програм. Шкідливі програми можуть переривати роботу інших програм."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"вмикати налагодження програми"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дозволяє програмі вмикати налагодження для іншої програми. Шкідливі програми можуть використовувати це для примусового припинення роботи інших програм."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змін. налашт. інтерф. кор."</string>

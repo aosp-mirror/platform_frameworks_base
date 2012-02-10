@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Приложение сможет перемещать задачи в режим активного или фонового выполнения. Вредоносные программы смогут переводить себя в активный режим без вашего ведома."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"остановка запущенных приложений"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Приложение сможет удалять задачи и собственные программы. Вредоносное ПО при этом сможет нарушать работу других приложений."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"включение отладки приложений"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Приложение сможет включать отладку для другой программы. Вредоносное ПО сможет таким образом останавливать работу других приложений."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"изменять настройки пользовательского интерфейса"</string>

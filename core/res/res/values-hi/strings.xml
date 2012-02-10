@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"एप्लिकेशन को अग्रभूमि और पृष्ठभूमि में कार्यों को ले जाने देता है. दुर्भावनापूर्ण एप्लिकेशन आपके नियंत्रण के बिना स्वयं को बलपूर्वक आगे कर सकते हैं."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"चलने वाले एप्लिकेशन रोकें"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"किसी एप्‍लिकेशन को कार्यों को निकालने और उनके एप्‍लिकेशन समाप्त करने देता है. दुर्भावनापूर्ण एप्‍लिकेशन अन्‍य एप्‍लिकेशन का व्‍यवहार बाधित कर सकते हैं."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"एप्‍लिकेशन डीबग करना सक्षम करें"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"एप्लिकेशन को अन्य एप्लिकेशन के लिए डीबग किया जाना चालू करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग अन्य एप्लिकेशन को समाप्त करने के लिए कर सकते हैं."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"अपनी UI सेटिंग बदलें"</string>

@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillader, at appen kan flytte opgaver til forgrunden og baggrunden. Ondsindede apps kan tvinge sig selv i forgrunden uden din kontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stoppe kørsel af apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillader, at en app kan fjerne opgaver og lukke deres apps. Ondsindede apps kan forstyrre adfærden for andre apps."</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivere fejlretning af appen"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Tillader, at appen kan slå fejlretning til for en anden app. Ondsindede apps kan bruge dette til at afslutte andre apps."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>

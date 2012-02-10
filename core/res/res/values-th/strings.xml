@@ -215,6 +215,10 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"อนุญาตให้แอปพลิเคชันย้ายงานไปยังส่วนหน้าและพื้นหลัง แอปพลิเคชันที่เป็นอันตรายอาจบังคับตัวเองให้ไปที่ส่วนหน้าโดยไม่มีการควบคุมจากคุณ"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"หยุดแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"อนุญาตให้แอปพลิเคชันลบงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
+    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
+    <skip />
+    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"เปิดใช้งานการแก้ไขบกพร่องของแอปพลิเคชัน"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"อนุญาตให้แอปพลิเคชันเปิดการแก้ไขข้อบกพร่องสำหรับแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติการทำงานของแอปพลิเคชันอื่นๆ ได้"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"เปลี่ยนการตั้งค่า UI ของคุณ"</string>
