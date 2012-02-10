@@ -19,56 +19,50 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 
 /**
- * SparseArrays map longs to Objects.  Unlike a normal array of Objects,
+ * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
  * there can be gaps in the indices.  It is intended to be more efficient
  * than using a HashMap to map Longs to Objects.
- *
- * @hide
  */
-public class LongSparseArray<E> {
+public class LongSparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
 
+    private long[] mKeys;
+    private Object[] mValues;
+    private int mSize;
+
     /**
-     * Creates a new SparseArray containing no mappings.
+     * Creates a new LongSparseArray containing no mappings.
      */
     public LongSparseArray() {
         this(10);
     }
 
     /**
-     * Creates a new SparseArray containing no mappings that will not
+     * Creates a new LongSparseArray containing no mappings that will not
      * require any additional memory allocation to store the specified
      * number of mappings.
      */
     public LongSparseArray(int initialCapacity) {
-        initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
+        initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
 
         mKeys = new long[initialCapacity];
         mValues = new Object[initialCapacity];
         mSize = 0;
     }
-    
-    /**
-     * @return A copy of all keys contained in the sparse array.
-     */
-    public long[] getKeys() {
-        int length = mKeys.length;
-        long[] result = new long[length];
-        System.arraycopy(mKeys, 0, result, 0, length);
-        return result;
-    }
-    
-    /**
-     * Sets all supplied keys to the given unique value.
-     * @param keys Keys to set
-     * @param uniqueValue Value to set all supplied keys to
-     */
-    public void setValues(long[] keys, E uniqueValue) {
-        int length = keys.length;
-        for (int i = 0; i < length; i++) {
-            put(keys[i], uniqueValue);
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public LongSparseArray<E> clone() {
+        LongSparseArray<E> clone = null;
+        try {
+            clone = (LongSparseArray<E>) super.clone();
+            clone.mKeys = mKeys.clone();
+            clone.mValues = mValues.clone();
+        } catch (CloneNotSupportedException cnse) {
+            /* ignore */
         }
+        return clone;
     }
 
     /**
@@ -83,6 +77,7 @@ public class LongSparseArray<E> {
      * Gets the Object mapped from the specified key, or the specified Object
      * if no such mapping has been made.
      */
+    @SuppressWarnings("unchecked")
     public E get(long key, E valueIfKeyNotFound) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
@@ -114,6 +109,16 @@ public class LongSparseArray<E> {
         delete(key);
     }
 
+    /**
+     * Removes the mapping at the specified index.
+     */
+    public void removeAt(int index) {
+        if (mValues[index] != DELETED) {
+            mValues[index] = DELETED;
+            mGarbage = true;
+        }
+    }
+
     private void gc() {
         // Log.e("SparseArray", "gc start with " + mSize);
 
@@ -129,6 +134,7 @@ public class LongSparseArray<E> {
                 if (i != o) {
                     keys[o] = keys[i];
                     values[o] = val;
+                    values[i] = null;
                 }
 
                 o++;
@@ -168,7 +174,7 @@ public class LongSparseArray<E> {
             }
 
             if (mSize >= mKeys.length) {
-                int n = ArrayUtils.idealIntArraySize(mSize + 1);
+                int n = ArrayUtils.idealLongArraySize(mSize + 1);
 
                 long[] nkeys = new long[n];
                 Object[] nvalues = new Object[n];
@@ -194,7 +200,7 @@ public class LongSparseArray<E> {
     }
 
     /**
-     * Returns the number of key-value mappings that this SparseArray
+     * Returns the number of key-value mappings that this LongSparseArray
      * currently stores.
      */
     public int size() {
@@ -208,7 +214,7 @@ public class LongSparseArray<E> {
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the key from the <code>index</code>th key-value mapping that this
-     * SparseArray stores.
+     * LongSparseArray stores.
      */
     public long keyAt(int index) {
         if (mGarbage) {
@@ -221,8 +227,9 @@ public class LongSparseArray<E> {
     /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the value from the <code>index</code>th key-value mapping that this
-     * SparseArray stores.
+     * LongSparseArray stores.
      */
+    @SuppressWarnings("unchecked")
     public E valueAt(int index) {
         if (mGarbage) {
             gc();
@@ -234,7 +241,7 @@ public class LongSparseArray<E> {
     /**
      * Given an index in the range <code>0...size()-1</code>, sets a new
      * value for the <code>index</code>th key-value mapping that this
-     * SparseArray stores.
+     * LongSparseArray stores.
      */
     public void setValueAt(int index, E value) {
         if (mGarbage) {
@@ -278,7 +285,7 @@ public class LongSparseArray<E> {
     }
 
     /**
-     * Removes all key-value mappings from this SparseArray.
+     * Removes all key-value mappings from this LongSparseArray.
      */
     public void clear() {
         int n = mSize;
@@ -308,7 +315,7 @@ public class LongSparseArray<E> {
 
         int pos = mSize;
         if (pos >= mKeys.length) {
-            int n = ArrayUtils.idealIntArraySize(pos + 1);
+            int n = ArrayUtils.idealLongArraySize(pos + 1);
 
             long[] nkeys = new long[n];
             Object[] nvalues = new Object[n];
@@ -345,20 +352,4 @@ public class LongSparseArray<E> {
         else
             return ~high;
     }
-
-    private void checkIntegrity() {
-        for (int i = 1; i < mSize; i++) {
-            if (mKeys[i] <= mKeys[i - 1]) {
-                for (int j = 0; j < mSize; j++) {
-                    Log.e("FAIL", j + ": " + mKeys[j] + " -> " + mValues[j]);
-                }
-
-                throw new RuntimeException();
-            }
-        }
-    }
-
-    private long[] mKeys;
-    private Object[] mValues;
-    private int mSize;
 }
