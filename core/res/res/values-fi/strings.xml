@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Poista langaton yhteys käytöstä"</string>
     <string name="screen_lock" msgid="799094655496098153">"Näytön lukitus"</string>
     <string name="power_off" msgid="4266614107412865048">"Virta pois"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Soittoääni: mykistetty"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Soittoääni: värinä"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Soittoääni: normaali"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
@@ -778,7 +775,7 @@
     <string name="searchview_description_query" msgid="5911778593125355124">"Hakulauseke"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Tyhjennä kysely"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Lähetä kysely"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"Äänihaku"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"Puhehaku"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"kuukausi sitten"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Yli kuukausi sitten"</string>
   <plurals name="num_seconds_ago">

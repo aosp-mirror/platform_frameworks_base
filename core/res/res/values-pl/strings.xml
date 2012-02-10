@@ -137,12 +137,9 @@
     <string name="turn_off_radio" msgid="8198784949987062346">"Wyłącz połączenia bezprzewodowe"</string>
     <string name="screen_lock" msgid="799094655496098153">"Blokada ekranu"</string>
     <string name="power_off" msgid="4266614107412865048">"Wyłącz"</string>
-    <!-- no translation found for silent_mode_silent (319298163018473078) -->
-    <skip />
-    <!-- no translation found for silent_mode_vibrate (7072043388581551395) -->
-    <skip />
-    <!-- no translation found for silent_mode_ring (8592241816194074353) -->
-    <skip />
+    <string name="silent_mode_silent" msgid="319298163018473078">"Dzwonek wyłączony"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"Dzwonek z wibracjami"</string>
+    <string name="silent_mode_ring" msgid="8592241816194074353">"Dzwonek włączony"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefon zostanie wyłączony"</string>
@@ -688,16 +685,16 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Zapoznaj się z instrukcją obsługi lub skontaktuj się z działem obsługi klienta."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Karta SIM jest zablokowana."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Odblokowywanie karty SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Wzór odblokowania został nieprawidłowo narysowany <xliff:g id="NUMBER_0">%d</xliff:g> razy. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> sekund."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Wzór odblokowania został nieprawidłowo narysowany <xliff:g id="NUMBER_0">%d</xliff:g> razy. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Hasło zostało nieprawidłowo wprowadzone <xliff:g id="NUMBER_0">%d</xliff:g> razy. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Niepoprawnie wprowadzono kod PIN <xliff:g id="NUMBER_0">%d</xliff:g> razy. "\n\n"Spróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Wzór odblokowania został <xliff:g id="NUMBER_0">%d</xliff:g> razy narysowany nieprawidłowo. Po <xliff:g id="NUMBER_1">%d</xliff:g> kolejnych próbach zakończonych niepowodzeniem konieczne będzie odblokowanie tabletu przy użyciu danych logowania na konto Google."\n\n" Spróbuj ponownie za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Wzór odblokowania został narysowany nieprawidłowo <xliff:g id="NUMBER_0">%d</xliff:g> razy. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon trzeba będzie odblokować przez zalogowanie na koncie Google."\n\n" Spróbuj ponownie za <xliff:g id="NUMBER_2">%d</xliff:g> sekund."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Wzór odblokowania został narysowany nieprawidłowo <xliff:g id="NUMBER_0">%d</xliff:g> razy. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon trzeba będzie odblokować przez zalogowanie na koncie Google."\n\n" Spróbuj ponownie za <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Próbowano <xliff:g id="NUMBER_0">%d</xliff:g> razy nieprawidłowo odblokować tablet. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach tablet zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Próbowano <xliff:g id="NUMBER_0">%d</xliff:g> razy nieprawidłowo odblokować telefon. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Próbowano <xliff:g id="NUMBER">%d</xliff:g> razy nieprawidłowo odblokować tablet. Tablet zostanie teraz zresetowany do ustawień fabrycznych."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Próbowano <xliff:g id="NUMBER">%d</xliff:g> razy nieprawidłowo odblokować telefon. Telefon zostanie teraz zresetowany do ustawień fabrycznych."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekund."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sek."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomniałeś wzoru?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odblokowanie konta"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Zbyt wiele prób narysowania wzoru!"</string>
@@ -804,11 +801,11 @@
   </plurals>
   <plurals name="in_num_seconds">
     <item quantity="one" msgid="2729745560954905102">"za sekundę"</item>
-    <item quantity="other" msgid="1241926116443974687">"za <xliff:g id="COUNT">%d</xliff:g> sekund"</item>
+    <item quantity="other" msgid="1241926116443974687">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
   </plurals>
   <plurals name="in_num_minutes">
     <item quantity="one" msgid="8793095251325200395">"za minutę"</item>
-    <item quantity="other" msgid="3330713936399448749">"za <xliff:g id="COUNT">%d</xliff:g> minut"</item>
+    <item quantity="other" msgid="3330713936399448749">"za <xliff:g id="COUNT">%d</xliff:g> min."</item>
   </plurals>
   <plurals name="in_num_hours">
     <item quantity="one" msgid="7164353342477769999">"za godzinę"</item>
@@ -910,9 +907,9 @@
     <string name="aerr_application" msgid="932628488013092776">"Niestety, aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> została zatrzymana."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Niestety, proces <xliff:g id="PROCESS">%1$s</xliff:g> został zatrzymany."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="8339738283149696827">"Aplikacja <xliff:g id="APPLICATION">%2$s</xliff:g> nie odpowiada."\n\n"Czy chcesz ją zamknąć?"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"Aplikacja <xliff:g id="APPLICATION">%2$s</xliff:g> nie reaguje."\n\n"Czy chcesz ją zamknąć?"</string>
     <string name="anr_activity_process" msgid="7018289416670457797">"Funkcja <xliff:g id="ACTIVITY">%1$s</xliff:g> nie odpowiada."\n\n"Czy chcesz ją zakończyć?"</string>
-    <string name="anr_application_process" msgid="7208175830253210526">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> nie odpowiada. Czy chcesz ją zamknąć?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> nie reaguje. Czy chcesz ją zamknąć?"</string>
     <string name="anr_process" msgid="306819947562555821">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nie odpowiada."\n\n"Czy chcesz go zakończyć?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Zgłoś"</string>
@@ -1211,12 +1208,12 @@
     <string name="ssl_certificate" msgid="6510040486049237639">"Certyfikat zabezpieczeń"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certyfikat jest ważny."</string>
     <string name="issued_to" msgid="454239480274921032">"Wystawiony dla:"</string>
-    <string name="common_name" msgid="2233209299434172646">"Nazwa pospolita (CN):"</string>
+    <string name="common_name" msgid="2233209299434172646">"Nazwa (CN):"</string>
     <string name="org_name" msgid="6973561190762085236">"Organizacja:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Jednostka organizacyjna:"</string>
     <string name="issued_by" msgid="2647584988057481566">"Wystawca:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Ważność:"</string>
-    <string name="issued_on" msgid="5895017404361397232">"Data wystawienia:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Wystawiony:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Wygasa:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numer seryjny:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Odciski cyfrowe:"</string>
