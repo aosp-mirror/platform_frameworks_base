@@ -1506,6 +1506,14 @@
         <enum name="KEYCODE_CALENDAR" value="208" />
         <enum name="KEYCODE_MUSIC" value="209" />
         <enum name="KEYCODE_CALCULATOR" value="210" />
+        <enum name="KEYCODE_ZENKAKU_HANKAKU" value="211" />
+        <enum name="KEYCODE_EISU" value="212" />
+        <enum name="KEYCODE_MUHENKAN" value="213" />
+        <enum name="KEYCODE_HENKAN" value="214" />
+        <enum name="KEYCODE_KATAKANA_HIRAGANA" value="215" />
+        <enum name="KEYCODE_YEN" value="216" />
+        <enum name="KEYCODE_RO" value="217" />
+        <enum name="KEYCODE_KANA" value="218" />
     </attr>
 
     <!-- ***************************************************************** -->

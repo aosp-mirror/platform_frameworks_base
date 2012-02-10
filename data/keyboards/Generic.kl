@@ -104,16 +104,16 @@ key 81    NUMPAD_3
 key 82    NUMPAD_0
 key 83    NUMPAD_DOT
 # key 84 (undefined)
-# key 85 "KEY_ZENKAKUHANKAKU"
+key 85    ZENKAKU_HANKAKU
 key 86    BACKSLASH
 key 87    F11
 key 88    F12
-# key 89 "KEY_RO"
+key 89    RO
 # key 90 "KEY_KATAKANA"
 # key 91 "KEY_HIRAGANA"
-# key 92 "KEY_HENKAN"
-# key 93 "KEY_KATAKANAHIRAGANA"
-# key 94 "KEY_MUHENKAN"
+key 92    HENKAN
+key 93    KATAKANA_HIRAGANA
+key 94    MUHENKAN
 key 95    NUMPAD_COMMA
 key 96    NUMPAD_ENTER
 key 97    CTRL_RIGHT
@@ -141,9 +141,9 @@ key 117   NUMPAD_EQUALS
 key 119   BREAK
 # key 120 (undefined)
 key 121   NUMPAD_COMMA
-# key 122 "KEY_HANGEUL"
-# key 123 "KEY_HANJA"
-# key 124 "KEY_YEN"
+key 122   KANA
+key 123   EISU
+key 124   YEN
 key 125   META_LEFT
 key 126   META_RIGHT
 key 127   MENU              WAKE_DROPPED
