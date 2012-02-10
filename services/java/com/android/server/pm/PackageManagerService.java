@@ -164,13 +164,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_APP_DIR_OBSERVER = false;
     private static final boolean DEBUG_VERIFY = false;
 
-    static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
     private static final int NFC_UID = Process.NFC_UID;
-    static final int FIRST_APPLICATION_UID =
-        Process.FIRST_APPLICATION_UID;
-    static final int MAX_APPLICATION_UIDS = 1000;
 
     private static final boolean GET_CERTIFICATES = true;
 
@@ -874,18 +870,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         mSettings = new Settings();
         mSettings.addSharedUserLPw("android.uid.system",
                 Process.SYSTEM_UID, ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.phone",
-                MULTIPLE_APPLICATION_UIDS
-                        ? RADIO_UID : FIRST_APPLICATION_UID,
-                ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.log",
-                MULTIPLE_APPLICATION_UIDS
-                        ? LOG_UID : FIRST_APPLICATION_UID,
-                ApplicationInfo.FLAG_SYSTEM);
-        mSettings.addSharedUserLPw("android.uid.nfc",
-                MULTIPLE_APPLICATION_UIDS
-                        ? NFC_UID : FIRST_APPLICATION_UID,
-                ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID, ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLPw("android.uid.log", LOG_UID, ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLPw("android.uid.nfc", NFC_UID, ApplicationInfo.FLAG_SYSTEM);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -2273,8 +2260,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 comp = intent.getComponent();
             }
         }
-
-        final int userId = UserId.getUserId(Binder.getCallingUid());
 
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
@@ -6446,10 +6431,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // package that we deleted.
             if(deletedPkg) {
                 File restoreFile = new File(deletedPackage.mPath);
-                if (restoreFile == null) {
-                    Slog.e(TAG, "Failed allocating storage when restoring pkg : " + pkgName);
-                    return;
-                }
                 // Parse old package
                 boolean oldOnSd = isExternal(deletedPackage);
                 int oldParseFlags  = mDefParseFlags | PackageParser.PARSE_CHATTY |
