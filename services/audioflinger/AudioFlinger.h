@@ -401,6 +401,8 @@ private:
                     audio_format_t format() const { return mFormat; }
                     size_t      frameCount() const { return mFrameCount; }
                     void        wakeUp()    { mWaitWorkCV.broadcast(); }
+        // Should be "virtual status_t requestExitAndWait()" and override same
+        // method in Thread, but Thread::requestExitAndWait() is not yet virtual.
                     void        exit();
         virtual     bool        checkForNewParameters_l() = 0;
         virtual     status_t    setParameters(const String8& keyValuePairs);
@@ -532,7 +534,6 @@ private:
                     Vector<ConfigEvent>     mConfigEvents;
                     bool                    mStandby;
                     const audio_io_handle_t mId;
-                    bool                    mExiting;
                     Vector< sp<EffectChain> > mEffectChains;
                     uint32_t                mDevice;    // output device for PlaybackThread
                                                         // input + output devices for RecordThread
