@@ -717,6 +717,13 @@
         android:label="@string/permlab_removeTasks"
         android:description="@string/permdesc_removeTasks" />
 
+    <!-- @hide Change the screen compatibility mode of applications -->
+    <permission android:name="android.permission.SET_SCREEN_COMPATIBILITY"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_setScreenCompatibility"
+        android:description="@string/permdesc_setScreenCompatibility" />
+
     <!-- Allows an application to modify the current configuration, such
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"

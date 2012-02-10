@@ -45,7 +45,8 @@ public interface IServiceManager extends IInterface
      * Place a new @a service called @a name into the service
      * manager.
      */
-    public void addService(String name, IBinder service) throws RemoteException;
+    public void addService(String name, IBinder service, boolean allowIsolated)
+                throws RemoteException;
 
     /**
      * Return a list of all currently running services.

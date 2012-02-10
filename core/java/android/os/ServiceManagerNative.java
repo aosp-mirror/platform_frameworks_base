@@ -71,7 +71,8 @@ public abstract class ServiceManagerNative extends Binder implements IServiceMan
                 data.enforceInterface(IServiceManager.descriptor);
                 String name = data.readString();
                 IBinder service = data.readStrongBinder();
-                addService(name, service);
+                boolean allowIsolated = data.readInt() != 0;
+                addService(name, service, allowIsolated);
                 return true;
             }
     
@@ -136,13 +137,14 @@ class ServiceManagerProxy implements IServiceManager {
         return binder;
     }
 
-    public void addService(String name, IBinder service)
+    public void addService(String name, IBinder service, boolean allowIsolated)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IServiceManager.descriptor);
         data.writeString(name);
         data.writeStrongBinder(service);
+        data.writeInt(allowIsolated ? 1 : 0);
         mRemote.transact(ADD_SERVICE_TRANSACTION, data, reply, 0);
         reply.recycle();
         data.recycle();

@@ -532,6 +532,13 @@
         tasks and kill their apps. Malicious apps may disrupt
         the behavior of other apps.</string>
 
+    <!-- Title of an application permission, allowing control of app screen compatibility mode -->
+    <string name="permlab_setScreenCompatibility">set screen compatibility</string>
+    <!-- Description of an application permission, allowing control of app screen compatibility mode -->
+    <string name="permdesc_setScreenCompatibility">Allows the app to control the
+        screen compatibility mode of other applications.  Malicious applications may
+        break the behavior of other applications.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setDebugApp">enable app debugging</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

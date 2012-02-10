@@ -47,7 +47,8 @@ public:
      * Register a service.
      */
     virtual status_t            addService( const String16& name,
-                                            const sp<IBinder>& service) = 0;
+                                            const sp<IBinder>& service,
+                                            bool allowIsolated = false) = 0;
 
     /**
      * Return list of all existing services.
