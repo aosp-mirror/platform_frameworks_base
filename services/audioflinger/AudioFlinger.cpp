@@ -998,7 +998,7 @@ AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, audio
         mChannelCount(0),
         mFrameSize(1), mFormat(AUDIO_FORMAT_INVALID),
         mParamStatus(NO_ERROR),
-        mStandby(false), mId(id), mExiting(false),
+        mStandby(false), mId(id),
         mDevice(device),
         mDeathRecipient(new PMDeathRecipient(this))
 {
@@ -1017,17 +1017,23 @@ AudioFlinger::ThreadBase::~ThreadBase()
 
 void AudioFlinger::ThreadBase::exit()
 {
-    // keep a strong ref on ourself so that we won't get
-    // destroyed in the middle of requestExitAndWait()
-    sp <ThreadBase> strongMe = this;
-
     ALOGV("ThreadBase::exit");
     {
+        // This lock prevents the following race in thread (uniprocessor for illustration):
+        //  if (!exitPending()) {
+        //      // context switch from here to exit()
+        //      // exit() calls requestExit(), what exitPending() observes
+        //      // exit() calls signal(), which is dropped since no waiters
+        //      // context switch back from exit() to here
+        //      mWaitWorkCV.wait(...);
+        //      // now thread is hung
+        //  }
         AutoMutex lock(mLock);
-        mExiting = true;
         requestExit();
         mWaitWorkCV.signal();
     }
+    // When Thread::requestExitAndWait is made virtual and this method is renamed to
+    // "virtual status_t requestExitAndWait()", replace by "return Thread::requestExitAndWait();"
     requestExitAndWait();
 }
 
@@ -4516,7 +4522,7 @@ status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrac
         ALOGV("Signal record thread");
         mWaitWorkCV.signal();
         // do not wait for mStartStopCond if exiting
-        if (mExiting) {
+        if (exitPending()) {
             mActiveTrack.clear();
             status = INVALID_OPERATION;
             goto startError;
@@ -4543,7 +4549,7 @@ void AudioFlinger::RecordThread::stop(RecordThread::RecordTrack* recordTrack) {
         if (mActiveTrack != 0 && recordTrack == mActiveTrack.get()) {
             mActiveTrack->mState = TrackBase::PAUSING;
             // do not wait for mStartStopCond if exiting
-            if (mExiting) {
+            if (exitPending()) {
                 return;
             }
             mStartStopCond.wait(mLock);
@@ -4989,6 +4995,8 @@ status_t AudioFlinger::closeOutput(audio_io_handle_t output)
         mPlaybackThreads.removeItem(output);
     }
     thread->exit();
+    // The thread entity (active unit of execution) is no longer running here,
+    // but the ThreadBase container still exists.
 
     if (thread->type() != ThreadBase::DUPLICATING) {
         AudioStreamOut *out = thread->clearOutput();
@@ -5132,6 +5140,8 @@ status_t AudioFlinger::closeInput(audio_io_handle_t input)
         mRecordThreads.removeItem(input);
     }
     thread->exit();
+    // The thread entity (active unit of execution) is no longer running here,
+    // but the ThreadBase container still exists.
 
     AudioStreamIn *in = thread->clearInput();
     assert(in != NULL);
