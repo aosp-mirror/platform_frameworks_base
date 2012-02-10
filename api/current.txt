@@ -21600,6 +21600,26 @@ package android.util {
     method public void println(java.lang.String);
   }
 
+  public class LongSparseArray implements java.lang.Cloneable {
+    ctor public LongSparseArray();
+    ctor public LongSparseArray(int);
+    method public void append(long, E);
+    method public void clear();
+    method public android.util.LongSparseArray<E> clone();
+    method public void delete(long);
+    method public E get(long);
+    method public E get(long, E);
+    method public int indexOfKey(long);
+    method public int indexOfValue(E);
+    method public long keyAt(int);
+    method public void put(long, E);
+    method public void remove(long);
+    method public void removeAt(int);
+    method public void setValueAt(int, E);
+    method public int size();
+    method public E valueAt(int);
+  }
+
   public class LruCache {
     ctor public LruCache(int);
     method protected V create(K);
