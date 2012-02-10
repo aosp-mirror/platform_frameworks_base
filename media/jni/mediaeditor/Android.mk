@@ -57,6 +57,7 @@ LOCAL_SHARED_LIBRARIES := \
     libaudioflinger \
     libbinder \
     libstagefright \
+    libstagefright_foundation \
     libstagefright_omx \
     libgui \
     libvideoeditorplayer
