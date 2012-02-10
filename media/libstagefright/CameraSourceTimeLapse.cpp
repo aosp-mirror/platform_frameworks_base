@@ -20,9 +20,9 @@
 #include <binder/IPCThreadState.h>
 #include <binder/MemoryBase.h>
 #include <binder/MemoryHeapBase.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/CameraSourceTimeLapse.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 #include <camera/Camera.h>
 #include <camera/CameraParameters.h>

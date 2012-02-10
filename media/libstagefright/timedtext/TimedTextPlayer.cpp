@@ -18,8 +18,8 @@
 #define LOG_TAG "TimedTextPlayer"
 #include <utils/Log.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/MediaPlayerInterface.h>
 

@@ -35,7 +35,7 @@
 #include <binder/ProcessState.h>
 #include <ui/FramebufferNativeWindow.h>
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
@@ -475,7 +475,7 @@ sp<MediaRecorder> SurfaceMediaSourceGLTest::setUpMediaRecorder(int fd, int video
     mr->setVideoFrameRate(fps);
     mr->prepare();
     ALOGV("Starting MediaRecorder...");
-    CHECK_EQ(OK, mr->start());
+    CHECK_EQ((status_t)OK, mr->start());
     return mr;
 }
 
@@ -757,7 +757,7 @@ TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuYV12BufferNpotWriteMediaS
 
     ASSERT_EQ(NO_ERROR, native_window_api_disconnect(mANW.get(), NATIVE_WINDOW_API_CPU));
     ALOGV("Stopping MediaRecorder...");
-    CHECK_EQ(OK, mr->stop());
+    CHECK_EQ((status_t)OK, mr->stop());
     mr.clear();
     close(fd);
 }
@@ -886,7 +886,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaSameImageEachBufNpotWrite) {
     mEglSurface = EGL_NO_SURFACE;
 
     ALOGV("Stopping MediaRecorder...");
-    CHECK_EQ(OK, mr->stop());
+    CHECK_EQ((status_t)OK, mr->stop());
     mr.clear();
     close(fd);
 }
@@ -929,7 +929,7 @@ TEST_F(SurfaceMediaSourceGLTest, EncodingFromGLRgbaDiffImageEachBufNpotWrite) {
     mEglSurface = EGL_NO_SURFACE;
 
     ALOGV("Stopping MediaRecorder...");
-    CHECK_EQ(OK, mr->stop());
+    CHECK_EQ((status_t)OK, mr->stop());
     mr.clear();
     close(fd);
 }

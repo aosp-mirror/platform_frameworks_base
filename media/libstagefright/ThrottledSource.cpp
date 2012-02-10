@@ -16,7 +16,7 @@
 
 #include "include/ThrottledSource.h"
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 
 namespace android {
 

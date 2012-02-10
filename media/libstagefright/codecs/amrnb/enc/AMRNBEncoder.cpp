@@ -18,8 +18,8 @@
 
 #include "gsmamr_enc.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -210,7 +210,7 @@ status_t AMRNBEncoder::read(
     }
 
     MediaBuffer *buffer;
-    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), OK);
+    CHECK_EQ(mBufferGroup->acquire_buffer(&buffer), (status_t)OK);
 
     uint8_t *outPtr = (uint8_t *)buffer->data();
 

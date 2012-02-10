@@ -24,6 +24,7 @@
 #include <binder/IServiceManager.h>
 
 #include <media/IMediaPlayerService.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/AACWriter.h>
@@ -31,7 +32,6 @@
 #include <media/stagefright/CameraSourceTimeLapse.h>
 #include <media/stagefright/MPEG2TSWriter.h>
 #include <media/stagefright/MPEG4Writer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
@@ -241,8 +241,8 @@ status_t StagefrightRecorder::setOutputFile(const char *path) {
 status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t length) {
     ALOGV("setOutputFile: %d, %lld, %lld", fd, offset, length);
     // These don't make any sense, do they?
-    CHECK_EQ(offset, 0);
-    CHECK_EQ(length, 0);
+    CHECK_EQ(offset, 0ll);
+    CHECK_EQ(length, 0ll);
 
     if (fd < 0) {
         ALOGE("Invalid file descriptor: %d", fd);
@@ -734,7 +734,7 @@ status_t StagefrightRecorder::prepare() {
 }
 
 status_t StagefrightRecorder::start() {
-    CHECK(mOutputFd >= 0);
+    CHECK_GE(mOutputFd, 0);
 
     if (mWriter != NULL) {
         ALOGE("File writer is not avaialble");
@@ -837,7 +837,7 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
     }
 
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
     sp<MediaSource> audioEncoder =
         OMXCodec::Create(client.interface(), encMeta,
@@ -850,9 +850,9 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
 status_t StagefrightRecorder::startAACRecording() {
     // FIXME:
     // Add support for OUTPUT_FORMAT_AAC_ADIF
-    CHECK(mOutputFormat == OUTPUT_FORMAT_AAC_ADTS);
+    CHECK_EQ(mOutputFormat, OUTPUT_FORMAT_AAC_ADTS);
 
-    CHECK(mAudioEncoder == AUDIO_ENCODER_AAC);
+    CHECK_EQ(mAudioEncoder, AUDIO_ENCODER_AAC);
     CHECK(mAudioSource != AUDIO_SOURCE_CNT);
 
     mWriter = new AACWriter(mOutputFd);
@@ -1386,7 +1386,7 @@ status_t StagefrightRecorder::setupVideoEncoder(
     }
 
     OMXClient client;
-    CHECK_EQ(client.connect(), OK);
+    CHECK_EQ(client.connect(), (status_t)OK);
 
     uint32_t encoder_flags = 0;
     if (mIsMetaDataStoredInVideoBuffers) {

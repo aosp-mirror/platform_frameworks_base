@@ -21,6 +21,7 @@
 
 #include <arpa/inet.h>
 #include <utils/String8.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/Utils.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaSource.h>
@@ -28,7 +29,6 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaDebug.h>
 #include <dlfcn.h>
 
 #include <utils/Errors.h>

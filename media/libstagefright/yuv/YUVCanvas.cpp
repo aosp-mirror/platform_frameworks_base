@@ -17,7 +17,7 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "YUVCanvas"
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/YUVCanvas.h>
 #include <media/stagefright/YUVImage.h>
 #include <ui/Rect.h>

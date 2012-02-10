@@ -24,8 +24,8 @@
 #include <OMX_Component.h>
 
 #include <binder/IMemory.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/HardwareAPI.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
 namespace android {
@@ -91,11 +91,11 @@ OMXNodeInstance::OMXNodeInstance(
 }
 
 OMXNodeInstance::~OMXNodeInstance() {
-    CHECK_EQ(mHandle, NULL);
+    CHECK(mHandle == NULL);
 }
 
 void OMXNodeInstance::setHandle(OMX::node_id node_id, OMX_HANDLETYPE handle) {
-    CHECK_EQ(mHandle, NULL);
+    CHECK(mHandle == NULL);
     mNodeID = node_id;
     mHandle = handle;
 }

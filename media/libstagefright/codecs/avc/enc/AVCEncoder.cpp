@@ -24,8 +24,8 @@
 #include "avcenc_int.h"
 #include "OMX_Video.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -417,7 +417,7 @@ status_t AVCEncoder::read(
     *out = NULL;
 
     MediaBuffer *outputBuffer;
-    CHECK_EQ(OK, mGroup->acquire_buffer(&outputBuffer));
+    CHECK_EQ((status_t)OK, mGroup->acquire_buffer(&outputBuffer));
     uint8_t *outPtr = (uint8_t *) outputBuffer->data();
     uint32_t dataLength = outputBuffer->size();
 
@@ -557,9 +557,9 @@ status_t AVCEncoder::read(
     encoderStatus = PVAVCEncodeNAL(mHandle, outPtr, &dataLength, &type);
     if (encoderStatus == AVCENC_SUCCESS) {
         outputBuffer->meta_data()->setInt32(kKeyIsSyncFrame, mIsIDRFrame);
-        CHECK_EQ(NULL, PVAVCEncGetOverrunBuffer(mHandle));
+        CHECK(NULL == PVAVCEncGetOverrunBuffer(mHandle));
     } else if (encoderStatus == AVCENC_PICTURE_READY) {
-        CHECK_EQ(NULL, PVAVCEncGetOverrunBuffer(mHandle));
+        CHECK(NULL == PVAVCEncGetOverrunBuffer(mHandle));
         if (mIsIDRFrame) {
             outputBuffer->meta_data()->setInt32(kKeyIsSyncFrame, mIsIDRFrame);
             mIsIDRFrame = 0;

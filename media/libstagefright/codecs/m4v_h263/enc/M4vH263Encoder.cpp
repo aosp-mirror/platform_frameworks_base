@@ -23,8 +23,8 @@
 #include "mp4enc_api.h"
 #include "OMX_Video.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -379,7 +379,7 @@ status_t M4vH263Encoder::read(
     *out = NULL;
 
     MediaBuffer *outputBuffer;
-    CHECK_EQ(OK, mGroup->acquire_buffer(&outputBuffer));
+    CHECK_EQ((status_t)OK, mGroup->acquire_buffer(&outputBuffer));
     uint8_t *outPtr = (uint8_t *) outputBuffer->data();
     int32_t dataLength = outputBuffer->size();
 
@@ -467,7 +467,7 @@ status_t M4vH263Encoder::read(
         mInputBuffer = NULL;
         return UNKNOWN_ERROR;
     }
-    CHECK_EQ(NULL, PVGetOverrunBuffer(mHandle));
+    CHECK(NULL == PVGetOverrunBuffer(mHandle));
     if (hintTrack.CodeType == 0) {  // I-frame serves as sync frame
         outputBuffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
     }

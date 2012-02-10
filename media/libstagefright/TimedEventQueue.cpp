@@ -31,7 +31,7 @@
 #include <sys/prctl.h>
 #include <sys/time.h>
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 
 #ifdef ANDROID_SIMULATOR
 #include <jni.h>
