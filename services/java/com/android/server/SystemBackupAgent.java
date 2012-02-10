@@ -44,12 +44,16 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String WALLPAPER_IMAGE_FILENAME = "wallpaper";
     private static final String WALLPAPER_INFO_FILENAME = "wallpaper_info.xml";
 
-    private static final String WALLPAPER_IMAGE_DIR = "/data/data/com.android.settings/files";
-    private static final String WALLPAPER_IMAGE = WALLPAPER_IMAGE_DIR + "/" + WALLPAPER_IMAGE_FILENAME;
+    // TODO: Will need to change if backing up non-primary user's wallpaper
+    private static final String WALLPAPER_IMAGE_DIR = "/data/system/users/0";
+    private static final String WALLPAPER_IMAGE = WallpaperBackupHelper.WALLPAPER_IMAGE;
 
-    private static final String WALLPAPER_INFO_DIR = "/data/system";
-    private static final String WALLPAPER_INFO = WALLPAPER_INFO_DIR + "/" +  WALLPAPER_INFO_FILENAME;
-
+    // TODO: Will need to change if backing up non-primary user's wallpaper
+    private static final String WALLPAPER_INFO_DIR = "/data/system/users/0";
+    private static final String WALLPAPER_INFO = WallpaperBackupHelper.WALLPAPER_INFO;
+    // Use old keys to keep legacy data compatibility and avoid writing two wallpapers
+    private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;
+    private static final String WALLPAPER_INFO_KEY = WallpaperBackupHelper.WALLPAPER_INFO_KEY;
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
@@ -58,13 +62,15 @@ public class SystemBackupAgent extends BackupAgentHelper {
         WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
                 Context.WALLPAPER_SERVICE);
         String[] files = new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO };
-        if (wallpaper != null && wallpaper.mName != null && wallpaper.mName.length() > 0) {
+        String[] keys = new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY };
+        if (wallpaper != null && wallpaper.getName() != null && wallpaper.getName().length() > 0) {
             // When the wallpaper has a name, back up the info by itself.
             // TODO: Don't rely on the innards of the service object like this!
             // TODO: Send a delete for any stored wallpaper image in this case?
             files = new String[] { WALLPAPER_INFO };
+            keys = new String[] { WALLPAPER_INFO_KEY };
         }
-        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files));
+        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
         super.onBackup(oldState, data, newState);
     }
 
@@ -90,9 +96,11 @@ public class SystemBackupAgent extends BackupAgentHelper {
             throws IOException {
         // On restore, we also support a previous data schema "system_files"
         addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this,
-                new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO }));
+                new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
+                new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} ));
         addHelper("system_files", new WallpaperBackupHelper(SystemBackupAgent.this,
-                new String[] { WALLPAPER_IMAGE }));
+                new String[] { WALLPAPER_IMAGE },
+                new String[] { WALLPAPER_IMAGE_KEY} ));
 
         try {
             super.onRestore(data, appVersionCode, newState);

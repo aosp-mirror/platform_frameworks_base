@@ -370,6 +370,12 @@ public class ContextWrapper extends Context {
         return mBase.bindService(service, conn, flags);
     }
 
+    /** @hide */
+    @Override
+    public boolean bindService(Intent service, ServiceConnection conn, int flags, int userId) {
+        return mBase.bindService(service, conn, flags, userId);
+    }
+
     @Override
     public void unbindService(ServiceConnection conn) {
         mBase.unbindService(conn);

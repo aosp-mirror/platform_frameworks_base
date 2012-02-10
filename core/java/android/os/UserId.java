@@ -73,6 +73,10 @@ public final class UserId {
         }
     }
 
+    public static final int getCallingUserId() {
+        return getUserId(Binder.getCallingUid());
+    }
+
     /**
      * Returns the uid that is composed from the userId and the appId.
      * @hide

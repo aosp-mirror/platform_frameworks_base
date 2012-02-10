@@ -166,7 +166,7 @@ public interface IActivityManager extends IInterface {
             int id, Notification notification, boolean keepNotification) throws RemoteException;
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType,
-            IServiceConnection connection, int flags) throws RemoteException;
+            IServiceConnection connection, int flags, int userId) throws RemoteException;
     public boolean unbindService(IServiceConnection connection) throws RemoteException;
     public void publishService(IBinder token,
             Intent intent, IBinder service) throws RemoteException;

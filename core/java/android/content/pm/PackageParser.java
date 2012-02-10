@@ -3380,7 +3380,8 @@ public class PackageParser {
 
     public static final ServiceInfo generateServiceInfo(Service s, int flags, int userId) {
         if (s == null) return null;
-        if (!copyNeeded(flags, s.owner, s.metaData) && userId == 0) {
+        if (!copyNeeded(flags, s.owner, s.metaData)
+                && userId == UserId.getUserId(s.info.applicationInfo.uid)) {
             return s.info;
         }
         // Make shallow copies so we can store the metadata safely
