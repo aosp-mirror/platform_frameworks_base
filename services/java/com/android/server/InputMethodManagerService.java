@@ -101,6 +101,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,6 +155,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final IWindowManager mIWindowManager;
     final HandlerCaller mCaller;
     private final InputMethodFileManager mFileManager;
+    private final InputMethodAndSubtypeListManager mImListManager;
 
     final InputBindResult mNoBinding = new InputBindResult(null, null, -1);
 
@@ -555,6 +557,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             mFileManager = new InputMethodFileManager(mMethodMap);
         }
+        mImListManager = new InputMethodAndSubtypeListManager(context, this);
 
         (new MyPackageMonitor()).register(mContext, true);
 
@@ -1693,6 +1696,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
+    public boolean switchToNextInputMethod(IBinder token, boolean onlyCurrentIme) {
+        synchronized (mMethodMap) {
+            final ImeSubtypeListItem nextSubtype = mImListManager.getNextInputMethod(
+                    onlyCurrentIme, mMethodMap.get(mCurMethodId), mCurrentSubtype);
+            if (nextSubtype == null) {
+                return false;
+            }
+            setInputMethodWithSubtypeId(token, nextSubtype.mImi.getId(), nextSubtype.mSubtypeId);
+            return true;
+        }
+    }
+
+    @Override
     public InputMethodSubtype getLastInputMethodSubtype() {
         synchronized (mMethodMap) {
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
@@ -2109,62 +2125,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             hideInputMethodMenuLocked();
 
-            final TreeMap<InputMethodInfo, List<InputMethodSubtype>> sortedImmis =
-                    new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
-                            new Comparator<InputMethodInfo>() {
-                                @Override
-                                public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
-                                    if (imi2 == null) return 0;
-                                    if (imi1 == null) return 1;
-                                    if (pm == null) {
-                                        return imi1.getId().compareTo(imi2.getId());
-                                    }
-                                    CharSequence imiId1 = imi1.loadLabel(pm) + "/" + imi1.getId();
-                                    CharSequence imiId2 = imi2.loadLabel(pm) + "/" + imi2.getId();
-                                    return imiId1.toString().compareTo(imiId2.toString());
-                                }
-                            });
-
-            sortedImmis.putAll(immis);
-
-            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<ImeSubtypeListItem>();
-
-            for (InputMethodInfo imi : sortedImmis.keySet()) {
-                if (imi == null) continue;
-                List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
-                HashSet<String> enabledSubtypeSet = new HashSet<String>();
-                for (InputMethodSubtype subtype: explicitlyOrImplicitlyEnabledSubtypeList) {
-                    enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
-                }
-                ArrayList<InputMethodSubtype> subtypes = getSubtypes(imi);
-                final CharSequence imeLabel = imi.loadLabel(pm);
-                if (showSubtypes && enabledSubtypeSet.size() > 0) {
-                    final int subtypeCount = imi.getSubtypeCount();
-                    if (DEBUG) {
-                        Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
-                    }
-                    for (int j = 0; j < subtypeCount; ++j) {
-                        final InputMethodSubtype subtype = imi.getSubtypeAt(j);
-                        final String subtypeHashCode = String.valueOf(subtype.hashCode());
-                        // We show all enabled IMEs and subtypes when an IME is shown.
-                        if (enabledSubtypeSet.contains(subtypeHashCode)
-                                && ((mInputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
-                            final CharSequence subtypeLabel =
-                                    subtype.overridesImplicitlyEnabledSubtype() ? null
-                                            : subtype.getDisplayName(context, imi.getPackageName(),
-                                                    imi.getServiceInfo().applicationInfo);
-                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j));
-
-                            // Removing this subtype from enabledSubtypeSet because we no longer
-                            // need to add an entry of this subtype to imList to avoid duplicated
-                            // entries.
-                            enabledSubtypeSet.remove(subtypeHashCode);
-                        }
-                    }
-                } else {
-                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID));
-                }
-            }
+            final List<ImeSubtypeListItem> imList =
+                    mImListManager.getSortedInputMethodAndSubtypeList(
+                            showSubtypes, mInputShown, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
                 final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtype();
@@ -2783,6 +2746,117 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             return false;
+        }
+    }
+
+    private static class InputMethodAndSubtypeListManager {
+        private final Context mContext;
+        private final PackageManager mPm;
+        private final InputMethodManagerService mImms;
+        public InputMethodAndSubtypeListManager(Context context, InputMethodManagerService imms) {
+            mContext = context;
+            mPm = context.getPackageManager();
+            mImms = imms;
+        }
+
+        private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
+                new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                        new Comparator<InputMethodInfo>() {
+                            @Override
+                            public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
+                                if (imi2 == null) return 0;
+                                if (imi1 == null) return 1;
+                                if (mPm == null) {
+                                    return imi1.getId().compareTo(imi2.getId());
+                                }
+                                CharSequence imiId1 = imi1.loadLabel(mPm) + "/" + imi1.getId();
+                                CharSequence imiId2 = imi2.loadLabel(mPm) + "/" + imi2.getId();
+                                return imiId1.toString().compareTo(imiId2.toString());
+                            }
+                        });
+
+        public ImeSubtypeListItem getNextInputMethod(
+                boolean onlyCurrentIme, InputMethodInfo imi, InputMethodSubtype subtype) {
+            if (imi == null) {
+                return null;
+            }
+            final List<ImeSubtypeListItem> imList = getSortedInputMethodAndSubtypeList();
+            if (imList.size() <= 1) {
+                return null;
+            }
+            final int N = imList.size();
+            final int currentSubtypeId = subtype != null
+                    ? mImms.getSubtypeIdFromHashCode(imi, subtype.hashCode())
+                    : NOT_A_SUBTYPE_ID;
+            for (int i = 0; i < N; ++i) {
+                final ImeSubtypeListItem isli = imList.get(i);
+                if (isli.mImi.equals(imi) && isli.mSubtypeId == currentSubtypeId) {
+                    if (!onlyCurrentIme) {
+                        return imList.get((i + 1) % N);
+                    }
+                    for (int j = 0; j < N - 1; ++j) {
+                        final ImeSubtypeListItem candidate = imList.get((i + j + 1) % N);
+                        if (candidate.mImi.equals(imi)) {
+                            return candidate;
+                        }
+                    }
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
+            return getSortedInputMethodAndSubtypeList(true, false, false);
+        }
+
+        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(boolean showSubtypes,
+                boolean inputShown, boolean isScreenLocked) {
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<ImeSubtypeListItem>();
+            final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
+                    mImms.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked();
+            if (immis == null || immis.size() == 0) {
+                return Collections.emptyList();
+            }
+            mSortedImmis.clear();
+            mSortedImmis.putAll(immis);
+            for (InputMethodInfo imi : mSortedImmis.keySet()) {
+                if (imi == null) continue;
+                List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
+                HashSet<String> enabledSubtypeSet = new HashSet<String>();
+                for (InputMethodSubtype subtype: explicitlyOrImplicitlyEnabledSubtypeList) {
+                    enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
+                }
+                ArrayList<InputMethodSubtype> subtypes = getSubtypes(imi);
+                final CharSequence imeLabel = imi.loadLabel(mPm);
+                if (showSubtypes && enabledSubtypeSet.size() > 0) {
+                    final int subtypeCount = imi.getSubtypeCount();
+                    if (DEBUG) {
+                        Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
+                    }
+                    for (int j = 0; j < subtypeCount; ++j) {
+                        final InputMethodSubtype subtype = imi.getSubtypeAt(j);
+                        final String subtypeHashCode = String.valueOf(subtype.hashCode());
+                        // We show all enabled IMEs and subtypes when an IME is shown.
+                        if (enabledSubtypeSet.contains(subtypeHashCode)
+                                && ((inputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
+                            final CharSequence subtypeLabel =
+                                    subtype.overridesImplicitlyEnabledSubtype() ? null
+                                            : subtype.getDisplayName(mContext, imi.getPackageName(),
+                                                    imi.getServiceInfo().applicationInfo);
+                            imList.add(new ImeSubtypeListItem(imeLabel, subtypeLabel, imi, j));
+
+                            // Removing this subtype from enabledSubtypeSet because we no longer
+                            // need to add an entry of this subtype to imList to avoid duplicated
+                            // entries.
+                            enabledSubtypeSet.remove(subtypeHashCode);
+                        }
+                    }
+                } else {
+                    imList.add(new ImeSubtypeListItem(imeLabel, null, imi, NOT_A_SUBTYPE_ID));
+                }
+            }
+            return imList;
         }
     }
 

@@ -1593,6 +1593,27 @@ public final class InputMethodManager {
     }
 
     /**
+     * Force switch to the next input method and subtype. If there is no IME enabled except
+     * current IME and subtype, do nothing.
+     * @param imeToken Supplies the identifying token given to an input method when it was started,
+     * which allows it to perform this operation on itself.
+     * @param onlyCurrentIme if true, the framework will find the next subtype which
+     * belongs to the current IME
+     * @return true if the current input method and subtype was successfully switched to the next
+     * input method and subtype.
+     */
+    public boolean switchToNextInputMethod(IBinder imeToken, boolean onlyCurrentIme) {
+        synchronized (mH) {
+            try {
+                return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
+    /**
      * Set additional input method subtypes. Only a process which shares the same uid with the IME
      * can add additional input method subtypes to the IME.
      * Please note that a subtype's status is stored in the system.
