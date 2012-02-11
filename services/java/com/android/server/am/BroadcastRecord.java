@@ -59,7 +59,7 @@ class BroadcastRecord extends Binder {
     IBinder receiver;       // who is currently running, null if none.
     int state;
     int anrCount;           // has this broadcast record hit any ANRs?
-    ActivityManagerService.BroadcastQueue queue;   // the outbound queue handling this broadcast
+    BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
@@ -162,7 +162,7 @@ class BroadcastRecord extends Binder {
         }
     }
 
-    BroadcastRecord(ActivityManagerService.BroadcastQueue _queue,
+    BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             int _callingPid, int _callingUid, String _requiredPermission,
             List _receivers, IIntentReceiver _resultTo, int _resultCode,

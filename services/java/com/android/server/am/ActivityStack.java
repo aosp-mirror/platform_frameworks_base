@@ -283,13 +283,13 @@ final class ActivityStack {
 
     private int mCurrentUser;
 
-    static final int SLEEP_TIMEOUT_MSG = 8;
-    static final int PAUSE_TIMEOUT_MSG = 9;
-    static final int IDLE_TIMEOUT_MSG = 10;
-    static final int IDLE_NOW_MSG = 11;
-    static final int LAUNCH_TIMEOUT_MSG = 16;
-    static final int DESTROY_TIMEOUT_MSG = 17;
-    static final int RESUME_TOP_ACTIVITY_MSG = 19;
+    static final int SLEEP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG;
+    static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
+    static final int IDLE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
+    static final int IDLE_NOW_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
+    static final int LAUNCH_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
+    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
+    static final int RESUME_TOP_ACTIVITY_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
     
     final Handler mHandler = new Handler() {
         //public Handler() {

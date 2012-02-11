@@ -41,7 +41,7 @@ public class CompatModePackages {
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
-    private static final int MSG_WRITE = 1;
+    private static final int MSG_WRITE = ActivityManagerService.FIRST_COMPAT_MODE_MSG;
 
     private final Handler mHandler = new Handler() {
         @Override public void handleMessage(Message msg) {
