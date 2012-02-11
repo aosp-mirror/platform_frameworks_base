@@ -258,7 +258,7 @@ private:
     void setVideoSource(sp<MediaSource> source);
     status_t initVideoDecoder(uint32_t flags = 0);
 
-    void addTextSource(sp<MediaSource> source);
+    void addTextSource(const sp<MediaSource>& source);
 
     void onStreamDone();
 
