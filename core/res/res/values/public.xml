@@ -1293,6 +1293,7 @@
   <java-symbol type="array" name="config_usbHostBlacklist" />
   <java-symbol type="array" name="config_serialPorts" />
   <java-symbol type="array" name="radioAttributes" />
+  <java-symbol type="array" name="config_oemUsbModeOverride" />
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
   <java-symbol type="bool" name="config_sf_limitedAlpha" />
