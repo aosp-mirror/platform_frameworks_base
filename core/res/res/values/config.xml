@@ -65,6 +65,17 @@
          master volume stream and nothing else . -->
     <bool name="config_useMasterVolume">false</bool>
 
+    <!-- Array of integer pairs controlling the rate at which the master volume changes
+         in response to volume up and down key events.
+         The first integer of each pair is compared against the current master volume
+         (in range 0 to 100).
+         The last pair with first integer <= the current volume is chosen,
+         and the second integer of the pair indicates the amount to increase the master volume
+         when volume up is pressed. -->
+    <integer-array name="config_masterVolumeRamp">
+        <item>0</item>  <item>5</item>  <!-- default: always increase volume by 5% -->
+    </integer-array>
+
     <!-- Flag indicating whether the AUDIO_BECOMING_NOISY notification should
          be sent during an change to the audio output device. -->
     <bool name="config_sendAudioBecomingNoisy">true</bool>
