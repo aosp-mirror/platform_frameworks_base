@@ -334,7 +334,7 @@ status_t InputPublisher::receiveFinishedSignal(uint32_t* outSeq, bool* outHandle
 // --- InputConsumer ---
 
 InputConsumer::InputConsumer(const sp<InputChannel>& channel) :
-        mChannel(channel), mDeferredEventSeq(0) {
+        mChannel(channel), mMsgDeferred(false) {
 }
 
 InputConsumer::~InputConsumer() {
@@ -350,55 +350,44 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
     *outSeq = 0;
     *outEvent = NULL;
 
-    // Report deferred event first, if we had to end a batch earlier than we expected
-    // during the previous time consume was called.
-    if (mDeferredEventSeq) {
-        MotionEvent* motionEvent = factory->createMotionEvent();
-        if (! motionEvent) return NO_MEMORY;
-
-        motionEvent->copyFrom(&mDeferredEvent, true /*keepHistory*/);
-        *outSeq = mDeferredEventSeq;
-        *outEvent = motionEvent;
-        mDeferredEventSeq = 0;
-#if DEBUG_TRANSPORT_ACTIONS
-        ALOGD("channel '%s' consumer ~ consumed deferred event, seq=%u",
-                mChannel->getName().string(), *outSeq);
-#endif
-        return OK;
-    }
-
     // Fetch the next input message.
     // Loop until an event can be returned or no additional events are received.
     while (!*outEvent) {
-        InputMessage msg;
-        status_t result = mChannel->receiveMessage(&msg);
-        if (result) {
-            // Consume the next batched event unless batches are being held for later.
-            if (!mBatches.isEmpty() && (consumeBatches || result != WOULD_BLOCK)) {
-                MotionEvent* motionEvent = factory->createMotionEvent();
-                if (! motionEvent) return NO_MEMORY;
+        if (mMsgDeferred) {
+            // mMsg contains a valid input message from the previous call to consume
+            // that has not yet been processed.
+            mMsgDeferred = false;
+        } else {
+            // Receive a fresh message.
+            status_t result = mChannel->receiveMessage(&mMsg);
+            if (result) {
+                // Consume the next batched event unless batches are being held for later.
+                if (!mBatches.isEmpty() && (consumeBatches || result != WOULD_BLOCK)) {
+                    MotionEvent* motionEvent = factory->createMotionEvent();
+                    if (! motionEvent) return NO_MEMORY;
 
-                const Batch& batch = mBatches.top();
-                motionEvent->copyFrom(&batch.event, true /*keepHistory*/);
-                *outSeq = batch.seq;
-                *outEvent = motionEvent;
-                mBatches.pop();
+                    const Batch& batch = mBatches.top();
+                    motionEvent->copyFrom(&batch.event, true /*keepHistory*/);
+                    *outSeq = batch.seq;
+                    *outEvent = motionEvent;
+                    mBatches.pop();
 #if DEBUG_TRANSPORT_ACTIONS
-                ALOGD("channel '%s' consumer ~ consumed batch event, seq=%u",
-                        mChannel->getName().string(), *outSeq);
+                    ALOGD("channel '%s' consumer ~ consumed batch event, seq=%u",
+                            mChannel->getName().string(), *outSeq);
 #endif
-                break;
+                    break;
+                }
+                return result;
             }
-            return result;
         }
 
-        switch (msg.header.type) {
+        switch (mMsg.header.type) {
         case InputMessage::TYPE_KEY: {
             KeyEvent* keyEvent = factory->createKeyEvent();
             if (!keyEvent) return NO_MEMORY;
 
-            initializeKeyEvent(keyEvent, &msg);
-            *outSeq = msg.body.key.seq;
+            initializeKeyEvent(keyEvent, &mMsg);
+            *outSeq = mMsg.body.key.seq;
             *outEvent = keyEvent;
 #if DEBUG_TRANSPORT_ACTIONS
             ALOGD("channel '%s' consumer ~ consumed key event, seq=%u",
@@ -408,10 +397,10 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
         }
 
         case AINPUT_EVENT_TYPE_MOTION: {
-            ssize_t batchIndex = findBatch(msg.body.motion.deviceId, msg.body.motion.source);
+            ssize_t batchIndex = findBatch(mMsg.body.motion.deviceId, mMsg.body.motion.source);
             if (batchIndex >= 0) {
                 Batch& batch = mBatches.editItemAt(batchIndex);
-                if (canAppendSamples(&batch.event, &msg)) {
+                if (canAppendSamples(&batch.event, &mMsg)) {
                     // Send finished message for the earlier part of the batch.
                     // Claim that we handled the event.  (The dispatcher doesn't care either
                     // way at the moment.)
@@ -421,8 +410,8 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
                     }
 
                     // Append to the batch and save the new sequence number for the tail end.
-                    appendSamples(&batch.event, &msg);
-                    batch.seq = msg.body.motion.seq;
+                    appendSamples(&batch.event, &mMsg);
+                    batch.seq = mMsg.body.motion.seq;
 #if DEBUG_TRANSPORT_ACTIONS
                     ALOGD("channel '%s' consumer ~ appended to batch event",
                             mChannel->getName().string());
@@ -433,9 +422,8 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
                     if (! motionEvent) return NO_MEMORY;
 
                     // We cannot append to the batch in progress, so we need to consume
-                    // the previous batch right now and defer the new event until later.
-                    mDeferredEventSeq = msg.body.motion.seq;
-                    initializeMotionEvent(&mDeferredEvent, &msg);
+                    // the previous batch right now and defer the new message until later.
+                    mMsgDeferred = true;
 
                     // Return the end of the previous batch.
                     motionEvent->copyFrom(&batch.event, true /*keepHistory*/);
@@ -452,12 +440,12 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
             }
 
             // Start a new batch if needed.
-            if (msg.body.motion.action == AMOTION_EVENT_ACTION_MOVE
-                    || msg.body.motion.action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+            if (mMsg.body.motion.action == AMOTION_EVENT_ACTION_MOVE
+                    || mMsg.body.motion.action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                 mBatches.push();
                 Batch& batch = mBatches.editTop();
-                batch.seq = msg.body.motion.seq;
-                initializeMotionEvent(&batch.event, &msg);
+                batch.seq = mMsg.body.motion.seq;
+                initializeMotionEvent(&batch.event, &mMsg);
 #if DEBUG_TRANSPORT_ACTIONS
                 ALOGD("channel '%s' consumer ~ started batch event",
                         mChannel->getName().string());
@@ -468,8 +456,8 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
             MotionEvent* motionEvent = factory->createMotionEvent();
             if (! motionEvent) return NO_MEMORY;
 
-            initializeMotionEvent(motionEvent, &msg);
-            *outSeq = msg.body.motion.seq;
+            initializeMotionEvent(motionEvent, &mMsg);
+            *outSeq = mMsg.body.motion.seq;
             *outEvent = motionEvent;
 #if DEBUG_TRANSPORT_ACTIONS
             ALOGD("channel '%s' consumer ~ consumed motion event, seq=%u",
@@ -480,7 +468,7 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
 
         default:
             ALOGE("channel '%s' consumer ~ Received unexpected message of type %d",
-                    mChannel->getName().string(), msg.header.type);
+                    mChannel->getName().string(), mMsg.header.type);
             return UNKNOWN_ERROR;
         }
     }
