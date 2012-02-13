@@ -2631,7 +2631,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             break;
         case DISPATCH_KEY: {
             KeyEvent event = (KeyEvent)msg.obj;
-            enqueueInputEvent(event, null, 0);
+            enqueueInputEvent(event, null, 0, true);
         } break;
         case DISPATCH_KEY_FROM_IME: {
             if (LOCAL_LOGV) Log.v(
@@ -2644,7 +2644,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 //noinspection UnusedAssignment
                 event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
             }
-            enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME);
+            enqueueInputEvent(event, null, QueuedInputEvent.FLAG_DELIVER_POST_IME, true);
         } break;
         case FINISH_INPUT_CONNECTION: {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -2947,7 +2947,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             case MotionEvent.ACTION_DOWN:
                 x.reset(2);
                 y.reset(2);
-                dispatchKey(new KeyEvent(curTime, curTime,
+                enqueueInputEvent(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                         InputDevice.SOURCE_KEYBOARD));
@@ -2955,7 +2955,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             case MotionEvent.ACTION_UP:
                 x.reset(2);
                 y.reset(2);
-                dispatchKey(new KeyEvent(curTime, curTime,
+                enqueueInputEvent(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                         InputDevice.SOURCE_KEYBOARD));
@@ -3009,7 +3009,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         + keycode);
                 movement--;
                 int repeatCount = accelMovement - movement;
-                dispatchKey(new KeyEvent(curTime, curTime,
+                enqueueInputEvent(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_MULTIPLE, keycode, repeatCount, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                         InputDevice.SOURCE_KEYBOARD));
@@ -3019,11 +3019,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         + keycode);
                 movement--;
                 curTime = SystemClock.uptimeMillis();
-                dispatchKey(new KeyEvent(curTime, curTime,
+                enqueueInputEvent(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_DOWN, keycode, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                         InputDevice.SOURCE_KEYBOARD));
-                dispatchKey(new KeyEvent(curTime, curTime,
+                enqueueInputEvent(new KeyEvent(curTime, curTime,
                         KeyEvent.ACTION_UP, keycode, 0, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FALLBACK,
                         InputDevice.SOURCE_KEYBOARD));
@@ -3090,7 +3090,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (xDirection != mLastJoystickXDirection) {
             if (mLastJoystickXKeyCode != 0) {
-                dispatchKey(new KeyEvent(time, time,
+                enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
                 mLastJoystickXKeyCode = 0;
@@ -3101,7 +3101,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (xDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickXKeyCode = xDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-                dispatchKey(new KeyEvent(time, time,
+                enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
             }
@@ -3109,7 +3109,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (yDirection != mLastJoystickYDirection) {
             if (mLastJoystickYKeyCode != 0) {
-                dispatchKey(new KeyEvent(time, time,
+                enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
                 mLastJoystickYKeyCode = 0;
@@ -3120,7 +3120,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (yDirection != 0 && synthesizeNewKeys) {
                 mLastJoystickYKeyCode = yDirection > 0
                         ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-                dispatchKey(new KeyEvent(time, time,
+                enqueueInputEvent(new KeyEvent(time, time,
                         KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
                         deviceId, 0, KeyEvent.FLAG_FALLBACK, source));
             }
@@ -3805,8 +3805,12 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    void enqueueInputEvent(InputEvent event) {
+        enqueueInputEvent(event, null, 0, false);
+    }
+
     void enqueueInputEvent(InputEvent event,
-            InputEventReceiver receiver, int flags) {
+            InputEventReceiver receiver, int flags, boolean processImmediately) {
         QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
 
         if (ViewDebug.DEBUG_LATENCY) {
@@ -3830,7 +3834,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             last.mNext = q;
         }
 
-        scheduleProcessInputEvents();
+        if (processImmediately) {
+            doProcessInputEvents();
+        } else {
+            scheduleProcessInputEvents();
+        }
     }
 
     private void scheduleProcessInputEvents() {
@@ -3919,13 +3927,14 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         @Override
         public void onInputEvent(InputEvent event) {
-            enqueueInputEvent(event, this, 0);
+            enqueueInputEvent(event, this, 0, true);
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
 
     public void dispatchKey(KeyEvent event) {
-        enqueueInputEvent(event, null, 0);
+        Message msg = obtainMessage(DISPATCH_KEY, event);
+        sendMessage(msg);
     }
 
     public void dispatchAppVisibility(boolean visible) {
