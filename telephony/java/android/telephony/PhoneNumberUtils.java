@@ -1438,7 +1438,8 @@ public class PhoneNumberUtils
      *            phoneNumber doesn't have the country code.
      * @param defaultCountryIso
      *            the ISO 3166-1 two letters country code whose convention will
-     *            be used if the phoneNumberE164 is null or invalid.
+     *            be used if the phoneNumberE164 is null or invalid, or if phoneNumber
+     *            contains IDD.
      * @return the formatted number if the given number has been formatted,
      *            otherwise, return the given number.
      *
@@ -1457,9 +1458,13 @@ public class PhoneNumberUtils
         if (phoneNumberE164 != null && phoneNumberE164.length() >= 2
                 && phoneNumberE164.charAt(0) == '+') {
             try {
-                PhoneNumber pn = util.parse(phoneNumberE164, defaultCountryIso);
+                // The number to be parsed is in E164 format, so the default region used doesn't
+                // matter.
+                PhoneNumber pn = util.parse(phoneNumberE164, "ZZ");
                 String regionCode = util.getRegionCodeForNumber(pn);
-                if (!TextUtils.isEmpty(regionCode)) {
+                if (!TextUtils.isEmpty(regionCode) &&
+                    // This makes sure phoneNumber doesn't contain an IDD
+                    normalizeNumber(phoneNumber).indexOf(phoneNumberE164.substring(1)) <= 0) {
                     defaultCountryIso = regionCode;
                 }
             } catch (NumberParseException e) {
