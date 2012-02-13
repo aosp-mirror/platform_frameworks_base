@@ -23,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
-
 import android.widget.*;
 
 import static android.text.InputType.*;
@@ -62,8 +61,8 @@ public class BiDiTestGridLayoutCodeLtr extends Fragment {
         Spec row7 = spec(6);
 
         Spec col1a = spec(0, 4, CENTER);
-        Spec col1b = spec(0, 4, START);
-        Spec col1c = spec(0, END);
+        Spec col1b = spec(0, 4, LEFT);
+        Spec col1c = spec(0, RIGHT);
         Spec col2 = spec(1, START);
         Spec col3 = spec(2, FILL);
         Spec col4a = spec(3);
