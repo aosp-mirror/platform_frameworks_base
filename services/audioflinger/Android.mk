@@ -6,7 +6,8 @@ LOCAL_SRC_FILES:=               \
     AudioFlinger.cpp            \
     AudioMixer.cpp.arm          \
     AudioResampler.cpp.arm      \
-    AudioPolicyService.cpp
+    AudioPolicyService.cpp      \
+    ServiceUtilities.cpp
 #   AudioResamplerSinc.cpp.arm
 #   AudioResamplerCubic.cpp.arm
 

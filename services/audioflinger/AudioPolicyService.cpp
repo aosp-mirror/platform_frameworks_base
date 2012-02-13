@@ -30,6 +30,7 @@
 #include <utils/String16.h>
 #include <utils/threads.h>
 #include "AudioPolicyService.h"
+#include "ServiceUtilities.h"
 #include <cutils/properties.h>
 #include <hardware_legacy/power.h>
 #include <media/AudioEffect.h>
@@ -48,13 +49,6 @@ static const char kCmdDeadlockedString[] = "AudioPolicyService command thread ma
 
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleepUs = 20000;
-
-static bool checkPermission() {
-    if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
-    bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
-    if (!ok) ALOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
-    return ok;
-}
 
 namespace {
     extern struct audio_policy_service_ops aps_ops;
@@ -157,7 +151,7 @@ status_t AudioPolicyService::setDeviceConnectionState(audio_devices_t device,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    if (!checkPermission()) {
+    if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
     if (!audio_is_output_device(device) && !audio_is_input_device(device)) {
@@ -190,7 +184,7 @@ status_t AudioPolicyService::setPhoneState(audio_mode_t state)
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    if (!checkPermission()) {
+    if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
     if (uint32_t(state) >= AUDIO_MODE_CNT) {
@@ -213,7 +207,7 @@ status_t AudioPolicyService::setForceUse(audio_policy_force_use_t usage,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    if (!checkPermission()) {
+    if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
     if (usage < 0 || usage >= AUDIO_POLICY_FORCE_USE_CNT) {
@@ -388,7 +382,7 @@ status_t AudioPolicyService::initStreamVolume(audio_stream_type_t stream,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    if (!checkPermission()) {
+    if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) {
@@ -405,7 +399,7 @@ status_t AudioPolicyService::setStreamVolumeIndex(audio_stream_type_t stream,
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
     }
-    if (!checkPermission()) {
+    if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
     if (uint32_t(stream) >= AUDIO_STREAM_CNT) {
@@ -578,7 +572,7 @@ status_t AudioPolicyService::dumpInternals(int fd)
 
 status_t AudioPolicyService::dump(int fd, const Vector<String16>& args)
 {
-    if (!checkCallingPermission(String16("android.permission.DUMP"))) {
+    if (!dumpAllowed()) {
         dumpPermissionDenial(fd);
     } else {
         bool locked = tryLock(mLock);

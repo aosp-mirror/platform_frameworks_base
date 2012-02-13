@@ -48,6 +48,7 @@
 
 #include "AudioMixer.h"
 #include "AudioFlinger.h"
+#include "ServiceUtilities.h"
 
 #include <media/EffectsFactoryApi.h>
 #include <audio_effects/effect_visualizer.h>
@@ -100,20 +101,6 @@ static const uint32_t kMaxThreadSleepTimeShift = 2;
 
 
 // ----------------------------------------------------------------------------
-
-static bool recordingAllowed() {
-    if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
-    bool ok = checkCallingPermission(String16("android.permission.RECORD_AUDIO"));
-    if (!ok) ALOGE("Request requires android.permission.RECORD_AUDIO");
-    return ok;
-}
-
-static bool settingsAllowed() {
-    if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
-    bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
-    if (!ok) ALOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
-    return ok;
-}
 
 // To collect the amplifier usage
 static void addBatteryData(uint32_t params) {
@@ -321,7 +308,7 @@ static bool tryLock(Mutex& mutex)
 
 status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
 {
-    if (!checkCallingPermission(String16("android.permission.DUMP"))) {
+    if (!dumpAllowed()) {
         dumpPermissionDenial(fd, args);
     } else {
         // get state of hardware lock
@@ -3436,7 +3423,7 @@ void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
     uint32_t vlr = mCblk->getVolumeLR();
     snprintf(buffer, size, "   %05d %05d %03u %03u 0x%08x %05u   %04u %1d %1d %1d %05u %05u %05u  0x%08x 0x%08x 0x%08x 0x%08x\n",
             mName - AudioMixer::TRACK0,
-            (mClient == 0) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid_cached : mClient->pid(),
             mStreamType,
             mFormat,
             mChannelMask,
@@ -3757,7 +3744,7 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
 void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
 {
     snprintf(buffer, size, "   %05d %03u 0x%08x %05d   %04u %01d %05u  %08x %08x\n",
-            (mClient == 0) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid_cached : mClient->pid(),
             mFormat,
             mChannelMask,
             mSessionId,
@@ -5404,7 +5391,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
 
     // Session AUDIO_SESSION_OUTPUT_STAGE is reserved for output stage effects
     // that can only be created by audio policy manager (running in same process)
-    if (sessionId == AUDIO_SESSION_OUTPUT_STAGE && getpid() != pid) {
+    if (sessionId == AUDIO_SESSION_OUTPUT_STAGE && getpid_cached != pid) {
         lStatus = PERMISSION_DENIED;
         goto Exit;
     }
@@ -7022,7 +7009,7 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
     bool locked = mCblk != NULL && tryLock(mCblk->lock);
 
     snprintf(buffer, size, "\t\t\t%05d %05d    %01u    %01u      %05u  %05u\n",
-            (mClient == 0) ? getpid() : mClient->pid(),
+            (mClient == 0) ? getpid_cached : mClient->pid(),
             mPriority,
             mHasControl,
             !locked,
