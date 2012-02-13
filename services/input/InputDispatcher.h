@@ -790,10 +790,6 @@ private:
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
         const char* getStatusLabel() const;
-
-        // Finds a DispatchEntry in the outbound queue associated with the specified event.
-        // Returns NULL if not found.
-        DispatchEntry* findQueuedDispatchEntryForEvent(const EventEntry* eventEntry) const;
     };
 
     enum DropReason {
