@@ -566,6 +566,10 @@ public class GridLayout extends ViewGroup {
                 return FILL;
             case AXIS_SPECIFIED:
                 return CENTER;
+            case (AXIS_SPECIFIED | AXIS_PULL_BEFORE | RELATIVE_LAYOUT_DIRECTION):
+                return START;
+            case (AXIS_SPECIFIED | AXIS_PULL_AFTER | RELATIVE_LAYOUT_DIRECTION):
+                return END;
             default:
                 return UNDEFINED_ALIGNMENT;
         }
@@ -590,7 +594,8 @@ public class GridLayout extends ViewGroup {
         Spec spec = horizontal ? p.columnSpec : p.rowSpec;
         Axis axis = horizontal ? horizontalAxis : verticalAxis;
         Interval span = spec.span;
-        boolean isAtEdge = leading ? (span.min == 0) : (span.max == axis.getCount());
+        boolean leading1 = (horizontal && isLayoutRtl()) ? !leading : leading;
+        boolean isAtEdge = leading1 ? (span.min == 0) : (span.max == axis.getCount());
 
         return getDefaultMargin(c, isAtEdge, horizontal, leading);
     }
@@ -760,10 +765,15 @@ public class GridLayout extends ViewGroup {
     private void drawLine(Canvas graphics, int x1, int y1, int x2, int y2, Paint paint) {
         int dx = getPaddingLeft();
         int dy = getPaddingTop();
-        graphics.drawLine(dx + x1, dy + y1, dx + x2, dy + y2, paint);
+        if (isLayoutRtl()) {
+            int width = getWidth();
+            graphics.drawLine(width - dx - x1, dy + y1, width - dx - x2, dy + y2, paint);
+        } else {
+            graphics.drawLine(dx + x1, dy + y1, dx + x2, dy + y2, paint);
+        }
     }
 
-    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
+    private void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
         canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
     }
 
@@ -945,7 +955,7 @@ public class GridLayout extends ViewGroup {
 
     final Alignment getAlignment(Alignment alignment, boolean horizontal) {
         return (alignment != UNDEFINED_ALIGNMENT) ? alignment :
-                (horizontal ? LEFT : BASELINE);
+                (horizontal ? START : BASELINE);
     }
 
     // Layout container
@@ -1003,41 +1013,41 @@ public class GridLayout extends ViewGroup {
             Alignment hAlign = getAlignment(columnSpec.alignment, true);
             Alignment vAlign = getAlignment(rowSpec.alignment, false);
 
-            int dx, dy;
-
             Bounds colBounds = horizontalAxis.getGroupBounds().getValue(i);
             Bounds rowBounds = verticalAxis.getGroupBounds().getValue(i);
 
             // Gravity offsets: the location of the alignment group relative to its cell group.
             //noinspection NullableProblems
-            int c2ax = protect(hAlign.getAlignmentValue(null, cellWidth - colBounds.size(true)));
+            int gravityOffsetX = protect(hAlign.getAlignmentValue(null,
+                    cellWidth - colBounds.size(true)));
             //noinspection NullableProblems
-            int c2ay = protect(vAlign.getAlignmentValue(null, cellHeight - rowBounds.size(true)));
+            int gravityOffsetY = protect(vAlign.getAlignmentValue(null,
+                    cellHeight - rowBounds.size(true)));
 
-            int leftMargin = getMargin(c, true, true);
+            boolean rtl = isLayoutRtl();
+            int startMargin = getMargin(c, true, !rtl);
             int topMargin = getMargin(c, false, true);
-            int rightMargin = getMargin(c, true, false);
+            int endMargin = getMargin(c, true, rtl);
             int bottomMargin = getMargin(c, false, false);
 
             // Same calculation as getMeasurementIncludingMargin()
-            int mWidth = leftMargin + pWidth + rightMargin;
+            int mWidth = startMargin + pWidth + endMargin;
             int mHeight = topMargin + pHeight + bottomMargin;
 
             // Alignment offsets: the location of the view relative to its alignment group.
-            int a2vx = colBounds.getOffset(c, hAlign, mWidth);
-            int a2vy = rowBounds.getOffset(c, vAlign, mHeight);
+            int alignmentOffsetX = colBounds.getOffset(c, hAlign, mWidth);
+            int alignmentOffsetY = rowBounds.getOffset(c, vAlign, mHeight);
 
-            dx = c2ax + a2vx + leftMargin;
-            dy = c2ay + a2vy + topMargin;
+            int dx = gravityOffsetX + alignmentOffsetX + startMargin;
+            int dy = gravityOffsetY + alignmentOffsetY + topMargin;
 
-            cellWidth -= leftMargin + rightMargin;
+            cellWidth -= startMargin + endMargin;
             cellHeight -= topMargin + bottomMargin;
 
-            int type = PRF;
-            int width = hAlign.getSizeInCell(c, pWidth, cellWidth, type);
-            int height = vAlign.getSizeInCell(c, pHeight, cellHeight, type);
+            int width = hAlign.getSizeInCell(c, pWidth, cellWidth, PRF);
+            int height = vAlign.getSizeInCell(c, pHeight, cellHeight, PRF);
 
-            int cx = paddingLeft + x1 + dx;
+            int cx = rtl ? targetWidth - paddingRight - x1 - dx - width : paddingLeft + x1 + dx;
             int cy = paddingTop + y1 + dy;
             if (width != c.getMeasuredWidth() || height != c.getMeasuredHeight()) {
                 c.measure(makeMeasureSpec(width, EXACTLY), makeMeasureSpec(height, EXACTLY));
@@ -2049,7 +2059,7 @@ public class GridLayout extends ViewGroup {
     /*
     For each group (with a given alignment) we need to store the amount of space required
     before the alignment point and the amount of space required after it. One side of this
-    calculation is always 0 for LEADING and TRAILING alignments but we don't make use of this.
+    calculation is always 0 for START and END alignments but we don't make use of this.
     For CENTER and BASELINE alignments both sides are needed and in the BASELINE case no
     simple optimisations are possible.
 
@@ -2405,18 +2415,29 @@ public class GridLayout extends ViewGroup {
     }
 
     static final Alignment UNDEFINED_ALIGNMENT = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             return UNDEFINED;
         }
     };
 
+    /**
+     * Indicates that a view should be aligned with the <em>start</em>
+     * edges of the other views in its cell group.
+     */
     private static final Alignment LEADING = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             return 0;
         }
     };
 
+    /**
+     * Indicates that a view should be aligned with the <em>end</em>
+     * edges of the other views in its cell group.
+     */
     private static final Alignment TRAILING = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             return viewSize;
         }
@@ -2435,16 +2456,41 @@ public class GridLayout extends ViewGroup {
     public static final Alignment BOTTOM = TRAILING;
 
     /**
-     * Indicates that a view should be aligned with the <em>right</em>
+     * Indicates that a view should be aligned with the <em>start</em>
      * edges of the other views in its cell group.
      */
-    public static final Alignment RIGHT = TRAILING;
+    public static final Alignment START = LEADING;
+
+    /**
+     * Indicates that a view should be aligned with the <em>end</em>
+     * edges of the other views in its cell group.
+     */
+    public static final Alignment END = TRAILING;
+
+    private static Alignment getAbsoluteAlignment(final Alignment a1, final Alignment a2) {
+        return new Alignment() {
+            @Override
+            public int getAlignmentValue(View view, int viewSize) {
+                if (view == null) {
+                    return UNDEFINED;
+                }
+                Alignment alignment = view.isLayoutRtl() ? a2 : a1;
+                return alignment.getAlignmentValue(view, viewSize);
+            }
+        };
+    }
 
     /**
      * Indicates that a view should be aligned with the <em>left</em>
      * edges of the other views in its cell group.
      */
-    public static final Alignment LEFT = LEADING;
+    public static final Alignment LEFT = getAbsoluteAlignment(START, END);
+
+    /**
+     * Indicates that a view should be aligned with the <em>right</em>
+     * edges of the other views in its cell group.
+     */
+    public static final Alignment RIGHT = getAbsoluteAlignment(END, START);
 
     /**
      * Indicates that a view should be <em>centered</em> with the other views in its cell group.
@@ -2452,6 +2498,7 @@ public class GridLayout extends ViewGroup {
      * LayoutParams#columnSpec columnSpecs}.
      */
     public static final Alignment CENTER = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             return viewSize >> 1;
         }
@@ -2465,6 +2512,7 @@ public class GridLayout extends ViewGroup {
      * @see View#getBaseline()
      */
     public static final Alignment BASELINE = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             if (view == null) {
                 return UNDEFINED;
@@ -2515,6 +2563,7 @@ public class GridLayout extends ViewGroup {
      * {@link LayoutParams#columnSpec columnSpecs}.
      */
     public static final Alignment FILL = new Alignment() {
+        @Override
         public int getAlignmentValue(View view, int viewSize) {
             return UNDEFINED;
         }
@@ -2530,6 +2579,5 @@ public class GridLayout extends ViewGroup {
     }
 
     private static final int INFLEXIBLE = 0;
-
     private static final int CAN_STRETCH = 2;
 }
