@@ -1602,6 +1602,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.NETSTATS_ENABLED,
                     R.bool.def_netstats_enabled);
+
+            loadIntegerSetting(stmt, Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT,
+                    R.integer.def_max_dhcp_retries);
         } finally {
             if (stmt != null) stmt.close();
         }
