@@ -1742,7 +1742,9 @@ public class WifiStateMachine extends StateMachine {
          * If we've exceeded the maximum number of retries for DHCP
          * to a given network, disable the network
          */
-        if (++mReconnectCount > getMaxDhcpRetries()) {
+        int maxRetries = getMaxDhcpRetries();
+        // maxRetries == 0 means keep trying forever
+        if (maxRetries > 0 && ++mReconnectCount > maxRetries) {
             loge("Failed " +
                     mReconnectCount + " times, Disabling " + mLastNetworkId);
             WifiConfigStore.disableNetwork(mLastNetworkId,
