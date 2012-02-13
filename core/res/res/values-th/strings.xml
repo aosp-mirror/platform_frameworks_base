@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"อนุญาตให้แอปพลิเคชันย้ายงานไปยังส่วนหน้าและพื้นหลัง แอปพลิเคชันที่เป็นอันตรายอาจบังคับตัวเองให้ไปที่ส่วนหน้าโดยไม่มีการควบคุมจากคุณ"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"หยุดแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"อนุญาตให้แอปพลิเคชันลบงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ตั้งค่าความเข้ากันได้ของหน้าจอ"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"อนุญาตให้แอปพลิเคชันควบคุมโหมดความเข้ากันได้ของหน้าจอของแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นทำงานผิดพลาด"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"เปิดใช้งานการแก้ไขบกพร่องของแอปพลิเคชัน"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"อนุญาตให้แอปพลิเคชันเปิดการแก้ไขข้อบกพร่องสำหรับแอปพลิเคชันอื่น แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติการทำงานของแอปพลิเคชันอื่นๆ ได้"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"เปลี่ยนการตั้งค่า UI ของคุณ"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"อนุญาตให้แอปพลิเคชันยืนยันว่าแพคเกจสามารถติดตั้งได้หรือไม่"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"เชื่อมโยงกับการยืนยันแพคเกจ"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"อนุญาตให้ผู้ใช้ส่งคำขอให้มีการยืนยันแพคเกจ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"เข้าถึงพอร์ตอนุกรม"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"อนุญาตให้ผู้ถือสามารถเข้าถึงพอร์ตอนุกรมโดยใช้ SerialManager API"</string>
     <string name="save_password_message" msgid="767344687139195790">"คุณต้องการให้เบราว์เซอร์จำรหัสผ่านนี้หรือไม่"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ยังไม่ใช้งานขณะนี้"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"จำไว้"</string>

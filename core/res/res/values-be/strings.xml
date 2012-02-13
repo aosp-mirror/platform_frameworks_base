@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дазваляе прыкладанням перамяшчаць заданні на ​​пярэдні план і фон. Шкоднасныя прыкладанні могуць прымусова рабіць сябе асноўнымі без вашага ведама."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спыніць запушчаныя прыкладанні"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дазваляе прыкладанням выдаляць заданні і спыняць прыкладанні, якія іх выкарыстоўваюць. Шкоднасныя прыкладаннi могуць перашкодзiць працы іншых прыкладанняў."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"усталяваць сумяшчальнасць экранаў"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дазваляе прыкладанню кіраваць рэжымам сумяшчальнасці экранаў іншых прыкладанняў. Шкоднаснае ПЗ можа перашкодзiць працы іншых прыкладанняў."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"уключыць адладку прыкладання"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дазваляе прыкладанням уключаць адладку для іншага прыкладання. Шкоднасныя прыкладанні могуць выкарыстоўваць гэта, каб спыняць іншыя прыкладанні."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змяняць налады карыстальніцкага інтэрфейса"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Дазваляе прыкладанням правяраць магчымасць усталявання пакету."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"прывязаць да верыфікатару пакету"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Дазваляе ўладальніку рабіць запыты верыфікатараў пакету. Не патрабуецца для звычайных прыкладанняў."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"атрымаць доступ да паслядоўных партоў"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Дазваляе ўладальніку атрымліваць доступ да паслядоўных партоў з дапамогай API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Вы хочаце, каб браўзэр запомніў гэты пароль?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не цяпер"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запомніць"</string>

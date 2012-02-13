@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permite que la aplicación mueva tareas al primero o segundo plano. Las aplicaciones maliciosas pueden forzar su paso al primer plano sin que tú las controles."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"detener las aplicaciones en ejecución"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que la aplicación elimine tareas y cierre sus aplicaciones. Las aplicaciones malintencionadas pueden usar este permiso para interferir en el comportamiento de otras aplicaciones."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Configurar el modo de la compatibilidad de otras pantalla"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permite a la aplicación controlar el modo de la compatibilidad de las pantallas de otras aplicaciones. Las aplicaciones malintencionadas pueden interrumpir el funcionamiento de otras aplicaciones."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activar depuración de aplicación"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que la aplicación active la depuración de otra aplicación. Las aplicaciones malintencionadas pueden usar este permiso para interrumpir la ejecución de otras aplicaciones."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"cambiar tu configuración de la interfaz de usuario"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permite que la aplicación verifique si se puede instalar un paquete."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"Vincular a un verificador de paquetes"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permite que el titular solicite verificadores de paquetes. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"Acceder a los puertos serie"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite acceder a puertos serie a través de la API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ahora no."</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recuerda"</string>
