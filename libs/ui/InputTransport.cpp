@@ -28,6 +28,13 @@
 
 namespace android {
 
+// Socket buffer size.  The default is typically about 128KB, which is much larger than
+// we really need.  So we make it smaller.  It just needs to be big enough to hold
+// a few dozen large multi-finger motion events in the case where an application gets
+// behind processing touches.
+static const size_t SOCKET_BUFFER_SIZE = 32 * 1024;
+
+
 // --- InputMessage ---
 
 bool InputMessage::isValid(size_t actualSize) const {
@@ -92,6 +99,12 @@ status_t InputChannel::openInputChannelPair(const String8& name,
         outClientChannel.clear();
         return result;
     }
+
+    int bufferSize = SOCKET_BUFFER_SIZE;
+    setsockopt(sockets[0], SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize));
+    setsockopt(sockets[0], SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize));
+    setsockopt(sockets[1], SOL_SOCKET, SO_SNDBUF, &bufferSize, sizeof(bufferSize));
+    setsockopt(sockets[1], SOL_SOCKET, SO_RCVBUF, &bufferSize, sizeof(bufferSize));
 
     String8 serverChannelName = name;
     serverChannelName.append(" (server)");
