@@ -2251,6 +2251,14 @@ status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
         {
             return setCacheStatCollectFreq(request);
         }
+        case KEY_PARAMETER_PLAYBACK_RATE_PERMILLE:
+        {
+            if (mAudioPlayer != NULL) {
+                return mAudioPlayer->setPlaybackRatePermille(request.readInt32());
+            } else {
+                return NO_INIT;
+            }
+        }
         default:
         {
             return ERROR_UNSUPPORTED;

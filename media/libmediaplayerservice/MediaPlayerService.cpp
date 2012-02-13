@@ -1265,6 +1265,8 @@ MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
     mStreamType = AUDIO_STREAM_MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
+    mPlaybackRatePermille = 1000;
+    mSampleRateHz = 0;
     mLatency = 0;
     mMsecsPerFrame = 0;
     mAuxEffectId = 0;
@@ -1402,10 +1404,15 @@ status_t MediaPlayerService::AudioOutput::open(
     ALOGV("setVolume");
     t->setVolume(mLeftVolume, mRightVolume);
 
-    mMsecsPerFrame = 1.e3 / (float) sampleRate;
+    mSampleRateHz = sampleRate;
+    mMsecsPerFrame = mPlaybackRatePermille / (float) sampleRate;
     mLatency = t->latency();
     mTrack = t;
 
+    status_t res = t->setSampleRate(mPlaybackRatePermille * mSampleRateHz / 1000);
+    if (res != NO_ERROR) {
+        return res;
+    }
     t->setAuxEffectSendLevel(mSendLevel);
     return t->attachAuxEffect(mAuxEffectId);;
 }
@@ -1467,6 +1474,22 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
     if (mTrack) {
         mTrack->setVolume(left, right);
     }
+}
+
+status_t MediaPlayerService::AudioOutput::setPlaybackRatePermille(int32_t ratePermille)
+{
+    ALOGV("setPlaybackRatePermille(%d)", ratePermille);
+    status_t res = NO_ERROR;
+    if (mTrack) {
+        res = mTrack->setSampleRate(ratePermille * mSampleRateHz / 1000);
+    } else {
+        res = NO_INIT;
+    }
+    mPlaybackRatePermille = ratePermille;
+    if (mSampleRateHz != 0) {
+        mMsecsPerFrame = mPlaybackRatePermille / (float) mSampleRateHz;
+    }
+    return res;
 }
 
 status_t MediaPlayerService::AudioOutput::setAuxEffectSendLevel(float level)

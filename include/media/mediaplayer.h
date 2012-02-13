@@ -145,6 +145,9 @@ enum media_parameter_keys {
     // audio track, or zero for error (e.g. no audio track) or unknown.
     KEY_PARAMETER_AUDIO_CHANNEL_COUNT = 1200,                   // get only
 
+    // Playback rate expressed in permille (1000 is normal speed), saved as int32_t, with negative
+    // values used for rewinding or reverse playback.
+    KEY_PARAMETER_PLAYBACK_RATE_PERMILLE = 1300,                // set only
 };
 
 // ----------------------------------------------------------------------------

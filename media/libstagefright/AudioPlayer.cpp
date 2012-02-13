@@ -268,6 +268,16 @@ bool AudioPlayer::reachedEOS(status_t *finalStatus) {
     return mReachedEOS;
 }
 
+status_t AudioPlayer::setPlaybackRatePermille(int32_t ratePermille) {
+    if (mAudioSink.get() != NULL) {
+        return mAudioSink->setPlaybackRatePermille(ratePermille);
+    } else if (mAudioTrack != NULL){
+        return mAudioTrack->setSampleRate(ratePermille * mSampleRate / 1000);
+    } else {
+        return NO_INIT;
+    }
+}
+
 // static
 size_t AudioPlayer::AudioSinkCallback(
         MediaPlayerBase::AudioSink *audioSink,

@@ -176,7 +176,7 @@ void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
 }
 
 status_t StagefrightPlayer::setParameter(int key, const Parcel &request) {
-    ALOGV("setParameter");
+    ALOGV("setParameter(key=%d)", key);
     return mPlayer->setParameter(key, request);
 }
 
