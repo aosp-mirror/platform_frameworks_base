@@ -851,6 +851,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     @Override
     public void onDraw() {
+        if (mInputEventReceiver != null) {
+            mInputEventReceiver.consumeBatchedInputEvents();
+        }
+        doProcessInputEvents();
+
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
             doTraversal();
@@ -891,8 +896,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     private void doTraversal() {
-        doProcessInputEvents();
-
         if (mProfile) {
             Debug.startMethodTracing("ViewAncestor");
         }
@@ -3928,6 +3931,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         @Override
         public void onInputEvent(InputEvent event) {
             enqueueInputEvent(event, this, 0, true);
+        }
+
+        @Override
+        public void onBatchedInputEventPending() {
+            mChoreographer.scheduleDraw();
         }
     }
     WindowInputEventReceiver mInputEventReceiver;

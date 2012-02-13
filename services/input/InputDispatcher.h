@@ -27,6 +27,7 @@
 #include <utils/String8.h>
 #include <utils/Looper.h>
 #include <utils/BitSet.h>
+#include <cutils/atomic.h>
 
 #include <stddef.h>
 #include <unistd.h>
@@ -522,6 +523,8 @@ private:
 
     // Tracks the progress of dispatching a particular event to a particular connection.
     struct DispatchEntry : Link<DispatchEntry> {
+        const uint32_t seq; // unique sequence number, never 0
+
         EventEntry* eventEntry; // the event to dispatch
         int32_t targetFlags;
         float xOffset;
@@ -543,6 +546,11 @@ private:
         inline bool isSplit() const {
             return targetFlags & InputTarget::FLAG_SPLIT;
         }
+
+    private:
+        static volatile int32_t sNextSeqAtomic;
+
+        static uint32_t nextSeq();
     };
 
     // A command entry captures state and behavior for an action to be performed in the
@@ -578,6 +586,7 @@ private:
         sp<InputApplicationHandle> inputApplicationHandle;
         sp<InputWindowHandle> inputWindowHandle;
         int32_t userActivityEventType;
+        uint32_t seq;
         bool handled;
     };
 
@@ -797,6 +806,8 @@ private:
         inline const char* getInputChannelName() const { return inputChannel->getName().string(); }
 
         const char* getStatusLabel() const;
+
+        DispatchEntry* findWaitQueueEntry(uint32_t seq);
     };
 
     enum DropReason {
@@ -1000,7 +1011,7 @@ private:
             EventEntry* eventEntry, const InputTarget* inputTarget, int32_t dispatchMode);
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
-            bool handled);
+            uint32_t seq, bool handled);
     void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool notify);
     void drainDispatchQueueLocked(Queue<DispatchEntry>* queue);
@@ -1034,7 +1045,7 @@ private:
 
     // Interesting events that we might like to log or tell the framework about.
     void onDispatchCycleFinishedLocked(
-            nsecs_t currentTime, const sp<Connection>& connection, bool handled);
+            nsecs_t currentTime, const sp<Connection>& connection, uint32_t seq, bool handled);
     void onDispatchCycleBrokenLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onANRLocked(

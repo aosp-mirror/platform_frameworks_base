@@ -21,6 +21,7 @@ import dalvik.system.CloseGuard;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 /**
  * Provides a low-level mechanism for an application to receive input events.
@@ -38,13 +39,14 @@ public abstract class InputEventReceiver {
     private InputChannel mInputChannel;
     private MessageQueue mMessageQueue;
 
-    // The sequence number of the event that is in progress.
-    private int mEventSequenceNumberInProgress = -1;
+    // Map from InputEvent sequence numbers to dispatcher sequence numbers.
+    private final SparseIntArray mSeqMap = new SparseIntArray();
 
     private static native int nativeInit(InputEventReceiver receiver,
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(int receiverPtr);
-    private static native void nativeFinishInputEvent(int receiverPtr, boolean handled);
+    private static native void nativeFinishInputEvent(int receiverPtr, int seq, boolean handled);
+    private static native void nativeConsumeBatchedInputEvents(int receiverPtr);
 
     /**
      * Creates an input event receiver bound to the specified input channel.
@@ -104,12 +106,25 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Called when a batched input event is pending.
+     *
+     * The batched input event will continue to accumulate additional movement
+     * samples until the recipient calls {@link #consumeBatchedInputEvents} or
+     * an event is received that ends the batch and causes it to be consumed
+     * immediately (such as a pointer up event).
+     */
+    public void onBatchedInputEventPending() {
+        consumeBatchedInputEvents();
+    }
+
+    /**
      * Finishes an input event and indicates whether it was handled.
+     * Must be called on the same Looper thread to which the receiver is attached.
      *
      * @param event The input event that was finished.
      * @param handled True if the event was handled.
      */
-    public void finishInputEvent(InputEvent event, boolean handled) {
+    public final void finishInputEvent(InputEvent event, boolean handled) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -117,21 +132,45 @@ public abstract class InputEventReceiver {
             Log.w(TAG, "Attempted to finish an input event but the input event "
                     + "receiver has already been disposed.");
         } else {
-            if (event.getSequenceNumber() != mEventSequenceNumberInProgress) {
+            int index = mSeqMap.indexOfKey(event.getSequenceNumber());
+            if (index < 0) {
                 Log.w(TAG, "Attempted to finish an input event that is not in progress.");
             } else {
-                mEventSequenceNumberInProgress = -1;
-                nativeFinishInputEvent(mReceiverPtr, handled);
+                int seq = mSeqMap.valueAt(index);
+                mSeqMap.removeAt(index);
+                nativeFinishInputEvent(mReceiverPtr, seq, handled);
             }
         }
         event.recycleIfNeededAfterDispatch();
     }
 
+    /**
+     * Consumes all pending batched input events.
+     * Must be called on the same Looper thread to which the receiver is attached.
+     *
+     * This method forces all batched input events to be delivered immediately.
+     * Should be called just before animating or drawing a new frame in the UI.
+     */
+    public final void consumeBatchedInputEvents() {
+        if (mReceiverPtr == 0) {
+            Log.w(TAG, "Attempted to consume batched input events but the input event "
+                    + "receiver has already been disposed.");
+        } else {
+            nativeConsumeBatchedInputEvents(mReceiverPtr);
+        }
+    }
+
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchInputEvent(InputEvent event) {
-        mEventSequenceNumberInProgress = event.getSequenceNumber();
+    private void dispatchInputEvent(int seq, InputEvent event) {
+        mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchBatchedInputEventPending() {
+        onBatchedInputEventPending();
     }
 
     public static interface Factory {

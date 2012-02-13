@@ -52,6 +52,7 @@ struct InputMessage {
 
     union Body {
         struct Key {
+            uint32_t seq;
             nsecs_t eventTime;
             int32_t deviceId;
             int32_t source;
@@ -69,6 +70,7 @@ struct InputMessage {
         } key;
 
         struct Motion {
+            uint32_t seq;
             nsecs_t eventTime;
             int32_t deviceId;
             int32_t source;
@@ -95,6 +97,7 @@ struct InputMessage {
         } motion;
 
         struct Finished {
+            uint32_t seq;
             bool handled;
 
             inline size_t size() const {
@@ -181,9 +184,11 @@ public:
      * Returns OK on success.
      * Returns WOULD_BLOCK if the channel is full.
      * Returns DEAD_OBJECT if the channel's peer has been closed.
+     * Returns BAD_VALUE if seq is 0.
      * Other errors probably indicate that the channel is broken.
      */
     status_t publishKeyEvent(
+            uint32_t seq,
             int32_t deviceId,
             int32_t source,
             int32_t action,
@@ -200,10 +205,11 @@ public:
      * Returns OK on success.
      * Returns WOULD_BLOCK if the channel is full.
      * Returns DEAD_OBJECT if the channel's peer has been closed.
-     * Returns BAD_VALUE if pointerCount is less than 1 or greater than MAX_POINTERS.
+     * Returns BAD_VALUE if seq is 0 or if pointerCount is less than 1 or greater than MAX_POINTERS.
      * Other errors probably indicate that the channel is broken.
      */
     status_t publishMotionEvent(
+            uint32_t seq,
             int32_t deviceId,
             int32_t source,
             int32_t action,
@@ -222,14 +228,17 @@ public:
             const PointerCoords* pointerCoords);
 
     /* Receives the finished signal from the consumer in reply to the original dispatch signal.
-     * Returns whether the consumer handled the message.
+     * If a signal was received, returns the message sequence number,
+     * and whether the consumer handled the message.
+     *
+     * The returned sequence number is never 0 unless the operation failed.
      *
      * Returns OK on success.
      * Returns WOULD_BLOCK if there is no signal present.
      * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Other errors probably indicate that the channel is broken.
      */
-    status_t receiveFinishedSignal(bool* outHandled);
+    status_t receiveFinishedSignal(uint32_t* outSeq, bool* outHandled);
 
 private:
     sp<InputChannel> mChannel;
@@ -252,24 +261,60 @@ public:
     /* Consumes an input event from the input channel and copies its contents into
      * an InputEvent object created using the specified factory.
      *
+     * Tries to combine a series of move events into larger batches whenever possible.
+     *
+     * If consumeBatches is false, then defers consuming pending batched events if it
+     * is possible for additional samples to be added to them later.  Call hasPendingBatch()
+     * to determine whether a pending batch is available to be consumed.
+     *
+     * If consumeBatches is true, then events are still batched but they are consumed
+     * immediately as soon as the input channel is exhausted.
+     *
+     * The returned sequence number is never 0 unless the operation failed.
+     *
      * Returns OK on success.
      * Returns WOULD_BLOCK if there is no event present.
      * Returns DEAD_OBJECT if the channel's peer has been closed.
      * Returns NO_MEMORY if the event could not be created.
      * Other errors probably indicate that the channel is broken.
      */
-    status_t consume(InputEventFactoryInterface* factory, InputEvent** outEvent);
+    status_t consume(InputEventFactoryInterface* factory, bool consumeBatches,
+            uint32_t* outSeq, InputEvent** outEvent);
 
-    /* Sends a finished signal to the publisher to inform it that the current message is
-     * finished processing and specifies whether the message was handled by the consumer.
+    /* Sends a finished signal to the publisher to inform it that the message
+     * with the specified sequence number has finished being process and whether
+     * the message was handled by the consumer.
      *
      * Returns OK on success.
+     * Returns BAD_VALUE if seq is 0.
      * Other errors probably indicate that the channel is broken.
      */
-    status_t sendFinishedSignal(bool handled);
+    status_t sendFinishedSignal(uint32_t seq, bool handled);
+
+    /* Returns true if there is a pending batch. */
+    bool hasPendingBatch() const;
 
 private:
     sp<InputChannel> mChannel;
+
+    // State about an event that consume would have returned except that it had to
+    // return a completed batch first.  Sequence number is non-zero if an event was deferred.
+    uint32_t mDeferredEventSeq;
+    MotionEvent mDeferredEvent;
+
+    // Batched motion events per device and source.
+    struct Batch {
+        uint32_t seq;
+        MotionEvent event;
+    };
+    Vector<Batch> mBatches;
+
+    ssize_t findBatch(int32_t deviceId, int32_t source) const;
+
+    static void initializeKeyEvent(KeyEvent* event, const InputMessage* msg);
+    static void initializeMotionEvent(MotionEvent* event, const InputMessage* msg);
+    static bool canAppendSamples(const MotionEvent* event, const InputMessage* msg);
+    static void appendSamples(MotionEvent* event, const InputMessage* msg);
 };
 
 } // namespace android
