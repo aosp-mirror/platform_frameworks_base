@@ -34,6 +34,8 @@ import java.util.List;
 public class MediaInserter {
     private final HashMap<Uri, List<ContentValues>> mRowMap =
             new HashMap<Uri, List<ContentValues>>();
+    private final HashMap<Uri, List<ContentValues>> mPriorityRowMap =
+            new HashMap<Uri, List<ContentValues>>();
 
     private IContentProvider mProvider;
     private int mBufferSizePerUri;
@@ -44,26 +46,45 @@ public class MediaInserter {
     }
 
     public void insert(Uri tableUri, ContentValues values) throws RemoteException {
-        List<ContentValues> list = mRowMap.get(tableUri);
+        insert(tableUri, values, false);
+    }
+
+    public void insertwithPriority(Uri tableUri, ContentValues values) throws RemoteException {
+        insert(tableUri, values, true);
+    }
+
+    private void insert(Uri tableUri, ContentValues values, boolean priority) throws RemoteException {
+        HashMap<Uri, List<ContentValues>> rowmap = priority ? mPriorityRowMap : mRowMap;
+        List<ContentValues> list = rowmap.get(tableUri);
         if (list == null) {
             list = new ArrayList<ContentValues>();
-            mRowMap.put(tableUri, list);
+            rowmap.put(tableUri, list);
         }
         list.add(new ContentValues(values));
         if (list.size() >= mBufferSizePerUri) {
-            flush(tableUri);
+            flushAllPriority();
+            flush(tableUri, list);
         }
     }
 
     public void flushAll() throws RemoteException {
+        flushAllPriority();
         for (Uri tableUri : mRowMap.keySet()){
-            flush(tableUri);
+            List<ContentValues> list = mRowMap.get(tableUri);
+            flush(tableUri, list);
         }
         mRowMap.clear();
     }
 
-    private void flush(Uri tableUri) throws RemoteException {
-        List<ContentValues> list = mRowMap.get(tableUri);
+    private void flushAllPriority() throws RemoteException {
+        for (Uri tableUri : mPriorityRowMap.keySet()){
+            List<ContentValues> list = mPriorityRowMap.get(tableUri);
+            flush(tableUri, list);
+        }
+        mPriorityRowMap.clear();
+    }
+
+    private void flush(Uri tableUri, List<ContentValues> list) throws RemoteException {
         if (!list.isEmpty()) {
             ContentValues[] valuesArray = new ContentValues[list.size()];
             valuesArray = list.toArray(valuesArray);

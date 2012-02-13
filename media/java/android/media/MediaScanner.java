@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 /**
@@ -374,7 +375,7 @@ public class MediaScanner
 
     // hashes file path to FileCacheEntry.
     // path should be lower case if mCaseInsensitivePaths is true
-    private HashMap<String, FileCacheEntry> mFileCache;
+    private LinkedHashMap<String, FileCacheEntry> mFileCache;
 
     private ArrayList<FileCacheEntry> mPlayLists;
 
@@ -922,16 +923,15 @@ public class MediaScanner
                     }
                 }
 
-                // new file, insert it
-                // We insert directories immediately to ensure they are in the database
-                // before the files they contain.
-                // Otherwise we can get duplicate directory entries in the database
-                // if one of the media FileInserters is flushed before the files table FileInserter
-                // Also, we immediately insert the file if the rowId of the inserted file is
-                // needed.
-                if (inserter == null || needToSetSettings ||
-                        entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
+                // New file, insert it.
+                // Directories need to be inserted before the files they contain, so they
+                // get priority when bulk inserting.
+                // If the rowId of the inserted file is needed, it gets inserted immediately,
+                // bypassing the bulk inserter.
+                if (inserter == null || needToSetSettings) {
                     result = mMediaProvider.insert(tableUri, values);
+                } else if (entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
+                    inserter.insertwithPriority(tableUri, values);
                 } else {
                     inserter.insert(tableUri, values);
                 }
@@ -1029,7 +1029,7 @@ public class MediaScanner
         String[] selectionArgs = null;
 
         if (mFileCache == null) {
-            mFileCache = new HashMap<String, FileCacheEntry>();
+            mFileCache = new LinkedHashMap<String, FileCacheEntry>();
         } else {
             mFileCache.clear();
         }
@@ -1151,7 +1151,8 @@ public class MediaScanner
     }
 
     static class MediaBulkDeleter {
-        StringBuilder idList = new StringBuilder();
+        StringBuilder whereClause = new StringBuilder();
+        ArrayList<String> whereArgs = new ArrayList<String>(100); 
         IContentProvider mProvider;
         Uri mBaseUri;
 
@@ -1161,19 +1162,26 @@ public class MediaScanner
         }
 
         public void delete(long id) throws RemoteException {
-            if (idList.length() != 0) {
-                idList.append(",");
+            if (whereClause.length() != 0) {
+                whereClause.append(",");
             }
-            idList.append(id);
-            if (idList.length() > 1024) {
+            whereClause.append("?");
+            whereArgs.add("" + id);
+            if (whereArgs.size() > 100) {
                 flush();
             }
         }
         public void flush() throws RemoteException {
-            int numrows = mProvider.delete(mBaseUri, MediaStore.MediaColumns._ID + " IN (" +
-                    idList.toString() + ")", null);
-            //Log.i("@@@@@@@@@", "rows deleted: " + numrows);
-            idList.setLength(0);
+            int size = whereArgs.size();
+            if (size > 0) {
+                String [] foo = new String [size];
+                foo = whereArgs.toArray(foo);
+                int numrows = mProvider.delete(mBaseUri, MediaStore.MediaColumns._ID + " IN (" +
+                        whereClause.toString() + ")", foo);
+                //Log.i("@@@@@@@@@", "rows deleted: " + numrows);
+                whereClause.setLength(0);
+                whereArgs.clear();
+            }
         }
     }
 
