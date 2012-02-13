@@ -90,6 +90,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      */
     @LargeTest
     public void testWifiDownload() throws Exception {
+        mConnectionUtil.wifiTestInit();
         assertTrue("Could not connect to wifi!", setDeviceWifiAndAirplaneMode(mSsid));
         downloadFile();
     }
@@ -143,6 +144,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      */
     @LargeTest
     public void testWifiUpload() throws Exception {
+        mConnectionUtil.wifiTestInit();
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         uploadFile();
     }
@@ -197,6 +199,7 @@ public class BandwidthTest extends InstrumentationTestCase {
      */
     @LargeTest
     public void testWifiDownloadWithDownloadManager() throws Exception {
+        mConnectionUtil.wifiTestInit();
         assertTrue(setDeviceWifiAndAirplaneMode(mSsid));
         downloadFileUsingDownloadManager();
     }
@@ -286,6 +289,8 @@ public class BandwidthTest extends InstrumentationTestCase {
      * @return true if we successfully connect to mobile data.
      */
     public boolean hasMobileData() {
+        assertTrue(mConnectionUtil.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
+                State.CONNECTED, ConnectionUtil.LONG_TIMEOUT));
         assertTrue("Not connected to mobile", mConnectionUtil.isConnectedToMobile());
         assertFalse("Still connected to wifi.", mConnectionUtil.isConnectedToWifi());
         return mConnectionUtil.hasData();
