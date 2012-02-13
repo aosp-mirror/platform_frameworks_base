@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"מאפשר ליישום להעביר משימות לחזית ולרקע. יישומים זדוניים עלולים לאלץ את עצמם לעבור לחזית ללא שליטה מצדך."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"עצירת יישומים פעילים"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"הרשאה זו מאפשרת ליישום להסיר משימות ולסגור את היישומים שבהם הן פועלות. יישומים זדוניים עלולים לשבש את פעולתם של יישומים אחרים."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"הגדרת תאימות מסך"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"מאפשר ליישום לשלוט במצב תאימות המסך של יישומים אחרים. יישומים זדוניים עלולים לפגוע בהתנהגות של יישומים אחרים."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"הפעלה של ניקוי באגים ביישומים"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"הרשאה זו מאפשרת ליישום להפעיל ניקוי באגים עבור יישום אחר. יישומים זדוניים עלולים להשתמש באפשרות זו כדי לסגור יישומים אחרים."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"שנה את הגדרות ממשק המשתמש שלך"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"מאפשר ליישום לאמת שחבילה ניתנת להתקנה."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"הכפפה למאמת חבילה"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"מאפשר למשתמש להגיש בקשות של מאמתי חבילות. הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"גישה ליציאות טוריות"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"מאפשר לבעלים לגשת ליציאות טוריות באמצעות ממשק ה- API של SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"האם ברצונך שהדפדפן יזכור סיסמה זו?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"לא כעת"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"זכור"</string>

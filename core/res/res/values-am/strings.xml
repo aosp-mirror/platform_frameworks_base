@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"ወደ ግንባር ዎይ እና ዳራ ስራዎችን ለማንቀሳቀስ ለመተግበሪያው ይፈቅዳሉ፡፡ ያለአንተ ቁጥጥር  ተንኮል አዘል መተግበሪያዎች ራሳቸውን ወደፊት መምጣት ሊያስገድዱ ይችላሉ፡፡"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"የአሂድ ትግበራዎች አቁም"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"ተግባሮችን ለማስወገድ እና መተግበሪያዎቻቸውን ለመግደል ለመተግበሪያ ይፈቅዳል። ጎጂ የሆኑ መተግበሪያዎች የሌሎችን መተግበሪያዎችን ባህሪ ሊያውኩ ይችላሉ።"</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"የማያ ገጽ ተኳኋኝነት መድብ"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"መተግበሪያው የሌሎች መተግበሪያዎች የማያ ገጽ ተኳኋኝነት ሁናቴ እንዲቆጣጠር ይፈቅዳል። ተንኮለኛ መተግበሪያዎች የሌሎች መተግበሪያዎች ባህሪ ሊሰብሩ ይችላሉ።"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"የትግበራ ማረሚያ አንቃ"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"ለሌላ መተግበሪያ አርምን አብራ ለመተግበሪያው ይፈቅዳሉ። ሌሎች መተግበሪያዎች ለመግደል ተንኮል አዘል መተግበሪያዎች ይሄንን ሊጠቀሙት ይችላሉ።"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"የUI ቅንብሮችን ለውጥ"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ፓኬጅ መጫን የሚችል መሆኑን ለማረጋገጥ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"በፓኬጅ አረጋጋጭ የተወሰነ"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"የፓኬጅ አረጋጋጮችን ጥየቃ ለማድረግ ያዡ ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"ተከታታይ ወደቦችን ድረስ"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Allows the holder to access serial ports using the SerialManager API. የተከታታይ አደራጅ APIን በመጠቀም ያዡ የተከታታይ ወደቦችን እንዲደርስ ይፈቅዳል።"</string>
     <string name="save_password_message" msgid="767344687139195790">"አሳሹ ይህን ይለፍ ቃል እንዲያስታወስ ይፈልጋሉ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"አሁን አይደለም"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"አስታውስ"</string>

@@ -764,6 +764,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"앱이 패키지가 설치 가능한지 확인할 수 있도록 허용합니다."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"패키지 인증 연결"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"권한을 가진 프로그램이 패키지 인증을 요청할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"직렬 포트에 액세스"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API를 사용하여 권한을 가진 프로그램이 직렬 포트에 액세스할 수 있도록 합니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"나중에"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"저장"</string>
