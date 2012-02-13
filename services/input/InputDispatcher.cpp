@@ -1737,7 +1737,6 @@ void InputDispatcher::enqueueDispatchEntriesLocked(nsecs_t currentTime,
 
     // If the outbound queue was previously empty, start the dispatch cycle going.
     if (wasEmpty && !connection->outboundQueue.isEmpty()) {
-        activateConnectionLocked(connection.get());
         startDispatchCycleLocked(currentTime, connection);
     }
 }
@@ -1975,9 +1974,6 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
             return;
         }
     }
-
-    // Outbound queue is empty, deactivate the connection.
-    deactivateConnectionLocked(connection.get());
 }
 
 void InputDispatcher::abortBrokenDispatchCycleLocked(nsecs_t currentTime,
@@ -2010,8 +2006,6 @@ void InputDispatcher::drainOutboundQueueLocked(Connection* connection) {
         }
         delete dispatchEntry;
     }
-
-    deactivateConnectionLocked(connection);
 }
 
 int InputDispatcher::handleReceiveCallback(int fd, int events, void* data) {
@@ -3045,20 +3039,6 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
 
     dump.appendFormat(INDENT "InboundQueue: length=%u\n", mInboundQueue.count());
 
-    if (!mActiveConnections.isEmpty()) {
-        dump.append(INDENT "ActiveConnections:\n");
-        for (size_t i = 0; i < mActiveConnections.size(); i++) {
-            const Connection* connection = mActiveConnections[i];
-            dump.appendFormat(INDENT2 "%d: '%s', status=%s, outboundQueueLength=%u, "
-                    "inputState.isNeutral=%s\n",
-                    i, connection->getInputChannelName(), connection->getStatusLabel(),
-                    connection->outboundQueue.count(),
-                    toString(connection->inputState.isNeutral()));
-        }
-    } else {
-        dump.append(INDENT "ActiveConnections: <none>\n");
-    }
-
     if (isAppSwitchPendingLocked()) {
         dump.appendFormat(INDENT "AppSwitch: pending, due in %01.1fms\n",
                 (mAppSwitchDueTime - now()) / 1000000.0);
@@ -3165,24 +3145,6 @@ ssize_t InputDispatcher::getConnectionIndexLocked(const sp<InputChannel>& inputC
     }
 
     return -1;
-}
-
-void InputDispatcher::activateConnectionLocked(Connection* connection) {
-    for (size_t i = 0; i < mActiveConnections.size(); i++) {
-        if (mActiveConnections.itemAt(i) == connection) {
-            return;
-        }
-    }
-    mActiveConnections.add(connection);
-}
-
-void InputDispatcher::deactivateConnectionLocked(Connection* connection) {
-    for (size_t i = 0; i < mActiveConnections.size(); i++) {
-        if (mActiveConnections.itemAt(i) == connection) {
-            mActiveConnections.removeAt(i);
-            return;
-        }
-    }
 }
 
 void InputDispatcher::onDispatchCycleStartedLocked(

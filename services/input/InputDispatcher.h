@@ -864,12 +864,6 @@ private:
 
     ssize_t getConnectionIndexLocked(const sp<InputChannel>& inputChannel);
 
-    // Active connections are connections that have a non-empty outbound queue.
-    // We don't use a ref-counted pointer here because we explicitly abort connections
-    // during unregistration which causes the connection's outbound queue to be cleared
-    // and the connection itself to be deactivated.
-    Vector<Connection*> mActiveConnections;
-
     // Input channels that will receive a copy of all input events.
     Vector<sp<InputChannel> > mMonitoringChannels;
 
