@@ -401,17 +401,16 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory,
             if (batchIndex >= 0) {
                 Batch& batch = mBatches.editItemAt(batchIndex);
                 if (canAppendSamples(&batch.event, &mMsg)) {
-                    // Send finished message for the earlier part of the batch.
-                    // Claim that we handled the event.  (The dispatcher doesn't care either
-                    // way at the moment.)
-                    status_t status = sendFinishedSignal(batch.seq, true);
-                    if (status) {
-                        return status;
-                    }
-
                     // Append to the batch and save the new sequence number for the tail end.
+                    uint32_t chain = batch.seq;
                     appendSamples(&batch.event, &mMsg);
                     batch.seq = mMsg.body.motion.seq;
+
+                    // Update the sequence number chain.
+                    SeqChain seqChain;
+                    seqChain.seq = batch.seq;
+                    seqChain.chain = chain;
+                    mSeqChains.push(seqChain);
 #if DEBUG_TRANSPORT_ACTIONS
                     ALOGD("channel '%s' consumer ~ appended to batch event",
                             mChannel->getName().string());
@@ -486,6 +485,41 @@ status_t InputConsumer::sendFinishedSignal(uint32_t seq, bool handled) {
         return BAD_VALUE;
     }
 
+    // Send finished signals for the batch sequence chain first.
+    size_t seqChainCount = mSeqChains.size();
+    if (seqChainCount) {
+        uint32_t currentSeq = seq;
+        uint32_t chainSeqs[seqChainCount];
+        size_t chainIndex = 0;
+        for (size_t i = seqChainCount; i-- > 0; ) {
+             const SeqChain& seqChain = mSeqChains.itemAt(i);
+             if (seqChain.seq == currentSeq) {
+                 currentSeq = seqChain.chain;
+                 chainSeqs[chainIndex++] = currentSeq;
+                 mSeqChains.removeAt(i);
+             }
+        }
+        status_t status = OK;
+        while (!status && chainIndex-- > 0) {
+            status = sendUnchainedFinishedSignal(chainSeqs[chainIndex], handled);
+        }
+        if (status) {
+            // An error occurred so at least one signal was not sent, reconstruct the chain.
+            do {
+                SeqChain seqChain;
+                seqChain.seq = chainIndex != 0 ? chainSeqs[chainIndex - 1] : seq;
+                seqChain.chain = chainSeqs[chainIndex];
+                mSeqChains.push(seqChain);
+            } while (chainIndex-- > 0);
+            return status;
+        }
+    }
+
+    // Send finished signal for the last message in the batch.
+    return sendUnchainedFinishedSignal(seq, handled);
+}
+
+status_t InputConsumer::sendUnchainedFinishedSignal(uint32_t seq, bool handled) {
     InputMessage msg;
     msg.header.type = InputMessage::TYPE_FINISHED;
     msg.body.finished.seq = seq;

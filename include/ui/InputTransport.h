@@ -306,12 +306,23 @@ private:
 
     // Batched motion events per device and source.
     struct Batch {
-        uint32_t seq;
+        uint32_t seq; // sequence number of last input message batched in the event
         MotionEvent event;
     };
     Vector<Batch> mBatches;
 
+    // Chain of batched sequence numbers.  When multiple input messages are combined into
+    // a batch, we append a record here that associates the last sequence number in the
+    // batch with the previous one.  When the finished signal is sent, we traverse the
+    // chain to individually finish all input messages that were part of the batch.
+    struct SeqChain {
+        uint32_t seq;   // sequence number of batched input message
+        uint32_t chain; // sequence number of previous batched input message
+    };
+    Vector<SeqChain> mSeqChains;
+
     ssize_t findBatch(int32_t deviceId, int32_t source) const;
+    status_t sendUnchainedFinishedSignal(uint32_t seq, bool handled);
 
     static void initializeKeyEvent(KeyEvent* event, const InputMessage* msg);
     static void initializeMotionEvent(MotionEvent* event, const InputMessage* msg);
