@@ -297,10 +297,12 @@ public:
 private:
     sp<InputChannel> mChannel;
 
-    // State about an event that consume would have returned except that it had to
-    // return a completed batch first.  Sequence number is non-zero if an event was deferred.
-    uint32_t mDeferredEventSeq;
-    MotionEvent mDeferredEvent;
+    // The current input message.
+    InputMessage mMsg;
+
+    // True if mMsg contains a valid input message that was deferred from the previous
+    // call to consume and that still needs to be handled.
+    bool mMsgDeferred;
 
     // Batched motion events per device and source.
     struct Batch {
