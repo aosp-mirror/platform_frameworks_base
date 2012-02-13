@@ -995,7 +995,7 @@ private:
     bool isWindowObscuredAtPointLocked(const sp<InputWindowHandle>& windowHandle,
             int32_t x, int32_t y) const;
     bool isWindowReadyForMoreInputLocked(nsecs_t currentTime,
-            const sp<InputWindowHandle>& windowHandle, bool focusedEvent);
+            const sp<InputWindowHandle>& windowHandle, const EventEntry* eventEntry);
     String8 getApplicationWindowLabelLocked(const sp<InputApplicationHandle>& applicationHandle,
             const sp<InputWindowHandle>& windowHandle);
 
