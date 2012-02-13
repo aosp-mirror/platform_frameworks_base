@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import java.io.PrintWriter;
+
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -95,6 +97,46 @@ class ScreenRotationAnimation {
     final Matrix mSnapshotFinalMatrix = new Matrix();
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpFloats = new float[9];
+
+    public void printTo(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("mSurface="); pw.print(mSurface);
+                pw.print(" mWidth="); pw.print(mWidth);
+                pw.print(" mHeight="); pw.println(mHeight);
+        pw.print(prefix); pw.print("mBlackFrame="); pw.println(mBlackFrame);
+        pw.print(prefix); pw.print("mSnapshotRotation="); pw.print(mSnapshotRotation);
+                pw.print(" mSnapshotDeltaRotation="); pw.print(mSnapshotDeltaRotation);
+                pw.print(" mCurRotation="); pw.println(mCurRotation);
+        pw.print(prefix); pw.print("mOriginalRotation="); pw.print(mOriginalRotation);
+                pw.print(" mOriginalWidth="); pw.print(mOriginalWidth);
+                pw.print(" mOriginalHeight="); pw.println(mOriginalHeight);
+        pw.print(prefix); pw.print("mStarted="); pw.print(mStarted);
+                pw.print(" mAnimRunning="); pw.print(mAnimRunning);
+                pw.print(" mFinishAnimReady="); pw.print(mFinishAnimReady);
+                pw.print(" mFinishAnimStartTime="); pw.println(mFinishAnimStartTime);
+        pw.print(prefix); pw.print("mStartExitAnimation="); pw.print(mStartExitAnimation);
+                pw.print(" "); mStartExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mStartEnterAnimation="); pw.print(mStartEnterAnimation);
+                pw.print(" "); mStartEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mFinishExitAnimation="); pw.print(mFinishExitAnimation);
+                pw.print(" "); mFinishExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mFinishEnterAnimation="); pw.print(mFinishEnterAnimation);
+                pw.print(" "); mFinishEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mRotateExitAnimation="); pw.print(mRotateExitAnimation);
+                pw.print(" "); mRotateExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mRotateEnterAnimation="); pw.print(mRotateEnterAnimation);
+                pw.print(" "); mRotateEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mLastRotateExitAnimation=");
+                pw.print(mLastRotateExitAnimation);
+                pw.print(" "); mLastRotateExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mExitTransformation=");
+                mExitTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mEnterTransformation=");
+                mEnterTransformation.printShortString(pw); pw.println();
+        pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
+                mSnapshotInitialMatrix.printShortString(pw);
+                pw.print(" mSnapshotFinalMatrix="); mSnapshotFinalMatrix.printShortString(pw);
+                pw.println();
+    }
 
     public ScreenRotationAnimation(Context context, SurfaceSession session,
             boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
