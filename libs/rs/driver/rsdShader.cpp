@@ -30,7 +30,7 @@ using namespace android;
 using namespace android::renderscript;
 
 RsdShader::RsdShader(const Program *p, uint32_t type,
-                       const char * shaderText, uint32_t shaderLength) {
+                       const char * shaderText, size_t shaderLength) {
 
     mUserShader.setTo(shaderText, shaderLength);
     mRSProgram = p;

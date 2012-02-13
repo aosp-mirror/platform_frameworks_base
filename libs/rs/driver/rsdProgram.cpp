@@ -34,7 +34,7 @@ using namespace android;
 using namespace android::renderscript;
 
 bool rsdProgramVertexInit(const Context *rsc, const ProgramVertex *pv,
-                          const char* shader, uint32_t shaderLen) {
+                          const char* shader, size_t shaderLen) {
     RsdShader *drv = new RsdShader(pv, GL_VERTEX_SHADER, shader, shaderLen);
     pv->mHal.drv = drv;
 
@@ -78,7 +78,7 @@ void rsdProgramVertexDestroy(const Context *rsc, const ProgramVertex *pv) {
 }
 
 bool rsdProgramFragmentInit(const Context *rsc, const ProgramFragment *pf,
-                          const char* shader, uint32_t shaderLen) {
+                          const char* shader, size_t shaderLen) {
     RsdShader *drv = new RsdShader(pf, GL_FRAGMENT_SHADER, shader, shaderLen);
     pf->mHal.drv = drv;
 
