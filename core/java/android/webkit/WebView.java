@@ -5555,7 +5555,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (isEnterActionKey(keyCode)) {
             switchOutDrawHistory();
             boolean wantsKeyEvents = nativeCursorNodePointer() == 0
                 || nativeCursorWantsKeyEvents();
@@ -5704,33 +5704,35 @@ public class WebView extends AbsoluteLayout
                 return true; // discard press if copy in progress
             }
 
-            // perform the single click
-            Rect visibleRect = sendOurVisibleRect();
-            // Note that sendOurVisibleRect calls viewToContent, so the
-            // coordinates should be in content coordinates.
-            if (!nativeCursorIntersects(visibleRect)) {
-                return false;
-            }
-            WebViewCore.CursorData data = cursorData();
-            mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
-            playSoundEffect(SoundEffectConstants.CLICK);
-            if (nativeCursorIsTextInput()) {
-                rebuildWebTextView();
-                centerKeyPressOnTextField();
-                if (inEditingMode()) {
-                    mWebTextView.setDefaultSelection();
+            if (!sDisableNavcache) {
+                // perform the single click
+                Rect visibleRect = sendOurVisibleRect();
+                // Note that sendOurVisibleRect calls viewToContent, so the
+                // coordinates should be in content coordinates.
+                if (!nativeCursorIntersects(visibleRect)) {
+                    return false;
                 }
-                return true;
-            }
-            clearTextEntry();
-            nativeShowCursorTimed();
-            if (mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
-                return true;
-            }
-            if (nativeCursorNodePointer() != 0 && !nativeCursorWantsKeyEvents()) {
-                mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
-                        nativeCursorNodePointer());
-                return true;
+                WebViewCore.CursorData data = cursorData();
+                mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
+                playSoundEffect(SoundEffectConstants.CLICK);
+                if (nativeCursorIsTextInput()) {
+                    rebuildWebTextView();
+                    centerKeyPressOnTextField();
+                    if (inEditingMode()) {
+                        mWebTextView.setDefaultSelection();
+                    }
+                    return true;
+                }
+                clearTextEntry();
+                nativeShowCursorTimed();
+                if (mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
+                    return true;
+                }
+                if (nativeCursorNodePointer() != 0 && !nativeCursorWantsKeyEvents()) {
+                    mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
+                            nativeCursorNodePointer());
+                    return true;
+                }
             }
         }
 

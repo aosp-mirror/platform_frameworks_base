@@ -333,6 +333,15 @@ public final class WebViewCore {
     }
 
     /**
+     * Called by JNI when the focus node changed.
+     */
+    private void focusNodeChanged(WebKitHitTest hitTest) {
+        if (mWebView == null) return;
+        mWebView.mPrivateHandler.obtainMessage(WebView.HIT_TEST_RESULT, hitTest)
+                .sendToTarget();
+    }
+
+    /**
      * Called by JNI.  Open a file chooser to upload a file.
      * @param acceptType The value of the 'accept' attribute of the
      *         input tag associated with this file picker.
@@ -614,7 +623,6 @@ public final class WebViewCore {
             int x, int y);
     private native String nativeRetrieveImageSource(int nativeClass,
             int x, int y);
-    private native void nativeStopPaintingCaret(int nativeClass);
     private native void nativeTouchUp(int nativeClass,
             int touchGeneration, int framePtr, int nodePtr, int x, int y);
 
@@ -1530,9 +1538,6 @@ public final class WebViewCore {
                             nativeMoveMouseIfLatest(mNativeClass,
                                     cData.mMoveGeneration,
                                     cData.mFrame, cData.mX, cData.mY);
-                            if (msg.arg1 == 1) {
-                                nativeStopPaintingCaret(mNativeClass);
-                            }
                             break;
 
                         case REQUEST_CURSOR_HREF: {
