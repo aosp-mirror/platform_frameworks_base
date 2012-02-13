@@ -142,4 +142,8 @@
 
     <!-- Development settings -->
     <bool name="def_stay_on_while_plugged_in">false</bool>
+
+    <!-- Number of retries for connecting to DHCP.
+         Value here is the same as WifiStateMachine.DEFAULT_MAX_DHCP_RETRIES -->
+    <integer name="def_max_dhcp_retries">9</integer>
 </resources>
