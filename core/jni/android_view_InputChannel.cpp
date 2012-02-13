@@ -199,32 +199,16 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
             String8 name = parcel->readString8();
-            int32_t parcelAshmemFd = parcel->readFileDescriptor();
-            int32_t ashmemFd = dup(parcelAshmemFd);
-            if (ashmemFd < 0) {
-                ALOGE("Error %d dup ashmem fd %d.", errno, parcelAshmemFd);
-            }
-            int32_t parcelReceivePipeFd = parcel->readFileDescriptor();
-            int32_t receivePipeFd = dup(parcelReceivePipeFd);
-            if (receivePipeFd < 0) {
-                ALOGE("Error %d dup receive pipe fd %d.", errno, parcelReceivePipeFd);
-            }
-            int32_t parcelSendPipeFd = parcel->readFileDescriptor();
-            int32_t sendPipeFd = dup(parcelSendPipeFd);
-            if (sendPipeFd < 0) {
-                ALOGE("Error %d dup send pipe fd %d.", errno, parcelSendPipeFd);
-            }
-            if (ashmemFd < 0 || receivePipeFd < 0 || sendPipeFd < 0) {
-                if (ashmemFd >= 0) ::close(ashmemFd);
-                if (receivePipeFd >= 0) ::close(receivePipeFd);
-                if (sendPipeFd >= 0) ::close(sendPipeFd);
+            int32_t rawFd = parcel->readFileDescriptor();
+            int32_t dupFd = dup(rawFd);
+            if (rawFd < 0) {
+                ALOGE("Error %d dup channel fd %d.", errno, rawFd);
                 jniThrowRuntimeException(env,
                         "Could not read input channel file descriptors from parcel.");
                 return;
             }
 
-            InputChannel* inputChannel = new InputChannel(name, ashmemFd,
-                    receivePipeFd, sendPipeFd);
+            InputChannel* inputChannel = new InputChannel(name, dupFd);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
 
             android_view_InputChannel_setNativeInputChannel(env, obj, nativeInputChannel);
@@ -243,9 +227,7 @@ static void android_view_InputChannel_nativeWriteToParcel(JNIEnv* env, jobject o
 
             parcel->writeInt32(1);
             parcel->writeString8(inputChannel->getName());
-            parcel->writeDupFileDescriptor(inputChannel->getAshmemFd());
-            parcel->writeDupFileDescriptor(inputChannel->getReceivePipeFd());
-            parcel->writeDupFileDescriptor(inputChannel->getSendPipeFd());
+            parcel->writeDupFileDescriptor(inputChannel->getFd());
         } else {
             parcel->writeInt32(0);
         }
