@@ -64,6 +64,8 @@ public:
     bool isSeeking();
     bool reachedEOS(status_t *finalStatus);
 
+    status_t setPlaybackRatePermille(int32_t ratePermille);
+
 private:
     friend class VideoEditorAudioPlayer;
     sp<MediaSource> mSource;
