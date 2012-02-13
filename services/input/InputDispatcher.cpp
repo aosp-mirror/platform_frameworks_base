@@ -1926,10 +1926,6 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     }
     }
 
-    // Record information about the newly started dispatch cycle.
-    connection->lastEventTime = eventEntry->eventTime;
-    connection->lastDispatchTime = currentTime;
-
     // Notify other system components.
     onDispatchCycleStartedLocked(currentTime, connection);
 }
@@ -1937,12 +1933,8 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 void InputDispatcher::finishDispatchCycleLocked(nsecs_t currentTime,
         const sp<Connection>& connection, bool handled) {
 #if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ finishDispatchCycle - %01.1fms since event, "
-            "%01.1fms since dispatch, handled=%s",
-            connection->getInputChannelName(),
-            connection->getEventLatencyMillis(currentTime),
-            connection->getDispatchLatencyMillis(currentTime),
-            toString(handled));
+    ALOGD("channel '%s' ~ finishDispatchCycle - handled=%s",
+            connection->getInputChannelName(), toString(handled));
 #endif
 
     if (connection->status == Connection::STATUS_BROKEN
@@ -3951,8 +3943,7 @@ InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel,
         const sp<InputWindowHandle>& inputWindowHandle, bool monitor) :
         status(STATUS_NORMAL), inputChannel(inputChannel), inputWindowHandle(inputWindowHandle),
         monitor(monitor),
-        inputPublisher(inputChannel),
-        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX) {
+        inputPublisher(inputChannel) {
 }
 
 InputDispatcher::Connection::~Connection() {

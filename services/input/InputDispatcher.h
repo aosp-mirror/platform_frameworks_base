@@ -784,9 +784,6 @@ private:
         InputState inputState;
         Queue<DispatchEntry> outboundQueue;
 
-        nsecs_t lastEventTime; // the time when the event was originally captured
-        nsecs_t lastDispatchTime; // the time when the last event was dispatched
-
         explicit Connection(const sp<InputChannel>& inputChannel,
                 const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
 
@@ -797,16 +794,6 @@ private:
         // Finds a DispatchEntry in the outbound queue associated with the specified event.
         // Returns NULL if not found.
         DispatchEntry* findQueuedDispatchEntryForEvent(const EventEntry* eventEntry) const;
-
-        // Gets the time since the current event was originally obtained from the input driver.
-        inline double getEventLatencyMillis(nsecs_t currentTime) const {
-            return (currentTime - lastEventTime) / 1000000.0;
-        }
-
-        // Gets the time since the current event entered the outbound dispatch queue.
-        inline double getDispatchLatencyMillis(nsecs_t currentTime) const {
-            return (currentTime - lastDispatchTime) / 1000000.0;
-        }
     };
 
     enum DropReason {
