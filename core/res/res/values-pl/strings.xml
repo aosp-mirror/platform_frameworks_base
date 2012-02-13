@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Pozwala aplikacji na przenoszenie zadań między tłem i pierwszym planem. Złośliwe aplikacje mogą wymusić przeniesienie się na pierwszy plan bez Twojego udziału."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zatrzymywanie uruchomionych aplikacji"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Umożliwia aplikacji usuwanie zadań i kończenie powiązanych z nimi aplikacji. Złośliwe aplikacje mogą zakłócić działanie innych aplikacji."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ustaw zgodność ekranu"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Pozwala aplikacji na sterowanie trybem zgodności ekranu innych aplikacji. Złośliwe aplikacje mogą zmienić zachowanie innych aplikacji."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"włączenie debugowania aplikacji"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Pozwala aplikacji na włączenie debugowania innej aplikacji. Złośliwe aplikacje mogą to wykorzystać do kończenia pracy innych programów."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"zmienianie ustawień interfejsu użytkownika"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Pozwala aplikacji na zweryfikowanie, czy pakiet można zainstalować."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"powiązanie z weryfikatorem pakietów"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Pozwala na wysyłanie żądań weryfikacji pakietu. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"dostęp do portów szeregowych"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Umożliwia posiadaczowi dostęp do portów szeregowych przy użyciu interfejsu API narzędzia SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie teraz"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamiętaj"</string>

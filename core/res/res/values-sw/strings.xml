@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Inaruhusu programu kusongesha kazi kwenye mandhari-mbele na mandhari-nyuma. Programu hasidi zinaweza kujilazimisha mbele bila udhibiti wako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Huruhusu programu kuondoa majukumu na kuua programu zao. Programu hasidi zinaweza kutatiza tabia ya programu zingine."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"weka utangamano wa skrini"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Huruhusu programu kudhibiti hali ya utangamano wa skrini ya programu zingine. Programu hasidi zinaweza kuvunja mwenendo wa programu zingine."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"wezesha utatuaji wa programu"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Huruhusu programu kuwasha kueua cha programu nyingine. Programu hasidi huenda zikatumia hii ili kuua programu nyingine."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"badilisha mipangilio yako ya onyesho"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Inaruhusu programu kuthibitisha kuwa furushi linaweza kusakinishwa."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"Funga kwa kithibitishaji cha furushi"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Inaruhusu mmiliki kutuma maombi ya vibainishi furushi. Kamwe hazitahitajika kwa programu za kawaida."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"kituo tambulishi cha ufikivu"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Inaruhusu mmiliki kufikia vituo tambulishi kwa kutumia KisimamiziTambulishi cha API."</string>
     <string name="save_password_message" msgid="767344687139195790">"Unataka kuvinjari ili ukumbuke nenosiri hili?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Si Sasa"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>

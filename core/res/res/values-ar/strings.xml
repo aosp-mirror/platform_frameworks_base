@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"إيقاف التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"للسماح للتطبيق بإزالة المهام وإنهاء تطبيقاتها. قد تعطل التطبيقات الضارة عمل التطبيقات الأخرى."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"تعيين توافق الشاشة"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"السماح للتطبيق بالتحكم في وضع التوافق مع شاشة التطبيقات الأخرى. قد تتسبب التطبيقات الضارة في تعطيل سلوك التطبيقات الأخرى."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"تمكين تصحيح أخطاء التطبيق"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"للسماح للتطبيق بتشغيل تصحيح الأخطاء لتطبيق آخر. قد تستخدم التطبيقات الضارة هذا لإنهاء التطبيقات الأخرى."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"تغيير إعدادات واجهة المستخدم"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"السماح للتطبيق بالتحقق من إمكانية تثبيت حزمة."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"الالتزام بمحقق حزمة"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"السماح للمالك بإجراء طلبات محققي الحزمة. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"الدخول إلى المنافذ التسلسلية"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"يسمح لحامله بالدخول إلى المنافذ التسلسلية باستخدام واجهة برمجة التطبيقات."</string>
     <string name="save_password_message" msgid="767344687139195790">"هل تريد من المتصفح تذكر كلمة المرور هذه؟"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ليس الآن"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"تذكّر"</string>

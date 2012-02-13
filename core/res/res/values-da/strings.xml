@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Tillader, at appen kan flytte opgaver til forgrunden og baggrunden. Ondsindede apps kan tvinge sig selv i forgrunden uden din kontrol."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"stoppe kørsel af apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillader, at en app kan fjerne opgaver og lukke deres apps. Ondsindede apps kan forstyrre adfærden for andre apps."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"indstil skærmens kompatibilitet"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Tillader, at appen kontrollerer kompatibilitetstilstanden for skærme i andre applikationer. Ondsindede applikationer kan forstyrre andre applikationers adfærd."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivere fejlretning af appen"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Tillader, at appen kan slå fejlretning til for en anden app. Ondsindede apps kan bruge dette til at afslutte andre apps."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Tillader, at appen kan bekræfte, at en pakke kan installeres."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind til en bekræftelse af pakker"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Tillader, at indehaveren kan sende anmodninger om bekræftelser af pakker. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"adgang til serielle porte"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Tillader, at indehaveren kan få adgang til serielle porte ved hjælp af SerialManager API."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>

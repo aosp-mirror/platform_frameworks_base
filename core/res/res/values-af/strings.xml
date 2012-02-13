@@ -543,30 +543,30 @@
     <item msgid="1735177144948329370">"Tuisfaks"</item>
     <item msgid="603878674477207394">"Roeper"</item>
     <item msgid="1650824275177931637">"Ander"</item>
-    <item msgid="9192514806975898961">"Gepasmaakte"</item>
+    <item msgid="9192514806975898961">"Gepasmaak"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Tuis"</item>
     <item msgid="7084237356602625604">"Werk"</item>
     <item msgid="1112044410659011023">"Ander"</item>
-    <item msgid="2374913952870110618">"Gepasmaakte"</item>
+    <item msgid="2374913952870110618">"Gepasmaak"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Tuis"</item>
     <item msgid="5629153956045109251">"Werk"</item>
     <item msgid="4966604264500343469">"Ander"</item>
-    <item msgid="4932682847595299369">"Gepasmaakte"</item>
+    <item msgid="4932682847595299369">"Gepasmaak"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Tuis"</item>
     <item msgid="1359644565647383708">"Werk"</item>
     <item msgid="7868549401053615677">"Ander"</item>
-    <item msgid="3145118944639869809">"Gepasmaakte"</item>
+    <item msgid="3145118944639869809">"Gepasmaak"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Werk"</item>
     <item msgid="4378074129049520373">"Ander"</item>
-    <item msgid="3455047468583965104">"Gepasmaakte"</item>
+    <item msgid="3455047468583965104">"Gepasmaak"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -578,7 +578,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Gepasmaakte"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Gepasmaak"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Tuis"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobiel"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Werk"</string>
@@ -599,24 +599,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Werkroeper"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Gepasmaakte"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Gepasmaak"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Verjaardag"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Herdenking"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Ander"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Gepasmaakte"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Gepasmaak"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Tuis"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Werk"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Ander"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobiel"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Gepasmaakte"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Gepasmaak"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Tuis"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Werk"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Ander"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Gepasmaakte"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Gepasmaak"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Tuis"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Werk"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Ander"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Gepasmaakte"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Gepasmaak"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -628,8 +628,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Werk"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Ander"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Gepasmaakte"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Gepasmaakte"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Gepasmaak"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Gepasmaak"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Assistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Broer"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Kind"</string>
@@ -644,7 +644,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Familielid"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Suster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Eggenoot"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Gepasmaakte"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Gepasmaak"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Tuis"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Werk"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Ander"</string>
@@ -764,6 +764,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Laat die program toe om te verifieer dat \'n pakket installeerbaar is."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind aan \'n pakkieverifieerder"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Laat die houer toe om versoeke aan pakketverifieerders te rig. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"kry toegang tot reekspoorte"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Laat die houer toe om toegang te verkry tot reekspoorte wat die SerialManager API gebruik."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil jy hê die blaaier moet hierdie wagwoord onthou?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nie nou nie"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthou"</string>

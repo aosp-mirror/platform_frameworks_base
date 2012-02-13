@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Omogućuje aplikaciji da premjesti zadatke u prednji plan ili pozadinu. Zlonamjerne aplikacije mogu na silu doći u prednji plan bez vašeg nadzora."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"zaustavljanje pokrenutih aplikacija"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Omogućuje aplikaciji uklanjanje zadataka i uklanjanje njihovih aplikacija. Zlonamjerne aplikacije mogu poremetiti rad drugih aplikacija."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"postavljanje zaslona kompatibilnost"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Aplikaciji omogućuje upravljanje načinom kompatibilnosti zaslona drugih aplikacija. Zlonamjerne aplikacije mogu prekinuti takvo ponašanje ostalih aplikacija."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"omogućavanje rješavanja programskih pogrešaka u aplikaciji"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Omogućuje aplikaciji uključivanje uklanjanja programskih pogrešaka za drugu aplikaciju. Zlonamjerne aplikacije mogu na taj način ukloniti druge aplikacije."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"promjena postavki korisničkog sučelja"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Aplikaciji omogućuje da provjeri je li paket moguće instalirati."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"vezano uz paketnu provjeru"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Nositelju omogućuje da traži paketnu provjeru. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"pristup serijskim priključcima"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Rukovatelju omogućuje pristup serijskim priključcima pomoću značajke SerialManager API."</string>
     <string name="save_password_message" msgid="767344687139195790">"Želite li da preglednik zapamti ovu zaporku?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne sada"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamti"</string>

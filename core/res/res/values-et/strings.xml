@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Pahatahtlikud rakendused võivad sundida end esiplaanile tulema teie loata."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"käitatud rakenduste peatamine"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Võimaldab rakendusel eemaldada ülesanded ja peatada nende rakendused. Pahatahtlikud rakendused võivad häirida teiste rakenduste käitumist."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"kuva ühilduvuse seadmine"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Võimaldab rakendusel juhtida teiste rakenduste kuva ühilduvuse režiimi. Pahatahtlikud rakendused võivad teisi rakendusi häirida."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"Rakenduse silumise lubamine"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Võimaldab rakendusel lülitada sisse teise rakenduse silumise. Pahatahtlikud rakendused võivad seda kasutada teiste rakenduste peatamiseks."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"muuda UI-seadeid"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Võimaldab rakendusel kinnitada, et paketti saab installida."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"sidumine paketi kinnitajaga"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Lubab omanikul teha taotlusi paketi kinnitajate kohta. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"juurdepääs jadaportidele"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Võimaldab omanikul SerialManageri API-liidese abil jadaportidele juurde pääseda."</string>
     <string name="save_password_message" msgid="767344687139195790">"Kas soovite, et brauser jätaks selle parooli meelde?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Mitte praegu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Pidage meeles"</string>
