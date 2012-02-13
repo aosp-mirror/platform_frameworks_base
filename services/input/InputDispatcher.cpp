@@ -1041,8 +1041,7 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
     }
 
     // If the currently focused window is still working on previous events then keep waiting.
-    if (!isWindowReadyForMoreInputLocked(currentTime,
-            mFocusedWindowHandle, true /*focusedEvent*/)) {
+    if (!isWindowReadyForMoreInputLocked(currentTime, mFocusedWindowHandle, entry)) {
 #if DEBUG_FOCUS
         ALOGD("Waiting because focused window still processing previous input.");
 #endif
@@ -1405,8 +1404,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             }
 
             // If the touched window is still working on previous events then keep waiting.
-            if (!isWindowReadyForMoreInputLocked(currentTime,
-                    touchedWindow.windowHandle, false /*focusedEvent*/)) {
+            if (!isWindowReadyForMoreInputLocked(currentTime, touchedWindow.windowHandle, entry)) {
 #if DEBUG_FOCUS
                 ALOGD("Waiting because touched window still processing previous input.");
 #endif
@@ -1618,25 +1616,43 @@ bool InputDispatcher::isWindowObscuredAtPointLocked(
 }
 
 bool InputDispatcher::isWindowReadyForMoreInputLocked(nsecs_t currentTime,
-        const sp<InputWindowHandle>& windowHandle, bool focusedEvent) {
+        const sp<InputWindowHandle>& windowHandle, const EventEntry* eventEntry) {
     ssize_t connectionIndex = getConnectionIndexLocked(windowHandle->getInputChannel());
     if (connectionIndex >= 0) {
         sp<Connection> connection = mConnectionsByFd.valueAt(connectionIndex);
         if (connection->inputPublisherBlocked) {
             return false;
         }
-        if (focusedEvent) {
-            // If the event relies on input focus (such as a key event), then we must
-            // wait for all previous events to complete before delivering it because they
-            // may move focus elsewhere.
+        if (eventEntry->type == EventEntry::TYPE_KEY) {
+            // If the event is a key event, then we must wait for all previous events to
+            // complete before delivering it because previous events may have the
+            // side-effect of transferring focus to a different window and we want to
+            // ensure that the following keys are sent to the new window.
+            //
+            // Suppose the user touches a button in a window then immediately presses "A".
+            // If the button causes a pop-up window to appear then we want to ensure that
+            // the "A" key is delivered to the new pop-up window.  This is because users
+            // often anticipate pending UI changes when typing on a keyboard.
+            // To obtain this behavior, we must serialize key events with respect to all
+            // prior input events.
             return connection->outboundQueue.isEmpty()
                     && connection->waitQueue.isEmpty();
         }
-        // Touch events can always be sent to a window because the user intended to touch
-        // whatever was visible immediately.  Even if focus changes or a new window appears,
-        // the touch event was meant for whatever happened to be on screen at the time.
-        // However, if the wait queue is piling up with lots of events, then hold up
-        // new events for awhile.  This condition ensures that ANRs still work.
+        // Touch events can always be sent to a window immediately because the user intended
+        // to touch whatever was visible at the time.  Even if focus changes or a new
+        // window appears moments later, the touch event was meant to be delivered to
+        // whatever window happened to be on screen at the time.
+        //
+        // Generic motion events, such as trackball or joystick events are a little trickier.
+        // Like key events, generic motion events are delivered to the focused window.
+        // Unlike key events, generic motion events don't tend to transfer focus to other
+        // windows and it is not important for them to be serialized.  So we prefer to deliver
+        // generic motion events as soon as possible to improve efficiency and reduce lag
+        // through batching.
+        //
+        // The one case where we pause input event delivery is when the wait queue is piling
+        // up with lots of events because the application is not responding.
+        // This condition ensures that ANRs are detected reliably.
         if (!connection->waitQueue.isEmpty()
                 && currentTime >= connection->waitQueue.head->eventEntry->eventTime
                         + STREAM_AHEAD_EVENT_TIMEOUT) {
