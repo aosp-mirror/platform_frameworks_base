@@ -2076,19 +2076,19 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
 
     nsecs_t currentTime = now();
 
-    mTempCancelationEvents.clear();
+    Vector<EventEntry*> cancelationEvents;
     connection->inputState.synthesizeCancelationEvents(currentTime,
-            mTempCancelationEvents, options);
+            cancelationEvents, options);
 
-    if (!mTempCancelationEvents.isEmpty()) {
+    if (!cancelationEvents.isEmpty()) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
         ALOGD("channel '%s' ~ Synthesized %d cancelation events to bring channel back in sync "
                 "with reality: %s, mode=%d.",
-                connection->getInputChannelName(), mTempCancelationEvents.size(),
+                connection->getInputChannelName(), cancelationEvents.size(),
                 options.reason, options.mode);
 #endif
-        for (size_t i = 0; i < mTempCancelationEvents.size(); i++) {
-            EventEntry* cancelationEventEntry = mTempCancelationEvents.itemAt(i);
+        for (size_t i = 0; i < cancelationEvents.size(); i++) {
+            EventEntry* cancelationEventEntry = cancelationEvents.itemAt(i);
             switch (cancelationEventEntry->type) {
             case EventEntry::TYPE_KEY:
                 logOutboundKeyDetailsLocked("cancel - ",
