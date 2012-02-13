@@ -4156,11 +4156,24 @@ void AudioFlinger::PlaybackThread::TimedTrack::releaseBuffer(
 
     Mutex::Autolock _l(mTimedBufferQueueLock);
 
-    if (buffer->raw != mTimedSilenceBuffer) {
+    // If the buffer which was just released is part of the buffer at the head
+    // of the queue, be sure to update the amt of the buffer which has been
+    // consumed.  If the buffer being returned is not part of the head of the
+    // queue, its either because the buffer is part of the silence buffer, or
+    // because the head of the timed queue was trimmed after the mixer called
+    // getNextBuffer but before the mixer called releaseBuffer.
+    if ((buffer->raw != mTimedSilenceBuffer) && mTimedBufferQueue.size()) {
         TimedBuffer& head = mTimedBufferQueue.editItemAt(0);
-        head.setPosition(head.position() + buffer->frameCount * mCblk->frameSize);
-        if (static_cast<size_t>(head.position()) >= head.buffer()->size()) {
-            mTimedBufferQueue.removeAt(0);
+
+        void* start = head.buffer()->pointer();
+        void* end   = head.buffer()->pointer() + head.buffer()->size();
+
+        if ((buffer->raw >= start) && (buffer->raw <= end)) {
+            head.setPosition(head.position() +
+                    (buffer->frameCount * mCblk->frameSize));
+            if (static_cast<size_t>(head.position()) >= head.buffer()->size()) {
+                mTimedBufferQueue.removeAt(0);
+            }
         }
     }
 
