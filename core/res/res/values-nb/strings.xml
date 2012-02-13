@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lar appen flytte oppgaver til forgrunnen eller bakgrunnen. Ondsinnede apper kan tvinge seg frem til forgrunnen utenfor din kontroll."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"avslutte apper som kjører"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Lar appen fjerne oppgaver og avslutte apper. Ondsinnede apper kan forstyrre atferden til andre apper."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"angi skjermkompatibilitet"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Lar appen kontrollere modus for skjermkompatibilitet i andre apper. Skadelige apper kan ødelegge funksjoner i andre apper."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivere feilsøking av app"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Lar appen slå av feilsøking for andre apper. Ondsinnede apper kan bruke dette til å avslutte andre apper."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"endre innstillingene for brukergrensesnitt"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Lar appen bekrefte om en pakke kan installeres."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind til en pakkeverifikator"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Lar innehaveren sende forespørsler om pakkeverifikatorer. Skal aldri være nødvendig for normale apper."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"tilgang til serielle porter"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Gir innehaveren tilgang til serielle porter ved hjelp av SerialManager API."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du at nettleseren skal huske dette passordet?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nå"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>

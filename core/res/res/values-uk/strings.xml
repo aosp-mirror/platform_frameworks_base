@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Дозволяє програмі переміщувати завдання в активні чи фонові вікна. Шкідливі програми можуть примусово ставати активними без вашого відома."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"зупиняти запущені програми"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Дозволяє програмі видаляти завдання та примусово припиняти роботу відповідних програм. Шкідливі програми можуть переривати роботу інших програм."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"установити сумісність екрана"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Дозволяє програмі контролювати режим сумісності екрана інших програм. Шкідливі програми можуть переривати роботу інших програм."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"вмикати налагодження програми"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Дозволяє програмі вмикати налагодження для іншої програми. Шкідливі програми можуть використовувати це для примусового припинення роботи інших програм."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змін. налашт. інтерф. кор."</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Дозволяє програмі перевіряти можливість встановлення пакета."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"прив’язуватися до програми перевірки пакетів"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Дозволяє власникові робити запити на програми перевірки пакетів. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"отримувати доступ до послідовних портів"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Дозволяє власнику отримувати доступ до послідовних портів за допомогою API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Хочете, щоб переглядач запам\'ятав цей пароль?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не зараз"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запам\'ятати"</string>

@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng độc hại có thể tự hiển thị ở nền trước mà không chịu sự kiểm soát của bạn."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"dừng các ứng dụng đang chạy"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Cho phép ứng dụng xóa công việc và loại bỏ các ứng dụng của chúng. Ứng dụng độc hại có thể làm gián đoạn hoạt động của các ứng dụng khác."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"đặt độ tương thích màn hình"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Cho phép ứng dụng kiểm soát chế độ tương thích màn hình của ứng dụng khác. Các ứng dụng độc hại có thể phá vỡ hoạt động của các ứng dụng khác."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"bật gỡ lỗi ứng dụng"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Cho phép ứng dụng bật gỡ lỗi cho một ứng dụng khác. Ứng dụng độc hại có thể sử dụng quyền này để loại bỏ những ứng dụng khác."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"thay đổi cài đặt giao diện người dùng của bạn"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Cho phép ứng dụng xác minh gói có thể cài đặt."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"liên kết với trình xác minh gói"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Cho phép chủ sở hữu yêu cầu trình xác minh gói. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"truy cập cổng nối tiếp"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Cho phép chủ sở hữu truy cập cổng nối tiếp sử dụng API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Bạn có muốn trình duyệt nhớ mật khẩu này không?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Không phải bây giờ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Nhớ"</string>

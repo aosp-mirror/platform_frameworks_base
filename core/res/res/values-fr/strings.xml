@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet à l\'application de faire passer les tâches de premier plan en arrière-plan. Des applications malveillantes peuvent exploiter cette fonctionnalité pour passer au premier plan sans votre consentement."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"arrêter les applications en cours d\'exécution"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet à l\'application de supprimer des tâches et de fermer les applications qui les exécutent. Des applications malveillantes peuvent exploiter cette fonctionnalité pour perturber le comportement des autres applications."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"définir la compatibilité de l\'écran"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permettre de contrôler le mode de compatibilité de l\'écran des autres applications. Des applications malveillantes peuvent perturber le fonctionnement d\'autres applications."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activer le débogage des applications"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet à l\'application d\'activer le débogage d\'une autre application. Des applications malveillantes peuvent exploiter cette fonctionnalité pour en fermer d\'autres."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Modification des paramètres de l\'IU"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permet à l\'application de vérifier qu\'un package peut être installé."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"associer à un vérificateur de package"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permet à l\'application autorisée d\'effectuer des requêtes de vérificateurs de package. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"accéder aux ports série"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet à l\'application autorisée d\'accéder aux ports série avec l\'API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voulez-vous que le navigateur se souvienne de ce mot de passe ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Pas maintenant"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Mémoriser"</string>

@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Leidžiama programai užduotis perkelti į priekinį planą ir į foną. Kenkėjiškos programos gali priverstinai persikelti į priekį be jūsų įsikišimo."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"sustabdyti vykdomas programas"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Leidžiama programai pašalinti užduotis ir panaikinti jų programas. Kenkėjiškos programos gali trikdyti kitų programų veikimą."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nustatyti ekrano suderinamumo režimą"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Programai leidžiama valdyti kitų programų ekrano suderinamumo režimą. Kenkėjiškos programos gali kliudyti veikti kitoms programoms."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"įgalinti programos derinimą"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Leidžiama programai įjungti kitos programos derinimą. Kenkėjiškos programos gali tai naudoti, kad išjungtų kitas programas."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"keisti UI nustatymus"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Leidžiama programai patikrinti, ar paketą galima įdiegti."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"susaistyti su paketo tikrinimo programa"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Savininkui leidžiama teikti užklausas patikrinti paketą. Įprastoms programoms to neturėtų prireikti."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"pasiekti nuosekliuosius prievadus"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Leidžiama savininkui pasiekti nuosekliuosius prievadus naudojant „SerialManager“ API."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ar norite, kad naršyklė atsimintų šį slaptažodį?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne dabar"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Atsiminti"</string>

@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Permet que l\'aplicació desplaci tasques en primer o segon pla. Les aplicacions malicioses poden aparèixer en primer pla sense el teu consentiment."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"atura les aplicacions que s\'estan executant"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permet que l\'aplicació elimini tasques i finalitzi les seves aplicacions. Les aplicacions malicioses poden alterar el comportament d\'altres aplicacions."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definició de la compatibilitat de pantalla"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Permet que l\'aplicació controli el mode de compatibilitat de pantalla d\'altres aplicacions. És possible que les aplicacions malicioses interrompin el comportament d\'altres aplicacions."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"activa la depuració d\'aplicacions"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permet que una aplicació activi la depuració per a una altra aplicació. Les aplicacions malicioses poden utilitzar aquesta funció per finalitzar altres aplicacions."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"canviar la configuració de la IU"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permet que l\'aplicació verifiqui si un paquet es pot instal·lar."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"vincula a un verificador de paquets"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permet que el titular sol·liciti verificadors de paquets. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"accedeix a ports sèrie"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet que el titular accedeixi a ports sèrie amb l\'API SerialManager."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voleu que el navegador recordi aquesta contrasenya?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ara no"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Recorda-ho"</string>

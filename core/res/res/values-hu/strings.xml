@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Lehetővé teszi az alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. A rosszindulatú alkalmazások az előtérbe helyezhetik magukat az Ön engedélye nélkül."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"futó alkalmazások leállítása"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Lehetővé teszi, hogy az alkalmazás feladatokat távolítson el és leállítsa azok alkalmazásait. Rosszindulatú alkalmazások megzavarhatják más alkalmazások viselkedését."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"Képernyő-kompatibilitás beállítása"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Lehetővé teszi, hogy az alkalmazás szabályozza az egyéb alkalmazások képernyő-kompatibilitási módját. A kártékony alkalmazások megzavarhatják a többi alkalmazás viselkedését."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"alkalmazások hibakeresésének bekapcsolása"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Lehetővé teszi az alkalmazás számára, hogy hibakeresést végezzen egy másik alkalmazáson. A rosszindulatú alkalmazások ezzel leállíthatnak más alkalmazásokat."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"a felhasználói felület beállításainak módosítása"</string>
@@ -764,6 +762,8 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Lehetővé teszi az alkalmazás számára, hogy ellenőrizze, egy csomag telepíthető-e."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"egy csomaghitelesítőhöz kötődnek"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Lehetővé teszi, hogy a tulajdonos kérelmeket nyújtson be a csomag hitelesítőivel kapcsolatban. A normál alkalmazásoknak erre soha nincs szüksége."</string>
+    <string name="permlab_serialPort" msgid="546083327654631076">"soros portok elérése"</string>
+    <string name="permdesc_serialPort" msgid="2991639985224598193">"Lehetővé teszi a tulajdonos számára a soros portok elérését a SerialManager API segítségével."</string>
     <string name="save_password_message" msgid="767344687139195790">"Szeretné, hogy a böngésző megjegyezze a jelszót?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Most nem"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Megjegyzés"</string>
