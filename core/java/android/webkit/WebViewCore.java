@@ -1001,6 +1001,15 @@ public final class WebViewCore {
             "REMOVE_JS_INTERFACE", // = 149;
         };
 
+    static class FindAllRequest {
+        public FindAllRequest(String text) {
+            mSearchText = text;
+            mMatchCount = -1;
+        }
+        public String mSearchText;
+        public int mMatchCount;
+    }
+
     /**
      * @hide
      */
@@ -1141,6 +1150,10 @@ public final class WebViewCore {
 
         // for updating state on trust storage change
         static final int TRUST_STORAGE_UPDATED = 220;
+
+        // find-on-page controls
+        static final int FIND_ALL = 220;
+        static final int FIND_NEXT = 221;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -1784,6 +1797,22 @@ public final class WebViewCore {
                         }
                         case SELECT_ALL:
                             nativeSelectAll(mNativeClass);
+                            break;
+                        case FIND_ALL: {
+                            FindAllRequest request = (FindAllRequest) msg.obj;
+                            if (request == null) {
+                                nativeFindAll(mNativeClass, null);
+                            } else {
+                                request.mMatchCount = nativeFindAll(
+                                    mNativeClass, request.mSearchText);
+                                synchronized(request) {
+                                    request.notify();
+                                }
+                            }
+                            break;
+                        }
+                        case FIND_NEXT:
+                            nativeFindNext(mNativeClass, msg.arg1 != 0);
                             break;
                     }
                 }
@@ -2783,13 +2812,6 @@ public final class WebViewCore {
     }
 
     // called by JNI
-    private void sendFindAgain() {
-        if (mWebView == null) return;
-        Message.obtain(mWebView.mPrivateHandler,
-                WebView.FIND_AGAIN).sendToTarget();
-    }
-
-    // called by JNI
     private void initEditField(int pointer, String text, int start, int end) {
         if (mWebView == null) {
             return;
@@ -2800,6 +2822,17 @@ public final class WebViewCore {
                 WebView.REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID, pointer,
                 0, new TextSelectionData(start, end, 0))
                 .sendToTarget();
+    }
+
+    // called by JNI
+    private void updateMatchCount(int matchIndex, int matchCount,
+        String findText) {
+        if (mWebView == null) {
+            return;
+        }
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.UPDATE_MATCH_COUNT, matchIndex, matchCount,
+                findText).sendToTarget();
     }
 
     private native void nativeUpdateFrameCacheIfLoading(int nativeClass);
@@ -3055,6 +3088,8 @@ public final class WebViewCore {
 
     private native void nativeAutoFillForm(int nativeClass, int queryId);
     private native void nativeScrollLayer(int nativeClass, int layer, Rect rect);
+    private native int nativeFindAll(int nativeClass, String text);
+    private native void nativeFindNext(int nativeClass, boolean forward);
 
     /**
      * Deletes editable text between two points. Note that the selection may

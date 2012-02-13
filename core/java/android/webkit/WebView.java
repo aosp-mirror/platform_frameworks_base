@@ -914,7 +914,7 @@ public class WebView extends AbsoluteLayout
     static final int REPLACE_BASE_CONTENT               = 123;
     static final int FORM_DID_BLUR                      = 124;
     static final int RETURN_LABEL                       = 125;
-    static final int FIND_AGAIN                         = 126;
+    static final int UPDATE_MATCH_COUNT                 = 126;
     static final int CENTER_FIT_RECT                    = 127;
     static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
     static final int SET_SCROLLBAR_MODES                = 129;
@@ -979,7 +979,7 @@ public class WebView extends AbsoluteLayout
         "REPLACE_BASE_CONTENT", //           = 123;
         "FORM_DID_BLUR", //                  = 124;
         "RETURN_LABEL", //                   = 125;
-        "FIND_AGAIN", //                     = 126;
+        "UPDATE_MATCH_COUNT", //             = 126;
         "CENTER_FIT_RECT", //                = 127;
         "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID", // = 128;
         "SET_SCROLLBAR_MODES", //            = 129;
@@ -1021,9 +1021,8 @@ public class WebView extends AbsoluteLayout
 
     // keep these in sync with their counterparts in WebView.cpp
     private static final int DRAW_EXTRAS_NONE = 0;
-    private static final int DRAW_EXTRAS_FIND = 1;
-    private static final int DRAW_EXTRAS_SELECTION = 2;
-    private static final int DRAW_EXTRAS_CURSOR_RING = 3;
+    private static final int DRAW_EXTRAS_SELECTION = 1;
+    private static final int DRAW_EXTRAS_CURSOR_RING = 2;
 
     // keep this in sync with WebCore:ScrollbarMode in WebKit
     private static final int SCROLLBAR_AUTO = 0;
@@ -3711,7 +3710,7 @@ public class WebView extends AbsoluteLayout
     public void findNext(boolean forward) {
         checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
-        nativeFindNext(forward);
+        mWebViewCore.sendMessage(EventHub.FIND_NEXT, forward ? 1 : 0);
     }
 
     /*
@@ -3721,13 +3720,40 @@ public class WebView extends AbsoluteLayout
      *              that were found.
      */
     public int findAll(String find) {
+        return findAllBody(find, false);
+    }
+
+    /**
+     * @hide
+     */
+    public void findAllAsync(String find) {
+        findAllBody(find, true);
+    }
+
+    private int findAllBody(String find, boolean isAsync) {
         checkThread();
         if (0 == mNativeClass) return 0; // client isn't initialized
-        int result = find != null ? nativeFindAll(find.toLowerCase(),
-                find.toUpperCase(), find.equalsIgnoreCase(mLastFind)) : 0;
-        invalidate();
         mLastFind = find;
-        return result;
+        mWebViewCore.removeMessages(EventHub.FIND_ALL);
+        WebViewCore.FindAllRequest request = new
+            WebViewCore.FindAllRequest(find);
+        if (isAsync) {
+            mWebViewCore.sendMessage(EventHub.FIND_ALL, request);
+            return 0; // no need to wait for response
+        }
+        synchronized(request) {
+            try {
+                mWebViewCore.sendMessageAtFrontOfQueue(EventHub.FIND_ALL,
+                    request);
+                while (request.mMatchCount == -1) {
+                    request.wait();
+                }
+            }
+            catch (InterruptedException e) {
+                return 0;
+            }
+        }
+        return request.mMatchCount;
     }
 
     /**
@@ -3763,6 +3789,7 @@ public class WebView extends AbsoluteLayout
         }
         if (text != null) {
             mFindCallback.setText(text);
+            mFindCallback.findAll();
         }
         return true;
     }
@@ -3780,14 +3807,6 @@ public class WebView extends AbsoluteLayout
         mFindIsUp = isUp;
         if (0 == mNativeClass) return; // client isn't initialized
         nativeSetFindIsUp(isUp);
-    }
-
-    /**
-     * Return the index of the currently highlighted match.
-     */
-    int findIndex() {
-        if (0 == mNativeClass) return -1;
-        return nativeFindIndex();
     }
 
     // Used to know whether the find dialog is open.  Affects whether
@@ -3856,9 +3875,10 @@ public class WebView extends AbsoluteLayout
         checkThread();
         if (mNativeClass == 0)
             return;
-        nativeSetFindIsEmpty();
-        invalidate();
+        mWebViewCore.removeMessages(EventHub.FIND_ALL);
+        mWebViewCore.sendMessage(EventHub.FIND_ALL, null);
     }
+
 
     /**
      * Called when the find ActionMode ends.
@@ -4954,12 +4974,12 @@ public class WebView extends AbsoluteLayout
 
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
-        if (mFindIsUp) {
-            extras = DRAW_EXTRAS_FIND;
-        } else if (mSelectingText) {
-            extras = DRAW_EXTRAS_SELECTION;
-        } else if (drawCursorRing) {
-            extras = DRAW_EXTRAS_CURSOR_RING;
+        if (!mFindIsUp) {
+            if (mSelectingText) {
+                extras = DRAW_EXTRAS_SELECTION;
+            } else if (drawCursorRing) {
+                extras = DRAW_EXTRAS_CURSOR_RING;
+            }
         }
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "mFindIsUp=" + mFindIsUp
@@ -8884,13 +8904,6 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
-                case FIND_AGAIN:
-                    // Ignore if find has been dismissed.
-                    if (mFindIsUp && mFindCallback != null) {
-                        mFindCallback.findAll();
-                    }
-                    break;
-
                 case DRAG_HELD_MOTIONLESS:
                     mHeldMotionless = MOTIONLESS_TRUE;
                     invalidate();
@@ -9092,6 +9105,14 @@ public class WebView extends AbsoluteLayout
                     int cursorPosition = start + text.length();
                     replaceTextfieldText(start, end, text,
                             cursorPosition, cursorPosition);
+                    break;
+                }
+
+                case UPDATE_MATCH_COUNT: {
+                    if (mFindCallback != null) {
+                        mFindCallback.updateMatchCount(msg.arg1, msg.arg2,
+                            (String) msg.obj);
+                    }
                     break;
                 }
 
@@ -9931,9 +9952,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect,
             RectF visibleRect, float scale);
     private native void     nativeExtendSelection(int x, int y);
-    private native int      nativeFindAll(String findLower, String findUpper,
-            boolean sameAsLastSearch);
-    private native void     nativeFindNext(boolean forward);
     /* package */ native int      nativeFocusCandidateFramePointer();
     /* package */ native boolean  nativeFocusCandidateHasNextTextfield();
     /* package */ native boolean  nativeFocusCandidateIsPassword();
@@ -9991,9 +10009,7 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativePointInNavCache(int x, int y, int slop);
     private native void     nativeSelectBestAt(Rect rect);
     private native void     nativeSelectAt(int x, int y);
-    private native int      nativeFindIndex();
     private native void     nativeSetExtendSelection();
-    private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native boolean  nativeSetBaseLayer(int nativeInstance,
