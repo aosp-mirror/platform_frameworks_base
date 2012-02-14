@@ -327,4 +327,3 @@ class CommonTimeServer : public Thread {
 }  // namespace android
 
 #endif  // ANDROID_COMMON_TIME_SERVER_H
-
