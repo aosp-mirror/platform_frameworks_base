@@ -246,6 +246,13 @@
         <item>4</item>
     </integer-array>
 
+    <!-- If the DUN connection for this CDMA device supports more than just DUN -->
+    <!-- traffic you should list them here. -->
+    <!-- If this device is not CDMA this is ignored.  If this list is empty on -->
+    <!-- a DUN-requiring CDMA device, the DUN APN will just support just DUN. -->
+    <string-array translatable="false" name="config_cdma_dun_supported_types">
+    </string-array>
+
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
