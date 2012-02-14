@@ -4803,7 +4803,9 @@ public class WebView extends AbsoluteLayout
         if (layer == 0 || isPictureAfterFirstLayout) {
             mWebViewCore.resumeWebKitDraw();
         } else if (queueFull) {
-            mWebViewCore.pauseWebKitDraw();
+            // temporarily disable webkit draw throttling
+            // TODO: re-enable
+            // mWebViewCore.pauseWebKitDraw();
         }
 
         if (mHTML5VideoViewProxy != null) {
