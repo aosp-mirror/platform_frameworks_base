@@ -34,6 +34,7 @@ public:
 
     virtual int64_t getCachedDurationUs(status_t *finalStatus) = 0;
     virtual void setAdaptiveStreamingMode(bool adaptive) = 0;
+    virtual void setUID(uid_t uid) = 0;
 };
 
 class WVMExtractor : public MediaExtractor {
@@ -59,6 +60,8 @@ public:
     // Should set to use adaptive streaming mode only if widevine:// protocol
     // is used.
     void setAdaptiveStreamingMode(bool adaptive);
+
+    void setUID(uid_t uid);
 
     static bool getVendorLibHandle();
 

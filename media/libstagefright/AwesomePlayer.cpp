@@ -2111,6 +2111,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
         mWVMExtractor = new WVMExtractor(dataSource);
         mWVMExtractor->setAdaptiveStreamingMode(true);
+        if (mUIDValid)
+            mWVMExtractor->setUID(mUID);
         extractor = mWVMExtractor;
     } else {
         extractor = MediaExtractor::Create(
