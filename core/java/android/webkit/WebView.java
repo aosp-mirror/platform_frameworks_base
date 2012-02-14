@@ -6029,7 +6029,7 @@ public class WebView extends AbsoluteLayout
         calcOurContentVisibleRectF(mVisibleContentRect);
         nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
                 mGLViewportEmpty ? null : mViewRectViewport,
-                mVisibleContentRect);
+                mVisibleContentRect, getScale());
     }
 
     /**
@@ -9815,7 +9815,7 @@ public class WebView extends AbsoluteLayout
     private native int      nativeGetDrawGLFunction(int nativeInstance, Rect rect,
             Rect viewRect, RectF visibleRect, float scale, int extras);
     private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect,
-            RectF visibleRect);
+            RectF visibleRect, float scale);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,
             boolean sameAsLastSearch);
