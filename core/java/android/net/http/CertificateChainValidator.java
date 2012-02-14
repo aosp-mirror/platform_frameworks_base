@@ -25,15 +25,17 @@ import javax.net.ssl.DefaultHostnameVerifier;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import javax.net.ssl.X509TrustManager;
 import org.apache.harmony.security.provider.cert.X509CertImpl;
 import org.apache.harmony.xnet.provider.jsse.SSLParametersImpl;
+import org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
 
 /**
  * Class responsible for all server certificate validation functionality
  *
  * {@hide}
  */
-class CertificateChainValidator {
+public class CertificateChainValidator {
 
     /**
      * The singleton instance of the certificate chain validator
@@ -119,6 +121,18 @@ class CertificateChainValidator {
         }
 
         return verifyServerDomainAndCertificates(serverCertificates, domain, authType);
+    }
+
+    /**
+     * Handles updates to credential storage.
+     */
+    public static void handleTrustStorageUpdate() {
+
+        X509TrustManager x509TrustManager = SSLParametersImpl.getDefaultTrustManager();
+        if( x509TrustManager instanceof TrustManagerImpl ) {
+            TrustManagerImpl trustManager = (TrustManagerImpl) x509TrustManager;
+            trustManager.handleTrustStorageUpdate();
+        }
     }
 
     /**
