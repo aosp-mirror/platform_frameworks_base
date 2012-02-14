@@ -98,7 +98,8 @@ protected:
     struct ProgramEntry {
         ProgramEntry(uint32_t numVtxAttr, uint32_t numVtxUnis,
                      uint32_t numFragUnis) : vtx(0), frag(0), program(0), vtxAttrCount(0),
-                                             vtxAttrs(0), vtxUniforms(0), fragUniforms(0) {
+                                             vtxAttrs(0), vtxUniforms(0), fragUniforms(0),
+                                             fragUniformIsSTO(0) {
             vtxAttrCount = numVtxAttr;
             if (numVtxAttr) {
                 vtxAttrs = new AttrData[numVtxAttr];
