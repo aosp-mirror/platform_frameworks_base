@@ -299,7 +299,6 @@ public:
      *          (loopEnd-loopStart) <= framecount()
      */
             status_t    setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount);
-            status_t    getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount) const;
 
     /* Sets marker position. When playback reaches the number of frames specified, a callback with
      * event type EVENT_MARKER is called. Calling setMarkerPosition with marker == 0 cancels marker
