@@ -907,7 +907,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // this enables cpu upload path (as opposed to gpu upload path)
         // and it's only meant to be a temporary workaround!
         settings.setProperty("enable_cpu_upload_path", "true");
-        settings.setProperty(WebViewProperties.gfxUseMinimalMemory, "false");
+        settings.setProperty("use_minimal_memory", "false");
     }
 
     private WebView mWebView;
