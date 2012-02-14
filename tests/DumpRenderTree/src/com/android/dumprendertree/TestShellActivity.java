@@ -903,9 +903,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setWorkersEnabled(false);
         settings.setXSSAuditorEnabled(false);
         settings.setPageCacheCapacity(0);
-        // this enables cpu upload path (as opposed to gpu upload path)
-        // and it's only meant to be a temporary workaround!
-        settings.setProperty("enable_cpu_upload_path", "true");
         settings.setProperty("use_minimal_memory", "false");
     }
 
