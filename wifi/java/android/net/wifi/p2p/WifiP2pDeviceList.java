@@ -27,8 +27,9 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * A class representing a Wi-Fi P2p device list
+ * A class representing a Wi-Fi P2p device list.
  *
+ * Note that the operations are not thread safe.
  * {@see WifiP2pManager}
  */
 public class WifiP2pDeviceList implements Parcelable {
@@ -80,6 +81,13 @@ public class WifiP2pDeviceList implements Parcelable {
         }
         //Not found, add a new one
         mDevices.put(device.deviceAddress, device);
+    }
+
+    /** @hide */
+    public void updateStatus(String deviceAddress, int status) {
+        if (deviceAddress == null) return;
+        WifiP2pDevice d = mDevices.get(deviceAddress);
+        d.status = status;
     }
 
     /** @hide */
