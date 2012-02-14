@@ -3494,11 +3494,11 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
     return false;
 }
 
-status_t AudioFlinger::PlaybackThread::Track::start()
+status_t AudioFlinger::PlaybackThread::Track::start(pid_t tid)
 {
     status_t status = NO_ERROR;
-    ALOGV("start(%d), calling pid %d session %d",
-            mName, IPCThreadState::self()->getCallingPid(), mSessionId);
+    ALOGV("start(%d), calling pid %d session %d tid %d",
+            mName, IPCThreadState::self()->getCallingPid(), mSessionId, tid);
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
@@ -3717,12 +3717,12 @@ getNextBuffer_exit:
     return NOT_ENOUGH_DATA;
 }
 
-status_t AudioFlinger::RecordThread::RecordTrack::start()
+status_t AudioFlinger::RecordThread::RecordTrack::start(pid_t tid)
 {
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         RecordThread *recordThread = (RecordThread *)thread.get();
-        return recordThread->start(this);
+        return recordThread->start(this, tid);
     } else {
         return BAD_VALUE;
     }
@@ -3789,9 +3789,9 @@ AudioFlinger::PlaybackThread::OutputTrack::~OutputTrack()
     clearBufferQueue();
 }
 
-status_t AudioFlinger::PlaybackThread::OutputTrack::start()
+status_t AudioFlinger::PlaybackThread::OutputTrack::start(pid_t tid)
 {
-    status_t status = Track::start();
+    status_t status = Track::start(tid);
     if (status != NO_ERROR) {
         return status;
     }
@@ -3821,7 +3821,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
     uint32_t waitTimeLeftMs = mSourceThread->waitTimeMs();
 
     if (!mActive && frames != 0) {
-        start();
+        start(0);
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
             MixerThread *mixerThread = (MixerThread *)thread.get();
@@ -4056,8 +4056,8 @@ sp<IMemory> AudioFlinger::TrackHandle::getCblk() const {
     return mTrack->getCblk();
 }
 
-status_t AudioFlinger::TrackHandle::start() {
-    return mTrack->start();
+status_t AudioFlinger::TrackHandle::start(pid_t tid) {
+    return mTrack->start(tid);
 }
 
 void AudioFlinger::TrackHandle::stop() {
@@ -4179,9 +4179,9 @@ sp<IMemory> AudioFlinger::RecordHandle::getCblk() const {
     return mRecordTrack->getCblk();
 }
 
-status_t AudioFlinger::RecordHandle::start() {
+status_t AudioFlinger::RecordHandle::start(pid_t tid) {
     ALOGV("RecordHandle::start()");
-    return mRecordTrack->start();
+    return mRecordTrack->start(tid);
 }
 
 void AudioFlinger::RecordHandle::stop() {
@@ -4473,9 +4473,9 @@ Exit:
     return track;
 }
 
-status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrack)
+status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrack, pid_t tid)
 {
-    ALOGV("RecordThread::start");
+    ALOGV("RecordThread::start tid=%d", tid);
     sp <ThreadBase> strongMe = this;
     status_t status = NO_ERROR;
     {
