@@ -675,14 +675,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public void clearFocus() {
-        if (DBG) {
-            System.out.println(this + " clearFocus()");
-        }
-        if (mFocused == null) {
-            super.clearFocus();
-        } else {
+        super.clearFocus();
+
+        // clear any child focus if it exists
+        if (mFocused != null) {
             mFocused.clearFocus();
-            mFocused = null;
         }
     }
 
@@ -694,12 +691,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (DBG) {
             System.out.println(this + " unFocus()");
         }
-        if (mFocused == null) {
-            super.unFocus();
-        } else {
+
+        super.unFocus();
+        if (mFocused != null) {
             mFocused.unFocus();
-            mFocused = null;
         }
+        mFocused = null;
     }
 
     /**
