@@ -60,18 +60,12 @@ static char const * const sExtensionString  =
 extern void initEglTraceLevel();
 extern void setGLHooksThreadSpecific(gl_hooks_t const *value);
 
-static int cmp_configs(const void* a, const void *b) {
-    const egl_config_t& c0 = *(egl_config_t const *)a;
-    const egl_config_t& c1 = *(egl_config_t const *)b;
-    return c0<c1 ? -1 : (c1<c0 ? 1 : 0);
-}
-
 // ----------------------------------------------------------------------------
 
 egl_display_t egl_display_t::sDisplay[NUM_DISPLAYS];
 
 egl_display_t::egl_display_t() :
-    magic('_dpy'), numTotalConfigs(0), configs(0), refs(0) {
+    magic('_dpy'), refs(0) {
 }
 
 egl_display_t::~egl_display_t() {
@@ -119,15 +113,13 @@ EGLDisplay egl_display_t::getDisplay(EGLNativeDisplayType display) {
     // get our driver loader
     Loader& loader(Loader::getInstance());
 
-    for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (cnx->dso && disp[i].dpy == EGL_NO_DISPLAY) {
-            EGLDisplay dpy = cnx->egl.eglGetDisplay(display);
-            disp[i].dpy = dpy;
-            if (dpy == EGL_NO_DISPLAY) {
-                loader.close(cnx->dso);
-                cnx->dso = NULL;
-            }
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && disp.dpy == EGL_NO_DISPLAY) {
+        EGLDisplay dpy = cnx->egl.eglGetDisplay(display);
+        disp.dpy = dpy;
+        if (dpy == EGL_NO_DISPLAY) {
+            loader.close(cnx->dso);
+            cnx->dso = NULL;
         }
     }
 
@@ -160,12 +152,11 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
     // initialize each EGL and
     // build our own extension string first, based on the extension we know
     // and the extension supported by our client implementation
-    for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        cnx->major = -1;
-        cnx->minor = -1;
-        if (!cnx->dso)
-            continue;
+
+    egl_connection_t* const cnx = &gEGLImpl;
+    cnx->major = -1;
+    cnx->minor = -1;
+    if (cnx->dso) {
 
 #if defined(ADRENO130)
 #warning "Adreno-130 eglInitialize() workaround"
@@ -177,31 +168,30 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
          * eglGetDisplay() before calling eglInitialize();
          */
         if (i == IMPL_HARDWARE) {
-            disp[i].dpy =
-            cnx->egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+            disp[i].dpy = cnx->egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
         }
 #endif
 
-        EGLDisplay idpy = disp[i].dpy;
+        EGLDisplay idpy = disp.dpy;
         if (cnx->egl.eglInitialize(idpy, &cnx->major, &cnx->minor)) {
-            //ALOGD("initialized %d dpy=%p, ver=%d.%d, cnx=%p",
-            //        i, idpy, cnx->major, cnx->minor, cnx);
+            //ALOGD("initialized dpy=%p, ver=%d.%d, cnx=%p",
+            //        idpy, cnx->major, cnx->minor, cnx);
 
             // display is now initialized
-            disp[i].state = egl_display_t::INITIALIZED;
+            disp.state = egl_display_t::INITIALIZED;
 
             // get the query-strings for this display for each implementation
-            disp[i].queryString.vendor = cnx->egl.eglQueryString(idpy,
+            disp.queryString.vendor = cnx->egl.eglQueryString(idpy,
                     EGL_VENDOR);
-            disp[i].queryString.version = cnx->egl.eglQueryString(idpy,
+            disp.queryString.version = cnx->egl.eglQueryString(idpy,
                     EGL_VERSION);
-            disp[i].queryString.extensions = cnx->egl.eglQueryString(idpy,
+            disp.queryString.extensions = cnx->egl.eglQueryString(idpy,
                     EGL_EXTENSIONS);
-            disp[i].queryString.clientApi = cnx->egl.eglQueryString(idpy,
+            disp.queryString.clientApi = cnx->egl.eglQueryString(idpy,
                     EGL_CLIENT_APIS);
 
         } else {
-            ALOGW("%d: eglInitialize(%p) failed (%s)", i, idpy,
+            ALOGW("eglInitialize(%p) failed (%s)", idpy,
                     egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
         }
     }
@@ -211,7 +201,7 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
     mVersionString.setTo(sVersionString);
     mClientApiString.setTo(sClientApiString);
 
-    // we only add extensions that exist in at least one implementation
+    // we only add extensions that exist in the implementation
     char const* start = sExtensionString;
     char const* end;
     do {
@@ -223,15 +213,13 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
             if (len) {
                 // NOTE: we could avoid the copy if we had strnstr.
                 const String8 ext(start, len);
-                // now go through all implementations and look for this extension
-                for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-                    if (disp[i].queryString.extensions) {
-                        // if we find it, add this extension string to our list
-                        // (and don't forget the space)
-                        const char* match = strstr(disp[i].queryString.extensions, ext.string());
-                        if (match && (match[len] == ' ' || match[len] == 0)) {
-                            mExtensionString.append(start, len+1);
-                        }
+                // now look for this extension
+                if (disp.queryString.extensions) {
+                    // if we find it, add this extension string to our list
+                    // (and don't forget the space)
+                    const char* match = strstr(disp.queryString.extensions, ext.string());
+                    if (match && (match[len] == ' ' || match[len] == 0)) {
+                        mExtensionString.append(start, len+1);
                     }
                 }
             }
@@ -242,52 +230,12 @@ EGLBoolean egl_display_t::initialize(EGLint *major, EGLint *minor) {
 
     egl_cache_t::get()->initialize(this);
 
-    EGLBoolean res = EGL_FALSE;
-    for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
-            EGLint n;
-            if (cnx->egl.eglGetConfigs(disp[i].dpy, 0, 0, &n)) {
-                disp[i].config = (EGLConfig*) malloc(sizeof(EGLConfig) * n);
-                if (disp[i].config) {
-                    if (cnx->egl.eglGetConfigs(disp[i].dpy, disp[i].config, n,
-                            &disp[i].numConfigs)) {
-                        numTotalConfigs += n;
-                        res = EGL_TRUE;
-                    }
-                }
-            }
-        }
-    }
-
-    if (res == EGL_TRUE) {
-        configs = new egl_config_t[numTotalConfigs];
-        for (int i = 0, k = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-            egl_connection_t* const cnx = &gEGLImpl[i];
-            if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
-                for (int j = 0; j < disp[i].numConfigs; j++) {
-                    configs[k].impl = i;
-                    configs[k].config = disp[i].config[j];
-                    configs[k].configId = k + 1; // CONFIG_ID start at 1
-                    // store the implementation's CONFIG_ID
-                    cnx->egl.eglGetConfigAttrib(disp[i].dpy, disp[i].config[j],
-                            EGL_CONFIG_ID, &configs[k].implConfigId);
-                    k++;
-                }
-            }
-        }
-
-        // sort our configurations so we can do binary-searches
-        qsort(configs, numTotalConfigs, sizeof(egl_config_t), cmp_configs);
-
-        refs++;
-        if (major != NULL)
-            *major = VERSION_MAJOR;
-        if (minor != NULL)
-            *minor = VERSION_MINOR;
-        return EGL_TRUE;
-    }
-    return setError(EGL_NOT_INITIALIZED, EGL_FALSE);
+    refs++;
+    if (major != NULL)
+        *major = VERSION_MAJOR;
+    if (minor != NULL)
+        *minor = VERSION_MINOR;
+    return EGL_TRUE;
 }
 
 EGLBoolean egl_display_t::terminate() {
@@ -305,22 +253,15 @@ EGLBoolean egl_display_t::terminate() {
     }
 
     EGLBoolean res = EGL_FALSE;
-    for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (cnx->dso && disp[i].state == egl_display_t::INITIALIZED) {
-            if (cnx->egl.eglTerminate(disp[i].dpy) == EGL_FALSE) {
-                ALOGW("%d: eglTerminate(%p) failed (%s)", i, disp[i].dpy,
-                        egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
-            }
-            // REVISIT: it's unclear what to do if eglTerminate() fails
-            free(disp[i].config);
-
-            disp[i].numConfigs = 0;
-            disp[i].config = 0;
-            disp[i].state = egl_display_t::TERMINATED;
-
-            res = EGL_TRUE;
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && disp.state == egl_display_t::INITIALIZED) {
+        if (cnx->egl.eglTerminate(disp.dpy) == EGL_FALSE) {
+            ALOGW("eglTerminate(%p) failed (%s)", disp.dpy,
+                    egl_tls_t::egl_strerror(cnx->egl.eglGetError()));
         }
+        // REVISIT: it's unclear what to do if eglTerminate() fails
+        disp.state = egl_display_t::TERMINATED;
+        res = EGL_TRUE;
     }
 
     // Mark all objects remaining in the list as terminated, unless
@@ -337,8 +278,6 @@ EGLBoolean egl_display_t::terminate() {
     objects.clear();
 
     refs--;
-    numTotalConfigs = 0;
-    delete[] configs;
     return res;
 }
 
@@ -390,13 +329,13 @@ EGLBoolean egl_display_t::makeCurrent(egl_context_t* c, egl_context_t* cur_c,
         Mutex::Autolock _l(lock);
         if (c) {
             result = c->cnx->egl.eglMakeCurrent(
-                    disp[c->impl].dpy, impl_draw, impl_read, impl_ctx);
+                    disp.dpy, impl_draw, impl_read, impl_ctx);
             if (result == EGL_TRUE) {
                 c->onMakeCurrent(draw, read);
             }
         } else {
             result = cur_c->cnx->egl.eglMakeCurrent(
-                    disp[cur_c->impl].dpy, impl_draw, impl_read, impl_ctx);
+                    disp.dpy, impl_draw, impl_read, impl_ctx);
             if (result == EGL_TRUE) {
                 cur_c->onLooseCurrent();
             }

@@ -44,23 +44,6 @@ class egl_connection_t;
 
 // ----------------------------------------------------------------------------
 
-struct egl_config_t {
-    egl_config_t() {}
-    egl_config_t(int impl, EGLConfig config)
-        : impl(impl), config(config), configId(0), implConfigId(0) { }
-    int         impl;           // the implementation this config is for
-    EGLConfig   config;         // the implementation's EGLConfig
-    EGLint      configId;       // our CONFIG_ID
-    EGLint      implConfigId;   // the implementation's CONFIG_ID
-    inline bool operator < (const egl_config_t& rhs) const {
-        if (impl < rhs.impl) return true;
-        if (impl > rhs.impl) return false;
-        return config < rhs.config;
-    }
-};
-
-// ----------------------------------------------------------------------------
-
 class EGLAPI egl_display_t { // marked as EGLAPI for testing purposes
     static egl_display_t sDisplay[NUM_DISPLAYS];
     EGLDisplay getDisplay(EGLNativeDisplayType display);
@@ -113,12 +96,9 @@ public:
     };
 
     struct DisplayImpl {
-        DisplayImpl() : dpy(EGL_NO_DISPLAY), config(0),
-                        state(NOT_INITIALIZED), numConfigs(0) { }
+        DisplayImpl() : dpy(EGL_NO_DISPLAY), state(NOT_INITIALIZED) { }
         EGLDisplay  dpy;
-        EGLConfig*  config;
         EGLint      state;
-        EGLint      numConfigs;
         strings_t   queryString;
     };
 
@@ -126,9 +106,7 @@ private:
     uint32_t        magic;
 
 public:
-    DisplayImpl     disp[IMPL_NUM_IMPLEMENTATIONS];
-    EGLint          numTotalConfigs;
-    egl_config_t*   configs;
+    DisplayImpl     disp;
 
 private:
             uint32_t                    refs;

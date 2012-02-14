@@ -118,12 +118,6 @@ status_t Loader::driver_t::set(void* hnd, int32_t api)
 
 // ----------------------------------------------------------------------------
 
-Loader::entry_t::entry_t(int dpy, int impl, const char* tag)
-    : dpy(dpy), impl(impl), tag(tag) {
-}
-
-// ----------------------------------------------------------------------------
-
 Loader::Loader()
 {
     char line[256];
@@ -131,8 +125,9 @@ Loader::Loader()
 
     /* Special case for GLES emulation */
     if (checkGlesEmulationStatus() == 0) {
-        ALOGD("Emulator without GPU support detected. Fallback to software renderer.");
-        gConfig.add( entry_t(0, 0, "android") );
+        ALOGD("Emulator without GPU support detected. "
+              "Fallback to software renderer.");
+        mDriverTag.setTo("android");
         return;
     }
 
@@ -141,14 +136,16 @@ Loader::Loader()
     if (cfg == NULL) {
         // default config
         ALOGD("egl.cfg not found, using default config");
-        gConfig.add( entry_t(0, 0, "android") );
+        mDriverTag.setTo("android");
     } else {
         while (fgets(line, 256, cfg)) {
-            int dpy;
-            int impl;
+            int dpy, impl;
             if (sscanf(line, "%u %u %s", &dpy, &impl, tag) == 3) {
                 //ALOGD(">>> %u %u %s", dpy, impl, tag);
-                gConfig.add( entry_t(dpy, impl, tag) );
+                // We only load the h/w accelerated implementation
+                if (tag != String8("android")) {
+                    mDriverTag = tag;
+                }
             }
         }
         fclose(cfg);
@@ -160,30 +157,12 @@ Loader::~Loader()
     GLTrace_stop();
 }
 
-const char* Loader::getTag(int dpy, int impl)
+void* Loader::open(egl_connection_t* cnx)
 {
-    const Vector<entry_t>& cfgs(gConfig);    
-    const size_t c = cfgs.size();
-    for (size_t i=0 ; i<c ; i++) {
-        if (dpy == cfgs[i].dpy)
-            if (impl == cfgs[i].impl)
-                return cfgs[i].tag.string();
-    }
-    return 0;
-}
-
-void* Loader::open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx)
-{
-    /*
-     * TODO: if we don't find display/0, then use 0/0
-     * (0/0 should always work)
-     */
-    
     void* dso;
-    int index = int(display);
     driver_t* hnd = 0;
     
-    char const* tag = getTag(index, impl);
+    char const* tag = mDriverTag.string();
     if (tag) {
         dso = load_driver("GLES", tag, cnx, EGL | GLESv1_CM | GLESv2);
         if (dso) {
@@ -193,16 +172,14 @@ void* Loader::open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx
             dso = load_driver("EGL", tag, cnx, EGL);
             if (dso) {
                 hnd = new driver_t(dso);
-
                 // TODO: make this more automated
                 hnd->set( load_driver("GLESv1_CM", tag, cnx, GLESv1_CM), GLESv1_CM );
-
-                hnd->set( load_driver("GLESv2", tag, cnx, GLESv2), GLESv2 );
+                hnd->set( load_driver("GLESv2",    tag, cnx, GLESv2),    GLESv2 );
             }
         }
     }
 
-    LOG_FATAL_IF(!index && !impl && !hnd, 
+    LOG_FATAL_IF(!index && !hnd,
             "couldn't find the default OpenGL ES implementation "
             "for default display");
     
@@ -221,7 +198,7 @@ void Loader::init_api(void* dso,
         __eglMustCastToProperFunctionPointerType* curr, 
         getProcAddressType getProcAddress) 
 {
-    const size_t SIZE = 256;
+    const ssize_t SIZE = 256;
     char scrap[SIZE];
     while (*api) {
         char const * name = *api;
@@ -326,14 +303,14 @@ void *Loader::load_driver(const char* kind, const char *tag,
     if (mask & GLESv1_CM) {
         init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
-                &cnx->hooks[GLESv1_INDEX]->gl,
+                &cnx->hooks[egl_connection_t::GLESv1_INDEX]->gl,
             getProcAddress);
     }
 
     if (mask & GLESv2) {
       init_api(dso, gl_names,
             (__eglMustCastToProperFunctionPointerType*)
-                &cnx->hooks[GLESv2_INDEX]->gl,
+                &cnx->hooks[egl_connection_t::GLESv2_INDEX]->gl,
             getProcAddress);
     }
     

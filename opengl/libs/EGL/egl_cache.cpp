@@ -83,39 +83,39 @@ egl_cache_t* egl_cache_t::get() {
 
 void egl_cache_t::initialize(egl_display_t *display) {
     Mutex::Autolock lock(mMutex);
-    for (int i = 0; i < IMPL_NUM_IMPLEMENTATIONS; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
-            const char* exts = display->disp[i].queryString.extensions;
-            size_t bcExtLen = strlen(BC_EXT_STR);
-            size_t extsLen = strlen(exts);
-            bool equal = !strcmp(BC_EXT_STR, exts);
-            bool atStart = !strncmp(BC_EXT_STR " ", exts, bcExtLen+1);
-            bool atEnd = (bcExtLen+1) < extsLen &&
-                    !strcmp(" " BC_EXT_STR, exts + extsLen - (bcExtLen+1));
-            bool inMiddle = strstr(exts, " " BC_EXT_STR " ");
-            if (equal || atStart || atEnd || inMiddle) {
-                PFNEGLSETBLOBCACHEFUNCSANDROIDPROC eglSetBlobCacheFuncsANDROID;
-                eglSetBlobCacheFuncsANDROID =
-                        reinterpret_cast<PFNEGLSETBLOBCACHEFUNCSANDROIDPROC>(
+
+    egl_connection_t* const cnx = &gEGLImpl;
+    if (cnx->dso && cnx->major >= 0 && cnx->minor >= 0) {
+        const char* exts = display->disp.queryString.extensions;
+        size_t bcExtLen = strlen(BC_EXT_STR);
+        size_t extsLen = strlen(exts);
+        bool equal = !strcmp(BC_EXT_STR, exts);
+        bool atStart = !strncmp(BC_EXT_STR " ", exts, bcExtLen+1);
+        bool atEnd = (bcExtLen+1) < extsLen &&
+                !strcmp(" " BC_EXT_STR, exts + extsLen - (bcExtLen+1));
+        bool inMiddle = strstr(exts, " " BC_EXT_STR " ");
+        if (equal || atStart || atEnd || inMiddle) {
+            PFNEGLSETBLOBCACHEFUNCSANDROIDPROC eglSetBlobCacheFuncsANDROID;
+            eglSetBlobCacheFuncsANDROID =
+                    reinterpret_cast<PFNEGLSETBLOBCACHEFUNCSANDROIDPROC>(
                             cnx->egl.eglGetProcAddress(
                                     "eglSetBlobCacheFuncsANDROID"));
-                if (eglSetBlobCacheFuncsANDROID == NULL) {
-                    ALOGE("EGL_ANDROID_blob_cache advertised by display %d, "
-                            "but unable to get eglSetBlobCacheFuncsANDROID", i);
-                    continue;
-                }
+            if (eglSetBlobCacheFuncsANDROID == NULL) {
+                ALOGE("EGL_ANDROID_blob_cache advertised, "
+                        "but unable to get eglSetBlobCacheFuncsANDROID");
+                return;
+            }
 
-                eglSetBlobCacheFuncsANDROID(display->disp[i].dpy,
-                        android::setBlob, android::getBlob);
-                EGLint err = cnx->egl.eglGetError();
-                if (err != EGL_SUCCESS) {
-                    ALOGE("eglSetBlobCacheFuncsANDROID resulted in an error: "
-                            "%#x", err);
-                }
+            eglSetBlobCacheFuncsANDROID(display->disp.dpy,
+                    android::setBlob, android::getBlob);
+            EGLint err = cnx->egl.eglGetError();
+            if (err != EGL_SUCCESS) {
+                ALOGE("eglSetBlobCacheFuncsANDROID resulted in an error: "
+                        "%#x", err);
             }
         }
     }
+
     mInitialized = true;
 }
 
