@@ -51,6 +51,11 @@ ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
     $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(font_symlink)
 
 ################################
+# On space-constrained devices, we include a subset of fonts:
+ifeq ($(SMALLER_FONT_FOOTPRINT),true)
+droidsans_fallback_src := DroidSansFallback.ttf
+extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf
+else
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansEthiopic-Regular.ttf
 LOCAL_SRC_FILES := $(LOCAL_MODULE)
@@ -59,15 +64,11 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 
-################################
-ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-droidsans_fallback_src := DroidSansFallback.ttf
-extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf
-else
 droidsans_fallback_src := DroidSansFallbackFull.ttf
 extra_droidsans_fonts := DroidSans.ttf DroidSans-Bold.ttf DroidSansEthiopic-Regular.ttf
 endif  # SMALLER_FONT_FOOTPRINT
 
+################################
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansFallback.ttf
 LOCAL_SRC_FILES := $(droidsans_fallback_src)
@@ -81,3 +82,46 @@ font_symlink_src :=
 font_symlink :=
 droidsans_fallback_src :=
 extra_droidsans_fonts :=
+
+################################
+# Build the rest font files as prebuilt.
+
+# $(1): The source file name in LOCAL_PATH.
+#       It also serves as the module name and the dest file name.
+define build-one-font-module
+$(eval include $(CLEAR_VARS))\
+$(eval LOCAL_MODULE := $(1))\
+$(eval LOCAL_SRC_FILES := $(1))\
+$(eval LOCAL_MODULE_CLASS := ETC)\
+$(eval LOCAL_MODULE_TAGS := optional)\
+$(eval LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts)\
+$(eval include $(BUILD_PREBUILT))
+endef
+
+font_src_files := \
+    Roboto-Regular.ttf \
+    Roboto-Bold.ttf \
+    Roboto-Italic.ttf \
+    Roboto-BoldItalic.ttf \
+    DroidSansArabic.ttf \
+    DroidNaskh-Regular.ttf \
+    DroidSansHebrew-Regular.ttf \
+    DroidSansHebrew-Bold.ttf \
+    DroidSansThai.ttf \
+    DroidSerif-Regular.ttf \
+    DroidSerif-Bold.ttf \
+    DroidSerif-Italic.ttf \
+    DroidSerif-BoldItalic.ttf \
+    DroidSansMono.ttf \
+    DroidSansArmenian.ttf \
+    DroidSansGeorgian.ttf \
+    AndroidEmoji.ttf \
+    Clockopia.ttf \
+    AndroidClock.ttf \
+    AndroidClock_Highlight.ttf \
+    AndroidClock_Solid.ttf \
+
+$(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
+
+build-one-font-module :=
+font_src_files :=
