@@ -39,6 +39,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
 import java.io.File;
+import java.io.PrintWriter;
 
 import static javax.microedition.khronos.egl.EGL10.*;
 
@@ -84,13 +85,27 @@ public abstract class HardwareRenderer {
     static final String DISABLE_VSYNC_PROPERTY = "hwui.disable_vsync";
 
     /**
+     * System property used to enable or disable hardware rendering profiling.
+     * The default value of this property is assumed to be false.
+     * 
+     * When profiling is enabled, the adb shell dumpsys gfxinfo command will
+     * output extra information about the time taken to execute by the last
+     * frames.
+     *
+     * Possible values:
+     * "true", to enable profiling
+     * "false", to disable profiling
+     */
+    static final String PROFILE_PROPERTY = "hwui.profile";
+
+    /**
      * System property used to debug EGL configuration choice.
      * 
      * Possible values:
      * "choice", print the chosen configuration only
      * "all", print all possible configurations
      */
-    static final String PRINT_CONFIG_PROPERTY = "hwui.print_config";    
+    static final String PRINT_CONFIG_PROPERTY = "hwui.print_config";
 
     /**
      * Turn on to draw dirty regions every other frame.
@@ -111,6 +126,16 @@ public abstract class HardwareRenderer {
      * @hide
      */
     public static boolean sSystemRendererDisabled = false;
+
+    /**
+     * Number of frames to profile.
+     */
+    private static final int PROFILE_MAX_FRAMES = 64;
+
+    /**
+     * Number of floats per profiled frame.
+     */
+    private static final int PROFILE_FRAME_DATA_COUNT = 3;
 
     private boolean mEnabled;
     private boolean mRequested = true;
@@ -225,6 +250,12 @@ public abstract class HardwareRenderer {
      */
     abstract HardwareCanvas getCanvas();
 
+    /**
+     * Outputs extra debugging information in the specified file descriptor.
+     * @param pw
+     */
+    abstract void dumpGfxInfo(PrintWriter pw);
+    
     /**
      * Sets the directory to use as a persistent storage for hardware rendering
      * resources.
@@ -439,6 +470,7 @@ public abstract class HardwareRenderer {
         
         GL mGl;
         HardwareCanvas mCanvas;
+
         int mFrameCount;
         Paint mDebugPaint;
 
@@ -456,6 +488,10 @@ public abstract class HardwareRenderer {
 
         final boolean mVsyncDisabled;
 
+        final boolean mProfileEnabled;
+        final float[] mProfileData;
+        int mProfileCurrentFrame = -PROFILE_FRAME_DATA_COUNT;
+
         final int mGlVersion;
         final boolean mTranslucent;
 
@@ -471,6 +507,34 @@ public abstract class HardwareRenderer {
             mVsyncDisabled = "true".equalsIgnoreCase(vsyncProperty);
             if (mVsyncDisabled) {
                 Log.d(LOG_TAG, "Disabling v-sync");
+            }
+
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            if (!ViewDebug.DEBUG_LATENCY) {
+                final String profileProperty = SystemProperties.get(PROFILE_PROPERTY, "false");
+                mProfileEnabled = "true".equalsIgnoreCase(profileProperty);
+                if (mProfileEnabled) {
+                    Log.d(LOG_TAG, "Profiling hardware renderer");
+                }
+            } else {
+                mProfileEnabled = true;
+            }
+
+            if (mProfileEnabled) {
+                mProfileData = new float[PROFILE_MAX_FRAMES * PROFILE_FRAME_DATA_COUNT];
+            } else {
+                mProfileData = null;
+            }
+        }
+
+        @Override
+        void dumpGfxInfo(PrintWriter pw) {
+            if (mProfileEnabled) {
+                pw.printf("\n\tDraw\tProcess\tExecute\n");
+                for (int i = 0; i < mProfileData.length; i += PROFILE_FRAME_DATA_COUNT) {
+                    pw.printf("\t%3.2f\t%3.2f\t%3.2f\n", mProfileData[i], mProfileData[i + 1],
+                            mProfileData[i + 2]);
+                }
             }
         }
 
@@ -860,34 +924,49 @@ public abstract class HardwareRenderer {
                                 (view.mPrivateFlags & View.INVALIDATED) == View.INVALIDATED;
                         view.mPrivateFlags &= ~View.INVALIDATED;
 
-                        final long getDisplayListStartTime;
-                        if (ViewDebug.DEBUG_LATENCY) {
+                        long getDisplayListStartTime = 0;
+                        if (mProfileEnabled) {
+                            mProfileCurrentFrame += PROFILE_FRAME_DATA_COUNT;
+                            if (mProfileCurrentFrame >= mProfileData.length) {
+                                mProfileCurrentFrame = 0;
+                            }
+
                             getDisplayListStartTime = System.nanoTime();
                         }
 
                         DisplayList displayList = view.getDisplayList();
 
-                        if (ViewDebug.DEBUG_LATENCY) {
+                        if (mProfileEnabled) {
                             long now = System.nanoTime();
-                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took "
-                                    + ((now - getDisplayListStartTime) * 0.000001f) + "ms");
+                            float total = (now - getDisplayListStartTime) * 0.000001f;
+                            //noinspection PointlessArithmeticExpression
+                            mProfileData[mProfileCurrentFrame] = total;
+
+                            if (ViewDebug.DEBUG_LATENCY) {
+                                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- getDisplayList() took " +
+                                        total + "ms");
+                            }
                         }
 
                         if (displayList != null) {
-                            final long drawDisplayListStartTime;
-                            if (ViewDebug.DEBUG_LATENCY) {
+                            long drawDisplayListStartTime = 0;
+                            if (mProfileEnabled) {
                                 drawDisplayListStartTime = System.nanoTime();
                             }
 
-                            boolean invalidateNeeded = canvas.drawDisplayList(
-                                    displayList, view.getWidth(),
-                                    view.getHeight(), mRedrawClip);
+                            boolean invalidateNeeded = canvas.drawDisplayList(displayList,
+                                    view.getWidth(), view.getHeight(), mRedrawClip);
 
-                            if (ViewDebug.DEBUG_LATENCY) {
+                            if (mProfileEnabled) {
                                 long now = System.nanoTime();
-                                Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- drawDisplayList() took "
-                                        + ((now - drawDisplayListStartTime) * 0.000001f)
-                                        + "ms, invalidateNeeded=" + invalidateNeeded + ".");
+                                float total = (now - drawDisplayListStartTime) * 0.000001f;
+                                mProfileData[mProfileCurrentFrame + 1] = total;
+
+                                if (ViewDebug.DEBUG_LATENCY) {
+                                    Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- drawDisplayList() took " +
+                                            total + "ms, invalidateNeeded=" +
+                                            invalidateNeeded + ".");
+                                }
                             }
 
                             if (invalidateNeeded) {
@@ -922,17 +1001,22 @@ public abstract class HardwareRenderer {
 
                     attachInfo.mIgnoreDirtyState = false;
 
-                    final long eglSwapBuffersStartTime;
-                    if (ViewDebug.DEBUG_LATENCY) {
+                    long eglSwapBuffersStartTime = 0;
+                    if (mProfileEnabled) {
                         eglSwapBuffersStartTime = System.nanoTime();
                     }
 
                     sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
 
-                    if (ViewDebug.DEBUG_LATENCY) {
+                    if (mProfileEnabled) {
                         long now = System.nanoTime();
-                        Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- eglSwapBuffers() took "
-                                + ((now - eglSwapBuffersStartTime) * 0.000001f) + "ms");
+                        float total = (now - eglSwapBuffersStartTime) * 0.000001f;
+                        mProfileData[mProfileCurrentFrame + 2] = total;
+
+                        if (ViewDebug.DEBUG_LATENCY) {
+                            Log.d(ViewDebug.DEBUG_LATENCY_TAG, "- eglSwapBuffers() took " +
+                                    total + "ms");
+                        }
                     }
 
                     checkEglErrors();

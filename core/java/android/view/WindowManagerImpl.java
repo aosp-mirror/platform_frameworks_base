@@ -480,9 +480,19 @@ public class WindowManagerImpl implements WindowManager {
         try {
             synchronized (this) {
                 if (mViews != null) {
-                    pw.println("View hierarchy:");
-
                     final int count = mViews.length;
+                    
+                    pw.println("Profile data in ms:");
+
+                    for (int i = 0; i < count; i++) {
+                        ViewRootImpl root = mRoots[i];
+                        HardwareRenderer renderer = root.getView().mAttachInfo.mHardwareRenderer;
+                        if (renderer != null) {
+                            renderer.dumpGfxInfo(pw);
+                        }
+                    }
+
+                    pw.println("\nView hierarchy:");
 
                     int viewsCount = 0;
                     int displayListsSize = 0;
