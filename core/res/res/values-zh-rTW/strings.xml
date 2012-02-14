@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"允許應用程式將工作移至前景或背景。請注意，惡意應用程式可能利用此功能自行移動至前景。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允許應用程式移除工作並終止執行工作的應用程式。請注意，惡意應用程式可能利用此功能干擾其他應用程式的行為。"</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"設定螢幕相容性"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允許應用程式控制其他應用程式的螢幕相容性模式。惡意應用程式可能藉此破壞其他應用程式的正常運作。"</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"啟用應用程式偵錯"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"允許應用程式為其他程式開啟偵錯功能。提醒您，惡意應用程式可能會利用這個功能終止其他應用程式。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"變更介面設定"</string>
