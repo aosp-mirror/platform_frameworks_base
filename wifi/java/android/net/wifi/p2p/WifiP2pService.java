@@ -49,6 +49,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -84,7 +85,7 @@ import java.util.Collection;
  */
 public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final String TAG = "WifiP2pService";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String NETWORKTYPE = "WIFI_P2P";
 
     private Context mContext;
@@ -93,11 +94,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     INetworkManagementService mNwService;
     private DhcpStateMachine mDhcpStateMachine;
-
-    //Tracked to notify the user about wifi client/hotspot being shut down
-    //during p2p bring up
-    private int mWifiState = WifiManager.WIFI_STATE_DISABLED;
-    private int mWifiApState = WifiManager.WIFI_AP_STATE_DISABLED;
 
     private P2pStateMachine mP2pStateMachine;
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -109,6 +105,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* Two minutes comes from the wpa_supplicant setting */
     private static final int GROUP_CREATING_WAIT_TIME_MS = 120 * 1000;
     private static int mGroupCreatingTimeoutIndex = 0;
+
+    /* Set a two minute discover timeout to avoid STA scans from being blocked */
+    private static final int DISCOVER_TIMEOUT_S = 120;
 
     /**
      * Delay between restarts upon failure to setup connection with supplicant
@@ -124,28 +123,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_SERVICE;
 
-    /* Message sent to WifiStateMachine to indicate p2p enable is pending */
-    public static final int P2P_ENABLE_PENDING              =   BASE + 1;
-    /* Message sent to WifiStateMachine to indicate Wi-Fi client/hotspot operation can proceed */
-    public static final int WIFI_ENABLE_PROCEED             =   BASE + 2;
-
     /* Delayed message to timeout group creation */
-    public static final int GROUP_CREATING_TIMED_OUT        =   BASE + 3;
-
-    /* User accepted to disable Wi-Fi in order to enable p2p */
-    private static final int WIFI_DISABLE_USER_ACCEPT       =   BASE + 4;
-    /* User rejected to disable Wi-Fi in order to enable p2p */
-    private static final int WIFI_DISABLE_USER_REJECT       =   BASE + 5;
+    public static final int GROUP_CREATING_TIMED_OUT        =   BASE + 1;
 
     /* User accepted a peer request */
-    private static final int PEER_CONNECTION_USER_ACCEPT    =   BASE + 6;
+    private static final int PEER_CONNECTION_USER_ACCEPT    =   BASE + 2;
     /* User rejected a peer request */
-    private static final int PEER_CONNECTION_USER_REJECT    =   BASE + 7;
-
-    /* Airplane mode changed */
-    private static final int AIRPLANE_MODE_CHANGED          =   BASE + 8;
-    /* Emergency callback mode */
-    private static final int EMERGENCY_CALLBACK_MODE        =   BASE + 9;
+    private static final int PEER_CONNECTION_USER_REJECT    =   BASE + 3;
 
     private final boolean mP2pSupported;
 
@@ -166,7 +150,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     public WifiP2pService(Context context) {
         mContext = context;
 
-        //STOPSHIP: fix this
+        //STOPSHIP: get this from native side
         mInterface = "p2p0";
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
 
@@ -179,40 +163,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
         mP2pStateMachine = new P2pStateMachine(TAG, mP2pSupported);
         mP2pStateMachine.start();
-
-        // broadcasts
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
-        mContext.registerReceiver(new WifiStateReceiver(), filter);
-
     }
 
     public void connectivityServiceReady() {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         mNwService = INetworkManagementService.Stub.asInterface(b);
-    }
-
-    private class WifiStateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                        WifiManager.WIFI_STATE_DISABLED);
-            } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
-                mWifiApState = intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
-                        WifiManager.WIFI_AP_STATE_DISABLED);
-            } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
-                mP2pStateMachine.sendMessage(AIRPLANE_MODE_CHANGED);
-            } else if (action.equals(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED)) {
-                if (intent.getBooleanExtra("phoneinECMState", false) == true) {
-                    mP2pStateMachine.sendMessage(EMERGENCY_CALLBACK_MODE);
-                }
-            }
-        }
     }
 
     private void enforceAccessPermission() {
@@ -264,8 +219,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         private P2pNotSupportedState mP2pNotSupportedState = new P2pNotSupportedState();
         private P2pDisablingState mP2pDisablingState = new P2pDisablingState();
         private P2pDisabledState mP2pDisabledState = new P2pDisabledState();
-        private WaitForUserActionState mWaitForUserActionState = new WaitForUserActionState();
-        private WaitForWifiDisableState mWaitForWifiDisableState = new WaitForWifiDisableState();
         private P2pEnablingState mP2pEnablingState = new P2pEnablingState();
         private P2pEnabledState mP2pEnabledState = new P2pEnabledState();
         // Inactive is when p2p is enabled with no connectivity
@@ -299,8 +252,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 addState(mP2pNotSupportedState, mDefaultState);
                 addState(mP2pDisablingState, mDefaultState);
                 addState(mP2pDisabledState, mDefaultState);
-                    addState(mWaitForUserActionState, mP2pDisabledState);
-                    addState(mWaitForWifiDisableState, mP2pDisabledState);
                 addState(mP2pEnablingState, mDefaultState);
                 addState(mP2pEnabledState, mDefaultState);
                     addState(mInactiveState, mP2pEnabledState);
@@ -346,21 +297,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     AsyncChannel ac = new AsyncChannel();
                     ac.connect(mContext, getHandler(), message.replyTo);
                     break;
-                case WifiStateMachine.WIFI_ENABLE_PENDING:
-                    // Disable p2p operation before we can respond
-                    sendMessage(WifiP2pManager.DISABLE_P2P);
-                    deferMessage(message);
-                    break;
-                case WifiP2pManager.ENABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.ENABLE_P2P_FAILED,
-                            WifiP2pManager.BUSY);
-                    break;
-                case WifiP2pManager.DISABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.DISABLE_P2P_FAILED,
-                            WifiP2pManager.BUSY);
-                    break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
+                            WifiP2pManager.BUSY);
+                    break;
+                case WifiP2pManager.STOP_DISCOVERY:
+                    replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_FAILED,
                             WifiP2pManager.BUSY);
                     break;
                 case WifiP2pManager.CONNECT:
@@ -388,16 +330,14 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiP2pManager.REQUEST_GROUP_INFO:
                     replyToMessage(message, WifiP2pManager.RESPONSE_GROUP_INFO, mGroup);
                     break;
-                case AIRPLANE_MODE_CHANGED:
-                    if (isAirplaneModeOn()) sendMessage(WifiP2pManager.DISABLE_P2P);
-                    break;
-                case EMERGENCY_CALLBACK_MODE:
-                    sendMessage(WifiP2pManager.DISABLE_P2P);
-                    break;
                     // Ignore
                 case WifiMonitor.P2P_INVITATION_RESULT_EVENT:
-                case WIFI_DISABLE_USER_ACCEPT:
-                case WIFI_DISABLE_USER_REJECT:
+                case WifiMonitor.SCAN_RESULTS_EVENT:
+                case WifiMonitor.SUP_CONNECTION_EVENT:
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                 case PEER_CONNECTION_USER_ACCEPT:
                 case PEER_CONNECTION_USER_REJECT:
                 case GROUP_CREATING_TIMED_OUT:
@@ -414,20 +354,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public boolean processMessage(Message message) {
             switch (message.what) {
-                // Allow Wi-Fi to proceed
-                case WifiStateMachine.WIFI_ENABLE_PENDING:
-                    replyToMessage(message, WIFI_ENABLE_PROCEED);
-                    break;
-                case WifiP2pManager.ENABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.ENABLE_P2P_FAILED,
-                            WifiP2pManager.P2P_UNSUPPORTED);
-                    break;
-                case WifiP2pManager.DISABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.DISABLE_P2P_FAILED,
-                            WifiP2pManager.P2P_UNSUPPORTED);
-                    break;
-                case WifiP2pManager.DISCOVER_PEERS:
+               case WifiP2pManager.DISCOVER_PEERS:
                     replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
+                            WifiP2pManager.P2P_UNSUPPORTED);
+                    break;
+                case WifiP2pManager.STOP_DISCOVERY:
+                    replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
                 case WifiP2pManager.CONNECT:
@@ -438,7 +370,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     replyToMessage(message, WifiP2pManager.CANCEL_CONNECT_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
-                case WifiP2pManager.CREATE_GROUP:
+               case WifiP2pManager.CREATE_GROUP:
                     replyToMessage(message, WifiP2pManager.CREATE_GROUP_FAILED,
                             WifiP2pManager.P2P_UNSUPPORTED);
                     break;
@@ -455,26 +387,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     class P2pDisablingState extends State {
         @Override
-        public void enter() {
-            if (DBG) logd(getName());
-            logd("stopping supplicant");
-            if (!mWifiNative.stopSupplicant()) {
-                loge("Failed to stop supplicant, issue kill");
-                mWifiNative.killSupplicant();
-            }
-        }
-
-        @Override
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
-                    logd("Supplicant connection lost");
-                    mWifiNative.closeSupplicantConnection();
+                    if (DBG) logd("p2p socket connection lost");
                     transitionTo(mP2pDisabledState);
                     break;
-                case WifiP2pManager.ENABLE_P2P:
-                case WifiP2pManager.DISABLE_P2P:
+                case WifiStateMachine.CMD_ENABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P:
                     deferMessage(message);
                     break;
                 default:
@@ -483,7 +404,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             return HANDLED;
         }
     }
-
 
     class P2pDisabledState extends State {
        @Override
@@ -495,118 +415,19 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
-                case WifiP2pManager.ENABLE_P2P:
-                    OnClickListener listener = new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (which == DialogInterface.BUTTON_POSITIVE) {
-                                sendMessage(WIFI_DISABLE_USER_ACCEPT);
-                            } else {
-                                sendMessage(WIFI_DISABLE_USER_REJECT);
-                            }
-                        }
-                    };
-
-                    // Show a user request dialog if we know Wi-Fi client/hotspot is in operation
-                    if (mWifiState != WifiManager.WIFI_STATE_DISABLED ||
-                            mWifiApState != WifiManager.WIFI_AP_STATE_DISABLED) {
-                        Resources r = Resources.getSystem();
-                        AlertDialog dialog = new AlertDialog.Builder(mContext)
-                            .setTitle(r.getString(R.string.wifi_p2p_dialog_title))
-                            .setMessage(r.getString(R.string.wifi_p2p_turnon_message))
-                            .setPositiveButton(r.getString(R.string.ok), listener)
-                            .setNegativeButton(r.getString(R.string.cancel), listener)
-                            .create();
-                        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                        dialog.show();
-                        transitionTo(mWaitForUserActionState);
-                    } else {
-                        mWifiChannel.sendMessage(P2P_ENABLE_PENDING);
-                        transitionTo(mWaitForWifiDisableState);
-                    }
-                    replyToMessage(message, WifiP2pManager.ENABLE_P2P_SUCCEEDED);
-                    break;
-                case WifiP2pManager.DISABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.DISABLE_P2P_SUCCEEDED);
-                    break;
-                case WifiStateMachine.WIFI_ENABLE_PENDING:
-                    replyToMessage(message, WIFI_ENABLE_PROCEED);
-                    break;
-                default:
-                    return NOT_HANDLED;
-            }
-            return HANDLED;
-        }
-    }
-
-    class WaitForUserActionState extends State {
-        @Override
-        public void enter() {
-            if (DBG) logd(getName());
-        }
-
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) logd(getName() + message.toString());
-            switch (message.what) {
-                case WIFI_DISABLE_USER_ACCEPT:
-                    mWifiChannel.sendMessage(P2P_ENABLE_PENDING);
-                    transitionTo(mWaitForWifiDisableState);
-                    break;
-                case WIFI_DISABLE_USER_REJECT:
-                    logd("User rejected enabling p2p");
-                    sendP2pStateChangedBroadcast(false);
-                    transitionTo(mP2pDisabledState);
-                    break;
-                case WifiP2pManager.ENABLE_P2P:
-                case WifiP2pManager.DISABLE_P2P:
-                    deferMessage(message);
-                    break;
-                default:
-                    return NOT_HANDLED;
-            }
-            return HANDLED;
-        }
-    }
-
-    class WaitForWifiDisableState extends State {
-        @Override
-        public void enter() {
-            if (DBG) logd(getName());
-        }
-
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) logd(getName() + message.toString());
-            switch (message.what) {
-                case WifiStateMachine.P2P_ENABLE_PROCEED:
+                case WifiStateMachine.CMD_ENABLE_P2P:
                     try {
-                        mNwService.wifiFirmwareReload(mInterface, "P2P");
-                    } catch (Exception e) {
-                        loge("Failed to reload p2p firmware " + e);
-                        // continue
+                        mNwService.setInterfaceUp(mInterface);
+                    } catch (RemoteException re) {
+                        loge("Unable to change interface settings: " + re);
+                    } catch (IllegalStateException ie) {
+                        loge("Unable to change interface settings: " + ie);
                     }
-
-                    //A runtime crash can leave the interface up and
-                    //this affects p2p when supplicant starts up.
-                    //Ensure interface is down before a supplicant start.
-                    try {
-                        mNwService.setInterfaceDown(mInterface);
-                    } catch (Exception e) {
-                        if (DBG) Slog.w(TAG, "Unable to bring down wlan interface: " + e);
-                    }
-
-                    if (mWifiNative.startP2pSupplicant()) {
-                        mWifiMonitor.startMonitoring();
-                        transitionTo(mP2pEnablingState);
-                    } else {
-                        notifyP2pEnableFailure();
-                        transitionTo(mP2pDisabledState);
-                    }
+                    mWifiMonitor.startMonitoring();
+                    transitionTo(mP2pEnablingState);
                     break;
-                case WifiP2pManager.ENABLE_P2P:
-                case WifiP2pManager.DISABLE_P2P:
-                    deferMessage(message);
+                case WifiStateMachine.CMD_DISABLE_P2P:
+                    //Nothing to do
                     break;
                 default:
                     return NOT_HANDLED;
@@ -626,22 +447,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
                 case WifiMonitor.SUP_CONNECTION_EVENT:
-                    logd("P2p start successful");
+                    if (DBG) logd("P2p socket connection successful");
                     transitionTo(mInactiveState);
                     break;
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
-                    if (++mP2pRestartCount <= P2P_RESTART_TRIES) {
-                        loge("Failed to start p2p, retry");
-                        mWifiNative.killSupplicant();
-                        sendMessageDelayed(WifiP2pManager.ENABLE_P2P, P2P_RESTART_INTERVAL_MSECS);
-                    } else {
-                        loge("Failed " + mP2pRestartCount + " times to start p2p, quit ");
-                        mP2pRestartCount = 0;
-                    }
+                    loge("P2p socket connection failed");
                     transitionTo(mP2pDisabledState);
                     break;
-                case WifiP2pManager.ENABLE_P2P:
-                case WifiP2pManager.DISABLE_P2P:
+                case WifiStateMachine.CMD_ENABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P:
                     deferMessage(message);
                     break;
                 default:
@@ -658,27 +472,33 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             sendP2pStateChangedBroadcast(true);
             mNetworkInfo.setIsAvailable(true);
             initializeP2pSettings();
-            showNotification();
         }
 
         @Override
         public boolean processMessage(Message message) {
             if (DBG) logd(getName() + message.toString());
             switch (message.what) {
-                case WifiP2pManager.ENABLE_P2P:
-                    replyToMessage(message, WifiP2pManager.ENABLE_P2P_SUCCEEDED);
+                case WifiStateMachine.CMD_ENABLE_P2P:
+                    //Nothing to do
                     break;
-                case WifiP2pManager.DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P:
                     if (mPeers.clear()) sendP2pPeersChangedBroadcast();
-                    replyToMessage(message, WifiP2pManager.DISABLE_P2P_SUCCEEDED);
+                    mWifiNative.closeSupplicantConnection();
                     transitionTo(mP2pDisablingState);
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
-                    int timeout = message.arg1;
-                    if (mWifiNative.p2pFind(timeout)) {
+                    if (mWifiNative.p2pFind(DISCOVER_TIMEOUT_S)) {
                         replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_SUCCEEDED);
                     } else {
                         replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
+                                WifiP2pManager.ERROR);
+                    }
+                    break;
+                case WifiP2pManager.STOP_DISCOVERY:
+                    if (mWifiNative.p2pStopFind()) {
+                        replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_SUCCEEDED);
+                    } else {
+                        replyToMessage(message, WifiP2pManager.STOP_DISCOVERY_FAILED,
                                 WifiP2pManager.ERROR);
                     }
                     break;
@@ -692,15 +512,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     device = (WifiP2pDevice) message.obj;
                     if (mPeers.remove(device)) sendP2pPeersChangedBroadcast();
                     break;
-               case WifiMonitor.SUP_DISCONNECTION_EVENT:  /* Supplicant died */
-                    loge("Connection lost, restart p2p");
-                    mWifiNative.killSupplicant();
-                    mWifiNative.closeSupplicantConnection();
-                    if (mPeers.clear()) sendP2pPeersChangedBroadcast();
-                    transitionTo(mP2pDisabledState);
-                    sendMessageDelayed(WifiP2pManager.ENABLE_P2P, P2P_RESTART_INTERVAL_MSECS);
-                    break;
-                default:
+               default:
                     return NOT_HANDLED;
             }
             return HANDLED;
@@ -710,7 +522,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void exit() {
             sendP2pStateChangedBroadcast(false);
             mNetworkInfo.setIsAvailable(false);
-            clearNotification();
         }
     }
 
@@ -719,7 +530,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void enter() {
             if (DBG) logd(getName());
             //Start listening every time we get inactive
-            mWifiNative.p2pListen();
+            //TODO: Fix listen after driver behavior is fixed
+            //mWifiNative.p2pListen();
         }
 
         @Override
@@ -737,6 +549,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                         //TODO: if failure, remove config and do a regular p2pConnect()
                         mWifiNative.p2pReinvoke(netId, mSavedPeerConfig.deviceAddress);
                     } else {
+                        //Stop discovery before issuing connect
+                        mWifiNative.p2pStopFind();
                         //If peer is a GO, we do not need to send provisional discovery,
                         //the supplicant takes care of it.
                         if (isGroupOwner(mSavedPeerConfig.deviceAddress)) {
@@ -1114,7 +928,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     // Do the regular device lost handling
                     return NOT_HANDLED;
-                case WifiP2pManager.DISABLE_P2P:
+                case WifiStateMachine.CMD_DISABLE_P2P:
                     sendMessage(WifiP2pManager.REMOVE_GROUP);
                     deferMessage(message);
                     break;
@@ -1492,55 +1306,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void loge(String s) {
         Slog.e(TAG, s);
-    }
-
-    private void showNotification() {
-        NotificationManager notificationManager =
-            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager == null || mNotification != null) {
-            return;
-        }
-
-        Intent intent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-
-        PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-
-        Resources r = Resources.getSystem();
-        CharSequence title = r.getText(R.string.wifi_p2p_enabled_notification_title);
-        CharSequence message = r.getText(R.string.wifi_p2p_enabled_notification_message);
-
-        mNotification = new Notification();
-        mNotification.when = 0;
-        //TODO: might change to be a seperate icon
-        mNotification.icon = R.drawable.stat_sys_tether_wifi;
-        mNotification.defaults &= ~Notification.DEFAULT_SOUND;
-        mNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mNotification.tickerText = title;
-        mNotification.setLatestEventInfo(mContext, title, message, pi);
-
-        notificationManager.notify(mNotification.icon, mNotification);
-    }
-
-    private void clearNotification() {
-        NotificationManager notificationManager =
-            (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null && mNotification != null) {
-            notificationManager.cancel(mNotification.icon);
-            mNotification = null;
-        }
-    }
-
-    private boolean isAirplaneSensitive() {
-        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_RADIOS);
-        return airplaneModeRadios == null
-            || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
-    }
-
-    private boolean isAirplaneModeOn() {
-        return isAirplaneSensitive() && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON, 0) == 1;
     }
 
     }
