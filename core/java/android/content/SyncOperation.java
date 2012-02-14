@@ -26,6 +26,7 @@ import android.os.SystemClock;
  */
 public class SyncOperation implements Comparable {
     public final Account account;
+    public final int userId;
     public int syncSource;
     public String authority;
     public final boolean allowParallelSyncs;
@@ -38,9 +39,10 @@ public class SyncOperation implements Comparable {
     public long delayUntil;
     public long effectiveRunTime;
 
-    public SyncOperation(Account account, int source, String authority, Bundle extras,
+    public SyncOperation(Account account, int userId, int source, String authority, Bundle extras,
             long delayInMs, long backoff, long delayUntil, boolean allowParallelSyncs) {
         this.account = account;
+        this.userId = userId;
         this.syncSource = source;
         this.authority = authority;
         this.allowParallelSyncs = allowParallelSyncs;
@@ -75,6 +77,7 @@ public class SyncOperation implements Comparable {
 
     SyncOperation(SyncOperation other) {
         this.account = other.account;
+        this.userId = other.userId;
         this.syncSource = other.syncSource;
         this.authority = other.authority;
         this.extras = new Bundle(other.extras);
@@ -120,7 +123,8 @@ public class SyncOperation implements Comparable {
     private String toKey() {
         StringBuilder sb = new StringBuilder();
         sb.append("authority: ").append(authority);
-        sb.append(" account {name=" + account.name + ", type=" + account.type + "}");
+        sb.append(" account {name=" + account.name + ", user=" + userId + ", type=" + account.type
+                + "}");
         sb.append(" extras: ");
         extrasToStringBuilder(extras, sb);
         return sb.toString();

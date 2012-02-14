@@ -20,6 +20,7 @@ import com.android.internal.os.AtomicFile;
 
 import android.accounts.Account;
 import android.os.Bundle;
+import android.os.Debug;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 import android.test.mock.MockContentResolver;
@@ -33,6 +34,10 @@ import java.io.FileOutputStream;
 import java.util.List;
 
 public class SyncStorageEngineTest extends AndroidTestCase {
+
+    private File getSyncDir() {
+        return new File(new File(getContext().getFilesDir(), "system"), "sync");
+    }
 
     /**
      * Test that we handle the case of a history row being old enough to purge before the
@@ -52,7 +57,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         long time0 = 1000;
         long historyId = engine.insertStartSyncEvent(
-                account, authority, time0, SyncStorageEngine.SOURCE_LOCAL);
+                account, 0, authority, time0, SyncStorageEngine.SOURCE_LOCAL);
         long time1 = time0 + SyncStorageEngine.MILLIS_IN_4WEEKS * 2;
         engine.stopSyncEvent(historyId, time1 - time0, "yay", 0, 0);
     }
@@ -82,38 +87,47 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(
                 new TestContext(mockResolver, getContext()));
 
-        removePeriodicSyncs(engine, account1, authority);
-        removePeriodicSyncs(engine, account2, authority);
+        removePeriodicSyncs(engine, account1, 0, authority);
+        removePeriodicSyncs(engine, account2, 0, authority);
+        removePeriodicSyncs(engine, account1, 1, authority);
 
         // this should add two distinct periodic syncs for account1 and one for account2
-        engine.addPeriodicSync(sync1.account, sync1.authority, sync1.extras, sync1.period);
-        engine.addPeriodicSync(sync2.account, sync2.authority, sync2.extras, sync2.period);
-        engine.addPeriodicSync(sync3.account, sync3.authority, sync3.extras, sync3.period);
-        engine.addPeriodicSync(sync4.account, sync4.authority, sync4.extras, sync4.period);
+        engine.addPeriodicSync(sync1.account, 0, sync1.authority, sync1.extras, sync1.period);
+        engine.addPeriodicSync(sync2.account, 0, sync2.authority, sync2.extras, sync2.period);
+        engine.addPeriodicSync(sync3.account, 0, sync3.authority, sync3.extras, sync3.period);
+        engine.addPeriodicSync(sync4.account, 0, sync4.authority, sync4.extras, sync4.period);
+        // add a second user
+        engine.addPeriodicSync(sync2.account, 1, sync2.authority, sync2.extras, sync2.period);
 
-        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account1, authority);
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account1, 0, authority);
 
         assertEquals(2, syncs.size());
 
         assertEquals(sync1, syncs.get(0));
         assertEquals(sync3, syncs.get(1));
 
-        engine.removePeriodicSync(sync1.account, sync1.authority, sync1.extras);
+        engine.removePeriodicSync(sync1.account, 0, sync1.authority, sync1.extras);
 
-        syncs = engine.getPeriodicSyncs(account1, authority);
+        syncs = engine.getPeriodicSyncs(account1, 0, authority);
         assertEquals(1, syncs.size());
         assertEquals(sync3, syncs.get(0));
 
-        syncs = engine.getPeriodicSyncs(account2, authority);
+        syncs = engine.getPeriodicSyncs(account2, 0, authority);
         assertEquals(1, syncs.size());
         assertEquals(sync4, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(sync2.account, 1, sync2.authority);
+        assertEquals(1, syncs.size());
+        assertEquals(sync2, syncs.get(0));
     }
 
-    private void removePeriodicSyncs(SyncStorageEngine engine, Account account, String authority) {
-        engine.setIsSyncable(account, authority, engine.getIsSyncable(account, authority));
-        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, authority);
+    private void removePeriodicSyncs(SyncStorageEngine engine, Account account, int userId,
+            String authority) {
+        engine.setIsSyncable(account, userId, authority,
+                engine.getIsSyncable(account, 0, authority));
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, userId, authority);
         for (PeriodicSync sync : syncs) {
-            engine.removePeriodicSync(sync.account, sync.authority, sync.extras);
+            engine.removePeriodicSync(sync.account, userId, sync.authority, sync.extras);
         }
     }
 
@@ -147,57 +161,57 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(
                 new TestContext(mockResolver, getContext()));
 
-        removePeriodicSyncs(engine, account1, authority1);
-        removePeriodicSyncs(engine, account2, authority1);
-        removePeriodicSyncs(engine, account1, authority2);
-        removePeriodicSyncs(engine, account2, authority2);
+        removePeriodicSyncs(engine, account1, 0, authority1);
+        removePeriodicSyncs(engine, account2, 0, authority1);
+        removePeriodicSyncs(engine, account1, 0, authority2);
+        removePeriodicSyncs(engine, account2, 0, authority2);
 
-        engine.setMasterSyncAutomatically(false);
+        engine.setMasterSyncAutomatically(false, 0);
 
-        engine.setIsSyncable(account1, authority1, 1);
-        engine.setSyncAutomatically(account1, authority1, true);
+        engine.setIsSyncable(account1, 0, authority1, 1);
+        engine.setSyncAutomatically(account1, 0, authority1, true);
 
-        engine.setIsSyncable(account2, authority1, 1);
-        engine.setSyncAutomatically(account2, authority1, true);
+        engine.setIsSyncable(account2, 0, authority1, 1);
+        engine.setSyncAutomatically(account2, 0, authority1, true);
 
-        engine.setIsSyncable(account1, authority2, 1);
-        engine.setSyncAutomatically(account1, authority2, false);
+        engine.setIsSyncable(account1, 0, authority2, 1);
+        engine.setSyncAutomatically(account1, 0, authority2, false);
 
-        engine.setIsSyncable(account2, authority2, 0);
-        engine.setSyncAutomatically(account2, authority2, true);
+        engine.setIsSyncable(account2, 0, authority2, 0);
+        engine.setSyncAutomatically(account2, 0, authority2, true);
 
-        engine.addPeriodicSync(sync1.account, sync1.authority, sync1.extras, sync1.period);
-        engine.addPeriodicSync(sync2.account, sync2.authority, sync2.extras, sync2.period);
-        engine.addPeriodicSync(sync3.account, sync3.authority, sync3.extras, sync3.period);
-        engine.addPeriodicSync(sync4.account, sync4.authority, sync4.extras, sync4.period);
-        engine.addPeriodicSync(sync5.account, sync5.authority, sync5.extras, sync5.period);
+        engine.addPeriodicSync(sync1.account, 0, sync1.authority, sync1.extras, sync1.period);
+        engine.addPeriodicSync(sync2.account, 0, sync2.authority, sync2.extras, sync2.period);
+        engine.addPeriodicSync(sync3.account, 0, sync3.authority, sync3.extras, sync3.period);
+        engine.addPeriodicSync(sync4.account, 0, sync4.authority, sync4.extras, sync4.period);
+        engine.addPeriodicSync(sync5.account, 0, sync5.authority, sync5.extras, sync5.period);
 
         engine.writeAllState();
         engine.clearAndReadState();
 
-        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account1, authority1);
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account1, 0, authority1);
         assertEquals(2, syncs.size());
         assertEquals(sync1, syncs.get(0));
         assertEquals(sync2, syncs.get(1));
 
-        syncs = engine.getPeriodicSyncs(account1, authority2);
+        syncs = engine.getPeriodicSyncs(account1, 0, authority2);
         assertEquals(2, syncs.size());
         assertEquals(sync3, syncs.get(0));
         assertEquals(sync4, syncs.get(1));
 
-        syncs = engine.getPeriodicSyncs(account2, authority1);
+        syncs = engine.getPeriodicSyncs(account2, 0, authority1);
         assertEquals(1, syncs.size());
         assertEquals(sync5, syncs.get(0));
 
-        assertEquals(true, engine.getSyncAutomatically(account1, authority1));
-        assertEquals(true, engine.getSyncAutomatically(account2, authority1));
-        assertEquals(false, engine.getSyncAutomatically(account1, authority2));
-        assertEquals(true, engine.getSyncAutomatically(account2, authority2));
+        assertEquals(true, engine.getSyncAutomatically(account1, 0, authority1));
+        assertEquals(true, engine.getSyncAutomatically(account2, 0, authority1));
+        assertEquals(false, engine.getSyncAutomatically(account1, 0, authority2));
+        assertEquals(true, engine.getSyncAutomatically(account2, 0, authority2));
 
-        assertEquals(1, engine.getIsSyncable(account1, authority1));
-        assertEquals(1, engine.getIsSyncable(account2, authority1));
-        assertEquals(1, engine.getIsSyncable(account1, authority2));
-        assertEquals(0, engine.getIsSyncable(account2, authority2));
+        assertEquals(1, engine.getIsSyncable(account1, 0, authority1));
+        assertEquals(1, engine.getIsSyncable(account2, 0, authority1));
+        assertEquals(1, engine.getIsSyncable(account1, 0, authority2));
+        assertEquals(0, engine.getIsSyncable(account2, 0, authority2));
     }
 
     @MediumTest
@@ -220,12 +234,13 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<accounts>\n"
-                + "<authority id=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
-                + "<authority id=\"1\" account=\"account1\" type=\"type1\" authority=\"auth2\" />\n"
-                + "<authority id=\"2\" account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
+                + "<authority id=\"0\" user=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
+                + "<authority id=\"1\" user=\"0\" account=\"account1\" type=\"type1\" authority=\"auth2\" />\n"
+                + "<authority id=\"2\"            account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
+                + "<authority id=\"3\" user=\"1\" account=\"account1\" type=\"type1\" authority=\"auth3\" />\n"
                 + "</accounts>\n").getBytes();
 
-        File syncDir = new File(new File(testContext.getFilesDir(), "system"), "sync");
+        File syncDir = getSyncDir();
         syncDir.mkdirs();
         AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
         FileOutputStream fos = accountInfoFile.startWrite();
@@ -234,15 +249,19 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
 
-        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, authority1);
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, 0, authority1);
         assertEquals(1, syncs.size());
         assertEquals(sync1, syncs.get(0));
 
-        syncs = engine.getPeriodicSyncs(account, authority2);
+        syncs = engine.getPeriodicSyncs(account, 0, authority2);
         assertEquals(1, syncs.size());
         assertEquals(sync2, syncs.get(0));
 
-        syncs = engine.getPeriodicSyncs(account, authority3);
+        syncs = engine.getPeriodicSyncs(account, 0, authority3);
+        assertEquals(1, syncs.size());
+        assertEquals(sync3, syncs.get(0));
+
+        syncs = engine.getPeriodicSyncs(account, 1, authority3);
         assertEquals(1, syncs.size());
         assertEquals(sync3, syncs.get(0));
 
@@ -260,13 +279,13 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         engine.clearAndReadState();
 
-        syncs = engine.getPeriodicSyncs(account, authority1);
+        syncs = engine.getPeriodicSyncs(account, 0, authority1);
         assertEquals(0, syncs.size());
 
-        syncs = engine.getPeriodicSyncs(account, authority2);
+        syncs = engine.getPeriodicSyncs(account, 0, authority2);
         assertEquals(0, syncs.size());
 
-        syncs = engine.getPeriodicSyncs(account, authority3);
+        syncs = engine.getPeriodicSyncs(account, 0, authority3);
         assertEquals(0, syncs.size());
 
         accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
@@ -289,17 +308,45 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         engine.clearAndReadState();
 
-        syncs = engine.getPeriodicSyncs(account, authority1);
+        syncs = engine.getPeriodicSyncs(account, 0, authority1);
         assertEquals(1, syncs.size());
         assertEquals(sync1s, syncs.get(0));
 
-        syncs = engine.getPeriodicSyncs(account, authority2);
+        syncs = engine.getPeriodicSyncs(account, 0, authority2);
         assertEquals(1, syncs.size());
         assertEquals(sync2s, syncs.get(0));
 
-        syncs = engine.getPeriodicSyncs(account, authority3);
+        syncs = engine.getPeriodicSyncs(account, 0, authority3);
         assertEquals(1, syncs.size());
         assertEquals(sync3s, syncs.get(0));
+    }
+
+    @MediumTest
+    public void testListenForTicklesParsing() throws Exception {
+        byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts>\n"
+                + "<listenForTickles user=\"0\" enabled=\"false\" />"
+                + "<listenForTickles user=\"1\" enabled=\"true\" />"
+                + "<authority id=\"0\" user=\"0\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
+                + "<authority id=\"1\" user=\"1\" account=\"account1\" type=\"type1\" authority=\"auth1\" />\n"
+                + "</accounts>\n").getBytes();
+
+        MockContentResolver mockResolver = new MockContentResolver();
+        final TestContext testContext = new TestContext(mockResolver, getContext());
+
+        File syncDir = getSyncDir();
+        syncDir.mkdirs();
+        AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        FileOutputStream fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
+
+        assertEquals(false, engine.getMasterSyncAutomatically(0));
+        assertEquals(true, engine.getMasterSyncAutomatically(1));
+        assertEquals(true, engine.getMasterSyncAutomatically(2));
+
     }
 
     @MediumTest
@@ -339,17 +386,17 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
 
-        assertEquals(false, engine.getSyncAutomatically(account1, authorityContacts));
-        assertEquals(false, engine.getSyncAutomatically(account1, authorityCalendar));
-        assertEquals(true, engine.getSyncAutomatically(account1, authorityOther));
-        assertEquals(true, engine.getSyncAutomatically(account1, authorityContactsNew));
-        assertEquals(true, engine.getSyncAutomatically(account1, authorityCalendarNew));
+        assertEquals(false, engine.getSyncAutomatically(account1, 0, authorityContacts));
+        assertEquals(false, engine.getSyncAutomatically(account1, 0, authorityCalendar));
+        assertEquals(true, engine.getSyncAutomatically(account1, 0, authorityOther));
+        assertEquals(true, engine.getSyncAutomatically(account1, 0, authorityContactsNew));
+        assertEquals(true, engine.getSyncAutomatically(account1, 0, authorityCalendarNew));
 
-        assertEquals(false, engine.getSyncAutomatically(account2, authorityContacts));
-        assertEquals(false, engine.getSyncAutomatically(account2, authorityCalendar));
-        assertEquals(true, engine.getSyncAutomatically(account2, authorityOther));
-        assertEquals(false, engine.getSyncAutomatically(account2, authorityContactsNew));
-        assertEquals(false, engine.getSyncAutomatically(account2, authorityCalendarNew));
+        assertEquals(false, engine.getSyncAutomatically(account2, 0, authorityContacts));
+        assertEquals(false, engine.getSyncAutomatically(account2, 0, authorityCalendar));
+        assertEquals(true, engine.getSyncAutomatically(account2, 0, authorityOther));
+        assertEquals(false, engine.getSyncAutomatically(account2, 0, authorityContactsNew));
+        assertEquals(false, engine.getSyncAutomatically(account2, 0, authorityCalendarNew));
     }
 
     @SmallTest
@@ -379,10 +426,10 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
 
-        assertEquals(-1, engine.getIsSyncable(account, "other1"));
-        assertEquals(1, engine.getIsSyncable(account, "other2"));
-        assertEquals(0, engine.getIsSyncable(account, "other3"));
-        assertEquals(1, engine.getIsSyncable(account, "other4"));
+        assertEquals(-1, engine.getIsSyncable(account, 0, "other1"));
+        assertEquals(1, engine.getIsSyncable(account, 0, "other2"));
+        assertEquals(0, engine.getIsSyncable(account, 0, "other3"));
+        assertEquals(1, engine.getIsSyncable(account, 0, "other4"));
     }
 }
 
