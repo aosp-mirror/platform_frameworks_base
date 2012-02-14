@@ -65,6 +65,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Transformation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -10947,6 +10948,340 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      */
     public boolean isHardwareAccelerated() {
         return mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
+    }
+
+    /**
+     * This method is called by ViewGroup.drawChild() to have each child view draw itself.
+     * This draw() method is an implementation detail and is not intended to be overridden or
+     * to be called from anywhere else other than ViewGroup.drawChild().
+     */
+    boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
+        boolean more = false;
+
+        final int cl = mLeft;
+        final int ct = mTop;
+        final int cr = mRight;
+        final int cb = mBottom;
+
+        final boolean childHasIdentityMatrix = hasIdentityMatrix();
+
+        final int flags = parent.mGroupFlags;
+
+        if ((flags & parent.FLAG_CLEAR_TRANSFORMATION) == parent.FLAG_CLEAR_TRANSFORMATION) {
+            parent.mChildTransformation.clear();
+            parent.mGroupFlags &= ~parent.FLAG_CLEAR_TRANSFORMATION;
+        }
+
+        Transformation transformToApply = null;
+        Transformation invalidationTransform;
+        final Animation a = getAnimation();
+        boolean concatMatrix = false;
+
+        boolean scalingRequired = false;
+        boolean caching;
+        int layerType = parent.mDrawLayers ? getLayerType() : LAYER_TYPE_NONE;
+
+        final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
+        if ((flags & parent.FLAG_CHILDREN_DRAWN_WITH_CACHE) == parent.FLAG_CHILDREN_DRAWN_WITH_CACHE ||
+                (flags & parent.FLAG_ALWAYS_DRAWN_WITH_CACHE) == parent.FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+            caching = true;
+            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
+        } else {
+            caching = (layerType != LAYER_TYPE_NONE) || hardwareAccelerated;
+        }
+
+        if (a != null) {
+            final boolean initialized = a.isInitialized();
+            if (!initialized) {
+                a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
+                a.initializeInvalidateRegion(0, 0, cr - cl, cb - ct);
+                onAnimationStart();
+            }
+
+            more = a.getTransformation(drawingTime, parent.mChildTransformation, 1f);
+            if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
+                if (parent.mInvalidationTransformation == null) {
+                    parent.mInvalidationTransformation = new Transformation();
+                }
+                invalidationTransform = parent.mInvalidationTransformation;
+                a.getTransformation(drawingTime, invalidationTransform, 1f);
+            } else {
+                invalidationTransform = parent.mChildTransformation;
+            }
+            transformToApply = parent.mChildTransformation;
+
+            concatMatrix = a.willChangeTransformationMatrix();
+
+            if (more) {
+                if (!a.willChangeBounds()) {
+                    if ((flags & (parent.FLAG_OPTIMIZE_INVALIDATE | parent.FLAG_ANIMATION_DONE)) ==
+                            parent.FLAG_OPTIMIZE_INVALIDATE) {
+                        parent.mGroupFlags |= parent.FLAG_INVALIDATE_REQUIRED;
+                    } else if ((flags & parent.FLAG_INVALIDATE_REQUIRED) == 0) {
+                        // The child need to draw an animation, potentially offscreen, so
+                        // make sure we do not cancel invalidate requests
+                        parent.mPrivateFlags |= DRAW_ANIMATION;
+                        invalidate(cl, ct, cr, cb);
+                    }
+                } else {
+                    if (parent.mInvalidateRegion == null) {
+                        parent.mInvalidateRegion = new RectF();
+                    }
+                    final RectF region = parent.mInvalidateRegion;
+                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, invalidationTransform);
+
+                    // The child need to draw an animation, potentially offscreen, so
+                    // make sure we do not cancel invalidate requests
+                    parent.mPrivateFlags |= DRAW_ANIMATION;
+
+                    final int left = cl + (int) region.left;
+                    final int top = ct + (int) region.top;
+                    invalidate(left, top, left + (int) (region.width() + .5f),
+                            top + (int) (region.height() + .5f));
+                }
+            }
+        } else if ((flags & parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
+                parent.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
+            final boolean hasTransform = parent.getChildStaticTransformation(this, parent.mChildTransformation);
+            if (hasTransform) {
+                final int transformType = parent.mChildTransformation.getTransformationType();
+                transformToApply = transformType != Transformation.TYPE_IDENTITY ?
+                        parent.mChildTransformation : null;
+                concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
+            }
+        }
+
+        concatMatrix |= !childHasIdentityMatrix;
+
+        // Sets the flag as early as possible to allow draw() implementations
+        // to call invalidate() successfully when doing animations
+        mPrivateFlags |= DRAWN;
+
+        if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
+                (mPrivateFlags & DRAW_ANIMATION) == 0) {
+            return more;
+        }
+
+        if (hardwareAccelerated) {
+            // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
+            // retain the flag's value temporarily in the mRecreateDisplayList flag
+            mRecreateDisplayList = (mPrivateFlags & INVALIDATED) == INVALIDATED;
+            mPrivateFlags &= ~INVALIDATED;
+        }
+
+        computeScroll();
+
+        final int sx = mScrollX;
+        final int sy = mScrollY;
+
+        DisplayList displayList = null;
+        Bitmap cache = null;
+        boolean hasDisplayList = false;
+        if (caching) {
+            if (!hardwareAccelerated) {
+                if (layerType != LAYER_TYPE_NONE) {
+                    layerType = LAYER_TYPE_SOFTWARE;
+                    buildDrawingCache(true);
+                }
+                cache = getDrawingCache(true);
+            } else {
+                switch (layerType) {
+                    case LAYER_TYPE_SOFTWARE:
+                        buildDrawingCache(true);
+                        cache = getDrawingCache(true);
+                        break;
+                    case LAYER_TYPE_NONE:
+                        // Delay getting the display list until animation-driven alpha values are
+                        // set up and possibly passed on to the view
+                        hasDisplayList = canHaveDisplayList();
+                        break;
+                }
+            }
+        }
+
+        final boolean hasNoCache = cache == null || hasDisplayList;
+        final boolean offsetForScroll = cache == null && !hasDisplayList &&
+                layerType != LAYER_TYPE_HARDWARE;
+
+        final int restoreTo = canvas.save();
+        if (offsetForScroll) {
+            canvas.translate(cl - sx, ct - sy);
+        } else {
+            canvas.translate(cl, ct);
+            if (scalingRequired) {
+                // mAttachInfo cannot be null, otherwise scalingRequired == false
+                final float scale = 1.0f / mAttachInfo.mApplicationScale;
+                canvas.scale(scale, scale);
+            }
+        }
+
+        float alpha = getAlpha();
+        if (transformToApply != null || alpha < 1.0f || !hasIdentityMatrix()) {
+            if (transformToApply != null || !childHasIdentityMatrix) {
+                int transX = 0;
+                int transY = 0;
+
+                if (offsetForScroll) {
+                    transX = -sx;
+                    transY = -sy;
+                }
+
+                if (transformToApply != null) {
+                    if (concatMatrix) {
+                        // Undo the scroll translation, apply the transformation matrix,
+                        // then redo the scroll translate to get the correct result.
+                        canvas.translate(-transX, -transY);
+                        canvas.concat(transformToApply.getMatrix());
+                        canvas.translate(transX, transY);
+                        parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                    }
+
+                    float transformAlpha = transformToApply.getAlpha();
+                    if (transformAlpha < 1.0f) {
+                        alpha *= transformToApply.getAlpha();
+                        parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                    }
+                }
+
+                if (!childHasIdentityMatrix) {
+                    canvas.translate(-transX, -transY);
+                    canvas.concat(getMatrix());
+                    canvas.translate(transX, transY);
+                }
+            }
+
+            if (alpha < 1.0f) {
+                parent.mGroupFlags |= parent.FLAG_CLEAR_TRANSFORMATION;
+                if (hasNoCache) {
+                    final int multipliedAlpha = (int) (255 * alpha);
+                    if (!onSetAlpha(multipliedAlpha)) {
+                        int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
+                        if ((flags & parent.FLAG_CLIP_CHILDREN) == parent.FLAG_CLIP_CHILDREN ||
+                                layerType != LAYER_TYPE_NONE) {
+                            layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
+                        }
+                        if (layerType == LAYER_TYPE_NONE) {
+                            final int scrollX = hasDisplayList ? 0 : sx;
+                            final int scrollY = hasDisplayList ? 0 : sy;
+                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + cr - cl,
+                                    scrollY + cb - ct, multipliedAlpha, layerFlags);
+                        }
+                    } else {
+                        // Alpha is handled by the child directly, clobber the layer's alpha
+                        mPrivateFlags |= ALPHA_SET;
+                    }
+                }
+            }
+        } else if ((mPrivateFlags & ALPHA_SET) == ALPHA_SET) {
+            onSetAlpha(255);
+            mPrivateFlags &= ~ALPHA_SET;
+        }
+
+        if ((flags & parent.FLAG_CLIP_CHILDREN) == parent.FLAG_CLIP_CHILDREN) {
+            if (offsetForScroll) {
+                canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
+            } else {
+                if (!scalingRequired || cache == null) {
+                    canvas.clipRect(0, 0, cr - cl, cb - ct);
+                } else {
+                    canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
+                }
+            }
+        }
+
+        if (hasDisplayList) {
+            displayList = getDisplayList();
+            if (!displayList.isValid()) {
+                // Uncommon, but possible. If a view is removed from the hierarchy during the call
+                // to getDisplayList(), the display list will be marked invalid and we should not
+                // try to use it again.
+                displayList = null;
+                hasDisplayList = false;
+            }
+        }
+
+        if (hasNoCache) {
+            boolean layerRendered = false;
+            if (layerType == LAYER_TYPE_HARDWARE) {
+                final HardwareLayer layer = getHardwareLayer();
+                if (layer != null && layer.isValid()) {
+                    mLayerPaint.setAlpha((int) (alpha * 255));
+                    ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                    layerRendered = true;
+                } else {
+                    final int scrollX = hasDisplayList ? 0 : sx;
+                    final int scrollY = hasDisplayList ? 0 : sy;
+                    canvas.saveLayer(scrollX, scrollY,
+                            scrollX + cr - cl, scrollY + cb - ct, mLayerPaint,
+                            Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                }
+            }
+
+            if (!layerRendered) {
+                if (!hasDisplayList) {
+                    // Fast path for layouts with no backgrounds
+                    if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                        if (ViewDebug.TRACE_HIERARCHY) {
+                            ViewDebug.trace(parent, ViewDebug.HierarchyTraceType.DRAW);
+                        }
+                        mPrivateFlags &= ~DIRTY_MASK;
+                        dispatchDraw(canvas);
+                    } else {
+                        draw(canvas);
+                    }
+                } else {
+                    mPrivateFlags &= ~DIRTY_MASK;
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList, cr - cl, cb - ct, null);
+                }
+            }
+        } else if (cache != null) {
+            mPrivateFlags &= ~DIRTY_MASK;
+            Paint cachePaint;
+
+            if (layerType == LAYER_TYPE_NONE) {
+                cachePaint = parent.mCachePaint;
+                if (cachePaint == null) {
+                    cachePaint = new Paint();
+                    cachePaint.setDither(false);
+                    parent.mCachePaint = cachePaint;
+                }
+                if (alpha < 1.0f) {
+                    cachePaint.setAlpha((int) (alpha * 255));
+                    parent.mGroupFlags |= parent.FLAG_ALPHA_LOWER_THAN_ONE;
+                } else if  ((flags & parent.FLAG_ALPHA_LOWER_THAN_ONE) == parent.FLAG_ALPHA_LOWER_THAN_ONE) {
+                    cachePaint.setAlpha(255);
+                    parent.mGroupFlags &= ~parent.FLAG_ALPHA_LOWER_THAN_ONE;
+                }
+            } else {
+                cachePaint = mLayerPaint;
+                cachePaint.setAlpha((int) (alpha * 255));
+            }
+            canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
+        }
+
+        canvas.restoreToCount(restoreTo);
+
+        if (a != null && !more) {
+            if (!hardwareAccelerated && !a.getFillAfter()) {
+                onSetAlpha(255);
+            }
+            parent.finishAnimatingView(this, a);
+        }
+
+        if (more && hardwareAccelerated) {
+            // invalidation is the trigger to recreate display lists, so if we're using
+            // display lists to render, force an invalidate to allow the animation to
+            // continue drawing another frame
+            parent.invalidate(true);
+            if (a.hasAlpha() && (mPrivateFlags & ALPHA_SET) == ALPHA_SET) {
+                // alpha animations should cause the child to recreate its display list
+                invalidate(true);
+            }
+        }
+
+        mRecreateDisplayList = false;
+
+        return more;
     }
 
     /**
