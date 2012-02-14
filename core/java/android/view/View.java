@@ -2618,7 +2618,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
 
     /**
      * Text direction is inherited thru {@link ViewGroup}
-     * @hide
      */
     public static final int TEXT_DIRECTION_INHERIT = 0;
 
@@ -2627,7 +2626,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * determines the paragraph direction. If there is no strong directional character, the
      * paragraph direction is the view's resolved layout direction.
      *
-     * @hide
      */
     public static final int TEXT_DIRECTION_FIRST_STRONG = 1;
 
@@ -2636,42 +2634,36 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * any strong RTL character, otherwise it is LTR if it contains any strong LTR characters.
      * If there are neither, the paragraph direction is the view's resolved layout direction.
      *
-     * @hide
      */
     public static final int TEXT_DIRECTION_ANY_RTL = 2;
 
     /**
      * Text direction is forced to LTR.
      *
-     * @hide
      */
     public static final int TEXT_DIRECTION_LTR = 3;
 
     /**
      * Text direction is forced to RTL.
      *
-     * @hide
      */
     public static final int TEXT_DIRECTION_RTL = 4;
 
     /**
      * Text direction is coming from the system Locale.
      *
-     * @hide
      */
     public static final int TEXT_DIRECTION_LOCALE = 5;
 
     /**
      * Default text direction is inherited
      *
-     * @hide
      */
     protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
 
     /**
      * The text direction that has been defined by {@link #setTextDirection(int)}.
      *
-     * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
@@ -2689,7 +2681,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * not TEXT_DIRECTION_INHERIT, otherwise resolution proceeds up the parent
      * chain of the view.
      *
-     * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "text", mapping = {
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
@@ -14106,7 +14097,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
      *
-     * @hide
      */
     public int getTextDirection() {
         return mTextDirection;
@@ -14124,7 +14114,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
      *
-     * @hide
      */
     public void setTextDirection(int textDirection) {
         if (textDirection != mTextDirection) {
@@ -14145,7 +14134,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE},
      *
-     * @hide
      */
     public int getResolvedTextDirection() {
         if (mResolvedTextDirection == TEXT_DIRECTION_INHERIT) {
@@ -14157,7 +14145,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Resolve the text direction.
      *
-     * @hide
      */
     protected void resolveTextDirection() {
         if (mTextDirection != TEXT_DIRECTION_INHERIT) {
@@ -14174,7 +14161,6 @@ public class View implements Drawable.Callback, Drawable.Callback2, KeyEvent.Cal
     /**
      * Reset resolved text direction. Will be resolved during a call to getResolvedTextDirection().
      *
-     * @hide
      */
     protected void resetResolvedTextDirection() {
         mResolvedTextDirection = TEXT_DIRECTION_INHERIT;

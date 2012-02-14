@@ -3495,4 +3495,6 @@
      =============================================================== -->
   <public type="attr" name="isolatedProcess" id="0x010103a7" />
 
+  <public type="attr" name="textDirection"/>
+
 </resources>

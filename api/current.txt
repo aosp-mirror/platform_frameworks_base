@@ -992,6 +992,7 @@ package android {
     field public static final int textColorTertiary = 16843282; // 0x1010212
     field public static final int textColorTertiaryInverse = 16843283; // 0x1010213
     field public static final int textCursorDrawable = 16843618; // 0x1010362
+    field public static final int textDirection = 16843688; // 0x10103a8
     field public static final int textEditNoPasteWindowLayout = 16843541; // 0x1010315
     field public static final int textEditPasteWindowLayout = 16843540; // 0x1010314
     field public static final int textEditSideNoPasteWindowLayout = 16843615; // 0x101035f
@@ -20478,6 +20479,19 @@ package android.text {
     method public int getTopPadding();
   }
 
+  public abstract interface TextDirectionHeuristic {
+  }
+
+  public class TextDirectionHeuristics {
+    ctor public TextDirectionHeuristics();
+    field public static final android.text.TextDirectionHeuristic ANYRTL_LTR;
+    field public static final android.text.TextDirectionHeuristic FIRSTSTRONG_LTR;
+    field public static final android.text.TextDirectionHeuristic FIRSTSTRONG_RTL;
+    field public static final android.text.TextDirectionHeuristic LOCALE;
+    field public static final android.text.TextDirectionHeuristic LTR;
+    field public static final android.text.TextDirectionHeuristic RTL;
+  }
+
   public class TextPaint extends android.graphics.Paint {
     ctor public TextPaint();
     ctor public TextPaint(int);
@@ -23171,6 +23185,7 @@ package android.view {
     method public final android.view.ViewParent getParent();
     method public float getPivotX();
     method public float getPivotY();
+    method public int getResolvedTextDirection();
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -23190,6 +23205,7 @@ package android.view {
     method public int getSystemUiVisibility();
     method public java.lang.Object getTag();
     method public java.lang.Object getTag(int);
+    method public int getTextDirection();
     method public final int getTop();
     method protected float getTopFadingEdgeStrength();
     method protected int getTopPaddingOffset();
@@ -23321,8 +23337,10 @@ package android.view {
     method public void requestLayout();
     method public boolean requestRectangleOnScreen(android.graphics.Rect);
     method public boolean requestRectangleOnScreen(android.graphics.Rect, boolean);
+    method protected void resetResolvedTextDirection();
     method public static int resolveSize(int, int);
     method public static int resolveSizeAndState(int, int, int);
+    method protected void resolveTextDirection();
     method public void restoreHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void saveHierarchyState(android.util.SparseArray<android.os.Parcelable>);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
@@ -23402,6 +23420,7 @@ package android.view {
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
+    method public void setTextDirection(int);
     method public final void setTop(int);
     method public void setTouchDelegate(android.view.TouchDelegate);
     method public void setTranslationX(float);
@@ -23424,6 +23443,7 @@ package android.view {
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
     field public static final android.util.Property ALPHA;
+    field protected static int DEFAULT_TEXT_DIRECTION;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
@@ -23500,6 +23520,12 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
+    field public static final int TEXT_DIRECTION_ANY_RTL = 2; // 0x2
+    field public static final int TEXT_DIRECTION_FIRST_STRONG = 1; // 0x1
+    field public static final int TEXT_DIRECTION_INHERIT = 0; // 0x0
+    field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5
+    field public static final int TEXT_DIRECTION_LTR = 3; // 0x3
+    field public static final int TEXT_DIRECTION_RTL = 4; // 0x4
     field public static final android.util.Property TRANSLATION_X;
     field public static final android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
@@ -23766,7 +23792,6 @@ package android.view {
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
     method protected void resetResolvedLayoutDirection();
-    method protected void resetResolvedTextDirection();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
@@ -27595,7 +27620,6 @@ package android.widget {
     method protected void resetResolvedDrawables();
     method protected void resetResolvedLayoutDirection();
     method protected void resolveDrawables();
-    method protected void resolveTextDirection();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
