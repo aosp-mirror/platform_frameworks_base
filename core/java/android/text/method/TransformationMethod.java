@@ -18,7 +18,6 @@ package android.text.method;
 
 import android.graphics.Rect;
 import android.view.View;
-import android.widget.TextView;
 
 /**
  * TextView uses TransformationMethods to do things like replacing the
