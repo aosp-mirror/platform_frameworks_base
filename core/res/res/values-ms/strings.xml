@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Membenarkan apl untuk memindahkan tugasan ke latar depan dan latar belakang. Apl hasad boleh memaksa diri mereka ke hadapan tanpa kawalan anda."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"hentikan apl yang sedang dijalankan"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Membenarkan apl untuk mengalih keluar tugasan dan melupuskan aplnya. Apl hasad boleh mengganggu tingkah laku apl lain."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"tetapkan keserasian skrin"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Membenarkan apl mengawal mod keserasian skrin aplikasi lain. Aplikasi hasad mungkin mematahkan kelakuan aplikasi lain."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"dayakan penyahpepijatan apl"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Membenarkan apl untuk menghidupkan penyahpepijatan untuk apl lain. Apl hasad boleh menggunakannya untuk menghapuskan apl lain."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"tukar tetapan UI anda"</string>

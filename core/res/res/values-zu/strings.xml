@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Ivumela insiza ukuthi ihambise izenzo ziye ngaphambili kanye nasemumva. Izinsiza ezinobungozi zingaziphoqelela ukuth iziye phambili ngaphandle kokulawula kwakho."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"misa izinsiza ezisebenzayo"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Vumela ukuthi insiza isuse okumele kwenziwe ibulale nezinsiza zakho. Izinsiza eziwubungozi zingaphazamisa ukusebenza kwezinye izinsiza."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"misa ukuhambelana kwesikrini"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Ivumela uhlelo lokusebenza ukulawula imodi yokuhambelana kwesikrini kwezinye izinhlelo zokusebenza. Izinhlelo zokusebenza ezinonya zingase zephule ukuziphatha kwezinye izinhlelo zokusebenza."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"vumela insiza ilungise inkinga"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Ivumela insiza ukuthi ivule uhlelo lokulungisa lwenye insiza. Izinsiza ezinobungozi zingasebenzisa lokhu ukubulala ezinye izinsiza."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"shintsha izilungiselelo zakho ze-UI"</string>

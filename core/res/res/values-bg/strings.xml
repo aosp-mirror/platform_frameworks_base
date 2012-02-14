@@ -215,10 +215,8 @@
     <string name="permdesc_reorderTasks" msgid="4175137612205663399">"Разрешава на приложението да прехвърля задачи на преден и на заден план. Злонамерените приложения могат сами да се изведат на преден план без ваша намеса."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"спиране на изпълняваните приложения"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Разрешава на приложението да премахва задачи и да прекратява приложенията им. Злонамерените приложения могат да нарушат поведението на други приложения."</string>
-    <!-- no translation found for permlab_setScreenCompatibility (6975387118861842061) -->
-    <skip />
-    <!-- no translation found for permdesc_setScreenCompatibility (692043618693917374) -->
-    <skip />
+    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"задаване на съвместимост на екрана"</string>
+    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Разрешава на приложението да контролира режима на съвместимост на екрана на други приложения. Злонамерените програми могат да нарушат поведението на други приложения."</string>
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"активиране на отстраняването на грешки в приложения"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Разрешава на приложението да включва отстраняването на грешки за друго приложение. Злонамерените приложения могат да използват това, за да прекратят други приложения."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"промяна на настройките ви за потребителския интерфейс"</string>
