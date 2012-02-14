@@ -26,6 +26,7 @@ import android.graphics.Region;
 import android.media.MediaFile;
 import android.net.ProxyProperties;
 import android.net.Uri;
+import android.net.http.CertificateChainValidator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -767,6 +768,11 @@ public final class WebViewCore {
                                 Message m = (Message)msg.obj;
                                 m.sendToTarget();
                                 break;
+                            case EventHub.TRUST_STORAGE_UPDATED:
+                                // post a task to network thread for updating trust manager
+                                nativeCertTrustChanged();
+                                CertificateChainValidator.handleTrustStorageUpdate();
+                                break;
                         }
                     }
                 };
@@ -1123,6 +1129,9 @@ public final class WebViewCore {
         static final int SELECT_TEXT = 213;
         static final int SELECT_WORD_AT = 214;
         static final int SELECT_ALL = 215;
+
+        // for updating state on trust storage change
+        static final int TRUST_STORAGE_UPDATED = 220;
 
         // Private handler for WebCore messages.
         private Handler mHandler;
@@ -3054,4 +3063,6 @@ public final class WebViewCore {
     private native void nativeClearTextSelection(int nativeClass);
     private native void nativeSelectWordAt(int nativeClass, int x, int y);
     private native void nativeSelectAll(int nativeClass);
+
+    private static native void nativeCertTrustChanged();
 }

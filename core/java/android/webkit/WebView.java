@@ -59,6 +59,7 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.security.KeyChain;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.InputType;
@@ -1261,6 +1262,7 @@ public class WebView extends AbsoluteLayout
         init();
         setupPackageListener(context);
         setupProxyListener(context);
+        setupTrustStorageListener(context);
         updateMultiTouchSupport(context);
 
         if (privateBrowsing) {
@@ -1268,6 +1270,41 @@ public class WebView extends AbsoluteLayout
         }
 
         mAutoFillData = new WebViewCore.AutoFillData();
+    }
+
+    private static class TrustStorageListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(KeyChain.ACTION_STORAGE_CHANGED)) {
+                handleCertTrustChanged();
+            }
+        }
+    }
+    private static TrustStorageListener sTrustStorageListener;
+
+    /**
+     * Handles update to the trust storage.
+     */
+    private static void handleCertTrustChanged() {
+        // send a message for indicating trust storage change
+        WebViewCore.sendStaticMessage(EventHub.TRUST_STORAGE_UPDATED, null);
+    }
+
+    /*
+     * @param context This method expects this to be a valid context.
+     */
+    private static void setupTrustStorageListener(Context context) {
+        if (sTrustStorageListener != null ) {
+            return;
+        }
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
+        sTrustStorageListener = new TrustStorageListener();
+        Intent current = 
+            context.getApplicationContext().registerReceiver(sTrustStorageListener, filter);
+        if (current != null) {
+            handleCertTrustChanged();
+        }
     }
 
     private static class ProxyReceiver extends BroadcastReceiver {
