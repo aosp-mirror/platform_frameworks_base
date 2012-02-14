@@ -860,8 +860,8 @@ public class TabletStatusBar extends StatusBar implements
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.priority == oldNotification.priority;
-                // priority now encompasses isOngoing()
+                && notification.score == oldNotification.score;
+                // score now encompasses/supersedes isOngoing()
         boolean updateTicker = notification.notification.tickerText != null
                 && !TextUtils.equals(notification.notification.tickerText,
                         oldEntry.notification.notification.tickerText);
@@ -1689,7 +1689,7 @@ public class TabletStatusBar extends StatusBar implements
 
                 mNotificationDNDDummyEntry = new NotificationData.Entry(
                         null,
-                        new StatusBarNotification("", 0, "", 0, 0, dndNotification),
+                        new StatusBarNotification("", 0, "", 0, 0, Notification.PRIORITY_MAX, dndNotification),
                         iconView);
 
                 mIconLayout.addView(iconView, params);

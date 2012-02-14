@@ -146,19 +146,18 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int id;
         final int uid;
         final int initialPid;
-        final int priority;
         final Notification notification;
+        final int score;
         IBinder statusBarKey;
 
-        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid, int priority,
-                Notification notification)
+        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid, int score, Notification notification)
         {
             this.pkg = pkg;
             this.tag = tag;
             this.id = id;
             this.uid = uid;
             this.initialPid = initialPid;
-            this.priority = priority;
+            this.score = score;
             this.notification = notification;
         }
 
@@ -166,6 +165,8 @@ public class NotificationManagerService extends INotificationManager.Stub
             pw.println(prefix + this);
             pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
                     + " / " + idDebugString(baseContext, this.pkg, notification.icon));
+            pw.println(prefix + "  pri=" + notification.priority);
+            pw.println(prefix + "  score=" + this.score);
             pw.println(prefix + "  contentIntent=" + notification.contentIntent);
             pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
             pw.println(prefix + "  tickerText=" + notification.tickerText);
@@ -187,7 +188,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 + " pkg=" + pkg
                 + " id=" + Integer.toHexString(id)
                 + " tag=" + tag 
-                + " pri=" + priority 
+                + " score=" + score
                 + "}";
         }
     }
@@ -660,27 +661,16 @@ public class NotificationManagerService extends INotificationManager.Stub
         enqueueNotificationInternal(pkg, Binder.getCallingUid(), Binder.getCallingPid(),
                 tag, id, notification, idOut);
     }
-
-    public void enqueueNotificationWithTagPriority(String pkg, String tag, int id, int priority,
-            Notification notification, int[] idOut)
-    {
-        enqueueNotificationInternal(pkg, Binder.getCallingUid(), Binder.getCallingPid(),
-                tag, id, priority, notification, idOut);
+    
+    private final static int clamp(int x, int low, int high) {
+        return (x < low) ? low : ((x > high) ? high : x);
     }
 
+    
     // Not exposed via Binder; for system use only (otherwise malicious apps could spoof the
     // uid/pid of another application)
     public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int[] idOut)
-    {
-        enqueueNotificationInternal(pkg, callingUid, callingPid, tag, id, 
-                ((notification.flags & Notification.FLAG_ONGOING_EVENT) != 0)
-                    ? StatusBarNotification.PRIORITY_ONGOING
-                    : StatusBarNotification.PRIORITY_NORMAL,
-                notification, idOut);
-    }
-    public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
-            String tag, int id, int priority, Notification notification, int[] idOut)
     {
         checkIncomingCall(pkg);
 
@@ -723,10 +713,35 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
         }
 
+        // === Scoring ===
+        
+        // 0. Sanitize inputs
+        notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN, Notification.PRIORITY_MAX);
+        // Migrate notification flags to scores
+        if (0 != (notification.flags & Notification.FLAG_HIGH_PRIORITY)) {
+            if (notification.priority < Notification.PRIORITY_MAX) notification.priority = Notification.PRIORITY_MAX;
+        } else if (0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
+            if (notification.priority < Notification.PRIORITY_HIGH) notification.priority = Notification.PRIORITY_HIGH;
+        }
+        
+        // 1. initial score: buckets of 10, around the app 
+        int score = notification.priority * 10; //[-20..20]
+
+        // 2. Consult oracles (external heuristics)
+        // TODO(dsandler): oracles
+
+        // 3. Apply local heuristics & overrides
+
+        // blocked apps
+        // TODO(dsandler): add block db
+        if (pkg.startsWith("com.test.spammer.")) {
+            score = -1000;
+        }
+
         synchronized (mNotificationList) {
             NotificationRecord r = new NotificationRecord(pkg, tag, id, 
                     callingUid, callingPid, 
-                    priority,
+                    score,
                     notification);
             NotificationRecord old = null;
 
@@ -752,9 +767,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             if (notification.icon != 0) {
                 StatusBarNotification n = new StatusBarNotification(pkg, id, tag,
-                        r.uid, r.initialPid, notification);
-                n.priority = r.priority;
-
+                        r.uid, r.initialPid, score, notification);
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();

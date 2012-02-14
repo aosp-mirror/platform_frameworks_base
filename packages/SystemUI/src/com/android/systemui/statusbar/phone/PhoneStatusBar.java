@@ -232,6 +232,11 @@ public class PhoneStatusBar extends StatusBar {
 
     private int mNavigationIconHints = 0;
 
+    // TODO(dsandler): codify this stuff in NotificationManager's header somewhere
+    private int mDisplayMinScore             = Notification.PRIORITY_LOW * 10;
+    private int mIntruderMinScore            = Notification.PRIORITY_HIGH * 10;
+    private int mIntruderInImmersiveMinScore = Notification.PRIORITY_HIGH * 10 + 5;
+    
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
             super(context, com.android.internal.R.style.Theme_Translucent_NoTitleBar);
@@ -538,6 +543,7 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
+        /* if (DEBUG) */ Slog.d(TAG, "addNotification score=" + notification.score);
         StatusBarIconView iconView = addNotificationViews(key, notification);
         if (iconView == null) return;
 
@@ -549,31 +555,30 @@ public class PhoneStatusBar extends StatusBar {
             }
         } catch (RemoteException ex) {
         }
-        if (immersive) {
-            if ((notification.notification.flags & Notification.FLAG_HIGH_PRIORITY) != 0) {
-                Slog.d(TAG, "Presenting high-priority notification in immersive activity");
-                // special new transient ticker mode
-                // 1. Populate mIntruderAlertView
+        if ((notification.score >= mIntruderInImmersiveMinScore) 
+                || (!immersive && (notification.score > mIntruderMinScore))) {
+            Slog.d(TAG, "Presenting high-priority notification");
+            // special new transient ticker mode
+            // 1. Populate mIntruderAlertView
 
-                ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
-                TextView alertText = (TextView) mIntruderAlertView.findViewById(R.id.alertText);
-                alertIcon.setImageDrawable(StatusBarIconView.getIcon(
-                    alertIcon.getContext(),
-                    iconView.getStatusBarIcon()));
-                alertText.setText(notification.notification.tickerText);
+            ImageView alertIcon = (ImageView) mIntruderAlertView.findViewById(R.id.alertIcon);
+            TextView alertText = (TextView) mIntruderAlertView.findViewById(R.id.alertText);
+            alertIcon.setImageDrawable(StatusBarIconView.getIcon(
+                alertIcon.getContext(),
+                iconView.getStatusBarIcon()));
+            alertText.setText(notification.notification.tickerText);
 
-                View button = mIntruderAlertView.findViewById(R.id.intruder_alert_content);
-                button.setOnClickListener(
-                    new NotificationClicker(notification.notification.contentIntent,
-                        notification.pkg, notification.tag, notification.id));
+            View button = mIntruderAlertView.findViewById(R.id.intruder_alert_content);
+            button.setOnClickListener(
+                new NotificationClicker(notification.notification.contentIntent,
+                    notification.pkg, notification.tag, notification.id));
 
-                // 2. Animate mIntruderAlertView in
-                mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
+            // 2. Animate mIntruderAlertView in
+            mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
 
-                // 3. Set alarm to age the notification off (TODO)
-                mHandler.removeMessages(MSG_HIDE_INTRUDER);
-                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
-            }
+            // 3. Set alarm to age the notification off (TODO)
+            mHandler.removeMessages(MSG_HIDE_INTRUDER);
+            mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
             Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
@@ -630,8 +635,8 @@ public class PhoneStatusBar extends StatusBar {
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.priority == oldNotification.priority;
-                // priority now encompasses isOngoing()
+                && notification.score == oldNotification.score;
+                // score now encompasses/supersedes isOngoing()
 
         boolean updateTicker = notification.notification.tickerText != null
                 && !TextUtils.equals(notification.notification.tickerText,
@@ -723,69 +728,6 @@ public class PhoneStatusBar extends StatusBar {
     }
 
 
-    View[] makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
-        Notification n = notification.notification;
-        RemoteViews remoteViews = n.contentView;
-        if (remoteViews == null) {
-            return null;
-        }
-
-        // create the row view
-        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
-
-        // wire up the veto button
-        View vetoButton = updateNotificationVetoButton(row, notification);
-        vetoButton.setContentDescription(mContext.getString(
-                R.string.accessibility_remove_notification));
-
-        // the large icon
-        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
-        if (notification.notification.largeIcon != null) {
-            largeIcon.setImageBitmap(notification.notification.largeIcon);
-        } else {
-            largeIcon.getLayoutParams().width = 0;
-            largeIcon.setVisibility(View.INVISIBLE);
-        }
-
-        // bind the click event to the content area
-        ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
-        content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        content.setOnFocusChangeListener(mFocusChangeListener);
-        PendingIntent contentIntent = n.contentIntent;
-        if (contentIntent != null) {
-            final View.OnClickListener listener = new NotificationClicker(contentIntent,
-                    notification.pkg, notification.tag, notification.id);
-            largeIcon.setOnClickListener(listener);
-            content.setOnClickListener(listener);
-        } else {
-            largeIcon.setOnClickListener(null);
-            content.setOnClickListener(null);
-        }
-
-        View expanded = null;
-        Exception exception = null;
-        try {
-            expanded = remoteViews.apply(mContext, content);
-        }
-        catch (RuntimeException e) {
-            exception = e;
-        }
-        if (expanded == null) {
-            String ident = notification.pkg + "/0x" + Integer.toHexString(notification.id);
-            Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
-            return null;
-        } else {
-            content.addView(expanded);
-            row.setDrawingCacheEnabled(true);
-        }
-
-        applyLegacyRowBackground(notification, content);
-
-        return new View[] { row, content, expanded };
-    }
-
     StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
         if (DEBUG) {
             Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
@@ -848,7 +790,7 @@ public class PhoneStatusBar extends StatusBar {
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
-                mPile.addView(v, 0); // the notification shade has newest at the top
+                mPile.addView(v, i);
             }
         }
     }
@@ -1805,7 +1747,7 @@ public class PhoneStatusBar extends StatusBar {
                     NotificationData.Entry e = mNotificationData.get(i);
                     pw.println("    [" + i + "] key=" + e.key + " icon=" + e.icon);
                     StatusBarNotification n = e.notification;
-                    pw.println("         pkg=" + n.pkg + " id=" + n.id + " priority=" + n.priority);
+                    pw.println("         pkg=" + n.pkg + " id=" + n.id + " score=" + n.score);
                     pw.println("         notification=" + n.notification);
                     pw.println("         tickerText=\"" + n.notification.tickerText + "\"");
                 }
@@ -2313,6 +2255,30 @@ public class PhoneStatusBar extends StatusBar {
         android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
                 Context.VIBRATOR_SERVICE);
         vib.vibrate(250);
+    }
+
+    public int getScoreThreshold() {
+        return mDisplayMinScore;
+    }
+
+    public void setScoreThreshold(int score) {
+        // XXX HAX
+        if (mDisplayMinScore != score) {
+            this.mDisplayMinScore = score;
+            applyScoreThreshold();
+        }
+    }
+    
+    private void applyScoreThreshold() {
+        int N = mNotificationData.size();
+        for (int i=0; i<N; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            int vis = (entry.notification.score < mDisplayMinScore)
+                ? View.GONE
+                : View.VISIBLE;
+            entry.row.setVisibility(vis);
+            entry.icon.setVisibility(vis);
+        }
     }
 
     Runnable mStartTracing = new Runnable() {
