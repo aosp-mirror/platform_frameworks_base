@@ -1625,14 +1625,14 @@ public class WifiStateMachine extends StateMachine {
     private void handleNetworkDisconnect() {
         if (DBG) log("Stopping DHCP and clearing IP");
 
-        /* In case we were in middle of DHCP operation
-           restore back powermode */
-        handlePostDhcpSetup();
-
         /*
          * stop DHCP
          */
         if (mDhcpStateMachine != null) {
+            /* In case we were in middle of DHCP operation
+               restore back powermode */
+            handlePostDhcpSetup();
+
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
             mDhcpStateMachine.quit();
             mDhcpStateMachine = null;
@@ -2395,6 +2395,10 @@ public class WifiStateMachine extends StateMachine {
         public void enter() {
             if (DBG) log(getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            /* Send any reset commands to supplicant before shutting it down */
+            handleNetworkDisconnect();
+
             if (DBG) log("stopping supplicant");
             if (!mWifiNative.stopSupplicant()) {
                 loge("Failed to stop supplicant");
@@ -2405,7 +2409,6 @@ public class WifiStateMachine extends StateMachine {
                     ++mSupplicantStopFailureToken, 0), SUPPLICANT_RESTART_INTERVAL_MSECS);
 
             mNetworkInfo.setIsAvailable(false);
-            handleNetworkDisconnect();
             setWifiState(WIFI_STATE_DISABLING);
             sendSupplicantConnectionChangedBroadcast(false);
             mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
