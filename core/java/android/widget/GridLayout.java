@@ -212,6 +212,7 @@ public class GridLayout extends ViewGroup {
     static final int PRF = 1;
     static final int MAX_SIZE = 100000;
     static final int DEFAULT_CONTAINER_MARGIN = 0;
+    static final int UNINITIALIZED_HASH = 0;
 
     // Defaults
 
@@ -240,6 +241,7 @@ public class GridLayout extends ViewGroup {
     boolean useDefaultMargins = DEFAULT_USE_DEFAULT_MARGINS;
     int alignmentMode = DEFAULT_ALIGNMENT_MODE;
     int defaultGap;
+    int lastLayoutParamsHashCode = UNINITIALIZED_HASH;
 
     // Constructors
 
@@ -668,7 +670,7 @@ public class GridLayout extends ViewGroup {
         int[] maxSizes = new int[count];
 
         for (int i = 0, N = getChildCount(); i < N; i++) {
-            LayoutParams lp = getLayoutParams1(getChildAt(i));
+            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
 
             final Spec majorSpec = horizontal ? lp.rowSpec : lp.columnSpec;
             final Interval majorRange = majorSpec.span;
@@ -713,6 +715,7 @@ public class GridLayout extends ViewGroup {
 
             minor = minor + minorSpan;
         }
+        lastLayoutParamsHashCode = computeLayoutParamsHashCode();
         invalidateStructure();
     }
 
@@ -733,8 +736,11 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    private LayoutParams getLayoutParams1(View c) {
-        return (LayoutParams) c.getLayoutParams();
+    /** @hide */
+    @Override
+    protected void onSetLayoutParams(View child, ViewGroup.LayoutParams layoutParams) {
+        super.onSetLayoutParams(child, layoutParams);
+        invalidateStructure();
     }
 
     final LayoutParams getLayoutParams(View c) {
@@ -742,7 +748,7 @@ public class GridLayout extends ViewGroup {
             validateLayoutParams();
             layoutParamsValid = true;
         }
-        return getLayoutParams1(c);
+        return (LayoutParams) c.getLayoutParams();
     }
 
     @Override
@@ -859,11 +865,28 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    // Measurement
-
-    final boolean isGone(View c) {
-        return c.getVisibility() == View.GONE;
+    private int computeLayoutParamsHashCode() {
+        int result = 1;
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            View c = getChildAt(i);
+            if (c.getVisibility() == View.GONE) continue;
+            LayoutParams lp = (LayoutParams) c.getLayoutParams();
+            result = 31 * result + lp.hashCode();
+        }
+        return result;
     }
+
+    private void checkForLayoutParamsModification() {
+        int layoutParamsHashCode = computeLayoutParamsHashCode();
+        if (lastLayoutParamsHashCode != UNINITIALIZED_HASH &&
+                lastLayoutParamsHashCode != layoutParamsHashCode) {
+            invalidateStructure();
+            Log.w(TAG, "The fields of some layout parameters were modified in between layout " +
+                    "operations. Check the javadoc for GridLayout.LayoutParams#rowSpec.");
+        }
+    }
+
+    // Measurement
 
     private void measureChildWithMargins2(View child, int parentWidthSpec, int parentHeightSpec,
                                           int childWidth, int childHeight) {
@@ -877,7 +900,7 @@ public class GridLayout extends ViewGroup {
     private void measureChildrenWithMargins(int widthSpec, int heightSpec, boolean firstPass) {
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View c = getChildAt(i);
-            if (isGone(c)) continue;
+            if (c.getVisibility() == View.GONE) continue;
             LayoutParams lp = getLayoutParams(c);
             if (firstPass) {
                 measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, lp.height);
@@ -902,6 +925,8 @@ public class GridLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
+        checkForLayoutParamsModification();
+
         /** If we have been called by {@link View#measure(int, int)}, one of width or height
          *  is  likely to have changed. We must invalidate if so. */
         invalidateValues();
@@ -941,7 +966,7 @@ public class GridLayout extends ViewGroup {
     }
 
     final int getMeasurementIncludingMargin(View c, boolean horizontal) {
-        if (isGone(c)) {
+        if (c.getVisibility() == View.GONE) {
             return 0;
         }
         return getMeasurement(c, horizontal) + getTotalMargin(c, horizontal);
@@ -974,6 +999,8 @@ public class GridLayout extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        checkForLayoutParamsModification();
+
         int targetWidth = right - left;
         int targetHeight = bottom - top;
 
@@ -990,7 +1017,7 @@ public class GridLayout extends ViewGroup {
 
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View c = getChildAt(i);
-            if (isGone(c)) continue;
+            if (c.getVisibility() == View.GONE) continue;
             LayoutParams lp = getLayoutParams(c);
             Spec columnSpec = lp.columnSpec;
             Spec rowSpec = lp.rowSpec;
@@ -1527,7 +1554,7 @@ public class GridLayout extends ViewGroup {
             int[] margins = leading ? leadingMargins : trailingMargins;
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
-                if (isGone(c)) continue;
+                if (c.getVisibility() == View.GONE) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 Interval span = spec.span;
@@ -1767,12 +1794,28 @@ public class GridLayout extends ViewGroup {
         /**
          * The spec that defines the vertical characteristics of the cell group
          * described by these layout parameters.
+         * If an assignment is made to this field after a measurement or layout operation
+         * has already taken place, a call to
+         * {@link ViewGroup#setLayoutParams(ViewGroup.LayoutParams)}
+         * must be made to notify GridLayout of the change. GridLayout is normally able
+         * to detect when code fails to observe this rule, issue a warning and take steps to
+         * compensate for the omission. This facility is implemented on a best effort basis
+         * and should not be relied upon in production code - so it is best to include the above
+         * calls to remove the warnings as soon as it is practical.
          */
         public Spec rowSpec = Spec.UNDEFINED;
 
         /**
          * The spec that defines the horizontal characteristics of the cell group
          * described by these layout parameters.
+         * If an assignment is made to this field after a measurement or layout operation
+         * has already taken place, a call to
+         * {@link ViewGroup#setLayoutParams(ViewGroup.LayoutParams)}
+         * must be made to notify GridLayout of the change. GridLayout is normally able
+         * to detect when code fails to observe this rule, issue a warning and take steps to
+         * compensate for the omission. This facility is implemented on a best effort basis
+         * and should not be relied upon in production code - so it is best to include the above
+         * calls to remove the warnings as soon as it is practical.
          */
         public Spec columnSpec = Spec.UNDEFINED;
 
@@ -1916,6 +1959,26 @@ public class GridLayout extends ViewGroup {
 
         final void setColumnSpecSpan(Interval span) {
             columnSpec = columnSpec.copyWriteSpan(span);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LayoutParams that = (LayoutParams) o;
+
+            if (!columnSpec.equals(that.columnSpec)) return false;
+            if (!rowSpec.equals(that.rowSpec)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = rowSpec.hashCode();
+            result = 31 * result + columnSpec.hashCode();
+            return result;
         }
     }
 
