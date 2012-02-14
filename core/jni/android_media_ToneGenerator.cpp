@@ -1,4 +1,4 @@
-/* //device/libs/android_runtime/android_media_AudioSystem.cpp
+/*
  **
  ** Copyright 2008, The Android Open Source Project
  **

@@ -1,4 +1,4 @@
-/* frameworks/base/media/libmedia/AudioTrack.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -772,7 +772,7 @@ status_t AudioTrack::createTrack_l(
                 }
             }
         } else {
-            // Ensure that buffer alignment matches channelcount
+            // Ensure that buffer alignment matches channelCount
             int channelCount = popcount(channelMask);
             if (((uint32_t)sharedBuffer->pointer() & (channelCount | 1)) != 0) {
                 ALOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
@@ -959,7 +959,8 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     if (mSharedBuffer != 0) return INVALID_OPERATION;
 
     if (ssize_t(userSize) < 0) {
-        // sanity-check. user is most-likely passing an error code.
+        // Sanity-check: user is most-likely passing an error code, and it would
+        // make the return value ambiguous (actualSize vs error).
         ALOGE("AudioTrack::write(buffer=%p, size=%u (%d)",
                 buffer, userSize, userSize);
         return BAD_VALUE;
@@ -982,8 +983,6 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     do {
         audioBuffer.frameCount = userSize/frameSz;
 
-        // Calling obtainBuffer() with a negative wait count causes
-        // an (almost) infinite wait time.
         status_t err = obtainBuffer(&audioBuffer, -1);
         if (err < 0) {
             // out of buffers, return #bytes written
@@ -1073,6 +1072,9 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         frames = mRemainingFrames;
     }
 
+    // See description of waitCount parameter at declaration of obtainBuffer().
+    // The logic below prevents us from being stuck below at obtainBuffer()
+    // not being able to handle timed events (position, markers, loops).
     int32_t waitCount = -1;
     if (mUpdatePeriod || (!mMarkerReached && mMarkerPosition) || mLoopCount) {
         waitCount = 1;
@@ -1082,9 +1084,6 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
         audioBuffer.frameCount = frames;
 
-        // Calling obtainBuffer() with a wait count of 1
-        // limits wait time to WAIT_PERIOD_MS. This prevents from being
-        // stuck here not being able to handle timed events (position, markers, loops).
         status_t err = obtainBuffer(&audioBuffer, waitCount);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {

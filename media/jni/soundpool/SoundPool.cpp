@@ -623,7 +623,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         newTrack->setVolume(leftVolume, rightVolume);
         newTrack->setLoop(0, frameCount, loop);
 
-        // From now on, AudioTrack callbacks recevieved with previous toggle value will be ignored.
+        // From now on, AudioTrack callbacks received with previous toggle value will be ignored.
         mToggle = toggle;
         mAudioTrack = newTrack;
         mPos = 0;

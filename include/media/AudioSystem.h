@@ -131,7 +131,7 @@ public:
         NUM_CONFIG_EVENTS
     };
 
-    // audio output descritor used to cache output configurations in client process to avoid frequent calls
+    // audio output descriptor used to cache output configurations in client process to avoid frequent calls
     // through IAudioFlinger
     class OutputDescriptor {
     public:

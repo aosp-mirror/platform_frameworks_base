@@ -1,4 +1,4 @@
-/* //device/include/server/AudioFlinger/AudioMixer.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -961,7 +961,12 @@ void AudioMixer::process__genericResampling(state_t* state)
 // one track, 16 bits stereo without resampling is the most common case
 void AudioMixer::process__OneTrack16BitsStereoNoResampling(state_t* state)
 {
+    // This method is only called when state->enabledTracks has exactly
+    // one bit set.  The asserts below would verify this, but are commented out
+    // since the whole point of this method is to optimize performance.
+    //assert(0 != state->enabledTracks);
     const int i = 31 - __builtin_clz(state->enabledTracks);
+    //assert((1 << i) == state->enabledTracks);
     const track_t& t = state->tracks[i];
 
     AudioBufferProvider::Buffer& b(t.buffer);

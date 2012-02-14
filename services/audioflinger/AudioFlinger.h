@@ -1,4 +1,4 @@
-/* //device/include/server/AudioFlinger/AudioFlinger.h
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -290,6 +290,8 @@ private:
             enum track_state {
                 IDLE,
                 TERMINATED,
+                // These are order-sensitive; do not change order without reviewing the impact.
+                // In particular there are assumptions about > STOPPED.
                 STOPPED,
                 RESUMING,
                 ACTIVE,
@@ -760,6 +762,9 @@ private:
         int                             mSuspended;
         int                             mBytesWritten;
     private:
+        // mMasterMute is in both PlaybackThread and in AudioFlinger.  When a
+        // PlaybackThread needs to find out if master-muted, it checks it's local
+        // copy rather than the one in AudioFlinger.  This optimization saves a lock.
         bool                            mMasterMute;
     protected:
         SortedVector< wp<Track> >       mActiveTracks;
@@ -853,6 +858,8 @@ private:
     private:
         void applyVolume(uint16_t leftVol, uint16_t rightVol, bool ramp);
 
+        // volumes last sent to audio HAL with stream->set_volume()
+        // FIXME use standard representation and names
         float mLeftVolFloat;
         float mRightVolFloat;
         uint16_t mLeftVolShort;
@@ -900,6 +907,7 @@ private:
 
     friend class AudioBuffer;
 
+    // server side of the client's IAudioTrack
     class TrackHandle : public android::BnAudioTrack {
     public:
                             TrackHandle(const sp<PlaybackThread::Track>& track);
@@ -1024,6 +1032,7 @@ private:
                 ssize_t                             mBytesRead;
     };
 
+    // server side of the client's IAudioRecord
     class RecordHandle : public android::BnAudioRecord {
     public:
         RecordHandle(const sp<RecordThread::RecordTrack>& recordTrack);
@@ -1152,6 +1161,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
         status_t            mStatus;    // initialization status
         effect_state        mState;     // current activation state
         Vector< wp<EffectHandle> > mHandles;    // list of client handles
+                    // First handle in mHandles has highest priority and controls the effect module
         uint32_t mMaxDisableWaitCnt;    // maximum grace period before forcing an effect off after
                                         // sending disable command.
         uint32_t mDisableWaitCnt;       // current process() calls count during disable period.
@@ -1377,6 +1387,7 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
             hwDev(dev), stream(in) {}
     };
 
+    // for mAudioSessionRefs only
     struct AudioSessionRef {
         // FIXME rename parameter names when fields get "m" prefix
         AudioSessionRef(int sessionid_, pid_t pid_) :
@@ -1432,10 +1443,11 @@ mutable Mutex               mLock;      // mutex for process, commands and handl
                 DefaultKeyedVector< audio_io_handle_t, sp<RecordThread> >    mRecordThreads;
 
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
-                volatile int32_t                    mNextUniqueId;
+                volatile int32_t                    mNextUniqueId;  // updated by android_atomic_inc
                 audio_mode_t                        mMode;
                 bool                                mBtNrecIsOff;
 
+                // protected by mLock
                 Vector<AudioSessionRef*> mAudioSessionRefs;
 
                 float       masterVolume_l() const  { return mMasterVolume; }
