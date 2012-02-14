@@ -19,7 +19,7 @@
 
 namespace android {
 /*
- * Dump the memory adddress of the calling process to the given fd.
+ * Dump the memory address of the calling process to the given fd.
  */
 extern void dumpMemoryAddresses(int fd);
 

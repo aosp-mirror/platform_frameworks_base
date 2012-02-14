@@ -58,8 +58,8 @@ public:
         EVENT_BUFFER_END = 5        // Playback head is at the end of the buffer.
     };
 
-    /* Create Buffer on the stack and pass it to obtainBuffer()
-     * and releaseBuffer().
+    /* Client should declare Buffer on the stack and pass address to obtainBuffer()
+     * and releaseBuffer().  See also callback_t for EVENT_MORE_DATA.
      */
 
     class Buffer
@@ -68,12 +68,16 @@ public:
         enum {
             MUTE    = 0x00000001
         };
-        uint32_t    flags;
+        uint32_t    flags;        // 0 or MUTE
         audio_format_t format; // but AUDIO_FORMAT_PCM_8_BIT -> AUDIO_FORMAT_PCM_16_BIT
         // accessed directly by WebKit ANP callback
         int         channelCount; // will be removed in the future, do not use
-        size_t      frameCount;
-        size_t      size;
+
+        size_t      frameCount;   // number of sample frames corresponding to size;
+                                  // on input it is the number of frames desired,
+                                  // on output is the number of frames actually filled
+
+        size_t      size;         // input/output in byte units
         union {
             void*       raw;
             short*      i16;    // signed 16-bit
@@ -84,15 +88,15 @@ public:
 
     /* As a convenience, if a callback is supplied, a handler thread
      * is automatically created with the appropriate priority. This thread
-     * invokes the callback when a new buffer becomes available or an underrun condition occurs.
+     * invokes the callback when a new buffer becomes available or various conditions occur.
      * Parameters:
      *
      * event:   type of event notified (see enum AudioTrack::event_type).
      * user:    Pointer to context for use by the callback receiver.
      * info:    Pointer to optional parameter according to event type:
      *          - EVENT_MORE_DATA: pointer to AudioTrack::Buffer struct. The callback must not write
-     *          more bytes than indicated by 'size' field and update 'size' if less bytes are
-     *          written.
+     *            more bytes than indicated by 'size' field and update 'size' if fewer bytes are
+     *            written.
      *          - EVENT_UNDERRUN: unused.
      *          - EVENT_LOOP_END: pointer to an int indicating the number of loops remaining.
      *          - EVENT_MARKER: pointer to an uint32_t containing the marker position in frames.
@@ -225,7 +229,7 @@ public:
      */
             uint32_t     latency() const;
 
-    /* getters, see constructor */
+    /* getters, see constructors and set() */
 
             audio_stream_type_t streamType() const;
             audio_format_t format() const;
@@ -400,13 +404,19 @@ public:
             status_t    attachAuxEffect(int effectId);
 
     /* Obtains a buffer of "frameCount" frames. The buffer must be
-     * filled entirely. If the track is stopped, obtainBuffer() returns
+     * filled entirely, and then released with releaseBuffer().
+     * If the track is stopped, obtainBuffer() returns
      * STOPPED instead of NO_ERROR as long as there are buffers available,
      * at which point NO_MORE_BUFFERS is returned.
      * Buffers will be returned until the pool (buffercount())
      * is exhausted, at which point obtainBuffer() will either block
      * or return WOULD_BLOCK depending on the value of the "blocking"
      * parameter.
+     *
+     * Interpretation of waitCount:
+     *  +n  limits wait time to n * WAIT_PERIOD_MS,
+     *  -1  causes an (almost) infinite wait time,
+     *   0  non-blocking.
      */
 
         enum {
@@ -415,12 +425,19 @@ public:
         };
 
             status_t    obtainBuffer(Buffer* audioBuffer, int32_t waitCount);
+
+    /* Release a filled buffer of "frameCount" frames for AudioFlinger to process. */
             void        releaseBuffer(Buffer* audioBuffer);
 
     /* As a convenience we provide a write() interface to the audio buffer.
-     * This is implemented on top of lockBuffer/unlockBuffer. For best
-     * performance use callbacks. Return actual number of bytes written.
-     *
+     * This is implemented on top of obtainBuffer/releaseBuffer. For best
+     * performance use callbacks. Returns actual number of bytes written >= 0,
+     * or one of the following negative status codes:
+     *      INVALID_OPERATION   AudioTrack is configured for shared buffer mode
+     *      BAD_VALUE           size is invalid
+     *      STOPPED             AudioTrack was stopped during the write
+     *      NO_MORE_BUFFERS     when obtainBuffer() returns same
+     *      or any other error code returned by IAudioTrack::start() or restoreTrack_l().
      */
             ssize_t     write(const void* buffer, size_t size);
 
@@ -447,6 +464,7 @@ private:
         AudioTrack& mReceiver;
     };
 
+            // body of AudioTrackThread::threadLoop()
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
             status_t createTrack_l(audio_stream_type_t streamType,
                                  uint32_t sampleRate,
@@ -483,7 +501,7 @@ private:
 
     bool                    mActive;                // protected by mLock
 
-    callback_t              mCbf;
+    callback_t              mCbf;                   // callback handler for events, or NULL
     void*                   mUserData;
     uint32_t                mNotificationFramesReq; // requested number of frames between each notification callback
     uint32_t                mNotificationFramesAct; // actual number of frames between each notification callback

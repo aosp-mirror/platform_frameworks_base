@@ -1,4 +1,4 @@
-/* //device/include/server/AudioFlinger/AudioFlinger.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -621,6 +621,7 @@ status_t AudioFlinger::setMasterMute(bool muted)
     }
 
     Mutex::Autolock _l(mLock);
+    // This is an optimization, so PlaybackThread doesn't have to look at the one from AudioFlinger
     mMasterMute = muted;
     for (size_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setMasterMute(muted);
@@ -3122,6 +3123,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
 void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
 {
+    // FIXME explain this formula
     int frameCount = (3 * mFrameCount * mSampleRate) / thread->sampleRate();
     OutputTrack *outputTrack = new OutputTrack((ThreadBase *)thread,
                                             this,
@@ -3393,7 +3395,7 @@ void AudioFlinger::PlaybackThread::Track::destroy()
 {
     // NOTE: destroyTrack_l() can remove a strong reference to this Track
     // by removing it from mTracks vector, so there is a risk that this Tracks's
-    // desctructor is called. As the destructor needs to lock mLock,
+    // destructor is called. As the destructor needs to lock mLock,
     // we must acquire a strong reference on this Track before locking mLock
     // here so that the destructor is called only when exiting this function.
     // On the other hand, as long as Track::destroy() is only called by
@@ -3999,6 +4001,7 @@ void AudioFlinger::PlaybackThread::OutputTrack::clearBufferQueue()
 AudioFlinger::Client::Client(const sp<AudioFlinger>& audioFlinger, pid_t pid)
     :   RefBase(),
         mAudioFlinger(audioFlinger),
+        // FIXME should be a "k" constant not hard-coded, in .h or ro. property, see 4 lines below
         mMemoryDealer(new MemoryDealer(1024*1024, "AudioFlinger::Client")),
         mPid(pid)
 {
@@ -4660,7 +4663,7 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
         }
         if (param.getInt(String8(AudioParameter::keyFrameCount), value) == NO_ERROR) {
             // do not accept frame count changes if tracks are open as the track buffer
-            // size depends on frame count and correct behavior would not be garantied
+            // size depends on frame count and correct behavior would not be guaranteed
             // if frame count is changed after track creation
             if (mActiveTrack != 0) {
                 status = INVALID_OPERATION;
@@ -6108,7 +6111,6 @@ status_t AudioFlinger::EffectModule::addHandle(const sp<EffectHandle>& handle)
     status_t status;
 
     Mutex::Autolock _l(mLock);
-    // First handle in mHandles has highest priority and controls the effect module
     int priority = handle->priority();
     size_t size = mHandles.size();
     sp<EffectHandle> h;
