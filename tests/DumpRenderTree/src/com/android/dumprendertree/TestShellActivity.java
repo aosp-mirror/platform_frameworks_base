@@ -16,18 +16,19 @@
 
 package com.android.dumprendertree;
 
+import com.android.browser.WebViewProperties;
 import com.android.dumprendertree.forwarder.ForwardService;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,7 +37,6 @@ import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.webkit.CookieManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
@@ -907,6 +907,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // this enables cpu upload path (as opposed to gpu upload path)
         // and it's only meant to be a temporary workaround!
         settings.setProperty("enable_cpu_upload_path", "true");
+        settings.setProperty(WebViewProperties.gfxUseMinimalMemory, "false");
     }
 
     private WebView mWebView;
