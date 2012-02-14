@@ -258,6 +258,7 @@ class ZoomManager {
             // Remember the current zoom density before it gets changed.
             final float originalDefault = mDefaultScale;
             // set the new default density
+            mDisplayDensity = density;
             setDefaultZoomScale(density);
             float scaleChange = (originalDefault > 0.0) ? density / originalDefault: 1.0f;
             // adjust the scale if it falls outside the new zoom bounds
