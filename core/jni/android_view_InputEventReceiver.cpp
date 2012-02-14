@@ -93,7 +93,7 @@ NativeInputEventReceiver::~NativeInputEventReceiver() {
 }
 
 status_t NativeInputEventReceiver::initialize() {
-    int32_t receiveFd = mInputConsumer.getChannel()->getFd();
+    int receiveFd = mInputConsumer.getChannel()->getFd();
     mLooper->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, handleReceiveCallback, this);
     return OK;
 }

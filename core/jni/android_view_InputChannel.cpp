@@ -199,9 +199,9 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
         bool isInitialized = parcel->readInt32();
         if (isInitialized) {
             String8 name = parcel->readString8();
-            int32_t rawFd = parcel->readFileDescriptor();
-            int32_t dupFd = dup(rawFd);
-            if (rawFd < 0) {
+            int rawFd = parcel->readFileDescriptor();
+            int dupFd = dup(rawFd);
+            if (dupFd < 0) {
                 ALOGE("Error %d dup channel fd %d.", errno, rawFd);
                 jniThrowRuntimeException(env,
                         "Could not read input channel file descriptors from parcel.");
