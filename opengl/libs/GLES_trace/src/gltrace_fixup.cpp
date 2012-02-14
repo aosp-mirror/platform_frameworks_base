@@ -15,9 +15,13 @@
  */
 
 #include <cutils/log.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include "gltrace.pb.h"
+#include "gltrace_api.h"
 #include "gltrace_context.h"
 #include "gltrace_fixup.h"
 
@@ -198,6 +202,20 @@ void fixup_glShaderSource(GLMessage *glmsg) {
     arg_strpp->add_charvalue(src);
 }
 
+void fixup_glUniformGenericInteger(int argIndex, int nIntegers, GLMessage *glmsg) {
+    /* void glUniform?iv(GLint location, GLsizei count, const GLint *value); */
+    GLMessage_DataType *arg_values = glmsg->mutable_args(argIndex);
+    GLint *src = (GLint*)arg_values->intvalue(0);
+
+    arg_values->set_type(GLMessage::DataType::INT);
+    arg_values->set_isarray(true);
+    arg_values->clear_intvalue();
+
+    for (int i = 0; i < nIntegers; i++) {
+        arg_values->add_intvalue(*src++);
+    }
+}
+
 void fixup_glUniformGeneric(int argIndex, int nFloats, GLMessage *glmsg) {
     GLMessage_DataType *arg_values = glmsg->mutable_args(argIndex);
     GLfloat *src = (GLfloat*)arg_values->intvalue(0);
@@ -223,6 +241,10 @@ void fixup_GenericIntArray(int argIndex, int nInts, GLMessage *glmsg) {
     GLMessage_DataType *arg_intarray = glmsg->mutable_args(argIndex);
     GLint *intp = (GLint *)arg_intarray->intvalue(0);
 
+    if (intp == NULL) {
+        return;
+    }
+
     arg_intarray->set_type(GLMessage::DataType::INT);
     arg_intarray->set_isarray(true);
     arg_intarray->clear_intvalue();
@@ -230,6 +252,15 @@ void fixup_GenericIntArray(int argIndex, int nInts, GLMessage *glmsg) {
     for (int i = 0; i < nInts; i++, intp++) {
         arg_intarray->add_intvalue(*intp);
     }
+}
+
+void fixup_GenericEnumArray(int argIndex, int nEnums, GLMessage *glmsg) {
+    // fixup as if they were ints
+    fixup_GenericIntArray(argIndex, nEnums, glmsg);
+
+    // and then set the data type to be enum
+    GLMessage_DataType *arg_enumarray = glmsg->mutable_args(argIndex);
+    arg_enumarray->set_type(GLMessage::DataType::ENUM);
 }
 
 void fixup_glGenGeneric(GLMessage *glmsg) {
@@ -270,6 +301,84 @@ void fixup_glGetFloatv(GLMessage *glmsg) {
     arg_params->add_floatvalue(*src);
 }
 
+void fixup_glLinkProgram(GLMessage *glmsg) {
+    /* void glLinkProgram(GLuint program); */
+    GLuint program = glmsg->args(0).intvalue(0);
+
+    /* We don't have to fixup this call, but as soon as a program is linked,
+       we obtain information about all active attributes and uniforms to
+       pass on to the debugger. Note that in order to pass this info to
+       the debugger, all we need to do is call the trace versions of the
+       necessary calls. */
+
+    GLint n, maxNameLength;
+    GLchar *name;
+    GLint size;
+    GLenum type;
+
+    // obtain info regarding active attributes
+    GLTrace_glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &n);
+    GLTrace_glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+
+    name = (GLchar *) malloc(maxNameLength);
+    for (int i = 0; i < n; i++) {
+        GLTrace_glGetActiveAttrib(program, i, maxNameLength, NULL, &size, &type, name);
+    }
+    free(name);
+
+    // obtain info regarding active uniforms
+    GLTrace_glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &n);
+    GLTrace_glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+
+    name = (GLchar *) malloc(maxNameLength);
+    for (int i = 0; i < n; i++) {
+        GLTrace_glGetActiveUniform(program, i, maxNameLength, NULL, &size, &type, name);
+    }
+    free(name);
+}
+
+/** Given a glGetActive[Uniform|Attrib] call, obtain the location
+ *  of the variable in the call.
+ */
+int getShaderVariableLocation(GLTraceContext *context, GLMessage *glmsg) {
+    GLMessage_Function func = glmsg->function();
+    if (func != GLMessage::glGetActiveAttrib && func != GLMessage::glGetActiveUniform) {
+        return -1;
+    }
+
+    int program = glmsg->args(0).intvalue(0);
+    GLchar *name = (GLchar*) glmsg->args(6).intvalue(0);
+
+    if (func == GLMessage::glGetActiveAttrib) {
+        return context->hooks->gl.glGetAttribLocation(program, name);
+    } else {
+        return context->hooks->gl.glGetUniformLocation(program, name);
+    }
+}
+
+void fixup_glGetActiveAttribOrUniform(GLMessage *glmsg, int location) {
+    /* void glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize,
+                GLsizei* length, GLint* size, GLenum* type, GLchar* name); */
+    /* void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize,
+                GLsizei* length, GLint* size, GLenum* type, GLchar* name) */
+
+    fixup_GenericIntArray(3, 1, glmsg);     // length
+    fixup_GenericIntArray(4, 1, glmsg);     // size
+    fixup_GenericEnumArray(5, 1, glmsg);    // type
+    fixup_CStringPtr(6, glmsg);             // name
+
+    // The index argument in the glGetActive[Attrib|Uniform] functions
+    // does not correspond to the actual location index as used in
+    // glUniform*() or glVertexAttrib*() to actually upload the data.
+    // In order to make things simpler for the debugger, we also pass
+    // a hidden location argument that stores the actual location.
+    // append the location value to the end of the argument list
+    GLMessage_DataType *arg_location = glmsg->add_args();
+    arg_location->set_isarray(false);
+    arg_location->set_type(GLMessage::DataType::INT);
+    arg_location->add_intvalue(location);
+}
+
 void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessage *glmsg) {
     // for all messages, set the current context id
     glmsg->set_context_id(context->getId());
@@ -291,6 +400,19 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
     case GLMessage::glGenRenderbuffers:  /* void glGenFramebuffers(GLsizei n, GLuint *buffers); */
     case GLMessage::glGenTextures:       /* void glGenTextures(GLsizei n, GLuint *textures); */
         fixup_glGenGeneric(glmsg);
+        break;
+    case GLMessage::glLinkProgram:       /* void glLinkProgram(GLuint program); */
+        fixup_glLinkProgram(glmsg);
+        break;
+    case GLMessage::glGetActiveAttrib:
+        fixup_glGetActiveAttribOrUniform(glmsg, getShaderVariableLocation(context, glmsg));
+        break;
+    case GLMessage::glGetActiveUniform:
+        fixup_glGetActiveAttribOrUniform(glmsg, getShaderVariableLocation(context, glmsg));
+        break;
+    case GLMessage::glBindAttribLocation:
+        /* void glBindAttribLocation(GLuint program, GLuint index, const GLchar* name); */
+        fixup_CStringPtr(2, glmsg);
         break;
     case GLMessage::glGetAttribLocation:  
     case GLMessage::glGetUniformLocation: 
@@ -330,6 +452,38 @@ void fixupGLMessage(GLTraceContext *context, nsecs_t start, nsecs_t end, GLMessa
         break;
     case GLMessage::glShaderSource:
         fixup_glShaderSource(glmsg);
+        break;
+    case GLMessage::glUniform1iv:
+        /* void glUniform1iv(GLint location, GLsizei count, const GLint *value); */
+        fixup_glUniformGenericInteger(2, 1, glmsg);
+        break;
+    case GLMessage::glUniform2iv:
+        /* void glUniform2iv(GLint location, GLsizei count, const GLint *value); */
+        fixup_glUniformGenericInteger(2, 2, glmsg);
+        break;
+    case GLMessage::glUniform3iv:
+        /* void glUniform3iv(GLint location, GLsizei count, const GLint *value); */
+        fixup_glUniformGenericInteger(2, 3, glmsg);
+        break;
+    case GLMessage::glUniform4iv:
+        /* void glUniform4iv(GLint location, GLsizei count, const GLint *value); */
+        fixup_glUniformGenericInteger(2, 4, glmsg);
+        break;
+    case GLMessage::glUniform1fv:
+        /* void glUniform1fv(GLint location, GLsizei count, const GLfloat *value); */
+        fixup_glUniformGeneric(2, 1, glmsg);
+        break;
+    case GLMessage::glUniform2fv:
+        /* void glUniform2fv(GLint location, GLsizei count, const GLfloat *value); */
+        fixup_glUniformGeneric(2, 2, glmsg);
+        break;
+    case GLMessage::glUniform3fv:
+        /* void glUniform3fv(GLint location, GLsizei count, const GLfloat *value); */
+        fixup_glUniformGeneric(2, 3, glmsg);
+        break;
+    case GLMessage::glUniform4fv:
+        /* void glUniform4fv(GLint location, GLsizei count, const GLfloat *value); */
+        fixup_glUniformGeneric(2, 4, glmsg);
         break;
     case GLMessage::glUniformMatrix2fv:
         /* void glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose,
