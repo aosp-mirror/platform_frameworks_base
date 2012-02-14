@@ -95,6 +95,7 @@ private:
         int32_t startFrame, int32_t rampDurationFrames,
         uint8_t *data,   size_t bytes);
 
+    void queueInputBuffer_l(MediaBuffer *buffer, int64_t timeUs);
     void releaseQueuedFrames_l();
     void waitOutstandingEncodingFrames_l();
     status_t reset();
