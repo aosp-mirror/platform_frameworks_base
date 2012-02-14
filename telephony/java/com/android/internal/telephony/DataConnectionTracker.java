@@ -1030,7 +1030,8 @@ public abstract class DataConnectionTracker extends Handler {
                 }
             }
             if (didDisable) {
-                if (enabledCount == 0) {
+                if ((enabledCount == 0) || (apnId == APN_DUN_ID)) {
+                    mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                     onCleanUpConnection(true, apnId, Phone.REASON_DATA_DISABLED);
                 }
 
