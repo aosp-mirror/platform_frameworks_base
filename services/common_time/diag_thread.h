@@ -38,9 +38,7 @@ class DiagThread : public Thread {
                              int64_t observed_common_time,
                              int64_t nominal_common_time,
                              int32_t total_correction,
-                             int32_t P_correction,
-                             int32_t I_correction,
-                             int32_t D_correction);
+                             int32_t rtt);
 
   private:
     typedef struct {
@@ -51,9 +49,7 @@ class DiagThread : public Thread {
         int64_t observed_common_time;
         int64_t nominal_common_time;
         int32_t total_correction;
-        int32_t P_correction;
-        int32_t I_correction;
-        int32_t D_correction;
+        int32_t rtt;
     } DisciplineEventRecord;
 
     bool            openListenSocket();

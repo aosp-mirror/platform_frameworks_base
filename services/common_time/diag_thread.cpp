@@ -176,9 +176,7 @@ void DiagThread::pushDisciplineEvent(int64_t observed_local_time,
                                      int64_t observed_common_time,
                                      int64_t nominal_common_time,
                                      int32_t total_correction,
-                                     int32_t P_correction,
-                                     int32_t I_correction,
-                                     int32_t D_correction) {
+                                     int32_t rtt) {
     Mutex::Autolock lock(&discipline_log_lock_);
 
     DisciplineEventRecord evt;
@@ -193,9 +191,7 @@ void DiagThread::pushDisciplineEvent(int64_t observed_local_time,
     evt.observed_common_time = observed_common_time;
     evt.nominal_common_time  = nominal_common_time;
     evt.total_correction     = total_correction;
-    evt.P_correction         = P_correction;
-    evt.I_correction         = I_correction;
-    evt.D_correction         = D_correction;
+    evt.rtt                  = rtt;
 
     discipline_log_.push_back(evt);
     while (discipline_log_.size() > kMaxDisciplineLogSize)
@@ -299,7 +295,7 @@ bool DiagThread::threadLoop() {
                 char buf[1024];
                 DisciplineEventRecord& e = *discipline_log_.begin();
                 snprintf(buf, sizeof(buf),
-                         "D,%lld,%lld,%lld,%lld,%lld,%lld,%d,%d,%d,%d\n",
+                         "D,%lld,%lld,%lld,%lld,%lld,%lld,%d,%d\n",
                          e.event_id,
                          e.action_local_time,
                          e.action_common_time,
@@ -307,9 +303,7 @@ bool DiagThread::threadLoop() {
                          e.observed_common_time,
                          e.nominal_common_time,
                          e.total_correction,
-                         e.P_correction,
-                         e.I_correction,
-                         e.D_correction);
+                         e.rtt);
                 buf[sizeof(buf) - 1] = 0;
 
                 if (data_fd_ >= 0)

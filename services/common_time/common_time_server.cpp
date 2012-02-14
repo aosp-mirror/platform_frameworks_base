@@ -870,7 +870,7 @@ bool CommonTimeServer::handleSyncResponse(
             if (shouldPanicNotGettingGoodData())
                 return becomeInitial("RX panic, no good data");
         } else {
-            result = mClockRecovery.pushDisciplineEvent(avgLocal, avgCommon, rtt);
+            result = mClockRecovery.pushDisciplineEvent(avgLocal, avgCommon, rttCommon);
             mClient_LastGoodSyncRX = clientRxLocalTime;
 
             if (result) {
