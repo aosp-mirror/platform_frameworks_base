@@ -2620,7 +2620,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @param canvas The canvas on which to draw the child
      * @param child Who to draw
-     * @param drawingTime The time at which draw is occuring
+     * @param drawingTime The time at which draw is occurring
      * @return True if an invalidate() was issued
      */
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
