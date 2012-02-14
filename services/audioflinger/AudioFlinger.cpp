@@ -712,7 +712,7 @@ float AudioFlinger::streamVolume(audio_stream_type_t stream, audio_io_handle_t o
         }
         volume = thread->streamVolume(stream);
     } else {
-        volume = mStreamTypes[stream].volume;
+        volume = streamVolume_l(stream);
     }
 
     return volume;
@@ -724,7 +724,8 @@ bool AudioFlinger::streamMute(audio_stream_type_t stream) const
         return true;
     }
 
-    return mStreamTypes[stream].mute;
+    AutoMutex lock(mLock);
+    return streamMute_l(stream);
 }
 
 status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs)
@@ -1377,11 +1378,13 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
     // There is no AUDIO_STREAM_MIN, and ++ operator does not compile
     for (audio_stream_type_t stream = (audio_stream_type_t) 0; stream < AUDIO_STREAM_CNT;
             stream = (audio_stream_type_t) (stream + 1)) {
-        mStreamTypes[stream].volume = mAudioFlinger->streamVolumeInternal(stream);
-        mStreamTypes[stream].mute = mAudioFlinger->streamMute(stream);
+        mStreamTypes[stream].volume = mAudioFlinger->streamVolume_l(stream);
+        mStreamTypes[stream].mute = mAudioFlinger->streamMute_l(stream);
         // initialized by stream_type_t default constructor
         // mStreamTypes[stream].valid = true;
     }
+    // mStreamTypes[AUDIO_STREAM_CNT] exists but isn't explicitly initialized here,
+    // because mAudioFlinger doesn't have one to copy from
 }
 
 AudioFlinger::PlaybackThread::~PlaybackThread()
@@ -1575,38 +1578,34 @@ uint32_t AudioFlinger::PlaybackThread::latency() const
     }
 }
 
-status_t AudioFlinger::PlaybackThread::setMasterVolume(float value)
+void AudioFlinger::PlaybackThread::setMasterVolume(float value)
 {
+    Mutex::Autolock _l(mLock);
     mMasterVolume = value;
-    return NO_ERROR;
 }
 
-status_t AudioFlinger::PlaybackThread::setMasterMute(bool muted)
+void AudioFlinger::PlaybackThread::setMasterMute(bool muted)
 {
-    mMasterMute = muted;
-    return NO_ERROR;
+    Mutex::Autolock _l(mLock);
+    setMasterMute_l(muted);
 }
 
-status_t AudioFlinger::PlaybackThread::setStreamVolume(audio_stream_type_t stream, float value)
+void AudioFlinger::PlaybackThread::setStreamVolume(audio_stream_type_t stream, float value)
 {
+    Mutex::Autolock _l(mLock);
     mStreamTypes[stream].volume = value;
-    return NO_ERROR;
 }
 
-status_t AudioFlinger::PlaybackThread::setStreamMute(audio_stream_type_t stream, bool muted)
+void AudioFlinger::PlaybackThread::setStreamMute(audio_stream_type_t stream, bool muted)
 {
+    Mutex::Autolock _l(mLock);
     mStreamTypes[stream].mute = muted;
-    return NO_ERROR;
 }
 
 float AudioFlinger::PlaybackThread::streamVolume(audio_stream_type_t stream) const
 {
+    Mutex::Autolock _l(mLock);
     return mStreamTypes[stream].volume;
-}
-
-bool AudioFlinger::PlaybackThread::streamMute(audio_stream_type_t stream) const
-{
-    return mStreamTypes[stream].mute;
 }
 
 // addTrack_l() must be called with ThreadBase::mLock held
@@ -1938,7 +1937,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
                             ALOGD("Silence is golden");
-                            setMasterMute(true);
+                            setMasterMute_l(true);
                         }
                     }
 
@@ -2639,7 +2638,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
                             ALOGD("Silence is golden");
-                            setMasterMute(true);
+                            setMasterMute_l(true);
                         }
                     }
 
@@ -3035,7 +3034,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                         property_get("ro.audio.silent", value, "0");
                         if (atoi(value)) {
                             ALOGD("Silence is golden");
-                            setMasterMute(true);
+                            setMasterMute_l(true);
                         }
                     }
 
